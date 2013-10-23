@@ -1,3 +1,7 @@
 .svn/*
 *.o
 *~
+*.pol
+*.log
+*solve
+*simulate

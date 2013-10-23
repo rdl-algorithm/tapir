@@ -13,10 +13,10 @@ namespace po = boost::program_options;
 UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(vm) {
 	ifstream inFile;
 
-	const char* mapFName = vm["UWNav.mapFName"].as<string>().c_str();
-	inFile.open(mapFName);
+	const char* mapPath = vm["problem.mapPath"].as<string>().c_str();
+	inFile.open(mapPath);
 	if (!inFile.is_open()) {
-		cerr << "Fail to open " << mapFName << "\n";
+		cerr << "Fail to open " << mapPath << "\n";
 		exit(1);
 	}
 	
@@ -38,16 +38,15 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(v
 	inFile.close();
 	setInitObsGoal();
 
-    goalReward = vm["UWNav.goalReward"].as<double>();
-    crashPenalty = vm["UWNav.crashPenalty"].as<double>();
-    moveCost = vm["UWNav.moveCost"].as<double>();
+    goalReward = vm["problem.goalReward"].as<double>();
+    crashPenalty = vm["problem.crashPenalty"].as<double>();
+    moveCost = vm["problem.moveCost"].as<double>();
 
-	rolloutExploreTh = vm["UWNav.rolloutExploreTh"].as<double>();
-	ctrlCorrectProb = vm["UWNav.ctrlCorrectProb"].as<double>();
-
-	nVerts = vm["UWNav.nVerts"].as<long>();
-	nTryCon = vm["UWNav.nTryCon"].as<long>();
-	maxDistCon = vm["UWNav.maxDistCon"].as<long>();
+	rolloutExploreTh = vm["solver.rolloutExploreTh"].as<double>();
+	ctrlCorrectProb = vm["solver.ctrlCorrectProb"].as<double>();
+	nVerts = vm["solver.nVerts"].as<long>();
+	nTryCon = vm["solver.nTryCon"].as<long>();
+	maxDistCon = vm["solver.maxDistCon"].as<long>();
 
 	nStVars = 2;
 	moveDiagCost = sqrt(2)*moveCost;
@@ -79,6 +78,7 @@ UnderwaterNavModifModel::~UnderwaterNavModifModel() {
 
 void UnderwaterNavModifModel::setInitObsGoal() {
 	vector<string>::iterator itMap;
+	nGoals = 0;
 	nInitBel = 0;
 	long i = 0;
 	for (itMap = envMap.begin(); itMap != envMap.end(); itMap++) {

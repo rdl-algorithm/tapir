@@ -48,10 +48,12 @@ INCDIRS	= -DDISTL1 -I$(PLANNER) -I$(PROBLEM) \
 # Linker flags
 #---------------------------------------------------------------------#
 
-LIBPATH = -libboost_program_options -L$(PROBLEM) \
+LIBPATH = -L$(PROBLEM) \
+-L/usr/lib/x86_64-linux-gnu/ \
 #-L/usr/local/lib/\
 						
 LDFLAGS = -g -w \
+-lboost_program_options \
 #-lopencv_legacy -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml \
 		
 #---------------------------------------------------------------------#
@@ -100,7 +102,8 @@ SRCS_PROBLEM	= 	$(PROBLEM)/UnderwaterNavModifModel.cc \
 					$(PROBLEM)/StRoadmap.cc 
 
 HDRS_PROBLEM	= 	$(PROBLEM)/UnderwaterNavModifModel.h \
-					$(PROBLEM)/StRoadmap.h
+					$(PROBLEM)/StRoadmap.h \
+					$(PROBLEM)/options.h
 		
 OBJS_PROBLEM	= 	$(SRCS_PPROBLEM:$(PROBLEM)/%.cc=%.o)
 

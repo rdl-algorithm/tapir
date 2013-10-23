@@ -21,15 +21,15 @@ class Model {
 		double discount, depthTh, exploreCoef, minVal, maxVal, distTh;
 
 		Model(po::variables_map vm) {
-		    nParticles = vm["nParticles"].as<long>();
-		    maxTrials = vm["maxTrials"].as<long>();
-		    maxDistTry = vm["maxDistTry"].as<long>();
+		    nParticles = vm["SBT.nParticles"].as<long>();
+		    maxTrials = vm["SBT.maxTrials"].as<long>();
+		    maxDistTry = vm["SBT.maxDistTry"].as<long>();
 
-		    exploreCoef = vm["exploreCoef"].as<double>();
-		    depthTh = vm["depthTh"].as<double>();
-		    distTh = vm["distTh"].as<double>();
+		    exploreCoef = vm["SBT.exploreCoef"].as<double>();
+		    depthTh = vm["SBT.depthTh"].as<double>();
+		    distTh = vm["SBT.distTh"].as<double>();
 
-		    discount = vm["discount"].as<double>();
+		    discount = vm["problem.discount"].as<double>();
         }
 
 		inline double getDiscount() { return discount; }

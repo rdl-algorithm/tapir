@@ -30,7 +30,7 @@ Solver.o: ../..//src//Solver.h ../..//src//Model.h \
 UnderwaterNavModifModel.o: \
  ../..//problems/underwaterNavModif//UnderwaterNavModifModel.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h \
- ../..//problems/underwaterNavModif//StRoadmap.h
+ ../..//problems/underwaterNavModif//StRoadmap.h 
 StRoadmap.o: ../..//problems/underwaterNavModif//StRoadmap.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h
 GlobalResources.o: ../..//src//GlobalResources.cc \
@@ -91,7 +91,8 @@ solve.o: ../..//problems/underwaterNavModif//solve.cc \
  ../..//src/HistoryEntry.h ../..//src/State.h ../..//src/Model.h \
  ../..//src/StatePool.h ../..//src/Action.h ../..//src/Observation.h \
  ../..//src/Histories.h ../..//src/Solver.h ../..//src/BeliefTree.h \
- ../..//src/RandGen.h
+ ../..//src/RandGen.h \
+ ../../problems/underwaterNavModif/options.h
 simulate.o: ../..//problems/underwaterNavModif//simulate.cc \
  ../..//problems/underwaterNavModif//UnderwaterNavModifModel.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h \
@@ -100,4 +101,5 @@ simulate.o: ../..//problems/underwaterNavModif//simulate.cc \
  ../..//src/HistoryEntry.h ../..//src/State.h ../..//src/Model.h \
  ../..//src/StatePool.h ../..//src/Action.h ../..//src/Observation.h \
  ../..//src/Histories.h ../..//src/Solver.h ../..//src/BeliefTree.h \
- ../..//src/RandGen.h
+ ../..//src/RandGen.h \
+ ../../problems/underwaterNavModif/options.h
