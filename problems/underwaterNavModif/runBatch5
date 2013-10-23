@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for (( i = 0 ; i < 30 ; i=i+6 ))
+do
+	echo Generate Epoch starting at $i to $j
+	j=$(( $i+6 ))
+	./runAnEpoch $i $j ./exp5 map-52X51-v2 changes-v2-1 param-v11 200 30 &
+	sleep 1
+done

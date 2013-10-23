@@ -1,0 +1,11 @@
+nChanges: 2
+t 10 : 7
+Add Obstacles ( 15 , 0 ) ( 24 , 12 )
+Add Obstacles ( 15 , 17 ) ( 24 , 33 )
+Add Obstacles ( 15 , 38 ) ( 24 , 52 )
+Add Observations ( 14 , 17 ) ( 15 , 33 )
+Add Observations ( 24 , 17 ) ( 25 , 33 )
+Add Observations ( 14 , 38 ) ( 15 , 52 )
+Add Observations ( 24 , 38 ) ( 25 , 52 )
+t 20 : 1
+Add Rocks ( 35 , 20 ) ( 39 , 52 )

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+STARTIDX=$1
+ENDIDX=$2
+EXPDIR=$3
+MAP=$4
+CHANGES=$5
+PARAM=$6
+NSTEPS=$7
+NSIM=$8
+
+for (( i = ${STARTIDX} ; i < ${ENDIDX} ; i=i+1 ))
+do
+	echo Generate Pol-$i
+	./solve tests/${MAP}.txt tests/${PARAM}.txt ${EXPDIR}/pol-${MAP}-${PARAM}-i$i.txt >> ${EXPDIR}/planOut-${MAP}-${PARAM}-i$i.txt 2>> ${EXPDIR}/planErr-${MAP}-${PARAM}-i$i1.txt
+	sleep 2
+	for (( j = 0 ; j < ${NSIM} ; j=j+1 ))
+	do
+		echo Simulate $j from Pol-$i
+		./simulate tests/${MAP}.txt tests/${PARAM}-sim.txt ${EXPDIR}/pol-${MAP}-${PARAM}-i$i.txt  tests/${CHANGES}.txt ${NSTEPS} 1 ${EXPDIR}/log_${MAP}-${PARAM}i$i-s$j.txt >> ${EXPDIR}/simOut-${MAP}-${PARAM}-pol$i.txt 2>> ${EXPDIR}/simErr-${MAP}-${PARAM}-pol$i.txt
+		sleep 2
+	done
+done

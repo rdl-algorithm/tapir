@@ -1,0 +1,15 @@
+nParticles: 5000
+maxTrials: 5000
+depthTh: 0.001
+rolloutExploreTh: 0.5
+ctrlCorrectProb: 0.8
+discount: 0.975
+goalReward: 10000
+crashPenalty: -2000
+moveCost: -1
+exploreCoef: 0.5
+distTh: 3
+maxDistTry: 100
+nVerts: 100
+nTryCon: 50
+maxDistCon: 50

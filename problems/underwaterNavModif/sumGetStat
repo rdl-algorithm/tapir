@@ -1,0 +1,10 @@
+#!/bin/bash
+
+NFILE=$1
+STARTIDX=$2
+ENDIDX=$3
+
+for (( i = ${STARTIDX} ; i < ${ENDIDX} ; i=i+1 ))
+do
+	java GetStat ${NFILE}$i.txt >> ${NFILE}-sum.txt
+done
