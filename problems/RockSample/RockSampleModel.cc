@@ -7,12 +7,16 @@
 #include <limits.h>
 #include "RockSampleModel.h"
 
-RockSampleModel::RockSampleModel(const char* mapFName, const char *paramFName) {
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
+RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
 	ifstream inFile;
-	
-	inFile.open(mapFName);
+
+	const char* mapPath = vm["problem.mapPath"].as<string>().c_str();
+	inFile.open(mapPath);
 	if (!inFile.is_open()) {
-		cerr << "Fail to open " << mapFName << "\n";
+		cerr << "Fail to open " << mapPath << "\n";
 		exit(1);
 	}
 	
@@ -32,39 +36,17 @@ RockSampleModel::RockSampleModel(const char* mapFName, const char *paramFName) {
 	}
 	
 	inFile.close();
-	
 	setInitObsGoal();
-/*	
-for (long i = 0; i < nInitBel; i++) {
-	cout << "initBel-" << i << " : ";
-	vector<double>::iterator itD;
-	for (itD = initBel[i].begin(); itD != initBel[i].end(); itD++) {
-		cout << *itD << " ";
-	}
-	cout << endl;
-}
-*/	
-	inFile.open(paramFName);
-	if (!inFile.is_open()) {
-		cerr << "Fail to open " << paramFName << "\n";
-		exit(1);
-	}
-	inFile >> tmp >> nParticles;	// not used.
-	inFile >> tmp >> maxTrials;
-	inFile >> tmp >> depthTh;
-	inFile >> tmp >> rolloutExploreTh;
-	inFile >> tmp >> ctrlCorrectProb;
-	inFile >> tmp >> discount;
-	inFile >> tmp >> goalReward;
-	inFile >> tmp >> crashPenalty;
-	inFile >> tmp >> moveCost;
-	inFile >> tmp >> exploreCoef;
-	inFile >> tmp >> distTh;
-	inFile >> tmp >> maxDistTry;
-	
-	inFile >> tmp >> nVerts;
-	inFile >> tmp >> nTryCon;
-	inFile >> tmp >> maxDistCon;
+
+    goalReward = vm["problem.goalReward"].as<double>();
+    crashPenalty = vm["problem.crashPenalty"].as<double>();
+    moveCost = vm["problem.moveCost"].as<double>();
+
+	rolloutExploreTh = vm["solver.rolloutExploreTh"].as<double>();
+	ctrlCorrectProb = vm["solver.ctrlCorrectProb"].as<double>();
+	nVerts = vm["solver.nVerts"].as<long>();
+	nTryCon = vm["solver.nTryCon"].as<long>();
+	maxDistCon = vm["solver.maxDistCon"].as<long>();
 
 	nStVars = 2;
 	moveDiagCost = sqrt(2)*moveCost;
@@ -96,6 +78,7 @@ RockSampleModel::~RockSampleModel() {
 
 void RockSampleModel::setInitObsGoal() {
 	vector<string>::iterator itMap;
+	nGoals = 0;
 	nInitBel = 0;
 	long i = 0;
 	for (itMap = envMap.begin(); itMap != envMap.end(); itMap++) {

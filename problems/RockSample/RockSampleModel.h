@@ -6,11 +6,16 @@
 #include <string>
 #include "Model.h"
 #include "GlobalResources.h"
+#include "StRoadmap.h"
+
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 using namespace std;
 
 class RockSampleModel : public Model {
 	public:
-		RockSampleModel(const char* mapFName, const char *paramFName);
+		RockSampleModel(po::variables_map vm);
 		~RockSampleModel();
 		
 		/***** Start implementation of Model's virtual functions *****/
@@ -32,21 +37,42 @@ class RockSampleModel : public Model {
 				vector<double> &modifRewSeq);
 		void drawEnv(ostream &os);
 		
+		// Additional initialisation.
+		void setInitObsGoal();
+		
 	private:
-	    enum Action {
-	        NORTH=0, 
-	        EAST=1, 
-	        SOUTH=2, 
-	        WEST=3,
-	        SAMPLE=4,
-	        CHECK=5
-	    };
+		enum { EAST=0, NORTH=1, SOUTH=2, NORTHEAST=3, SOUTHEAST=4 };
+		
+		long nX, nY, nObservations, nGoals, nRocks;
+		double goalReward, crashPenalty, moveCost, moveDiagCost;
+		double ctrlCorrectProb, ctrlErrProb1;
+		double rolloutExploreTh;
+		vector<string> envMap;
+		vector<StateVals> goals;
+		vector<StateVals> rocks;
+		vector<StateVals> allObservations;
+		map< long, map<long, short> > cellType;		// 0: usual, 1: goals, 2: rocks, 3: observation, 4: spc. reward, 5: obstacle.
+		short nSpcRew;
+		vector<double> spcRew;
+		map< long, vector<string> > changes;
+		vector<StateVals> obstacleRegion;
 
-	    enum Observation {
-	        NONE=0,
-	        GOOD=1,
-	        BAD=2
-	    };
+		StRoadmap *roadmap;
+		long nTryCon, maxDistCon, nVerts;
+		
+		//double getExpDist(StateVals &s, long firstAct);
+		double getDist(StateVals &s1, StateVals &s2);
+		void getNextState(StateVals &s, long actId, StateVals &sp);
+		void inObsRegion(StateVals &st, ObsVals &obs);
+		double getDistToNearestGoal(StateVals &st);
+		double getDistToNearestObs(StateVals &st, StateVals &nxtSt);
+		bool inGoal(StateVals &st);
+		bool inRock(StateVals &st);
+		void getReachableSt(StateVals &s, long actId, vector<StateVals> &nxtS);
+		vector<StateVals>::iterator getIterator(vector<StateVals> &vecStVals, long x, long y);
+
+		int findCollision(StateVals &s);
+
 };
 
 #endif

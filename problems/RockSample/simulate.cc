@@ -8,40 +8,64 @@
 #include "Solver.h"
 #include "RandGen.h"
 
+#include "options.h"
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 using namespace std;
 
 int main(int argc, const char* argv[]) {
-	if (argc != 8) {
-		cerr << "Usage: simulate mapFileName paremeterFileName polFile chFile nSteps nRuns simlogFile\n";
-		return -1;
-	}
-	
-	long int seed = time(NULL);
-//seed = 1370825668;	
-//seed = 1371187715;
-//seed = 1371355345;
-//seed = 1371363169;
-//seed = 1371446972;
-//seed = 1372490590;
-//seed = 1372781887;
-	GlobalResources::randGen.ranf_start(seed);
-cerr << "seed: " << seed << endl;
-double tmp = GlobalResources::randGen.ranf_arr_next();
-cerr << "tmp " << tmp << endl;
+    po::options_description visibleOptions;
+    po::options_description allOptions;
+    visibleOptions.add(options::generic()).add(options::sbt()).add(
+            options::problem()).add(options::solver()).add(
+            options::simulation());
+    allOptions.add(visibleOptions);
 
-	Model* model = new UnderwaterNavModifModel(argv[1], argv[2]);
+    // Set up positional options
+    po::positional_options_description positional;
+    positional.add("problem.mapPath", 1);
+    positional.add("cfg", 2);
+    positional.add("policy", 3);
+    positional.add("changes.changesPath", 4);
+    positional.add("simulation.nSteps", 5);
+    positional.add("simulation.nRuns", 6);
+    positional.add("log", 7);
+
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).options(allOptions)
+            .positional(positional).run(), vm);
+    if (vm.count("help")) {
+        cout << "Usage: solve [options] [mapPath] [cfgPath] [policyPath]" 
+            << " [changesPath] [nSteps] [nRuns] [logPath]\n";
+        cout << visibleOptions << "\n";
+        return 0;
+    }
+    string cfgPath = vm["cfg"].as<string>();
+    po::store(po::parse_config_file<char>(cfgPath.c_str(),allOptions),
+            vm);
+    po::notify(vm);
+
+    string polPath = vm["policy"].as<string>();
+    string changesPath = vm["changes.changesPath"].as<string>();
+    string logPath = vm["log"].as<string>();
+    long nSteps = vm["simulation.nSteps"].as<long>();
+    long nRuns = vm["simulation.nRuns"].as<long>();
+    long seed = vm["seed"].as<long>();
+    cerr << "Seed: " << seed << endl;
+	GlobalResources::randGen.ranf_start(seed);
+    double tmp = GlobalResources::randGen.ranf_arr_next();
+    cerr << "tmp " << tmp << endl;
+
+	Model* model = new UnderwaterNavModifModel(vm);
 	BeliefNode::maxParticles = model->nParticles;
 	BeliefNode::nStVars = model->nStVars;
 	BeliefTree* policy = new BeliefTree();
-	//policy->getRoot()->setEMDSig(model->nParticles, model->nStVars);
 	Histories* histories = new Histories();
-	Solver* solver = new Solver(model, argv[3], policy, histories);
+	Solver* solver = new Solver(model, polPath.c_str(), policy, histories);
 	
 	vector<long> modelCh;
-	model->setChanges(argv[4], modelCh);	
-	long nSteps = atol(argv[5]);
-	long nRuns = atol(argv[6]);
-
+	model->setChanges(changesPath.c_str(), modelCh);	
 	vector<StateVals> trajSt;
 	vector<long> trajActId;
 	vector<ObsVals> trajObs;
@@ -54,7 +78,7 @@ cerr << "tmp " << tmp << endl;
 	vector<double>::iterator itR;
 	vector<double>::iterator itD;
 	ofstream os;
-	os.open(argv[7]);
+	os.open(logPath.c_str());
 	
 	//for (long i = 0; i < nRuns; i++) {
 		clock_t tStart;

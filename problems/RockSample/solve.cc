@@ -8,30 +8,55 @@
 #include "Solver.h"
 #include "RandGen.h"
 
+#include "options.h"
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 using namespace std;
 
 int main(int argc, const char* argv[]) {
-	if (argc < 4) {
-		cerr << "Usage: solve mapFileName paremeterFileName policyFileName\n";
-		return -1;
-	}
-	
-	long int seed = time(NULL);
-//seed = 1364881089;	
-//seed = 1371272182;
-	GlobalResources::randGen.ranf_start(seed);
-cerr << "seed: " << seed << endl;
+    po::options_description visibleOptions;
+    po::options_description allOptions;
+    visibleOptions.add(options::generic()).add(options::sbt()).add(
+            options::problem()).add(options::solver());
+    allOptions.add(visibleOptions).add(options::simulation());
 
-	Model* model = new UnderwaterNavModifModel(argv[1], argv[2]);
+    // Set up positional options
+    po::positional_options_description positional;
+    positional.add("problem.mapPath", 1);
+    positional.add("cfg", 2);
+    positional.add("policy", 3);
+
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).options(allOptions)
+            .positional(positional).run(), vm);
+    if (vm.count("help")) {
+        cout << "Usage: solve [mapPath] [cfgPath] [policyPath]\n";
+        cout << visibleOptions << "\n";
+        return 0;
+    }
+
+    string cfgPath = vm["cfg"].as<string>();
+    po::store(po::parse_config_file<char>(cfgPath.c_str(),allOptions),
+            vm);
+    po::notify(vm);
+
+    string polPath = vm["policy"].as<string>();
+    long seed = vm["seed"].as<long>();
+    cerr << "Seed: " << seed << endl;
+	GlobalResources::randGen.ranf_start(seed);
+
+    cout << "Model!" << endl;
+	Model* model = new UnderwaterNavModifModel(vm);
+	cout << "!" << endl;
 	BeliefNode::maxParticles = model->nParticles;
 	BeliefNode::nStVars = model->nStVars;
 	BeliefTree* policy = new BeliefTree();
-	//policy->getRoot()->setEMDSig(model->nParticles, model->nStVars);
 	Histories* histories = new Histories();
+	cout << "?" << endl;
 	Solver* solver = new Solver(model, policy, histories);
+	cout << "Done" << endl;
 
-	//double stopTh;
-	//sscanf(argv[1], "%lf", &stopTh);
 	double totT;
 	clock_t tStart;
 	tStart = clock();
@@ -39,7 +64,7 @@ cerr << "seed: " << seed << endl;
 	totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
 
 	ofstream os;
-	os.open(argv[3]);
+	os.open(polPath.c_str());
 	solver->write(os);
 	os.close();
 	

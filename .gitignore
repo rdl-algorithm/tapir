@@ -1,6 +1,7 @@
 .svn/*
-*.o
 *~
+*.o
+*.class
 *.pol
 *.log
 *solve

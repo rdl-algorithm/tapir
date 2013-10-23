@@ -46,16 +46,12 @@ int main(int argc, const char* argv[]) {
     cerr << "Seed: " << seed << endl;
 	GlobalResources::randGen.ranf_start(seed);
 
-    cout << "Model!" << endl;
 	Model* model = new UnderwaterNavModifModel(vm);
-	cout << "!" << endl;
 	BeliefNode::maxParticles = model->nParticles;
 	BeliefNode::nStVars = model->nStVars;
 	BeliefTree* policy = new BeliefTree();
 	Histories* histories = new Histories();
-	cout << "?" << endl;
 	Solver* solver = new Solver(model, policy, histories);
-	cout << "Done" << endl;
 
 	double totT;
 	clock_t tStart;
