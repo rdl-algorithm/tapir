@@ -1,7 +1,10 @@
 #ifndef UWNAV_OPTIONS_H
 #define UWNAV_OPTIONS_H
 
+#include <string>
+
 #include <ctime>
+
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 

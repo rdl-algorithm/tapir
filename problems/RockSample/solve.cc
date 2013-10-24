@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 
-#include <cstdio>
 #include <ctime>
 
 #include "RockSampleModel.h"
@@ -33,8 +33,8 @@ int main(int argc, const char* argv[]) {
     po::store(po::command_line_parser(argc, argv).options(allOptions)
             .positional(positional).run(), vm);
     if (vm.count("help")) {
-        cout << "Usage: solve [mapPath] [cfgPath] [policyPath]\n";
-        cout << visibleOptions << "\n";
+        cout << "Usage: solve [mapPath] [cfgPath] [policyPath]" << endl;
+        cout << visibleOptions << endl;
         return 0;
     }
 
@@ -49,6 +49,7 @@ int main(int argc, const char* argv[]) {
 	GlobalResources::randGen.ranf_start(seed);
 
 	Model* model = new RockSampleModel(vm);
+	/*
 	BeliefNode::maxParticles = model->getNParticles();
 	BeliefNode::nStVars = model->getNStVars();
 	BeliefTree* policy = new BeliefTree();
@@ -68,8 +69,9 @@ int main(int argc, const char* argv[]) {
 
 	cout << "SolvingTime: " << totT << endl;
 
-	delete policy;
-	delete histories;
 	delete solver;
+	delete histories;
+	delete policy;
+	*/
 	delete model;
 }

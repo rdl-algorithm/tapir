@@ -1,5 +1,8 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <string>
+
 #include <cstdlib>
 #include <ctime>
 
@@ -38,8 +41,8 @@ int main(int argc, const char* argv[]) {
             .positional(positional).run(), vm);
     if (vm.count("help")) {
         cout << "Usage: solve [options] [mapPath] [cfgPath] [policyPath]"
-            << " [changesPath] [nSteps] [nRuns] [logPath]\n";
-        cout << visibleOptions << "\n";
+            " [changesPath] [nSteps] [nRuns] [logPath]" << endl;
+        cout << visibleOptions << endl;
         return 0;
     }
     string cfgPath = vm["cfg"].as<string>();
@@ -81,13 +84,14 @@ int main(int argc, const char* argv[]) {
 	ofstream os;
 	os.open(logPath.c_str());
 
-	//for (long i = 0; i < nRuns; i++) {
+	for (long i = 0; i < nRuns; i++) {
 		clock_t tStart;
 		long actualNSteps;
 		double totT;
 		double totChTime, totImpTime;
 		tStart = clock();
-		val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs, trajRew, &actualNSteps, &totChTime, &totImpTime);
+		val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs,
+		        trajRew, &actualNSteps, &totChTime, &totImpTime);
 		totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
 
 		os << "Val:  " << val << endl;
@@ -98,7 +102,9 @@ int main(int argc, const char* argv[]) {
 		}
 		os << " )\n";
 		itS ++;
-		for (itA = trajActId.begin(), itO = trajObs.begin(), itR = trajRew.begin(), j = 0; itA != trajActId.end();
+		for (itA = trajActId.begin(), itO = trajObs.begin(),
+		        itR = trajRew.begin(), j = 0;
+		        itA != trajActId.end();
 				itS++, itA++, itO++, itR++, j++) {
 			os << "Step-" << j << " " << *itA;
 			os << " ( ";
@@ -111,12 +117,10 @@ int main(int argc, const char* argv[]) {
 			}
 			os << " > " << *itR << endl;
 		}
-	//}
+        cout << val << " " << actualNSteps << " " << totChTime << " "
+            << totImpTime << " " << totT << endl;
+	}
 	os.close();
-
-	//solver->write(cout);
-
-	cout << val << " " << actualNSteps << " " << totChTime << " " << totImpTime << " " << totT << endl;
 
 	delete policy;
 	delete histories;

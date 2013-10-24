@@ -1,9 +1,10 @@
 #ifndef ROCKSAMPLE_OPTIONS_H
 #define ROCKSAMPLE_OPTIONS_H
 
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <string>
+
+#include <ctime>
+
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
@@ -14,9 +15,9 @@ namespace options {
         generic.add_options()
             ("help,h", "produce help message")
             ("cfg,c",
-            po::value<string>()->default_value("tests/default.cfg"),
+            po::value<std::string>()->default_value("tests/default.cfg"),
             "config file path")
-            ("policy,p", po::value<string>()->default_value("pol.pol"),
+            ("policy,p", po::value<std::string>()->default_value("pol.pol"),
             "policy file path (output)")
             ("seed,s", po::value<long>()->default_value(time(NULL)), "RNG seed")
             ;
@@ -27,14 +28,16 @@ namespace options {
     po::options_description simulation() {
         po::options_description simulation("Simulation-specific settings");
         simulation.add_options()
-            ("log,l", po::value<string>()->default_value("log.log"),
-             "File to log changes to")
-            ("changes.changesPath", po::value<string>(),
-             "Path to the file with runtime changes to the POMDP model")
+            ("log,l", po::value<std::string>()->default_value("log.log"),
+             "file to log changes to")
+            ("changes.hasChanges,hc", po::value<bool>()->default_value(false),
+             "whether the PODMP model will change at runtime.")
+            ("changes.changesPath,ch", po::value<std::string>(),
+             "path to the file with runtime changes to the POMDP model")
             ("simulation.nSteps", po::value<long>(),
-             "Maximum number of steps to simulate")
+             "maximum number of steps to simulate")
             ("simulation.nRuns", po::value<long>(),
-             "Number of times to run the simulation")
+             "number of times to run the simulation")
             ;
         return simulation;
     }
@@ -60,7 +63,7 @@ namespace options {
                 "Settings specific to the RockSample POMDP");
         problem.add_options()
             ("problem.discount,d", po::value<double>(), "discount factor")
-            ("problem.mapPath,m", po::value<string>(), "path to map file")
+            ("problem.mapPath,m", po::value<std::string>(), "path to map file")
             ("problem.goodRockReward", po::value<double>(),
              "reward for sampling a good rock")
             ("problem.badRockPenalty", po::value<double>(),

@@ -10,7 +10,15 @@ namespace po = boost::program_options;
 
 typedef std::vector<double> StateVals;
 typedef std::vector<double> ObsVals;
-enum ChType { UNDEFINED=0, ADDSTATE=1, REWARD=2, TRANSITION=3, DELSTATE=4 , ADDOBSERVATION=5, ADDOBSTACLE=6 };
+enum ChType {
+    UNDEFINED=0,
+    ADDSTATE=1,
+    REWARD=2,
+    TRANSITION=3,
+    DELSTATE=4,
+    ADDOBSERVATION=5,
+    ADDOBSTACLE=6
+};
 
 class Model {
 	public:
@@ -51,19 +59,30 @@ class Model {
 		/***** Start virtual functions *****/
 		virtual void sampleAnInitState(StateVals& tmpStVals)=0;
 		virtual void solveHeuristic(StateVals &s, double *qVal)=0;
-		virtual bool getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals, ObsVals &obs)=0;
+		virtual bool getNextState(StateVals &sVals, long actIdx,
+		        StateVals &nxtSVals, ObsVals &obs)=0;
 		virtual double getReward(StateVals &sVals)=0;
 		virtual double getReward(StateVals &sVals, long actId)=0;
-		virtual double getNextStateNRew(StateVals &currStVals, long actId, ObsVals &obs, bool &isTerm)=0;
-		virtual bool getNextState(StateVals &currStVals, long actIdx, double *immediateRew, StateVals &nxtSVals, ObsVals &obs)=0;
-		virtual void setChanges(const char* chName, std::vector<long> &chTime)=0;
-		virtual void update(long tCh, std::vector<StateVals> &affectedRange, std::vector<ChType> &typeOfChanges)=0;
+		virtual double getNextStateNRew(StateVals &currStVals, long actId,
+		        ObsVals &obs, bool &isTerm)=0;
+		virtual bool getNextState(StateVals &currStVals, long actIdx,
+		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs)=0;
+		virtual void setChanges(const char* chName,
+		        std::vector<long> &chTime)=0;
+		virtual void update(long tCh, std::vector<StateVals> &affectedRange,
+		        std::vector<ChType> &typeOfChanges)=0;
 		virtual double getDefaultVal()=0;
-		virtual void getStatesSeeObs(long actId, ObsVals &obs, std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt)=0;
-		virtual void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt)=0;
+		virtual void getStatesSeeObs(long actId, ObsVals &obs,
+		        std::vector<StateVals> &partSt,
+		        std::map<int, StateVals> &partNxtSt)=0;
+		virtual void getStatesSeeObs(ObsVals &obs,
+		        std::vector<StateVals> &posNxtSt)=0;
 		virtual bool isTerm(StateVals &sVals)=0;
-		virtual bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
-				std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
+		virtual bool modifStSeq(std::vector<StateVals> &seqStVals,
+		        long startAffectedIdx, long endAffectedIdx,
+				std::vector<StateVals> &modifStSeq,
+				std::vector<long> &modifActSeq,
+				std::vector<ObsVals> &modifObsSeq,
 				std::vector<double> &modifRewSeq)=0;
 		virtual void drawEnv(std::ostream &os)=0;
 
@@ -77,9 +96,9 @@ class Model {
         long nObservations;
         /** The number of state variables. */
         long nStVars;
-        /** The number of distinct possible initial states. */
+        /** The number of state particles in the initial belief. */
         long nInitBel;
-        /** A vector of all the possible initial states. */
+        /** A vector of all the states in the initial belief. */
         std::vector<StateVals> initBel;
 
         // SBT parameters

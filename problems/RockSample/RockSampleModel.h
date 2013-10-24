@@ -31,9 +31,17 @@ class RockSampleModel : public Model {
 		~RockSampleModel();
 
 		/***** Start implementation of Model's virtual functions *****/
+
+        /**
+         * Samples an initial state from the belief vector.
+         */
 		void sampleAnInitState(StateVals& tmpStVals);
+		/** ? */
 		bool getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals,
 		        ObsVals &obs);
+        /**
+        * Approximates the q-value of a state.
+        */
 		void solveHeuristic(StateVals &s, double *qVal);
 		double getReward(StateVals &sVals);
 		double getReward(StateVals &sVals, long actId);
@@ -100,7 +108,7 @@ class RockSampleModel : public Model {
         /** The reward for sampling a good rock. */
         double goodRockReward;
         /** The penalty for sampling a bad rock. */
-        double badRockReward;
+        double badRockPenalty;
         /** The reward for exiting the map. */
         double exitReward;
         /** The penalty for an illegal move. */

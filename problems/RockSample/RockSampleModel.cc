@@ -1,10 +1,15 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <iterator>
 
 #include "RockSampleModel.h"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
+
+using std::cout;
+using std::endl;
 
 RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
     // Read the map from the file.
@@ -24,7 +29,37 @@ RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
 	}
 	inFile.close();
 
+    goodRockReward = vm["problem.goodRockReward"].as<double>();
+    badRockPenalty = vm["problem.badRockPenalty"].as<double>();
+    exitReward = vm["problem.exitReward"].as<double>();
+    illegalMovePenalty = vm["problem.illegalMovePenalty"].as<double>();
+    halfEfficiencyDistance = vm["problem.halfEfficiencyDistance"].as<double>();
 	initialise();
+
+    /*
+	cout << "Discount: " << discount << endl;
+	cout << "mapSize: " << mapSize << endl;
+	cout << "Start: " << startPos.i << " " << startPos.j << endl;
+	cout << "nRocks: " << nRocks << endl;
+	cout << rockCoords[0].i << " " << rockCoords[0].j << endl;
+	cout << rockCoords[1].i << " " << rockCoords[1].j << endl;
+	cout << "good rock reward: " << goodRockReward << endl;
+	cout << "nActions: " << nActions << endl;
+	cout << "nObservations: " << nObservations << endl;
+	cout << "nStVars: " << nStVars << endl;
+	cout << "nInitBel: " << nInitBel << endl;
+    std::copy(initBel[0].begin(), initBel[0].end(), std::ostream_iterator<double>(cout, " "));
+    cout << endl;
+    std::copy(initBel[1].begin(), initBel[1].end(), std::ostream_iterator<double>(cout, " "));
+    cout << endl;
+    std::copy(initBel[2].begin(), initBel[2].end(), std::ostream_iterator<double>(cout, " "));
+    cout << endl;
+    std::copy(initBel[3].begin(), initBel[3].end(), std::ostream_iterator<double>(cout, " "));
+    cout << endl;
+    std::copy(initBel[255].begin(), initBel[255].end(), std::ostream_iterator<double>(cout, " "));
+    cout << endl;
+	cout << "nParticles: " << nParticles << endl;
+	*/
 }
 
 RockSampleModel::~RockSampleModel() {
@@ -49,7 +84,7 @@ void RockSampleModel::initialise() {
             }
         }
 	}
-	nActions = CHECK + nRocks;
+	nActions = 5 + nRocks;
 	nObservations = 2;
 	nStVars = 2 + nRocks;
 	StateVals s(nStVars);
@@ -76,14 +111,12 @@ void RockSampleModel::sampleAnInitState(StateVals& tmpStVals) {
 	tmpStVals = initBel[idx];
 }
 
-/**
- * Approximates the q-value of a state.
- */
 void RockSampleModel::solveHeuristic(StateVals &s, double *qVal) {
     *qVal = 0;
 }
 
-bool RockSampleModel::getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals, ObsVals &obs) {
+bool RockSampleModel::getNextState(StateVals &sVals, long actIdx,
+        StateVals &nxtSVals, ObsVals &obs) {
 }
 
 double RockSampleModel::getReward(StateVals &sVals) {
@@ -92,34 +125,49 @@ double RockSampleModel::getReward(StateVals &sVals) {
 double RockSampleModel::getReward(StateVals &sVals, long actId) {
 }
 
-double RockSampleModel::getNextStateNRew(StateVals &sVals, long actId, ObsVals &obs, bool &isTerm) {
+double RockSampleModel::getNextStateNRew(StateVals &sVals, long actId,
+        ObsVals &obs, bool &isTerm) {
 }
 
-bool RockSampleModel::getNextState(StateVals &currStVals, long actIdx, double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
+bool RockSampleModel::getNextState(StateVals &currStVals, long actIdx,
+        double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
 }
 
-void RockSampleModel::setChanges(const char* chName, std::vector<long> &chTime) {
+void RockSampleModel::setChanges(const char* chName, std::vector<long> &chTime)
+{
 }
 
-void RockSampleModel::update(long tCh, std::vector<StateVals> &affectedRange, std::vector<ChType> &typeOfChanges) {
+void RockSampleModel::update(long tCh, std::vector<StateVals> &affectedRange,
+        std::vector<ChType> &typeOfChanges) {
 }
 
 double RockSampleModel::getDefaultVal() {
 	return minVal;
 }
 
-void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs, std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt) {
+void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
+        std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt) {
 }
 
-void RockSampleModel::getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt) {
+void RockSampleModel::getStatesSeeObs(ObsVals &obs,
+        std::vector<StateVals> &posNxtSt) {
 }
 
-bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
+
+bool RockSampleModel::isTerm(StateVals &sVals) {
 }
 
-void RockSampleModel::drawEnv(ostream &os) {
-    for (std::vector<string>:: iterator it = envMap.begin();
+bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals,
+        long startAffectedIdx, long endAffectedIdx,
+		std::vector<StateVals> &modifStSeq,
+		std::vector<long> &modifActSeq,
+		std::vector<ObsVals> &modifObsSeq,
+		std::vector<double> &modifRewSeq) {
+}
+
+void RockSampleModel::drawEnv(std::ostream &os) {
+    for (std::vector<std::string>:: iterator it = envMap.begin();
             it != envMap.end(); it++) {
-        os << *it << endl;
+        os << *it << std::endl;
     }
 }
