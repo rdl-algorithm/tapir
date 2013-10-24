@@ -18,29 +18,29 @@ DESTDIR	      = ./
 #
 DEPFILE       = Makefile.dep
 
-# 
+#
 # source directories
 #
 PLANNER			= $(ROOT)/src/
-PROBLEM			= $(ROOT)/problems/underwaterNavModif/
+PROBLEM			= $(ROOT)/problems/RockSample/
 
 # ----------------------------------------------------------------------
 # Compiler & linker
 # ----------------------------------------------------------------------
-CC            = gcc 
+CC            = gcc
 
-CXX           = g++ 
+CXX           = g++
 
-LINKER	      = g++ 
-		
+LINKER	      = g++
+
 #---------------------------------------------------------------------#
 # Compiler flags
 #---------------------------------------------------------------------#
- 
-#CXXFLAGS =  -DNO_FREETYPE `freetype-config --cflags`  
+
+#CXXFLAGS =  -DNO_FREETYPE `freetype-config --cflags`
 CXXFLAGS = 	-g -frounding-math -O3 $(INCDIRS)
 #CXXFLAGS  =  $(INCDIRS)
- 
+
 INCDIRS	= -DDISTL1 -I$(PLANNER) -I$(PROBLEM) \
 #-I/usr/local/include/opencv/ \
 
@@ -51,11 +51,11 @@ INCDIRS	= -DDISTL1 -I$(PLANNER) -I$(PROBLEM) \
 LIBPATH = -L$(PROBLEM) \
 -L/usr/lib/x86_64-linux-gnu/ \
 #-L/usr/local/lib/\
-						
+
 LDFLAGS = -g -w \
 -lboost_program_options \
 #-lopencv_legacy -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml \
-		
+
 #---------------------------------------------------------------------#
 # Archiver
 #---------------------------------------------------------------------#
@@ -80,7 +80,7 @@ SRCS_PLANNER 	= 	$(PLANNER)/GlobalResources.cc \
 					$(PLANNER)/Observation.cc \
 					$(PLANNER)/BeliefNode.cc \
 					$(PLANNER)/BeliefTree.cc \
-					$(PLANNER)/Solver.cc 
+					$(PLANNER)/Solver.cc
 
 HDRS_PLANNER 	= 	$(PLANNER)/Model.h \
 					$(PLANNER)/GlobalResources.h \
@@ -94,30 +94,28 @@ HDRS_PLANNER 	= 	$(PLANNER)/Model.h \
 					$(PLANNER)/Observation.h \
 					$(PLANNER)/BeliefNode.h \
 					$(PLANNER)/BeliefTree.h \
-					$(PLANNER)/Solver.h 
+					$(PLANNER)/Solver.h
 
 OBJS_PLANNER	= 	$(SRCS_PLANNER:$(PLANNER)/%.cc=%.o)
 
-SRCS_PROBLEM	= 	$(PROBLEM)/UnderwaterNavModifModel.cc \
-					$(PROBLEM)/StRoadmap.cc 
+SRCS_PROBLEM	= 	$(PROBLEM)/RockSampleModel.cc \
 
-HDRS_PROBLEM	= 	$(PROBLEM)/UnderwaterNavModifModel.h \
-					$(PROBLEM)/StRoadmap.h \
+HDRS_PROBLEM	= 	$(PROBLEM)/RockSampleModel.h \
 					$(PROBLEM)/options.h
-		
+
 OBJS_PROBLEM	= 	$(SRCS_PPROBLEM:$(PROBLEM)/%.cc=%.o)
 
 TARGET_SOLVER  	= solve
 
-SRCS_SOLVER		= $(PROBLEM)/solve.cc 
+SRCS_SOLVER		= $(PROBLEM)/solve.cc
 
-OBJ_SOLVER		= solve.o 
+OBJ_SOLVER		= solve.o
 
 TARGET_SIMULATOR= simulate
 
-SRCS_SIMULATOR	= $(PROBLEM)/simulate.cc 
+SRCS_SIMULATOR	= $(PROBLEM)/simulate.cc
 
-OBJ_SIMULATOR	= simulate.o 
+OBJ_SIMULATOR	= simulate.o
 
 OBJS_PROBLEM	= $(SRCS_PROBLEM:$(PROBLEM)/%.cc=%.o)
 
@@ -131,12 +129,12 @@ OBJSCODE = $(OBJS_PLANNER) $(OBJS_PROBLEM)
 .PHONY: all
 all:		$(TARGET_SOLVER) $(TARGET_SIMULATOR)
 
-$(TARGET_SOLVER): $(OBJSCODE) $(OBJ_SOLVER) 
+$(TARGET_SOLVER): $(OBJSCODE) $(OBJ_SOLVER)
 		$(LINKER) $(LIBPATH) $(OBJSCODE) $(OBJ_SOLVER) $(LDFLAGS) -o $@
 
-$(TARGET_SIMULATOR): $(OBJSCODE) $(OBJ_SIMULATOR) 
+$(TARGET_SIMULATOR): $(OBJSCODE) $(OBJ_SIMULATOR)
 		$(LINKER) $(LIBPATH) $(OBJSCODE) $(OBJ_SIMULATOR) $(LDFLAGS) -o $@
-		
+
 $(OBJSCODE):
 		$(CXX)  $(CXXFLAGS) -o $@ -c $<
 
@@ -145,8 +143,8 @@ $(OBJSCODE):
 
 #$(OBJS_SIMULATOR):
 #		$(CXX)  $(CXXFLAGS) -o $@ -c $<
-	
-clean:;	rm -f $(OBJSCODE)	
+
+clean:;	rm -f $(OBJSCODE)
 		rm -f $(OBJ_SOLVER)
 		rm -f $(OBJ_SIMULATOR)
 		rm -f $(TARGET_SOLVER)

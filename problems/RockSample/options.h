@@ -13,7 +13,7 @@ namespace options {
         po::options_description generic("Generic options");
         generic.add_options()
             ("help,h", "produce help message")
-            ("cfg,c", 
+            ("cfg,c",
             po::value<string>()->default_value("tests/default.cfg"),
             "config file path")
             ("policy,p", po::value<string>()->default_value("pol.pol"),
@@ -31,14 +31,14 @@ namespace options {
              "File to log changes to")
             ("changes.changesPath", po::value<string>(),
              "Path to the file with runtime changes to the POMDP model")
-            ("simulation.nSteps", po::value<long>(), 
+            ("simulation.nSteps", po::value<long>(),
              "Maximum number of steps to simulate")
             ("simulation.nRuns", po::value<long>(),
              "Number of times to run the simulation")
             ;
         return simulation;
     }
-        
+
     // Configuration options for the SBT
     po::options_description sbt() {
         po::options_description sbt("SBT settings");

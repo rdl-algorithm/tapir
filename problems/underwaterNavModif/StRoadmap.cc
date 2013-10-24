@@ -7,21 +7,21 @@ using namespace std;
 
 StRoadmap::StRoadmap(vector<StateVals> &goals, long maxVerts, long nGoalsSamp,
         long nTryCon, long maxDistCon, map<long, map<long, short> > &env,
-        long nX, long nY): maxVerts(maxVerts), maxTryCon(nTryCon), 
+        long nX, long nY): maxVerts(maxVerts), maxTryCon(nTryCon),
         maxDistCon(maxDistCon), env(env), nX(nX), nY(nY) {
 	setWeight();
 	nVerts = 0;
 	insertGoalMilestones(goals, nGoalsSamp);
 	long i = lastGoalIdx;
-	
+
 	//insertMyMilestones();
-	
+
 	while (i < maxVerts) {
 		StateVals s(2);
 		sampleAMilestone(s);
 		if (insertMilestone(s)) { i++; }
 	}
-/*	
+/*
 vector<StateVals>::iterator itV;
 cerr << "Vertices: (lastGoal "  << lastGoalIdx << ")\n";
 i=0;
@@ -62,12 +62,12 @@ void StRoadmap::setWeight() {
 	for (itX = env.begin(); itX != env.end(); itX++) {
 		for (long x = prevX; x < itX->first; x++) {
 //cerr << "Fr " << prevX << " to " << itX->first << " curr " << x
-//		<< " prevY " << prevY << " to " << itY->first << endl;		
+//		<< " prevY " << prevY << " to " << itY->first << endl;
 			pivIdx = x*nY;
 			for (long y = 0; y < nY; y++) {
 				totW++;
 				weight[totW] = pivIdx + y;
-//cerr << "LeftOverY weight[" << totW << "] : " << x << " " << y << " " << weight[totW] << endl;					
+//cerr << "LeftOverY weight[" << totW << "] : " << x << " " << y << " " << weight[totW] << endl;
 			}
 		}
 //cerr << "At " << itX->first << endl;
@@ -77,16 +77,16 @@ void StRoadmap::setWeight() {
 			for (long y = prevY; y < itY->first; y++) {
 				totW++;
 				weight[totW] = pivIdx + y;
-//cerr << "weight[" << totW << "] : " << itX->first << " " << y << " " << weight[totW] << endl;					
-			} 
+//cerr << "weight[" << totW << "] : " << itX->first << " " << y << " " << weight[totW] << endl;
+			}
 			if (itY->second == 3) {	// Observation
-//cerr << "OBS ( " << itX->first << " " << itY->first << " ) ";				
+//cerr << "OBS ( " << itX->first << " " << itY->first << " ) ";
 				totW++;
 				weight[totW] = pivIdx + itY->first;
-//cerr << "weight[" << totW << "] : " << itX->first << " " << itY->first << " " << weight[totW] << " ";					
+//cerr << "weight[" << totW << "] : " << itX->first << " " << itY->first << " " << weight[totW] << " ";
 				totW++;
 				weight[totW] = pivIdx + itY->first;
-//cerr << "weight[" << totW << "] : " << itX->first << " " << itY->first << " " << weight[totW] << endl;					
+//cerr << "weight[" << totW << "] : " << itX->first << " " << itY->first << " " << weight[totW] << endl;
 			}
 			/*
 			else if (itY->second == 0) { // Usual empty space
@@ -96,15 +96,15 @@ void StRoadmap::setWeight() {
 			*/
 /*
 if (itY->second == 2) {
-cerr << "ROCKS ( " << itX->first << " " << itY->first << " ) ";				
+cerr << "ROCKS ( " << itX->first << " " << itY->first << " ) ";
 }
-*/					
+*/
 			prevY = itY->first+1;
 		}
 		for (long y = prevY; y < nY; y++) {
 			totW++;
 			weight[totW] = pivIdx + y;
-//cerr << "LeftOverY weight[" << totW << "] : " << itX->first << " " << y << " " << weight[totW] << endl;					
+//cerr << "LeftOverY weight[" << totW << "] : " << itX->first << " " << y << " " << weight[totW] << endl;
 		}
 
 		prevX = itX->first+1;
@@ -114,7 +114,7 @@ cerr << "ROCKS ( " << itX->first << " " << itY->first << " ) ";
 		for (long y = 0; y < nY; y++) {
 			totW++;
 			weight[totW] = pivIdx + y;
-//cerr << "LeftOverX weight[" << totW << "] : " << x << " " << y << " " << weight[totW] << endl;								
+//cerr << "LeftOverX weight[" << totW << "] : " << x << " " << y << " " << weight[totW] << endl;
 		}
 	}
 	for (long x = prevX; x < nX; x++) {
@@ -122,7 +122,7 @@ cerr << "ROCKS ( " << itX->first << " " << itY->first << " ) ";
 		for (long y = 0; y < nY; y++) {
 			totW++;
 			weight[totW] = pivIdx + y;
-//cerr << "LeftOverX weight[" << totW << "] : " << x << " " << y << " " << weight[totW] << endl;								
+//cerr << "LeftOverX weight[" << totW << "] : " << x << " " << y << " " << weight[totW] << endl;
 		}
 	}
 }
@@ -149,8 +149,8 @@ void StRoadmap::insertGoalMilestones(vector<StateVals> &goals, long nGoalsSamp) 
 
 void StRoadmap::insertMyMilestones() {
 	vector<StateVals> s;
-	StateVals st(2); 
-	
+	StateVals st(2);
+
 	st[0] = 14; st[1] = 20;
 	s.push_back(st);
 	st[0] = 14; st[1] = 40;
@@ -174,13 +174,13 @@ void StRoadmap::sampleAMilestone(StateVals &st) {
 	long rawIdx = (long) floor(GlobalResources::randGen.ranf_arr_next()*totW);
 	st[0] = (long) floor(weight[rawIdx]/nY);
 	st[1] = weight[rawIdx]%nY;
-/*	
+/*
 if (st[0] >= 35 && st[0] < 39 && st[1] >= 20 && st[1] < 52) {
-	cerr << "SAMPLE ROCK raw " << rawIdx << " w " << weight[rawIdx] << " env " 
-			<< env[st[0]][st[1]] << " ( " << st[0] << " " << st[1] << " ) " 
+	cerr << "SAMPLE ROCK raw " << rawIdx << " w " << weight[rawIdx] << " env "
+			<< env[st[0]][st[1]] << " ( " << st[0] << " " << st[1] << " ) "
 			<< weight[rawIdx-1] << " " << weight[rawIdx+1] << endl;
 }
-*/	
+*/
 }
 
 bool StRoadmap::insertMilestone(StateVals &st) {
@@ -191,7 +191,7 @@ bool StRoadmap::insertMilestone(StateVals &st) {
 			return false;
 		}
 	}
-	
+
 	long nTry = 0;
 	for (itV = V.begin(), i = 0; itV != V.end(); itV++, i++) {
 		if (dist(st, *itV) < maxDistCon && nTry < maxTryCon && (c = lineSegOk(st, *itV)) > -1) {
@@ -212,9 +212,9 @@ double StRoadmap::dist(StateVals &s1, StateVals &s2) {
 long StRoadmap::lineSegOk(StateVals &st1, StateVals &st2) {
 	map< long, map<long, short> >::iterator itX;
 	map<long, short>::iterator itY;
-	
+
 	// Move until Y = end Y position, and then move in X direction.
-	if ((itX = env.find(st1[0])) == env.end()) {	
+	if ((itX = env.find(st1[0])) == env.end()) {
 		for (long x = st1[0]; x < st2[0]; x++) {
 			itX = env.find(x);
 			if (itX != env.end()) {
@@ -247,9 +247,9 @@ long StRoadmap::lineSegOk(StateVals &st1, StateVals &st2) {
 		}
 		return (fabs(st2[0]-st1[0]) + fabs(st2[1]-st1[1]));
 	}
-		
+
 	// Move until Y = end Y position, and then move in X direction.
-	if ((itX = env.find(st2[0])) == env.end()) {	
+	if ((itX = env.find(st2[0])) == env.end()) {
 		for (long x = st1[0]; x < st2[0]; x++) {
 			itX = env.find(x);
 			if (itX != env.end()) {
@@ -288,7 +288,7 @@ long StRoadmap::lineSegOk(StateVals &st1, StateVals &st2) {
 void StRoadmap::getDistToGoal() {
 	vector< pair<long, long> >::iterator itNxt;
 	long tmpDist;
-	
+
 	// Find shortest path to each goal
 	vector< vector<long> > allDist;
 	for (long i = 0; i <= lastGoalIdx; i++) {
@@ -300,7 +300,7 @@ void StRoadmap::getDistToGoal() {
 			dist[j] = 0;
 			visited[j] = true;
 		}
-	
+
 		// Iteration
 		multimap<long, long> q;
 		map< long, multimap<long, long>::iterator > ptrToIdx;
@@ -311,7 +311,7 @@ void StRoadmap::getDistToGoal() {
 			ptrToIdx[j] = q.end();
 		}
 		for (itNxt = inEdges[i].begin(); itNxt != inEdges[i].end(); itNxt++) {
-//cerr << "About to erase " << itNxt->first << " of v " << i << endl;			
+//cerr << "About to erase " << itNxt->first << " of v " << i << endl;
 			q.erase(ptrToIdx[itNxt->first]);
 			ptrToIdx[itNxt->first] = q.insert(pair<long, long>(itNxt->second, itNxt->first));
 			dist[itNxt->first] = itNxt->second;
@@ -328,7 +328,7 @@ void StRoadmap::getDistToGoal() {
 					ptrToIdx[itNxt->first] = q.insert(pair<long, long>(tmpDist, itNxt->first));
 					dist[itNxt->first] = tmpDist;
 					//nxt[itNxt->first] = currIdx;
-				}				
+				}
 			}
 			visited[currIdx] = true;
 			q.erase(itQ);
@@ -343,7 +343,7 @@ cerr << endl;
 */
 		allDist.push_back(dist);
 	}
-	
+
 	vector< vector<long> >::iterator itVecVecL = allDist.begin();
 	vector<long>::iterator itVecL;
 	for (long i = 0; i < nVerts; i++) {
@@ -372,13 +372,13 @@ double StRoadmap::getDistToGoal(StateVals &st) {
 	long minDist = LONG_MAX;
 	long minIdx = 0;
 	long tmpDist;
-	
+
 	map<long, long>::iterator itM;
 	for (itM = shortestDistToGoal.begin(); itM != shortestDistToGoal.end(); itM++) {
 		if ((tmpDist = dist(st, V[itM->first])) < minDist) {
 			minDist = tmpDist;
 			minIdx = itM->first;
-		} 
+		}
 	}
 //cerr << "UseForHeuristic: " << minIdx << " " << shortestDistToGoal[minIdx] << endl;
 	return shortestDistToGoal[minIdx];
@@ -386,7 +386,7 @@ double StRoadmap::getDistToGoal(StateVals &st) {
 
 void StRoadmap::updateRoadmap(map< long, map<long, short> > &env_, vector<StateVals> &goals, long nGoalsSamp) {
 	env = env_;
-	
+
 	V.clear();
 	weight.clear();
 	map< long, vector< pair<long, long> > >::iterator itMap;
@@ -398,14 +398,14 @@ void StRoadmap::updateRoadmap(map< long, map<long, short> > &env_, vector<StateV
 		itMap->second.clear();
 	}
 	inEdges.clear();
-	
+
 	setWeight();
 	for (long i = 0; i < maxVerts; i++) {
 		insertGoalMilestones(goals, nGoalsSamp);
 		StateVals s(2);
 		sampleAMilestone(s);
 		insertMilestone(s);
-	}	
+	}
 	getDistToGoal();
 }
 
@@ -419,7 +419,7 @@ bool StRoadmap::VContains(long x, long y) {
 }
 
 void StRoadmap::draw(ostream &os) {
-	map< long, map<long, short> >::iterator itCellType;	
+	map< long, map<long, short> >::iterator itCellType;
 	os << endl;
 	for (long y = 0; y < nY; y++) {
 		for (long x = 0; x < nX; x++) {

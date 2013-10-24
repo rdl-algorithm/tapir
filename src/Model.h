@@ -47,9 +47,9 @@ class Model {
 		inline double getMinVal() { return minVal; }
 		inline double getMaxVal() { return maxVal; }
 		inline double getDistTh() { return distTh; }
-		
+
 		/***** Start virtual functions *****/
-		virtual void sampleAnInitState(StateVals& tmpStVals)=0;		
+		virtual void sampleAnInitState(StateVals& tmpStVals)=0;
 		virtual void solveHeuristic(StateVals &s, double *qVal)=0;
 		virtual bool getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals, ObsVals &obs)=0;
 		virtual double getReward(StateVals &sVals)=0;

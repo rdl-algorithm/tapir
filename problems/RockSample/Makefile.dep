@@ -27,11 +27,8 @@ Solver.o: ../..//src//Solver.h ../..//src//Model.h \
  ../..//src//Histories.h ../..//src//HistorySeq.h \
  ../..//src//HistoryEntry.h ../..//src//State.h ../..//src//StatePool.h \
  ../..//src//Action.h ../..//src//Observation.h
-UnderwaterNavModifModel.o: \
- ../..//problems/underwaterNavModif//UnderwaterNavModifModel.h \
- ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h \
- ../..//problems/underwaterNavModif//StRoadmap.h 
-StRoadmap.o: ../..//problems/underwaterNavModif//StRoadmap.h \
+RockSampleModel.o: \
+ ../..//problems/RockSample//RockSampleModel.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h
 GlobalResources.o: ../..//src//GlobalResources.cc \
  ../..//src//GlobalResources.h ../..//src//RandGen.h
@@ -75,31 +72,27 @@ Solver.o: ../..//src//Solver.cc ../..//src//Solver.h ../..//src//Model.h \
  ../..//src//HistoryEntry.h ../..//src//State.h ../..//src//StatePool.h \
  ../..//src//Action.h ../..//src//Observation.h \
  ../..//src//GlobalResources.h ../..//src//RandGen.h
-UnderwaterNavModifModel.o: \
- ../..//problems/underwaterNavModif//UnderwaterNavModifModel.cc \
- ../..//problems/underwaterNavModif//UnderwaterNavModifModel.h \
+RockSampleModel.o: \
+ ../..//problems/RockSample//RockSampleModel.cc \
+ ../..//problems/RockSample//RockSampleModel.h \
+ ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h
+solve.o: ../..//problems/RockSample//solve.cc \
+ ../..//problems/RockSample//RockSampleModel.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h \
- ../..//problems/underwaterNavModif//StRoadmap.h
-StRoadmap.o: ../..//problems/underwaterNavModif//StRoadmap.cc \
- ../..//problems/underwaterNavModif//StRoadmap.h ../..//src/Model.h \
- ../..//src/GlobalResources.h ../..//src/RandGen.h
-solve.o: ../..//problems/underwaterNavModif//solve.cc \
- ../..//problems/underwaterNavModif//UnderwaterNavModifModel.h \
- ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h \
- ../..//problems/underwaterNavModif//StRoadmap.h ../..//src/BeliefTree.h \
+ ../..//src/BeliefTree.h \
  ../..//src/BeliefNode.h ../..//src/Histories.h ../..//src/HistorySeq.h \
  ../..//src/HistoryEntry.h ../..//src/State.h ../..//src/Model.h \
  ../..//src/StatePool.h ../..//src/Action.h ../..//src/Observation.h \
  ../..//src/Histories.h ../..//src/Solver.h ../..//src/BeliefTree.h \
  ../..//src/RandGen.h \
- ../../problems/underwaterNavModif/options.h
-simulate.o: ../..//problems/underwaterNavModif//simulate.cc \
- ../..//problems/underwaterNavModif//UnderwaterNavModifModel.h \
+ ../../problems/RockSample/options.h
+simulate.o: ../..//problems/RockSample//simulate.cc \
+ ../..//problems/RockSample//RockSampleModel.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h \
- ../..//problems/underwaterNavModif//StRoadmap.h ../..//src/BeliefTree.h \
+ ../..//src/BeliefTree.h \
  ../..//src/BeliefNode.h ../..//src/Histories.h ../..//src/HistorySeq.h \
  ../..//src/HistoryEntry.h ../..//src/State.h ../..//src/Model.h \
  ../..//src/StatePool.h ../..//src/Action.h ../..//src/Observation.h \
  ../..//src/Histories.h ../..//src/Solver.h ../..//src/BeliefTree.h \
  ../..//src/RandGen.h \
- ../../problems/underwaterNavModif/options.h
+ ../../problems/RockSample/options.h

@@ -30,7 +30,7 @@ Solver.o: ../..//src//Solver.h ../..//src//Model.h \
 UnderwaterNavModifModel.o: \
  ../..//problems/underwaterNavModif//UnderwaterNavModifModel.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h \
- ../..//problems/underwaterNavModif//StRoadmap.h 
+ ../..//problems/underwaterNavModif//StRoadmap.h
 StRoadmap.o: ../..//problems/underwaterNavModif//StRoadmap.h \
  ../..//src/Model.h ../..//src/GlobalResources.h ../..//src/RandGen.h
 GlobalResources.o: ../..//src//GlobalResources.cc \

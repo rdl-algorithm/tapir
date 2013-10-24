@@ -23,8 +23,8 @@ State::State(string &str, long nStVars) {
 	string tmpStr;
 	double tmpDouble = -1;
 	sstr >> tmpStr >> id >> tmpStr;
-	for (long i = 0; i < nStVars; i++) { 
-		sstr >> tmpDouble;	
+	for (long i = 0; i < nStVars; i++) {
+		sstr >> tmpDouble;
 		s.push_back(tmpDouble);
 	}
 	if (id > currId) { currId = id; }

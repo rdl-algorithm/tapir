@@ -33,7 +33,7 @@ HistoryEntry::~HistoryEntry() {
 void HistoryEntry::setBelNode(BeliefNode *bel) {
 	partOfBelNode = bel;
 }
-/*		
+/*
 void HistoryEntry::prepareDel() {
 	if (actId != -1) {
 		partOfBelNode->delParticle(this, actId, qVal);
@@ -49,8 +49,8 @@ void HistoryEntry::write(ostream &os) {
 		os << *itObs << " ";
 	}
 	os << " > " << disc << " " << rew << " " << qVal << " ) ";
-	st->write(os);	
-} 
+	st->write(os);
+}
 
 void HistoryEntry::writeln(ostream &os) {
 	os << "HistEntry < " << seqId << " " << entryId << " >: ( " << st->getId() << " " << actId << " < ";
@@ -59,10 +59,10 @@ void HistoryEntry::writeln(ostream &os) {
 		os << *itObs << " ";
 	}
 	os << " > " << disc << " " << rew << " " << qVal << " ) ";
-	st->write(os);	
+	st->write(os);
 	os << endl;
-} 
+}
 
 void HistoryEntry::writeSt(ostream &os) {
-	os << "( "; st->write(os); os << " ) "; 
+	os << "( "; st->write(os); os << " ) ";
 }

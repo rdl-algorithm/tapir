@@ -1,3 +1,4 @@
+#include <iostream>
 #include <fstream>
 
 #include "RockSampleModel.h"
@@ -11,7 +12,7 @@ RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
 	const char* mapPath = vm["problem.mapPath"].as<std::string>().c_str();
 	inFile.open(mapPath);
 	if (!inFile.is_open()) {
-		cerr << "Fail to open " << mapPath << "\n";
+        std::cerr << "Fail to open " << mapPath << "\n";
 		exit(1);
 	}
 	inFile >> mapSize;
@@ -31,7 +32,7 @@ RockSampleModel::~RockSampleModel() {
     // and are automatically deallocated.
 }
 
-/** 
+/**
  * Finds and counts the rocks on the map, and initialisese the required
  * data structures and variables.
  */
@@ -40,9 +41,9 @@ void RockSampleModel::initialise() {
     Coords p;
 	for (p.i = 0; p.i < mapSize; p.i++) {
 		for (p.j = 0; p.j < mapSize; p.j++) {
-		    if (itMap[p.i][p.j] == 'S') {
+		    if (envMap[p.i][p.j] == 'S') {
 		        startPos = p;
-		    } else if (itMap[i][j] == 'o') {
+		    } else if (envMap[p.i][p.j] == 'o') {
 		        rockCoords.push_back(p);
 		        nRocks++;
             }
@@ -82,15 +83,12 @@ void RockSampleModel::solveHeuristic(StateVals &s, double *qVal) {
     *qVal = 0;
 }
 
-void RockSampleModel::getNextState(StateVals &s, long actId, StateVals &sp) {
-}
-
 bool RockSampleModel::getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals, ObsVals &obs) {
 }
 
 double RockSampleModel::getReward(StateVals &sVals) {
 }
-	
+
 double RockSampleModel::getReward(StateVals &sVals, long actId) {
 }
 
@@ -100,27 +98,27 @@ double RockSampleModel::getNextStateNRew(StateVals &sVals, long actId, ObsVals &
 bool RockSampleModel::getNextState(StateVals &currStVals, long actIdx, double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
 }
 
-void RockSampleModel::setChanges(const char* chName, vector<long> &chTime) {
+void RockSampleModel::setChanges(const char* chName, std::vector<long> &chTime) {
 }
 
-void RockSampleModel::update(long tCh, vector<StateVals> &affectedRange, vector<ChType> &typeOfChanges) {
+void RockSampleModel::update(long tCh, std::vector<StateVals> &affectedRange, std::vector<ChType> &typeOfChanges) {
 }
 
 double RockSampleModel::getDefaultVal() {
 	return minVal;
 }
 
-void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs, vector<StateVals> &partSt, map<int, StateVals> &partNxtSt) {
+void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs, std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt) {
 }
 
-void RockSampleModel::getStatesSeeObs(ObsVals &obs, vector<StateVals> &posNxtSt) {
+void RockSampleModel::getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt) {
 }
 
-bool RockSampleModel::modifStSeq(vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
+bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
 }
 
 void RockSampleModel::drawEnv(ostream &os) {
-    for (vector<string>:: iterator it = envMap.begin();
+    for (std::vector<string>:: iterator it = envMap.begin();
             it != envMap.end(); it++) {
         os << *it << endl;
     }

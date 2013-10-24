@@ -78,7 +78,7 @@ void BeliefNode::setAct(string str, vector<BeliefNode*> &tmpNodes) {
 			nxtNode = new BeliefNode(nxtNodeId);
 			tmpNodes[nxtNodeId] = nxtNode;
 		}
-		actChildren[actId]->addChild(o, nxtNode);		
+		actChildren[actId]->addChild(o, nxtNode);
 	}
 }
 
@@ -90,9 +90,9 @@ long BeliefNode::getUCBAct() {
 	itAct ++;
 	for (; itAct != actChildren.end(); itAct++) {
 		tmpVal = itAct->second->avgQVal + exploreParam*sqrt(log(nParticles)/itAct->second->nParticles);
-		if (maxVal < tmpVal) { 
-			maxVal = tmpVal; 
-			bestActId = itAct->first; 
+		if (maxVal < tmpVal) {
+			maxVal = tmpVal;
+			bestActId = itAct->first;
 		}
 	}
 	return bestActId;
@@ -114,7 +114,7 @@ if (actChildren.size() == 0) { cerr << "DANGER\n"; }
 }
 
 void BeliefNode::add(HistoryEntry *newHistEntry) {
-/*	
+/*
 	if (nParticles < maxParticles) {
 		setEMDSig();
 		emdSigTmp->resize((size_t) nParticles+1);
@@ -131,12 +131,12 @@ void BeliefNode::add(HistoryEntry *newHistEntry) {
 
 	}
 	//emdSig = emdSigTmp;
-*/	
+*/
 	tLastAddedParticle = (double) (clock()-startTime)*10000 / CLOCKS_PER_SEC;
 
 	particles.push_back(newHistEntry);
 	nParticles ++;
-	
+
 }
 /*
 void BeliefNode::setEMDSig() {
@@ -158,7 +158,7 @@ void BeliefNode::setEMDSig() {
 		long colIdx = 1;
 		(*it)->st->getVals(tmpS);
 		for (itD = tmpS.begin(); itD != tmpS.end(); itD++, colIdx++) {
-			cvSet2D(emdSig, rowIdx, colIdx, cvScalar(*itD));	
+			cvSet2D(emdSig, rowIdx, colIdx, cvScalar(*itD));
 			//emdSigTmp->at<double>(rowIdx, colIdx) = *itD;
 		}
 		it++; rowIdx++;
@@ -171,7 +171,7 @@ void BeliefNode::setEMDSig() {
 BeliefNode* BeliefNode::addChild(long actIdx, ObsVals &obs, HistoryEntry* nxtHistEntry) {
 	BeliefNode* res;
 	if (actChildren.find(actIdx) == actChildren.end()) {
-		res = new BeliefNode(); 
+		res = new BeliefNode();
 		actChildren[actIdx] = new Action(actIdx, obs, res);
 		nActChildren ++;
 	}
@@ -190,7 +190,7 @@ BeliefNode* BeliefNode::addChild(long actIdx, ObsVals &obs, HistoryEntry* nxtHis
 BeliefNode* BeliefNode::addChild(long actIdx, ObsVals &obs) {
 	BeliefNode* res;
 	if (actChildren.find(actIdx) == actChildren.end()) {
-		res = new BeliefNode(); 
+		res = new BeliefNode();
 		actChildren[actIdx] = new Action(actIdx, obs, res);
 		nActChildren ++;
 	}
@@ -207,10 +207,10 @@ BeliefNode* BeliefNode::addChild(long actIdx, ObsVals &obs) {
 
 HistoryEntry* BeliefNode::sampleAParticle() {
 	long randIdx = (long) floor(GlobalResources::randGen.ranf_arr_next()*(nParticles-1));
-//cerr << "nodeId: " << id << " nParticles: " << nParticles << " " << particles.size() << " randIdx " << randIdx << endl;	
+//cerr << "nodeId: " << id << " nParticles: " << nParticles << " " << particles.size() << " randIdx " << randIdx << endl;
 	return particles[randIdx];
 }
-		
+
 void BeliefNode::updateVal(long actIdx, double newVal) {
 /*
 map<long, Action*>::iterator itM2;
@@ -218,14 +218,14 @@ cerr << "BeliefNode::Update 2 param Before " << actChildren.size() << " ";
 for (itM2 = actChildren.begin(); itM2 != actChildren.end(); itM2++) {
 	cerr << "( " << itM2->first << " " << itM2->second->avgQVal << " " << itM2->second->nParticles << " ) ";
 }
-cerr << endl;	
+cerr << endl;
 */
 
 	if (actChildren.find(actIdx) == actChildren.end()) {
-//cerr << "UpdateVal No Children Act: " << actIdx << endl;		
+//cerr << "UpdateVal No Children Act: " << actIdx << endl;
 		return;
 	}
-	
+
 	actChildren[actIdx]->updateQVal(newVal);
 	map<long, Action*>::iterator itM = actChildren.begin();
 	bestAvgQVal = itM->second->avgQVal;
@@ -242,17 +242,17 @@ cerr << endl;
 void BeliefNode::updateVal(long actIdx, double prevVal, double newVal, bool cutPart) {
 /*
 map<long, Action*>::iterator itM2;
-cerr << "About to updateQVal bel-" << id << " act-" << actIdx << " prevVal " << prevVal << " " << newVal << " ";	
+cerr << "About to updateQVal bel-" << id << " act-" << actIdx << " prevVal " << prevVal << " " << newVal << " ";
 cerr << "Before " << actChildren.size() << " ";
 for (itM2 = actChildren.begin(); itM2 != actChildren.end(); itM2++) {
 	cerr << "( " << itM2->first << " " << itM2->second->avgQVal << " " << itM2->second->nParticles << " ) ";
 }
-cerr << endl;	
+cerr << endl;
 */
 //cerr << "Original bestQ " << bestAvgQVal << " " << bestAct << " After ";
 
 	if (actChildren.find(actIdx) == actChildren.end()) {
-//cerr << "UpdateValWPart NoChildren Act: " << actIdx << endl;		
+//cerr << "UpdateValWPart NoChildren Act: " << actIdx << endl;
 		return;
 	}
 
@@ -272,7 +272,7 @@ cerr << "After ";
 for (itM2 = actChildren.begin(); itM2 != actChildren.end(); itM2++) {
 	cerr << "( " << itM2->first << " " << itM2->second->avgQVal << " ) ";
 }
-cerr << endl;	
+cerr << endl;
 cerr << "After bestQ " << bestAvgQVal << " " << bestAct << " nPart " << nParticles << " " << particles.size() << endl;
 */
 /*
@@ -284,7 +284,7 @@ for (itHistEntry = particles.begin(); itHistEntry != particles.end(); itHistEntr
 }
 
 void BeliefNode::calcBestVal() {
-//cerr << "inCalcBestVal: " << actChildren.size() << "\n";	
+//cerr << "inCalcBestVal: " << actChildren.size() << "\n";
 	if (actChildren.size() == 0) { return; }
 	map<long, Action*>::iterator itM = actChildren.begin();
 	bestAvgQVal = itM->second->avgQVal;
@@ -295,7 +295,7 @@ void BeliefNode::calcBestVal() {
 			bestAvgQVal = itM->second->avgQVal;
 			bestAct = itM->first;
 		}
-	}	
+	}
 }
 
 /*
@@ -306,7 +306,7 @@ void BeliefNode::delPartNUpdateVal(HistoryEntry *histEntryToBeDeleted, double pr
 }
 */
 BeliefNode* BeliefNode::getChild(long actIdx, ObsVals &obs) {
-//cerr <<" In BeliefNode->getChild for act " << actIdx << " " << actChildren.size() << endl;	
+//cerr <<" In BeliefNode->getChild for act " << actIdx << " " << actChildren.size() << endl;
 //cerr << "This Belief Node: "; writeStParticles(cerr);
 	if (actChildren.find(actIdx) == actChildren.end()) {
 		return NULL;
@@ -318,7 +318,7 @@ void BeliefNode::getChildren(queue<BeliefNode*> &res) {
 	map<long, Action*>::iterator itAct;
 	for (itAct = actChildren.begin(); itAct != actChildren.end(); itAct++) {
 		itAct->second->getChildren(res);
-	}	
+	}
 }
 
 double BeliefNode::distL1Independent(BeliefNode *b) {
@@ -373,5 +373,5 @@ void BeliefNode::writeStParticles(ostream &os) {
 	for (it = particles.begin(); it != particles.end(); it++) {
 		(*it)->writeSt(os);
 	}
-	os << endl;	
+	os << endl;
 }

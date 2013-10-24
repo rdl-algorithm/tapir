@@ -9,7 +9,7 @@ Action::Action(long actId_, ObsVals &obs, BeliefNode* nxtBelNode): actId(actId_)
 	nParticles = 1;
 }
 
-Action::Action(long actId_, long nParticles_, double qVal_, double avgQVal_): 
+Action::Action(long actId_, long nParticles_, double qVal_, double avgQVal_):
 	actId(actId_), nParticles(nParticles_), qVal(qVal_), avgQVal(avgQVal_) {
 }
 
@@ -33,7 +33,7 @@ void Action::updateQVal(double newVal) {
 
 void Action::updateQVal(double prevVal, double newVal, bool reduceParticles) {
 	if (reduceParticles) { nParticles--; }
-//cerr << "nParticles: " << nParticles << " fr " << qVal << " " << avgQVal;	
+//cerr << "nParticles: " << nParticles << " fr " << qVal << " " << avgQVal;
 	qVal = qVal - prevVal + newVal;
 	if (nParticles > 0) {
 		avgQVal = qVal / (double) nParticles;
@@ -49,7 +49,7 @@ void Action::delParticle(double delVal) {
 	nParticles --;
 	avgQVal = qVal / (double) nParticles;
 }
-	 
+
 bool Action::isAct(long aIdx) {
 	if (aIdx == actId) { return true; }
 	else { return false; }
@@ -59,7 +59,7 @@ void Action::addChild(ObsVals &obs, BeliefNode* nxtBelNode) {
 	obsChildren.push_back(new Observation(obs, nxtBelNode));
 }
 
-BeliefNode* Action::getObsChild(ObsVals &obs) {	
+BeliefNode* Action::getObsChild(ObsVals &obs) {
 /*
 cerr << "Trying	to get obs from " << obsChildren.size() << " obs: ";
 vector<double>::iterator itO;
@@ -69,17 +69,17 @@ for (itO = obs.begin(); itO != obs.end(); itO++) {
 cerr << endl;
 */
 	vector<Observation*>::iterator itObs;
-//int i = 0;	
+//int i = 0;
 	for (itObs = obsChildren.begin(); itObs != obsChildren.end(); itObs++) {
 /*
-cerr << "Obs-" << i << endl;		
-(*itObs)->write(cerr);		
+cerr << "Obs-" << i << endl;
+(*itObs)->write(cerr);
 cerr << endl;
 */
 		if ((*itObs)->isObs(obs)) {
 			return (*itObs)->getNodeChild();
 		}
-//i++;		
+//i++;
 	}
 	return NULL;
 }
@@ -90,9 +90,9 @@ void Action::getChildren(queue<BeliefNode*> &res) {
 		(*it)->getChildren(res);
 	}
 }
- 
+
 void Action::write(ostream &os) {
-	os << "A " << actId << " " << nParticles << " " << qVal << " " 
+	os << "A " << actId << " " << nParticles << " " << qVal << " "
 			<< avgQVal << " " << obsChildren.size() << " ";
 }
 

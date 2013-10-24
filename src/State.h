@@ -12,12 +12,12 @@ class BeliefNode;
 class HistoryEntry;
 
 class State {
-	public:		
+	public:
 		friend class StatePool;
 		friend class Solver;
 
 		double distUse;
-		
+
 		State(StateVals &s_);
 		State(std::string &str, long nStVars);
 		~State();
@@ -29,13 +29,13 @@ class State {
 		double distL1(State *st);
 
 		void delUsedInHistEntry(HistoryEntry *toBeDeleted);
-		
+
 		void write(std::ostream &os);
 		void writeln(std::ostream &os);
 
 		void getVals(StateVals &res) const { res = s; }
 		long getId() const { return id; }
-		
+
 	private:
 		static long currId;
 
@@ -43,7 +43,7 @@ class State {
 		StateVals s;
         std::vector<HistoryEntry*> usedInHistEntries;
         std::set<BeliefNode*> usedInBelNode;
-		
+
 		ChType chType;
 };
 #endif

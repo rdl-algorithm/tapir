@@ -7,8 +7,8 @@ public class GetStat {
 			System.out.println("Usage : java GetStat inputFileName");
 			System.exit(1);
 		}
-		
-		try {		
+
+		try {
 			BufferedReader in = new BufferedReader(new FileReader(args[0]));
 			String inStr, tmpStr;
 			StringTokenizer tok;
@@ -19,8 +19,8 @@ public class GetStat {
 				statSum[i] = 0.0;
 				statSqSum[i] = 0.0;
 			}
-			int nData = 0;			
-			
+			int nData = 0;
+
 			while ((inStr = in.readLine()) != null) {
 				tok = new StringTokenizer(inStr);
 				for (int i = 0; i < 5; i++) {
@@ -35,9 +35,9 @@ public class GetStat {
 			for (int i = 0; i < 5; i++) {
 				double avg = statSum[i] / (double)nData;
 				double sqAvg = statSqSum[i] / (double)nData;
-				System.out.print(statSum[i] + "\t" + avg + "\t" + 
+				System.out.print(statSum[i] + "\t" + avg + "\t" +
 						(sqAvg - avg*avg) + "\t");
-			}			
+			}
 			System.out.println("");
 		}
 		catch (IOException e) {

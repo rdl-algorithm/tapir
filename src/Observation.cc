@@ -40,7 +40,7 @@ void Observation::write(ostream &os) {
 	vector<double>::iterator it;
 	for (it = vals.begin(); it != vals.end(); it++) {
 		os << *it << " ";
-	} 
+	}
 	os << " ) " << child->getId() << " ";
 }
 

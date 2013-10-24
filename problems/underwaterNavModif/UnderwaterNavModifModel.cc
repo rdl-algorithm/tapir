@@ -1,3 +1,4 @@
+#include <iostream>
 #include <sstream>
 #include <fstream>
 
@@ -21,11 +22,11 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(v
 		cerr << "Fail to open " << mapPath << "\n";
 		exit(1);
 	}
-	
+
 	string tmp;
 	inFile >> nX >> nY;
 	getline(inFile, tmp);
-	
+
 	for (long i = 0; i < nY; i++) {
 		getline(inFile, tmp);
 		envMap.push_back(tmp);
@@ -36,7 +37,7 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(v
 	for (short i = 0; i < nSpcRew; i++) {
 		inFile >> tmp >> spcRew[i];
 	}
-	
+
 	inFile.close();
 
     goalReward = vm["problem.goalReward"].as<double>();
@@ -102,7 +103,7 @@ void UnderwaterNavModifModel::setInitObsGoal() {
 				StateVals s(2); s[0] = j; s[1] = i;
 				goals.push_back(s);
 				nGoals ++;
-			}			
+			}
 			else if ((*itMap)[j] == 'R') {
 				cellType[j][i] = 2;
 				StateVals s(2); s[0] = j; s[1] = i;
@@ -122,10 +123,10 @@ void UnderwaterNavModifModel::setInitObsGoal() {
 
 void UnderwaterNavModifModel::sampleAnInitState(StateVals& tmpStVals) {
 	double tmp = GlobalResources::randGen.ranf_arr_next();
-cerr << "RAND: " << tmp << endl;	
+cerr << "RAND: " << tmp << endl;
 	long idx = (long) floor(tmp*(nInitBel-1));
 	tmpStVals = initBel[idx];
-//cerr << "sampled " << tmpStVals[0] << " " << tmpStVals[1] << endl;	
+//cerr << "sampled " << tmpStVals[0] << " " << tmpStVals[1] << endl;
 }
 
 /*
@@ -138,8 +139,8 @@ long UnderwaterNavModifModel::getRolloutAct(StateVals &stVals) {
 	else {							// Shortest path to goal.
 		long bestAct = 0;
 		double tmpDist;
-		double minDist = getExpDist(stVals, 0);		
-		for (long i = 1; i < nActions; i++) {			
+		double minDist = getExpDist(stVals, 0);
+		for (long i = 1; i < nActions; i++) {
 			tmpDist = getExpDist(stVals, i);
 			if (tmpDist < minDist) {
 				minDist = tmpDist;
@@ -160,8 +161,8 @@ long UnderwaterNavModifModel::getRolloutAct(StateVals &stVals, double *rew) {
 	else {							// Shortest path to goal.
 		long bestAct = 0;
 		double tmpDist;
-		double minDist = getExpDist(stVals, 0);		
-		for (long i = 1; i < nActions; i++) {			
+		double minDist = getExpDist(stVals, 0);
+		for (long i = 1; i < nActions; i++) {
 			tmpDist = getExpDist(stVals, i);
 			if (tmpDist < minDist) {
 				minDist = tmpDist;
@@ -238,7 +239,7 @@ double UnderwaterNavModifModel::getExpDist(StateVals &s, long firstAct) {
 	for (long i = 0; i < nParticles; i++) {
 		StateVals nxtSt;
 		getNextState(s, firstAct, nxtSt);
-	
+
 		itGoal = goals.begin();
 		double minDist = getDist(nxtSt, *itGoal);
 		double tmpDist;
@@ -255,7 +256,7 @@ double UnderwaterNavModifModel::getExpDist(StateVals &s, long firstAct) {
 }
 */
 void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &sp) {
-	sp.resize(2); 
+	sp.resize(2);
 
 	double tmp = GlobalResources::randGen.ranf_arr_next();
 	switch(actId) {
@@ -270,7 +271,7 @@ void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &
 			}
 			else {
 				sp[0] = s[0] + 1.0;
-				sp[1] = s[1] - 1.0;				
+				sp[1] = s[1] - 1.0;
 			}
 			break;
 		}
@@ -285,7 +286,7 @@ void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &
 			}
 			else {
 				sp[0] = s[0] + 1.0;
-				sp[1] = s[1] - 1.0;				
+				sp[1] = s[1] - 1.0;
 			}
 			break;
 		}
@@ -300,7 +301,7 @@ void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &
 			}
 			else {
 				sp[0] = s[0] + 1.0;
-				sp[1] = s[1] + 1.0;				
+				sp[1] = s[1] + 1.0;
 			}
 			break;
 		}
@@ -315,10 +316,10 @@ void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &
 			}
 			else {
 				sp[0] = s[0] + 1.0;
-				sp[1] = s[1];				
-			}		
-			break;				
-		}		
+				sp[1] = s[1];
+			}
+			break;
+		}
 		case SOUTHEAST: {
 			if (tmp < ctrlCorrectProb) {
 				sp[0] = s[0] + 1.0;
@@ -330,9 +331,9 @@ void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &
 			}
 			else {
 				sp[0] = s[0] + 1.0;
-				sp[1] = s[1];				
-			}		
-			break;	
+				sp[1] = s[1];
+			}
+			break;
 		}
 	}
 //cerr << "sp: " << s[0] << " " << s[1] << " act " << actId << " s " << sp[0] << " " << sp[1] << endl;
@@ -344,11 +345,11 @@ void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &
 		sp = s;
 	}
 */
-/*	
+/*
 if (cellType[sp[0]][sp[1]] == 2) {
 	cerr << "Visit rocks at " << sp[0] << " " << sp[1] << endl;
 }
-*/		
+*/
 	map< long, map<long, short> >::iterator itCellType = cellType.find(sp[0]);
 	if (itCellType != cellType.end()) {
 		if (itCellType->second.find(sp[1]) != itCellType->second.end()) {
@@ -357,9 +358,9 @@ if (cellType[sp[0]][sp[1]] == 2) {
 			}
 		}
 	}
-	
-//cout << "s: " << s[0] << " " << s[1] << " s': " << sp[0] << " " << sp[1] << " act: " 
-//		<< actId << " tmp " << tmp << " nX: " << nX << " " << nY << endl;	
+
+//cout << "s: " << s[0] << " " << s[1] << " s': " << sp[0] << " " << sp[1] << " act: "
+//		<< actId << " tmp " << tmp << " nX: " << nX << " " << nY << endl;
 }
 
 double UnderwaterNavModifModel::getDist(StateVals &s1, StateVals &s2) {
@@ -367,19 +368,19 @@ double UnderwaterNavModifModel::getDist(StateVals &s1, StateVals &s2) {
 	vector<double>::iterator it1, it2;
 	for (it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end(); it1++, it2++) {
 		d = d + abs(*it1-*it2);
-	} 
+	}
 	return d;
 }
 
 bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals, ObsVals &obs) {
 	nxtSVals.clear();
-//cerr << "input currSt " << sVals[0] << " " << sVals[1] << " a " << actIdx << endl;	
+//cerr << "input currSt " << sVals[0] << " " << sVals[1] << " a " << actIdx << endl;
 	getNextState(sVals, actIdx, nxtSVals);
-//cerr << "currSt " << sVals[0] << " " << sVals[1] << " a " << actIdx << " nxtSt: " << nxtSVals[0] << " " << nxtSVals[1] << endl;	
+//cerr << "currSt " << sVals[0] << " " << sVals[1] << " a " << actIdx << " nxtSt: " << nxtSVals[0] << " " << nxtSVals[1] << endl;
 	inObsRegion(nxtSVals, obs);
 	if (inGoal(nxtSVals)) {
 //cerr << "InGoal\n";
-		return true; 
+		return true;
 	}
 	else {
 		return false;
@@ -390,14 +391,14 @@ void UnderwaterNavModifModel::inObsRegion(StateVals &sVals, ObsVals &obs) {
 	obs.resize(2);
 /*
 	if (cellType[sVals[0]][sVals[1]] == 3) {
-		obs[0] = sVals[0]; obs[1] = sVals[1];		
+		obs[0] = sVals[0]; obs[1] = sVals[1];
 	}
 	else {
-		obs[0] = -1; obs[1] = -1;		
+		obs[0] = -1; obs[1] = -1;
 	}
-*/	
+*/
 	map< long, map<long, short> >::iterator itCellType = cellType.find(sVals[0]);
-	
+
 	if (itCellType != cellType.end()) {
 		if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
 			if (cellType[sVals[0]][sVals[1]] == 3) {
@@ -411,7 +412,7 @@ void UnderwaterNavModifModel::inObsRegion(StateVals &sVals, ObsVals &obs) {
 
 bool UnderwaterNavModifModel::inGoal(StateVals &st) {
 	//return cellType[st[0]][st[1]] == 1 ? true : false;
-	
+
 	vector<StateVals>::iterator it;
 	for (it = goals.begin(); it != goals.end(); it++) {
 		if (st[0] == (*it)[0] && st[1] == (*it)[1]) {
@@ -423,7 +424,7 @@ bool UnderwaterNavModifModel::inGoal(StateVals &st) {
 
 bool UnderwaterNavModifModel::inRock(StateVals &st) {
 	//return cellType[st[0]][st[1]] == 2 ? true : false;
-	
+
 	vector<StateVals>::iterator it;
 	for (it = rocks.begin(); it != rocks.end(); it++) {
 		if (st[0] == (*it)[0] && st[1] == (*it)[1]) {
@@ -431,7 +432,7 @@ bool UnderwaterNavModifModel::inRock(StateVals &st) {
 		}
 	}
 	return false;
-	
+
 }
 /*
 bool UnderwaterNavModifModel::inSpcRew(StateVals &st) {
@@ -439,7 +440,7 @@ bool UnderwaterNavModifModel::inSpcRew(StateVals &st) {
 	for (it = spcRew.begin(); it != spcRew.end(); it++) {
 		if (st[0] == (*it)[0] && st[1] == (*it)[1]) {
 			return true;
-		}		
+		}
 	}
 	return false;
 }
@@ -447,15 +448,15 @@ bool UnderwaterNavModifModel::inSpcRew(StateVals &st) {
 double UnderwaterNavModifModel::getReward(StateVals &sVals) {
 	double totRew;
 	short ct = 0;
-	
+
 	map< long, map<long, short> >::iterator itCellType = cellType.find(sVals[0]);
-	
+
 	if (itCellType != cellType.end()) {
 		if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
 			ct = cellType[sVals[0]][sVals[1]];
 		}
 	}
-//cout << "st: " << sVals[0] << " " << sVals[1] << " ct " << ct << endl;	
+//cout << "st: " << sVals[0] << " " << sVals[1] << " ct " << ct << endl;
 	switch (ct) {
 		case 0 : { totRew = 0.0; break; }
 		case 1 : { totRew = goalReward; break; }
@@ -465,19 +466,19 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals) {
 	}
 	return totRew;
 }
-	
+
 double UnderwaterNavModifModel::getReward(StateVals &sVals, long actId) {
 	double totRew;
 	short ct = 0;
 
 	map< long, map<long, short> >::iterator itCellType = cellType.find(sVals[0]);
-	
+
 	if (itCellType != cellType.end()) {
 		if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
 			ct = cellType[sVals[0]][sVals[1]];
 		}
 	}
-//cerr << "sVals: " << sVals[0] << " " << sVals[1] << " " << ct << endl;	
+//cerr << "sVals: " << sVals[0] << " " << sVals[1] << " " << ct << endl;
 	switch (ct) {
 		case 0 : { totRew = 0.0; break; }
 		case 1 : { totRew = goalReward; break; }
@@ -485,16 +486,16 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals, long actId) {
 		case 3 : { totRew = 0.0; break; }
 		//default: { totRew = spcRew[ct-3]; break; }
 	}
-	
+
 	if (actId == EAST || actId == NORTH || actId == SOUTH) {
-//cerr << "Straight action\n";		
+//cerr << "Straight action\n";
 		totRew = totRew + moveCost;
 	}
 	else {
 //cerr << "diagonal action]n";
 		totRew = totRew + moveDiagCost;
 	}
-//cerr << "totRew: " << totRew << endl;	
+//cerr << "totRew: " << totRew << endl;
 	return totRew;
 }
 
@@ -519,7 +520,7 @@ bool UnderwaterNavModifModel::getNextState(StateVals &currStVals, long actIdx, d
 	bool isTerm;
 	getNextState(currStVals, actIdx, nxtSVals);
 	inObsRegion(nxtSVals, obs);
-//cerr << "GettingNxtState from " << currStVals[0] << " " << currStVals[1] << " act " << actIdx << endl;	
+//cerr << "GettingNxtState from " << currStVals[0] << " " << currStVals[1] << " act " << actIdx << endl;
 	*immediateRew = getReward(currStVals, actIdx);
 //cerr << "imRew: " << *immediateRew << endl;
 	return (inGoal(nxtSVals) ? true : false);
@@ -527,13 +528,13 @@ bool UnderwaterNavModifModel::getNextState(StateVals &currStVals, long actIdx, d
 
 void UnderwaterNavModifModel::setChanges(const char* chName, vector<long> &chTime) {
 	ifstream inFile;
-	
+
 	inFile.open(chName);
 	if (!inFile.is_open()) {
 		cerr << "Fail to open " << chName << "\n";
 		exit(1);
 	}
-	
+
 	chTime.clear();
 	long t;
 	long nChanges, nPrimChanges;
@@ -556,11 +557,11 @@ void UnderwaterNavModifModel::setChanges(const char* chName, vector<long> &chTim
 void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange, vector<ChType> &typeOfChanges) {
 	affectedRange.clear();
 	vector<string>::iterator it;
-	vector<StateVals>::iterator itStVals; 
+	vector<StateVals>::iterator itStVals;
 	string cmd, var, tmpStr;
 	for (it = changes[tCh].begin(); it != changes[tCh].end(); it++) {
 		stringstream ss(*it);
-		ss >> cmd; 
+		ss >> cmd;
 		if (cmd.compare("Add") == 0) {
 			ss >> var;
 			if (var.compare("Rocks") == 0) {
@@ -588,7 +589,7 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
 						}
 						cellType[x][y] = 2;
 						StateVals s(2); s[0] = x; s[1] = y;
-//cerr << "AddRocks ( " << s[0] << " " << s[1] << " ) ";						
+//cerr << "AddRocks ( " << s[0] << " " << s[1] << " ) ";
 						rocks.push_back(s);
 						nRocks ++;
 						y = y + 1;
@@ -624,7 +625,7 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
 						y = y + 1;
 					}
 					x = x + 1;
-				}	
+				}
 			}
 			else if (var.compare("Observations") == 0) {
 				double xl, yl, xu, yu;
@@ -657,7 +658,7 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
 					}
 					x = x + 1;
 				}
-				
+
 			}
 
 			else {
@@ -734,13 +735,13 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
 	delete roadmap;
 	roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon, cellType, nX, nY);
 	//roadmap->updateRoadmap(cellType, goals, nGoals);
-	
+
 //cerr << "#affected: " << affectedRange.size() << " #type: " << typeOfChanges.size() << endl;
 /*
 vector<StateVals>::iterator itR;
 long z = 0;
 for (itR = rocks.begin(); itR != rocks.end(); itR++, z++) {
-	cerr << "Rock-" << z << " ( " << (*itR)[0] << " " << (*itR)[1] << endl; 
+	cerr << "Rock-" << z << " ( " << (*itR)[0] << " " << (*itR)[1] << endl;
 }
 */
 }
@@ -778,39 +779,39 @@ void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId, vector<St
 	nxtS.clear();
 	switch(actId) {
 		case EAST: {
-			StateVals sp(2); 
+			StateVals sp(2);
 			sp[0] = s[0] + 1.0; sp[1] = s[1]; nxtS.push_back(sp);
 			sp[0] = s[0] + 1.0; sp[1] = s[1] + 1.0; nxtS.push_back(sp);
 			sp[0] = s[0] + 1.0; sp[1] = s[1] - 1.0; nxtS.push_back(sp);
 			break;
 		}
 		case NORTH: {
-			StateVals sp(2); 
+			StateVals sp(2);
 			sp[0] = s[0]; sp[1] = s[1] - 1.0; nxtS.push_back(sp);
 			sp[0] = s[0] - 1.0; sp[1] = s[1] - 1.0; nxtS.push_back(sp);
 			sp[0] = s[0] + 1.0; sp[1] = s[1] - 1.0; nxtS.push_back(sp);
 			break;
 		}
 		case SOUTH: {
-			StateVals sp(2); 
+			StateVals sp(2);
 			sp[0] = s[0]; sp[1] = s[1] + 1.0; nxtS.push_back(sp);
 			sp[0] = s[0] - 1.0; sp[1] = s[1] + 1.0; nxtS.push_back(sp);
 			sp[0] = s[0] + 1.0; sp[1] = s[1] + 1.0; nxtS.push_back(sp);
 			break;
 		}
 		case NORTHEAST: {
-			StateVals sp(2); 
+			StateVals sp(2);
 			sp[0] = s[0] + 1.0; sp[1] = s[1] - 1.0; nxtS.push_back(sp);
 			sp[0] = s[0]; sp[1] = s[1] - 1.0; nxtS.push_back(sp);
 			sp[0] = s[0] + 1.0; sp[1] = s[1]; nxtS.push_back(sp);
-			break;				
-		}		
+			break;
+		}
 		case SOUTHEAST: {
-			StateVals sp(2); 
+			StateVals sp(2);
 			sp[0] = s[0] + 1.0; sp[1] = s[1] + 1.0; nxtS.push_back(sp);
 			sp[0] = s[0]; sp[1] = s[1] + 1.0; nxtS.push_back(sp);
 			sp[0] = s[0] + 1.0; sp[1] = s[1]; nxtS.push_back(sp);
-			break;	
+			break;
 		}
 	}
 }
@@ -828,12 +829,12 @@ int UnderwaterNavModifModel::findCollision(StateVals &s) {
 /*
 cerr << "obsSize: " << obstacleRegion.size() << endl;
 for (i = 0; it1 != obstacleRegion.end(); i++) {
-cerr << " ( " << s[0] << " " << s[1] << " ) Obs " << (*it1)[0] << " " << (*it1)[1] << " to " << (*it2)[0] << " " << (*it2)[1] << endl;		
+cerr << " ( " << s[0] << " " << s[1] << " ) Obs " << (*it1)[0] << " " << (*it1)[1] << " to " << (*it2)[0] << " " << (*it2)[1] << endl;
 		it1++; it1++; it2++; it2++;
 	}
 */
 	for (i = 0; it1 != obstacleRegion.end(); i++) {
-//cerr << " ( " << s[0] << " " << s[1] << " ) Obs " << (*it1)[0] << " " << (*it1)[1] << " to " << (*it2)[0] << " " << (*it2)[1] << endl;		
+//cerr << " ( " << s[0] << " " << s[1] << " ) Obs " << (*it1)[0] << " " << (*it1)[1] << " to " << (*it2)[0] << " " << (*it2)[1] << endl;
 		if ((*it1)[0] <= s[0] && s[0] < (*it2)[0] && (*it1)[1] <= s[1] && s[1] < (*it2)[1]) {
 			return i;
 		}
@@ -850,22 +851,22 @@ bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals, long star
 	long startAffected = startAffectedIdx;
 	long affByIdx = -1;
 	while (startAffected <= endAffectedIdx && affByIdx == -1) {
-		affByIdx = findCollision(seqStVals[startAffected]);	
+		affByIdx = findCollision(seqStVals[startAffected]);
 		startAffected ++;
 	}
-	
+
 	if (affByIdx == -1) {
 		return false;
 	}
-	
-//cerr << "AffByIdx " << affByIdx << " " << startAffected << " " << startAffectedIdx << " affPos " << seqStVals[startAffected-1][0] 
-//		<< " " << seqStVals[startAffected-1][1] << endl;	
+
+//cerr << "AffByIdx " << affByIdx << " " << startAffected << " " << startAffectedIdx << " affPos " << seqStVals[startAffected-1][0]
+//		<< " " << seqStVals[startAffected-1][1] << endl;
 	startAffectedIdx = startAffected-1;
-	
+
 	vector<StateVals> affRegV;
 	affRegV.push_back(obstacleRegion[affByIdx]);		// ll
 	affRegV.push_back(obstacleRegion[affByIdx+1]);		// ru
-	StateVals s(2); 
+	StateVals s(2);
 	s[0] = obstacleRegion[2*affByIdx][0]; s[1] = obstacleRegion[2*affByIdx+1][1]; affRegV.push_back(s);
 	s[0] = obstacleRegion[2*affByIdx+1][0]; s[1] = obstacleRegion[2*affByIdx][1]; affRegV.push_back(s);
 	s = seqStVals[startAffectedIdx];
@@ -918,7 +919,7 @@ bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals, long star
 		}
 	}
 	else {
-//cerr << "oout1\n";		
+//cerr << "oout1\n";
 		return false;
 	}
 	modifStSeq.push_back(sStart);
@@ -932,7 +933,7 @@ bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals, long star
 			case NORTHEAST: { s[0] = prevS[0]+1; s[1] = prevS[1]-1; break; }
 			case SOUTHEAST: { s[0] = prevS[0]+1; s[1] = prevS[1]+1; break; }
 		}
-		modifStSeq.push_back(s); 
+		modifStSeq.push_back(s);
 		prevS = s;
 	}
 /*
@@ -1004,7 +1005,7 @@ cerr << "ok3ok3\n";
 					break;
 				}
 			}
-		}		
+		}
 	}
 /*
 cerr << "ok4\n";
@@ -1023,7 +1024,7 @@ cerr << "ok4ok4\n";
 	if (it != modifStSeq.end()) {
 		modifRewSeq.push_back(getReward(*it));
 		ObsVals obs; inObsRegion(*it, obs);
-		modifObsSeq.push_back(obs);		
+		modifObsSeq.push_back(obs);
 	}
 
 	return true;
@@ -1037,11 +1038,11 @@ bool UnderwaterNavModifModel::isTerm(StateVals &sVals) {
 			ct = cellType[sVals[0]][sVals[1]];
 		}
 	}
-	return (ct == 1) ? true : false; 
+	return (ct == 1) ? true : false;
 }
 
 void UnderwaterNavModifModel::drawEnv(ostream &os) {
-	map< long, map<long, short> >::iterator itCellType;	
+	map< long, map<long, short> >::iterator itCellType;
 	os << endl;
 	for (long y = 0; y < nY; y++) {
 		for (long x = 0; x < nX; x++) {

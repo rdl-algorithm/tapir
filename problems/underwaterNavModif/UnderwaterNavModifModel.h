@@ -17,9 +17,9 @@ class UnderwaterNavModifModel : public Model {
 	public:
 		UnderwaterNavModifModel(po::variables_map vm);
 		~UnderwaterNavModifModel();
-		
+
 		/***** Start implementation of Model's virtual functions *****/
-		void sampleAnInitState(StateVals& tmpStVals);	
+		void sampleAnInitState(StateVals& tmpStVals);
 		bool getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals, ObsVals &obs);
 		void solveHeuristic(StateVals &s, double *qVal);
 		double getReward(StateVals &sVals);
@@ -36,13 +36,13 @@ class UnderwaterNavModifModel : public Model {
 				std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
 				std::vector<double> &modifRewSeq);
 		void drawEnv(std::ostream &os);
-		
+
 		// Additional initialisation.
 		void setInitObsGoal();
-		
+
 	private:
 		enum { EAST=0, NORTH=1, SOUTH=2, NORTHEAST=3, SOUTHEAST=4 };
-		
+
 		long nX, nY, nGoals, nRocks;
 		double goalReward, crashPenalty, moveCost, moveDiagCost;
 		double ctrlCorrectProb, ctrlErrProb1;
@@ -59,7 +59,7 @@ class UnderwaterNavModifModel : public Model {
 
 		StRoadmap *roadmap;
 		long nTryCon, maxDistCon, nVerts;
-		
+
 		//double getExpDist(StateVals &s, long firstAct);
 		double getDist(StateVals &s1, StateVals &s2);
 		void getNextState(StateVals &s, long actId, StateVals &sp);

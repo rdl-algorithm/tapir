@@ -17,14 +17,14 @@ Histories::~Histories() {
 
 HistorySeq* Histories::addHistorySeq(State *s) {
 	HistorySeq *newSeq = new HistorySeq(new HistoryEntry(s, 0));
-	
+
 	allHistSeq.push_back(newSeq);
 	return newSeq;
 }
 
 HistorySeq* Histories::addHistorySeq(State *s, long startDepth) {
 	HistorySeq *newSeq = new HistorySeq(new HistoryEntry(s, 0), startDepth);
-	
+
 	allHistSeq.push_back(newSeq);
 	return newSeq;
 }
@@ -36,7 +36,7 @@ void Histories::readHistories(ifstream &inFile, StatePool *stPool) {
 	while(tmpStr.find("HISTORIES-BEGIN") == string::npos) {
 		getline(inFile, tmpStr);
 	}
-	getline(inFile, tmpStr);	
+	getline(inFile, tmpStr);
 
 	long seqId, entryId, stId;
 	State *stPtr;
@@ -69,7 +69,7 @@ void Histories::setAffected(long seqIdx, long entryIdx, ChType chType) {
 void Histories::resetAffected(set<long> &reachAffected, set<long> &notReachAffected) {
 	set<long>::iterator itL;
 	for (itL = reachAffected.begin(); itL != reachAffected.end(); itL++) {
-		allHistSeq[*itL]->startAffectedIdx = LONG_MAX; 
+		allHistSeq[*itL]->startAffectedIdx = LONG_MAX;
 	}
 	for (itL = notReachAffected.begin(); itL != notReachAffected.end(); itL++) {
 		allHistSeq[*itL]->startAffectedIdx = LONG_MAX;
@@ -79,7 +79,7 @@ void Histories::resetAffected(set<long> &reachAffected, set<long> &notReachAffec
 void Histories::resetAffected(set<long> &affected) {
 	set<long>::iterator itL;
 	for (itL = affected.begin(); itL != affected.end(); itL++) {
-		allHistSeq[*itL]->startAffectedIdx = LONG_MAX; 
+		allHistSeq[*itL]->startAffectedIdx = LONG_MAX;
 	}
 }
 */
@@ -106,7 +106,7 @@ void Histories::eraseNUpdBel(BeliefNode *currNode, set<long> &affectedHistSeq) {
 void Histories::write(ostream &os) {
 	long i = 0;
 	vector<HistorySeq*>::iterator it;
-//cerr << "#histSeq: " << allHistSeq.size() << endl;	
+//cerr << "#histSeq: " << allHistSeq.size() << endl;
 	for (it = allHistSeq.begin(); it != allHistSeq.end(); it++) {
 		(*it)->write(os);
 	}

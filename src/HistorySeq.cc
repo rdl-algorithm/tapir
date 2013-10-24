@@ -88,7 +88,7 @@ void HistorySeq::deleteAffectedEntries(Model *m) {
 	for (; itHistEntry != histSeq.end(); itHistEntry++) {
 		(*itHistEntry)->partOfBelNode->delPartNUpdateVal(*itHistEntry, (*itHistEntry)->qVal, 0.0);
 	}
-	
+
 	histSeq.erase(histSeq.begin()+startAffectedIdx, histSeq.end());
 	cutAffected = true;
 }
@@ -100,7 +100,7 @@ void HistorySeq::prepareDel() {
 		(*it)->prepareDel();
 		delete(*it);
 		histSeq.erase(it);
-	} 
+	}
 }
 */
 
@@ -135,5 +135,5 @@ void HistorySeq::writeln(ostream &os) {
 	for (it = histSeq.begin(); it != histSeq.end(); it++) {
 		(*it)->writeln(os);
 	}
-	os << endl;	
+	os << endl;
 }

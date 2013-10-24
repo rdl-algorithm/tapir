@@ -65,7 +65,7 @@ int main(int argc, const char* argv[]) {
 	os.open(polPath.c_str());
 	solver->write(os);
 	os.close();
-	
+
 	cout << "SolvingTime: " << totT << endl;
 
 	delete policy;

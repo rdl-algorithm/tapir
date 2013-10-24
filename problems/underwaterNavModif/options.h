@@ -11,7 +11,7 @@ namespace options {
         po::options_description generic("Generic options");
         generic.add_options()
             ("help,h", "produce help message")
-            ("cfg,c", 
+            ("cfg,c",
             po::value<std::string>()->default_value("tests/default.cfg"),
             "config file path")
             ("policy,p", po::value<std::string>()->default_value("pol.pol"),
@@ -29,14 +29,14 @@ namespace options {
              "File to log changes to")
             ("changes.changesPath", po::value<std::string>(),
              "Path to the file with runtime changes to the POMDP model")
-            ("simulation.nSteps", po::value<long>(), 
+            ("simulation.nSteps", po::value<long>(),
              "Maximum number of steps to simulate")
             ("simulation.nRuns", po::value<long>(),
              "Number of times to run the simulation")
             ;
         return simulation;
     }
-        
+
     // Configuration options for the SBT
     po::options_description sbt() {
         po::options_description sbt("SBT settings");
@@ -64,7 +64,7 @@ namespace options {
             ("problem.crashPenalty", po::value<double>(),
             "penalty for crashing")
             ("problem.moveCost", po::value<double>(), "cost of moving")
-            ("problem.ctrlCorrectProb", po::value<double>(), 
+            ("problem.ctrlCorrectProb", po::value<double>(),
              "probability of ending up in the desired position")
             ;
         return problem;

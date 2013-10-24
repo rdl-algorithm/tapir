@@ -37,7 +37,7 @@ int main(int argc, const char* argv[]) {
     po::store(po::command_line_parser(argc, argv).options(allOptions)
             .positional(positional).run(), vm);
     if (vm.count("help")) {
-        cout << "Usage: solve [options] [mapPath] [cfgPath] [policyPath]" 
+        cout << "Usage: solve [options] [mapPath] [cfgPath] [policyPath]"
             << " [changesPath] [nSteps] [nRuns] [logPath]\n";
         cout << visibleOptions << "\n";
         return 0;
@@ -64,9 +64,9 @@ int main(int argc, const char* argv[]) {
 	BeliefTree* policy = new BeliefTree();
 	Histories* histories = new Histories();
 	Solver* solver = new Solver(model, polPath.c_str(), policy, histories);
-	
+
 	vector<long> modelCh;
-	model->setChanges(changesPath.c_str(), modelCh);	
+	model->setChanges(changesPath.c_str(), modelCh);
 	vector<StateVals> trajSt;
 	vector<long> trajActId;
 	vector<ObsVals> trajObs;
@@ -80,7 +80,7 @@ int main(int argc, const char* argv[]) {
 	vector<double>::iterator itD;
 	ofstream os;
 	os.open(logPath.c_str());
-	
+
 	//for (long i = 0; i < nRuns; i++) {
 		clock_t tStart;
 		long actualNSteps;
@@ -89,7 +89,7 @@ int main(int argc, const char* argv[]) {
 		tStart = clock();
 		val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs, trajRew, &actualNSteps, &totChTime, &totImpTime);
 		totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
-		
+
 		os << "Val:  " << val << endl;
 		itS = trajSt.begin();
 		os << "Init: ( ";
@@ -98,7 +98,7 @@ int main(int argc, const char* argv[]) {
 		}
 		os << " )\n";
 		itS ++;
-		for (itA = trajActId.begin(), itO = trajObs.begin(), itR = trajRew.begin(), j = 0; itA != trajActId.end(); 
+		for (itA = trajActId.begin(), itO = trajObs.begin(), itR = trajRew.begin(), j = 0; itA != trajActId.end();
 				itS++, itA++, itO++, itR++, j++) {
 			os << "Step-" << j << " " << *itA;
 			os << " ( ";
@@ -113,11 +113,11 @@ int main(int argc, const char* argv[]) {
 		}
 	//}
 	os.close();
-	
+
 	//solver->write(cout);
 
 	cout << val << " " << actualNSteps << " " << totChTime << " " << totImpTime << " " << totT << endl;
-	
+
 	delete policy;
 	delete histories;
 	delete solver;
