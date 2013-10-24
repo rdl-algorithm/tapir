@@ -1,13 +1,14 @@
 #ifndef STATEPOOL_H
 #define STATEPOOL_H
 
-#include <iostream>
+#include <fstream>
+#include <ostream>
 #include <set>
 #include <map>
+#include <vector>
+
 #include "State.h"
 #include "Model.h"
-
-using namespace std;
 
 struct CompStVals {
 	bool operator()(const State* s1, const State* s2) const {
@@ -15,7 +16,7 @@ struct CompStVals {
 		s1->getVals(s1Vals); s2->getVals(s2Vals);
 //cout << "s1Size: " << s1Vals.size() << " " << s2Vals.size() << endl;
 //cout << "compare: ( " << s1Vals[0] << " " << s1Vals[1] << " ) ( " << s2Vals[0] << " " << s2Vals[1] << ")\n";		
-		vector<double>::iterator it1, it2;
+		std::vector<double>::iterator it1, it2;
 		for (it1 = s1Vals.begin(), it2 = s2Vals.begin(); it1 != s1Vals.end(); it1++, it2++) {
 //cout << "it1: " << *it1 << " it2: " << *it2 << " min: " << *it1 - *it2 << endl;			
 			if (*it1 - *it2 < 0) { return true; }
@@ -40,20 +41,20 @@ class StatePool {
 		StatePool();
 		~StatePool();
 		
-		void readStates(ifstream &inFile, Model *model);
+		void readStates(std::ifstream &inFile, Model *model);
 		State* add(StateVals &sVals);
 		State* getStPtr(long stId);
 		void identifyAffectedStates(StateVals &lowLeft, StateVals &upRight, ChType chType, 
-				set<State*> &affectedSt);
-		//void getPosNNBelNode(State *s, double distTh, set<BeliefNode*> &res);
-		void write (ostream &os);
+				std::set<State*> &affectedSt);
+		//void getPosNNBelNode(State *s, double distTh, std::set<BeliefNode*> &res);
+		void write (std::ostream &os);
 		
 	private:
 		long nStates, nSDim;
-		set<State*, CompStVals> allStates;
-		vector<State*> allStatesIdx;
-		//vector< multimap<double, set<State*, CompStVals>::iterator> > stStruct;
-		vector< multimap<double, State*> > stStruct;
+		std::set<State*, CompStVals> allStates;
+		std::vector<State*> allStatesIdx;
+		//std::vector< std::multimap<double, std::set<State*, CompStVals>::iterator> > stStruct;
+		std::vector< std::multimap<double, State*> > stStruct;
 		
 };
 #endif

@@ -1,37 +1,39 @@
 #ifndef StRoadmap_H
 #define StRoadmap_H
 
+#include <ostream>
 #include <utility> 
 #include <vector>
 #include <map>
+
 #include "Model.h"
 #include "GlobalResources.h"
 
-using namespace std;
-
 class StRoadmap {
 	public:
-		StRoadmap(vector<StateVals> &goals, long nVerts_, long nGoalsSamp, long nTryCon_, long maxDistCon_,
-				map< long, map<long, short> > &env_, long nX_, long nY_);
+		StRoadmap(std::vector<StateVals> &goals, long nVerts, long nGoalsSamp,
+		        long nTryCon, long maxDistCon,
+		        std::map<long, std::map<long, short> > &env,
+		        long nX, long nY);
 		~StRoadmap();
 		
-		void updateRoadmap(map< long, map<long, short> > &env_, vector<StateVals> &goals, long nGoalsSamp);
+		void updateRoadmap(std::map< long, std::map<long, short> > &env_, std::vector<StateVals> &goals, long nGoalsSamp);
 		double getDistToGoal(StateVals &startSt);
-		void draw(ostream &os);
+		void draw(std::ostream &os);
 
 	private:
 		long nX, nY;
-		map< long, map<long, short> > env;
-		map<long, long> weight;
+		std::map< long, std::map<long, short> > env;
+		std::map<long, long> weight;
 		long totW, maxTryCon, maxDistCon;
 		
 		long nVerts, maxVerts, lastGoalIdx;
-		vector<StateVals> V;
-		map< long, vector< pair<long, long> > > outEdges, inEdges;	// e: (fromVertIdx, toVertIdx, cost)
-		map<long, long> shortestDistToGoal;
+		std::vector<StateVals> V;
+		std::map< long, std::vector< std::pair<long, long> > > outEdges, inEdges;	// e: (fromVertIdx, toVertIdx, cost)
+		std::map<long, long> shortestDistToGoal;
 		
 		void setWeight();
-		void insertGoalMilestones(vector<StateVals> &goals, long nGoalsSamp);
+		void insertGoalMilestones(std::vector<StateVals> &goals, long nGoalsSamp);
 		void sampleAMilestone(StateVals &st);
 		bool insertMilestone(StateVals &st);
 		long lineSegOk(StateVals &st1, StateVals &st2);

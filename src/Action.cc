@@ -1,6 +1,8 @@
 #include "Action.h"
 #include "BeliefNode.h"
 
+using namespace std;
+
 Action::Action(long actId_, ObsVals &obs, BeliefNode* nxtBelNode): actId(actId_) {
 	obsChildren.push_back(new Observation(obs, nxtBelNode));
 	qVal = avgQVal = 0.0;

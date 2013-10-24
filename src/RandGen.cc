@@ -17,8 +17,11 @@
 /************ see the book for explanations and caveats! *******************/
 /************ in particular, you need two's complement arithmetic **********/
 
-#include <stdio.h>
+#include <cstdio>
+
 #include "RandGen.h"
+
+using namespace std;
 
 #define KK 100                     /* the long lag */
 #define LL  37                     /* the short lag */

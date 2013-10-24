@@ -1,8 +1,11 @@
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
+
 #include "BeliefNode.h"
 #include "RandGen.h"
 #include "GlobalResources.h"
+
+using namespace std;
 
 long BeliefNode::currId = 0;
 double BeliefNode::exploreParam = 1.0;

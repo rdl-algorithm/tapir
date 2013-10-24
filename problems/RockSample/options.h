@@ -1,5 +1,5 @@
-#ifndef UWNAV_OPTIONS_H
-#define UWNAV_OPTIONS_H
+#ifndef ROCKSAMPLE_OPTIONS_H
+#define ROCKSAMPLE_OPTIONS_H
 
 #include <time.h>
 #include <stdio.h>
@@ -54,33 +54,32 @@ namespace options {
         return sbt;
     }
 
-    // Configurations options for the Underwater Navigation POMDP
+    // Configurations options for the RockSample POMDP
     po::options_description problem() {
         po::options_description problem(
-                "Settings specific to the Underwater Navigation POMDP");
+                "Settings specific to the RockSample POMDP");
         problem.add_options()
             ("problem.discount,d", po::value<double>(), "discount factor")
             ("problem.mapPath,m", po::value<string>(), "path to map file")
-            ("problem.goalReward", po::value<double>(),
-            "reward for reaching the goal.")
-            ("problem.crashPenalty", po::value<double>(),
-            "penalty for crashing")
-            ("problem.moveCost", po::value<double>(), "cost of moving")
+            ("problem.goodRockReward", po::value<double>(),
+             "reward for sampling a good rock")
+            ("problem.badRockPenalty", po::value<double>(),
+             "penalty for sampling a bad rock")
+            ("problem.exitReward", po::value<double>(),
+             "reward for moving into the exit area")
+            ("problem.illegalMovePenalty", po::value<double>(),
+             "penalty for making an illegal move")
+            ("problem.halfEfficiencyDistance,d0", po::value<double>(),
+             "half efficiency distance d0; sensor efficiency = 2^(-d/d0)")
             ;
         return problem;
     }
 
-    // Configuration options for the Underwater Navigation Solver
+    // Configuration options for the RockSample Solver
     po::options_description solver() {
         po::options_description solver(
-                "Settings specific to the Underwater Navigation solver");
-        solver.add_options()
-            ("solver.rolloutExploreTh", po::value<double>(), "??")
-            ("solver.ctrlCorrectProb", po::value<double>(), "??")
-            ("solver.nVerts", po::value<long>(), "??")
-            ("solver.nTryCon", po::value<long>(), "??")
-            ("solver.maxDistCon", po::value<long>(), "??")
-            ;
+                "Settings specific to the RockSample solver");
+        //solver.add_options()
         return solver;
     }
 }

@@ -1,13 +1,12 @@
 #ifndef HISTORYENTRY_H
 #define HISTORYENTRY_H
 
-#include <iostream>
+#include <ostream>
 #include <string>
 #include <sstream>
+
 #include "State.h"
 #include "Model.h"
-
-using namespace std;
 
 class BeliefNode;
 
@@ -19,15 +18,15 @@ class HistoryEntry {
 		
 		HistoryEntry(State *st_, long entryId_);
 		HistoryEntry(State *st_, long seqId_, long entryIdId_);
-		HistoryEntry(long seqId_, long entryId_, State *st_, stringstream &sstr);
+		HistoryEntry(long seqId_, long entryId_, State *st_, std::stringstream &sstr);
 		~HistoryEntry();
 		
 		void setBelNode(BeliefNode *bel);
 		//void prepareDel();
 		
-		void write(ostream &os);
-		void writeln(ostream &os);
-		void writeSt(ostream &os);
+		void write(std::ostream &os);
+		void writeln(std::ostream &os);
+		void writeSt(std::ostream &os);
 		
 		inline void setSeqId(long seqId_) { seqId = seqId_; }
 		inline void setNxt(long actId_, ObsVals &obs_) { actId = actId_, obs = obs_; }

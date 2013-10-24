@@ -1,8 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <time.h>
-#include "UnderwaterNavModifModel.h"
+#include <cstdlib>
+#include <ctime>
+
+#include "RockSampleModel.h"
 #include "BeliefTree.h"
 #include "Histories.h"
 #include "Solver.h"
@@ -46,7 +47,7 @@ int main(int argc, const char* argv[]) {
             vm);
     po::notify(vm);
 
-    string polPath = vm["policy"].as<string>();
+    string polPath = vm["poicy"].as<string>();
     string changesPath = vm["changes.changesPath"].as<string>();
     string logPath = vm["log"].as<string>();
     long nSteps = vm["simulation.nSteps"].as<long>();
@@ -57,9 +58,9 @@ int main(int argc, const char* argv[]) {
     double tmp = GlobalResources::randGen.ranf_arr_next();
     cerr << "tmp " << tmp << endl;
 
-	Model* model = new UnderwaterNavModifModel(vm);
-	BeliefNode::maxParticles = model->nParticles;
-	BeliefNode::nStVars = model->nStVars;
+	Model* model = new RockSampleModel(vm);
+	BeliefNode::maxParticles = model->getNParticles();
+	BeliefNode::nStVars = model->getNStVars();
 	BeliefTree* policy = new BeliefTree();
 	Histories* histories = new Histories();
 	Solver* solver = new Solver(model, polPath.c_str(), policy, histories);

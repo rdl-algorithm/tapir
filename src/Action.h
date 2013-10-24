@@ -3,10 +3,9 @@
 
 #include <vector>
 #include <queue>
+
 #include "Observation.h"
 #include "Model.h"
-
-using namespace std;
 
 class BeliefNode;
 
@@ -23,10 +22,10 @@ class Action {
 		bool isAct(long aIdx);
 		void addChild(ObsVals &obs, BeliefNode* nxtBelNode);
 		BeliefNode* getObsChild(ObsVals &obs);
-		void getChildren(queue<BeliefNode*> &res);
+		void getChildren(std::queue<BeliefNode*> &res);
 		void delParticle(double delVal);
-		void write(ostream &os);
-		void writeNGetChildren(ostream &os, queue<BeliefNode*> &res);
+		void write(std::ostream &os);
+		void writeNGetChildren(std::ostream &os, std::queue<BeliefNode*> &res);
 		
 		inline double getQVal() { return qVal; }
 		
@@ -34,7 +33,7 @@ class Action {
 		long actId, nParticles;
 		double qVal, avgQVal;
 		
-		vector<Observation*> obsChildren;
+		std::vector<Observation*> obsChildren;
 		
 };
 #endif

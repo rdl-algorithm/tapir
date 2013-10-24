@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include <stdio.h>
-#include <time.h>
+
+#include <cstdio>
+#include <ctime>
+
 #include "UnderwaterNavModifModel.h"
 #include "BeliefTree.h"
 #include "Histories.h"
@@ -47,8 +49,8 @@ int main(int argc, const char* argv[]) {
 	GlobalResources::randGen.ranf_start(seed);
 
 	Model* model = new UnderwaterNavModifModel(vm);
-	BeliefNode::maxParticles = model->nParticles;
-	BeliefNode::nStVars = model->nStVars;
+	BeliefNode::maxParticles = model->getNParticles();
+	BeliefNode::nStVars = model->getNStVars();
 	BeliefTree* policy = new BeliefTree();
 	Histories* histories = new Histories();
 	Solver* solver = new Solver(model, policy, histories);

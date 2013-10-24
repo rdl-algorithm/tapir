@@ -1,12 +1,14 @@
-#include <iostream>
 #include <cmath>
-#include <limits.h>
+#include <climits>
+
 #include "StRoadmap.h"
 
-StRoadmap::StRoadmap(vector<StateVals> &goals, long maxVerts_, long nGoalsSamp, long nTryCon_, long maxDistCon_,
-		map< long, map<long, short> > &env_, long nX_, long nY_): maxVerts(maxVerts_), 
-		maxTryCon(nTryCon_), maxDistCon(maxDistCon_), env(env_), nX(nX_), nY(nY_) {
+using namespace std;
 
+StRoadmap::StRoadmap(vector<StateVals> &goals, long maxVerts, long nGoalsSamp,
+        long nTryCon, long maxDistCon, map<long, map<long, short> > &env,
+        long nX, long nY): maxVerts(maxVerts), maxTryCon(nTryCon), 
+        maxDistCon(maxDistCon), env(env), nX(nX), nY(nY) {
 	setWeight();
 	nVerts = 0;
 	insertGoalMilestones(goals, nGoalsSamp);

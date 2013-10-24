@@ -1,14 +1,16 @@
-#include <iostream>
-#include <string>
 #include <sstream>
 #include <fstream>
+
 #include <cmath>
 #include <cstdlib>
-#include <limits.h>
+#include <climits>
+
 #include "UnderwaterNavModifModel.h"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
+
+using namespace std;
 
 UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(vm) {
 	ifstream inFile;
@@ -36,27 +38,24 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(v
 	}
 	
 	inFile.close();
-	setInitObsGoal();
 
     goalReward = vm["problem.goalReward"].as<double>();
     crashPenalty = vm["problem.crashPenalty"].as<double>();
     moveCost = vm["problem.moveCost"].as<double>();
+	ctrlCorrectProb = vm["problem.ctrlCorrectProb"].as<double>();
 
 	rolloutExploreTh = vm["solver.rolloutExploreTh"].as<double>();
-	ctrlCorrectProb = vm["solver.ctrlCorrectProb"].as<double>();
 	nVerts = vm["solver.nVerts"].as<long>();
 	nTryCon = vm["solver.nTryCon"].as<long>();
 	maxDistCon = vm["solver.maxDistCon"].as<long>();
 
-	nStVars = 2;
+	setInitObsGoal();
+
 	moveDiagCost = sqrt(2)*moveCost;
 	ctrlErrProb1 = ((1.0-ctrlCorrectProb) / 2.0) + ctrlCorrectProb;
-	inFile.close();
-//cout << "rolloutExploreTh: " << rolloutExploreTh << " ctrl: " << ctrlCorrectProb << " " << ctrlErrProb1 << endl;	
-	nActions = 5;
-	
 	minVal = crashPenalty / (1.0-discount);
 	maxVal = goalReward;
+
 	roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon, cellType, nX, nY);
 }
 
@@ -78,8 +77,12 @@ UnderwaterNavModifModel::~UnderwaterNavModifModel() {
 
 void UnderwaterNavModifModel::setInitObsGoal() {
 	vector<string>::iterator itMap;
-	nGoals = 0;
+	nActions = 5;
+	nObservations = 0;
+	nStVars = 2;
 	nInitBel = 0;
+
+	nGoals = 0;
 	long i = 0;
 	for (itMap = envMap.begin(); itMap != envMap.end(); itMap++) {
 		for (long j = 0; j < nX; j++) {
@@ -87,7 +90,6 @@ void UnderwaterNavModifModel::setInitObsGoal() {
 				StateVals s(2); s[0] = j; s[1] = i;
 				initBel.push_back(s);
 				nInitBel ++;
-//cerr << "init " << j << " " << i << endl;				
 			}
 			else if ((*itMap)[j] == 'O') {
 				cellType[j][i] = 3;
@@ -548,6 +550,7 @@ void UnderwaterNavModifModel::setChanges(const char* chName, vector<long> &chTim
 		}
 		changes[t] = aChange;
 	}
+	inFile.close();
 }
 
 void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange, vector<ChType> &typeOfChanges) {

@@ -1,7 +1,10 @@
 #include <cmath>
 #include <cstdlib>
+
 #include "Observation.h"
 #include "BeliefNode.h"
+
+using namespace std;
 
 Observation::Observation() {
 	child = NULL;

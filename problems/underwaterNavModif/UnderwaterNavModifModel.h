@@ -1,17 +1,17 @@
 #ifndef UnderwaterNavModifModel_H
 #define UnderwaterNavModifModel_H
 
+#include <ostream>
 #include <vector>
 #include <map>
 #include <string>
+
 #include "Model.h"
 #include "GlobalResources.h"
 #include "StRoadmap.h"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-using namespace std;
 
 class UnderwaterNavModifModel : public Model {
 	public:
@@ -26,16 +26,16 @@ class UnderwaterNavModifModel : public Model {
 		double getReward(StateVals &sVals, long actId);
 		double getNextStateNRew(StateVals &currStVals, long actId, ObsVals &obs, bool &isTerm);
 		bool getNextState(StateVals &currStVals, long actIdx, double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
-		void setChanges(const char* chName, vector<long> &chTime);
-		void update(long tCh, vector<StateVals> &affectedRange, vector<ChType> &typeOfChanges);
+		void setChanges(const char* chName, std::vector<long> &chTime);
+		void update(long tCh, std::vector<StateVals> &affectedRange, std::vector<ChType> &typeOfChanges);
 		double getDefaultVal();
-		void getStatesSeeObs(long actId, ObsVals &obs, vector<StateVals> &partSt, map<int, StateVals> &partNxtSt);
-		void getStatesSeeObs(ObsVals &obs, vector<StateVals> &posNxtSt);
+		void getStatesSeeObs(long actId, ObsVals &obs, std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt);
+		void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt);
 		bool isTerm(StateVals &sVals);
-		bool modifStSeq(vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
-				vector<StateVals> &modifStSeq, vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq,
-				vector<double> &modifRewSeq);
-		void drawEnv(ostream &os);
+		bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
+				std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
+				std::vector<double> &modifRewSeq);
+		void drawEnv(std::ostream &os);
 		
 		// Additional initialisation.
 		void setInitObsGoal();
@@ -43,19 +43,19 @@ class UnderwaterNavModifModel : public Model {
 	private:
 		enum { EAST=0, NORTH=1, SOUTH=2, NORTHEAST=3, SOUTHEAST=4 };
 		
-		long nX, nY, nObservations, nGoals, nRocks;
+		long nX, nY, nGoals, nRocks;
 		double goalReward, crashPenalty, moveCost, moveDiagCost;
 		double ctrlCorrectProb, ctrlErrProb1;
 		double rolloutExploreTh;
-		vector<string> envMap;
-		vector<StateVals> goals;
-		vector<StateVals> rocks;
-		vector<StateVals> allObservations;
-		map< long, map<long, short> > cellType;		// 0: usual, 1: goals, 2: rocks, 3: observation, 4: spc. reward, 5: obstacle.
+		std::vector<std::string> envMap;
+		std::vector<StateVals> goals;
+		std::vector<StateVals> rocks;
+		std::vector<StateVals> allObservations;
+		std::map< long, std::map<long, short> > cellType;		// 0: usual, 1: goals, 2: rocks, 3: observation, 4: spc. reward, 5: obstacle.
 		short nSpcRew;
-		vector<double> spcRew;
-		map< long, vector<string> > changes;
-		vector<StateVals> obstacleRegion;
+		std::vector<double> spcRew;
+		std::map< long, std::vector<std::string> > changes;
+		std::vector<StateVals> obstacleRegion;
 
 		StRoadmap *roadmap;
 		long nTryCon, maxDistCon, nVerts;
@@ -68,8 +68,8 @@ class UnderwaterNavModifModel : public Model {
 		double getDistToNearestObs(StateVals &st, StateVals &nxtSt);
 		bool inGoal(StateVals &st);
 		bool inRock(StateVals &st);
-		void getReachableSt(StateVals &s, long actId, vector<StateVals> &nxtS);
-		vector<StateVals>::iterator getIterator(vector<StateVals> &vecStVals, long x, long y);
+		void getReachableSt(StateVals &s, long actId, std::vector<StateVals> &nxtS);
+		std::vector<StateVals>::iterator getIterator(std::vector<StateVals> &vecStVals, long x, long y);
 
 		int findCollision(StateVals &s);
 

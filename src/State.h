@@ -1,13 +1,12 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <set>
-#include "Model.h"
 
-using namespace std;
+#include "Model.h"
 
 class BeliefNode;
 class HistoryEntry;
@@ -20,7 +19,7 @@ class State {
 		double distUse;
 		
 		State(StateVals &s_);
-		State(string &str, long nStVars);
+		State(std::string &str, long nStVars);
 		~State();
 
 		void setId();
@@ -31,8 +30,8 @@ class State {
 
 		void delUsedInHistEntry(HistoryEntry *toBeDeleted);
 		
-		void write(ostream &os);
-		void writeln(ostream &os);
+		void write(std::ostream &os);
+		void writeln(std::ostream &os);
 
 		void getVals(StateVals &res) const { res = s; }
 		long getId() const { return id; }
@@ -42,8 +41,8 @@ class State {
 
 		long id;
 		StateVals s;
-		vector<HistoryEntry*> usedInHistEntries;
-		set<BeliefNode*> usedInBelNode;
+        std::vector<HistoryEntry*> usedInHistEntries;
+        std::set<BeliefNode*> usedInBelNode;
 		
 		ChType chType;
 };

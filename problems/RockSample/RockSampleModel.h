@@ -1,9 +1,10 @@
 #ifndef RockSampleModel_H
 #define RockSampleModel_H
 
+#include <ostream>
 #include <vector>
-#include <map>
 #include <string>
+
 #include "Model.h"
 #include "GlobalResources.h"
 #include "StRoadmap.h"
@@ -11,7 +12,16 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-using namespace std;
+struct Coords {
+    long i; 
+    long j;
+    Coords() : i(0), j(0) {}
+    Coords(long i, long j) : i(i), j(j) {}
+
+    double distance(Coords other) {
+        return 
+    }
+}
 
 class RockSampleModel : public Model {
 	public:
@@ -26,53 +36,71 @@ class RockSampleModel : public Model {
 		double getReward(StateVals &sVals, long actId);
 		double getNextStateNRew(StateVals &currStVals, long actId, ObsVals &obs, bool &isTerm);
 		bool getNextState(StateVals &currStVals, long actIdx, double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
-		void setChanges(const char* chName, vector<long> &chTime);
-		void update(long tCh, vector<StateVals> &affectedRange, vector<ChType> &typeOfChanges);
+		void setChanges(const char* chName, std::vector<long> &chTime);
+		void update(long tCh, std::vector<StateVals> &affectedRange, std::vector<ChType> &typeOfChanges);
 		double getDefaultVal();
-		void getStatesSeeObs(long actId, ObsVals &obs, vector<StateVals> &partSt, map<int, StateVals> &partNxtSt);
-		void getStatesSeeObs(ObsVals &obs, vector<StateVals> &posNxtSt);
+		void getStatesSeeObs(long actId, ObsVals &obs, std::vector<StateVals> &partSt, map<int, StateVals> &partNxtSt);
+		void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt);
 		bool isTerm(StateVals &sVals);
-		bool modifStSeq(vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
-				vector<StateVals> &modifStSeq, vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq,
-				vector<double> &modifRewSeq);
-		void drawEnv(ostream &os);
-		
-		// Additional initialisation.
-		void setInitObsGoal();
+		bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
+				std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
+				std::vector<double> &modifRewSeq);
+		void drawEnv(std::ostream &os);
 		
 	private:
-		enum { EAST=0, NORTH=1, SOUTH=2, NORTHEAST=3, SOUTHEAST=4 };
-		
-		long nX, nY, nObservations, nGoals, nRocks;
-		double goalReward, crashPenalty, moveCost, moveDiagCost;
-		double ctrlCorrectProb, ctrlErrProb1;
-		double rolloutExploreTh;
-		vector<string> envMap;
-		vector<StateVals> goals;
-		vector<StateVals> rocks;
-		vector<StateVals> allObservations;
-		map< long, map<long, short> > cellType;		// 0: usual, 1: goals, 2: rocks, 3: observation, 4: spc. reward, 5: obstacle.
-		short nSpcRew;
-		vector<double> spcRew;
-		map< long, vector<string> > changes;
-		vector<StateVals> obstacleRegion;
+	    
+	    /** Initialises the required parameters and data structures/ */
+	    void initialise();
 
-		StRoadmap *roadmap;
-		long nTryCon, maxDistCon, nVerts;
-		
-		//double getExpDist(StateVals &s, long firstAct);
-		double getDist(StateVals &s1, StateVals &s2);
-		void getNextState(StateVals &s, long actId, StateVals &sp);
-		void inObsRegion(StateVals &st, ObsVals &obs);
-		double getDistToNearestGoal(StateVals &st);
-		double getDistToNearestObs(StateVals &st, StateVals &nxtSt);
-		bool inGoal(StateVals &st);
-		bool inRock(StateVals &st);
-		void getReachableSt(StateVals &s, long actId, vector<StateVals> &nxtS);
-		vector<StateVals>::iterator getIterator(vector<StateVals> &vecStVals, long x, long y);
+	    /** 
+	     * Enumerates the possible actions. Note that there are actually
+	     * multiple check actions; Check-i is represented by CHECK+i,
+	     * where i is the rock number from 0..k-1 and k is the number
+	     * of rocks.
+	     */
+	    enum RockSampleAction {
+	        NORTH=0,
+	        EAST=1,
+	        SOUTH=2,
+	        WEST=3,
+	        SAMPLE=4,
+	        CHECK=5
+        };
 
-		int findCollision(StateVals &s);
+        /** 
+         * There are only two possible observations - the rock
+         * is either good or bad. Note that observations are 
+         * only meaningful when the action taken was SAMPLE;
+         * they are meaningless otherwise.
+         */
+        enum RockSampleObservation {
+            GOOD = 0,
+            BAD = 1
+        };
 
+        /** The map is square, mapSize * mapSize */
+        long mapSize;
+        /** The number of rocks on the map. */
+        long nRocks;
+        /** The starting position. */
+        Coords startPos;
+        /** The coordinates of the rocks. */
+        std::vector<Coords> rockCoords;
+
+        /** The reward for sampling a good rock. */
+        double goodRockReward;
+        /** The penalty for sampling a bad rock. */
+        double badRockReward;
+        /** The reward for exiting the map. */
+        double exitReward;
+        /** The penalty for an illegal move. */
+        double illegalMovePenalty;
+
+        /** The half efficiency distance d0 */
+        double halfEfficiencyDistance;
+
+        /** The environment map. */
+        std::vector<std::string> envMap;
 };
 
 #endif

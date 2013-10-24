@@ -1,10 +1,14 @@
 #include <sstream>
+#include <algorithm>
+
 #include <cmath>
 #include <cstdlib>
-#include <algorithm>
+
 #include "State.h"
 #include "BeliefNode.h"
 #include "HistoryEntry.h"
+
+using namespace std;
 
 long State::currId = 0;
 

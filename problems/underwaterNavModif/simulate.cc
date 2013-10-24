@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <time.h>
+
+#include <cstdlib>
+#include <ctime>
+
 #include "UnderwaterNavModifModel.h"
 #include "BeliefTree.h"
 #include "Histories.h"
@@ -58,8 +60,8 @@ int main(int argc, const char* argv[]) {
     cerr << "tmp " << tmp << endl;
 
 	Model* model = new UnderwaterNavModifModel(vm);
-	BeliefNode::maxParticles = model->nParticles;
-	BeliefNode::nStVars = model->nStVars;
+	BeliefNode::maxParticles = model->getNParticles();
+	BeliefNode::nStVars = model->getNStVars();
 	BeliefTree* policy = new BeliefTree();
 	Histories* histories = new Histories();
 	Solver* solver = new Solver(model, polPath.c_str(), policy, histories);

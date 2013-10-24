@@ -1,15 +1,15 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-#include <iostream>
+#include <ostream>
 #include <vector>
+#include <set>
+
 #include "Model.h"
 #include "BeliefTree.h"
 #include "Histories.h"
 #include "State.h"
 #include "StatePool.h"
-
-using namespace std;
 
 class Solver {
 	public:
@@ -18,9 +18,9 @@ class Solver {
 		~Solver();
 		
 		void genPol(long maxTrials, double depthTh);
-		double runSim(long nSteps, vector<long> &tChanges, vector<StateVals> &trajSt,
-				vector<long> &trajActId, vector<ObsVals> &trajObs, vector<double> &trajRew, long *actualNSteps, double *totChTime, double *totImpTime);
-		void write(ostream &os);
+		double runSim(long nSteps, std::vector<long> &tChanges, std::vector<StateVals> &trajSt,
+				std::vector<long> &trajActId, std::vector<ObsVals> &trajObs, std::vector<double> &trajRew, long *actualNSteps, double *totChTime, double *totImpTime);
+		void write(std::ostream &os);
 		
 	private:
 		Model *model;
@@ -47,24 +47,24 @@ class Solver {
 		void backup(HistorySeq *history);
 
 		bool simAStep(StateVals& currStVals, StateVals &nxtStVals, BeliefNode **startNode, BeliefNode **nxtNode,
-				double *rew, vector<StateVals> &trajSt, vector<long> &trajActId, vector<ObsVals> &trajObs); 
+				double *rew, std::vector<StateVals> &trajSt, std::vector<long> &trajActId, std::vector<ObsVals> &trajObs); 
 		/*
-		void identifyAffectedPol(vector<StateVals> &affectedRage, BeliefNode *currNode, set<long> &affectedHistSeq);
-		void identifyAffectedPol(vector<StateVals> &affectedRange, BeliefNode *currNode, 
-				set<long> &reachAffectedHistSeq, set<long> &notReachAffectedHistSeq);
+		void identifyAffectedPol(std::vector<StateVals> &affectedRage, BeliefNode *currNode, std::set<long> &affectedHistSeq);
+		void identifyAffectedPol(std::vector<StateVals> &affectedRange, BeliefNode *currNode, 
+				std::set<long> &reachAffectedHistSeq, std::set<long> &notReachAffectedHistSeq);
 		*/
-		void identifyAffectedPol(vector<StateVals> &affectedRage, vector<ChType> &chTypes, 
-				BeliefNode *currNode, set<HistorySeq*> &affectedHistSeq);
+		void identifyAffectedPol(std::vector<StateVals> &affectedRage, std::vector<ChType> &chTypes, 
+				BeliefNode *currNode, std::set<HistorySeq*> &affectedHistSeq);
 				
-		void resetAffected(set<HistorySeq*> affectedHistSeq);
-		void updatePol(set<HistorySeq*> &affectedHistSeq);	
+		void resetAffected(std::set<HistorySeq*> affectedHistSeq);
+		void updatePol(std::set<HistorySeq*> &affectedHistSeq);	
 		void updateVal(HistorySeq *histSeq);
 		void improveSol(BeliefNode* startNode, long maxTrials, double depthTh);
 		BeliefNode* addChild(BeliefNode *currNode, long actId, ObsVals &obs, long timeStep);
 		
 		void removePathFrBelNode(HistorySeq *history);
-		void modifHistSeqFr(HistorySeq *history, vector<StateVals> &modifStSeq, vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq);
-		void modifHistSeqFrTo(HistorySeq *history, vector<StateVals> &modifStSeq, vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq);
+		void modifHistSeqFr(HistorySeq *history, std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq, std::vector<double> &modifRewSeq);
+		void modifHistSeqFrTo(HistorySeq *history, std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq, std::vector<double> &modifRewSeq);
 	
 };
 #endif

@@ -1,9 +1,12 @@
-#include <fstream>
 #include <sstream>
-#include <stdlib.h>
 #include <string>
 #include <algorithm>
+
+#include <cstdlib>
+
 #include "StatePool.h"
+
+using namespace std;
 
 StatePool::StatePool() {
 	nStates = 0;

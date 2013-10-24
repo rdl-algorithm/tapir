@@ -1,12 +1,16 @@
 #include <fstream>
-#include <stdlib.h>
 #include <algorithm>
+
 #include <cmath>
-#include <time.h>
-#include <float.h>
-#include <limits.h>
+#include <cstdlib>
+#include <ctime>
+#include <cfloat>
+#include <climits>
+
 #include "Solver.h"
 #include "GlobalResources.h"
+
+using namespace std;
 
 Solver::Solver(Model *model_, BeliefTree *policy_, Histories *histories_): 
 				model(model_), policy(policy_), allHistories(histories_) {
@@ -134,7 +138,7 @@ void Solver::singleSearch(double discount, double depthTh) {
 	bool done = false;
 	while (!done && currDiscFactor > depthTh) {
 //cerr << "#children: " << model->nActions << " " << currNode->actChildren.size() << endl;
-		if (model->nActions == currNode->actChildren.size()) {
+		if (model->getNActions() == currNode->actChildren.size()) {
 //cerr << "Start UCB act\n";			
 			actIdx = currNode->getUCBAct();			
 			nxtSVals.clear(); obs.clear();
@@ -312,7 +316,7 @@ BeliefNode* Solver::getNNBelNode(BeliefNode *b) {
 	vector<BeliefNode*>::iterator itNode;
 	long nTry = 0;
 	for (itNode = policy->allNodes.begin(); itNode != policy->allNodes.end(); itNode++) {	
-		if (nTry < model->maxDistTry) {
+		if (nTry < model->getMaxDistTry()) {
 			if (b->tNNComp < (*itNode)->tLastAddedParticle) {
 				d =  b->distL1Independent(*itNode);
 				if (d < minDist) {
@@ -333,7 +337,7 @@ BeliefNode* Solver::getNNBelNode(BeliefNode *b) {
 //cerr << "new tNNComp: " << b->tNNComp << endl;	
 	b->nnBel = nnBel;
 //cerr << "Done getNNL1 ";
-	if (minDist > model->distTh) { return NULL; }
+	if (minDist > model->getDistTh()) { return NULL; }
 	return nnBel;
 }
 
@@ -344,7 +348,7 @@ cerr << "rolloutUsed: " << rolloutUsed << " calImprovement " << valImprovement/m
 		<< nUsedRollout[1] << " " << cRollout[1] << " " << cRollout[1]/nUsedRollout[1] << endl;	
 */
 	if (valImprovement < 1e-7) { valImprovement = 0.0; }
-	wRollout[rolloutUsed] = wRollout[rolloutUsed]*exp( exploreCoef* (valImprovement/model->maxVal) / (2*pRollout[rolloutUsed]) );
+	wRollout[rolloutUsed] = wRollout[rolloutUsed]*exp( exploreCoef* (valImprovement/model->getMaxVal()) / (2*pRollout[rolloutUsed]) );
 //cerr << "newW " << wRollout[0] << " " << wRollout[1] << endl;		
 	double totWRollout = 0.0;
 	for (int i = 0; i < 2; i++) {
@@ -526,7 +530,7 @@ cerr << "In add particle due to depletion\n";
 	
 	map<int, StateVals> partNxtSt;
 	model->getStatesSeeObs(actId, obs, partSt, partNxtSt);
-	double disc = model->discount;
+	double disc = model->getDiscount();
 	double d = pow(disc, timeStep);
 	
 	if (partNxtSt.empty()) {	// Create new particles for next node, based on observation alone.
@@ -616,7 +620,7 @@ bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals, BeliefNode **
 	trajObs.push_back(obs);
 	if (isTerm) { 
 //		cerr << " Reach terminal\n"; 
-		*rew = *rew + model->discount*model->getReward(nxtStVals); 
+		*rew = *rew + model->getDiscount()*model->getReward(nxtStVals); 
 		*nxtNode = NULL; 
 	}
 	else { 
@@ -817,7 +821,7 @@ for (itH1 = history->histSeq.begin(); itH1 != history->histSeq.end(); itH1++, hI
 		}
 		hIdx++; itSt++; itAct++; itObs++; itRew++;
 		for (; itAct != modifActSeq.end(); hIdx++, itSt++, itAct++, itObs++, itRew++) {
-			currDisc = currDisc*model->discount;
+			currDisc = currDisc*model->getDiscount();
 			if (hIdx < nOrgEntries) {
 				hEntry = history->histSeq[hIdx];
 				s = allStates->add(*itSt);
@@ -847,7 +851,7 @@ cerr << "\n";
 			}	
 		}
 		if (itSt != modifStSeq.end()) {
-			currDisc = currDisc*model->discount;
+			currDisc = currDisc*model->getDiscount();
 			if (hIdx < nOrgEntries) {
 				hEntry = history->histSeq[hIdx];
 				s = allStates->add(*itSt);
@@ -930,7 +934,7 @@ for (itH1 = history->histSeq.begin(); itH1 != history->histSeq.end(); itH1++, hI
 		}
 		hIdx++; itSt++; itAct++; itObs++; itRew++;
 		for (; itAct != modifActSeq.end(); hIdx++, itSt++, itAct++, itObs++, itRew++) {
-			currDisc = model->discount*currDisc;
+			currDisc = model->getDiscount()*currDisc;
 			if (hIdx <= nOrgEntries) {
 				hEntry = history->histSeq[hIdx];
 				s = allStates->add(*itSt);
@@ -967,7 +971,7 @@ for (itH1 = history->histSeq.begin(); itH1 != history->histSeq.end(); itH1++, hI
 		long sIdx = hIdx;
 		vector<HistoryEntry*>::iterator itH;
 		for (itH = history->histSeq.begin()+sIdx; itH != history->histSeq.end(); itH++, hIdx++) {
-			currDisc = currDisc*model->discount;
+			currDisc = currDisc*model->getDiscount();
 			(*itH)->disc = currDisc;
 			(*itH)->partOfBelNode = b;
 			b->add(*itH);
@@ -1063,7 +1067,7 @@ void Solver::singleSearch(BeliefNode *startNode, double discount, double depthTh
 	bool rolloutUsed = false;
 	bool done = false;
 	while (!done && currDiscFactor > depthTh) {
-		if (model->nActions == currNode->actChildren.size()) {
+		if (model->getNActions() == currNode->actChildren.size()) {
 			actIdx = currNode->getUCBAct();			
 			nxtSVals.clear(); obs.clear();
 			done = model->getNextState(currHistEntry->st->s, actIdx, &immediateRew, nxtSVals, obs); 

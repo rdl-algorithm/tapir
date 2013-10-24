@@ -1,9 +1,7 @@
 #ifndef UWNAV_OPTIONS_H
 #define UWNAV_OPTIONS_H
 
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <ctime>
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
@@ -14,9 +12,9 @@ namespace options {
         generic.add_options()
             ("help,h", "produce help message")
             ("cfg,c", 
-            po::value<string>()->default_value("tests/default.cfg"),
+            po::value<std::string>()->default_value("tests/default.cfg"),
             "config file path")
-            ("policy,p", po::value<string>()->default_value("pol.pol"),
+            ("policy,p", po::value<std::string>()->default_value("pol.pol"),
             "policy file path (output)")
             ("seed,s", po::value<long>()->default_value(time(NULL)), "RNG seed")
             ;
@@ -27,9 +25,9 @@ namespace options {
     po::options_description simulation() {
         po::options_description simulation("Simulation-specific settings");
         simulation.add_options()
-            ("log,l", po::value<string>()->default_value("log.log"),
+            ("log,l", po::value<std::string>()->default_value("log.log"),
              "File to log changes to")
-            ("changes.changesPath", po::value<string>(),
+            ("changes.changesPath", po::value<std::string>(),
              "Path to the file with runtime changes to the POMDP model")
             ("simulation.nSteps", po::value<long>(), 
              "Maximum number of steps to simulate")
@@ -60,12 +58,14 @@ namespace options {
                 "Settings specific to the Underwater Navigation POMDP");
         problem.add_options()
             ("problem.discount,d", po::value<double>(), "discount factor")
-            ("problem.mapPath,m", po::value<string>(), "path to map file")
+            ("problem.mapPath,m", po::value<std::string>(), "path to map file")
             ("problem.goalReward", po::value<double>(),
             "reward for reaching the goal.")
             ("problem.crashPenalty", po::value<double>(),
             "penalty for crashing")
             ("problem.moveCost", po::value<double>(), "cost of moving")
+            ("problem.ctrlCorrectProb", po::value<double>(), 
+             "probability of ending up in the desired position")
             ;
         return problem;
     }
@@ -76,7 +76,6 @@ namespace options {
                 "Settings specific to the Underwater Navigation solver");
         solver.add_options()
             ("solver.rolloutExploreTh", po::value<double>(), "??")
-            ("solver.ctrlCorrectProb", po::value<double>(), "??")
             ("solver.nVerts", po::value<long>(), "??")
             ("solver.nTryCon", po::value<long>(), "??")
             ("solver.maxDistCon", po::value<long>(), "??")

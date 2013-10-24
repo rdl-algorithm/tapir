@@ -1,6 +1,6 @@
-#include <fstream>
-#include <queue>
 #include "BeliefTree.h"
+
+using namespace std;
 
 BeliefTree::BeliefTree() {
 	// Set root

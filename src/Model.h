@@ -1,25 +1,19 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include <ostream>
 #include <vector>
 #include <map>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-using namespace std;
-
-typedef vector<double> StateVals;
-typedef vector<double> ObsVals;
+typedef std::vector<double> StateVals;
+typedef std::vector<double> ObsVals;
 enum ChType { UNDEFINED=0, ADDSTATE=1, REWARD=2, TRANSITION=3, DELSTATE=4 , ADDOBSERVATION=5, ADDOBSTACLE=6 };
 
 class Model {
 	public:
-		long nParticles, nActions;
-		vector<StateVals> initBel;
-		long nInitBel, maxTrials, nStVars, maxDistTry;
-		double discount, depthTh, exploreCoef, minVal, maxVal, distTh;
-
 		Model(po::variables_map vm) {
 		    nParticles = vm["SBT.nParticles"].as<long>();
 		    maxTrials = vm["SBT.maxTrials"].as<long>();
@@ -32,13 +26,27 @@ class Model {
 		    discount = vm["problem.discount"].as<double>();
         }
 
+        // Note: Subclasses must initially calculate the following parameters:
+        // nActions, nObservations, nStVars, nInitBel
+        // initBel
+        // minVal, maxVal
+
+        // Problem parameters
 		inline double getDiscount() { return discount; }
-		inline long getMaxTrials() { return maxTrials; }
-		inline double getDepthTh() { return depthTh; }
-		inline long getNParticles() { return nParticles; }
 		inline long getNActions() { return nActions; }
+		inline long getNObservations() { return nObservations; }
 		inline long getNStVars() { return nStVars; }
+		inline long getNInitBel() { return nInitBel; }
+
+        // SBT parameters
+		inline long getNParticles() { return nParticles; }
+		inline long getMaxTrials() { return maxTrials; }
+		inline long getMaxDistTry() { return maxDistTry; }
+		inline double getDepthTh() { return depthTh; }
 		inline double getExploreCoef() { return exploreCoef; }
+		inline double getMinVal() { return minVal; }
+		inline double getMaxVal() { return maxVal; }
+		inline double getDistTh() { return distTh; }
 		
 		/***** Start virtual functions *****/
 		virtual void sampleAnInitState(StateVals& tmpStVals)=0;		
@@ -48,16 +56,49 @@ class Model {
 		virtual double getReward(StateVals &sVals, long actId)=0;
 		virtual double getNextStateNRew(StateVals &currStVals, long actId, ObsVals &obs, bool &isTerm)=0;
 		virtual bool getNextState(StateVals &currStVals, long actIdx, double *immediateRew, StateVals &nxtSVals, ObsVals &obs)=0;
-		virtual void setChanges(const char* chName, vector<long> &chTime)=0;
-		virtual void update(long tCh, vector<StateVals> &affectedRange, vector<ChType> &typeOfChanges)=0;
+		virtual void setChanges(const char* chName, std::vector<long> &chTime)=0;
+		virtual void update(long tCh, std::vector<StateVals> &affectedRange, std::vector<ChType> &typeOfChanges)=0;
 		virtual double getDefaultVal()=0;
-		virtual void getStatesSeeObs(long actId, ObsVals &obs, vector<StateVals> &partSt, map<int, StateVals> &partNxtSt)=0;
-		virtual void getStatesSeeObs(ObsVals &obs, vector<StateVals> &posNxtSt)=0;
+		virtual void getStatesSeeObs(long actId, ObsVals &obs, std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt)=0;
+		virtual void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt)=0;
 		virtual bool isTerm(StateVals &sVals)=0;
-		virtual bool modifStSeq(vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
-				vector<StateVals> &modifStSeq, vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq,
-				vector<double> &modifRewSeq)=0;
-		virtual void drawEnv(ostream &os)=0;
+		virtual bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
+				std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
+				std::vector<double> &modifRewSeq)=0;
+		virtual void drawEnv(std::ostream &os)=0;
+
+    protected:
+        // Problem parameters.
+        /** The discount factor for the POMDP. */
+        double discount;
+        /** The number of possible actions. */
+        long nActions;
+        /** The number of possible observations. */
+        long nObservations;
+        /** The number of state variables. */
+        long nStVars;
+        /** The number of distinct possible initial states. */
+        long nInitBel;
+        /** A vector of all the possible initial states. */
+        std::vector<StateVals> initBel;
+
+        // SBT parameters
+        /** The number of particles per belief. */
+        long nParticles;
+        /** ?? */
+        long maxTrials;
+        /** ?? */
+        long maxDistTry;
+        /** ?? */
+        double depthTh;
+        /** ?? */
+        double exploreCoef;
+        /** ?? */
+        double minVal;
+        /** ?? */
+        double maxVal;
+        /** ?? */
+        double distTh;
 };
 
 #endif

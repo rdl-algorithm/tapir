@@ -1,6 +1,8 @@
-#include <fstream>
-#include <limits.h>
+#include <climits>
+
 #include "Histories.h"
+
+using namespace std;
 
 Histories::Histories() {
 }

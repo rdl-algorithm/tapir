@@ -1,6 +1,9 @@
-#include <stdlib.h>
+#include <cstdlib>
+
 #include "HistoryEntry.h"
 #include "BeliefNode.h"
+
+using namespace std;
 
 HistoryEntry::HistoryEntry(State *st_, long entryId_): st(st_), entryId(entryId_) {
 	actId = -1;

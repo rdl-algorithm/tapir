@@ -1,12 +1,10 @@
 #ifndef OBSERVATION_H
 #define OBSERVATION_H
 
-#include <iostream>
-#include <vector>
+#include <ostream>
 #include <queue>
-#include "Model.h"
 
-using namespace std;
+#include "Model.h"
 
 class BeliefNode;
 
@@ -18,9 +16,9 @@ class Observation {
 		
 		bool isObs(ObsVals &o);
 		BeliefNode* getNodeChild();
-		void getChildren(queue<BeliefNode*> &res);
-		void write(ostream &os);
-		void writeNGetChildren(ostream &os, queue<BeliefNode*> &res);
+		void getChildren(std::queue<BeliefNode*> &res);
+		void write(std::ostream &os);
+		void writeNGetChildren(std::ostream &os, std::queue<BeliefNode*> &res);
 	
 	private:
 		ObsVals vals;

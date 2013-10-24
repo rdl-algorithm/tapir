@@ -3,10 +3,9 @@
 
 #include <iostream>
 #include <vector>
+
 #include "HistoryEntry.h"
 #include "Model.h"
-
-using namespace std;
 
 class HistorySeq {
 	public:
@@ -27,10 +26,10 @@ class HistorySeq {
 		//void deleteAffectedEntries(Model *m);
 		//void prepareDel();
 		void updateVal(Model *m);
-		void getStValsSeq(vector<StateVals> &seqStVals);
+		void getStValsSeq(std::vector<StateVals> &seqStVals);
 		
-		void write (ostream &os);
-		void writeln (ostream &os);
+		void write (std::ostream &os);
+		void writeln (std::ostream &os);
 		
 		long getId() { return id; }
 		void fixEntryId();
@@ -40,7 +39,7 @@ class HistorySeq {
 		
 		bool chOnlyRew, cutAffected;
 		long id, startDepth, startAffectedIdx, endAffectedIdx;
-		vector<HistoryEntry*> histSeq;
+		std::vector<HistoryEntry*> histSeq;
 		
 		ChType chType;
 

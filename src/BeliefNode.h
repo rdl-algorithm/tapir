@@ -1,18 +1,21 @@
 #ifndef BELIEFNODE_H
 #define BELIEFNODE_H
 
-#include <iostream>
+#include <string>
+#include <ostream>
 #include <vector>
 #include <queue>
 #include <map>
-#include <time.h>
+
+#include <ctime>
+
 //#include <cv.h>
 //#include <highgui.h>
+
 #include "Histories.h"
 #include "HistoryEntry.h"
 #include "Action.h"
 
-using namespace std;
 //using namespace cv;
 
 class BeliefNode {
@@ -29,8 +32,8 @@ class BeliefNode {
 		BeliefNode(long id_);
 		~BeliefNode();
 	
-		void set(stringstream &sstr, Histories *allHist);
-		void setAct(string str, vector<BeliefNode*> &tmpNodes);
+		void set(std::stringstream &sstr, Histories *allHist);
+		void setAct(std::string str, std::vector<BeliefNode*> &tmpNodes);
 		long getUCBAct();
 		long getBestAct();
 		void add(HistoryEntry *newHistEntry);
@@ -43,10 +46,10 @@ class BeliefNode {
 		double distL1Independent(BeliefNode *b);
 		
 		BeliefNode* getChild(long actIdx, ObsVals &obs);
-		void getChildren(queue<BeliefNode*> &res);
-		void write(ostream &os);
-		void writeNGetChildren(ostream &os, queue<BeliefNode*> &res);
-		void writeStParticles(ostream &os);
+		void getChildren(std::queue<BeliefNode*> &res);
+		void write(std::ostream &os);
+		void writeNGetChildren(std::ostream &os, std::queue<BeliefNode*> &res);
+		void writeStParticles(std::ostream &os);
 		
 		long getNxtActToTry();
 		void calcBestVal();
@@ -59,7 +62,7 @@ class BeliefNode {
 	private:
 		static long currId;
 		static double exploreParam;
-		static clock_t startTime;
+		static std::clock_t startTime;
 		
 		long id, nParticles, nActChildren, nxtActToTry;
 		double bestAvgQVal;
@@ -70,8 +73,8 @@ class BeliefNode {
 		//CvMat *emdSig;
 
 		
-		vector<HistoryEntry*> particles;
-		map<long, Action*> actChildren, invalidActChildren;
+		std::vector<HistoryEntry*> particles;
+		std::map<long, Action*> actChildren, invalidActChildren;
 		
 };
 #endif

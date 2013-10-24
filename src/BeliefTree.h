@@ -1,12 +1,13 @@
 #ifndef BELIEFTREE_H
 #define BELIEFTREE_H
 
-#include <iostream>
+#include <vector>
+#include <queue>
+#include <fstream>
+
 #include "BeliefNode.h"
 #include "Model.h"
 #include "Histories.h"
-
-using namespace std;
 
 class BeliefTree {
 	public:
@@ -14,17 +15,17 @@ class BeliefTree {
 		
 		BeliefTree();
 		~BeliefTree();
-		void deleteHelper(queue<BeliefNode*> &tmpNodes);
+		void deleteHelper(std::queue<BeliefNode*> &tmpNodes);
 		
-		void readPolicy(ifstream &inFile, Histories *allHist);
-		void write(ostream &os);
-		void writeHelp(queue<BeliefNode*> &tmpNodes, ostream &os);
+		void readPolicy(std::ifstream &inFile, Histories *allHist);
+		void write(std::ostream &os);
+		void writeHelp(std::queue<BeliefNode*> &tmpNodes, std::ostream &os);
 		
 		BeliefNode* getRoot() { return root; }
 		
 	private:
 		BeliefNode *root;
-		vector<BeliefNode*> allNodes;
+        std::vector<BeliefNode*> allNodes;
 		
 		
 };

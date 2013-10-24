@@ -1,5 +1,8 @@
-#include <limits.h>
+#include <climits>
+
 #include "HistorySeq.h"
+
+using namespace std;
 
 long HistorySeq::currId = 0;
 

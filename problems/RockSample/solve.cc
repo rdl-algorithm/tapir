@@ -1,8 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include <stdio.h>
-#include <time.h>
-#include "UnderwaterNavModifModel.h"
+
+#include <cstdio>
+#include <ctime>
+
+#include "RockSampleModel.h"
 #include "BeliefTree.h"
 #include "Histories.h"
 #include "Solver.h"
@@ -46,16 +48,12 @@ int main(int argc, const char* argv[]) {
     cerr << "Seed: " << seed << endl;
 	GlobalResources::randGen.ranf_start(seed);
 
-    cout << "Model!" << endl;
-	Model* model = new UnderwaterNavModifModel(vm);
-	cout << "!" << endl;
-	BeliefNode::maxParticles = model->nParticles;
-	BeliefNode::nStVars = model->nStVars;
+	Model* model = new RockSampleModel(vm);
+	BeliefNode::maxParticles = model->getNParticles();
+	BeliefNode::nStVars = model->getNStVars();
 	BeliefTree* policy = new BeliefTree();
 	Histories* histories = new Histories();
-	cout << "?" << endl;
 	Solver* solver = new Solver(model, policy, histories);
-	cout << "Done" << endl;
 
 	double totT;
 	clock_t tStart;
