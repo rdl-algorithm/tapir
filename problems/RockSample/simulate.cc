@@ -22,7 +22,7 @@ int main(int argc, const char* argv[]) {
     po::options_description visibleOptions;
     po::options_description allOptions;
     visibleOptions.add(options::generic()).add(options::sbt()).add(
-            options::problem()).add(options::solver()).add(
+            options::problem()).add(options::heuristic()).add(
             options::simulation());
     allOptions.add(visibleOptions);
 

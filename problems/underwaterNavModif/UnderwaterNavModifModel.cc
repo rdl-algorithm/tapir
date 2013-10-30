@@ -45,10 +45,10 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(v
     moveCost = vm["problem.moveCost"].as<double>();
 	ctrlCorrectProb = vm["problem.ctrlCorrectProb"].as<double>();
 
-	rolloutExploreTh = vm["solver.rolloutExploreTh"].as<double>();
-	nVerts = vm["solver.nVerts"].as<long>();
-	nTryCon = vm["solver.nTryCon"].as<long>();
-	maxDistCon = vm["solver.maxDistCon"].as<long>();
+	rolloutExploreTh = vm["heuristic.rolloutExploreTh"].as<double>();
+	nVerts = vm["heuristic.nVerts"].as<long>();
+	nTryCon = vm["heuristic.nTryCon"].as<long>();
+	maxDistCon = vm["heuristic.maxDistCon"].as<long>();
 
 	setInitObsGoal();
 
@@ -61,6 +61,9 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(v
 }
 
 UnderwaterNavModifModel::~UnderwaterNavModifModel() {
+    // There is no need to clear all these vectors as they will go out of scope
+    // and be properly deallocated anyway.
+    /*
 	vector<StateVals>::iterator it;
 	for (it = initBel.begin(); it != initBel.end(); it++) {
 		it->clear();
@@ -74,6 +77,7 @@ UnderwaterNavModifModel::~UnderwaterNavModifModel() {
 		itMap->second.clear();
 	}
 	cellType.clear();
+	*/
 }
 
 void UnderwaterNavModifModel::setInitObsGoal() {

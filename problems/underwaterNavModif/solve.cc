@@ -20,7 +20,7 @@ int main(int argc, const char* argv[]) {
     po::options_description visibleOptions;
     po::options_description allOptions;
     visibleOptions.add(options::generic()).add(options::sbt()).add(
-            options::problem()).add(options::solver());
+            options::problem()).add(options::heuristic());
     allOptions.add(visibleOptions).add(options::simulation());
 
     // Set up positional options

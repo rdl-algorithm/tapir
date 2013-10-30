@@ -78,12 +78,12 @@ namespace options {
         return problem;
     }
 
-    // Configuration options for the RockSample Solver
-    po::options_description solver() {
-        po::options_description solver(
-                "Settings specific to the RockSample solver");
+    // RockSample heuristic configuration
+    po::options_description heuristic() {
+        po::options_description heuristic(
+                "RockSample heuristic configuration");
         //solver.add_options()
-        return solver;
+        return heuristic;
     }
 }
 #endif

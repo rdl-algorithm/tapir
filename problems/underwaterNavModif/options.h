@@ -73,17 +73,17 @@ namespace options {
         return problem;
     }
 
-    // Configuration options for the Underwater Navigation Solver
-    po::options_description solver() {
-        po::options_description solver(
-                "Settings specific to the Underwater Navigation solver");
-        solver.add_options()
-            ("solver.rolloutExploreTh", po::value<double>(), "??")
-            ("solver.nVerts", po::value<long>(), "??")
-            ("solver.nTryCon", po::value<long>(), "??")
-            ("solver.maxDistCon", po::value<long>(), "??")
+    // Underwater Navigation heuristic configuration
+    po::options_description heuristic() {
+        po::options_description heuristic(
+                "Underwater Navigation heuristic configuration");
+        heuristic.add_options()
+            ("heuristic.rolloutExploreTh", po::value<double>(), "??")
+            ("heuristic.nVerts", po::value<long>(), "??")
+            ("heuristic.nTryCon", po::value<long>(), "??")
+            ("heuristic.maxDistCon", po::value<long>(), "??")
             ;
-        return solver;
+        return heuristic;
     }
 }
 #endif
