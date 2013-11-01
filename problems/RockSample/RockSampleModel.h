@@ -32,43 +32,56 @@ class RockSampleModel : public Model {
 
 		/***** Start implementation of Model's virtual functions *****/
 
-        /**
-         * Samples an initial state from the belief vector.
-         */
 		void sampleAnInitState(StateVals& tmpStVals);
-		/** ? */
+		bool isTerm(StateVals &sVals);
+		void solveHeuristic(StateVals &s, double *qVal);
+		double getDefaultVal();
+
 		bool getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals,
 		        ObsVals &obs);
-        /**
-        * Approximates the q-value of a state.
-        */
-		void solveHeuristic(StateVals &s, double *qVal);
+		bool getNextState(StateVals &sVals, long actIdx,
+		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
+		double getNextStateNRew(StateVals &sVals, long actId, ObsVals &obs,
+		        bool &isTerm);
 		double getReward(StateVals &sVals);
 		double getReward(StateVals &sVals, long actId);
-		double getNextStateNRew(StateVals &currStVals, long actId, ObsVals &obs,
-		        bool &isTerm);
-		bool getNextState(StateVals &currStVals, long actIdx,
-		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
-		void setChanges(const char* chName, std::vector<long> &chTime);
-		void update(long tCh, std::vector<StateVals> &affectedRange,
-		        std::vector<ChType> &typeOfChanges);
-		double getDefaultVal();
+
 		void getStatesSeeObs(long actId, ObsVals &obs,
 		        std::vector<StateVals> &partSt,
 		        std::map<int, StateVals> &partNxtSt);
 		void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt);
-		bool isTerm(StateVals &sVals);
+
+		void setChanges(const char* chName, std::vector<long> &chTime);
+		void update(long tCh, std::vector<StateVals> &affectedRange,
+		        std::vector<ChType> &typeOfChanges);
 		bool modifStSeq(std::vector<StateVals> &seqStVals,
 		        long startAffectedIdx, long endAffectedIdx,
 				std::vector<StateVals> &modifStSeq,
 				std::vector<long> &modifActSeq,
 				std::vector<ObsVals> &modifObsSeq,
 				std::vector<double> &modifRewSeq);
+
 		void drawEnv(std::ostream &os);
 
-	private:
-	    /** Initialises the required parameters and data structures/ */
+    private:
+        /** The number of state particles in the initial belief. */
+        long nInitBel;
+        /** A vector of all the states in the initial belief. */
+        std::vector<StateVals> initBel;
+
+        /**
+        * Finds and counts the rocks on the map, and initialisese the required
+        * data structures and variables.
+        */
 	    void initialise();
+
+        /**
+         * Generates a next state for the given state and action;
+         * returns true if the action was legal, and false if it was illegal.
+         */
+        bool makeNextState(StateVals &sVals, long actId, StateVals &nxtSVals);
+        /** Generates an observation given a current state and action. */
+        RockSampleObservation makeObs(StateVals &sVals, long actId);
 
 	    /**
 	     * Enumerates the possible actions. Note that there are actually
@@ -92,12 +105,25 @@ class RockSampleModel : public Model {
          * they are meaningless otherwise.
          */
         enum RockSampleObservation {
+            NONE = 0, // Indentical should be OK.
             GOOD = 0,
             BAD = 1
         };
 
-        /** The map is square, mapSize * mapSize */
-        long mapSize;
+        /**
+         * Rocks are enumerated 0, 1, 2, ... ;
+         * other cell types should be negative.
+         */
+        enum CellType {
+            ROCK = 0,
+            EMPTY = -1,
+            GOAL = -2,
+        };
+
+        /** The number of rows in the map. */
+        long nRows;
+        /** The number of columns in the map. */
+        long nCols;
         /** The number of rocks on the map. */
         long nRocks;
         /** The starting position. */
@@ -117,8 +143,11 @@ class RockSampleModel : public Model {
         /** The half efficiency distance d0 */
         double halfEfficiencyDistance;
 
-        /** The environment map. */
-        std::vector<std::string> envMap;
+        /** The environment map in text form. */
+        std::vector<std::string> mapText;
+
+        /** The environment map in vector form. */
+        std::vector<std::vector<int>> envMap;
 };
 
 #endif

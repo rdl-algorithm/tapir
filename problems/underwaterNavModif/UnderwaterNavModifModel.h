@@ -41,6 +41,11 @@ class UnderwaterNavModifModel : public Model {
 		void setInitObsGoal();
 
 	private:
+        /** The number of state particles in the initial belief. */
+        long nInitBel;
+        /** A vector of all the states in the initial belief. */
+        std::vector<StateVals> initBel;
+
 		enum { EAST=0, NORTH=1, SOUTH=2, NORTHEAST=3, SOUTHEAST=4 };
 
 		long nX, nY, nGoals, nRocks;

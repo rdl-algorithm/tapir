@@ -35,8 +35,7 @@ class Model {
         }
 
         // Note: Subclasses must initially calculate the following parameters:
-        // nActions, nObservations, nStVars, nInitBel
-        // initBel
+        // nActions, nObservations, nStVars,
         // minVal, maxVal
 
         // Problem parameters
@@ -44,7 +43,6 @@ class Model {
 		inline long getNActions() { return nActions; }
 		inline long getNObservations() { return nObservations; }
 		inline long getNStVars() { return nStVars; }
-		inline long getNInitBel() { return nInitBel; }
 
         // SBT parameters
 		inline long getNParticles() { return nParticles; }
@@ -56,34 +54,43 @@ class Model {
 		inline double getMaxVal() { return maxVal; }
 		inline double getDistTh() { return distTh; }
 
-		/***** Start virtual functions *****/
+
+		/* --------------- Start virtual functions ----------------- */
+
+		/** Samples an initial state from the belief vector. */
 		virtual void sampleAnInitState(StateVals& tmpStVals)=0;
-		virtual void solveHeuristic(StateVals &s, double *qVal)=0;
-		virtual bool getNextState(StateVals &sVals, long actIdx,
+		virtual bool isTerm(StateVals &sVals)=0;
+		/** Approximates the q-value of a state */
+		virtual void solveHeuristic(StateVals &sVals, double *qVal)=0;
+		virtual double getDefaultVal()=0;
+
+		virtual bool getNextState(StateVals &sVals, long actId,
 		        StateVals &nxtSVals, ObsVals &obs)=0;
+		virtual bool getNextState(StateVals &sVals, long actId,
+		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs)=0;
+		virtual double getNextStateNRew(StateVals &sVals, long actId,
+		        ObsVals &obs, bool &isTerm)=0;
 		virtual double getReward(StateVals &sVals)=0;
 		virtual double getReward(StateVals &sVals, long actId)=0;
-		virtual double getNextStateNRew(StateVals &currStVals, long actId,
-		        ObsVals &obs, bool &isTerm)=0;
-		virtual bool getNextState(StateVals &currStVals, long actIdx,
-		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs)=0;
-		virtual void setChanges(const char* chName,
-		        std::vector<long> &chTime)=0;
-		virtual void update(long tCh, std::vector<StateVals> &affectedRange,
-		        std::vector<ChType> &typeOfChanges)=0;
-		virtual double getDefaultVal()=0;
+
+
 		virtual void getStatesSeeObs(long actId, ObsVals &obs,
 		        std::vector<StateVals> &partSt,
 		        std::map<int, StateVals> &partNxtSt)=0;
 		virtual void getStatesSeeObs(ObsVals &obs,
 		        std::vector<StateVals> &posNxtSt)=0;
-		virtual bool isTerm(StateVals &sVals)=0;
+
+		virtual void setChanges(const char* chName,
+		        std::vector<long> &chTime)=0;
+		virtual void update(long tCh, std::vector<StateVals> &affectedRange,
+		        std::vector<ChType> &typeOfChanges)=0;
 		virtual bool modifStSeq(std::vector<StateVals> &seqStVals,
 		        long startAffectedIdx, long endAffectedIdx,
 				std::vector<StateVals> &modifStSeq,
 				std::vector<long> &modifActSeq,
 				std::vector<ObsVals> &modifObsSeq,
 				std::vector<double> &modifRewSeq)=0;
+
 		virtual void drawEnv(std::ostream &os)=0;
 
     protected:
@@ -96,10 +103,6 @@ class Model {
         long nObservations;
         /** The number of state variables. */
         long nStVars;
-        /** The number of state particles in the initial belief. */
-        long nInitBel;
-        /** A vector of all the states in the initial belief. */
-        std::vector<StateVals> initBel;
 
         // SBT parameters
         /** The number of particles per belief. */
