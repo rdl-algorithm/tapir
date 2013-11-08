@@ -13,7 +13,8 @@ namespace po = boost::program_options;
 
 using namespace std;
 
-UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(vm) {
+UnderwaterNavModifModel::UnderwaterNavModifModel(
+        po::variables_map vm) : Model(vm) {
 	ifstream inFile;
 
 	const char* mapPath = vm["problem.mapPath"].as<string>().c_str();
@@ -57,7 +58,8 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) : Model(v
 	minVal = crashPenalty / (1.0-discount);
 	maxVal = goalReward;
 
-	roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon, cellType, nX, nY);
+	roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon,
+	        cellType, nX, nY);
 }
 
 UnderwaterNavModifModel::~UnderwaterNavModifModel() {
@@ -219,7 +221,8 @@ double UnderwaterNavModifModel::getDistToNearestGoal(StateVals &st) {
 	return minDist;
 }
 
-double UnderwaterNavModifModel::getDistToNearestObs(StateVals &st, StateVals &nxtSt) {
+double UnderwaterNavModifModel::getDistToNearestObs(StateVals &st,
+        StateVals &nxtSt) {
 	vector<StateVals>::iterator it = allObservations.begin();
 	double minDist = getDist(st, *it);
 	nxtSt = *it;
@@ -259,7 +262,8 @@ double UnderwaterNavModifModel::getExpDist(StateVals &s, long firstAct) {
 	return totDist / (double) nParticles;
 }
 */
-void UnderwaterNavModifModel::getNextState(StateVals &s, long actId, StateVals &sp) {
+void UnderwaterNavModifModel::getNextState(StateVals &s, long actId,
+        StateVals &sp) {
 	sp.resize(2);
 
 	double tmp = GlobalResources::randGen.ranf_arr_next();
@@ -376,7 +380,8 @@ double UnderwaterNavModifModel::getDist(StateVals &s1, StateVals &s2) {
 	return d;
 }
 
-bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId, StateVals &nxtSVals, ObsVals &obs) {
+bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId,
+        StateVals &nxtSVals, ObsVals &obs) {
 	nxtSVals.clear();
 //cerr << "input currSt " << sVals[0] << " " << sVals[1] << " a " << actId << endl;
 	getNextState(sVals, actId, nxtSVals);
@@ -503,7 +508,8 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals, long actId) {
 	return totRew;
 }
 
-double UnderwaterNavModifModel::getNextStateNRew(StateVals &sVals, long actId, ObsVals &obs, bool &isTerm) {
+double UnderwaterNavModifModel::getNextStateNRew(StateVals &sVals, long actId,
+        ObsVals &obs, bool &isTerm) {
 	double rew;
 	StateVals nxtSVals;
 	getNextState(sVals, actId, nxtSVals);
@@ -520,7 +526,8 @@ double UnderwaterNavModifModel::getNextStateNRew(StateVals &sVals, long actId, O
 	return rew;
 }
 
-bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId, double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
+bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId,
+        double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
 	bool isTerm;
 	getNextState(sVals, actId, nxtSVals);
 	inObsRegion(nxtSVals, obs);
@@ -530,7 +537,8 @@ bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId, double 
 	return (inGoal(nxtSVals) ? true : false);
 }
 
-void UnderwaterNavModifModel::setChanges(const char* chName, vector<long> &chTime) {
+void UnderwaterNavModifModel::setChanges(const char* chName,
+        vector<long> &chTime) {
 	ifstream inFile;
 
 	inFile.open(chName);
@@ -558,7 +566,8 @@ void UnderwaterNavModifModel::setChanges(const char* chName, vector<long> &chTim
 	inFile.close();
 }
 
-void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange, vector<ChType> &typeOfChanges) {
+void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
+        vector<ChType> &typeOfChanges) {
 	affectedRange.clear();
 	vector<string>::iterator it;
 	vector<StateVals>::iterator itStVals;
@@ -737,7 +746,8 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
 		}
 	}
 	delete roadmap;
-	roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon, cellType, nX, nY);
+	roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon,
+	        cellType, nX, nY);
 	//roadmap->updateRoadmap(cellType, goals, nGoals);
 
 //cerr << "#affected: " << affectedRange.size() << " #type: " << typeOfChanges.size() << endl;
@@ -754,7 +764,8 @@ double UnderwaterNavModifModel::getDefaultVal() {
 	return minVal;
 }
 
-vector<StateVals>::iterator UnderwaterNavModifModel::getIterator(vector<StateVals> &vecStVals, long x, long y) {
+vector<StateVals>::iterator UnderwaterNavModifModel::getIterator(
+        vector<StateVals> &vecStVals, long x, long y) {
 	vector<StateVals>::iterator it;
 	for (it = vecStVals.begin(); it != vecStVals.end(); it++) {
 		if ((*it)[0] == x && (*it)[1] == y) {
@@ -764,7 +775,8 @@ vector<StateVals>::iterator UnderwaterNavModifModel::getIterator(vector<StateVal
 	return vecStVals.end();
 }
 
-void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs, vector<StateVals> &partSt, map<int, StateVals> &partNxtSt) {
+void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
+        vector<StateVals> &partSt, map<int, StateVals> &partNxtSt) {
 	vector<StateVals>::iterator itSt, itReachSt;
 	long idx = 0;
 	for (itSt = partSt.begin(); itSt != partSt.end(); itSt++, idx++) {
@@ -772,14 +784,15 @@ void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs, vector<S
 		getReachableSt(*itSt, actId, nxtSt);
 		for (itReachSt = nxtSt.begin(); itReachSt != nxtSt.end(); itReachSt++) {
 			if ((*itReachSt)[0] == obs[0] && (*itReachSt)[1] == obs[1]) {
-				partNxtSt[idx] = *itSt;
+				partNxtSt[idx] = *itReachSt;
 				break;
 			}
 		}
 	}
 }
 
-void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId, vector<StateVals> &nxtS) {
+void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId,
+        vector<StateVals> &nxtS) {
 	nxtS.clear();
 	switch(actId) {
 		case EAST: {
@@ -820,7 +833,8 @@ void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId, vector<St
 	}
 }
 
-void UnderwaterNavModifModel::getStatesSeeObs(ObsVals &obs, vector<StateVals> &posNxtSt) {
+void UnderwaterNavModifModel::getStatesSeeObs(ObsVals &obs,
+        vector<StateVals> &posNxtSt) {
 	StateVals s(2);
 	s[0] = obs[0]; s[1] = obs[1];
 	posNxtSt.push_back(s);
@@ -848,8 +862,10 @@ cerr << " ( " << s[0] << " " << s[1] << " ) Obs " << (*it1)[0] << " " << (*it1)[
 	return -1;
 }
 
-bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals, long startAffectedIdx, long endAffectedIdx,
-		vector<StateVals> &modifStSeq, vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq) {
+bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals,
+        long startAffectedIdx, long endAffectedIdx,
+		vector<StateVals> &modifStSeq, vector<long> &modifActSeq,
+		vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq) {
 
 	// Get nearest vertex of affected region.
 	long startAffected = startAffectedIdx;
@@ -1020,7 +1036,8 @@ cerr << "ok4ok4\n";
 */
 	// Set observation and reward.
 	vector<long>::iterator itAct;
-	for (it = modifStSeq.begin(), itAct = modifActSeq.begin(); itAct != modifActSeq.end(); it++, itAct++) {
+	for (it = modifStSeq.begin(), itAct = modifActSeq.begin();
+	        itAct != modifActSeq.end(); it++, itAct++) {
 		modifRewSeq.push_back(getReward(*it, *itAct));
 		ObsVals obs; inObsRegion(*it, obs);
 		modifObsSeq.push_back(obs);
