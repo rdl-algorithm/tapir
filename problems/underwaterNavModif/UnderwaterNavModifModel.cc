@@ -380,22 +380,6 @@ double UnderwaterNavModifModel::getDist(StateVals &s1, StateVals &s2) {
 	return d;
 }
 
-bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId,
-        StateVals &nxtSVals, ObsVals &obs) {
-	nxtSVals.clear();
-//cerr << "input currSt " << sVals[0] << " " << sVals[1] << " a " << actId << endl;
-	getNextState(sVals, actId, nxtSVals);
-//cerr << "currSt " << sVals[0] << " " << sVals[1] << " a " << actId << " nxtSt: " << nxtSVals[0] << " " << nxtSVals[1] << endl;
-	inObsRegion(nxtSVals, obs);
-	if (inGoal(nxtSVals)) {
-//cerr << "InGoal\n";
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
 void UnderwaterNavModifModel::inObsRegion(StateVals &sVals, ObsVals &obs) {
 	obs.resize(2);
 /*
@@ -508,24 +492,6 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals, long actId) {
 	return totRew;
 }
 
-double UnderwaterNavModifModel::getNextStateNRew(StateVals &sVals, long actId,
-        ObsVals &obs, bool &isTerm) {
-	double rew;
-	StateVals nxtSVals;
-	getNextState(sVals, actId, nxtSVals);
-	inObsRegion(nxtSVals, obs);
-	if (inGoal(nxtSVals)) {
-		isTerm = true;
-		rew = getReward(sVals, actId) + discount*getReward(nxtSVals);
-	}
-	else {
-		isTerm = false;
-		rew = getReward(sVals, actId);
-	}
-	sVals = nxtSVals;
-	return rew;
-}
-
 bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId,
         double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
 	bool isTerm;
@@ -534,7 +500,7 @@ bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId,
 //cerr << "GettingNxtState from " << sVals[0] << " " << sVals[1] << " act " << actId << endl;
 	*immediateRew = getReward(sVals, actId);
 //cerr << "imRew: " << *immediateRew << endl;
-	return (inGoal(nxtSVals) ? true : false);
+	return inGoal(nxtSVals);
 }
 
 void UnderwaterNavModifModel::setChanges(const char* chName,

@@ -101,13 +101,13 @@ class RockSampleModel : public Model {
         /**
          * There are only two possible observations - the rock
          * is either good or bad. Note that observations are
-         * only meaningful when the action taken was SAMPLE;
+         * only meaningful when the action taken was CHECK;
          * they are meaningless otherwise.
          */
         enum RockSampleObservation {
-            NONE = 0, // Indentical should be OK.
-            GOOD = 0,
-            BAD = 1
+            NONE = 0,
+            BAD = 1,
+            GOOD = 2
         };
 
         /**

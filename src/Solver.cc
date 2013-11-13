@@ -303,7 +303,7 @@ cerr << "Enter getNNEMD ";
 //cerr << "new tNNComp: " << b->tNNComp << endl;
 	b->nnBel = nnBel;
 cerr << "Done getNNEMD ";
-	if (minDist > model->distTh) { return NULL; }
+	if (minDist > model->getDistTh()) { return NULL; }
 	return nnBel;
 }
 */
@@ -1037,12 +1037,18 @@ void Solver::updateVal(HistorySeq *histSeq) {
 
 void Solver::improveSol(BeliefNode* startNode, long maxTrials, double depthTh) {
 	double disc = model->getDiscount();
+	vector<HistoryEntry*> samples;
 	for (long i = 0; i < maxTrials; i++) {
-		singleSearch(startNode, disc, depthTh);
-	}
+	    samples.push_back(startNode->sampleAParticle());
+    }
+    for (vector<HistoryEntry*>::iterator it = samples.begin();
+            it != samples.end(); it++) {
+        singleSearch(startNode, disc, depthTh, *it);
+    }
 }
 
-void Solver::singleSearch(BeliefNode *startNode, double discount, double depthTh) {
+void Solver::singleSearch(BeliefNode *startNode, double discount,
+        double depthTh, HistoryEntry* startParticle) {
 	HistorySeq *currHistSeq;
 	long actIdx;
 	double immediateRew;
@@ -1054,11 +1060,11 @@ void Solver::singleSearch(BeliefNode *startNode, double discount, double depthTh
 //cerr << "#part in startNode: " << startNode->nParticles << " " << initStartVal << endl;
 	BeliefNode *currNode = startNode;
 	BeliefNode *nxtNode;
-	HistoryEntry *tmpHistEntry = currNode->sampleAParticle();
-	HistoryEntry *currHistEntry = new HistoryEntry(tmpHistEntry->st, 0);
+	HistoryEntry *currHistEntry = new HistoryEntry(startParticle->st, 0);
 	currHistEntry->partOfBelNode = currNode;
 	currNode->add(currHistEntry);
-	long startDepth = allHistories->allHistSeq[tmpHistEntry->seqId]->startDepth + tmpHistEntry->entryId;
+	long startDepth = allHistories->allHistSeq[startParticle->seqId]->startDepth
+	    + startParticle->entryId;
 	double currDiscFactor = pow(discount, startDepth);
 	currHistEntry->disc = currDiscFactor;
 	currHistSeq = new HistorySeq(currHistEntry, startDepth);

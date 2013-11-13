@@ -105,9 +105,9 @@ void RockSampleModel::initialise() {
 	for (int val = 0; val < nInitBel; val++) {
 	    for (int j = 0; j < nRocks; j++) {
 	        if (val & (1 << j)) {
-	            s[j+2] = 1;
+	            s[j+2] = GOOD;
             } else {
-	            s[j+2] = 0;
+	            s[j+2] = BAD;
             }
         }
         initBel.push_back(s);
@@ -210,9 +210,9 @@ RockSampleObservation RockSampleModel::makeObs(StateVals &sVals, long actId) {
     double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance)) * 0.5;
 	double tmp = GlobalResources::randGen.ranf_arr_next();
 	if (tmp <= efficiency) {
-	    return sVals[2+rockNo] == 1 ? GOOD : BAD; // Correct obs.
+	    return sVals[2+rockNo] == GOOD ? GOOD : BAD; // Correct obs.
 	} else {
-	    return sVals[2+rockNo] == 1 ? BAD : GOOD; // Incorrect obs.
+	    return sVals[2+rockNo] == GOOD ? BAD : GOOD; // Incorrect obs.
     }
 }
 
@@ -271,6 +271,42 @@ double RockSampleModel::getReward(StateVals &sVals, long actId) {
 
 void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt) {
+    // If it's a CHECK action, we condition on the observation.
+    if (actId >= CHECK) {
+        int rockNo = actId - CHECK;
+        Coords pos(sVals[0], sVals[1]);
+        double dist = pos.distance(rockCoords[rockNo]);
+        double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance)) * 0.5;
+        std::map<StateVals, double> weights;
+        double weightTotal = 0;
+        for (std::vector<StateVals>::iterator it = partSt.begin();
+                it != partSt.end(); it++) {
+            int rockState = *it[2+rockNo];
+            double probabilityFactor = 2 * (rockState == obs[0] ? efficiency :
+                    1 - efficiency);
+            weights[*it] += probabilityFactor;
+            weightTotal += probabilityFactor;
+        }
+        double scale = nParticles / weightTotal;
+        for (std::map<StateVals, double>::iterator it = weights.begin();
+                it != weights.end(); it++) {
+            double proportion = *it.second * scale;
+            int numToAdd = floor(proportion);
+            double tmp = GlobalResources::randGen.ranf_arr_next();
+            if (tmp <= (proportion - numToAdd)) {
+                numToAdd += 1;
+            }
+            partNxtSt.insert(partNxtSt.end(), numToAdd, *it.first);
+        }
+    } else {
+        // It's not a CHECK action, so we just add each resultant state.
+        for (std::vector<StateVals>::iterator it = partSt.begin();
+                it != partSt.end(); it++) {
+            StateVals nextState;
+            makeNextState(*it, actId, nextState);
+            partNxtSt.push_back(nextState);
+        }
+    }
 }
 
 void RockSampleModel::getStatesSeeObs(ObsVals &obs,
@@ -278,7 +314,7 @@ void RockSampleModel::getStatesSeeObs(ObsVals &obs,
 }
 
 
-void RockSampleModel::setChanges(const char* chName, 
+void RockSampleModel::setChanges(const char* chName,
         std::vector<long> &chTime) {
 }
 

@@ -20,30 +20,30 @@ class UnderwaterNavModifModel : public Model {
 
 		/***** Start implementation of Model's virtual functions *****/
 		void sampleAnInitState(StateVals& tmpStVals);
-		bool getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals,
-		        ObsVals &obs);
+		bool isTerm(StateVals &sVals);
 		void solveHeuristic(StateVals &s, double *qVal);
-		double getReward(StateVals &sVals);
-		double getReward(StateVals &sVals, long actId);
-		double getNextStateNRew(StateVals &currStVals, long actId, ObsVals &obs,
-		        bool &isTerm);
+		double getDefaultVal();
+
 		bool getNextState(StateVals &currStVals, long actIdx,
 		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
-		void setChanges(const char* chName, std::vector<long> &chTime);
-		void update(long tCh, std::vector<StateVals> &affectedRange,
-		        std::vector<ChType> &typeOfChanges);
-		double getDefaultVal();
+		double getReward(StateVals &sVals);
+		double getReward(StateVals &sVals, long actId);
+
 		void getStatesSeeObs(long actId, ObsVals &obs,
 		        std::vector<StateVals> &partSt,
 		        std::map<int, StateVals> &partNxtSt);
 		void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt);
-		bool isTerm(StateVals &sVals);
+
+		void setChanges(const char* chName, std::vector<long> &chTime);
+		void update(long tCh, std::vector<StateVals> &affectedRange,
+		        std::vector<ChType> &typeOfChanges);
 		bool modifStSeq(std::vector<StateVals> &seqStVals,
 		        long startAffectedIdx, long endAffectedIdx,
 				std::vector<StateVals> &modifStSeq,
 				std::vector<long> &modifActSeq,
 				std::vector<ObsVals> &modifObsSeq,
 				std::vector<double> &modifRewSeq);
+
 		void drawEnv(std::ostream &os);
 
 		// Additional initialisation.

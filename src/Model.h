@@ -39,19 +39,39 @@ class Model {
         // minVal, maxVal
 
         // Problem parameters
+        /** Returns the POMDP discount factor. */
 		inline double getDiscount() { return discount; }
+		/** Returns the # of actions for this POMDP. */
 		inline long getNActions() { return nActions; }
+		/** Returns the # of observations for this POMDP. */
 		inline long getNObservations() { return nObservations; }
+		/** Returns the number of state variables for this PODMP. */
 		inline long getNStVars() { return nStVars; }
 
         // SBT parameters
+        /** Returns the maximum number of particles */
 		inline long getNParticles() { return nParticles; }
+        /** Returns the maximum number of trials to run. */
 		inline long getMaxTrials() { return maxTrials; }
-		inline long getMaxDistTry() { return maxDistTry; }
+		/** Returns the maximum depth. */
 		inline double getDepthTh() { return depthTh; }
+		/** Returns the exploration coefficient used for rollouts.
+		 * ??
+		 */
 		inline double getExploreCoef() { return exploreCoef; }
+
+		/** Returns a lower bound on the q-value. */
 		inline double getMinVal() { return minVal; }
+		/** Returns an upper bound on the q-value. */
 		inline double getMaxVal() { return maxVal; }
+
+        /** Returns the maximum number of nodes to check when searching
+         * for a nearest-neighbour belief node.
+         */
+		inline long getMaxDistTry() { return maxDistTry; }
+		/** Returns the smallest allowable distance when searching for
+		 * a nearest-neighbour belief node.
+		 */
 		inline double getDistTh() { return distTh; }
 
 
@@ -59,21 +79,23 @@ class Model {
 
 		/** Samples an initial state from the belief vector. */
 		virtual void sampleAnInitState(StateVals& tmpStVals)=0;
+		/** Returns true iff the given state is terminal. */
 		virtual bool isTerm(StateVals &sVals)=0;
 		/** Approximates the q-value of a state */
 		virtual void solveHeuristic(StateVals &sVals, double *qVal)=0;
+		/** Returns the default reward */
 		virtual double getDefaultVal()=0;
 
-		virtual bool getNextState(StateVals &sVals, long actId,
-		        StateVals &nxtSVals, ObsVals &obs)=0;
+		/** Generates the next state, an observation, and the reward. */
 		virtual bool getNextState(StateVals &sVals, long actId,
 		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs)=0;
-		virtual double getNextStateNRew(StateVals &sVals, long actId,
-		        ObsVals &obs, bool &isTerm)=0;
+		/** Returns the reward for the given state. */
 		virtual double getReward(StateVals &sVals)=0;
+		/** Returns the reward for the given state and action. */
 		virtual double getReward(StateVals &sVals, long actId)=0;
 
-
+        /** Creates a new belief node based on the state particles of the
+         * previous node, and 
 		virtual void getStatesSeeObs(long actId, ObsVals &obs,
 		        std::vector<StateVals> &partSt,
 		        std::map<int, StateVals> &partNxtSt)=0;
@@ -95,31 +117,20 @@ class Model {
 
     protected:
         // Problem parameters.
-        /** The discount factor for the POMDP. */
         double discount;
-        /** The number of possible actions. */
         long nActions;
-        /** The number of possible observations. */
         long nObservations;
-        /** The number of state variables. */
         long nStVars;
 
         // SBT parameters
-        /** The number of particles per belief. */
         long nParticles;
-        /** ?? */
         long maxTrials;
-        /** ?? */
-        long maxDistTry;
-        /** ?? */
         double depthTh;
-        /** ?? */
         double exploreCoef;
-        /** ?? */
         double minVal;
-        /** ?? */
         double maxVal;
-        /** ?? */
+
+        long maxDistTry;
         double distTh;
 };
 

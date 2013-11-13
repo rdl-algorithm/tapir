@@ -38,7 +38,8 @@ class Solver {
 
 
 		void singleSearch(double discount, double depthTh);
-		void singleSearch(BeliefNode *startNode, double discount, double depthTh);
+		void singleSearch(BeliefNode *startNode, double discount,
+		        double depthTh, HistoryEntry* startParticle);
 		long getRolloutAct(BeliefNode *belNode, StateVals &s, double startDisc, double disc, StateVals &nxtSVals, ObsVals &obs, double *immediateRew, double *qVal);
 		double rolloutPolHelper(BeliefNode *currNode, StateVals &s, double disc);
 		//BeliefNode* getNNBelNodeEMD(BeliefNode *b);
