@@ -290,13 +290,13 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
         double scale = nParticles / weightTotal;
         for (std::map<StateVals, double>::iterator it = weights.begin();
                 it != weights.end(); it++) {
-            double proportion = *it.second * scale;
+            double proportion = it->second * scale;
             int numToAdd = floor(proportion);
             double tmp = GlobalResources::randGen.ranf_arr_next();
             if (tmp <= (proportion - numToAdd)) {
                 numToAdd += 1;
             }
-            partNxtSt.insert(partNxtSt.end(), numToAdd, *it.first);
+            partNxtSt.insert(partNxtSt.end(), numToAdd, it->first);
         }
     } else {
         // It's not a CHECK action, so we just add each resultant state.

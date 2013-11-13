@@ -741,22 +741,6 @@ vector<StateVals>::iterator UnderwaterNavModifModel::getIterator(
 	return vecStVals.end();
 }
 
-void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
-        vector<StateVals> &partSt, map<int, StateVals> &partNxtSt) {
-	vector<StateVals>::iterator itSt, itReachSt;
-	long idx = 0;
-	for (itSt = partSt.begin(); itSt != partSt.end(); itSt++, idx++) {
-		vector<StateVals> nxtSt;
-		getReachableSt(*itSt, actId, nxtSt);
-		for (itReachSt = nxtSt.begin(); itReachSt != nxtSt.end(); itReachSt++) {
-			if ((*itReachSt)[0] == obs[0] && (*itReachSt)[1] == obs[1]) {
-				partNxtSt[idx] = *itReachSt;
-				break;
-			}
-		}
-	}
-}
-
 void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId,
         vector<StateVals> &nxtS) {
 	nxtS.clear();
@@ -799,11 +783,26 @@ void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId,
 	}
 }
 
-void UnderwaterNavModifModel::getStatesSeeObs(ObsVals &obs,
-        vector<StateVals> &posNxtSt) {
+void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
+        vector<StateVals> &partSt, vector<StateVals> &partNxtSt) {
+	vector<StateVals>::iterator itSt, itReachSt;
+	for (itSt = partSt.begin(); itSt != partSt.end(); itSt++) {
+		vector<StateVals> nxtSt;
+		getReachableSt(*itSt, actId, nxtSt);
+		for (itReachSt = nxtSt.begin(); itReachSt != nxtSt.end(); itReachSt++) {
+			if ((*itReachSt)[0] == obs[0] && (*itReachSt)[1] == obs[1]) {
+				partNxtSt.push_back(*itReachSt);
+				break;
+			}
+		}
+	}
+}
+
+void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
+        vector<StateVals> &partNxtSt) {
 	StateVals s(2);
 	s[0] = obs[0]; s[1] = obs[1];
-	posNxtSt.push_back(s);
+	partNxtSt.push_back(s);
 }
 
 int UnderwaterNavModifModel::findCollision(StateVals &s) {

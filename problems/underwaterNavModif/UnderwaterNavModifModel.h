@@ -31,8 +31,9 @@ class UnderwaterNavModifModel : public Model {
 
 		void getStatesSeeObs(long actId, ObsVals &obs,
 		        std::vector<StateVals> &partSt,
-		        std::map<int, StateVals> &partNxtSt);
-		void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt);
+		        std::vector<StateVals> &partNxtSt);
+		void getStatesSeeObs(long actId, ObsVals &obs,
+		        std::vector<StateVals> &partNxtSt);
 
 		void setChanges(const char* chName, std::vector<long> &chTime);
 		void update(long tCh, std::vector<StateVals> &affectedRange,

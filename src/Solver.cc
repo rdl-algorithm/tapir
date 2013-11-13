@@ -518,85 +518,59 @@ cerr << endl;
 }
 
 // To handle particle depletion.
-BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs, long timeStep) {
-cerr << "In add particle due to depletion\n";
+BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs,
+        long timeStep) {
+    cerr << "In add particle due to depletion" << endl;
 	BeliefNode *nxtNode = NULL;
 
 	vector<StateVals> partSt;
 	vector<HistoryEntry*>::iterator it;
-	for (it = currNode->particles.begin(); it != currNode->particles.end(); it++) {
+	for (it = currNode->particles.begin(); it != currNode->particles.end();
+	        it++) {
 		partSt.push_back((*it)->st->s);
 	}
 
-	map<int, StateVals> partNxtSt;
-	model->getStatesSeeObs(actId, obs, partSt, partNxtSt);
 	double disc = model->getDiscount();
 	double d = pow(disc, timeStep);
+	// Attempt to generate particles for next state based on the current belief,
+	// the observation, and the action.
+    vector<StateVals> partNxtSt;
+	model->getStatesSeeObs(actId, obs, partSt, partNxtSt);
+	if (partNxtSt.empty()) {
+	    // If that fails, ignore the current belief.
+	    model->getStatesSeeObs(actId, obs, partNxtSt);
+    }
+    if (partNxtSt.empty()) {
+        cerr << "Could not generate new particles!" << endl;
+    }
 
-	if (partNxtSt.empty()) {	// Create new particles for next node, based on observation alone.
-		vector<StateVals> posNxtSt;
-		model->getStatesSeeObs(obs, posNxtSt);
-		if (!posNxtSt.empty()) {
-			nxtNode = currNode->addChild(actId, obs);
-			//nxtNode->setEMDSig(model->nParticles, model->nStVars);
-			policy->allNodes.push_back(nxtNode);
-			vector<StateVals>::iterator itSt;
-			State *st;
-			HistoryEntry *histEntry;
-			HistorySeq *histSeq;
+    nxtNode = currNode->addChild(actId, obs);
+    policy->allNodes.push_back(nxtNode);
 
-			for (itSt = posNxtSt.begin(); itSt != posNxtSt.end(); itSt++) {
-				st = allStates->add(*itSt);
-				histEntry = new HistoryEntry(st, 0);
-				histSeq = new HistorySeq(histEntry, timeStep);
-				nxtNode->add(histEntry);
-				histEntry->partOfBelNode = nxtNode;
-				allHistories->add(histSeq);
+    State *st;
+    HistoryEntry *histEntry;
+    HistorySeq *histSeq;
+    for (vector<StateVals>::iterator itSt = partNxtSt.begin();
+            itSt != partNxtSt.end(); itSt++) {
+        st = allStates->add(*itSt);
+        histEntry = new HistoryEntry(st, 0);
+        histSeq = new HistorySeq(histEntry, timeStep);
+        nxtNode->add(histEntry);
+        histEntry->partOfBelNode = nxtNode;
+        allHistories->add(histSeq);
 
-				// Assign value to the new history entry
-				histEntry->rew = model->getReward(*itSt);
-				histEntry->disc = d;
-				if (model->isTerm(*itSt)) {
-					histEntry->qVal = d*histEntry->rew;
-				}
-				else {
-					histEntry->qVal = d*(histEntry->rew + disc*model->getDefaultVal());
-				}
+        // Assign value to the new history entry
+        histEntry->rew = model->getReward(*itSt);
+        histEntry->disc = d;
+        if (model->isTerm(*itSt)) {
+                histEntry->qVal = d*histEntry->rew;
+            }
+        else {
+            histEntry->qVal = d*(histEntry->rew + disc*model->getDefaultVal());
+        }
 
-				backup(histSeq);
-			}
-		}
+        backup(histSeq);
 	}
-	else {		// Continue history entry.
-		nxtNode = currNode->addChild(actId, obs);
-		//nxtNode->setEMDSig(model->nParticles, model->nStVars);
-		policy->allNodes.push_back(nxtNode);
-		State *st;
-		HistoryEntry *histEntry;
-		HistorySeq *histSeq;
-		map<int, StateVals>::iterator itNxtSt;
-		for (itNxtSt = partNxtSt.begin(); itNxtSt != partNxtSt.end(); itNxtSt++) {
-			histEntry = currNode->particles[itNxtSt->first];
-			histSeq = allHistories->allHistSeq[histEntry->seqId];
-			State *st = allStates->add(itNxtSt->second);
-			histEntry = histSeq->addEntry(actId, obs, st);
-			histEntry->partOfBelNode = nxtNode;
-			nxtNode->add(histEntry);
-
-			// Assign value to the new history entry
-			histEntry->rew = model->getReward(itNxtSt->second);
-			histEntry->disc = d;
-			if (model->isTerm(itNxtSt->second)) {
-				histEntry->qVal = d*histEntry->rew;
-			}
-			else {
-				histEntry->qVal = d*(histEntry->rew + disc*model->getDefaultVal());
-			}
-
-			backup(histSeq);
-		}
-	}
-
 	return nxtNode;
 }
 

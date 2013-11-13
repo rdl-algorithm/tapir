@@ -95,15 +95,24 @@ class Model {
 		virtual double getReward(StateVals &sVals, long actId)=0;
 
         /** Creates a new belief node based on the state particles of the
-         * previous node, and 
+         * previous node, as well as on the action and observation.
+         */
 		virtual void getStatesSeeObs(long actId, ObsVals &obs,
 		        std::vector<StateVals> &partSt,
-		        std::map<int, StateVals> &partNxtSt)=0;
-		virtual void getStatesSeeObs(ObsVals &obs,
-		        std::vector<StateVals> &posNxtSt)=0;
+		        std::vector<StateVals> &partNxtSt)=0;
+        /** Creates a new belief node based only on the previous action and
+         * observation, assuming a poorly-informed prior over previous states.
+         *
+         * This should only be used if the previous belief turns out to be
+         * incompatible with the current observation.
+         */
+		virtual void getStatesSeeObs(long actId, ObsVals &obs,
+		        std::vector<StateVals> &partNxtSt)=0;
 
+        /** Loads model changes from the given file. */
 		virtual void setChanges(const char* chName,
 		        std::vector<long> &chTime)=0;
+		/** Retrieves the states that are affected*/
 		virtual void update(long tCh, std::vector<StateVals> &affectedRange,
 		        std::vector<ChType> &typeOfChanges)=0;
 		virtual bool modifStSeq(std::vector<StateVals> &seqStVals,
