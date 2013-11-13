@@ -38,9 +38,8 @@ RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
     halfEfficiencyDistance = vm["problem.halfEfficiencyDistance"].as<double>();
 	initialise();
 
-	cout << "Constructed the RockSampleModel" << endl;
-
     /*
+	cout << "Constructed the RockSampleModel" << endl;
 	cout << "Discount: " << discount << endl;
 	cout << "Size: " << nRows << " by " << nCols << endl;
 	cout << "Start: " << startPos.i << " " << startPos.j << endl;
@@ -78,7 +77,7 @@ void RockSampleModel::initialise() {
 	    envMap.emplace_back();
 		for (p.j = 0; p.j < nCols; p.j++) {
 		    char c = mapText[p.i][p.j];
-		    int cellType;
+		    long cellType;
 		    if (c == 'o') {
 		        rockCoords.push_back(p);
 		        cellType = ROCK + nRocks;
@@ -91,7 +90,7 @@ void RockSampleModel::initialise() {
             } else {
                 cellType = EMPTY;
             }
-            envMap[i].push_back(cellType);
+            envMap.back().push_back(cellType);
         }
 	}
 
@@ -151,19 +150,20 @@ void RockSampleModel::solveHeuristic(StateVals &s, double *qVal) {
             }
         }
         currentDiscount *= std::pow(discount, lowestDist);
-        qVal += currentDiscount * goodRockReward;
+        *qVal += currentDiscount * goodRockReward;
         goodRocks.erase(bestRock);
         currentPos = rockCoords[bestRock];
     }
     currentDiscount *= std::pow(discount, nCols - currentPos.j);
-    qVal += currentDiscount * exitReward;
+    *qVal += currentDiscount * exitReward;
 }
 
 double RockSampleModel::getDefaultVal() {
 	return minVal;
 }
 
-bool makeNextState(StateVals &sVals, long actId, StateVals &nxtSVals) {
+bool RockSampleModel::makeNextState(StateVals &sVals, long actId,
+        StateVals &nxtSVals) {
     nxtSVals = sVals;
     switch(actId) {
         case NORTH:
@@ -189,13 +189,13 @@ bool makeNextState(StateVals &sVals, long actId, StateVals &nxtSVals) {
     // Check all boundaries.
     if (nxtSVals[0] < 0 || nxtSVals[0] >= nRows || nxtSVals[1] < 0 ||
             nxtSVals[1] >= nCols) {
-        nxtSVals = s;
+        nxtSVals = sVals;
         return false;
     }
     return true;
 }
 
-RockSampleObservation RockSampleModel::makeObs(StateVals &sVals, long actId) {
+int RockSampleModel::makeObs(StateVals &sVals, long actId) {
     switch(actId) {
         case NORTH:
         case EAST:
@@ -216,29 +216,14 @@ RockSampleObservation RockSampleModel::makeObs(StateVals &sVals, long actId) {
     }
 }
 
-
-bool RockSampleModel::getNextState(StateVals &sVals, long actId,
-        StateVals &nxtSVals, ObsVals &obs) {
-    double reward;
-    return getNextState(sVals, actId, reward, nxtSvals, obs);
-}
-
 bool RockSampleModel::getNextState(StateVals &sVals, long actId,
         double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
+    cout << actId << endl;
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
     obs.resize(1);
     obs[0] = makeObs(sVals, actId);
     return isTerm(nxtSVals);
-}
-
-double RockSampleModel::getNextStateNRew(StateVals &sVals, long actId,
-        ObsVals &obs, bool &isTerm) {
-    double reward;
-    StateVals nxtSVals;
-    isTerm = getNextState(sVals, actId, reward, nxtSvals, obs);
-    sVals = nxtSVals;
-    return reward;
 }
 
 double RockSampleModel::getReward(StateVals &sVals) {
@@ -270,18 +255,20 @@ double RockSampleModel::getReward(StateVals &sVals, long actId) {
 
 
 void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
-        std::vector<StateVals> &partSt, std::map<int, StateVals> &partNxtSt) {
+        std::vector<StateVals> &partSt,
+        std::vector<StateVals> &partNxtSt) {
     // If it's a CHECK action, we condition on the observation.
     if (actId >= CHECK) {
         int rockNo = actId - CHECK;
-        Coords pos(sVals[0], sVals[1]);
-        double dist = pos.distance(rockCoords[rockNo]);
-        double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance)) * 0.5;
         std::map<StateVals, double> weights;
         double weightTotal = 0;
         for (std::vector<StateVals>::iterator it = partSt.begin();
                 it != partSt.end(); it++) {
-            int rockState = *it[2+rockNo];
+            Coords pos((*it)[0], (*it)[1]);
+            double dist = pos.distance(rockCoords[rockNo]);
+            double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance))
+                * 0.5;
+            int rockState = (*it)[2+rockNo];
             double probabilityFactor = 2 * (rockState == obs[0] ? efficiency :
                     1 - efficiency);
             weights[*it] += probabilityFactor;
@@ -309,8 +296,19 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
     }
 }
 
-void RockSampleModel::getStatesSeeObs(ObsVals &obs,
-        std::vector<StateVals> &posNxtSt) {
+void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
+        std::vector<StateVals> &partNxtSt) {
+    while (partNxtSt.size() < nParticles) {
+        StateVals state;
+        sampleAnInitState(state);
+        StateVals nextState;
+        ObsVals obs2;
+        double reward;
+        getNextState(state, actId, &reward, nextState, obs);
+        if (obs == obs2) {
+            partNxtSt.push_back(nextState);
+        }
+    }
 }
 
 

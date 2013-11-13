@@ -50,8 +50,12 @@ int main(int argc, const char* argv[]) {
             vm);
     po::notify(vm);
 
-    string polPath = vm["poicy"].as<string>();
-    string changesPath = vm["changes.changesPath"].as<string>();
+    string polPath = vm["policy"].as<string>();
+    bool hasChanges = vm["changes.hasChanges"].as<bool>();
+    string changesPath;
+    if (hasChanges) {
+        changesPath = vm["changes.changesPath"].as<string>();
+    }
     string logPath = vm["log"].as<string>();
     long nSteps = vm["simulation.nSteps"].as<long>();
     long nRuns = vm["simulation.nRuns"].as<long>();
@@ -69,7 +73,9 @@ int main(int argc, const char* argv[]) {
 	Solver* solver = new Solver(model, polPath.c_str(), policy, histories);
 
 	vector<long> modelCh;
-	model->setChanges(changesPath.c_str(), modelCh);
+	if (hasChanges) {
+    	model->setChanges(changesPath.c_str(), modelCh);
+    }
 	vector<StateVals> trajSt;
 	vector<long> trajActId;
 	vector<ObsVals> trajObs;

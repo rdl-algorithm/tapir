@@ -20,13 +20,55 @@ struct Coords {
     Coords() : i(0), j(0) {}
     Coords(long i, long j) : i(i), j(j) {}
 
-    double distance(Coords other) {
+    double distance(Coords& other) {
         return std::abs(i - other.i) + std::abs(j - other.j);
     }
 };
 
+inline bool operator==(const Coords& lhs, const Coords& rhs) {
+    return lhs.i == rhs.i && lhs.j == rhs.j;
+}
+
 class RockSampleModel : public Model {
 	public:
+        /**
+	     * Enumerates the possible actions. Note that there are actually
+	     * multiple check actions; Check-i is represented by CHECK+i,
+	     * where i is the rock number from 0..k-1 and k is the number
+	     * of rocks.
+	     */
+	    enum Action : int {
+	        NORTH=0,
+	        EAST=1,
+	        SOUTH=2,
+	        WEST=3,
+	        SAMPLE=4,
+	        CHECK=5
+        };
+
+        /**
+         * There are only two possible observations - the rock
+         * is either good or bad. Note that observations are
+         * only meaningful when the action taken was CHECK;
+         * they are meaningless otherwise.
+         */
+        enum Obs : int {
+            NONE = 0,
+            BAD = 1,
+            GOOD = 2
+        };
+
+        /**
+         * Rocks are enumerated 0, 1, 2, ... ;
+         * other cell types should be negative.
+         */
+        enum CellType : int {
+            ROCK = 0,
+            EMPTY = -1,
+            GOAL = -2,
+        };
+
+
 		RockSampleModel(po::variables_map vm);
 		~RockSampleModel();
 
@@ -37,19 +79,16 @@ class RockSampleModel : public Model {
 		void solveHeuristic(StateVals &s, double *qVal);
 		double getDefaultVal();
 
-		bool getNextState(StateVals &sVals, long actIdx, StateVals &nxtSVals,
-		        ObsVals &obs);
 		bool getNextState(StateVals &sVals, long actIdx,
 		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
-		double getNextStateNRew(StateVals &sVals, long actId, ObsVals &obs,
-		        bool &isTerm);
 		double getReward(StateVals &sVals);
 		double getReward(StateVals &sVals, long actId);
 
 		void getStatesSeeObs(long actId, ObsVals &obs,
 		        std::vector<StateVals> &partSt,
-		        std::map<int, StateVals> &partNxtSt);
-		void getStatesSeeObs(ObsVals &obs, std::vector<StateVals> &posNxtSt);
+		        std::vector<StateVals> &partNxtSt);
+		void getStatesSeeObs(long actId, ObsVals &obs,
+		        std::vector<StateVals> &partNxtSt);
 
 		void setChanges(const char* chName, std::vector<long> &chTime);
 		void update(long tCh, std::vector<StateVals> &affectedRange,
@@ -81,44 +120,8 @@ class RockSampleModel : public Model {
          */
         bool makeNextState(StateVals &sVals, long actId, StateVals &nxtSVals);
         /** Generates an observation given a current state and action. */
-        RockSampleObservation makeObs(StateVals &sVals, long actId);
+        int makeObs(StateVals &sVals, long actId);
 
-	    /**
-	     * Enumerates the possible actions. Note that there are actually
-	     * multiple check actions; Check-i is represented by CHECK+i,
-	     * where i is the rock number from 0..k-1 and k is the number
-	     * of rocks.
-	     */
-	    enum RockSampleAction {
-	        NORTH=0,
-	        EAST=1,
-	        SOUTH=2,
-	        WEST=3,
-	        SAMPLE=4,
-	        CHECK=5
-        };
-
-        /**
-         * There are only two possible observations - the rock
-         * is either good or bad. Note that observations are
-         * only meaningful when the action taken was CHECK;
-         * they are meaningless otherwise.
-         */
-        enum RockSampleObservation {
-            NONE = 0,
-            BAD = 1,
-            GOOD = 2
-        };
-
-        /**
-         * Rocks are enumerated 0, 1, 2, ... ;
-         * other cell types should be negative.
-         */
-        enum CellType {
-            ROCK = 0,
-            EMPTY = -1,
-            GOAL = -2,
-        };
 
         /** The number of rows in the map. */
         long nRows;
@@ -147,7 +150,7 @@ class RockSampleModel : public Model {
         std::vector<std::string> mapText;
 
         /** The environment map in vector form. */
-        std::vector<std::vector<int>> envMap;
+        std::vector<std::vector<int> > envMap;
 };
 
 #endif

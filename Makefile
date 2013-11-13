@@ -6,20 +6,14 @@
 #
 # root directory of the package
 #
-ROOT = ../..
-PROBLEM = .
+ROOT = .
 
 #
 # directories
 #
-DESTDIR = .
-PL_SRCDIR = $(ROOT)/src
-PL_OBJDIR = $(ROOT)/obj
-PL_DEPDIR = $(ROOT)/dep
-PR_SRCDIR = $(PROBLEM)
-PR_OBJDIR = $(PROBLEM)/obj
-PR_DEPDIR = $(PROBLEM)/dep
-
+SRCDIR = $(ROOT)/src
+OBJDIR = $(ROOT)/obj
+DEPDIR = $(ROOT)/dep
 
 # ----------------------------------------------------------------------
 # Compiler & linker
@@ -37,7 +31,7 @@ CXXFLAGS = -std=c++11 -DDISTL1 $(INCDIRS)
 DEBUG_FLAGS = -DDEBUG -g -O0
 RELEASE_FLAGS = -frounding-math -O3
 
-INCDIRS = -I$(PL_SRCDIR) -I$(PR_SRCDIR)
+INCDIRS = -I$(SRCDIR)
 
 #---------------------------------------------------------------------#
 # Linker flags

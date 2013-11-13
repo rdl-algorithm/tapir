@@ -47,9 +47,9 @@ int main(int argc, const char* argv[]) {
     long seed = vm["seed"].as<long>();
     cerr << "Seed: " << seed << endl;
 	GlobalResources::randGen.ranf_start(seed);
+    GlobalResources::randGen.ranf_arr_next();
 
 	Model* model = new RockSampleModel(vm);
-	/*
 	BeliefNode::maxParticles = model->getNParticles();
 	BeliefNode::nStVars = model->getNStVars();
 	BeliefTree* policy = new BeliefTree();
@@ -72,6 +72,5 @@ int main(int argc, const char* argv[]) {
 	delete solver;
 	delete histories;
 	delete policy;
-	*/
 	delete model;
 }
