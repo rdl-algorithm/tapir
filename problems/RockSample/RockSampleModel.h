@@ -46,6 +46,30 @@ class RockSampleModel : public Model {
 	        CHECK=5
         };
 
+        void dispAct(int actId, std::ostream& os) {
+            if (actId >= CHECK) {
+                os << "CHECK-" << actId-CHECK;
+                return;
+            }
+            switch(actID) {
+                case NORTH:
+                    os << "NORTH";
+                    break;
+                case EAST:
+                    os << "EAST";
+                    break;
+                case SOUTH:
+                    os << "SOUTH";
+                    break;
+                case WEST:
+                    os << "WEST";
+                    break;
+                case SAMPLE:
+                    os << "SAMPLE";
+                    break;
+            }
+        }
+
         /**
          * There are only two possible observations - the rock
          * is either good or bad. Note that observations are
@@ -67,6 +91,22 @@ class RockSampleModel : public Model {
             EMPTY = -1,
             GOAL = -2,
         };
+
+        void dispCell(int cellType, ostream& os) {
+            if (cellType >= ROCK) {
+                os << std::hex << cellType - ROCK;
+                return;
+            }
+            switch(cellType) {
+                case EMPTY:
+                    os << '.';
+                    break;
+                case GOAL:
+                    os << 'G';
+                    break;
+            }
+        }
+
 
 
 		RockSampleModel(po::variables_map vm);

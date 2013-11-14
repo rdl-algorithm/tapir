@@ -122,6 +122,7 @@ class Model {
 				std::vector<ObsVals> &modifObsSeq,
 				std::vector<double> &modifRewSeq)=0;
 
+        virtual void dispAct(int actId, std::ostream& os)=0;
 		virtual void drawEnv(std::ostream &os)=0;
 
     protected:

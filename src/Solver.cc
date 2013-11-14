@@ -603,6 +603,16 @@ bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals, BeliefNode **
 		*nxtNode = (*startNode)->getChild(actId, obs);
 //cerr << "#particles: " << (*nxtNode)->nParticles << endl;
 	}
+	cout << "Action: ";
+	model->dispAct(actId, cout);
+	cout << endl<< "Reward: " << *rew << endl;
+	cout << "State: ";
+	for (vector<double>::iterator it = nxtStVals.begin();
+	        it != nxtStVals.end(); it++) {
+        cout << *it << " ";
+    }
+    cout << endl;
+
 	return isTerm;
 }
 

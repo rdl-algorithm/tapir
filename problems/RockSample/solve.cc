@@ -50,6 +50,7 @@ int main(int argc, const char* argv[]) {
     GlobalResources::randGen.ranf_arr_next();
 
 	Model* model = new RockSampleModel(vm);
+	model->drawEnv(cout);
 	BeliefNode::maxParticles = model->getNParticles();
 	BeliefNode::nStVars = model->getNStVars();
 	BeliefTree* policy = new BeliefTree();
