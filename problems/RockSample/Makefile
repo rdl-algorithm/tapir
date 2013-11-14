@@ -15,10 +15,9 @@ PROBLEM = .
 DESTDIR = .
 PL_SRCDIR = $(ROOT)/src
 PL_OBJDIR = $(ROOT)/obj
-PL_DEPDIR = $(ROOT)/dep
 PR_SRCDIR = $(PROBLEM)
 PR_OBJDIR = $(PROBLEM)/obj
-PR_DEPDIR = $(PROBLEM)/dep
+DEPDIR = $(PROBLEM)/dep
 
 
 # ----------------------------------------------------------------------
@@ -54,12 +53,12 @@ LDFLAGS = -g -w -lboost_program_options
 PL_SRCS = $(wildcard $(PL_SRCDIR)/*.cc)
 PL_HDRS = $(wildcard $(PL_SRCDIR)/*.h)
 PL_OBJS  = $(patsubst $(PL_SRCDIR)/%.cc,$(PL_OBJDIR)/%.o, $(PL_SRCS))
-PL_DEPS  = $(patsubst $(PL_SRCDIR)/%.cc,$(PL_DEPDIR)/%.d, $(PL_SRCS))
+PL_DEPS  = $(patsubst $(PL_SRCDIR)/%.cc,$(DEPDIR)/%.dep, $(PL_SRCS))
 
 PR_SRCS = $(PR_SRCDIR)/RockSampleModel.cc
 PR_HDRS = $(PR_SRCDIR)/RockSampleModel.h $(PR_SRCDIR)/options.h
 PR_OBJS  = $(patsubst $(PR_SRCDIR)/%.cc,$(PR_OBJDIR)/%.o, $(PR_SRCS))
-PR_DEPS  = $(patsubst $(PR_SRCDIR)/%.cc,$(PR_DEPDIR)/%.d, $(PR_SRCS))
+PR_DEPS  = $(patsubst $(PR_SRCDIR)/%.cc,$(DEPDIR)/%.dep, $(PR_SRCS))
 
 TARGET_SOLVER = $(DESTDIR)/solve
 SRC_SOLVER = $(PR_SRCDIR)/solve.cc
@@ -72,7 +71,7 @@ OBJ_SIMULATOR = $(PR_OBJDIR)/simulate.o
 SRCS = $(PL_SRCS) $(PR_SRCS)
 HDRS = $(PL_HDRS) $(PR_HDRS)
 OBJS = $(PL_OBJS) $(PR_OBJS)
-DEPS = $(PL_DEPS) $(PR_DEPS) $(PR_DEPDIR)/solve.d $(PR_OBJDIR)/simulate.d
+DEPS = $(PL_DEPS) $(PR_DEPS) $(DEPDIR)/solve.dep $(DEPDIR)/simulate.dep
 
 # ----------------------------------------------------------------------
 # Targets
@@ -91,55 +90,22 @@ $(TARGET_SOLVER): $(OBJS) $(OBJ_SOLVER)
 $(TARGET_SIMULATOR): $(OBJS) $(OBJ_SIMULATOR)
 	$(LINKER) $(LIBPATH) $(OBJS) $(OBJ_SIMULATOR) $(LDFLAGS) -o $@
 
-$(PL_OBJS) :| $(PL_OBJDIR)
-$(PL_OBJDIR) :; mkdir $(PL_OBJDIR)
-$(PL_DEPS) :| $(PL_DEPDIR)
-$(PL_DEPDIR) :; mkdir $(PL_DEPDIR)
-$(PR_OBJS) :| $(PR_OBJDIR)
-$(PR_OBJDIR) :; mkdir $(PR_OBJDIR)
-$(PR_DEPS) :| $(PR_DEPDIR)
-$(PR_DEPDIR) :; mkdir $(PR_DEPDIR)
+$(PL_OBJS) :| $(PL_OBJDIR) $(DEPDIR)
+$(PR_OBJS) :| $(PR_OBJDIR) $(DEPDIR)
+$(DEPDIR) $(PL_OBJDIR) $(PR_OBJDIR) :; mkdir -p $@
 
-# Compile and generate dependency info
-# 1. Compile the .cpp file
-# 2. Generate dependency information, explicitly specifying the target name
-# 3. The final three lines do a little bit of sed magic. The following
-#    sub-items all correspond to the single sed command below:
-#    a. sed: Strip the target (everything before the colon)
-#    b. sed: Remove any continuation backslashes
-#    c. fmt -1: List words one per line
-#    d. sed: Strip leading spaces
-#    e. sed: Add trailing colons
 $(PL_OBJDIR)/%.o : $(PL_SRCDIR)/%.cc
-	$(CXX) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
-	$(CXX) -MM -MT $(PL_OBJDIR)/$*.o $(CXXFLAGS) $(INCDIRS) \
-		$(PL_SRCDIR)/$*.cc > $(PL_DEPDIR)/$*.d
-	@cp -f $(PL_DEPDIR)/$*.d $(PL_DEPDIR)/$*.d.tmp
-	@sed -e 's/.*://' -e 's/\\\\$$//' < $(PL_DEPDIR)/$*.d.tmp | fmt -1 | \
-		sed -e 's/^ *//' -e 's/$$/:/' >> $(PL_DEPDIR)/$*.d
-	@rm -f $(PL_DEPDIR)/$*.d.tmp
+	$(CXX) $(CXXFLAGS) -MD -MT $@ -c $< -o $@
+	@mv $(PL_OBJDIR)/$*.d $(DEPDIR)/$*.dep
 
 $(PR_OBJDIR)/%.o : $(PR_SRCDIR)/%.cc
-	$(CXX) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
-	$(CXX) -MM -MT $(PR_OBJDIR)/$*.o $(CXXFLAGS) $(INCDIRS) \
-		$(PR_SRCDIR)/$*.cc > $(PR_DEPDIR)/$*.d
-	@cp -f $(PR_DEPDIR)/$*.d $(PR_DEPDIR)/$*.d.tmp
-	@sed -e 's/.*://' -e 's/\\\\$$//' < $(PR_DEPDIR)/$*.d.tmp | fmt -1 | \
-		sed -e 's/^ *//' -e 's/$$/:/' >> $(PR_DEPDIR)/$*.d
-	@rm -f $(PR_DEPDIR)/$*.d.tmp
+	$(CXX) $(CXXFLAGS) -MD -MT $@ -c $< -o $@
+	@mv $(PR_OBJDIR)/$*.d $(DEPDIR)/$*.dep
 
 .PHONY: clean
 clean:
-	rm -f $(OBJS) $(OBJ_SOLVER) $(OBJ_SIMULATOR)
 	rm -f $(TARGET_SOLVER) $(TARGET_SIMULATOR)
-	rm -fd $(PL_OBJDIR) $(PR_OBJDIR)
-
-.PHONY: test
-test:
-	echo $(PR_SRCS)
-	echo $(PR_HDRS)
-	echo $(PR_OBJS)
-	echo $(PR_DEPS)
+	rm -rf $(PL_OBJDIR) $(PR_OBJDIR) $(DEPDIR)
 
 -include $(DEPS)
 

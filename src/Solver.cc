@@ -238,7 +238,7 @@ long Solver::getRolloutAct(BeliefNode *belNode, StateVals &s, double startDisc, 
 			}
 			else {
 //cerr << " YESPOL\n";
-				//actSelected = currNode->bestAct;
+				//actSelected = currNode->getBestAct();
 				actSelected = belNode->getNxtActToTry();
 				bool isTerm = model->getNextState(s, actSelected, immediateRew, nxtSVals, obs);
 				currNode = currNode->getChild(actSelected, obs);
@@ -258,18 +258,20 @@ long Solver::getRolloutAct(BeliefNode *belNode, StateVals &s, double startDisc, 
 }
 
 double Solver::rolloutPolHelper(BeliefNode *currNode, StateVals &s, double disc) {
-	if (currNode == NULL) {
+	if (currNode == NULL || currNode->nParticles == 0 ||
+	        currNode->actChildren.size() == 0) {
 		return 0.0;
 	}
 	StateVals nxtSVals;
 	ObsVals obs;
 	double immediateRew;
-	bool isTerm = model->getNextState(s, currNode->bestAct, &immediateRew, nxtSVals, obs);
-	currNode = currNode->getChild(currNode->bestAct, obs);
+	//cout << currNode->nParticles << " " << currNode->particles.size() << endl;
+	long actId = currNode->getBestAct();
+	bool isTerm = model->getNextState(s, actId, &immediateRew, nxtSVals, obs);
+	currNode = currNode->getChild(actId, obs);
 	if (isTerm) {
 		return immediateRew + disc*model->getReward(nxtSVals);
-	}
-	else {
+	} else {
 		return immediateRew + disc*rolloutPolHelper(currNode, nxtSVals, disc);
 	}
 }

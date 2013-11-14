@@ -218,7 +218,6 @@ int RockSampleModel::makeObs(StateVals &sVals, long actId) {
 
 bool RockSampleModel::getNextState(StateVals &sVals, long actId,
         double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
-    cout << actId << endl;
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
     obs.resize(1);

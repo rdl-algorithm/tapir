@@ -129,7 +129,6 @@ void UnderwaterNavModifModel::setInitObsGoal() {
 
 void UnderwaterNavModifModel::sampleAnInitState(StateVals& tmpStVals) {
 	double tmp = GlobalResources::randGen.ranf_arr_next();
-cerr << "RAND: " << tmp << endl;
 	long idx = (long) floor(tmp*(nInitBel-1));
 	tmpStVals = initBel[idx];
 //cerr << "sampled " << tmpStVals[0] << " " << tmpStVals[1] << endl;

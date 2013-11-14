@@ -99,7 +99,10 @@ long BeliefNode::getUCBAct() {
 }
 
 long BeliefNode::getBestAct() {
-if (actChildren.size() == 0) { cerr << "DANGER\n"; }
+    if (actChildren.size() == 0) {
+        cerr << "DANGER" << endl;
+        return -1;
+    }
 	map<long, Action*>::iterator itAct = actChildren.begin();
 	double bestQVal = itAct->second->avgQVal;
 	long bestActId = itAct->first;
