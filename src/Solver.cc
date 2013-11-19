@@ -257,11 +257,19 @@ long Solver::getRolloutAct(BeliefNode *belNode, StateVals &s, double startDisc, 
 	return actSelected;
 }
 
-double Solver::rolloutPolHelper(BeliefNode *currNode, StateVals &s, double disc) {
-	if (currNode == NULL || currNode->nParticles == 0 ||
-	        currNode->actChildren.size() == 0) {
+double Solver::rolloutPolHelper(BeliefNode *currNode, StateVals &s,
+        double disc) {
+	if (currNode == NULL) {
+	    // cerr << "NULL in rolloutPolHelper!" << endl;
 		return 0.0;
+	} else if (currNode->nParticles == 0) {
+	    cerr << "nParticles == 0 in rolloutPolHelper" << endl;
+	} else if (currNode->actChildren.size() == 0) {
+	    // cerr << "No children in rolloutPolHelper" << endl;
+	    return 0.0;
 	}
+	// || currNode->nParticles == 0 ||
+	//        currNode->actChildren.size() == 0) {
 	StateVals nxtSVals;
 	ObsVals obs;
 	double immediateRew;
@@ -428,14 +436,14 @@ double Solver::runSim(long nSteps, vector<long> &tChanges, vector<StateVals> &tr
 	bool isTerm;
 	vector<long>::iterator itCh = tChanges.begin();
 	for (long i = 0; i < nSteps; i++) {
-cerr << "t-" << i << " ";
+        cerr << "t-" << i << endl;
 		if (!last && i == *itCh) {	// Model changes.
-cerr << "ModelChanges ";
-//cerr << "Time-" << i << "\n";
-//model->drawEnv(cerr);
-//if (i == 10 || i == 20) {
-//	write(cerr);
-//}
+            cerr << "ModelChanges" << endl;
+            //cerr << "Time-" << i << "\n";
+            //model->drawEnv(cerr);
+            //if (i == 10 || i == 20) {
+            //	write(cerr);
+            //}
 
 			chTimeStart = clock();
 			// Reset Affected data structures.
@@ -460,62 +468,35 @@ cerr << "ModelChanges ";
 				modifByDeformAffected(currNode, affectedRange, typeOfChanges);
 			#endif
 */
-			impSolTimeStart = clock();
-			improveSol(currNode, maxTrials, depthTh);
-			impSolTimeEnd = clock();
-			*totImpTime = *totImpTime + ((impSolTimeEnd-impSolTimeStart)*1000/CLOCKS_PER_SEC);
-
-			isTerm = simAStep(currStVals, nxtStVals, &currNode, &nxtNode, &rew, trajSt, trajActId, trajObs);
-			trajRew.push_back(rew);
-			val = val + currDiscFactor*rew;
-			currDiscFactor = currDiscFactor*discFactor;
-			if (isTerm) {
-				*actualNSteps = i;
-				break;
-				//i = nSteps;
-			}
-			else {
-				if (nxtNode == NULL) {
-					nxtNode = addChild(currNode, trajActId.back(), trajObs.back(), i);
-				}
-				//else {
-					currNode = nxtNode;
-				//}
-			}
 			itCh ++;
 			if (itCh == tChanges.end()) { last = true; }
-		}
-		else {
-//cerr << "ModelStays ";
-			impSolTimeStart = clock();
-			improveSol(currNode, maxTrials, depthTh);
-			impSolTimeEnd = clock();
-			*totImpTime = *totImpTime + ((impSolTimeEnd-impSolTimeStart)*1000/CLOCKS_PER_SEC);
+        }
+        impSolTimeStart = clock();
+        improveSol(currNode, maxTrials, depthTh);
+        impSolTimeEnd = clock();
+        *totImpTime = *totImpTime + (
+                (impSolTimeEnd-impSolTimeStart)*1000/CLOCKS_PER_SEC);
 
-			isTerm = simAStep(currStVals, nxtStVals, &currNode, &nxtNode, &rew, trajSt, trajActId, trajObs);
-			trajRew.push_back(rew);
-			val = val + currDiscFactor*rew;
-			currDiscFactor = currDiscFactor*discFactor;
-			if (isTerm) {
-				*actualNSteps = i;
-				break;
-				//i = nSteps;
-			}
-			else {
-				if (nxtNode == NULL) {
-					nxtNode = addChild(currNode, trajActId.back(), trajObs.back(), i);
-				}
-				//else {
-					currNode = nxtNode;
-				//}
-			}
-		}
-//cerr << "currSt " << currStVals[0] << " " << currStVals[1] << " rew " << rew << " nxtSt " << nxtStVals[0] << " " << nxtStVals[1] << " val " << val << endl;
-		currStVals = nxtStVals;
+        isTerm = simAStep(currStVals, nxtStVals, &currNode, &nxtNode,
+                &rew, trajSt, trajActId, trajObs);
+        trajRew.push_back(rew);
+        val = val + currDiscFactor*rew;
+        currDiscFactor = currDiscFactor*discFactor;
+        cerr << "Discount Factor: " << currDiscFactor << endl;
+        cerr << "Total Reward: " << val << endl;
 
+        if (nxtNode == NULL) {
+            nxtNode = addChild(currNode, trajActId.back(), trajObs.back(), i);
+        }
+        currNode = nxtNode;
+        currStVals = nxtStVals;
 
+        if (isTerm) {
+            *actualNSteps = i;
+            break;
+        }
 	}
-cerr << endl;
+    // cerr << endl;
 	return val;
 }
 
@@ -539,6 +520,7 @@ BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs,
     vector<StateVals> partNxtSt;
 	model->getStatesSeeObs(actId, obs, partSt, partNxtSt);
 	if (partNxtSt.empty()) {
+	    cerr << "Could not generate based on belief!" << endl;
 	    // If that fails, ignore the current belief.
 	    model->getStatesSeeObs(actId, obs, partNxtSt);
     }
@@ -578,40 +560,40 @@ BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs,
 
 void Solver::resetAffected(set<HistorySeq*> affectedHistSeq) {
 	set<HistorySeq*>::iterator itHistSeq;
-	for (itHistSeq = affectedHistSeq.begin(); itHistSeq != affectedHistSeq.end(); itHistSeq++) {
+	for (itHistSeq = affectedHistSeq.begin();
+	        itHistSeq != affectedHistSeq.end(); itHistSeq++) {
 		(*itHistSeq)->startAffectedIdx = LONG_MAX;
 		(*itHistSeq)->endAffectedIdx = -1;
 		(*itHistSeq)->chType = UNDEFINED;
 	}
 }
 
-bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals, BeliefNode **startNode, BeliefNode **nxtNode,
-		double *rew, vector<StateVals> &trajSt, vector<long> &trajActId, vector<ObsVals> &trajObs) {
+bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals,
+        BeliefNode **startNode, BeliefNode **nxtNode,
+		double *rew, vector<StateVals> &trajSt, vector<long> &trajActId,
+		vector<ObsVals> &trajObs) {
 	long actId = (*startNode)->getBestAct();
 	ObsVals obs;
 	bool isTerm = model->getNextState(currStVals, actId, rew, nxtStVals, obs);
-//cerr << "st " << currStVals[0] << " " << currStVals[1] << " " << *rew << " nxtSt " << nxtStVals[0] << " " << nxtStVals[1] << " obs " << obs[0] << " " << obs[1] << endl;
 	trajSt.push_back(nxtStVals);
 	trajActId.push_back(actId);
 	trajObs.push_back(obs);
 	if (isTerm) {
-//		cerr << " Reach terminal\n";
+		cerr << " Reach terminal" << endl;
 		*rew = *rew + model->getDiscount()*model->getReward(nxtStVals);
 		*nxtNode = NULL;
 	}
 	else {
 		*nxtNode = (*startNode)->getChild(actId, obs);
-//cerr << "#particles: " << (*nxtNode)->nParticles << endl;
 	}
-	cout << "Action: ";
-	model->dispAct(actId, cout);
-	cout << endl<< "Reward: " << *rew << endl;
-	cout << "State: ";
-	for (vector<double>::iterator it = nxtStVals.begin();
-	        it != nxtStVals.end(); it++) {
-        cout << *it << " ";
-    }
-    cout << endl;
+	cerr << "Action: ";
+	model->dispAct(actId, cerr);
+	cerr << "; " << "Reward: " << *rew;
+	cerr << "; " << "Obs: ";
+	model->dispObs(obs, cerr);
+	cerr << endl << "State: ";
+	model->dispState(nxtStVals, cerr);
+    cerr << endl;
 
 	return isTerm;
 }

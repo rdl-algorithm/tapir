@@ -100,7 +100,7 @@ long BeliefNode::getUCBAct() {
 
 long BeliefNode::getBestAct() {
     if (actChildren.size() == 0) {
-        cerr << "DANGER" << endl;
+        cerr << "No children - could not retrieve best action." << endl;
         return -1;
     }
 	map<long, Action*>::iterator itAct = actChildren.begin();

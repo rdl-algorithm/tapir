@@ -11,6 +11,7 @@
 namespace po = boost::program_options;
 
 using std::cout;
+using std::cerr;
 using std::endl;
 
 RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
@@ -37,32 +38,31 @@ RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
     illegalMovePenalty = vm["problem.illegalMovePenalty"].as<double>();
     halfEfficiencyDistance = vm["problem.halfEfficiencyDistance"].as<double>();
 	initialise();
-
-    /*
 	cout << "Constructed the RockSampleModel" << endl;
 	cout << "Discount: " << discount << endl;
 	cout << "Size: " << nRows << " by " << nCols << endl;
 	cout << "Start: " << startPos.i << " " << startPos.j << endl;
 	cout << "nRocks: " << nRocks << endl;
-	cout << rockCoords[0].i << " " << rockCoords[0].j << endl;
-	cout << rockCoords[1].i << " " << rockCoords[1].j << endl;
+	cout << "Rock 0: " << rockCoords[0] << endl;
+	cout << "Rock 1: " << rockCoords[1] << endl;
 	cout << "good rock reward: " << goodRockReward << endl;
 	cout << "nActions: " << nActions << endl;
 	cout << "nObservations: " << nObservations << endl;
 	cout << "nStVars: " << nStVars << endl;
 	cout << "nInitBel: " << nInitBel << endl;
-    std::copy(initBel[0].begin(), initBel[0].end(), std::ostream_iterator<double>(cout, " "));
-    cout << endl;
-    std::copy(initBel[1].begin(), initBel[1].end(), std::ostream_iterator<double>(cout, " "));
-    cout << endl;
-    std::copy(initBel[2].begin(), initBel[2].end(), std::ostream_iterator<double>(cout, " "));
-    cout << endl;
-    std::copy(initBel[3].begin(), initBel[3].end(), std::ostream_iterator<double>(cout, " "));
-    cout << endl;
-    std::copy(initBel[255].begin(), initBel[255].end(), std::ostream_iterator<double>(cout, " "));
-    cout << endl;
+	dispState(initBel[0], cout);
+	cout << endl;
+	dispState(initBel[1], cout);
+	cout << endl;
+	dispState(initBel[2], cout);
+	cout << endl;
+	dispState(initBel[3], cout);
+	cout << endl;
+	dispState(initBel[255], cout);
+	cout << endl;
 	cout << "nParticles: " << nParticles << endl;
-	*/
+	cout << "Environment:" << endl;
+	drawEnv(cout);
 }
 
 RockSampleModel::~RockSampleModel() {
@@ -101,25 +101,45 @@ void RockSampleModel::initialise() {
 	s[0] = startPos.i;
 	s[1] = startPos.j;
 	nInitBel = 1 << nRocks;
-	for (int val = 0; val < nInitBel; val++) {
-	    for (int j = 0; j < nRocks; j++) {
-	        if (val & (1 << j)) {
-	            s[j+2] = GOOD;
-            } else {
-	            s[j+2] = BAD;
-            }
-        }
-        initBel.push_back(s);
+	for (long val = 0; val < nInitBel; val++) {
+	    decodeRocks(val, s);
+	    initBel.push_back(s);
     }
     minVal = -illegalMovePenalty / (1 - discount);
     maxVal = goodRockReward * nRocks + exitReward;
 }
 
 
-void RockSampleModel::sampleAnInitState(StateVals& tmpStVals) {
+void RockSampleModel::sampleAnInitState(StateVals& sVals) {
 	double tmp = GlobalResources::randGen.ranf_arr_next();
-	long idx = (long) floor(tmp*(nInitBel-1));
-	tmpStVals = initBel[idx];
+	long idx = (long)floor(tmp * nInitBel);
+	sVals = initBel[idx];
+}
+
+void RockSampleModel::sampleStateUniform(StateVals& sVals) {
+    sVals.resize(nStVars);
+	double tmp = GlobalResources::randGen.ranf_arr_next();
+	sVals[0] = (long)floor(tmp * nRows);
+	tmp = GlobalResources::randGen.ranf_arr_next();
+	sVals[1] = (long)floor(tmp * nCols);
+	sampleRocks(sVals);
+	dispState(sVals, cerr);
+	cerr << endl;
+}
+
+void RockSampleModel::sampleRocks(StateVals& sVals) {
+	double tmp = GlobalResources::randGen.ranf_arr_next();
+	decodeRocks((long)floor(tmp * nRows), sVals);
+}
+
+void RockSampleModel::decodeRocks(long val, StateVals& sVals) {
+    for (int j = 0; j < nRocks; j++) {
+        if (val & (1 << j)) {
+            sVals[j+2] = GOOD;
+        } else {
+            sVals[j+2] = BAD;
+        }
+    }
 }
 
 bool RockSampleModel::isTerm(StateVals &sVals) {
@@ -156,6 +176,8 @@ void RockSampleModel::solveHeuristic(StateVals &s, double *qVal) {
     }
     currentDiscount *= std::pow(discount, nCols - currentPos.j);
     *qVal += currentDiscount * exitReward;
+    // dispState(s, cerr);
+    // cerr << endl << "Heuristic: " << *qVal << endl;
 }
 
 double RockSampleModel::getDefaultVal() {
@@ -171,7 +193,7 @@ bool RockSampleModel::makeNextState(StateVals &sVals, long actId,
     if (actId == SAMPLE) {
         int rockNo = envMap[sVals[0]][sVals[1]] - ROCK;
         if (0 <= rockNo && rockNo < nRocks) {
-            nxtSVals[rockNo + 2] = BAD;
+            nxtSVals[2+rockNo] = BAD;
             return true;
         }
         return false;
@@ -207,6 +229,7 @@ int RockSampleModel::makeObs(StateVals &sVals, long actId) {
     Coords pos(sVals[0], sVals[1]);
     double dist = pos.distance(rockCoords[rockNo]);
     double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance)) * 0.5;
+    // cerr << "D: " << dist << " E:" << efficiency << endl;
 	double tmp = GlobalResources::randGen.ranf_arr_next();
 	if (tmp <= efficiency) {
 	    return sVals[2+rockNo] == GOOD ? GOOD : BAD; // Correct obs.
@@ -241,7 +264,7 @@ double RockSampleModel::getReward(StateVals &sVals, long actId) {
     if (actId == SAMPLE) {
         int rockNo = envMap[sVals[0]][sVals[1]] - ROCK;
         if (0 <= rockNo && rockNo < nRocks) {
-            return sVals[rockNo + 2] == GOOD ? goodRockReward : -badRockPenalty;
+            return sVals[2+rockNo] == GOOD ? goodRockReward : -badRockPenalty;
         } else {
             // We shouldn't end up here, since isLegal should've been false.
             return -illegalMovePenalty;
@@ -249,7 +272,6 @@ double RockSampleModel::getReward(StateVals &sVals, long actId) {
     }
     return 0;
 }
-
 
 
 void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
@@ -287,9 +309,9 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
         // It's not a CHECK action, so we just add each resultant state.
         for (std::vector<StateVals>::iterator it = partSt.begin();
                 it != partSt.end(); it++) {
-            StateVals nextState;
-            makeNextState(*it, actId, nextState);
-            partNxtSt.push_back(nextState);
+            StateVals nxtStVals;
+            makeNextState(*it, actId, nxtStVals);
+            partNxtSt.push_back(nxtStVals);
         }
     }
 }
@@ -297,14 +319,14 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
 void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<StateVals> &partNxtSt) {
     while (partNxtSt.size() < nParticles) {
-        StateVals state;
-        sampleAnInitState(state);
-        StateVals nextState;
+        StateVals sVals;
+        sampleStateUniform(sVals);
+        StateVals nxtStVals;
         ObsVals obs2;
         double reward;
-        getNextState(state, actId, &reward, nextState, obs);
+        getNextState(sVals, actId, &reward, nxtStVals, obs);
         if (obs == obs2) {
-            partNxtSt.push_back(nextState);
+            partNxtSt.push_back(nxtStVals);
         }
     }
 }

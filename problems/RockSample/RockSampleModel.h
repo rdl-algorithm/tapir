@@ -23,8 +23,13 @@ struct Coords {
     double distance(Coords& other) {
         return std::abs(i - other.i) + std::abs(j - other.j);
     }
+
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Coords& obj) {
+    os << "(" << obj.i << ", " << obj.j << ")";
+    return os;
+}
 inline bool operator==(const Coords& lhs, const Coords& rhs) {
     return lhs.i == rhs.i && lhs.j == rhs.j;
 }
@@ -51,7 +56,7 @@ class RockSampleModel : public Model {
                 os << "CHECK-" << actId-CHECK;
                 return;
             }
-            switch(actID) {
+            switch(actId) {
                 case NORTH:
                     os << "NORTH";
                     break;
@@ -66,6 +71,9 @@ class RockSampleModel : public Model {
                     break;
                 case SAMPLE:
                     os << "SAMPLE";
+                    break;
+                default:
+                    os << "ERROR-" << actId;
                     break;
             }
         }
@@ -92,7 +100,7 @@ class RockSampleModel : public Model {
             GOAL = -2,
         };
 
-        void dispCell(int cellType, ostream& os) {
+        void dispCell(int cellType, std::ostream& os) {
             if (cellType >= ROCK) {
                 os << std::hex << cellType - ROCK;
                 return;
@@ -104,17 +112,54 @@ class RockSampleModel : public Model {
                 case GOAL:
                     os << 'G';
                     break;
+                default:
+                    os << "ERROR-" << cellType;
+                    break;
             }
         }
 
+        void dispState(StateVals& s, std::ostream& os) {
+            os << Coords(s[0], s[1]) << " GOOD: {";
+            std::vector<int> goodRocks;
+            std::vector<int> badRocks;
+            for (int i = 2; i < s.size(); i++) {
+                if (s[i] == GOOD) {
+                    goodRocks.push_back(i-2);
+                } else {
+                    badRocks.push_back(i-2);
+                }
+            }
+            std::copy(goodRocks.begin(), goodRocks.end(),
+                    std::ostream_iterator<double>(os, " "));
+            os << "}; BAD: {";
+            std::copy(badRocks.begin(), badRocks.end(),
+                    std::ostream_iterator<double>(os, " "));
+            os << "}";
+        }
 
+        void dispObs(ObsVals& o, std::ostream& os) {
+            switch((int)o[0]) {
+                case NONE:
+                    os << "NONE";
+                    break;
+                case GOOD:
+                    os << "GOOD";
+                    break;
+                case BAD:
+                    os << "BAD";
+                    break;
+                default:
+                    os << "ERROR-" << o[0];
+                    break;
+            }
+        }
 
 		RockSampleModel(po::variables_map vm);
 		~RockSampleModel();
 
 		/***** Start implementation of Model's virtual functions *****/
 
-		void sampleAnInitState(StateVals& tmpStVals);
+		void sampleAnInitState(StateVals& sVals);
 		bool isTerm(StateVals &sVals);
 		void solveHeuristic(StateVals &s, double *qVal);
 		double getDefaultVal();
@@ -153,6 +198,13 @@ class RockSampleModel : public Model {
         * data structures and variables.
         */
 	    void initialise();
+
+        /** Generates a state uniformly at random. */
+        void sampleStateUniform(StateVals& sVals);
+        /** Generates the state of the rocks uniformly at random. */
+        void sampleRocks(StateVals& sVals);
+        /** Decodes rocks from an integer. */
+        void decodeRocks(long val, StateVals& sVals);
 
         /**
          * Generates a next state for the given state and action;

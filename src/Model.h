@@ -78,7 +78,7 @@ class Model {
 		/* --------------- Start virtual functions ----------------- */
 
 		/** Samples an initial state from the belief vector. */
-		virtual void sampleAnInitState(StateVals& tmpStVals)=0;
+		virtual void sampleAnInitState(StateVals& sVals)=0;
 		/** Returns true iff the given state is terminal. */
 		virtual bool isTerm(StateVals &sVals)=0;
 		/** Approximates the q-value of a state */
@@ -123,6 +123,8 @@ class Model {
 				std::vector<double> &modifRewSeq)=0;
 
         virtual void dispAct(int actId, std::ostream& os)=0;
+        virtual void dispState(StateVals& s, std::ostream& os)=0;
+        virtual void dispObs(ObsVals& o, std::ostream& os)=0;
 		virtual void drawEnv(std::ostream &os)=0;
 
     protected:
