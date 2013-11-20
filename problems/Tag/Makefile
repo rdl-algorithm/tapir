@@ -16,7 +16,7 @@ PROBLEM_OBJDIR = $(PROBLEM)/obj
 PROBLEM_DEPDIR = $(PROBLEM)/dep
 DESTDIR = $(PROBLEM)
 
-VPATH = $(ROOT):$(PROBLEM)
+VPATH = $(SOLVER_SRCDIR):$(PROBLEM_SRCDIR)
 
 # ----------------------------------------------------------------------
 # Compiler & linker
@@ -74,10 +74,11 @@ debug: $(MAINS)
 $(MAINS): $(PROBLEM_OBJDIR)/$$@.o $(SOLVER_OBJS) $(PROBLEM_OBJS)
 	$(LINKER) $^ $(LDFLAGS) -o $@
 
-$(PROBLEM_OBJS) $(MAIN_OBJS) :| $(PROBLEM_OBJDIR) $(PROBLEM_DEPDIR)
-$(PROBLEM_DEPDIR) $(PROBLEM_OBJDIR) :; mkdir -p $@
+$(PROBLEM_OBJS) $(MAIN_OBJS): | $(PROBLEM_OBJDIR) $(PROBLEM_DEPDIR)
+$(PROBLEM_DEPDIR) $(PROBLEM_OBJDIR):
+	mkdir -p $@
 
-$(PROBLEM_OBJDIR)/%.o : $(PROBLEM_SRCDIR)/%.cc
+$(PROBLEM_OBJDIR)/%.o: $(PROBLEM_SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -MMD -c $< -o $@
 	@mv $(PROBLEM_OBJDIR)/$*.d $(PROBLEM_DEPDIR)/$*.dep
 
@@ -87,13 +88,9 @@ clean:
 	rm -f $(OBJS)
 	rm -f $(DEPS)
 
-.PHONY: disp
-disp:
-	@echo MAINS: $(MAINS)
-	@echo SRCS: $(SRCS)
-	@echo HDRS: $(HDRS)
-	@echo OBJS: $(OBJS)
-	@echo DEPS: $(DEPS)
+.PHONY:
+rmdirs:
+	rm -rf $(PROBLEM_OBJDIR) $(PROBLEM_DEPDIR) $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
 
 -include $(DEPS)
 

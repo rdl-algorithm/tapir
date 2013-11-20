@@ -8,7 +8,7 @@
 #include "BeliefTree.h"
 #include "Histories.h"
 #include "Solver.h"
-#include "RandGen.h"
+#include "GlobalResources.h"
 
 #include "options.h"
 #include <boost/program_options.hpp>
@@ -46,30 +46,30 @@ int main(int argc, const char* argv[]) {
     string polPath = vm["policy"].as<string>();
     long seed = vm["seed"].as<long>();
     cerr << "Seed: " << seed << endl;
-	GlobalResources::randGen.ranf_start(seed);
+    GlobalResources::randGen.seed(seed);
 
-	Model* model = new UnderwaterNavModifModel(vm);
-	BeliefNode::maxParticles = model->getNParticles();
-	BeliefNode::nStVars = model->getNStVars();
-	BeliefTree* policy = new BeliefTree();
-	Histories* histories = new Histories();
-	Solver* solver = new Solver(model, policy, histories);
+    Model* model = new UnderwaterNavModifModel(vm);
+    BeliefNode::maxParticles = model->getNParticles();
+    BeliefNode::nStVars = model->getNStVars();
+    BeliefTree* policy = new BeliefTree();
+    Histories* histories = new Histories();
+    Solver* solver = new Solver(model, policy, histories);
 
-	double totT;
-	clock_t tStart;
-	tStart = clock();
-	solver->genPol(model->getMaxTrials(), model->getDepthTh());
-	totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
+    double totT;
+    clock_t tStart;
+    tStart = clock();
+    solver->genPol(model->getMaxTrials(), model->getDepthTh());
+    totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
 
-	ofstream os;
-	os.open(polPath.c_str());
-	solver->write(os);
-	os.close();
+    ofstream os;
+    os.open(polPath.c_str());
+    solver->write(os);
+    os.close();
 
-	cout << "SolvingTime: " << totT << endl;
+    cout << "SolvingTime: " << totT << endl;
 
-	delete policy;
-	delete histories;
-	delete solver;
-	delete model;
+    delete policy;
+    delete histories;
+    delete solver;
+    delete model;
 }

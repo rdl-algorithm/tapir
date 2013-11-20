@@ -1,3 +1,3 @@
 #include "GlobalResources.h"
 
-RandGen GlobalResources::randGen;
+std::default_random_engine GlobalResources::randGen;

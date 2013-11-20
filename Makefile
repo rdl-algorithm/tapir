@@ -1,6 +1,8 @@
 default: all
 include Makefile.common
 
+VPATH = $(SOLVER_SRCDIR)
+
 # Compiler & linker
 # ----------------------------------------------------------------------
 CC = gcc

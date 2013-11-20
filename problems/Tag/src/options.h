@@ -57,23 +57,21 @@ namespace options {
         return sbt;
     }
 
-    // Configurations options for the RockSample POMDP
+    // Configurations options for the Tag POMDP
     po::options_description problem() {
         po::options_description problem(
-                "Settings specific to the RockSample POMDP");
+                "Settings specific to the Tag POMDP");
         problem.add_options()
             ("problem.discount,d", po::value<double>(), "discount factor")
             ("problem.mapPath,m", po::value<std::string>(), "path to map file")
-            ("problem.goodRockReward", po::value<double>(),
-             "reward for sampling a good rock")
-            ("problem.badRockPenalty", po::value<double>(),
-             "penalty for sampling a bad rock")
-            ("problem.exitReward", po::value<double>(),
-             "reward for moving into the exit area")
-            ("problem.illegalMovePenalty", po::value<double>(),
-             "penalty for making an illegal move")
-            ("problem.halfEfficiencyDistance,d0", po::value<double>(),
-             "half efficiency distance d0; sensor efficiency = 2^(-d/d0)")
+            ("problem.moveCost", po::value<double>(),
+             "movement cost")
+            ("problem.tagReward", po::value<double>(),
+             "reward for tagging the opponent")
+            ("problem.failedTagPenalty", po::value<double>(),
+             "penalty for attempting to tag the opponent but failing")
+            ("problem.opponentStayProbability", po::value<double>(),
+             "probability that the opponent will stay in place")
             ;
         return problem;
     }
@@ -81,7 +79,7 @@ namespace options {
     // RockSample heuristic configuration
     po::options_description heuristic() {
         po::options_description heuristic(
-                "RockSample heuristic configuration");
+                "Tag heuristic configuration");
         //solver.add_options()
         return heuristic;
     }

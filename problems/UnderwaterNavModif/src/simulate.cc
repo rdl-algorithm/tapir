@@ -8,7 +8,7 @@
 #include "BeliefTree.h"
 #include "Histories.h"
 #include "Solver.h"
-#include "RandGen.h"
+#include "GlobalResources.h"
 
 #include "options.h"
 #include <boost/program_options.hpp>
@@ -55,72 +55,70 @@ int main(int argc, const char* argv[]) {
     long nRuns = vm["simulation.nRuns"].as<long>();
     long seed = vm["seed"].as<long>();
     cerr << "Seed: " << seed << endl;
-	GlobalResources::randGen.ranf_start(seed);
-    double tmp = GlobalResources::randGen.ranf_arr_next();
-    cerr << "tmp " << tmp << endl;
+    GlobalResources::randGen.seed(seed);
 
-	Model* model = new UnderwaterNavModifModel(vm);
-	BeliefNode::maxParticles = model->getNParticles();
-	BeliefNode::nStVars = model->getNStVars();
-	BeliefTree* policy = new BeliefTree();
-	Histories* histories = new Histories();
-	Solver* solver = new Solver(model, polPath.c_str(), policy, histories);
+    Model* model = new UnderwaterNavModifModel(vm);
+    BeliefNode::maxParticles = model->getNParticles();
+    BeliefNode::nStVars = model->getNStVars();
+    BeliefTree* policy = new BeliefTree();
+    Histories* histories = new Histories();
+    Solver* solver = new Solver(model, polPath.c_str(), policy, histories);
 
-	vector<long> modelCh;
-	model->setChanges(changesPath.c_str(), modelCh);
-	vector<StateVals> trajSt;
-	vector<long> trajActId;
-	vector<ObsVals> trajObs;
-	vector<double> trajRew;
-	double val;
-	long j;
-	vector<StateVals>::iterator itS;
-	vector<long>::iterator itA;
-	vector<ObsVals>::iterator itO;
-	vector<double>::iterator itR;
-	vector<double>::iterator itD;
-	ofstream os;
-	os.open(logPath.c_str());
+    vector<long> modelCh;
+    model->setChanges(changesPath.c_str(), modelCh);
+    vector<StateVals> trajSt;
+    vector<long> trajActId;
+    vector<ObsVals> trajObs;
+    vector<double> trajRew;
+    double val;
+    long j;
+    vector<StateVals>::iterator itS;
+    vector<long>::iterator itA;
+    vector<ObsVals>::iterator itO;
+    vector<double>::iterator itR;
+    vector<double>::iterator itD;
+    ofstream os;
+    os.open(logPath.c_str());
 
-	//for (long i = 0; i < nRuns; i++) {
-		clock_t tStart;
-		long actualNSteps;
-		double totT;
-		double totChTime, totImpTime;
-		tStart = clock();
-		val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs, trajRew, &actualNSteps, &totChTime, &totImpTime);
-		totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
+    //for (long i = 0; i < nRuns; i++) {
+        clock_t tStart;
+        long actualNSteps;
+        double totT;
+        double totChTime, totImpTime;
+        tStart = clock();
+        val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs, trajRew, &actualNSteps, &totChTime, &totImpTime);
+        totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
 
-		os << "Val:  " << val << endl;
-		itS = trajSt.begin();
-		os << "Init: ( ";
-		for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
-			os << *itD << " ";
-		}
-		os << " )\n";
-		itS ++;
-		for (itA = trajActId.begin(), itO = trajObs.begin(), itR = trajRew.begin(), j = 0; itA != trajActId.end();
-				itS++, itA++, itO++, itR++, j++) {
-			os << "Step-" << j << " " << *itA;
-			os << " ( ";
-			for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
-				os << *itD << " ";
-			}
-			os << " ) < ";
-			for (itD = (*itO).begin(); itD != (*itO).end(); itD++) {
-				os << *itD << " ";
-			}
-			os << " > " << *itR << endl;
-		}
-	//}
-	os.close();
+        os << "Val:  " << val << endl;
+        itS = trajSt.begin();
+        os << "Init: ( ";
+        for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
+            os << *itD << " ";
+        }
+        os << " )\n";
+        itS ++;
+        for (itA = trajActId.begin(), itO = trajObs.begin(), itR = trajRew.begin(), j = 0; itA != trajActId.end();
+                itS++, itA++, itO++, itR++, j++) {
+            os << "Step-" << j << " " << *itA;
+            os << " ( ";
+            for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
+                os << *itD << " ";
+            }
+            os << " ) < ";
+            for (itD = (*itO).begin(); itD != (*itO).end(); itD++) {
+                os << *itD << " ";
+            }
+            os << " > " << *itR << endl;
+        }
+    //}
+    os.close();
 
-	//solver->write(cout);
+    //solver->write(cout);
 
-	cout << val << " " << actualNSteps << " " << totChTime << " " << totImpTime << " " << totT << endl;
+    cout << val << " " << actualNSteps << " " << totChTime << " " << totImpTime << " " << totT << endl;
 
-	delete policy;
-	delete histories;
-	delete solver;
-	delete model;
+    delete policy;
+    delete histories;
+    delete solver;
+    delete model;
 }

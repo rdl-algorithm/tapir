@@ -17,52 +17,45 @@ using std::endl;
 TagModel::TagModel(po::variables_map vm) : Model(vm) {
     // Read the map from the file.
     std::ifstream inFile;
-	const char* mapPath = vm["problem.mapPath"].as<std::string>().c_str();
-	inFile.open(mapPath);
-	if (!inFile.is_open()) {
+    const char* mapPath = vm["problem.mapPath"].as<std::string>().c_str();
+    inFile.open(mapPath);
+    if (!inFile.is_open()) {
         std::cerr << "Fail to open " << mapPath << "\n";
-		exit(1);
-	}
-	inFile >> nRows >> nCols;
+        exit(1);
+    }
+    inFile >> nRows >> nCols;
     std::string tmp;
-	getline(inFile, tmp);
-	for (long i = 0; i < nRows; i++) {
-		getline(inFile, tmp);
-		mapText.push_back(tmp);
-	}
-	inFile.close();
+    getline(inFile, tmp);
+    for (long i = 0; i < nRows; i++) {
+        getline(inFile, tmp);
+        mapText.push_back(tmp);
+    }
+    inFile.close();
 
-    goodRockReward = vm["problem.goodRockReward"].as<double>();
-    badRockPenalty = vm["problem.badRockPenalty"].as<double>();
-    exitReward = vm["problem.exitReward"].as<double>();
-    illegalMovePenalty = vm["problem.illegalMovePenalty"].as<double>();
-    halfEfficiencyDistance = vm["problem.halfEfficiencyDistance"].as<double>();
-	initialise();
-	cout << "Constructed the TagModel" << endl;
-	cout << "Discount: " << discount << endl;
-	cout << "Size: " << nRows << " by " << nCols << endl;
-	cout << "Start: " << startPos.i << " " << startPos.j << endl;
-	cout << "nRocks: " << nRocks << endl;
-	cout << "Rock 0: " << rockCoords[0] << endl;
-	cout << "Rock 1: " << rockCoords[1] << endl;
-	cout << "good rock reward: " << goodRockReward << endl;
-	cout << "nActions: " << nActions << endl;
-	cout << "nObservations: " << nObservations << endl;
-	cout << "nStVars: " << nStVars << endl;
-	cout << "nInitBel: " << nInitBel << endl;
-	dispState(initBel[0], cout);
-	cout << endl;
-	dispState(initBel[1], cout);
-	cout << endl;
-	dispState(initBel[2], cout);
-	cout << endl;
-	dispState(initBel[3], cout);
-	cout << endl;
-	dispState(initBel[255], cout);
-	cout << endl;
-	cout << "nParticles: " << nParticles << endl;
-	cout << "Environment:" << endl;
-	drawEnv(cout);
+    moveCost = vm["problem.moveCost"].as<double>();
+    tagReward = vm["problem.tagReward"].as<double>();
+    failedTagPenalty = vm["problem.failedTagPenalty"].as<double>();
+    opponentStayProbability = vm["problem.opponentStayProbability"].as<double>();
+    initialise();
+    cout << "Constructed the TagModel" << endl;
+    cout << "Discount: " << discount << endl;
+    cout << "Size: " << nRows << " by " << nCols << endl;
+    cout << "move cost: " << moveCost << endl;
+    cout << "nActions: " << nActions << endl;
+    cout << "nObservations: " << nObservations << endl;
+    cout << "nStVars: " << nStVars << endl;
+    StateVals s;
+    cout << "Example States: " << endl;
+    for (int i = 0; i < 5; i++) {
+        sampleAnInitState(s);
+        double q;
+        solveHeuristic(s, &q);
+        dispState(s, cout);
+        cout << " Heuristic: " << q << endl;
+    }
+    cout << "nParticles: " << nParticles << endl;
+    cout << "Environment:" << endl;
+    drawEnv(cout);
 }
 
 TagModel::~TagModel() {
@@ -71,170 +64,220 @@ TagModel::~TagModel() {
 }
 
 void TagModel::initialise() {
-    nRocks = 0;
     Coords p;
-	for (p.i = 0; p.i < nRows; p.i++) {
-	    envMap.emplace_back();
-		for (p.j = 0; p.j < nCols; p.j++) {
-		    char c = mapText[p.i][p.j];
-		    long cellType;
-		    if (c == 'o') {
-		        rockCoords.push_back(p);
-		        cellType = ROCK + nRocks;
-		        nRocks++;
-		    } else if (c == 'G') {
-		        cellType = GOAL;
-            } else if (c == 'S') {
-		        startPos = p;
-		        cellType = EMPTY;
+    nEmptyCells = 0;
+    envMap.resize(nRows);
+    for (p.i = nRows - 1; p.i >= 0; p.i--) {
+        envMap[p.i].resize(nCols);
+        for (p.j = nCols - 1; p.j >= 0; p.j--) {
+            char c = mapText[p.i][p.j];
+            long cellType;
+            if (c == 'X') {
+                cellType = WALL;
             } else {
-                cellType = EMPTY;
+                cellType = EMPTY + nEmptyCells;
+                emptyCells.push_back(p);
+                nEmptyCells++;
             }
-            envMap.back().push_back(cellType);
+            envMap[p.i][p.j] = cellType;
         }
-	}
-
-	nActions = 5 + nRocks;
-	nObservations = 2;
-	nStVars = 2 + nRocks;
-	StateVals s(nStVars);
-	s[0] = startPos.i;
-	s[1] = startPos.j;
-	nInitBel = 1 << nRocks;
-	for (long val = 0; val < nInitBel; val++) {
-	    decodeRocks(val, s);
-	    initBel.push_back(s);
     }
-    minVal = -illegalMovePenalty / (1 - discount);
-    maxVal = goodRockReward * nRocks + exitReward;
+
+    nActions = 5;
+    nObservations = nEmptyCells * 2;
+    nStVars = 5;
+    minVal = -failedTagPenalty / (1 - discount);
+    maxVal = tagReward;
 }
 
+long TagModel::encodeCoords(Coords c) {
+    return envMap[c.i][c.j];
+}
+
+Coords TagModel::decodeCoords(long code) {
+    return emptyCells[code];
+}
 
 void TagModel::sampleAnInitState(StateVals& sVals) {
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	long idx = (long)floor(tmp * nInitBel);
-	sVals = initBel[idx];
+    sampleStateUniform(sVals);
 }
 
 void TagModel::sampleStateUniform(StateVals& sVals) {
     sVals.resize(nStVars);
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	sVals[0] = (long)floor(tmp * nRows);
-	tmp = GlobalResources::randGen.ranf_arr_next();
-	sVals[1] = (long)floor(tmp * nCols);
-	sampleRocks(sVals);
-	dispState(sVals, cerr);
-	cerr << endl;
-}
-
-void TagModel::sampleRocks(StateVals& sVals) {
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	decodeRocks((long)floor(tmp * nRows), sVals);
-}
-
-void TagModel::decodeRocks(long val, StateVals& sVals) {
-    for (int j = 0; j < nRocks; j++) {
-        if (val & (1 << j)) {
-            sVals[j+2] = GOOD;
-        } else {
-            sVals[j+2] = BAD;
-        }
-    }
+    sVals[0] = GlobalResources::randIntBetween(0, nRows - 1);
+    sVals[1] = GlobalResources::randIntBetween(0, nCols - 1);
+    sVals[2] = GlobalResources::randIntBetween(0, nRows - 1);
+    sVals[3] = GlobalResources::randIntBetween(0, nCols - 1);
+    sVals[4] = UNTAGGED;
 }
 
 bool TagModel::isTerm(StateVals &sVals) {
-    return envMap[sVals[0]][sVals[1]] == GOAL;
+    return sVals[2] == TAGGED;
 }
 
 void TagModel::solveHeuristic(StateVals &s, double *qVal) {
-    *qVal = 0;
-    double currentDiscount = 1;
-    Coords currentPos(s[0], s[1]);
-
-    std::set<int> goodRocks;
-    for (int i = 0; i < nRocks; i++) {
-        if (s[i+2] == GOOD) {
-            goodRocks.insert(i);
-        }
+    Coords robotPos = decodeCoords(s[0]);
+    Coords opponentPos = decodeCoords(s[1]);
+    if (s[2] == TAGGED) {
+        *qVal = 0;
+        return;
     }
-    while (!goodRocks.empty()) {
-        std::set<int>::iterator it = goodRocks.begin();
-        int bestRock = *it;
-        long lowestDist = rockCoords[bestRock].distance(currentPos);
-        ++it;
-        for (; it != goodRocks.end(); ++it) {
-            long dist = rockCoords[*it].distance(currentPos);
-            if (dist < lowestDist) {
-                bestRock = *it;
-                lowestDist = dist;
-            }
-        }
-        currentDiscount *= std::pow(discount, lowestDist);
-        *qVal += currentDiscount * goodRockReward;
-        goodRocks.erase(bestRock);
-        currentPos = rockCoords[bestRock];
-    }
-    currentDiscount *= std::pow(discount, nCols - currentPos.j);
-    *qVal += currentDiscount * exitReward;
-    // dispState(s, cerr);
-    // cerr << endl << "Heuristic: " << *qVal << endl;
+    int dist = robotPos.distance(opponentPos);
+    double nSteps = dist / opponentStayProbability;
+    double finalDiscount = pow(discount, nSteps);
+    *qVal = -moveCost * (1 - finalDiscount) / (1 - discount);
+    *qVal += finalDiscount * tagReward;
 }
 
 double TagModel::getDefaultVal() {
-	return minVal;
+    return minVal;
 }
 
 bool TagModel::makeNextState(StateVals &sVals, long actId,
         StateVals &nxtSVals) {
     nxtSVals = sVals;
-    if (actId >= CHECK) {
-        return true;
-    }
-    if (actId == SAMPLE) {
-        int rockNo = envMap[sVals[0]][sVals[1]] - ROCK;
-        if (0 <= rockNo && rockNo < nRocks) {
-            nxtSVals[2+rockNo] = BAD;
-            return true;
-        }
+    if (sVals[2] == TAGGED) {
         return false;
     }
 
+    Coords robotPos = decodeCoords(sVals[0]);
+    Coords opponentPos = decodeCoords(sVals[1]);
+    if (actId == TAG && robotPos == opponentPos) {
+        nxtSVals[2] = TAGGED;
+        return true;
+    }
+    moveOpponent(robotPos, opponentPos);
+    nxtSVals[1] = e
+
+void TagModel::sampleAnInitState(StateVals& sVals) {
+    sampleStateUniform(sVals);
+}
+
+void TagModel::sampleStateUniform(StateVals& sVals) {
+    sVals.resize(nStVars);
+    sVals[0] = GlobalResources::randIntBetween(0, nRows - 1);
+    sVals[1] = GlobalResources::randIntBetween(0, nCols - 1);
+    sVals[2] = GlobalResources::randIntBetween(0, nRows - 1);
+    sVals[3] = GlobalResources::randIntBetween(0, nCols - 1);
+    sVals[4] = UNTAGGED;
+}
+
+bool TagModel::isTerm(StateVals &sVals) {
+    return sVals[2] == TAGGED;
+}
+
+void TagModel::solveHeuristic(StateVals &s, double *qVal) {
+    Coords robotPos = decodeCoords(s[0]);
+    Coords opponentPos = decodeCoords(s[1]);
+    if (s[2] == TAGGED) {
+        *qVal = 0;
+        return;
+    }
+    int dist = robotPos.distance(opponentPos);
+    double nSteps = dist / opponentStayProbability;
+    double finalDiscount = pow(discount, nSteps);
+    *qVal = -moveCost * (1 - finalDiscount) / (1 - discount);
+    *qVal += finalDiscount * tagReward;
+}
+
+double TagModel::getDefaultVal() {
+    return minVal;
+}
+
+bool TagModel::makeNextState(StateVals &sVals, long actId,
+        StateVals &nxtSVals) {
+    nxtSVals = sVals;
+    if (sVals[2] == TAGGED) {
+        return false;
+    }
+
+    Coords robotPos = decodeCoords(sVals[0]);
+    Coords opponentPos = decodeCoords(sVals[1]);
+    if (actId == TAG && robotPos == opponentPos) {
+        nxtSVals[2] = TAGGED;
+        return true;
+    }
+    moveOpponent(robotPos, opponentPos);
+    nxtSVals[1] = encodeCoords(opponentPos);
+    robotPos = getMovedPos(robotPos, actId);
+    if !isValid(robotPos) {
+        return false;
+    }
+    nxtSVals[0] = encodeCoords(robotPos);
+    return true;
+}
+
+void TagModel::makeOpponentActions(coords& robotPos, Coords& opponentPos,
+        vector<long>& actions) {
+    if (robotPos.i > opponentPos.i) {
+        actions.push_back(NORTH);
+        actions.push_back(NORTH);
+    } else if (robotPos.i < opponentPos.i) {
+        actions.push_back(SOUTH);
+        actions.push_back(SOUTH);
+    } else {
+        actions.push_back(NORTH);
+        actions.push_back(SOUTH);
+    }
+    if (robotPos.j > opponentPos.j) {
+        actions.push_back(WEST);
+        actions.push_back(WEST);
+    } else if (robotPos.j < opponentPos.j) {
+        actions.push_back(EAST);
+        actions.push_back(EAST);
+    } else {
+        actions.push_back(EAST);
+        actions.push_back(WEST);
+    }
+}
+
+void TagModel::moveOpponent(Coords &robotPos, Coords &opponentPos) {
+    // Randomize to see if the opponent stays still.
+    if (GlobalResources::rand01() < opponentStayProbability) {
+        return;
+    }
+    vector<long> actions;
+    makeOpponentActions(robotPos, opponentPos, actions);
+    Coords newOpponentPos = getMovedPos(opponentPos,
+            actions[GlobalResources::randIntBetween(0, actions.size() - 1)]);
+    if isValid(newOpponentPos) {
+        opponentPos = newOpponentPos;
+    }
+}
+
+Coords TagModel::getMovedPos(Coords &coords, long actId) {
+    Coords movedPos = coords;
     switch(actId) {
         case NORTH:
-            nxtSVals[0] -= 1;
+            movedPos.i -= 1;
             break;
         case EAST:
-            nxtSVals[1] += 1;
+            movedPos.j += 1
             break;
         case SOUTH:
-            nxtSVals[0] += 1;
+            movedPos.i += 1;
             break;
         case WEST:
-            nxtSVals[1] -= 1;
+            movedPos.j -= 1;
     }
-    // Check all boundaries.
-    if (nxtSVals[0] < 0 || nxtSVals[0] >= nRows || nxtSVals[1] < 0 ||
-            nxtSVals[1] >= nCols) {
-        nxtSVals = sVals;
+    return movedPos;
+}
+
+boolean isValid(Coords &coords) {
+    if (coords.i < 0 || coords.i >= nRows || coords.j < 0 ||
+            coords.j >= nCols || envMap[coords.i][coords.j] == WALL) {
         return false;
     }
     return true;
 }
 
-int TagModel::makeObs(StateVals &sVals, long actId) {
-    if (actId < CHECK) {
-        return NONE;
-    }
-    int rockNo = actId - CHECK;
-    Coords pos(sVals[0], sVals[1]);
-    double dist = pos.distance(rockCoords[rockNo]);
-    double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance)) * 0.5;
-    // cerr << "D: " << dist << " E:" << efficiency << endl;
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	if (tmp <= efficiency) {
-	    return sVals[2+rockNo] == GOOD ? GOOD : BAD; // Correct obs.
-	} else {
-	    return sVals[2+rockNo] == GOOD ? BAD : GOOD; // Incorrect obs.
+void TagModel::makeObs(StateVals &nxtSVals, long actId, ObsVals &obsVals) {
+    obsVals[0] = nxtSVals[0];
+    obsVals[1] = nxtSVals[1];
+    if (nxtSVals[0] == nxtSVals[2] && nxtSVals[1] == nxtSVals[3]) {
+        obsVals[2] = SEEN;
+    } else {
+        obsVals[2] = UNSEEN;
     }
 }
 
@@ -252,83 +295,53 @@ double TagModel::getReward(StateVals &sVals) {
 }
 
 double TagModel::getReward(StateVals &sVals, long actId) {
-    StateVals nxtSVals;
-    bool isLegal = makeNextState(sVals, actId, nxtSVals);
-    if (!isLegal) {
-        return -illegalMovePenalty;
-    }
-    if (isTerm(nxtSVals)) {
-        return exitReward;
-    }
-
-    if (actId == SAMPLE) {
-        int rockNo = envMap[sVals[0]][sVals[1]] - ROCK;
-        if (0 <= rockNo && rockNo < nRocks) {
-            return sVals[2+rockNo] == GOOD ? goodRockReward : -badRockPenalty;
+    if (actId == TAG) {
+        if (sVals[0] == sVals[1]) {
+            return tagReward;
         } else {
-            // We shouldn't end up here, since isLegal should've been false.
-            return -illegalMovePenalty;
+            return -failedTagPenalty;
         }
+    } else {
+        return -moveCost;
     }
-    return 0;
 }
 
 
 void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<StateVals> &partSt,
         std::vector<StateVals> &partNxtSt) {
-    // If it's a CHECK action, we condition on the observation.
-    if (actId >= CHECK) {
-        int rockNo = actId - CHECK;
-        std::map<StateVals, double> weights;
-        double weightTotal = 0;
-        for (std::vector<StateVals>::iterator it = partSt.begin();
-                it != partSt.end(); it++) {
-            Coords pos((*it)[0], (*it)[1]);
-            double dist = pos.distance(rockCoords[rockNo]);
-            double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance))
-                * 0.5;
-            int rockState = (*it)[2+rockNo];
-            double probabilityFactor = 2 * (rockState == obs[0] ? efficiency :
-                    1 - efficiency);
-            weights[*it] += probabilityFactor;
-            weightTotal += probabilityFactor;
+    std::map<StateVals, double> weights;
+    double weightTotal = 0;
+    for (std::vector<StateVals>::iterator it = partSt.begin();
+            it != partSt.end(); it++) {
+        Coords oldRobotPos = decodeCoords((*it)[0]);
+        Coords newrobotPos = getMovedPos(oldRobotPos, actId);
+        Coords oldOpponentPos = decodeCoords((*it)[1]);
+        if (obs[1] == SEEN) {
+            tagged
+        double dist = pos.distance(rockCoords[rockNo]);
+        double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance))
+            * 0.5;
+        int rockState = (*it)[2+rockNo];
+        double probabilityFactor = 2 * (rockState == obs[0] ? efficiency :
+                1 - efficiency);
+        weights[*it] += probabilityFactor;
+        weightTotal += probabilityFactor;
+    }
+    double scale = nParticles / weightTotal;
+    for (std::map<StateVals, double>::iterator it = weights.begin();
+            it != weights.end(); it++) {
+        double proportion = it->second * scale;
+        int numToAdd = floor(proportion);
+        if (GlobalResources::rand01() <= (proportion - numToAdd)) {
+            numToAdd += 1;
         }
-        double scale = nParticles / weightTotal;
-        for (std::map<StateVals, double>::iterator it = weights.begin();
-                it != weights.end(); it++) {
-            double proportion = it->second * scale;
-            int numToAdd = floor(proportion);
-            double tmp = GlobalResources::randGen.ranf_arr_next();
-            if (tmp <= (proportion - numToAdd)) {
-                numToAdd += 1;
-            }
-            partNxtSt.insert(partNxtSt.end(), numToAdd, it->first);
-        }
-    } else {
-        // It's not a CHECK action, so we just add each resultant state.
-        for (std::vector<StateVals>::iterator it = partSt.begin();
-                it != partSt.end(); it++) {
-            StateVals nxtStVals;
-            makeNextState(*it, actId, nxtStVals);
-            partNxtSt.push_back(nxtStVals);
-        }
+        partNxtSt.insert(partNxtSt.end(), numToAdd, it->first);
     }
 }
 
 void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<StateVals> &partNxtSt) {
-    while (partNxtSt.size() < nParticles) {
-        StateVals sVals;
-        sampleStateUniform(sVals);
-        StateVals nxtStVals;
-        ObsVals obs2;
-        double reward;
-        getNextState(sVals, actId, &reward, nxtStVals, obs);
-        if (obs == obs2) {
-            partNxtSt.push_back(nxtStVals);
-        }
-    }
 }
 
 
@@ -342,10 +355,10 @@ void TagModel::update(long tCh, std::vector<StateVals> &affectedRange,
 
 bool TagModel::modifStSeq(std::vector<StateVals> &seqStVals,
         long startAffectedIdx, long endAffectedIdx,
-		std::vector<StateVals> &modifStSeq,
-		std::vector<long> &modifActSeq,
-		std::vector<ObsVals> &modifObsSeq,
-		std::vector<double> &modifRewSeq) {
+        std::vector<StateVals> &modifStSeq,
+        std::vector<long> &modifActSeq,
+        std::vector<ObsVals> &modifObsSeq,
+        std::vector<double> &modifRewSeq) {
 }
 
 
@@ -355,6 +368,7 @@ void TagModel::drawEnv(std::ostream &os) {
         for (std::vector<int>::iterator it2 = it->begin(); it2 != it->end();
                 it2++) {
             dispCell(*it2, os);
+            os << " ";
         }
         os << endl;
     }

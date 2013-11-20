@@ -35,20 +35,20 @@ inline bool operator==(const Coords& lhs, const Coords& rhs) {
 }
 
 class RockSampleModel : public Model {
-	public:
+    public:
         /**
-	     * Enumerates the possible actions. Note that there are actually
-	     * multiple check actions; Check-i is represented by CHECK+i,
-	     * where i is the rock number from 0..k-1 and k is the number
-	     * of rocks.
-	     */
-	    enum Action : int {
-	        NORTH=0,
-	        EAST=1,
-	        SOUTH=2,
-	        WEST=3,
-	        SAMPLE=4,
-	        CHECK=5
+         * Enumerates the possible actions. Note that there are actually
+         * multiple check actions; Check-i is represented by CHECK+i,
+         * where i is the rock number from 0..k-1 and k is the number
+         * of rocks.
+         */
+        enum Action : int {
+            NORTH=0,
+            EAST=1,
+            SOUTH=2,
+            WEST=3,
+            SAMPLE=4,
+            CHECK=5
         };
 
         void dispAct(int actId, std::ostream& os) {
@@ -154,38 +154,38 @@ class RockSampleModel : public Model {
             }
         }
 
-		RockSampleModel(po::variables_map vm);
-		~RockSampleModel();
+        RockSampleModel(po::variables_map vm);
+        ~RockSampleModel();
 
-		/***** Start implementation of Model's virtual functions *****/
+        /***** Start implementation of Model's virtual functions *****/
 
-		void sampleAnInitState(StateVals& sVals);
-		bool isTerm(StateVals &sVals);
-		void solveHeuristic(StateVals &s, double *qVal);
-		double getDefaultVal();
+        void sampleAnInitState(StateVals& sVals);
+        bool isTerm(StateVals &sVals);
+        void solveHeuristic(StateVals &s, double *qVal);
+        double getDefaultVal();
 
-		bool getNextState(StateVals &sVals, long actIdx,
-		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
-		double getReward(StateVals &sVals);
-		double getReward(StateVals &sVals, long actId);
+        bool getNextState(StateVals &sVals, long actIdx,
+                double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
+        double getReward(StateVals &sVals);
+        double getReward(StateVals &sVals, long actId);
 
-		void getStatesSeeObs(long actId, ObsVals &obs,
-		        std::vector<StateVals> &partSt,
-		        std::vector<StateVals> &partNxtSt);
-		void getStatesSeeObs(long actId, ObsVals &obs,
-		        std::vector<StateVals> &partNxtSt);
+        void getStatesSeeObs(long actId, ObsVals &obs,
+                std::vector<StateVals> &partSt,
+                std::vector<StateVals> &partNxtSt);
+        void getStatesSeeObs(long actId, ObsVals &obs,
+                std::vector<StateVals> &partNxtSt);
 
-		void setChanges(const char* chName, std::vector<long> &chTime);
-		void update(long tCh, std::vector<StateVals> &affectedRange,
-		        std::vector<ChType> &typeOfChanges);
-		bool modifStSeq(std::vector<StateVals> &seqStVals,
-		        long startAffectedIdx, long endAffectedIdx,
-				std::vector<StateVals> &modifStSeq,
-				std::vector<long> &modifActSeq,
-				std::vector<ObsVals> &modifObsSeq,
-				std::vector<double> &modifRewSeq);
+        void setChanges(const char* chName, std::vector<long> &chTime);
+        void update(long tCh, std::vector<StateVals> &affectedRange,
+                std::vector<ChType> &typeOfChanges);
+        bool modifStSeq(std::vector<StateVals> &seqStVals,
+                long startAffectedIdx, long endAffectedIdx,
+                std::vector<StateVals> &modifStSeq,
+                std::vector<long> &modifActSeq,
+                std::vector<ObsVals> &modifObsSeq,
+                std::vector<double> &modifRewSeq);
 
-		void drawEnv(std::ostream &os);
+        void drawEnv(std::ostream &os);
 
     private:
         /** The number of state particles in the initial belief. */
@@ -197,7 +197,7 @@ class RockSampleModel : public Model {
         * Finds and counts the rocks on the map, and initialisese the required
         * data structures and variables.
         */
-	    void initialise();
+        void initialise();
 
         /** Generates a state uniformly at random. */
         void sampleStateUniform(StateVals& sVals);
@@ -211,8 +211,10 @@ class RockSampleModel : public Model {
          * returns true if the action was legal, and false if it was illegal.
          */
         bool makeNextState(StateVals &sVals, long actId, StateVals &nxtSVals);
-        /** Generates an observation given a current state and action. */
-        int makeObs(StateVals &sVals, long actId);
+        /** Generates an observation given a next state (i.e. after the action)
+         * and an action.
+         */
+        int makeObs(StateVals &nxtSVals, long actId);
 
 
         /** The number of rows in the map. */

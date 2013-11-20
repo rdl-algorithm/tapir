@@ -2,6 +2,7 @@
 #define TagModel_H
 
 #include <ostream>
+#include <iomanip>
 #include <vector>
 #include <map>
 #include <string>
@@ -23,7 +24,6 @@ struct Coords {
     double distance(Coords& other) {
         return std::abs(i - other.i) + std::abs(j - other.j);
     }
-
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Coords& obj) {
@@ -35,27 +35,17 @@ inline bool operator==(const Coords& lhs, const Coords& rhs) {
 }
 
 class TagModel : public Model {
-	public:
-        /**
-	     * Enumerates the possible actions. Note that there are actually
-	     * multiple check actions; Check-i is represented by CHECK+i,
-	     * where i is the rock number from 0..k-1 and k is the number
-	     * of rocks.
-	     */
-	    enum Action : int {
-	        NORTH=0,
-	        EAST=1,
-	        SOUTH=2,
-	        WEST=3,
-	        SAMPLE=4,
-	        CHECK=5
+    public:
+        /** Enumerates the possible actions */
+        enum Action : int {
+            NORTH=0,
+            EAST=1,
+            SOUTH=2,
+            WEST=3,
+            TAG=4
         };
 
-        void dispAct(int actId, std::ostream& os) {
-            if (actId >= CHECK) {
-                os << "CHECK-" << actId-CHECK;
-                return;
-            }
+        void dispAct(long actId, std::ostream& os) {
             switch(actId) {
                 case NORTH:
                     os << "NORTH";
@@ -69,48 +59,29 @@ class TagModel : public Model {
                 case WEST:
                     os << "WEST";
                     break;
-                case SAMPLE:
-                    os << "SAMPLE";
-                    break;
-                default:
-                    os << "ERROR-" << actId;
+                case TAG:
+                    os << "TAG";
                     break;
             }
         }
 
-        /**
-         * There are only two possible observations - the rock
-         * is either good or bad. Note that observations are
-         * only meaningful when the action taken was CHECK;
-         * they are meaningless otherwise.
-         */
-        enum Obs : int {
-            NONE = 0,
-            BAD = 1,
-            GOOD = 2
-        };
-
-        /**
-         * Rocks are enumerated 0, 1, 2, ... ;
-         * other cell types should be negative.
+        /** The cells are either empty or walls; empty cells are numbered
+         * starting at 0
          */
         enum CellType : int {
-            ROCK = 0,
-            EMPTY = -1,
-            GOAL = -2,
+            EMPTY = 0,
+            WALL = -1
         };
 
         void dispCell(int cellType, std::ostream& os) {
-            if (cellType >= ROCK) {
-                os << std::hex << cellType - ROCK;
+            if (cellType >= EMPTY) {
+                os << std::setw(2);
+                os << cellType;
                 return;
             }
             switch(cellType) {
-                case EMPTY:
-                    os << '.';
-                    break;
-                case GOAL:
-                    os << 'G';
+                case WALL:
+                    os << "XX";
                     break;
                 default:
                     os << "ERROR-" << cellType;
@@ -118,129 +89,116 @@ class TagModel : public Model {
             }
         }
 
+        enum TaggedState : int {
+            UNTAGGED = 0,
+            TAGGED = 1
+        };
+
         void dispState(StateVals& s, std::ostream& os) {
-            os << Coords(s[0], s[1]) << " GOOD: {";
-            std::vector<int> goodRocks;
-            std::vector<int> badRocks;
-            for (int i = 2; i < s.size(); i++) {
-                if (s[i] == GOOD) {
-                    goodRocks.push_back(i-2);
-                } else {
-                    badRocks.push_back(i-2);
-                }
+            os << "ROBOT: " << decodeCoords(s[0]) << " OPPONENT: "
+                << decodeCoords(s[1]);
+            if (s[2] == TAGGED) {
+                os << " TAGGED!";
             }
-            std::copy(goodRocks.begin(), goodRocks.end(),
-                    std::ostream_iterator<double>(os, " "));
-            os << "}; BAD: {";
-            std::copy(badRocks.begin(), badRocks.end(),
-                    std::ostream_iterator<double>(os, " "));
-            os << "}";
         }
+
+        enum Obs : int {
+            UNSEEN = 0,
+            SEEN = 1
+        };
 
         void dispObs(ObsVals& o, std::ostream& os) {
-            switch((int)o[0]) {
-                case NONE:
-                    os << "NONE";
-                    break;
-                case GOOD:
-                    os << "GOOD";
-                    break;
-                case BAD:
-                    os << "BAD";
-                    break;
-                default:
-                    os << "ERROR-" << o[0];
-                    break;
+            os << decodeCoords(o[0]);
+            if (o[1] == SEEN) {
+                os << " SEEN!";
             }
         }
 
-		TagModel(po::variables_map vm);
-		~TagModel();
+        TagModel(po::variables_map vm);
+        ~TagModel();
 
-		/***** Start implementation of Model's virtual functions *****/
+        /***** Start implementation of Model's virtual functions *****/
 
-		void sampleAnInitState(StateVals& sVals);
-		bool isTerm(StateVals &sVals);
-		void solveHeuristic(StateVals &s, double *qVal);
-		double getDefaultVal();
+        void sampleAnInitState(StateVals& sVals);
+        bool isTerm(StateVals &sVals);
+        void solveHeuristic(StateVals &s, double *qVal);
+        double getDefaultVal();
 
-		bool getNextState(StateVals &sVals, long actIdx,
-		        double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
-		double getReward(StateVals &sVals);
-		double getReward(StateVals &sVals, long actId);
+        bool getNextState(StateVals &sVals, long actId,
+                double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
+        double getReward(StateVals &sVals);
+        double getReward(StateVals &sVals, long actId);
 
-		void getStatesSeeObs(long actId, ObsVals &obs,
-		        std::vector<StateVals> &partSt,
-		        std::vector<StateVals> &partNxtSt);
-		void getStatesSeeObs(long actId, ObsVals &obs,
-		        std::vector<StateVals> &partNxtSt);
+        void getStatesSeeObs(long actId, ObsVals &obs,
+                std::vector<StateVals> &partSt,
+                std::vector<StateVals> &partNxtSt);
+        void getStatesSeeObs(long actId, ObsVals &obs,
+                std::vector<StateVals> &partNxtSt);
 
-		void setChanges(const char* chName, std::vector<long> &chTime);
-		void update(long tCh, std::vector<StateVals> &affectedRange,
-		        std::vector<ChType> &typeOfChanges);
-		bool modifStSeq(std::vector<StateVals> &seqStVals,
-		        long startAffectedIdx, long endAffectedIdx,
-				std::vector<StateVals> &modifStSeq,
-				std::vector<long> &modifActSeq,
-				std::vector<ObsVals> &modifObsSeq,
-				std::vector<double> &modifRewSeq);
+        void setChanges(const char* chName, std::vector<long> &chTime);
+        void update(long tCh, std::vector<StateVals> &affectedRange,
+                std::vector<ChType> &typeOfChanges);
+        bool modifStSeq(std::vector<StateVals> &seqStVals,
+                long startAffectedIdx, long endAffectedIdx,
+                std::vector<StateVals> &modifStSeq,
+                std::vector<long> &modifActSeq,
+                std::vector<ObsVals> &modifObsSeq,
+                std::vector<double> &modifRewSeq);
 
-		void drawEnv(std::ostream &os);
+        void drawEnv(std::ostream &os);
 
     private:
-        /** The number of state particles in the initial belief. */
-        long nInitBel;
-        /** A vector of all the states in the initial belief. */
-        std::vector<StateVals> initBel;
+        /** Initialises the required data structures and variables */
+        void initialise();
 
-        /**
-        * Finds and counts the rocks on the map, and initialisese the required
-        * data structures and variables.
-        */
-	    void initialise();
-
-        /** Generates a state uniformly at random. */
+        /** Generates an untagged state uniformly at random. */
         void sampleStateUniform(StateVals& sVals);
-        /** Generates the state of the rocks uniformly at random. */
-        void sampleRocks(StateVals& sVals);
-        /** Decodes rocks from an integer. */
-        void decodeRocks(long val, StateVals& sVals);
 
         /**
          * Generates a next state for the given state and action;
          * returns true if the action was legal, and false if it was illegal.
          */
         bool makeNextState(StateVals &sVals, long actId, StateVals &nxtSVals);
-        /** Generates an observation given a current state and action. */
-        int makeObs(StateVals &sVals, long actId);
+        /** Generates an observation given a next state (i.e. after the action)
+         * and an action.
+         */
+        void makeObs(StateVals &nxtSVals, long actId, ObsVals &obsVals);
+        /** Moves the opponent. */
+        void moveOpponent(Coords &robotPos, Coords &opponentPos);
 
+        /** Gets the expected coordinates after taking the given action;
+         *  this may result in invalid coordinates.
+         */
+        Coords getMovedPos(Coords &coords, long actId);
+        /** Returns true iff the given coords form a valid position. */
+        bool isValid(StateVals &sVals);
+
+        /** Encodes the coordinates as an integer. */
+        long encodeCoords(Coords c);
+        /** Decodes the coordinates from an integer. */
+        Coords decodeCoords(long code);
 
         /** The number of rows in the map. */
         long nRows;
         /** The number of columns in the map. */
         long nCols;
-        /** The number of rocks on the map. */
-        long nRocks;
-        /** The starting position. */
-        Coords startPos;
-        /** The coordinates of the rocks. */
-        std::vector<Coords> rockCoords;
 
-        /** The reward for sampling a good rock. */
-        double goodRockReward;
-        /** The penalty for sampling a bad rock. */
-        double badRockPenalty;
-        /** The reward for exiting the map. */
-        double exitReward;
-        /** The penalty for an illegal move. */
-        double illegalMovePenalty;
+        /** The number of empty cells in the map. */
+        long nEmptyCells;
+        /** The empty cells, numbered; */
+        std::vector<Coords> emptyCells;
 
-        /** The half efficiency distance d0 */
-        double halfEfficiencyDistance;
+        /** The penalty for each movement. */
+        double moveCost;
+        /** The reward for taggint the opponent. */
+        double tagReward;
+        /** The penalty for failing a tag attempt. */
+        double failedTagPenalty;
+        /** The probability that the opponent will stay still. */
+        double opponentStayProbability;
 
         /** The environment map in text form. */
         std::vector<std::string> mapText;
-
         /** The environment map in vector form. */
         std::vector<std::vector<int> > envMap;
 };

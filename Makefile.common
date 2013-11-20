@@ -25,12 +25,13 @@ SOLVER_OBJS := $(patsubst $(SOLVER_SRCDIR)/%.cc, $(SOLVER_OBJDIR)/%.o,   $(SOLVE
 SOLVER_DEPS := $(patsubst $(SOLVER_SRCDIR)/%.cc, $(SOLVER_DEPDIR)/%.dep, $(SOLVER_SRCS))
 
 # ----------------------------------------------------------------------
-# Target/home/lackofcheese/Research/sbt/problems/RockSample/Makefiles
+# Targets
 # ----------------------------------------------------------------------/
 
-$(SOLVER_OBJS) :| $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
-$(SOLVER_DEPDIR) $(SOLVER_OBJDIR) :; mkdir -p $@
-$(SOLVER_OBJDIR)/%.o : $(SOLVER_SRCDIR)/%.cc
-	cd $(ROOT); $(CXX) $(CXXFLAGS) -MMD -MT "\$$(SOLVER_OBJDIR)/$*.o" \
-		-c $(SOLVER_SRCDIR_REL)/$*.cc -o $(SOLVER_OBJDIR_REL)/$*.o
+$(SOLVER_OBJS):| $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
+$(SOLVER_DEPDIR) $(SOLVER_OBJDIR):
+	mkdir -p $@
+$(SOLVER_OBJDIR)/%.o: $(SOLVER_SRCDIR)/%.cc
+	cd $(SOLVER_SRCDIR); $(CXX) $(CXXFLAGS) -MMD -MT "\$$(SOLVER_OBJDIR)/$*.o" \
+		-c $*.cc -o $(abspath $@)
 	@mv $(SOLVER_OBJDIR)/$*.d $(SOLVER_DEPDIR)/$*.dep

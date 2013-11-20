@@ -17,52 +17,52 @@ using std::endl;
 RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
     // Read the map from the file.
     std::ifstream inFile;
-	const char* mapPath = vm["problem.mapPath"].as<std::string>().c_str();
-	inFile.open(mapPath);
-	if (!inFile.is_open()) {
+    const char* mapPath = vm["problem.mapPath"].as<std::string>().c_str();
+    inFile.open(mapPath);
+    if (!inFile.is_open()) {
         std::cerr << "Fail to open " << mapPath << "\n";
-		exit(1);
-	}
-	inFile >> nRows >> nCols;
+        exit(1);
+    }
+    inFile >> nRows >> nCols;
     std::string tmp;
-	getline(inFile, tmp);
-	for (long i = 0; i < nRows; i++) {
-		getline(inFile, tmp);
-		mapText.push_back(tmp);
-	}
-	inFile.close();
+    getline(inFile, tmp);
+    for (long i = 0; i < nRows; i++) {
+        getline(inFile, tmp);
+        mapText.push_back(tmp);
+    }
+    inFile.close();
 
     goodRockReward = vm["problem.goodRockReward"].as<double>();
     badRockPenalty = vm["problem.badRockPenalty"].as<double>();
     exitReward = vm["problem.exitReward"].as<double>();
     illegalMovePenalty = vm["problem.illegalMovePenalty"].as<double>();
     halfEfficiencyDistance = vm["problem.halfEfficiencyDistance"].as<double>();
-	initialise();
-	cout << "Constructed the RockSampleModel" << endl;
-	cout << "Discount: " << discount << endl;
-	cout << "Size: " << nRows << " by " << nCols << endl;
-	cout << "Start: " << startPos.i << " " << startPos.j << endl;
-	cout << "nRocks: " << nRocks << endl;
-	cout << "Rock 0: " << rockCoords[0] << endl;
-	cout << "Rock 1: " << rockCoords[1] << endl;
-	cout << "good rock reward: " << goodRockReward << endl;
-	cout << "nActions: " << nActions << endl;
-	cout << "nObservations: " << nObservations << endl;
-	cout << "nStVars: " << nStVars << endl;
-	cout << "nInitBel: " << nInitBel << endl;
-	dispState(initBel[0], cout);
-	cout << endl;
-	dispState(initBel[1], cout);
-	cout << endl;
-	dispState(initBel[2], cout);
-	cout << endl;
-	dispState(initBel[3], cout);
-	cout << endl;
-	dispState(initBel[255], cout);
-	cout << endl;
-	cout << "nParticles: " << nParticles << endl;
-	cout << "Environment:" << endl;
-	drawEnv(cout);
+    initialise();
+    cout << "Constructed the RockSampleModel" << endl;
+    cout << "Discount: " << discount << endl;
+    cout << "Size: " << nRows << " by " << nCols << endl;
+    cout << "Start: " << startPos.i << " " << startPos.j << endl;
+    cout << "nRocks: " << nRocks << endl;
+    cout << "Rock 0: " << rockCoords[0] << endl;
+    cout << "Rock 1: " << rockCoords[1] << endl;
+    cout << "good rock reward: " << goodRockReward << endl;
+    cout << "nActions: " << nActions << endl;
+    cout << "nObservations: " << nObservations << endl;
+    cout << "nStVars: " << nStVars << endl;
+    cout << "nInitBel: " << nInitBel << endl;
+    dispState(initBel[0], cout);
+    cout << endl;
+    dispState(initBel[1], cout);
+    cout << endl;
+    dispState(initBel[2], cout);
+    cout << endl;
+    dispState(initBel[3], cout);
+    cout << endl;
+    dispState(initBel[255], cout);
+    cout << endl;
+    cout << "nParticles: " << nParticles << endl;
+    cout << "Environment:" << endl;
+    drawEnv(cout);
 }
 
 RockSampleModel::~RockSampleModel() {
@@ -73,37 +73,37 @@ RockSampleModel::~RockSampleModel() {
 void RockSampleModel::initialise() {
     nRocks = 0;
     Coords p;
-	for (p.i = 0; p.i < nRows; p.i++) {
-	    envMap.emplace_back();
-		for (p.j = 0; p.j < nCols; p.j++) {
-		    char c = mapText[p.i][p.j];
-		    long cellType;
-		    if (c == 'o') {
-		        rockCoords.push_back(p);
-		        cellType = ROCK + nRocks;
-		        nRocks++;
-		    } else if (c == 'G') {
-		        cellType = GOAL;
+    for (p.i = 0; p.i < nRows; p.i++) {
+        envMap.emplace_back();
+        for (p.j = 0; p.j < nCols; p.j++) {
+            char c = mapText[p.i][p.j];
+            long cellType;
+            if (c == 'o') {
+                rockCoords.push_back(p);
+                cellType = ROCK + nRocks;
+                nRocks++;
+            } else if (c == 'G') {
+                cellType = GOAL;
             } else if (c == 'S') {
-		        startPos = p;
-		        cellType = EMPTY;
+                startPos = p;
+                cellType = EMPTY;
             } else {
                 cellType = EMPTY;
             }
             envMap.back().push_back(cellType);
         }
-	}
+    }
 
-	nActions = 5 + nRocks;
-	nObservations = 2;
-	nStVars = 2 + nRocks;
-	StateVals s(nStVars);
-	s[0] = startPos.i;
-	s[1] = startPos.j;
-	nInitBel = 1 << nRocks;
-	for (long val = 0; val < nInitBel; val++) {
-	    decodeRocks(val, s);
-	    initBel.push_back(s);
+    nActions = 5 + nRocks;
+    nObservations = 2;
+    nStVars = 2 + nRocks;
+    StateVals s(nStVars);
+    s[0] = startPos.i;
+    s[1] = startPos.j;
+    nInitBel = 1 << nRocks;
+    for (long val = 0; val < nInitBel; val++) {
+        decodeRocks(val, s);
+        initBel.push_back(s);
     }
     minVal = -illegalMovePenalty / (1 - discount);
     maxVal = goodRockReward * nRocks + exitReward;
@@ -111,25 +111,21 @@ void RockSampleModel::initialise() {
 
 
 void RockSampleModel::sampleAnInitState(StateVals& sVals) {
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	long idx = (long)floor(tmp * nInitBel);
-	sVals = initBel[idx];
+    sVals = initBel[GlobalResources::randIntBetween(0, nInitBel - 1)];
 }
 
 void RockSampleModel::sampleStateUniform(StateVals& sVals) {
     sVals.resize(nStVars);
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	sVals[0] = (long)floor(tmp * nRows);
-	tmp = GlobalResources::randGen.ranf_arr_next();
-	sVals[1] = (long)floor(tmp * nCols);
-	sampleRocks(sVals);
-	dispState(sVals, cerr);
-	cerr << endl;
+    sVals[0] = GlobalResources::randIntBetween(0, nRows - 1);
+    sVals[1] = GlobalResources::randIntBetween(0, nCols - 1);
+    sampleRocks(sVals);
+    cerr << "Uniform random state: ";
+    dispState(sVals, cerr);
+    cerr << endl;
 }
 
 void RockSampleModel::sampleRocks(StateVals& sVals) {
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	decodeRocks((long)floor(tmp * nRows), sVals);
+    decodeRocks(GlobalResources::randIntBetween(0, 1<<nRocks - 1), sVals);
 }
 
 void RockSampleModel::decodeRocks(long val, StateVals& sVals) {
@@ -181,7 +177,7 @@ void RockSampleModel::solveHeuristic(StateVals &s, double *qVal) {
 }
 
 double RockSampleModel::getDefaultVal() {
-	return minVal;
+    return minVal;
 }
 
 bool RockSampleModel::makeNextState(StateVals &sVals, long actId,
@@ -221,20 +217,19 @@ bool RockSampleModel::makeNextState(StateVals &sVals, long actId,
     return true;
 }
 
-int RockSampleModel::makeObs(StateVals &sVals, long actId) {
+int RockSampleModel::makeObs(StateVals &nxtSVals, long actId) {
     if (actId < CHECK) {
         return NONE;
     }
     int rockNo = actId - CHECK;
-    Coords pos(sVals[0], sVals[1]);
+    Coords pos(nxtSVals[0], nxtSVals[1]);
     double dist = pos.distance(rockCoords[rockNo]);
     double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance)) * 0.5;
     // cerr << "D: " << dist << " E:" << efficiency << endl;
-	double tmp = GlobalResources::randGen.ranf_arr_next();
-	if (tmp <= efficiency) {
-	    return sVals[2+rockNo] == GOOD ? GOOD : BAD; // Correct obs.
-	} else {
-	    return sVals[2+rockNo] == GOOD ? BAD : GOOD; // Incorrect obs.
+    if (GlobalResources::rand01() < efficiency) {
+        return nxtSVals[2+rockNo] == GOOD ? GOOD : BAD; // Correct obs.
+    } else {
+        return nxtSVals[2+rockNo] == GOOD ? BAD : GOOD; // Incorrect obs.
     }
 }
 
@@ -243,7 +238,7 @@ bool RockSampleModel::getNextState(StateVals &sVals, long actId,
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
     obs.resize(1);
-    obs[0] = makeObs(sVals, actId);
+    obs[0] = makeObs(nxtSVals, actId);
     return isTerm(nxtSVals);
 }
 
@@ -299,8 +294,7 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
                 it != weights.end(); it++) {
             double proportion = it->second * scale;
             int numToAdd = floor(proportion);
-            double tmp = GlobalResources::randGen.ranf_arr_next();
-            if (tmp <= (proportion - numToAdd)) {
+            if (GlobalResources::rand01() <= (proportion - numToAdd)) {
                 numToAdd += 1;
             }
             partNxtSt.insert(partNxtSt.end(), numToAdd, it->first);
@@ -342,10 +336,10 @@ void RockSampleModel::update(long tCh, std::vector<StateVals> &affectedRange,
 
 bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals,
         long startAffectedIdx, long endAffectedIdx,
-		std::vector<StateVals> &modifStSeq,
-		std::vector<long> &modifActSeq,
-		std::vector<ObsVals> &modifObsSeq,
-		std::vector<double> &modifRewSeq) {
+        std::vector<StateVals> &modifStSeq,
+        std::vector<long> &modifActSeq,
+        std::vector<ObsVals> &modifObsSeq,
+        std::vector<double> &modifRewSeq) {
 }
 
 

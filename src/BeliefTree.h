@@ -10,21 +10,21 @@
 #include "Histories.h"
 
 class BeliefTree {
-	public:
-		friend class Solver;
+    public:
+        friend class Solver;
 
-		BeliefTree();
-		~BeliefTree();
-		void deleteHelper(std::queue<BeliefNode*> &tmpNodes);
+        BeliefTree();
+        ~BeliefTree();
+        void deleteHelper(std::queue<BeliefNode*> &tmpNodes);
 
-		void readPolicy(std::ifstream &inFile, Histories *allHist);
-		void write(std::ostream &os);
-		void writeHelp(std::queue<BeliefNode*> &tmpNodes, std::ostream &os);
+        void readPolicy(std::ifstream &inFile, Histories *allHist);
+        void write(std::ostream &os);
+        void writeHelp(std::queue<BeliefNode*> &tmpNodes, std::ostream &os);
 
-		BeliefNode* getRoot() { return root; }
+        BeliefNode* getRoot() { return root; }
 
-	private:
-		BeliefNode *root;
+    private:
+        BeliefNode *root;
         std::vector<BeliefNode*> allNodes;
 
 
