@@ -1,21 +1,6 @@
+default: all
+include Makefile.common
 
-# ----------------------------------------------------------------------
-# Customizations
-# ----------------------------------------------------------------------
-
-#
-# root directory of the package
-#
-ROOT := .
-
-#
-# directories
-#
-SRCDIR = $(ROOT)/src
-OBJDIR = $(ROOT)/obj
-DEPDIR = $(ROOT)/dep
-
-# ----------------------------------------------------------------------
 # Compiler & linker
 # ----------------------------------------------------------------------
 CC = gcc
@@ -35,42 +20,27 @@ INCDIRS =
 # Linker flags
 #---------------------------------------------------------------------#
 
-LIBPATH = -L/usr/lib/x86_64-linux-gnu/
-
-LDFLAGS = -g -w -lboost_program_options
-
-# ----------------------------------------------------------------------
-# Files
-# ----------------------------------------------------------------------
-
-SRCS = $(wildcard $(SRCDIR)/*.cc)
-HDRS = $(wildcard $(SRCDIR)/*.h)
-OBJS = $(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o, $(SRCS))
-DEPS = $(patsubst $(SRCDIR)/%.cc,$(DEPDIR)/%.dep, $(SRCS))
-
+LDFLAGS = -g -w -lboost_program_options -L/usr/lib/x86_64-linux-gnu/
 
 # ----------------------------------------------------------------------
 # Targets
-# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------/
+.PHONY: all
 all: CXXFLAGS += $(RELEASE_FLAGS)
-all: $(OBJS)
+all: $(SOLVER_OBJS)
 
+.PHONY: debug
 debug: CXXFLAGS += $(DEBUG_FLAGS)
-debug: $(OBJS)
+debug: $(SOLVER_OBJS)
 
-$(OBJS) :| $(OBJDIR) $(DEPDIR)
-$(DEPDIR) $(OBJDIR) :; mkdir -p $@
-
-$(OBJDIR)/%.o : $(SRCDIR)/%.cc
-	$(CXX) $(CXXFLAGS) -MM -MD -MT $@ -c $< -o $@
-	@mv $(OBJDIR)/$*.d $(DEPDIR)/$*.dep
-
+.PHONY: clean
 clean:
-	rm -rf $(OBJDIR)
-	rm -rf $(DEPDIR)
+	rm -f $(SOLVER_OBJS) $(SOLVER_DEPS)
 
--include $(DEPS)
+-include $(SOLVER_DEPS)
 
-.PHONY: all clean debug
+.PHONY: disp
+disp:
+	@echo $(SOLVER_OBJS)
 
 # DO NOT DELETE

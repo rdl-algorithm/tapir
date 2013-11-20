@@ -15,6 +15,50 @@ namespace po = boost::program_options;
 
 class UnderwaterNavModifModel : public Model {
 	public:
+		enum Action: int {
+		    EAST=0,
+		    NORTH=1,
+		    SOUTH=2,
+		    NORTHEAST=3,
+		    SOUTHEAST=4
+		};
+
+		void dispAct(int actId, std::ostream& os) {
+            switch(actId) {
+                case EAST:
+                    os << "EAST";
+                    break;
+                case NORTH:
+                    os << "NORTH";
+                    break;
+                case SOUTH:
+                    os << "SOUTH";
+                    break;
+                case NORTHEAST:
+                    os << "NORTHEAST";
+                    break;
+                case SOUTHEAST:
+                    os << "SOUTHEAST";
+                    break;
+                default:
+                    os << "ERROR-" << actId;
+                    break;
+            }
+        }
+
+        void dispState(StateVals& s, std::ostream& os) {
+            os << "(" << s[0] << ", " << s[1] << ")";
+        }
+
+        void dispObs(ObsVals& o, std::ostream& os) {
+            if (o[0] == -1 && o[1] == -1) {
+                os << "NONE";
+                return;
+            }
+            os << "(" << o[0] << ", " << o[1] << ")";
+        }
+
+
 		UnderwaterNavModifModel(po::variables_map vm);
 		~UnderwaterNavModifModel();
 
@@ -55,8 +99,6 @@ class UnderwaterNavModifModel : public Model {
         long nInitBel;
         /** A vector of all the states in the initial belief. */
         std::vector<StateVals> initBel;
-
-		enum { EAST=0, NORTH=1, SOUTH=2, NORTHEAST=3, SOUTHEAST=4 };
 
 		long nX, nY, nGoals, nRocks;
 		double goalReward, crashPenalty, moveCost, moveDiagCost;
