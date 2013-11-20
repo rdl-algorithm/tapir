@@ -20,17 +20,17 @@ struct Coords {
     Coords() : i(0), j(0) {}
     Coords(long i, long j) : i(i), j(j) {}
 
-    double distance(Coords& other) {
+    double distance(Coords &other) {
         return std::abs(i - other.i) + std::abs(j - other.j);
     }
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Coords& obj) {
+inline std::ostream &operator<<(std::ostream &os, const Coords &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";
     return os;
 }
-inline bool operator==(const Coords& lhs, const Coords& rhs) {
+inline bool operator==(const Coords &lhs, const Coords &rhs) {
     return lhs.i == rhs.i && lhs.j == rhs.j;
 }
 
@@ -42,7 +42,7 @@ class RockSampleModel : public Model {
          * where i is the rock number from 0..k-1 and k is the number
          * of rocks.
          */
-        enum Action : int {
+        enum Action : long {
             NORTH=0,
             EAST=1,
             SOUTH=2,
@@ -51,7 +51,7 @@ class RockSampleModel : public Model {
             CHECK=5
         };
 
-        void dispAct(int actId, std::ostream& os) {
+        void dispAct(long actId, std::ostream &os) {
             if (actId >= CHECK) {
                 os << "CHECK-" << actId-CHECK;
                 return;
@@ -100,7 +100,7 @@ class RockSampleModel : public Model {
             GOAL = -2,
         };
 
-        void dispCell(int cellType, std::ostream& os) {
+        void dispCell(int cellType, std::ostream &os) {
             if (cellType >= ROCK) {
                 os << std::hex << cellType - ROCK;
                 return;
@@ -118,7 +118,7 @@ class RockSampleModel : public Model {
             }
         }
 
-        void dispState(StateVals& s, std::ostream& os) {
+        void dispState(StateVals &s, std::ostream &os) {
             os << Coords(s[0], s[1]) << " GOOD: {";
             std::vector<int> goodRocks;
             std::vector<int> badRocks;
@@ -137,7 +137,7 @@ class RockSampleModel : public Model {
             os << "}";
         }
 
-        void dispObs(ObsVals& o, std::ostream& os) {
+        void dispObs(ObsVals &o, std::ostream &os) {
             switch((int)o[0]) {
                 case NONE:
                     os << "NONE";
@@ -159,7 +159,7 @@ class RockSampleModel : public Model {
 
         /***** Start implementation of Model's virtual functions *****/
 
-        void sampleAnInitState(StateVals& sVals);
+        void sampleAnInitState(StateVals &sVals);
         bool isTerm(StateVals &sVals);
         void solveHeuristic(StateVals &s, double *qVal);
         double getDefaultVal();
@@ -175,7 +175,7 @@ class RockSampleModel : public Model {
         void getStatesSeeObs(long actId, ObsVals &obs,
                 std::vector<StateVals> &partNxtSt);
 
-        void setChanges(const char* chName, std::vector<long> &chTime);
+        void setChanges(const char *chName, std::vector<long> &chTime);
         void update(long tCh, std::vector<StateVals> &affectedRange,
                 std::vector<ChType> &typeOfChanges);
         bool modifStSeq(std::vector<StateVals> &seqStVals,
@@ -200,11 +200,11 @@ class RockSampleModel : public Model {
         void initialise();
 
         /** Generates a state uniformly at random. */
-        void sampleStateUniform(StateVals& sVals);
+        void sampleStateUniform(StateVals &sVals);
         /** Generates the state of the rocks uniformly at random. */
-        void sampleRocks(StateVals& sVals);
+        void sampleRocks(StateVals &sVals);
         /** Decodes rocks from an integer. */
-        void decodeRocks(long val, StateVals& sVals);
+        void decodeRocks(long val, StateVals &sVals);
 
         /**
          * Generates a next state for the given state and action;

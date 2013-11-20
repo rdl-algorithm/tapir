@@ -17,7 +17,7 @@ using std::endl;
 TagModel::TagModel(po::variables_map vm) : Model(vm) {
     // Read the map from the file.
     std::ifstream inFile;
-    const char* mapPath = vm["problem.mapPath"].as<std::string>().c_str();
+    const char *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
         std::cerr << "Fail to open " << mapPath << "\n";
@@ -85,7 +85,7 @@ void TagModel::initialise() {
 
     nActions = 5;
     nObservations = nEmptyCells * 2;
-    nStVars = 5;
+    nStVars = 3;
     minVal = -failedTagPenalty / (1 - discount);
     maxVal = tagReward;
 }
@@ -98,68 +98,15 @@ Coords TagModel::decodeCoords(long code) {
     return emptyCells[code];
 }
 
-void TagModel::sampleAnInitState(StateVals& sVals) {
+void TagModel::sampleAnInitState(StateVals &sVals) {
     sampleStateUniform(sVals);
 }
 
-void TagModel::sampleStateUniform(StateVals& sVals) {
+void TagModel::sampleStateUniform(StateVals &sVals) {
     sVals.resize(nStVars);
-    sVals[0] = GlobalResources::randIntBetween(0, nRows - 1);
-    sVals[1] = GlobalResources::randIntBetween(0, nCols - 1);
-    sVals[2] = GlobalResources::randIntBetween(0, nRows - 1);
-    sVals[3] = GlobalResources::randIntBetween(0, nCols - 1);
-    sVals[4] = UNTAGGED;
-}
-
-bool TagModel::isTerm(StateVals &sVals) {
-    return sVals[2] == TAGGED;
-}
-
-void TagModel::solveHeuristic(StateVals &s, double *qVal) {
-    Coords robotPos = decodeCoords(s[0]);
-    Coords opponentPos = decodeCoords(s[1]);
-    if (s[2] == TAGGED) {
-        *qVal = 0;
-        return;
-    }
-    int dist = robotPos.distance(opponentPos);
-    double nSteps = dist / opponentStayProbability;
-    double finalDiscount = pow(discount, nSteps);
-    *qVal = -moveCost * (1 - finalDiscount) / (1 - discount);
-    *qVal += finalDiscount * tagReward;
-}
-
-double TagModel::getDefaultVal() {
-    return minVal;
-}
-
-bool TagModel::makeNextState(StateVals &sVals, long actId,
-        StateVals &nxtSVals) {
-    nxtSVals = sVals;
-    if (sVals[2] == TAGGED) {
-        return false;
-    }
-
-    Coords robotPos = decodeCoords(sVals[0]);
-    Coords opponentPos = decodeCoords(sVals[1]);
-    if (actId == TAG && robotPos == opponentPos) {
-        nxtSVals[2] = TAGGED;
-        return true;
-    }
-    moveOpponent(robotPos, opponentPos);
-    nxtSVals[1] = e
-
-void TagModel::sampleAnInitState(StateVals& sVals) {
-    sampleStateUniform(sVals);
-}
-
-void TagModel::sampleStateUniform(StateVals& sVals) {
-    sVals.resize(nStVars);
-    sVals[0] = GlobalResources::randIntBetween(0, nRows - 1);
-    sVals[1] = GlobalResources::randIntBetween(0, nCols - 1);
-    sVals[2] = GlobalResources::randIntBetween(0, nRows - 1);
-    sVals[3] = GlobalResources::randIntBetween(0, nCols - 1);
-    sVals[4] = UNTAGGED;
+    sVals[0] = GlobalResources::randIntBetween(0, nEmptyCells);
+    sVals[1] = GlobalResources::randIntBetween(0, nEmptyCells);
+    sVals[2] = UNTAGGED;
 }
 
 bool TagModel::isTerm(StateVals &sVals) {
@@ -200,15 +147,15 @@ bool TagModel::makeNextState(StateVals &sVals, long actId,
     moveOpponent(robotPos, opponentPos);
     nxtSVals[1] = encodeCoords(opponentPos);
     robotPos = getMovedPos(robotPos, actId);
-    if !isValid(robotPos) {
+    if (!isValid(robotPos)) {
         return false;
     }
     nxtSVals[0] = encodeCoords(robotPos);
     return true;
 }
 
-void TagModel::makeOpponentActions(coords& robotPos, Coords& opponentPos,
-        vector<long>& actions) {
+void TagModel::makeOpponentActions(Coords &robotPos, Coords &opponentPos,
+        std::vector<long> &actions) {
     if (robotPos.i > opponentPos.i) {
         actions.push_back(NORTH);
         actions.push_back(NORTH);
@@ -236,11 +183,11 @@ void TagModel::moveOpponent(Coords &robotPos, Coords &opponentPos) {
     if (GlobalResources::rand01() < opponentStayProbability) {
         return;
     }
-    vector<long> actions;
+    std::vector<long> actions;
     makeOpponentActions(robotPos, opponentPos, actions);
     Coords newOpponentPos = getMovedPos(opponentPos,
             actions[GlobalResources::randIntBetween(0, actions.size() - 1)]);
-    if isValid(newOpponentPos) {
+    if (isValid(newOpponentPos)) {
         opponentPos = newOpponentPos;
     }
 }
@@ -252,7 +199,7 @@ Coords TagModel::getMovedPos(Coords &coords, long actId) {
             movedPos.i -= 1;
             break;
         case EAST:
-            movedPos.j += 1
+            movedPos.j += 1;
             break;
         case SOUTH:
             movedPos.i += 1;
@@ -263,7 +210,7 @@ Coords TagModel::getMovedPos(Coords &coords, long actId) {
     return movedPos;
 }
 
-boolean isValid(Coords &coords) {
+bool TagModel::isValid(Coords &coords) {
     if (coords.i < 0 || coords.i >= nRows || coords.j < 0 ||
             coords.j >= nCols || envMap[coords.i][coords.j] == WALL) {
         return false;
@@ -273,11 +220,10 @@ boolean isValid(Coords &coords) {
 
 void TagModel::makeObs(StateVals &nxtSVals, long actId, ObsVals &obsVals) {
     obsVals[0] = nxtSVals[0];
-    obsVals[1] = nxtSVals[1];
-    if (nxtSVals[0] == nxtSVals[2] && nxtSVals[1] == nxtSVals[3]) {
-        obsVals[2] = SEEN;
+    if (nxtSVals[0] == nxtSVals[1]) {
+        obsVals[1] = SEEN;
     } else {
-        obsVals[2] = UNSEEN;
+        obsVals[1] = UNSEEN;
     }
 }
 
@@ -285,8 +231,8 @@ bool TagModel::getNextState(StateVals &sVals, long actId,
         double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
-    obs.resize(1);
-    obs[0] = makeObs(sVals, actId);
+    obs.resize(2);
+    makeObs(sVals, actId, obs);
     return isTerm(nxtSVals);
 }
 
@@ -312,20 +258,40 @@ void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<StateVals> &partNxtSt) {
     std::map<StateVals, double> weights;
     double weightTotal = 0;
-    for (std::vector<StateVals>::iterator it = partSt.begin();
-            it != partSt.end(); it++) {
-        Coords oldRobotPos = decodeCoords((*it)[0]);
-        Coords newrobotPos = getMovedPos(oldRobotPos, actId);
-        Coords oldOpponentPos = decodeCoords((*it)[1]);
-        if (obs[1] == SEEN) {
-            tagged
+    Coords newRobotPos = decodeCoords(obs[0]);
+    if (obs[1] == SEEN) {
+        Coords newOpponentPos = newRobotPos;
+        StateVals nxtSVals(nStVars);
+        nxtSVals[0] = nxtSVals[1] = obs[0];
+        nxtSVals[2] = (actId == TAG ? TAGGED : UNTAGGED);
+        partNxtSt.push_back(nxtSVals);
+        return;
+    }
+    for (StateVals &sv : partSt) {
+        Coords oldRobotPos = decodeCoords(sv[0]);
+        // Ignore states that do not match knowledge of the robot's position.
+        if (newRobotPos != getMovedPos(oldRobotPos, actId)) {
+            continue;
+        }
+        Coords oldOpponentPos = decodeCoords((sv)[1]);
+        std::vector<long> actions;
+        makeOpponentActions(oldRobotPos, oldOpponentPos, actions);
+        std::vector<long> newActions(actions.size());
+        auto newActionsEnd = std::copy_if(actions.begin(), actions.end(),
+                newActions.begin(), [](long x) {
+                return getMovedPos(oldOpponentPos, x) != newRobotPos;
+                });
+        newActions.resize(std::distance(newActions.begin(), newActionsEnd));
+        for (auto &it2 : newActions) {
+            double probabilityFactor = 1.0 / newActions.size();
+        }
         double dist = pos.distance(rockCoords[rockNo]);
-        double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance))
-            * 0.5;
-        int rockState = (*it)[2+rockNo];
+        double efficiency = ((1 + pow(2, -dist / halfEfficiencyDistance))
+            * 0.5);
+        int rockState = (sv)[2+rockNo];
         double probabilityFactor = 2 * (rockState == obs[0] ? efficiency :
                 1 - efficiency);
-        weights[*it] += probabilityFactor;
+        weights[sv] += probabilityFactor;
         weightTotal += probabilityFactor;
     }
     double scale = nParticles / weightTotal;
@@ -342,10 +308,18 @@ void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
 
 void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<StateVals> &partNxtSt) {
+    if (obs[1] == SEEN) {
+        Coords newOpponentPos = newRobotPos;
+        StateVals nxtSVals(nStVars);
+        nxtSVals[0] = nxtSVals[1] = obs[0];
+        nxtSVals[2] = (actId == TAG ? TAGGED : UNTAGGED);
+        partNxtSt.push_back(nxtSVals);
+        return;
+    }
 }
 
 
-void TagModel::setChanges(const char* chName,
+void TagModel::setChanges(const char *chName,
         std::vector<long> &chTime) {
 }
 
@@ -363,11 +337,9 @@ bool TagModel::modifStSeq(std::vector<StateVals> &seqStVals,
 
 
 void TagModel::drawEnv(std::ostream &os) {
-    for (std::vector<std::vector<int>>:: iterator it = envMap.begin();
-            it != envMap.end(); it++) {
-        for (std::vector<int>::iterator it2 = it->begin(); it2 != it->end();
-                it2++) {
-            dispCell(*it2, os);
+    for (std::vector<int> &row : envMap) {
+        for (int &cellType : row) {
+            dispCell(cellType, os);
             os << " ";
         }
         os << endl;

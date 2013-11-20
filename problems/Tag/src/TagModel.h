@@ -21,16 +21,16 @@ struct Coords {
     Coords() : i(0), j(0) {}
     Coords(long i, long j) : i(i), j(j) {}
 
-    double distance(Coords& other) {
+    double distance(Coords &other) {
         return std::abs(i - other.i) + std::abs(j - other.j);
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Coords& obj) {
+inline std::ostream &operator<<(std::ostream &os, const Coords &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";
     return os;
 }
-inline bool operator==(const Coords& lhs, const Coords& rhs) {
+inline bool operator==(const Coords &lhs, const Coords &rhs) {
     return lhs.i == rhs.i && lhs.j == rhs.j;
 }
 
@@ -45,7 +45,7 @@ class TagModel : public Model {
             TAG=4
         };
 
-        void dispAct(long actId, std::ostream& os) {
+        void dispAct(long actId, std::ostream &os) {
             switch(actId) {
                 case NORTH:
                     os << "NORTH";
@@ -73,7 +73,7 @@ class TagModel : public Model {
             WALL = -1
         };
 
-        void dispCell(int cellType, std::ostream& os) {
+        void dispCell(int cellType, std::ostream &os) {
             if (cellType >= EMPTY) {
                 os << std::setw(2);
                 os << cellType;
@@ -94,7 +94,7 @@ class TagModel : public Model {
             TAGGED = 1
         };
 
-        void dispState(StateVals& s, std::ostream& os) {
+        void dispState(StateVals &s, std::ostream &os) {
             os << "ROBOT: " << decodeCoords(s[0]) << " OPPONENT: "
                 << decodeCoords(s[1]);
             if (s[2] == TAGGED) {
@@ -107,7 +107,7 @@ class TagModel : public Model {
             SEEN = 1
         };
 
-        void dispObs(ObsVals& o, std::ostream& os) {
+        void dispObs(ObsVals &o, std::ostream &os) {
             os << decodeCoords(o[0]);
             if (o[1] == SEEN) {
                 os << " SEEN!";
@@ -119,7 +119,7 @@ class TagModel : public Model {
 
         /***** Start implementation of Model's virtual functions *****/
 
-        void sampleAnInitState(StateVals& sVals);
+        void sampleAnInitState(StateVals &sVals);
         bool isTerm(StateVals &sVals);
         void solveHeuristic(StateVals &s, double *qVal);
         double getDefaultVal();
@@ -135,7 +135,7 @@ class TagModel : public Model {
         void getStatesSeeObs(long actId, ObsVals &obs,
                 std::vector<StateVals> &partNxtSt);
 
-        void setChanges(const char* chName, std::vector<long> &chTime);
+        void setChanges(const char *chName, std::vector<long> &chTime);
         void update(long tCh, std::vector<StateVals> &affectedRange,
                 std::vector<ChType> &typeOfChanges);
         bool modifStSeq(std::vector<StateVals> &seqStVals,
@@ -152,7 +152,7 @@ class TagModel : public Model {
         void initialise();
 
         /** Generates an untagged state uniformly at random. */
-        void sampleStateUniform(StateVals& sVals);
+        void sampleStateUniform(StateVals &sVals);
 
         /**
          * Generates a next state for the given state and action;
@@ -165,13 +165,16 @@ class TagModel : public Model {
         void makeObs(StateVals &nxtSVals, long actId, ObsVals &obsVals);
         /** Moves the opponent. */
         void moveOpponent(Coords &robotPos, Coords &opponentPos);
+        /** Generates the distribution for the opponent's actions. */
+        void makeOpponentActions(Coords &robotPos, Coords &opponentPos,
+                std::vector<long> &actions);
 
         /** Gets the expected coordinates after taking the given action;
          *  this may result in invalid coordinates.
          */
         Coords getMovedPos(Coords &coords, long actId);
         /** Returns true iff the given coords form a valid position. */
-        bool isValid(StateVals &sVals);
+        bool isValid(Coords &sVals);
 
         /** Encodes the coordinates as an integer. */
         long encodeCoords(Coords c);

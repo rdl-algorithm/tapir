@@ -43,7 +43,7 @@ class Model {
         inline double getDiscount() { return discount; }
         /** Returns the # of actions for this POMDP. */
         inline long getNActions() { return nActions; }
-        /** Returns the # of observations for this POMDP. */
+        /** Returns the # of observations f {or this POMDP. */
         inline long getNObservations() { return nObservations; }
         /** Returns the number of state variables for this PODMP. */
         inline long getNStVars() { return nStVars; }
@@ -78,7 +78,7 @@ class Model {
         /* --------------- Start virtual functions ----------------- */
 
         /** Samples an initial state from the belief vector. */
-        virtual void sampleAnInitState(StateVals& sVals)=0;
+        virtual void sampleAnInitState(StateVals &sVals)=0;
         /** Returns true iff the given state is terminal. */
         virtual bool isTerm(StateVals &sVals)=0;
         /** Approximates the q-value of a state */
@@ -110,7 +110,7 @@ class Model {
                 std::vector<StateVals> &partNxtSt)=0;
 
         /** Loads model changes from the given file. */
-        virtual void setChanges(const char* chName,
+        virtual void setChanges(const char *chName,
                 std::vector<long> &chTime)=0;
         /** Retrieves the states that are affected*/
         virtual void update(long tCh, std::vector<StateVals> &affectedRange,
@@ -122,9 +122,9 @@ class Model {
                 std::vector<ObsVals> &modifObsSeq,
                 std::vector<double> &modifRewSeq)=0;
 
-        virtual void dispAct(long actId, std::ostream& os)=0;
-        virtual void dispState(StateVals& s, std::ostream& os)=0;
-        virtual void dispObs(ObsVals& o, std::ostream& os)=0;
+        virtual void dispAct(long actId, std::ostream &os)=0;
+        virtual void dispState(StateVals &s, std::ostream &os)=0;
+        virtual void dispObs(ObsVals &o, std::ostream &os)=0;
         virtual void drawEnv(std::ostream &os)=0;
 
     protected:

@@ -483,19 +483,16 @@ double Solver::runSim(long nSteps, vector<long> &tChanges, vector<StateVals> &tr
         currDiscFactor = currDiscFactor*discFactor;
         cerr << "Discount Factor: " << currDiscFactor << endl;
         cerr << "Total Reward: " << val << endl;
-
+        if (isTerm) {
+            *actualNSteps = i;
+            break;
+        }
         if (nxtNode == NULL) {
             nxtNode = addChild(currNode, trajActId.back(), trajObs.back(), i);
         }
         currNode = nxtNode;
         currStVals = nxtStVals;
-
-        if (isTerm) {
-            *actualNSteps = i;
-            break;
-        }
     }
-    // cerr << endl;
     return val;
 }
 

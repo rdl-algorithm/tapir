@@ -83,7 +83,6 @@ UnderwaterNavModifModel::~UnderwaterNavModifModel() {
 }
 
 void UnderwaterNavModifModel::setInitObsGoal() {
-    vector<string>::iterator itMap;
     nActions = 5;
     nObservations = 0;
     nStVars = 2;
@@ -91,43 +90,43 @@ void UnderwaterNavModifModel::setInitObsGoal() {
 
     nGoals = 0;
     long i = 0;
-    for (itMap = envMap.begin(); itMap != envMap.end(); itMap++) {
+    for (string &line : envMap) {
         for (long j = 0; j < nX; j++) {
-            if ((*itMap)[j] == 'S') {
+            if (line[j] == 'S') {
                 StateVals s(2); s[0] = j; s[1] = i;
                 initBel.push_back(s);
                 nInitBel ++;
             }
-            else if ((*itMap)[j] == 'O') {
+            else if (line[j] == 'O') {
                 cellType[j][i] = 3;
                 StateVals s(2); s[0] = j; s[1] = i;
                 allObservations.push_back(s);
                 nObservations ++;
             }
-            else if ((*itMap)[j] == 'D') {
+            else if (line[j] == 'D') {
                 cellType[j][i] = 1;
                 StateVals s(2); s[0] = j; s[1] = i;
                 goals.push_back(s);
                 nGoals ++;
             }
-            else if ((*itMap)[j] == 'R') {
+            else if (line[j] == 'R') {
                 cellType[j][i] = 2;
                 StateVals s(2); s[0] = j; s[1] = i;
                 rocks.push_back(s);
                 nRocks ++;
             }
-            else if  ((*itMap)[j] == '1') {
+            else if  (line[j] == '1') {
                 cellType[j][i] = 5;
             }
-            else if (islower((*itMap)[j])) {
-                cellType[j][i] = (short) ((*itMap)[j]) - 97;
+            else if (islower(line[j])) {
+                cellType[j][i] = (short) (line[j]) - 97;
             }
         }
         i++;
     }
 }
 
-void UnderwaterNavModifModel::sampleAnInitState(StateVals& tmpStVals) {
+void UnderwaterNavModifModel::sampleAnInitState(StateVals &tmpStVals) {
     long idx = GlobalResources::randIntBetween(0, nInitBel - 1);
     tmpStVals = initBel[idx];
 //cerr << "sampled " << tmpStVals[0] << " " << tmpStVals[1] << endl;
@@ -401,10 +400,8 @@ void UnderwaterNavModifModel::inObsRegion(StateVals &sVals, ObsVals &obs) {
 
 bool UnderwaterNavModifModel::inGoal(StateVals &st) {
     //return cellType[st[0]][st[1]] == 1 ? true : false;
-
-    vector<StateVals>::iterator it;
-    for (it = goals.begin(); it != goals.end(); it++) {
-        if (st[0] == (*it)[0] && st[1] == (*it)[1]) {
+    for (StateVals &goal : goals) {
+        if (st[0] == goal[0] && st[1] == goal[1]) {
             return true;
         }
     }
@@ -413,10 +410,8 @@ bool UnderwaterNavModifModel::inGoal(StateVals &st) {
 
 bool UnderwaterNavModifModel::inRock(StateVals &st) {
     //return cellType[st[0]][st[1]] == 2 ? true : false;
-
-    vector<StateVals>::iterator it;
-    for (it = rocks.begin(); it != rocks.end(); it++) {
-        if (st[0] == (*it)[0] && st[1] == (*it)[1]) {
+    for (StateVals &rock : rocks) {
+        if (st[0] == rock[0] && st[1] == rock[1]) {
             return true;
         }
     }
@@ -531,11 +526,10 @@ void UnderwaterNavModifModel::setChanges(const char* chName,
 void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
         vector<ChType> &typeOfChanges) {
     affectedRange.clear();
-    vector<string>::iterator it;
     vector<StateVals>::iterator itStVals;
     string cmd, var, tmpStr;
-    for (it = changes[tCh].begin(); it != changes[tCh].end(); it++) {
-        stringstream ss(*it);
+    for (string changeString : changes[tCh]) {
+        stringstream ss(changeString);
         ss >> cmd;
         if (cmd.compare("Add") == 0) {
             ss >> var;
@@ -781,13 +775,12 @@ void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId,
 
 void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
         vector<StateVals> &partSt, vector<StateVals> &partNxtSt) {
-    vector<StateVals>::iterator itSt, itReachSt;
-    for (itSt = partSt.begin(); itSt != partSt.end(); itSt++) {
-        vector<StateVals> nxtSt;
-        getReachableSt(*itSt, actId, nxtSt);
-        for (itReachSt = nxtSt.begin(); itReachSt != nxtSt.end(); itReachSt++) {
-            if ((*itReachSt)[0] == obs[0] && (*itReachSt)[1] == obs[1]) {
-                partNxtSt.push_back(*itReachSt);
+    for (StateVals &sVals : partSt) {
+        vector<StateVals> reachableSt;
+        getReachableSt(sVals, actId, reachableSt);
+        for (StateVals &nxtSt : reachableSt) {
+            if (nxtSt[0] == obs[0] && nxtSt[1] == obs[1]) {
+                partNxtSt.push_back(nxtSt);
                 break;
             }
         }
@@ -848,16 +841,20 @@ bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals,
     affRegV.push_back(obstacleRegion[affByIdx]);        // ll
     affRegV.push_back(obstacleRegion[affByIdx+1]);      // ru
     StateVals s(2);
-    s[0] = obstacleRegion[2*affByIdx][0]; s[1] = obstacleRegion[2*affByIdx+1][1]; affRegV.push_back(s);
-    s[0] = obstacleRegion[2*affByIdx+1][0]; s[1] = obstacleRegion[2*affByIdx][1]; affRegV.push_back(s);
+    s[0] = obstacleRegion[2*affByIdx][0];
+    s[1] = obstacleRegion[2*affByIdx+1][1];
+    affRegV.push_back(s);
+    s[0] = obstacleRegion[2*affByIdx+1][0];
+    s[1] = obstacleRegion[2*affByIdx][1];
+    affRegV.push_back(s);
     s = seqStVals[startAffectedIdx];
-    vector<StateVals>::iterator it = affRegV.begin();
     double tmpDist;
     double minDist = LONG_MAX;
     short minIdx = -1;
     short i = 0;
-    for (it = affRegV.begin(); it != affRegV.end(); it++, i++) {
-        if ((*it)[0] > 0 && (*it)[1] > 0 && (*it)[0] < nX-1 && (*it)[1] < nY-1 && (tmpDist = getDist(s, *it)) < minDist) {
+    for (StateVals &sv : affRegV) {
+        if (sv[0] > 0 && sv[1] > 0 && sv[0] < nX-1 && sv[1] < nY-1 &&
+                (tmpDist = getDist(s, sv)) < minDist) {
             minDist = tmpDist;
             minIdx = i;
         }
@@ -996,6 +993,7 @@ for (it1 = modifStSeq.begin(); it1 != modifStSeq.end(); it1++) {
 cerr << "ok4ok4\n";
 */
     // Set observation and reward.
+    vector<StateVals>::iterator it;
     vector<long>::iterator itAct;
     for (it = modifStSeq.begin(), itAct = modifActSeq.begin();
             itAct != modifActSeq.end(); it++, itAct++) {

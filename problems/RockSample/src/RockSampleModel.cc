@@ -17,7 +17,7 @@ using std::endl;
 RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
     // Read the map from the file.
     std::ifstream inFile;
-    const char* mapPath = vm["problem.mapPath"].as<std::string>().c_str();
+    const char *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
         std::cerr << "Fail to open " << mapPath << "\n";
@@ -110,11 +110,11 @@ void RockSampleModel::initialise() {
 }
 
 
-void RockSampleModel::sampleAnInitState(StateVals& sVals) {
+void RockSampleModel::sampleAnInitState(StateVals &sVals) {
     sVals = initBel[GlobalResources::randIntBetween(0, nInitBel - 1)];
 }
 
-void RockSampleModel::sampleStateUniform(StateVals& sVals) {
+void RockSampleModel::sampleStateUniform(StateVals &sVals) {
     sVals.resize(nStVars);
     sVals[0] = GlobalResources::randIntBetween(0, nRows - 1);
     sVals[1] = GlobalResources::randIntBetween(0, nCols - 1);
@@ -124,13 +124,13 @@ void RockSampleModel::sampleStateUniform(StateVals& sVals) {
     cerr << endl;
 }
 
-void RockSampleModel::sampleRocks(StateVals& sVals) {
+void RockSampleModel::sampleRocks(StateVals &sVals) {
     decodeRocks(GlobalResources::randIntBetween(0, 1<<nRocks - 1), sVals);
 }
 
-void RockSampleModel::decodeRocks(long val, StateVals& sVals) {
+void RockSampleModel::decodeRocks(long val, StateVals &sVals) {
     for (int j = 0; j < nRocks; j++) {
-        if (val & (1 << j)) {
+        if (val  &(1 << j)) {
             sVals[j+2] = GOOD;
         } else {
             sVals[j+2] = BAD;
@@ -277,34 +277,31 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
         int rockNo = actId - CHECK;
         std::map<StateVals, double> weights;
         double weightTotal = 0;
-        for (std::vector<StateVals>::iterator it = partSt.begin();
-                it != partSt.end(); it++) {
-            Coords pos((*it)[0], (*it)[1]);
+        for (StateVals &sv : partSt) {
+            Coords pos(sv[0], sv[1]);
             double dist = pos.distance(rockCoords[rockNo]);
-            double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance))
-                * 0.5;
-            int rockState = (*it)[2+rockNo];
-            double probabilityFactor = 2 * (rockState == obs[0] ? efficiency :
+            double efficiency = ((1 + pow(2, -dist / halfEfficiencyDistance))
+                    * 0.5);
+            int rockState = sv[2+rockNo];
+            double probabilityFactor = (rockState == obs[0] ? efficiency :
                     1 - efficiency);
-            weights[*it] += probabilityFactor;
+            weights[sv] += probabilityFactor;
             weightTotal += probabilityFactor;
         }
         double scale = nParticles / weightTotal;
-        for (std::map<StateVals, double>::iterator it = weights.begin();
-                it != weights.end(); it++) {
-            double proportion = it->second * scale;
+        for (std::map<StateVals, double>::value_type &it : weights) {
+            double proportion = it.second * scale;
             int numToAdd = floor(proportion);
             if (GlobalResources::rand01() <= (proportion - numToAdd)) {
                 numToAdd += 1;
             }
-            partNxtSt.insert(partNxtSt.end(), numToAdd, it->first);
+            partNxtSt.insert(partNxtSt.end(), numToAdd, it.first);
         }
     } else {
         // It's not a CHECK action, so we just add each resultant state.
-        for (std::vector<StateVals>::iterator it = partSt.begin();
-                it != partSt.end(); it++) {
+        for (StateVals &sv : partSt) {
             StateVals nxtStVals;
-            makeNextState(*it, actId, nxtStVals);
+            makeNextState(sv, actId, nxtStVals);
             partNxtSt.push_back(nxtStVals);
         }
     }
@@ -326,7 +323,7 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
 }
 
 
-void RockSampleModel::setChanges(const char* chName,
+void RockSampleModel::setChanges(const char *chName,
         std::vector<long> &chTime) {
 }
 
@@ -344,11 +341,9 @@ bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals,
 
 
 void RockSampleModel::drawEnv(std::ostream &os) {
-    for (std::vector<std::vector<int>>:: iterator it = envMap.begin();
-            it != envMap.end(); it++) {
-        for (std::vector<int>::iterator it2 = it->begin(); it2 != it->end();
-                it2++) {
-            dispCell(*it2, os);
+    for (std::vector<int> &row : envMap) {
+        for (int &cellValue : row) {
+            dispCell(cellValue, os);
         }
         os << endl;
     }

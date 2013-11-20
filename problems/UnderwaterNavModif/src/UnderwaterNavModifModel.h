@@ -23,7 +23,7 @@ class UnderwaterNavModifModel : public Model {
             SOUTHEAST=4
         };
 
-        void dispAct(int actId, std::ostream& os) {
+        void dispAct(long actId, std::ostream &os) {
             switch(actId) {
                 case EAST:
                     os << "EAST";
@@ -46,11 +46,11 @@ class UnderwaterNavModifModel : public Model {
             }
         }
 
-        void dispState(StateVals& s, std::ostream& os) {
+        void dispState(StateVals &s, std::ostream &os) {
             os << "(" << s[0] << ", " << s[1] << ")";
         }
 
-        void dispObs(ObsVals& o, std::ostream& os) {
+        void dispObs(ObsVals &o, std::ostream &os) {
             if (o[0] == -1 && o[1] == -1) {
                 os << "NONE";
                 return;
@@ -63,7 +63,7 @@ class UnderwaterNavModifModel : public Model {
         ~UnderwaterNavModifModel();
 
         /***** Start implementation of Model's virtual functions *****/
-        void sampleAnInitState(StateVals& tmpStVals);
+        void sampleAnInitState(StateVals &tmpStVals);
         bool isTerm(StateVals &sVals);
         void solveHeuristic(StateVals &s, double *qVal);
         double getDefaultVal();
