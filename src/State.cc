@@ -12,12 +12,19 @@ using namespace std;
 
 long State::currId = 0;
 
-State::State(StateVals &s_): s(s_) {
-//  id = currId;
-//  currId ++;
+State::State(StateVals &s) :
+        s(s) {
+    // Default values; should be overridden later.
+    id = 0;
+    chType = Change::UNDEFINED;
 }
 
 State::State(string &str, long nStVars) {
+    // Default values; should be overridden later.
+    id = 0;
+    chType = Change::UNDEFINED;
+
+    // Load info from the string.
     s.clear();
     stringstream sstr(str);
     string tmpStr;
@@ -27,7 +34,10 @@ State::State(string &str, long nStVars) {
         sstr >> tmpDouble;
         s.push_back(tmpDouble);
     }
-    if (id > currId) { currId = id; }
+    if (id > currId) {
+        currId = id + 1;
+    }
+    chType = Change::UNDEFINED;
 }
 
 State::~State() {
@@ -36,7 +46,7 @@ State::~State() {
 
 void State::setId() {
     id = currId;
-    currId ++;
+    currId++;
 }
 
 void State::addInfo(HistoryEntry *h, BeliefNode *b) {
@@ -54,7 +64,7 @@ void State::addInfo(BeliefNode *b) {
 
 double State::distL1(State *st) {
     vector<double>::iterator it1, it2;
-    distUse = 0.0;
+    double distUse = 0.0;
     for (it1 = s.begin(), it2 = st->s.begin(); it1 != s.end(); it1++, it2++) {
         distUse = distUse + abs(*it1 - *it2);
     }
@@ -62,7 +72,8 @@ double State::distL1(State *st) {
 }
 
 void State::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
-    vector<HistoryEntry*>::iterator it = find(usedInHistEntries.begin(), usedInHistEntries.end(), toBeDeleted);
+    vector<HistoryEntry*>::iterator it = find(usedInHistEntries.begin(),
+            usedInHistEntries.end(), toBeDeleted);
     (*it) = NULL;
 }
 

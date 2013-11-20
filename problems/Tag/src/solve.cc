@@ -30,8 +30,9 @@ int main(int argc, const char* argv[]) {
     positional.add("policy", 3);
 
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(allOptions)
-            .positional(positional).run(), vm);
+    po::store(
+            po::command_line_parser(argc, argv).options(allOptions).positional(
+                    positional).run(), vm);
     if (vm.count("help")) {
         cout << "Usage: solve [mapPath] [cfgPath] [policyPath]" << endl;
         cout << visibleOptions << endl;
@@ -39,8 +40,7 @@ int main(int argc, const char* argv[]) {
     }
 
     string cfgPath = vm["cfg"].as<string>();
-    po::store(po::parse_config_file<char>(cfgPath.c_str(),allOptions),
-            vm);
+    po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
     po::notify(vm);
 
     string polPath = vm["policy"].as<string>();
@@ -59,7 +59,7 @@ int main(int argc, const char* argv[]) {
     clock_t tStart;
     tStart = clock();
     solver->genPol(model->getMaxTrials(), model->getDepthTh());
-    totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
+    totT = (clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
     ofstream os;
     os.open(polPath.c_str());

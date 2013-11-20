@@ -13,7 +13,7 @@ LINKER = g++
 # Compiler flags
 #---------------------------------------------------------------------#
 
-CXXFLAGS = -std=c++11 -DDISTL1 $(INCDIRS)
+CXXFLAGS = -Wall -std=c++11 -DDISTL1 $(INCDIRS)
 DEBUG_FLAGS = -DDEBUG -g -O0
 RELEASE_FLAGS = -frounding-math -O3
 INCDIRS =

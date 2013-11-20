@@ -5,17 +5,28 @@
 
 using namespace std;
 
-HistoryEntry::HistoryEntry(State *st_, long entryId_): st(st_), entryId(entryId_) {
+HistoryEntry::HistoryEntry(State *st, long entryId) :
+        st(st), entryId(entryId) {
     actId = -1;
     hasBeenBackup = false;
+
+    // Will be overriden later.
+    disc = 1.0;
 }
 
-HistoryEntry::HistoryEntry(State *st_, long seqId_, long entryId_): st(st_), seqId(seqId_), entryId(entryId_) {
+HistoryEntry::HistoryEntry(State *st, long seqId, long entryId) :
+        st(st), seqId(seqId), entryId(entryId) {
     actId = -1;
     hasBeenBackup = false;
+
+    // Will be overriden later.
+        disc = 1.0;
 }
 
-HistoryEntry::HistoryEntry(long seqId_, long entryId_, State *st_, stringstream &sstr): st(st_), seqId(seqId_), entryId(entryId_) {
+HistoryEntry::HistoryEntry(long seqId, long entryId, State *st,
+        stringstream &sstr) :
+        st(st), seqId(seqId), entryId(entryId) {
+    actId = 0;
     string usrStr;
     sstr >> actId >> usrStr >> usrStr;
     obs.clear();
@@ -25,6 +36,9 @@ HistoryEntry::HistoryEntry(long seqId_, long entryId_, State *st_, stringstream 
     }
     sstr >> disc >> rew >> qVal;
     hasBeenBackup = true;
+
+    // Will be overriden later.
+    disc = 1.0;
 }
 
 HistoryEntry::~HistoryEntry() {
@@ -34,16 +48,17 @@ void HistoryEntry::setBelNode(BeliefNode *bel) {
     partOfBelNode = bel;
 }
 /*
-void HistoryEntry::prepareDel() {
-    if (actId != -1) {
-        partOfBelNode->delParticle(this, actId, qVal);
-    }
-}
-*/
+ void HistoryEntry::prepareDel() {
+ if (actId != -1) {
+ partOfBelNode->delParticle(this, actId, qVal);
+ }
+ }
+ */
 void HistoryEntry::write(ostream &os) {
 //StateVals tmpVals; st->getVals(tmpVals);
 //cout << "Entry ( " << tmpVals[0] << " " << tmpVals[1] << " ) ";
-    os << "HistEntry < " << seqId << " " << entryId << " >: ( " << st->getId() << " " << actId << " < ";
+    os << "HistEntry < " << seqId << " " << entryId << " >: ( " << st->getId()
+            << " " << actId << " < ";
     vector<double>::iterator itObs;
     for (itObs = obs.begin(); itObs != obs.end(); itObs++) {
         os << *itObs << " ";
@@ -53,7 +68,8 @@ void HistoryEntry::write(ostream &os) {
 }
 
 void HistoryEntry::writeln(ostream &os) {
-    os << "HistEntry < " << seqId << " " << entryId << " >: ( " << st->getId() << " " << actId << " < ";
+    os << "HistEntry < " << seqId << " " << entryId << " >: ( " << st->getId()
+            << " " << actId << " < ";
     vector<double>::iterator itObs;
     for (itObs = obs.begin(); itObs != obs.end(); itObs++) {
         os << *itObs << " ";
@@ -64,5 +80,7 @@ void HistoryEntry::writeln(ostream &os) {
 }
 
 void HistoryEntry::writeSt(ostream &os) {
-    os << "( "; st->write(os); os << " ) ";
+    os << "( ";
+    st->write(os);
+    os << " ) ";
 }

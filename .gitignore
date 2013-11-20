@@ -7,3 +7,6 @@
 *.log
 *solve
 *simulate
+.cproject
+.project
+.settings

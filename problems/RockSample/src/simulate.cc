@@ -37,17 +37,17 @@ int main(int argc, const char* argv[]) {
     positional.add("log", 7);
 
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(allOptions)
-            .positional(positional).run(), vm);
+    po::store(
+            po::command_line_parser(argc, argv).options(allOptions).positional(
+                    positional).run(), vm);
     if (vm.count("help")) {
         cout << "Usage: solve [options] [mapPath] [cfgPath] [policyPath]"
-            " [changesPath] [nSteps] [nRuns] [logPath]" << endl;
+                " [changesPath] [nSteps] [nRuns] [logPath]" << endl;
         cout << visibleOptions << endl;
         return 0;
     }
     string cfgPath = vm["cfg"].as<string>();
-    po::store(po::parse_config_file<char>(cfgPath.c_str(),allOptions),
-            vm);
+    po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
     po::notify(vm);
 
     string polPath = vm["policy"].as<string>();
@@ -96,7 +96,7 @@ int main(int argc, const char* argv[]) {
         tStart = clock();
         val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs,
                 trajRew, &actualNSteps, &totChTime, &totImpTime);
-        totT = (clock()-tStart)*1000/CLOCKS_PER_SEC;
+        totT = (clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
         os << "Val:  " << val << endl;
         itS = trajSt.begin();
@@ -105,10 +105,9 @@ int main(int argc, const char* argv[]) {
             os << *itD << " ";
         }
         os << " )\n";
-        itS ++;
-        for (itA = trajActId.begin(), itO = trajObs.begin(),
-                itR = trajRew.begin(), j = 0;
-                itA != trajActId.end();
+        itS++;
+        for (itA = trajActId.begin(), itO = trajObs.begin(), itR =
+                trajRew.begin(), j = 0; itA != trajActId.end();
                 itS++, itA++, itO++, itR++, j++) {
             os << "Step-" << j << " " << *itA;
             os << " ( ";
@@ -122,7 +121,7 @@ int main(int argc, const char* argv[]) {
             os << " > " << *itR << endl;
         }
         cout << val << " " << actualNSteps << " " << totChTime << " "
-            << totImpTime << " " << totT << endl;
+                << totImpTime << " " << totT << endl;
     }
     os.close();
 

@@ -14,7 +14,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-RockSampleModel::RockSampleModel(po::variables_map vm) : Model(vm) {
+RockSampleModel::RockSampleModel(po::variables_map vm) :
+        Model(vm) {
     // Read the map from the file.
     std::ifstream inFile;
     const char *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -109,7 +110,6 @@ void RockSampleModel::initialise() {
     maxVal = goodRockReward * nRocks + exitReward;
 }
 
-
 void RockSampleModel::sampleAnInitState(StateVals &sVals) {
     sVals = initBel[GlobalResources::randIntBetween(0, nInitBel - 1)];
 }
@@ -125,15 +125,15 @@ void RockSampleModel::sampleStateUniform(StateVals &sVals) {
 }
 
 void RockSampleModel::sampleRocks(StateVals &sVals) {
-    decodeRocks(GlobalResources::randIntBetween(0, 1<<nRocks - 1), sVals);
+    decodeRocks(GlobalResources::randIntBetween(0, 1 << nRocks - 1), sVals);
 }
 
 void RockSampleModel::decodeRocks(long val, StateVals &sVals) {
     for (int j = 0; j < nRocks; j++) {
-        if (val  &(1 << j)) {
-            sVals[j+2] = GOOD;
+        if (val & (1 << j)) {
+            sVals[j + 2] = GOOD;
         } else {
-            sVals[j+2] = BAD;
+            sVals[j + 2] = BAD;
         }
     }
 }
@@ -149,7 +149,7 @@ void RockSampleModel::solveHeuristic(StateVals &s, double *qVal) {
 
     std::set<int> goodRocks;
     for (int i = 0; i < nRocks; i++) {
-        if (s[i+2] == GOOD) {
+        if (s[i + 2] == GOOD) {
             goodRocks.insert(i);
         }
     }
@@ -189,28 +189,28 @@ bool RockSampleModel::makeNextState(StateVals &sVals, long actId,
     if (actId == SAMPLE) {
         int rockNo = envMap[sVals[0]][sVals[1]] - ROCK;
         if (0 <= rockNo && rockNo < nRocks) {
-            nxtSVals[2+rockNo] = BAD;
+            nxtSVals[2 + rockNo] = BAD;
             return true;
         }
         return false;
     }
 
-    switch(actId) {
-        case NORTH:
-            nxtSVals[0] -= 1;
-            break;
-        case EAST:
-            nxtSVals[1] += 1;
-            break;
-        case SOUTH:
-            nxtSVals[0] += 1;
-            break;
-        case WEST:
-            nxtSVals[1] -= 1;
+    switch (actId) {
+    case NORTH:
+        nxtSVals[0] -= 1;
+        break;
+    case EAST:
+        nxtSVals[1] += 1;
+        break;
+    case SOUTH:
+        nxtSVals[0] += 1;
+        break;
+    case WEST:
+        nxtSVals[1] -= 1;
     }
     // Check all boundaries.
-    if (nxtSVals[0] < 0 || nxtSVals[0] >= nRows || nxtSVals[1] < 0 ||
-            nxtSVals[1] >= nCols) {
+    if (nxtSVals[0] < 0 || nxtSVals[0] >= nRows || nxtSVals[1] < 0
+            || nxtSVals[1] >= nCols) {
         nxtSVals = sVals;
         return false;
     }
@@ -227,9 +227,9 @@ int RockSampleModel::makeObs(StateVals &nxtSVals, long actId) {
     double efficiency = (1 + pow(2, -dist / halfEfficiencyDistance)) * 0.5;
     // cerr << "D: " << dist << " E:" << efficiency << endl;
     if (GlobalResources::rand01() < efficiency) {
-        return nxtSVals[2+rockNo] == GOOD ? GOOD : BAD; // Correct obs.
+        return nxtSVals[2 + rockNo] == GOOD ? GOOD : BAD; // Correct obs.
     } else {
-        return nxtSVals[2+rockNo] == GOOD ? BAD : GOOD; // Incorrect obs.
+        return nxtSVals[2 + rockNo] == GOOD ? BAD : GOOD; // Incorrect obs.
     }
 }
 
@@ -259,7 +259,7 @@ double RockSampleModel::getReward(StateVals &sVals, long actId) {
     if (actId == SAMPLE) {
         int rockNo = envMap[sVals[0]][sVals[1]] - ROCK;
         if (0 <= rockNo && rockNo < nRocks) {
-            return sVals[2+rockNo] == GOOD ? goodRockReward : -badRockPenalty;
+            return sVals[2 + rockNo] == GOOD ? goodRockReward : -badRockPenalty;
         } else {
             // We shouldn't end up here, since isLegal should've been false.
             return -illegalMovePenalty;
@@ -268,10 +268,8 @@ double RockSampleModel::getReward(StateVals &sVals, long actId) {
     return 0;
 }
 
-
 void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
-        std::vector<StateVals> &partSt,
-        std::vector<StateVals> &partNxtSt) {
+        std::vector<StateVals> &partSt, std::vector<StateVals> &partNxtSt) {
     // If it's a CHECK action, we condition on the observation.
     if (actId >= CHECK) {
         int rockNo = actId - CHECK;
@@ -282,9 +280,9 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
             double dist = pos.distance(rockCoords[rockNo]);
             double efficiency = ((1 + pow(2, -dist / halfEfficiencyDistance))
                     * 0.5);
-            int rockState = sv[2+rockNo];
-            double probabilityFactor = (rockState == obs[0] ? efficiency :
-                    1 - efficiency);
+            int rockState = sv[2 + rockNo];
+            double probabilityFactor = (
+                    rockState == obs[0] ? efficiency : 1 - efficiency);
             weights[sv] += probabilityFactor;
             weightTotal += probabilityFactor;
         }
@@ -322,23 +320,20 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
     }
 }
 
-
 void RockSampleModel::setChanges(const char *chName,
         std::vector<long> &chTime) {
 }
 
 void RockSampleModel::update(long tCh, std::vector<StateVals> &affectedRange,
-        std::vector<ChType> &typeOfChanges) {
+        std::vector<Change> &typeOfChanges) {
 }
 
 bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals,
         long startAffectedIdx, long endAffectedIdx,
-        std::vector<StateVals> &modifStSeq,
-        std::vector<long> &modifActSeq,
-        std::vector<ObsVals> &modifObsSeq,
-        std::vector<double> &modifRewSeq) {
+        std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
+        std::vector<ObsVals> &modifObsSeq, std::vector<double> &modifRewSeq) {
+    return false;
 }
-
 
 void RockSampleModel::drawEnv(std::ostream &os) {
     for (std::vector<int> &row : envMap) {

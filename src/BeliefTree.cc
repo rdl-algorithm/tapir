@@ -15,7 +15,7 @@ BeliefTree::~BeliefTree() {
 }
 
 void BeliefTree::deleteHelper(queue<BeliefNode*> &tmpNodes) {
-    while(!tmpNodes.empty()) {
+    while (!tmpNodes.empty()) {
         BeliefNode *aNode = tmpNodes.front();
         tmpNodes.pop();
         aNode->getChildren(tmpNodes);
@@ -26,7 +26,7 @@ void BeliefTree::deleteHelper(queue<BeliefNode*> &tmpNodes) {
 void BeliefTree::readPolicy(ifstream &inFile, Histories *allHist) {
     string tmpStr, usrStr;
     getline(inFile, tmpStr);
-    while(tmpStr.find("BELIEFTREE-BEGIN") == string::npos) {
+    while (tmpStr.find("BELIEFTREE-BEGIN") == string::npos) {
         getline(inFile, tmpStr);
     }
     getline(inFile, tmpStr);
@@ -34,7 +34,8 @@ void BeliefTree::readPolicy(ifstream &inFile, Histories *allHist) {
     double nNodes;
     stringstream sstr(tmpStr);
     sstr >> usrStr >> nNodes;
-    sstr.flush(); sstr.clear();
+    sstr.flush();
+    sstr.clear();
     vector<BeliefNode*> allNodes(nNodes, NULL);
     allNodes[0] = root;
 
@@ -52,10 +53,10 @@ void BeliefTree::readPolicy(ifstream &inFile, Histories *allHist) {
 
     // Set the rest of the node
     getline(inFile, tmpStr);
-    while(tmpStr.find("BELIEFTREE-END") == string::npos) {
+    while (tmpStr.find("BELIEFTREE-END") == string::npos) {
         sstr.str(tmpStr);
         sstr >> usrStr >> nodeId;
-//cerr << "node: " << nodeId << endl;
+        //cerr << "node: " << nodeId << endl;
         allNodes[nodeId]->set(sstr, allHist);
         for (long i = 0; i < allNodes[nodeId]->nActChildren; i++) {
             getline(inFile, tmpStr);

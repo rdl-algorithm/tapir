@@ -21,8 +21,11 @@ Observation::~Observation() {
 
 bool Observation::isObs(ObsVals &o) {
     vector<double>::iterator thisObs, otherObs;
-    for (thisObs = vals.begin(), otherObs = o.begin(); thisObs != vals.end(); thisObs++, otherObs++) {
-        if (abs(*thisObs-*otherObs) > 1e-7) { return false; }
+    for (thisObs = vals.begin(), otherObs = o.begin(); thisObs != vals.end();
+            thisObs++, otherObs++) {
+        if (abs(*thisObs - *otherObs) > 1e-7) {
+            return false;
+        }
     }
     return true;
 }
@@ -45,7 +48,7 @@ void Observation::write(ostream &os) {
 }
 
 void Observation::writeNGetChildren(ostream &os, queue<BeliefNode*> &res) {
-    write (os);
+    write(os);
     res.push(child);
 }
 

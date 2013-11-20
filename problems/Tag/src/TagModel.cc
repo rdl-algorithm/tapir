@@ -14,7 +14,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-TagModel::TagModel(po::variables_map vm) : Model(vm) {
+TagModel::TagModel(po::variables_map vm) :
+        Model(vm) {
     // Read the map from the file.
     std::ifstream inFile;
     const char *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -35,7 +36,8 @@ TagModel::TagModel(po::variables_map vm) : Model(vm) {
     moveCost = vm["problem.moveCost"].as<double>();
     tagReward = vm["problem.tagReward"].as<double>();
     failedTagPenalty = vm["problem.failedTagPenalty"].as<double>();
-    opponentStayProbability = vm["problem.opponentStayProbability"].as<double>();
+    opponentStayProbability =
+            vm["problem.opponentStayProbability"].as<double>();
     initialise();
     cout << "Constructed the TagModel" << endl;
     cout << "Discount: " << discount << endl;
@@ -194,25 +196,25 @@ void TagModel::moveOpponent(Coords &robotPos, Coords &opponentPos) {
 
 Coords TagModel::getMovedPos(Coords &coords, long actId) {
     Coords movedPos = coords;
-    switch(actId) {
-        case NORTH:
-            movedPos.i -= 1;
-            break;
-        case EAST:
-            movedPos.j += 1;
-            break;
-        case SOUTH:
-            movedPos.i += 1;
-            break;
-        case WEST:
-            movedPos.j -= 1;
+    switch (actId) {
+    case NORTH:
+        movedPos.i -= 1;
+        break;
+    case EAST:
+        movedPos.j += 1;
+        break;
+    case SOUTH:
+        movedPos.i += 1;
+        break;
+    case WEST:
+        movedPos.j -= 1;
     }
     return movedPos;
 }
 
 bool TagModel::isValid(Coords &coords) {
-    if (coords.i < 0 || coords.i >= nRows || coords.j < 0 ||
-            coords.j >= nCols || envMap[coords.i][coords.j] == WALL) {
+    if (coords.i < 0 || coords.i >= nRows || coords.j < 0 || coords.j >= nCols
+            || envMap[coords.i][coords.j] == WALL) {
         return false;
     }
     return true;
@@ -227,8 +229,8 @@ void TagModel::makeObs(StateVals &nxtSVals, long actId, ObsVals &obsVals) {
     }
 }
 
-bool TagModel::getNextState(StateVals &sVals, long actId,
-        double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
+bool TagModel::getNextState(StateVals &sVals, long actId, double *immediateRew,
+        StateVals &nxtSVals, ObsVals &obs) {
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
     obs.resize(2);
@@ -252,10 +254,8 @@ double TagModel::getReward(StateVals &sVals, long actId) {
     }
 }
 
-
 void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
-        std::vector<StateVals> &partSt,
-        std::vector<StateVals> &partNxtSt) {
+        std::vector<StateVals> &partSt, std::vector<StateVals> &partNxtSt) {
     std::map<StateVals, double> weights;
     double weightTotal = 0;
     Coords newRobotPos = decodeCoords(obs[0]);
@@ -279,20 +279,12 @@ void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<long> newActions(actions.size());
         auto newActionsEnd = std::copy_if(actions.begin(), actions.end(),
                 newActions.begin(), [](long x) {
-                return getMovedPos(oldOpponentPos, x) != newRobotPos;
+                    return getMovedPos(oldOpponentPos, x) != newRobotPos;
                 });
         newActions.resize(std::distance(newActions.begin(), newActionsEnd));
         for (auto &it2 : newActions) {
             double probabilityFactor = 1.0 / newActions.size();
         }
-        double dist = pos.distance(rockCoords[rockNo]);
-        double efficiency = ((1 + pow(2, -dist / halfEfficiencyDistance))
-            * 0.5);
-        int rockState = (sv)[2+rockNo];
-        double probabilityFactor = 2 * (rockState == obs[0] ? efficiency :
-                1 - efficiency);
-        weights[sv] += probabilityFactor;
-        weightTotal += probabilityFactor;
     }
     double scale = nParticles / weightTotal;
     for (std::map<StateVals, double>::iterator it = weights.begin();
@@ -309,7 +301,7 @@ void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
 void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
         std::vector<StateVals> &partNxtSt) {
     if (obs[1] == SEEN) {
-        Coords newOpponentPos = newRobotPos;
+        Coords newOpponentPos = decodeCoords(obs[0]);
         StateVals nxtSVals(nStVars);
         nxtSVals[0] = nxtSVals[1] = obs[0];
         nxtSVals[2] = (actId == TAG ? TAGGED : UNTAGGED);
@@ -318,23 +310,19 @@ void TagModel::getStatesSeeObs(long actId, ObsVals &obs,
     }
 }
 
-
-void TagModel::setChanges(const char *chName,
-        std::vector<long> &chTime) {
+void TagModel::setChanges(const char *chName, std::vector<long> &chTime) {
 }
 
 void TagModel::update(long tCh, std::vector<StateVals> &affectedRange,
-        std::vector<ChType> &typeOfChanges) {
+        std::vector<Change> &typeOfChanges) {
 }
 
 bool TagModel::modifStSeq(std::vector<StateVals> &seqStVals,
         long startAffectedIdx, long endAffectedIdx,
-        std::vector<StateVals> &modifStSeq,
-        std::vector<long> &modifActSeq,
-        std::vector<ObsVals> &modifObsSeq,
-        std::vector<double> &modifRewSeq) {
+        std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
+        std::vector<ObsVals> &modifObsSeq, std::vector<double> &modifRewSeq) {
+    return false;
 }
-
 
 void TagModel::drawEnv(std::ostream &os) {
     for (std::vector<int> &row : envMap) {

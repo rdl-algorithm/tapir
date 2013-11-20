@@ -32,7 +32,7 @@ void StatePool::readStates(ifstream &inFile, Model *model) {
 
     string tmpStr, usrStr;
     getline(inFile, tmpStr);
-    while(tmpStr.find("STATESPOOL-BEGIN") == string::npos) {
+    while (tmpStr.find("STATESPOOL-BEGIN") == string::npos) {
         getline(inFile, tmpStr);
     }
 
@@ -44,8 +44,8 @@ void StatePool::readStates(ifstream &inFile, Model *model) {
     for (long i = 0; i < nStates; i++) {
         allStatesIdx.push_back(NULL);
     }
-    pair< set<State*, CompStVals>::iterator, bool > ret;
-    while(tmpStr.find("STATESPOOL-END") == string::npos) {
+    pair<set<State*, CompStVals>::iterator, bool> ret;
+    while (tmpStr.find("STATESPOOL-END") == string::npos) {
         State *newSt = new State(tmpStr, nSDim);
         ret = allStates.insert(newSt);
         allStatesIdx[newSt->id] = *(ret.first);
@@ -58,14 +58,13 @@ void StatePool::readStates(ifstream &inFile, Model *model) {
 
 State* StatePool::add(StateVals &sVals) {
     State* newSt = new State(sVals);
-    pair< set<State*, CompStVals>::iterator, bool > ret = allStates.insert(newSt);
+    pair<set<State*, CompStVals>::iterator, bool> ret = allStates.insert(newSt);
     if (ret.second) {
         newSt->setId();
         allStatesIdx.push_back(newSt);
-        nStates ++;
+        nStates++;
         return newSt;
-    }
-    else {
+    } else {
         delete newSt;
         return *(ret.first);
     }
@@ -75,30 +74,30 @@ State* StatePool::getStPtr(long stId) {
     return allStatesIdx[stId];
 }
 
-void StatePool::identifyAffectedStates(StateVals &lowLeft, StateVals &upRight, ChType chType,
-        set<State*> &allAffectedSt) {
+void StatePool::identifyAffectedStates(StateVals &lowLeft, StateVals &upRight,
+        Change chType, set<State*> &allAffectedSt) {
     multimap<double, State*>::iterator start, end, it;
-/*
-cerr << "InStPool size of StStruct: " << stStruct.size() << " " << stStruct[0].size() << " low " << lowLeft[0] << " " << upRight[0] << endl;
-for (start = stStruct[0].begin(); start != stStruct[0].end(); start++) {
-    cerr << "stStruct " << start->first << " " << start->second->s[0] << " " << start->second->s[1] << endl;
-}
-*/
+    /*
+     cerr << "InStPool size of StStruct: " << stStruct.size() << " " << stStruct[0].size() << " low " << lowLeft[0] << " " << upRight[0] << endl;
+     for (start = stStruct[0].begin(); start != stStruct[0].end(); start++) {
+     cerr << "stStruct " << start->first << " " << start->second->s[0] << " " << start->second->s[1] << endl;
+     }
+     */
     start = stStruct[0].lower_bound(lowLeft[0]);
     end = stStruct[0].lower_bound(upRight[0]);
-/*
-if (start == stStruct[0].end()) { cerr << "No Start\n"; }
-if (end == stStruct[0].end()) { cerr << "No End\n"; }
-cerr << "StartEndStVals " << start->second->s[0] << " " << start->second->s[1] << " to " <<
-        end->second->s[0] << " " << end->second->s[1] << endl;
-*/
+    /*
+     if (start == stStruct[0].end()) { cerr << "No Start\n"; }
+     if (end == stStruct[0].end()) { cerr << "No End\n"; }
+     cerr << "StartEndStVals " << start->second->s[0] << " " << start->second->s[1] << " to " <<
+     end->second->s[0] << " " << end->second->s[1] << endl;
+     */
     set<State*> affectedSt;
     for (it = start; it != end; it++) {
-/*
-if (it->first == 15) {
-    cerr << "St " << it->second->s[0] << " " << it->second->s[1] << endl;
-}
-*/
+        /*
+         if (it->first == 15) {
+         cerr << "St " << it->second->s[0] << " " << it->second->s[1] << endl;
+         }
+         */
         affectedSt.insert(it->second);
     }
 //cerr << "#affectedSt: " << affectedSt.size() << endl;
@@ -111,8 +110,9 @@ if (it->first == 15) {
             posAffectedSt.insert(it->second);
         }
 //cerr << "#affectedSt for dim-" << i << " : " << posAffectedSt.size() << endl;
-        set_intersection(affectedSt.begin(), affectedSt.end(), posAffectedSt.begin(),
-                posAffectedSt.end(), insert_iterator< set<State*> >(tmpSet, tmpSet.begin()));
+        set_intersection(affectedSt.begin(), affectedSt.end(),
+                posAffectedSt.begin(), posAffectedSt.end(),
+                insert_iterator<set<State*> >(tmpSet, tmpSet.begin()));
         affectedSt = tmpSet;
 //cerr << "#IntersectAffectedSt for dim-" << i << " : " << affectedSt.size() << endl;
     }
@@ -127,15 +127,15 @@ if (it->first == 15) {
 //cerr << "ok3\n";
 }
 /*
-void StatePool::getPosNNBelNode(State *s, double distTh, set<BeliefNode*> &res) {
-    set<State*>::iterator itSt;
-    for (itSt = allStates.begin(); itSt != allStates.end(); itSt++) {
-        if (s->distL1(*itSt) < distTh) {
-            set_union((*itSt)->usedInBelNode.begin(), (*itSt)->usedInBelNode.end(), res.begin(), res.end(), res.begin());
-        }
-    }
-}
-*/
+ void StatePool::getPosNNBelNode(State *s, double distTh, set<BeliefNode*> &res) {
+ set<State*>::iterator itSt;
+ for (itSt = allStates.begin(); itSt != allStates.end(); itSt++) {
+ if (s->distL1(*itSt) < distTh) {
+ set_union((*itSt)->usedInBelNode.begin(), (*itSt)->usedInBelNode.end(), res.begin(), res.end(), res.begin());
+ }
+ }
+ }
+ */
 
 void StatePool::write(ostream &os) {
     os << "nStates: " << nStates << endl;
