@@ -13,9 +13,9 @@
 
 class Solver {
 public:
-    Solver(Model *model_, BeliefTree *policy_, Histories *histories_);
-    Solver(Model *model_, const char *polFile, BeliefTree *policy_,
-            Histories *histories_);
+    Solver(Model *model, BeliefTree *policy, Histories *histories);
+    Solver(Model *model, const char *polFile, BeliefTree *policy,
+            Histories *histories);
     ~Solver();
 
     void genPol(long maxTrials, double depthTh);
@@ -31,10 +31,12 @@ private:
     Histories *allHistories;
     StatePool *allStates;
 
-    enum ModeRollout {
-        ROLLOUT_RANDHEURISTIC = 0, ROLLOUT_POL = 1
+    enum RolloutMode {
+        ROLLOUT_RANDHEURISTIC = 0,
+        ROLLOUT_POL = 1
     };
-    ModeRollout rolloutUsed;
+
+    RolloutMode rolloutUsed;
     double exploreCoef;
     double cRollout[2], wRollout[2], pRollout[2];
     long nUsedRollout[2];

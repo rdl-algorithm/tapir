@@ -5,28 +5,21 @@
 
 using namespace std;
 
-HistoryEntry::HistoryEntry(State *st, long entryId) :
+HistoryEntry::HistoryEntry(State *st, unsigned long entryId) :
         st(st), entryId(entryId) {
-    actId = -1;
-    hasBeenBackup = false;
+    initialise();
 
-    // Will be overriden later.
-    disc = 1.0;
 }
 
-HistoryEntry::HistoryEntry(State *st, long seqId, long entryId) :
+HistoryEntry::HistoryEntry(State *st, unsigned long seqId, unsigned long entryId) :
         st(st), seqId(seqId), entryId(entryId) {
-    actId = -1;
-    hasBeenBackup = false;
-
-    // Will be overriden later.
-        disc = 1.0;
+    initialise();
 }
 
-HistoryEntry::HistoryEntry(long seqId, long entryId, State *st,
+HistoryEntry::HistoryEntry(unsigned long seqId, unsigned long entryId, State *st,
         stringstream &sstr) :
         st(st), seqId(seqId), entryId(entryId) {
-    actId = 0;
+    initialise();
     string usrStr;
     sstr >> actId >> usrStr >> usrStr;
     obs.clear();
@@ -34,14 +27,21 @@ HistoryEntry::HistoryEntry(long seqId, long entryId, State *st,
         obs.push_back(atof(usrStr.c_str()));
         sstr >> usrStr;
     }
-    sstr >> disc >> rew >> qVal;
     hasBeenBackup = true;
-
-    // Will be overriden later.
-    disc = 1.0;
+    sstr >> disc >> rew >> qVal;
 }
 
 HistoryEntry::~HistoryEntry() {
+}
+
+void HistoryEntry::initialise() {
+    // Many of these values must be overridden later!
+    actId = -1;
+    hasBeenBackup = false;
+    disc = 1.0;
+    partOfBelNode = nullptr;
+    rew = 0;
+    qVal = 0;
 }
 
 void HistoryEntry::setBelNode(BeliefNode *bel) {

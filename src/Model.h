@@ -11,7 +11,7 @@ namespace po = boost::program_options;
 typedef std::vector<double> StateVals;
 typedef std::vector<double> ObsVals;
 
-enum Change {
+enum class Change {
     UNDEFINED = 0,
     ADDSTATE = 1,
     REWARD = 2,
@@ -36,41 +36,21 @@ public:
         distTh = vm["SBT.distTh"].as<double>();
 
         discount = vm["problem.discount"].as<double>();
-
-        nActions = 0;
-        nObservations = 0;
-        nStVars = 0;
     }
 
     /** Destructor must be virtual */
     virtual ~Model() {
     }
 
-    // Note: Subclasses must initially calculate the following parameters:
-    // nActions, nObservations, nStVars,
-    // minVal, maxVal
-
-    // Problem parameters
+    /* ------------------ Non-virtual getters ------------------ */
     /** Returns the POMDP discount factor. */
     inline double getDiscount() {
         return discount;
     }
-    /** Returns the # of actions for this POMDP. */
-    inline long getNActions() {
-        return nActions;
-    }
-    /** Returns the # of observations f {or this POMDP. */
-    inline long getNObservations() {
-        return nObservations;
-    }
-    /** Returns the number of state variables for this PODMP. */
-    inline long getNStVars() {
-        return nStVars;
-    }
 
     // SBT parameters
     /** Returns the maximum number of particles */
-    inline long getNParticles() {
+    inline unsigned long getNParticles() {
         return nParticles;
     }
     /** Returns the maximum number of trials to run. */
@@ -88,15 +68,6 @@ public:
         return exploreCoef;
     }
 
-    /** Returns a lower bound on the q-value. */
-    inline double getMinVal() {
-        return minVal;
-    }
-    /** Returns an upper bound on the q-value. */
-    inline double getMaxVal() {
-        return maxVal;
-    }
-
     /** Returns the maximum number of nodes to check when searching
      * for a nearest-neighbour belief node.
      */
@@ -110,8 +81,21 @@ public:
         return distTh;
     }
 
-    /* --------------- Start virtual functions ----------------- */
+    /* --------------- Start virtual getters ----------------- */
+    // Subclasses are necessarily required to define these methods.
 
+    /** Returns the # of actions for this POMDP. */
+    virtual unsigned long getNActions()=0;
+    /** Returns the # of observations f {or this POMDP. */
+    virtual unsigned long getNObservations()=0;
+    /** Returns the number of state variables for this PODMP. */
+    virtual unsigned long getNStVars()=0;
+    /** Returns a lower bound on the q-value. */
+    virtual double getMinVal()=0;
+    /** Returns an upper bound on the q-value. */
+    virtual double getMaxVal()=0;
+
+    /* --------------- Start virtual functions ----------------- */
     /** Samples an initial state from the belief vector. */
     virtual void sampleAnInitState(StateVals &sVals)=0;
     /** Returns true iff the given state is terminal. */
@@ -122,17 +106,17 @@ public:
     virtual double getDefaultVal()=0;
 
     /** Generates the next state, an observation, and the reward. */
-    virtual bool getNextState(StateVals &sVals, long actId,
+    virtual bool getNextState(StateVals &sVals, unsigned long actId,
             double *immediateRew, StateVals &nxtSVals, ObsVals &obs)=0;
     /** Returns the reward for the given state. */
     virtual double getReward(StateVals &sVals)=0;
     /** Returns the reward for the given state and action. */
-    virtual double getReward(StateVals &sVals, long actId)=0;
+    virtual double getReward(StateVals &sVals, unsigned long actId)=0;
 
     /** Creates a new belief node based on the state particles of the
      * previous node, as well as on the action and observation.
      */
-    virtual void getStatesSeeObs(long actId, ObsVals &obs,
+    virtual void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partSt,
             std::vector<StateVals> &partNxtSt)=0;
     /** Creates a new belief node based only on the previous action and
@@ -141,7 +125,7 @@ public:
      * This should only be used if the previous belief turns out to be
      * incompatible with the current observation.
      */
-    virtual void getStatesSeeObs(long actId, ObsVals &obs,
+    virtual void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partNxtSt)=0;
 
     /** Loads model changes from the given file. */
@@ -150,12 +134,12 @@ public:
     virtual void update(long tCh, std::vector<StateVals> &affectedRange,
             std::vector<Change> &typeOfChanges)=0;
     virtual bool modifStSeq(std::vector<StateVals> &seqStVals,
-            long startAffectedIdx, long endAffectedIdx,
+            unsigned long startAffectedIdx, unsigned long endAffectedIdx,
             std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
             std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq)=0;
 
-    virtual void dispAct(long actId, std::ostream &os)=0;
+    virtual void dispAct(unsigned long actId, std::ostream &os)=0;
     virtual void dispState(StateVals &s, std::ostream &os)=0;
     virtual void dispObs(ObsVals &o, std::ostream &os)=0;
     virtual void drawEnv(std::ostream &os)=0;
@@ -163,17 +147,12 @@ public:
 protected:
     // Problem parameters.
     double discount;
-    long nActions;
-    long nObservations;
-    long nStVars;
 
     // SBT parameters
-    long nParticles;
+    unsigned long nParticles;
     long maxTrials;
     double depthTh;
     double exploreCoef;
-    double minVal;
-    double maxVal;
 
     long maxDistTry;
     double distTh;

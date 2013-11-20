@@ -17,7 +17,7 @@ po::options_description generic() {
             "config file path")("policy,p",
             po::value<std::string>()->default_value("pol.pol"),
             "policy file path (output)")("seed,s",
-            po::value<long>()->default_value(time(NULL)), "RNG seed");
+            po::value<long>()->default_value(time(nullptr)), "RNG seed");
     return generic;
 }
 

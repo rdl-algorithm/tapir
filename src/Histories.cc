@@ -46,7 +46,6 @@ void Histories::readHistories(ifstream &inFile, StatePool *stPool) {
 }
 
 void Histories::write(ostream &os) {
-    long i = 0;
     vector<HistorySeq*>::iterator it;
     //cerr << "#histSeq: " << allHistSeq.size() << endl;
     for (it = allHistSeq.begin(); it != allHistSeq.end(); it++) {

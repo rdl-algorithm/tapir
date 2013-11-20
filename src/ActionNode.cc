@@ -4,14 +4,11 @@
 using namespace std;
 
 ActionNode::ActionNode(long actId, ObsVals &obs, BeliefNode* nxtBelNode) :
-        actId(actId) {
+        ActionNode(actId, 1, 0.0, 0.0) {
     obsChildren.push_back(new Observation(obs, nxtBelNode));
-    qVal = avgQVal = 0.0;
-    nParticles = 1;
 }
 
-ActionNode::ActionNode(long actId, long nParticles, double qVal,
-        double avgQVal) :
+ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal) :
         actId(actId), nParticles(nParticles), qVal(qVal), avgQVal(avgQVal) {
 }
 
@@ -72,7 +69,7 @@ BeliefNode* ActionNode::getObsChild(ObsVals &obs) {
             return (*itObs)->getNodeChild();
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void ActionNode::getChildren(queue<BeliefNode*> &res) {

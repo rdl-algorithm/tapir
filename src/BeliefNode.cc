@@ -12,37 +12,24 @@ clock_t BeliefNode::startTime = clock();
 long BeliefNode::maxParticles = 0;
 long BeliefNode::nStVars = 0;
 
-BeliefNode::BeliefNode() {
-    id = currId;
-    currId++;
-    nParticles = 0;
-    nActChildren = 0;
-    distChecked = false;
-    nxtActToTry = -1;
-    tNNComp = -1.0;
-    nnBel = NULL;
-    tEmdSig = -1;
-
-    // Initially invalid values:
-    bestAct = -1;
-    bestAvgQVal = 0;
-    tLastAddedParticle = 0;
+BeliefNode::BeliefNode() :
+        BeliefNode(currId) {
 }
 
-BeliefNode::BeliefNode(long id_) :
-        id(id_) {
+BeliefNode::BeliefNode(long id) :
+        id(id) {
     if (currId <= id) {
         currId = id + 1;
     }
     nParticles = 0;
     nActChildren = 0;
     distChecked = false;
-    nxtActToTry = -1;
     tNNComp = -1.0;
-    nnBel = NULL;
+    nnBel = nullptr;
     tEmdSig = -1;
 
     // Initially invalid values:
+    nxtActToTry = -1;
     bestAct = -1;
     bestAvgQVal = 0;
     tLastAddedParticle = 0;
@@ -85,7 +72,7 @@ void BeliefNode::setAct(string str, vector<BeliefNode*> &tmpNodes) {
         }
         sstr >> nxtNodeId;
         BeliefNode* nxtNode = tmpNodes[nxtNodeId];
-        if (nxtNode == NULL) {
+        if (nxtNode == nullptr) {
             nxtNode = new BeliefNode(nxtNodeId);
             tmpNodes[nxtNodeId] = nxtNode;
         }
@@ -148,7 +135,7 @@ BeliefNode* BeliefNode::addChild(long actIdx, ObsVals &obs,
         nActChildren++;
     } else {
         res = actChildren[actIdx]->getObsChild(obs);
-        if (res == NULL) {
+        if (res == nullptr) {
             res = new BeliefNode();
             actChildren[actIdx]->addChild(obs, res);
         }
@@ -166,7 +153,7 @@ BeliefNode* BeliefNode::addChild(long actIdx, ObsVals &obs) {
         nActChildren++;
     } else {
         res = actChildren[actIdx]->getObsChild(obs);
-        if (res == NULL) {
+        if (res == nullptr) {
             res = new BeliefNode();
             actChildren[actIdx]->addChild(obs, res);
         }
@@ -220,7 +207,7 @@ BeliefNode* BeliefNode::getChild(long actIdx, ObsVals &obs) {
     //cerr <<" In BeliefNode->getChild for act " << actIdx << " " << actChildren.size() << endl;
     //cerr << "This Belief Node: "; writeStParticles(cerr);
     if (actChildren.find(actIdx) == actChildren.end()) {
-        return NULL;
+        return nullptr;
     }
     return actChildren[actIdx]->getObsChild(obs);
 }

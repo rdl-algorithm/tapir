@@ -258,7 +258,7 @@ double UnderwaterNavModifModel::getDistToNearestObs(StateVals &st,
  return totDist / (double) nParticles;
  }
  */
-void UnderwaterNavModifModel::getNextState(StateVals &s, long actId,
+void UnderwaterNavModifModel::getNextState(StateVals &s, unsigned long actId,
         StateVals &sp) {
     sp.resize(2);
 
@@ -456,7 +456,7 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals) {
     return totRew;
 }
 
-double UnderwaterNavModifModel::getReward(StateVals &sVals, long actId) {
+double UnderwaterNavModifModel::getReward(StateVals &sVals, unsigned long actId) {
     double totRew;
     short ct = 0;
 
@@ -499,7 +499,7 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals, long actId) {
     return totRew;
 }
 
-bool UnderwaterNavModifModel::getNextState(StateVals &sVals, long actId,
+bool UnderwaterNavModifModel::getNextState(StateVals &sVals, unsigned long actId,
         double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
     bool isTerm;
     getNextState(sVals, actId, nxtSVals);
@@ -681,7 +681,7 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
                 su.push_back(yu);
                 affectedRange.push_back(sl);
                 affectedRange.push_back(su);
-                typeOfChanges.push_back(REWARD);
+                typeOfChanges.push_back(Change::REWARD);
                 vector<StateVals>::iterator itSt;
                 long x = (long) floor(xl);
                 while (x < xu) {
@@ -710,7 +710,7 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
                 su.push_back(yu);
                 affectedRange.push_back(sl);
                 affectedRange.push_back(su);
-                typeOfChanges.push_back(REWARD);
+                typeOfChanges.push_back(Change::REWARD);
                 double newRew;
                 ss >> tmpStr >> newRew;
                 spcRew.push_back(newRew);
@@ -732,7 +732,7 @@ void UnderwaterNavModifModel::update(long tCh, vector<StateVals> &affectedRange,
              StateVals sl; sl.push_back(xl); sl.push_back(yl);
              StateVals su; su.push_back(xl); su.push_back(yl);
              affectedRange.push_back(sl); affectedRange.push_back(su);
-             typesOfChanges.push_back(TRANSITION);
+             typesOfChanges.push_back(Change::TRANSITION);
              //...
              }
              */
@@ -773,7 +773,7 @@ vector<StateVals>::iterator UnderwaterNavModifModel::getIterator(
     return vecStVals.end();
 }
 
-void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId,
+void UnderwaterNavModifModel::getReachableSt(StateVals &s, unsigned long actId,
         vector<StateVals> &nxtS) {
     nxtS.clear();
     switch (actId) {
@@ -845,7 +845,7 @@ void UnderwaterNavModifModel::getReachableSt(StateVals &s, long actId,
     }
 }
 
-void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
+void UnderwaterNavModifModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         vector<StateVals> &partSt, vector<StateVals> &partNxtSt) {
     for (StateVals &sVals : partSt) {
         vector<StateVals> reachableSt;
@@ -859,7 +859,7 @@ void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
     }
 }
 
-void UnderwaterNavModifModel::getStatesSeeObs(long actId, ObsVals &obs,
+void UnderwaterNavModifModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         vector<StateVals> &partNxtSt) {
     StateVals s(2);
     s[0] = obs[0];
@@ -894,7 +894,7 @@ int UnderwaterNavModifModel::findCollision(StateVals &s) {
 }
 
 bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals,
-        long startAffectedIdx, long endAffectedIdx,
+        unsigned long startAffectedIdx, unsigned long endAffectedIdx,
         vector<StateVals> &modifStSeq, vector<long> &modifActSeq,
         vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq) {
 

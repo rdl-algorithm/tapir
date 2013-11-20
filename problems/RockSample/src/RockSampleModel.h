@@ -54,7 +54,7 @@ public:
             NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, SAMPLE = 4, CHECK = 5
     };
 
-    void dispAct(long actId, std::ostream &os) {
+    void dispAct(unsigned long actId, std::ostream &os) {
         if (actId >= CHECK) {
             os << "CHECK-" << actId - CHECK;
             return;
@@ -156,33 +156,53 @@ public:
     }
 
     /***** Start implementation of Model's virtual functions *****/
+    // Simple getters
+    inline unsigned long getNActions() {
+        return nActions;
+    }
+    inline unsigned long getNObservations() {
+        return nObservations;
+    }
+    inline unsigned long getNStVars() {
+        return nStVars;
+    }
+    inline double getMinVal() {
+        return minVal;
+    }
+    inline double getMaxVal() {
+        return maxVal;
+    }
 
     void sampleAnInitState(StateVals &sVals);
     bool isTerm(StateVals &sVals);
     void solveHeuristic(StateVals &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(StateVals &sVals, long actIdx, double *immediateRew,
+    bool getNextState(StateVals &sVals, unsigned long actIdx, double *immediateRew,
             StateVals &nxtSVals, ObsVals &obs);
     double getReward(StateVals &sVals);
-    double getReward(StateVals &sVals, long actId);
+    double getReward(StateVals &sVals, unsigned long actId);
 
-    void getStatesSeeObs(long actId, ObsVals &obs,
+    void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partSt, std::vector<StateVals> &partNxtSt);
-    void getStatesSeeObs(long actId, ObsVals &obs,
+    void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partNxtSt);
 
     void setChanges(const char *chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<StateVals> &affectedRange,
             std::vector<Change> &typeOfChanges);
-    bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<StateVals> &modifStSeq,
+    bool modifStSeq(std::vector<StateVals> &seqStVals, unsigned long startAffectedIdx,
+            unsigned long endAffectedIdx, std::vector<StateVals> &modifStSeq,
             std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
 
 private:
+    // Values for the required getters
+    unsigned long nActions, nObservations, nStVars;
+    double minVal, maxVal;
+
     /** The number of state particles in the initial belief. */
     long nInitBel;
     /** A vector of all the states in the initial belief. */

@@ -41,8 +41,9 @@ clean:
 
 -include $(SOLVER_DEPS)
 
-.PHONY: disp
-disp:
-	@echo $(SOLVER_OBJS)
+.PHONY: redo
+redo:
+	$(MAKE) clean
+	$(MAKE)
 
 # DO NOT DELETE

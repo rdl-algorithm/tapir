@@ -6,24 +6,20 @@ using namespace std;
 
 long HistorySeq::currId = 0;
 
-HistorySeq::HistorySeq(HistoryEntry *startEntry) {
-    id = currId;
-    startDepth = 0;
-    startAffectedIdx = LONG_MAX;
-    endAffectedIdx = -1;
-    currId++;
-    startEntry->setSeqId(id);
-    histSeq.push_back(startEntry);
+HistorySeq::HistorySeq(HistoryEntry *startEntry) :
+        HistorySeq(startEntry, 0) {
 }
 
-HistorySeq::HistorySeq(HistoryEntry *startEntry, long startDepth_) :
-        startDepth(startDepth_) {
+HistorySeq::HistorySeq(HistoryEntry *startEntry, long startDepth) :
+        startDepth(startDepth) {
     id = currId;
+    currId++;
     startAffectedIdx = LONG_MAX;
     endAffectedIdx = -1;
-    currId++;
     startEntry->setSeqId(id);
     histSeq.push_back(startEntry);
+
+    chType = Change::UNDEFINED;
 }
 
 HistorySeq::~HistorySeq() {
@@ -71,42 +67,6 @@ void HistorySeq::addEntry(HistoryEntry *histEntry) {
     histSeq.push_back(histEntry);
 }
 
-/*
- HistoryEntry* HistorySeq::addEntry(double discRew_, State *nxtSt) {
- histSeq.back()->discRew = discRew_;
- HistoryEntry* newEntry = new HistoryEntry(nxtSt, id, histSeq.size());
- histSeq.push_back(newEntry);
- return newEntry;
- }
- */
-/*
- void HistorySeq::deleteAffectedEntries(Model *m) {
- vector<HistoryEntry*>::iterator itHistEntry = histSeq.begin()+startAffectedIdx-1;
- double prevQVal = (*itHistEntry)->qVal;
- (*itHistEntry)->rew = m->getReward((*itHistEntry)->st->s);
- (*itHistEntry)->qVal = (*itHistEntry)->disc*(*itHistEntry)->rew;
- (*itHistEntry)->partOfBelNode->updateVal(*itHistEntry, prevQVal, 0.0, false);
- (*itHistEntry)->actId = -1;
- itHistEntry ++;
- for (; itHistEntry != histSeq.end(); itHistEntry++) {
- (*itHistEntry)->partOfBelNode->delPartNUpdateVal(*itHistEntry, (*itHistEntry)->qVal, 0.0);
- }
-
- histSeq.erase(histSeq.begin()+startAffectedIdx, histSeq.end());
- cutAffected = true;
- }
- */
-/*
- void HistorySeq::prepareDel() {
- vector<HistoryEntry*>::reverse_iterator it;
- for (it = histSeq.rbegin(); it != histSeq.rend(); it++) {
- (*it)->prepareDel();
- delete(*it);
- histSeq.erase(it);
- }
- }
- */
-
 void HistorySeq::getStValsSeq(vector<StateVals> &seqStVals) {
     seqStVals.clear();
     vector<HistoryEntry*>::iterator it;
@@ -126,7 +86,6 @@ void HistorySeq::fixEntryId() {
 }
 
 void HistorySeq::write(ostream &os) {
-    long i = 0;
     vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
         (*it)->writeln(os);
@@ -134,7 +93,6 @@ void HistorySeq::write(ostream &os) {
 }
 
 void HistorySeq::writeln(ostream &os) {
-    long i = 0;
     vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
         (*it)->writeln(os);

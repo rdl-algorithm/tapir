@@ -18,10 +18,6 @@ public:
     HistorySeq* addHistorySeq(State *s);
     HistorySeq* addHistorySeq(State *s, long startDepth);
     void readHistories(std::ifstream &inFile, StatePool *stPool);
-    //void setAffected(long seqIdx, long entryIdx);
-    //void resetAffected(set<long> &raffected;
-    //void updateVal(double defaultVal, set<long> &reachAffectedHistSeq, set<long> &notReachAffectedHistSeq);
-    //void eraseNUpdBel(BeliefNode *currNode, set<long> &affectedHistSeq);
     void write(std::ostream &os);
 
     inline void add(HistorySeq *histSeq) {

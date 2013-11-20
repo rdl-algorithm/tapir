@@ -74,7 +74,7 @@ double State::distL1(State *st) {
 void State::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
     vector<HistoryEntry*>::iterator it = find(usedInHistEntries.begin(),
             usedInHistEntries.end(), toBeDeleted);
-    (*it) = NULL;
+    (*it) = nullptr;
 }
 
 void State::write(ostream &os) {

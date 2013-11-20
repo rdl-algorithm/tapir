@@ -34,8 +34,13 @@ inline std::ostream &operator<<(std::ostream &os, const Coords &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";
     return os;
 }
+
 inline bool operator==(const Coords &lhs, const Coords &rhs) {
     return lhs.i == rhs.i && lhs.j == rhs.j;
+}
+
+inline bool operator!=(const Coords &lhs, const Coords &rhs) {
+    return !(lhs == rhs);
 }
 
 class TagModel: public Model {
@@ -49,7 +54,7 @@ public:
             NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, TAG = 4
     };
 
-    void dispAct(long actId, std::ostream &os) {
+    void dispAct(unsigned long actId, std::ostream &os) {
         switch (actId) {
         case NORTH:
             os << "NORTH";
@@ -119,33 +124,53 @@ public:
     }
 
     /***** Start implementation of Model's virtual functions *****/
+    // Simple getters
+    inline unsigned long getNActions() {
+        return nActions;
+    }
+    inline unsigned long getNObservations() {
+        return nObservations;
+    }
+    inline unsigned long getNStVars() {
+        return nStVars;
+    }
+    inline double getMinVal() {
+        return minVal;
+    }
+    inline double getMaxVal() {
+        return maxVal;
+    }
 
     void sampleAnInitState(StateVals &sVals);
     bool isTerm(StateVals &sVals);
     void solveHeuristic(StateVals &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(StateVals &sVals, long actId, double *immediateRew,
+    bool getNextState(StateVals &sVals, unsigned long actId, double *immediateRew,
             StateVals &nxtSVals, ObsVals &obs);
     double getReward(StateVals &sVals);
-    double getReward(StateVals &sVals, long actId);
+    double getReward(StateVals &sVals, unsigned long actId);
 
-    void getStatesSeeObs(long actId, ObsVals &obs,
+    void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partSt, std::vector<StateVals> &partNxtSt);
-    void getStatesSeeObs(long actId, ObsVals &obs,
+    void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partNxtSt);
 
     void setChanges(const char *chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<StateVals> &affectedRange,
             std::vector<Change> &typeOfChanges);
-    bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<StateVals> &modifStSeq,
+    bool modifStSeq(std::vector<StateVals> &seqStVals, unsigned long startAffectedIdx,
+            unsigned long endAffectedIdx, std::vector<StateVals> &modifStSeq,
             std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
 
 private:
+    // Values for the required getters
+    unsigned long nActions, nObservations, nStVars;
+    double minVal, maxVal;
+
     /** Initialises the required data structures and variables */
     void initialise();
 
@@ -156,11 +181,11 @@ private:
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
      */
-    bool makeNextState(StateVals &sVals, long actId, StateVals &nxtSVals);
+    bool makeNextState(StateVals &sVals, unsigned long actId, StateVals &nxtSVals);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    void makeObs(StateVals &nxtSVals, long actId, ObsVals &obsVals);
+    void makeObs(StateVals &nxtSVals, unsigned long actId, ObsVals &obsVals);
     /** Moves the opponent. */
     void moveOpponent(Coords &robotPos, Coords &opponentPos);
     /** Generates the distribution for the opponent's actions. */
@@ -170,7 +195,7 @@ private:
     /** Gets the expected coordinates after taking the given action;
      *  this may result in invalid coordinates.
      */
-    Coords getMovedPos(Coords &coords, long actId);
+    Coords getMovedPos(Coords &coords, unsigned long actId);
     /** Returns true iff the given coords form a valid position. */
     bool isValid(Coords &sVals);
 

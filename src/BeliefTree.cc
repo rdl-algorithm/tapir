@@ -36,7 +36,7 @@ void BeliefTree::readPolicy(ifstream &inFile, Histories *allHist) {
     sstr >> usrStr >> nNodes;
     sstr.flush();
     sstr.clear();
-    vector<BeliefNode*> allNodes(nNodes, NULL);
+    vector<BeliefNode*> allNodes(nNodes, nullptr);
     allNodes[0] = root;
 
     // Set root node

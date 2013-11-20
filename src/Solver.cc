@@ -12,8 +12,8 @@
 
 using namespace std;
 
-Solver::Solver(Model *model_, BeliefTree *policy_, Histories *histories_) :
-        model(model_), policy(policy_), allHistories(histories_) {
+Solver::Solver(Model *model, BeliefTree *policy, Histories *histories) :
+        model(model), policy(policy), allHistories(histories) {
     allStates = new StatePool();
     exploreCoef = model->getExploreCoef();
     cRollout[0] = cRollout[1] = 1.0;
@@ -22,26 +22,18 @@ Solver::Solver(Model *model_, BeliefTree *policy_, Histories *histories_) :
     nUsedRollout[0] = nUsedRollout[1] = 1;
 }
 
-Solver::Solver(Model *model_, const char *polFile, BeliefTree *policy_,
-        Histories *histories_) :
-        model(model_), policy(policy_), allHistories(histories_) {
-
+Solver::Solver(Model *model, const char *polFile, BeliefTree *policy,
+        Histories *histories) : Solver(model, policy, histories) {
     ifstream inFile;
     inFile.open(polFile);
     if (!inFile.is_open()) {
         cerr << "Fail to open " << polFile << "\n";
         exit(1);
     }
-    allStates = new StatePool();
     allStates->readStates(inFile, model);
     allHistories->readHistories(inFile, allStates);
     policy->readPolicy(inFile, allHistories);
     inFile.close();
-    exploreCoef = model->getExploreCoef();
-    cRollout[0] = cRollout[1] = 1.0;
-    wRollout[0] = wRollout[1] = 1.0;
-    pRollout[0] = pRollout[1] = 0.5;
-    nUsedRollout[0] = nUsedRollout[1] = 1;
 }
 
 Solver::~Solver() {
@@ -58,13 +50,10 @@ void Solver::genPol(long maxTrials, double depthTh) {
     HistoryEntry *currHistEntry;
     HistorySeq *currHistSeq;
 
-    long actIdx;
-    double immediateRew, qVal, currDiscFactor;
     ObsVals obs;
     StateVals sVals, nxtSVals;
     State *st;
-
-    for (long i = 0; i < model->getNActions(); i++) {
+    for (unsigned long i = 0; i < model->getNActions(); i++) {
         model->sampleAnInitState(sVals);
         st = allStates->add(sVals);
         rootHistEntry = new HistoryEntry(st, 0);
@@ -74,7 +63,8 @@ void Solver::genPol(long maxTrials, double depthTh) {
         st->usedInBelNode.insert(root);
         currHistSeq = new HistorySeq(rootHistEntry, 0);
         allHistories->add(currHistSeq);
-//cerr << "sample-" << i << " " << sVals[0] << " " << sVals[1] << endl;
+        double immediateRew;
+        //cerr << "sample-" << i << " " << sVals[0] << " " << sVals[1] << endl;
         bool isTerm = model->getNextState(sVals, i, &immediateRew, nxtSVals,
                 obs);
         rootHistEntry->disc = 1.0;
@@ -237,15 +227,14 @@ long Solver::getRolloutAct(BeliefNode *belNode, StateVals &s, double startDisc,
 #elif defined(DISTEMD)
             BeliefNode *currNode = getNNBelNode(belNode);
 #endif
-            if (currNode == NULL) {
+            if (currNode == nullptr) {
 //cerr << " NOPOL\n";
                 randMode = 0.0;
             } else {
 //cerr << " YESPOL\n";
                 //actSelected = currNode->getBestAct();
                 actSelected = belNode->getNxtActToTry();
-                bool isTerm = model->getNextState(s, actSelected, immediateRew,
-                        nxtSVals, obs);
+                model->getNextState(s, actSelected, immediateRew, nxtSVals, obs);
                 currNode = currNode->getChild(actSelected, obs);
                 *qVal = startDisc * rolloutPolHelper(currNode, nxtSVals, disc);
                 rolloutUsed = ROLLOUT_POL;
@@ -265,8 +254,8 @@ long Solver::getRolloutAct(BeliefNode *belNode, StateVals &s, double startDisc,
 
 double Solver::rolloutPolHelper(BeliefNode *currNode, StateVals &s,
         double disc) {
-    if (currNode == NULL) {
-        // cerr << "NULL in rolloutPolHelper!" << endl;
+    if (currNode == nullptr) {
+        // cerr << "nullptr in rolloutPolHelper!" << endl;
         return 0.0;
     } else if (currNode->nParticles == 0) {
         cerr << "nParticles == 0 in rolloutPolHelper" << endl;
@@ -319,7 +308,7 @@ double Solver::rolloutPolHelper(BeliefNode *currNode, StateVals &s,
  //cerr << "new tNNComp: " << b->tNNComp << endl;
  b->nnBel = nnBel;
  cerr << "Done getNNEMD ";
- if (minDist > model->getDistTh()) { return NULL; }
+ if (minDist > model->getDistTh()) { return nullptr; }
  return nnBel;
  }
  */
@@ -355,7 +344,7 @@ BeliefNode* Solver::getNNBelNode(BeliefNode *b) {
     b->nnBel = nnBel;
 //cerr << "Done getNNL1 ";
     if (minDist > model->getDistTh()) {
-        return NULL;
+        return nullptr;
     }
     return nnBel;
 }
@@ -436,7 +425,6 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
     double discFactor = model->getDiscount();
     double currDiscFactor = 1.0;
 
-    long currIdx = 0;
     double rew;
     double val = 0.0;
     BeliefNode* currNode = policy->getRoot();
@@ -511,7 +499,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
             *actualNSteps = i;
             break;
         }
-        if (nxtNode == NULL) {
+        if (nxtNode == nullptr) {
             nxtNode = addChild(currNode, trajActId.back(), trajObs.back(), i);
         }
         currNode = nxtNode;
@@ -524,7 +512,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
 BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs,
         long timeStep) {
     cerr << "In add particle due to depletion" << endl;
-    BeliefNode *nxtNode = NULL;
+    BeliefNode *nxtNode = nullptr;
 
     vector<StateVals> partSt;
     vector<HistoryEntry*>::iterator it;
@@ -584,7 +572,7 @@ void Solver::resetAffected(set<HistorySeq*> affectedHistSeq) {
             itHistSeq != affectedHistSeq.end(); itHistSeq++) {
         (*itHistSeq)->startAffectedIdx = LONG_MAX;
         (*itHistSeq)->endAffectedIdx = -1;
-        (*itHistSeq)->chType = UNDEFINED;
+        (*itHistSeq)->chType = Change::UNDEFINED;
     }
 }
 
@@ -601,7 +589,7 @@ bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals,
     if (isTerm) {
         cerr << " Reach terminal" << endl;
         *rew = *rew + model->getDiscount() * model->getReward(nxtStVals);
-        *nxtNode = NULL;
+        *nxtNode = nullptr;
     } else {
         *nxtNode = (*startNode)->getChild(actId, obs);
     }
@@ -654,7 +642,7 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
     for (itS = affectedStates.begin(); itS != affectedStates.end(); itS++) {
         for (itH = (*itS)->usedInHistEntries.begin();
                 itH != (*itS)->usedInHistEntries.end(); itH++) {
-            if (*itH != NULL) {
+            if (*itH != nullptr) {
                 histSeq = allHistories->allHistSeq[(*itH)->seqId];
 
                 // Set affected
@@ -675,7 +663,7 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
                         << histSeq->endAffectedIdx << " of "
                         << histSeq->histSeq.size() << " affST " << (*itS)->s[0]
                         << " " << (*itS)->s[1] << endl;
-                for (int y = 0; y < histSeq->histSeq.size(); y++) {
+                for (unsigned long y = 0; y < histSeq->histSeq.size(); y++) {
                     cerr << "El-" << y << " " << histSeq->histSeq[y]->st->s[0]
                             << " " << histSeq->histSeq[y]->st->s[1] << " "
                             << histSeq->histSeq[y]->entryId << endl;
@@ -684,7 +672,7 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
 
         }
 
-        histSeq->chType = UNDEFINED;
+        histSeq->chType = Change::UNDEFINED;
     }
 }
 
@@ -698,7 +686,7 @@ void Solver::updatePol(set<HistorySeq*> &affectedHistSeq) {
             itHistSeq != affectedHistSeq.end(); itHistSeq++) {
 //cerr << "Proc affected hist seq-" << z << " seqId " << (*itHistSeq)->id << endl;
         switch ((*itHistSeq)->chType) {
-        case REWARD: {
+        case Change::REWARD: {
 //cerr << "endAffIdx: " << (*itHistSeq)->endAffectedIdx << " seq size: " << (*itHistSeq)->histSeq.size() << endl;
             if ((*itHistSeq)->endAffectedIdx >= (*itHistSeq)->histSeq.size()) {
                 (*itHistSeq)->writeln(cerr);
@@ -750,7 +738,7 @@ void Solver::updatePol(set<HistorySeq*> &affectedHistSeq) {
 
             break;
         }
-        case ADDOBSTACLE: {
+        case Change::ADDOBSTACLE: {
 //cerr << "Start Working on addObs\n";
             vector<StateVals> seqStVals, modifStSeq;
             vector<long> modifActSeq;
@@ -781,8 +769,13 @@ void Solver::updatePol(set<HistorySeq*> &affectedHistSeq) {
 //cerr << "End working on addObs\n";
             break;
         }
+        case Change::ADDOBSERVATION:
+        case Change::ADDSTATE:
+        case Change::DELSTATE:
+        case Change::TRANSITION:
+        case Change::UNDEFINED:
+            break;
         }
-//z++;
     }
 }
 
@@ -804,7 +797,7 @@ void Solver::modifHistSeqFr(HistorySeq *history, vector<StateVals> &modifStSeq,
     vector<ObsVals>::iterator itObs = modifObsSeq.begin();
     vector<double>::iterator itRew = modifRewSeq.begin();
 
-    BeliefNode *b = NULL;
+    BeliefNode *b = nullptr;
     State *s;
     HistoryEntry *hEntry;
 
@@ -832,7 +825,7 @@ void Solver::modifHistSeqFr(HistorySeq *history, vector<StateVals> &modifStSeq,
         hEntry->obs = *itObs;
         hEntry->rew = *itRew;
         b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
-        if (b == NULL) {
+        if (b == nullptr) {
 //cerr << "ADDCHILD1\n";
             b = hEntry->partOfBelNode->addChild(*itAct, *itObs);
         }
@@ -862,7 +855,7 @@ void Solver::modifHistSeqFr(HistorySeq *history, vector<StateVals> &modifStSeq,
                 hEntry->hasBeenBackup = false;
             }
             b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
-            if (b == NULL) {
+            if (b == nullptr) {
                 /*
                  cerr << "ADDCHILD2 from " << (*itSt)[0] << " " << (*itSt)[1];
                  if (*itAct != -1) { cerr << " act " << *itAct;  }
@@ -924,7 +917,7 @@ void Solver::modifHistSeqFrTo(HistorySeq *history,
     vector<ObsVals>::iterator itObs = modifObsSeq.begin();
     vector<double>::iterator itRew = modifRewSeq.begin();
 
-    BeliefNode *b, *bParent;
+    BeliefNode *b;
     State *s;
     HistoryEntry *hEntry;
 
@@ -952,7 +945,7 @@ void Solver::modifHistSeqFrTo(HistorySeq *history,
         hEntry->rew = *itRew;
         b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
         hEntry->hasBeenBackup = false;
-        if (b == NULL) {
+        if (b == nullptr) {
             b = hEntry->partOfBelNode->addChild(*itAct, *itObs, hEntry);
         }
         hIdx++;
@@ -982,7 +975,7 @@ void Solver::modifHistSeqFrTo(HistorySeq *history,
                 hEntry->hasBeenBackup = false;
             }
             b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
-            if (b == NULL) {
+            if (b == nullptr) {
                 b = hEntry->partOfBelNode->addChild(*itAct, *itObs);
             }
         }
@@ -1009,7 +1002,7 @@ void Solver::modifHistSeqFrTo(HistorySeq *history,
             (*itH)->hasBeenBackup = false;
             if ((*itH)->actId >= 0) {
                 b = hEntry->partOfBelNode->getChild((*itH)->actId, (*itH)->obs);
-                if (b == NULL) {
+                if (b == nullptr) {
                     b = hEntry->partOfBelNode->addChild((*itH)->actId,
                             (*itH)->obs);
                 }

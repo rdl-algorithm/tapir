@@ -25,7 +25,7 @@ public:
     static long nStVars;
 
     BeliefNode();
-    BeliefNode(long id_);
+    BeliefNode(long id);
     ~BeliefNode();
 
     void set(std::stringstream &sstr, Histories *allHist);

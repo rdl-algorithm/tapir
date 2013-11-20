@@ -20,7 +20,7 @@ public:
             EAST = 0, NORTH = 1, SOUTH = 2, NORTHEAST = 3, SOUTHEAST = 4
     };
 
-    void dispAct(long actId, std::ostream &os) {
+    void dispAct(unsigned long actId, std::ostream &os) {
         switch (actId) {
         case EAST:
             os << "EAST";
@@ -59,26 +59,43 @@ public:
     ~UnderwaterNavModifModel();
 
     /***** Start implementation of Model's virtual functions *****/
+    // Simple getters
+    inline unsigned long getNActions() {
+        return nActions;
+    }
+    inline unsigned long getNObservations() {
+        return nObservations;
+    }
+    inline unsigned long getNStVars() {
+        return nStVars;
+    }
+    inline double getMinVal() {
+        return minVal;
+    }
+    inline double getMaxVal() {
+        return maxVal;
+    }
+
     void sampleAnInitState(StateVals &tmpStVals);
     bool isTerm(StateVals &sVals);
     void solveHeuristic(StateVals &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(StateVals &currStVals, long actIdx, double *immediateRew,
+    bool getNextState(StateVals &currStVals, unsigned long actId, double *immediateRew,
             StateVals &nxtSVals, ObsVals &obs);
     double getReward(StateVals &sVals);
-    double getReward(StateVals &sVals, long actId);
+    double getReward(StateVals &sVals, unsigned long actId);
 
-    void getStatesSeeObs(long actId, ObsVals &obs,
+    void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partSt, std::vector<StateVals> &partNxtSt);
-    void getStatesSeeObs(long actId, ObsVals &obs,
+    void getStatesSeeObs(unsigned long actId, ObsVals &obs,
             std::vector<StateVals> &partNxtSt);
 
     void setChanges(const char* chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<StateVals> &affectedRange,
             std::vector<Change> &typeOfChanges);
-    bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<StateVals> &modifStSeq,
+    bool modifStSeq(std::vector<StateVals> &seqStVals, unsigned long startAffectedIdx,
+            unsigned long endAffectedIdx, std::vector<StateVals> &modifStSeq,
             std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
@@ -88,12 +105,16 @@ public:
     void setInitObsGoal();
 
 private:
+    // Values for the required getters
+    unsigned long nActions, nObservations, nStVars;
+    double minVal, maxVal;
+
     /** The number of state particles in the initial belief. */
-    long nInitBel;
+    unsigned long nInitBel;
     /** A vector of all the states in the initial belief. */
     std::vector<StateVals> initBel;
 
-    long nX, nY, nGoals, nRocks;
+    unsigned long nX, nY, nGoals, nRocks;
     double goalReward, crashPenalty, moveCost, moveDiagCost;
     double ctrlCorrectProb, ctrlErrProb1;
     double rolloutExploreTh;
@@ -118,13 +139,13 @@ private:
 
     //double getExpDist(StateVals &s, long firstAct);
     double getDist(StateVals &s1, StateVals &s2);
-    void getNextState(StateVals &s, long actId, StateVals &sp);
+    void getNextState(StateVals &s, unsigned long actId, StateVals &sp);
     void inObsRegion(StateVals &st, ObsVals &obs);
     double getDistToNearestGoal(StateVals &st);
     double getDistToNearestObs(StateVals &st, StateVals &nxtSt);
     bool inGoal(StateVals &st);
     bool inRock(StateVals &st);
-    void getReachableSt(StateVals &s, long actId, std::vector<StateVals> &nxtS);
+    void getReachableSt(StateVals &s, unsigned long actId, std::vector<StateVals> &nxtS);
     std::vector<StateVals>::iterator getIterator(
             std::vector<StateVals> &vecStVals, long x, long y);
 

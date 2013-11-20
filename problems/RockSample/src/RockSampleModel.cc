@@ -233,7 +233,7 @@ int RockSampleModel::makeObs(StateVals &nxtSVals, long actId) {
     }
 }
 
-bool RockSampleModel::getNextState(StateVals &sVals, long actId,
+bool RockSampleModel::getNextState(StateVals &sVals, unsigned long actId,
         double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
@@ -246,7 +246,7 @@ double RockSampleModel::getReward(StateVals &sVals) {
     return 0;
 }
 
-double RockSampleModel::getReward(StateVals &sVals, long actId) {
+double RockSampleModel::getReward(StateVals &sVals, unsigned long actId) {
     StateVals nxtSVals;
     bool isLegal = makeNextState(sVals, actId, nxtSVals);
     if (!isLegal) {
@@ -268,7 +268,7 @@ double RockSampleModel::getReward(StateVals &sVals, long actId) {
     return 0;
 }
 
-void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
+void RockSampleModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         std::vector<StateVals> &partSt, std::vector<StateVals> &partNxtSt) {
     // If it's a CHECK action, we condition on the observation.
     if (actId >= CHECK) {
@@ -305,7 +305,7 @@ void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
     }
 }
 
-void RockSampleModel::getStatesSeeObs(long actId, ObsVals &obs,
+void RockSampleModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         std::vector<StateVals> &partNxtSt) {
     while (partNxtSt.size() < nParticles) {
         StateVals sVals;
@@ -329,7 +329,7 @@ void RockSampleModel::update(long tCh, std::vector<StateVals> &affectedRange,
 }
 
 bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals,
-        long startAffectedIdx, long endAffectedIdx,
+        unsigned long startAffectedIdx, unsigned long endAffectedIdx,
         std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
         std::vector<ObsVals> &modifObsSeq, std::vector<double> &modifRewSeq) {
     return false;

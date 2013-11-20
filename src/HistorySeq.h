@@ -13,7 +13,7 @@ public:
     friend class Solver;
 
     HistorySeq(HistoryEntry* startEntry);
-    HistorySeq(HistoryEntry* startEntry, long startDepth_);
+    HistorySeq(HistoryEntry* startEntry, long startDepth);
     ~HistorySeq();
 
     HistoryEntry* getFirstEntry();
@@ -24,9 +24,6 @@ public:
             double disc, long atIdx);
     void addEntry(HistoryEntry *histEntry);
 
-    //HistoryEntry* addEntry(double discRew_, State *nxtSt);
-    //void deleteAffectedEntries(Model *m);
-    //void prepareDel();
     void updateVal(Model *m);
     void getStValsSeq(std::vector<StateVals> &seqStVals);
 
@@ -41,8 +38,8 @@ public:
 private:
     static long currId;
 
-    bool chOnlyRew, cutAffected;
-    long id, startDepth, startAffectedIdx, endAffectedIdx;
+    long id;
+    unsigned long startDepth, startAffectedIdx, endAffectedIdx;
     std::vector<HistoryEntry*> histSeq;
 
     Change chType;

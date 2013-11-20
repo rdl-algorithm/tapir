@@ -7,7 +7,7 @@
 using namespace std;
 
 Observation::Observation() {
-    child = NULL;
+    child = nullptr;
 }
 
 Observation::Observation(ObsVals &o, BeliefNode* nxtBelNode) {

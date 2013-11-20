@@ -42,7 +42,7 @@ void StatePool::readStates(ifstream &inFile, Model *model) {
     getline(inFile, tmpStr);
 
     for (long i = 0; i < nStates; i++) {
-        allStatesIdx.push_back(NULL);
+        allStatesIdx.push_back(nullptr);
     }
     pair<set<State*, CompStVals>::iterator, bool> ret;
     while (tmpStr.find("STATESPOOL-END") == string::npos) {
@@ -100,8 +100,8 @@ void StatePool::identifyAffectedStates(StateVals &lowLeft, StateVals &upRight,
          */
         affectedSt.insert(it->second);
     }
-//cerr << "#affectedSt: " << affectedSt.size() << endl;
-//cerr << "ok1\n";
+    //cerr << "#affectedSt: " << affectedSt.size() << endl;
+    //cerr << "ok1\n";
     for (long i = 1; i < nSDim; i++) {
         start = stStruct[i].lower_bound(lowLeft[i]);
         end = stStruct[i].lower_bound(upRight[i]);
@@ -109,14 +109,14 @@ void StatePool::identifyAffectedStates(StateVals &lowLeft, StateVals &upRight,
         for (it = start; it != end; it++) {
             posAffectedSt.insert(it->second);
         }
-//cerr << "#affectedSt for dim-" << i << " : " << posAffectedSt.size() << endl;
+        //cerr << "#affectedSt for dim-" << i << " : " << posAffectedSt.size() << endl;
         set_intersection(affectedSt.begin(), affectedSt.end(),
                 posAffectedSt.begin(), posAffectedSt.end(),
                 insert_iterator<set<State*> >(tmpSet, tmpSet.begin()));
         affectedSt = tmpSet;
-//cerr << "#IntersectAffectedSt for dim-" << i << " : " << affectedSt.size() << endl;
+        //cerr << "#IntersectAffectedSt for dim-" << i << " : " << affectedSt.size() << endl;
     }
-//cerr << "ok2\n";
+    //cerr << "ok2\n";
     set<State*>::iterator itSt;
     for (itSt = affectedSt.begin(); itSt != affectedSt.end(); itSt++) {
         (*itSt)->chType = max((*itSt)->chType, chType);
@@ -124,18 +124,8 @@ void StatePool::identifyAffectedStates(StateVals &lowLeft, StateVals &upRight,
     for (itSt = affectedSt.begin(); itSt != affectedSt.end(); itSt++) {
         allAffectedSt.insert(*itSt);
     }
-//cerr << "ok3\n";
+    //cerr << "ok3\n";
 }
-/*
- void StatePool::getPosNNBelNode(State *s, double distTh, set<BeliefNode*> &res) {
- set<State*>::iterator itSt;
- for (itSt = allStates.begin(); itSt != allStates.end(); itSt++) {
- if (s->distL1(*itSt) < distTh) {
- set_union((*itSt)->usedInBelNode.begin(), (*itSt)->usedInBelNode.end(), res.begin(), res.end(), res.begin());
- }
- }
- }
- */
 
 void StatePool::write(ostream &os) {
     os << "nStates: " << nStates << endl;
