@@ -1,25 +1,25 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "Observation.h"
+#include "ObservationEdge.h"
 #include "BeliefNode.h"
 
 using namespace std;
 
-Observation::Observation() {
+ObservationEdge::ObservationEdge() {
     child = nullptr;
 }
 
-Observation::Observation(ObsVals &o, BeliefNode* nxtBelNode) {
+ObservationEdge::ObservationEdge(ObsVals &o, BeliefNode* nxtBelNode) {
     vals = o;
     child = nxtBelNode;
 }
 
-Observation::~Observation() {
+ObservationEdge::~ObservationEdge() {
     vals.clear();
 }
 
-bool Observation::isObs(ObsVals &o) {
+bool ObservationEdge::isObs(ObsVals &o) {
     vector<double>::iterator thisObs, otherObs;
     for (thisObs = vals.begin(), otherObs = o.begin(); thisObs != vals.end();
             thisObs++, otherObs++) {
@@ -30,15 +30,15 @@ bool Observation::isObs(ObsVals &o) {
     return true;
 }
 
-BeliefNode* Observation::getNodeChild() {
+BeliefNode* ObservationEdge::getNodeChild() {
     return child;
 }
 
-void Observation::getChildren(queue<BeliefNode*> &res) {
+void ObservationEdge::getChildren(queue<BeliefNode*> &res) {
     res.push(child);
 }
 
-void Observation::write(ostream &os) {
+void ObservationEdge::write(ostream &os) {
     os << "O ( ";
     vector<double>::iterator it;
     for (it = vals.begin(); it != vals.end(); it++) {
@@ -47,7 +47,7 @@ void Observation::write(ostream &os) {
     os << " ) " << child->getId() << " ";
 }
 
-void Observation::writeNGetChildren(ostream &os, queue<BeliefNode*> &res) {
+void ObservationEdge::writeNGetChildren(ostream &os, queue<BeliefNode*> &res) {
     write(os);
     res.push(child);
 }

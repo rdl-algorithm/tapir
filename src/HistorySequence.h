@@ -7,20 +7,20 @@
 #include "HistoryEntry.h"
 #include "Model.h"
 
-class HistorySeq {
+class HistorySequence {
 public:
     friend class Histories;
     friend class Solver;
 
-    HistorySeq(HistoryEntry* startEntry);
-    HistorySeq(HistoryEntry* startEntry, long startDepth);
-    ~HistorySeq();
+    HistorySequence(HistoryEntry* startEntry);
+    HistorySequence(HistoryEntry* startEntry, long startDepth);
+    ~HistorySequence();
 
     HistoryEntry* getFirstEntry();
-    HistoryEntry* addEntry(long actId, ObsVals &obs, State *s);
-    HistoryEntry* addEntry(State *s, long actId, ObsVals &obs, double rew,
+    HistoryEntry* addEntry(long actId, ObsVals &obs, StateWrapper *s);
+    HistoryEntry* addEntry(StateWrapper *s, long actId, ObsVals &obs, double rew,
             double disc);
-    HistoryEntry* addEntry(State *s, long actId, ObsVals &obs, double rew,
+    HistoryEntry* addEntry(StateWrapper *s, long actId, ObsVals &obs, double rew,
             double disc, long atIdx);
     void addEntry(HistoryEntry *histEntry);
 

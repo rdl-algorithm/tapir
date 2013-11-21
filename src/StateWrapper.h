@@ -11,20 +11,20 @@
 class BeliefNode;
 class HistoryEntry;
 
-class State {
+class StateWrapper {
 public:
     friend class StatePool;
     friend class Solver;
 
-    State(StateVals &s);
-    State(std::string &str, long nStVars);
-    ~State();
+    StateWrapper(StateVals &s);
+    StateWrapper(std::string &str, long nStVars);
+    ~StateWrapper();
 
     void setId();
     void addInfo(HistoryEntry *h, BeliefNode *b);
     void addInfo(HistoryEntry *h);
     void addInfo(BeliefNode *b);
-    double distL1(State *st);
+    double distL1(StateWrapper *st);
 
     void delUsedInHistEntry(HistoryEntry *toBeDeleted);
 

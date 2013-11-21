@@ -7,11 +7,11 @@
 #include <map>
 #include <vector>
 
-#include "State.h"
+#include "StateWrapper.h"
 #include "Model.h"
 
 struct CompStVals {
-    bool operator()(const State* s1, const State* s2) const {
+    bool operator()(const StateWrapper* s1, const StateWrapper* s2) const {
         StateVals s1Vals, s2Vals;
         s1->getVals(s1Vals);
         s2->getVals(s2Vals);
@@ -32,7 +32,7 @@ struct CompStVals {
 };
 
 struct CompIdVals {
-    bool operator()(const State* s1, const State* s2) const {
+    bool operator()(const StateWrapper* s1, const StateWrapper* s2) const {
         if ((s1->getId() - s2->getId()) < 0) {
             return true;
         } else if ((s1->getId() - s2->getId()) > 0) {
@@ -50,19 +50,19 @@ public:
     ~StatePool();
 
     void readStates(std::ifstream &inFile, Model *model);
-    State* add(StateVals &sVals);
-    State* getStPtr(long stId);
+    StateWrapper* add(StateVals &sVals);
+    StateWrapper* getStPtr(long stId);
     void identifyAffectedStates(StateVals &lowLeft, StateVals &upRight,
-            Change chType, std::set<State*> &affectedSt);
+            Change chType, std::set<StateWrapper*> &affectedSt);
     //void getPosNNBelNode(State *s, double distTh, std::set<BeliefNode*> &res);
     void write(std::ostream &os);
 
 private:
     long nStates, nSDim;
-    std::set<State*, CompStVals> allStates;
-    std::vector<State*> allStatesIdx;
+    std::set<StateWrapper*, CompStVals> allStates;
+    std::vector<StateWrapper*> allStatesIdx;
     //std::vector< std::multimap<double, std::set<State*, CompStVals>::iterator> > stStruct;
-    std::vector<std::multimap<double, State*> > stStruct;
+    std::vector<std::multimap<double, StateWrapper*> > stStruct;
 
 };
 #endif

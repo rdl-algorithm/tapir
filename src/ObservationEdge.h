@@ -8,11 +8,11 @@
 
 class BeliefNode;
 
-class Observation {
+class ObservationEdge {
 public:
-    Observation();
-    Observation(ObsVals &o, BeliefNode* nxtBelNode);
-    ~Observation();
+    ObservationEdge();
+    ObservationEdge(ObsVals &o, BeliefNode* nxtBelNode);
+    ~ObservationEdge();
 
     bool isObs(ObsVals &o);
     BeliefNode* getNodeChild();

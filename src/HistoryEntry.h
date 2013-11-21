@@ -5,20 +5,20 @@
 #include <string>
 #include <sstream>
 
-#include "State.h"
+#include "StateWrapper.h"
 #include "Model.h"
 
 class BeliefNode;
 
 class HistoryEntry {
 public:
-    friend class HistorySeq;
+    friend class HistorySequence;
     friend class BeliefNode;
     friend class Solver;
 
-    HistoryEntry(State *st, unsigned long entryId);
-    HistoryEntry(State *st, unsigned long seqId, unsigned long entryId);
-    HistoryEntry(unsigned long seqId, unsigned long entryId, State *st, std::stringstream &sstr);
+    HistoryEntry(StateWrapper *st, unsigned long entryId);
+    HistoryEntry(StateWrapper *st, unsigned long seqId, unsigned long entryId);
+    HistoryEntry(unsigned long seqId, unsigned long entryId, StateWrapper *st, std::stringstream &sstr);
     void initialise();
     ~HistoryEntry();
 
@@ -49,7 +49,7 @@ public:
     }
 
 private:
-    State *st;
+    StateWrapper *st;
     bool hasBeenBackup;
     unsigned long seqId, entryId;
     double disc, rew, qVal; // disc: discount factor for the immediate reward, rew: not discounted immediate reward, qVal: discounted total reward.

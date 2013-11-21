@@ -4,22 +4,22 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "State.h"
+#include "StateWrapper.h"
 #include "BeliefNode.h"
 #include "HistoryEntry.h"
 
 using namespace std;
 
-long State::currId = 0;
+long StateWrapper::currId = 0;
 
-State::State(StateVals &s) :
+StateWrapper::StateWrapper(StateVals &s) :
         s(s) {
     // Default values; should be overridden later.
     id = 0;
     chType = Change::UNDEFINED;
 }
 
-State::State(string &str, long nStVars) {
+StateWrapper::StateWrapper(string &str, long nStVars) {
     // Default values; should be overridden later.
     id = 0;
     chType = Change::UNDEFINED;
@@ -40,29 +40,29 @@ State::State(string &str, long nStVars) {
     chType = Change::UNDEFINED;
 }
 
-State::~State() {
+StateWrapper::~StateWrapper() {
     s.clear();
 }
 
-void State::setId() {
+void StateWrapper::setId() {
     id = currId;
     currId++;
 }
 
-void State::addInfo(HistoryEntry *h, BeliefNode *b) {
+void StateWrapper::addInfo(HistoryEntry *h, BeliefNode *b) {
     usedInHistEntries.push_back(h);
     usedInBelNode.insert(b);
 }
 
-void State::addInfo(HistoryEntry *h) {
+void StateWrapper::addInfo(HistoryEntry *h) {
     usedInHistEntries.push_back(h);
 }
 
-void State::addInfo(BeliefNode *b) {
+void StateWrapper::addInfo(BeliefNode *b) {
     usedInBelNode.insert(b);
 }
 
-double State::distL1(State *st) {
+double StateWrapper::distL1(StateWrapper *st) {
     vector<double>::iterator it1, it2;
     double distUse = 0.0;
     for (it1 = s.begin(), it2 = st->s.begin(); it1 != s.end(); it1++, it2++) {
@@ -71,13 +71,13 @@ double State::distL1(State *st) {
     return distUse;
 }
 
-void State::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
+void StateWrapper::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
     vector<HistoryEntry*>::iterator it = find(usedInHistEntries.begin(),
             usedInHistEntries.end(), toBeDeleted);
     (*it) = nullptr;
 }
 
-void State::write(ostream &os) {
+void StateWrapper::write(ostream &os) {
     os << "s " << id << " : ";
     vector<double>::iterator it;
     for (it = s.begin(); it != s.end(); it++) {
@@ -85,7 +85,7 @@ void State::write(ostream &os) {
     }
 }
 
-void State::writeln(ostream &os) {
+void StateWrapper::writeln(ostream &os) {
     os << "s " << id << " : ";
     vector<double>::iterator it;
     for (it = s.begin(); it != s.end(); it++) {

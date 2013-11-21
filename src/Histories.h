@@ -4,8 +4,8 @@
 #include <fstream>
 #include <vector>
 
-#include "HistorySeq.h"
-#include "State.h"
+#include "HistorySequence.h"
+#include "StateWrapper.h"
 #include "StatePool.h"
 
 class Histories {
@@ -15,12 +15,12 @@ public:
     Histories();
     ~Histories();
 
-    HistorySeq* addHistorySeq(State *s);
-    HistorySeq* addHistorySeq(State *s, long startDepth);
+    HistorySequence* addHistorySeq(StateWrapper *s);
+    HistorySequence* addHistorySeq(StateWrapper *s, long startDepth);
     void readHistories(std::ifstream &inFile, StatePool *stPool);
     void write(std::ostream &os);
 
-    inline void add(HistorySeq *histSeq) {
+    inline void add(HistorySequence *histSeq) {
         allHistSeq.push_back(histSeq);
     }
     inline long getNHistSeq() {
@@ -31,6 +31,6 @@ public:
     }
 
 private:
-    std::vector<HistorySeq*> allHistSeq;
+    std::vector<HistorySequence*> allHistSeq;
 };
 #endif

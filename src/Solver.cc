@@ -20,6 +20,7 @@ Solver::Solver(Model *model, BeliefTree *policy, Histories *histories) :
     wRollout[0] = wRollout[1] = 1.0;
     pRollout[0] = pRollout[1] = 0.5;
     nUsedRollout[0] = nUsedRollout[1] = 1;
+    rolloutUsed = ROLLOUT_RANDHEURISTIC;
 }
 
 Solver::Solver(Model *model, const char *polFile, BeliefTree *policy,
@@ -48,11 +49,11 @@ void Solver::genPol(long maxTrials, double depthTh) {
     BeliefNode *currNode;
     HistoryEntry *rootHistEntry;
     HistoryEntry *currHistEntry;
-    HistorySeq *currHistSeq;
+    HistorySequence *currHistSeq;
 
     ObsVals obs;
     StateVals sVals, nxtSVals;
-    State *st;
+    StateWrapper *st;
     for (unsigned long i = 0; i < model->getNActions(); i++) {
         model->sampleAnInitState(sVals);
         st = allStates->add(sVals);
@@ -61,7 +62,7 @@ void Solver::genPol(long maxTrials, double depthTh) {
         root->add(rootHistEntry);
         st->usedInHistEntries.push_back(rootHistEntry);
         st->usedInBelNode.insert(root);
-        currHistSeq = new HistorySeq(rootHistEntry, 0);
+        currHistSeq = new HistorySequence(rootHistEntry, 0);
         allHistories->add(currHistSeq);
         double immediateRew;
         //cerr << "sample-" << i << " " << sVals[0] << " " << sVals[1] << endl;
@@ -100,7 +101,7 @@ void Solver::genPol(long maxTrials, double depthTh) {
 }
 
 void Solver::singleSearch(double discount, double depthTh) {
-    HistorySeq *currHistSeq;
+    HistorySequence *currHistSeq;
     long actIdx;
     double immediateRew;
     ObsVals obs;
@@ -111,7 +112,7 @@ void Solver::singleSearch(double discount, double depthTh) {
     double initStartVal = currNode->bestAvgQVal;
     model->sampleAnInitState(nxtSVals);
 //cerr << "sampledInit: " << nxtSVals[0] << " " << nxtSVals[1] << endl;
-    State *nxtSt = allStates->add(nxtSVals);
+    StateWrapper *nxtSt = allStates->add(nxtSVals);
 //cerr << "st: " << nxtSt->s[0] << " " << nxtSt->s[1] << endl;
     HistoryEntry *currHistEntry = new HistoryEntry(nxtSt, 0);
 //cerr << "currHistEntry: "  << currHistEntry->st->s[0] << " " << currHistEntry->st->s[1] << endl;
@@ -122,7 +123,7 @@ void Solver::singleSearch(double discount, double depthTh) {
 
     double currDiscFactor = 1.0;
     currHistEntry->disc = currDiscFactor;
-    currHistSeq = new HistorySeq(currHistEntry, 0);
+    currHistSeq = new HistorySequence(currHistEntry, 0);
     allHistories->add(currHistSeq);
 
     bool rolloutUsed = false;
@@ -380,7 +381,7 @@ void Solver::updWeightRolloutAct(double valImprovement) {
 //cerr << "normP " << pRollout[0] << " " << pRollout[1] << " totP: " << totP << " " << totWRollout << endl;
 }
 
-void Solver::backup(HistorySeq *history) {
+void Solver::backup(HistorySequence *history) {
 //cerr << "In backup\n";
     vector<HistoryEntry*>::reverse_iterator itHist = history->histSeq.rbegin();
     double totRew;
@@ -436,7 +437,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
     vector<StateVals> affectedRange;
     vector<Change> typeOfChanges;
     //set<long> reachAffectedHistSeq; set<long> notReachAffectedHistSeq;
-    set<HistorySeq*> affectedHistSeq;
+    set<HistorySequence*> affectedHistSeq;
 
     bool last = tChanges.empty();
     bool isTerm;
@@ -539,14 +540,14 @@ BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs,
     nxtNode = currNode->addChild(actId, obs);
     policy->allNodes.push_back(nxtNode);
 
-    State *st;
+    StateWrapper *st;
     HistoryEntry *histEntry;
-    HistorySeq *histSeq;
+    HistorySequence *histSeq;
     for (vector<StateVals>::iterator itSt = partNxtSt.begin();
             itSt != partNxtSt.end(); itSt++) {
         st = allStates->add(*itSt);
         histEntry = new HistoryEntry(st, 0);
-        histSeq = new HistorySeq(histEntry, timeStep);
+        histSeq = new HistorySequence(histEntry, timeStep);
         nxtNode->add(histEntry);
         histEntry->partOfBelNode = nxtNode;
         allHistories->add(histSeq);
@@ -566,8 +567,8 @@ BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs,
     return nxtNode;
 }
 
-void Solver::resetAffected(set<HistorySeq*> affectedHistSeq) {
-    set<HistorySeq*>::iterator itHistSeq;
+void Solver::resetAffected(set<HistorySequence*> affectedHistSeq) {
+    set<HistorySequence*>::iterator itHistSeq;
     for (itHistSeq = affectedHistSeq.begin();
             itHistSeq != affectedHistSeq.end(); itHistSeq++) {
         (*itHistSeq)->startAffectedIdx = LONG_MAX;
@@ -607,9 +608,9 @@ bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals,
 
 void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
         vector<Change> &chTypes, BeliefNode *currNode,
-        set<HistorySeq*> &affectedHistSeq) {
+        set<HistorySequence*> &affectedHistSeq) {
     // Get affected states
-    set<State*> affectedStates;
+    set<StateWrapper*> affectedStates;
     vector<StateVals>::iterator it1, it2;
     vector<Change>::iterator itType = chTypes.begin();
     it1 = affectedRange.begin();
@@ -636,8 +637,8 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
 //cerr << "cool\n";
     // Get affected history seq.
     vector<HistoryEntry*>::iterator itH;
-    set<State*>::iterator itS;
-    HistorySeq *histSeq;
+    set<StateWrapper*>::iterator itS;
+    HistorySequence *histSeq;
 //cerr << "last #affectedStates: " << affectedStates.size() << endl;
     for (itS = affectedStates.begin(); itS != affectedStates.end(); itS++) {
         for (itH = (*itS)->usedInHistEntries.begin();
@@ -676,9 +677,9 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
     }
 }
 
-void Solver::updatePol(set<HistorySeq*> &affectedHistSeq) {
+void Solver::updatePol(set<HistorySequence*> &affectedHistSeq) {
     double disc = model->getDiscount();
-    set<HistorySeq*>::iterator itHistSeq;
+    set<HistorySequence*>::iterator itHistSeq;
     HistoryEntry *currHistEntry;
 //cerr << "#affectedHistSeq: " << affectedHistSeq.size() << endl;
 //int z = 0;
@@ -779,7 +780,7 @@ void Solver::updatePol(set<HistorySeq*> &affectedHistSeq) {
     }
 }
 
-void Solver::removePathFrBelNode(HistorySeq *history) {
+void Solver::removePathFrBelNode(HistorySequence *history) {
     vector<HistoryEntry*>::iterator itHist;
     for (itHist = history->histSeq.begin() + 1;
             itHist != history->histSeq.end(); itHist++) {
@@ -789,7 +790,7 @@ void Solver::removePathFrBelNode(HistorySeq *history) {
     }
 }
 
-void Solver::modifHistSeqFr(HistorySeq *history, vector<StateVals> &modifStSeq,
+void Solver::modifHistSeqFr(HistorySequence *history, vector<StateVals> &modifStSeq,
         vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq,
         vector<double> &modifRewSeq) {
     vector<StateVals>::iterator itSt = modifStSeq.begin();
@@ -798,7 +799,7 @@ void Solver::modifHistSeqFr(HistorySeq *history, vector<StateVals> &modifStSeq,
     vector<double>::iterator itRew = modifRewSeq.begin();
 
     BeliefNode *b = nullptr;
-    State *s;
+    StateWrapper *s;
     HistoryEntry *hEntry;
 
     long nOrgEntries = history->histSeq.size();
@@ -908,7 +909,7 @@ void Solver::modifHistSeqFr(HistorySeq *history, vector<StateVals> &modifStSeq,
 //cerr << "After backup\n";
 }
 
-void Solver::modifHistSeqFrTo(HistorySeq *history,
+void Solver::modifHistSeqFrTo(HistorySequence *history,
         vector<StateVals> &modifStSeq, vector<long> &modifActSeq,
         vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq) {
 
@@ -918,7 +919,7 @@ void Solver::modifHistSeqFrTo(HistorySeq *history,
     vector<double>::iterator itRew = modifRewSeq.begin();
 
     BeliefNode *b;
-    State *s;
+    StateWrapper *s;
     HistoryEntry *hEntry;
 
     long nOrgEntries = history->endAffectedIdx;
@@ -1034,7 +1035,7 @@ void Solver::modifHistSeqFrTo(HistorySeq *history,
 //cerr << "After backup\n";
 }
 
-void Solver::updateVal(HistorySeq *histSeq) {
+void Solver::updateVal(HistorySequence *histSeq) {
     double prevRew;
     long startAffectedIdx = histSeq->startAffectedIdx;
     long endAffectedIdx = histSeq->endAffectedIdx;
@@ -1081,12 +1082,12 @@ void Solver::improveSol(BeliefNode* startNode, long maxTrials, double depthTh) {
 
 void Solver::singleSearch(BeliefNode *startNode, double discount,
         double depthTh, HistoryEntry* startParticle) {
-    HistorySeq *currHistSeq;
+    HistorySequence *currHistSeq;
     long actIdx;
     double immediateRew;
     ObsVals obs;
     StateVals nxtSVals;
-    State *nxtSt;
+    StateWrapper *nxtSt;
 
     double initStartVal = startNode->bestAvgQVal;
 //cerr << "#part in startNode: " << startNode->nParticles << " " << initStartVal << endl;
@@ -1099,7 +1100,7 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
             + startParticle->entryId;
     double currDiscFactor = pow(discount, startDepth);
     currHistEntry->disc = currDiscFactor;
-    currHistSeq = new HistorySeq(currHistEntry, startDepth);
+    currHistSeq = new HistorySequence(currHistEntry, startDepth);
     allHistories->add(currHistSeq);
 
     bool rolloutUsed = false;

@@ -1,16 +1,16 @@
 #include <climits>
 
-#include "HistorySeq.h"
+#include "HistorySequence.h"
 
 using namespace std;
 
-long HistorySeq::currId = 0;
+long HistorySequence::currId = 0;
 
-HistorySeq::HistorySeq(HistoryEntry *startEntry) :
-        HistorySeq(startEntry, 0) {
+HistorySequence::HistorySequence(HistoryEntry *startEntry) :
+        HistorySequence(startEntry, 0) {
 }
 
-HistorySeq::HistorySeq(HistoryEntry *startEntry, long startDepth) :
+HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
         startDepth(startDepth) {
     id = currId;
     currId++;
@@ -22,7 +22,7 @@ HistorySeq::HistorySeq(HistoryEntry *startEntry, long startDepth) :
     chType = Change::UNDEFINED;
 }
 
-HistorySeq::~HistorySeq() {
+HistorySequence::~HistorySequence() {
     vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
         delete (*it);
@@ -30,18 +30,18 @@ HistorySeq::~HistorySeq() {
     histSeq.resize(0);
 }
 
-HistoryEntry* HistorySeq::getFirstEntry() {
+HistoryEntry* HistorySequence::getFirstEntry() {
     return histSeq[0];
 }
 
-HistoryEntry* HistorySeq::addEntry(long actId, ObsVals &obs, State *s) {
+HistoryEntry* HistorySequence::addEntry(long actId, ObsVals &obs, StateWrapper *s) {
     histSeq.back()->setNxt(actId, obs);
     HistoryEntry* newEntry = new HistoryEntry(s, id, histSeq.size());
     histSeq.push_back(newEntry);
     return newEntry;
 }
 
-HistoryEntry* HistorySeq::addEntry(State *s, long actId, ObsVals &obs,
+HistoryEntry* HistorySequence::addEntry(StateWrapper *s, long actId, ObsVals &obs,
         double rew, double disc) {
     HistoryEntry* newEntry = new HistoryEntry(s, id, histSeq.size());
     newEntry->actId = actId;
@@ -52,7 +52,7 @@ HistoryEntry* HistorySeq::addEntry(State *s, long actId, ObsVals &obs,
     return newEntry;
 }
 
-HistoryEntry* HistorySeq::addEntry(State *s, long actId, ObsVals &obs,
+HistoryEntry* HistorySequence::addEntry(StateWrapper *s, long actId, ObsVals &obs,
         double rew, double disc, long atIdx) {
     HistoryEntry* newEntry = new HistoryEntry(s, id, atIdx);
     newEntry->actId = actId;
@@ -63,11 +63,11 @@ HistoryEntry* HistorySeq::addEntry(State *s, long actId, ObsVals &obs,
     return newEntry;
 }
 
-void HistorySeq::addEntry(HistoryEntry *histEntry) {
+void HistorySequence::addEntry(HistoryEntry *histEntry) {
     histSeq.push_back(histEntry);
 }
 
-void HistorySeq::getStValsSeq(vector<StateVals> &seqStVals) {
+void HistorySequence::getStValsSeq(vector<StateVals> &seqStVals) {
     seqStVals.clear();
     vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
@@ -77,7 +77,7 @@ void HistorySeq::getStValsSeq(vector<StateVals> &seqStVals) {
     }
 }
 
-void HistorySeq::fixEntryId() {
+void HistorySequence::fixEntryId() {
     vector<HistoryEntry*>::iterator itH;
     long i = 0;
     for (itH = histSeq.begin(); itH != histSeq.end(); itH++, i++) {
@@ -85,14 +85,14 @@ void HistorySeq::fixEntryId() {
     }
 }
 
-void HistorySeq::write(ostream &os) {
+void HistorySequence::write(ostream &os) {
     vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
         (*it)->writeln(os);
     }
 }
 
-void HistorySeq::writeln(ostream &os) {
+void HistorySequence::writeln(ostream &os) {
     vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
         (*it)->writeln(os);

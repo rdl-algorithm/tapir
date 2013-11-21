@@ -4,7 +4,7 @@
 #include <vector>
 #include <queue>
 
-#include "Observation.h"
+#include "ObservationEdge.h"
 #include "Model.h"
 
 class BeliefNode;
@@ -35,7 +35,7 @@ private:
     long actId, nParticles;
     double qVal, avgQVal;
 
-    std::vector<Observation*> obsChildren;
+    std::vector<ObservationEdge*> obsChildren;
 
 };
 #endif

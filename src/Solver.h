@@ -8,7 +8,7 @@
 #include "Model.h"
 #include "BeliefTree.h"
 #include "Histories.h"
-#include "State.h"
+#include "StateWrapper.h"
 #include "StatePool.h"
 
 class Solver {
@@ -53,7 +53,7 @@ private:
     //BeliefNode* getNNBelNodeEMD(BeliefNode *b);
     BeliefNode* getNNBelNode(BeliefNode *b);
     void updWeightRolloutAct(double valImprovement);
-    void backup(HistorySeq *history);
+    void backup(HistorySequence *history);
 
     bool simAStep(StateVals& currStVals, StateVals &nxtStVals,
             BeliefNode **startNode, BeliefNode **nxtNode, double *rew,
@@ -66,20 +66,20 @@ private:
      */
     void identifyAffectedPol(std::vector<StateVals> &affectedRage,
             std::vector<Change> &chTypes, BeliefNode *currNode,
-            std::set<HistorySeq*> &affectedHistSeq);
+            std::set<HistorySequence*> &affectedHistSeq);
 
-    void resetAffected(std::set<HistorySeq*> affectedHistSeq);
-    void updatePol(std::set<HistorySeq*> &affectedHistSeq);
-    void updateVal(HistorySeq *histSeq);
+    void resetAffected(std::set<HistorySequence*> affectedHistSeq);
+    void updatePol(std::set<HistorySequence*> &affectedHistSeq);
+    void updateVal(HistorySequence *histSeq);
     void improveSol(BeliefNode* startNode, long maxTrials, double depthTh);
     BeliefNode* addChild(BeliefNode *currNode, long actId, ObsVals &obs,
             long timeStep);
 
-    void removePathFrBelNode(HistorySeq *history);
-    void modifHistSeqFr(HistorySeq *history, std::vector<StateVals> &modifStSeq,
+    void removePathFrBelNode(HistorySequence *history);
+    void modifHistSeqFr(HistorySequence *history, std::vector<StateVals> &modifStSeq,
             std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
-    void modifHistSeqFrTo(HistorySeq *history,
+    void modifHistSeqFrTo(HistorySequence *history,
             std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
             std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);

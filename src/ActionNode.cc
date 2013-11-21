@@ -5,7 +5,7 @@ using namespace std;
 
 ActionNode::ActionNode(long actId, ObsVals &obs, BeliefNode* nxtBelNode) :
         ActionNode(actId, 1, 0.0, 0.0) {
-    obsChildren.push_back(new Observation(obs, nxtBelNode));
+    obsChildren.push_back(new ObservationEdge(obs, nxtBelNode));
 }
 
 ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal) :
@@ -13,7 +13,7 @@ ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal)
 }
 
 ActionNode::~ActionNode() {
-    vector<Observation*>::iterator it;
+    vector<ObservationEdge*>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
         delete (*it);
     }
@@ -59,11 +59,11 @@ bool ActionNode::isAct(long aIdx) {
 }
 
 void ActionNode::addChild(ObsVals &obs, BeliefNode* nxtBelNode) {
-    obsChildren.push_back(new Observation(obs, nxtBelNode));
+    obsChildren.push_back(new ObservationEdge(obs, nxtBelNode));
 }
 
 BeliefNode* ActionNode::getObsChild(ObsVals &obs) {
-    vector<Observation*>::iterator itObs;
+    vector<ObservationEdge*>::iterator itObs;
     for (itObs = obsChildren.begin(); itObs != obsChildren.end(); itObs++) {
         if ((*itObs)->isObs(obs)) {
             return (*itObs)->getNodeChild();
@@ -73,7 +73,7 @@ BeliefNode* ActionNode::getObsChild(ObsVals &obs) {
 }
 
 void ActionNode::getChildren(queue<BeliefNode*> &res) {
-    vector<Observation*>::iterator it;
+    vector<ObservationEdge*>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
         (*it)->getChildren(res);
     }
@@ -86,7 +86,7 @@ void ActionNode::write(ostream &os) {
 
 void ActionNode::writeNGetChildren(ostream &os, queue<BeliefNode*> &res) {
     write(os);
-    vector<Observation*>::iterator it;
+    vector<ObservationEdge*>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
         (*it)->writeNGetChildren(os, res);
     }
