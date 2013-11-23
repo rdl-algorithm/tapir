@@ -71,7 +71,7 @@ void TagModel::initialise() {
     envMap.resize(nRows);
     for (p.i = nRows - 1; p.i >= 0; p.i--) {
         envMap[p.i].resize(nCols);
-        for (p.j = nCols - 1; p.j >= 0; p.j--) {
+        for (p.j = 0; p.j < nCols; p.j++) {
             char c = mapText[p.i][p.j];
             long cellType;
             if (c == 'X') {
@@ -106,8 +106,8 @@ void TagModel::sampleAnInitState(StateVals &sVals) {
 
 void TagModel::sampleStateUniform(StateVals &sVals) {
     sVals.resize(nStVars);
-    sVals[0] = GlobalResources::randIntBetween(0, nEmptyCells);
-    sVals[1] = GlobalResources::randIntBetween(0, nEmptyCells);
+    sVals[0] = GlobalResources::randIntBetween(0, nEmptyCells - 1);
+    sVals[1] = GlobalResources::randIntBetween(0, nEmptyCells - 1);
     sVals[2] = UNTAGGED;
 }
 
@@ -139,7 +139,6 @@ bool TagModel::makeNextState(StateVals &sVals, unsigned long actId,
     if (sVals[2] == TAGGED) {
         return false;
     }
-
     Coords robotPos = decodeCoords(sVals[0]);
     Coords opponentPos = decodeCoords(sVals[1]);
     if (actId == TAG && robotPos == opponentPos) {
@@ -273,19 +272,26 @@ void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         if (newRobotPos != getMovedPos(oldRobotPos, actId)) {
             continue;
         }
-        Coords oldOpponentPos = decodeCoords((sv)[1]);
+        Coords oldOpponentPos = decodeCoords(sv[1]);
         std::vector<long> actions;
         makeOpponentActions(oldRobotPos, oldOpponentPos, actions);
         std::vector<long> newActions(actions.size());
         std::vector<long>::iterator newActionsEnd = (
                 std::copy_if(actions.begin(), actions.end(),
                         newActions.begin(),
-                        [&oldOpponentPos, &newRobotPos, this] (long x) {
-            return getMovedPos(oldOpponentPos, x) != newRobotPos;
+                        [&oldOpponentPos, &newRobotPos, this] (long action) {
+            return getMovedPos(oldOpponentPos, action) != newRobotPos;
         }));
         newActions.resize(std::distance(newActions.begin(), newActionsEnd));
-        for (auto &it2 : newActions) {
-            double probabilityFactor = 1.0 / newActions.size();
+		double probabilityFactor = 1.0 / newActions.size();
+        for (long &action : newActions) {
+			Coords newOpponentPos = getMovedPos(oldOpponentPos, action);
+			StateVals sVals(nStVars);
+			sVals[0] = obs[0];
+            sVals[1] = encodeCoords(newOpponentPos);
+			sVals[2] = UNTAGGED;
+			weights[sVals] += probabilityFactor;
+			weightTotal += probabilityFactor;
         }
     }
     double scale = nParticles / weightTotal;
@@ -309,6 +315,18 @@ void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         nxtSVals[2] = (actId == TAG ? TAGGED : UNTAGGED);
         partNxtSt.push_back(nxtSVals);
         return;
+    }
+
+	while (partNxtSt.size() < nParticles) {
+        StateVals sVals;
+        sampleStateUniform(sVals);
+        StateVals nxtStVals;
+        ObsVals obs2;
+        double reward;
+        getNextState(sVals, actId, &reward, nxtStVals, obs2);
+        if (obs == obs2) {
+            partNxtSt.push_back(nxtStVals);
+        }
     }
 }
 

@@ -313,7 +313,7 @@ void RockSampleModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         StateVals nxtStVals;
         ObsVals obs2;
         double reward;
-        getNextState(sVals, actId, &reward, nxtStVals, obs);
+        getNextState(sVals, actId, &reward, nxtStVals, obs2);
         if (obs == obs2) {
             partNxtSt.push_back(nxtStVals);
         }
