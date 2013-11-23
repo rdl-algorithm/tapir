@@ -143,6 +143,7 @@ public:
     virtual void dispState(StateVals &s, std::ostream &os)=0;
     virtual void dispObs(ObsVals &o, std::ostream &os)=0;
     virtual void drawEnv(std::ostream &os)=0;
+    virtual void drawState(StateVals &s, std::ostream &os)=0;
 
 protected:
     // Problem parameters.

@@ -432,6 +432,8 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
     BeliefNode* nxtNode;
     StateVals currStVals, nxtStVals;
     model->sampleAnInitState(currStVals);
+    cerr << "Initial State:" << endl;
+    model->drawState(currStVals, cerr);
     trajSt.push_back(currStVals);
 
     vector<StateVals> affectedRange;
@@ -494,8 +496,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
         trajRew.push_back(rew);
         val = val + currDiscFactor * rew;
         currDiscFactor = currDiscFactor * discFactor;
-        cerr << "Discount Factor: " << currDiscFactor << endl;
-        cerr << "Total Reward: " << val << endl;
+        cerr << "Discount Factor: " << currDiscFactor << "; Total Reward: " << val << endl;
         if (isTerm) {
             *actualNSteps = i;
             break;
@@ -596,13 +597,10 @@ bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals,
     }
     cerr << "Action: ";
     model->dispAct(actId, cerr);
-    cerr << "; " << "Reward: " << *rew;
-    cerr << "; " << "Obs: ";
+    cerr << "; Reward: " << *rew << "; Obs: ";
     model->dispObs(obs, cerr);
-    cerr << endl << "State: ";
-    model->dispState(nxtStVals, cerr);
     cerr << endl;
-
+    model->drawState(nxtStVals, cerr);
     return isTerm;
 }
 
@@ -657,6 +655,7 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
                 histSeq->chType = max(histSeq->chType, (*itS)->chType);
                 affectedHistSeq.insert(histSeq);
             }
+            /*
             if (histSeq->endAffectedIdx >= histSeq->histSeq.size()) {
                 cerr << "AftAffectedIdx  ID " << (*itH)->seqId << " "
                         << (*itH)->entryId << " aff "
@@ -670,7 +669,7 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
                             << histSeq->histSeq[y]->entryId << endl;
                 }
             }
-
+            */
         }
 
         histSeq->chType = Change::UNDEFINED;

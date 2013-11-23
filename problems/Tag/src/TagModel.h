@@ -165,6 +165,7 @@ public:
             std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
+    void drawState(StateVals &s, std::ostream &os);
 
 private:
     // Values for the required getters

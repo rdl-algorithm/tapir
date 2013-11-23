@@ -104,6 +104,7 @@ public:
     void dispCell(int cellType, std::ostream &os) {
         if (cellType >= ROCK) {
             os << std::hex << cellType - ROCK;
+            os << std::dec;
             return;
         }
         switch (cellType) {
@@ -197,6 +198,7 @@ public:
             std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
+    void drawState(StateVals &s, std::ostream &os);
 
 private:
     // Values for the required getters

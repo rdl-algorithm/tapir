@@ -343,3 +343,18 @@ void RockSampleModel::drawEnv(std::ostream &os) {
         os << endl;
     }
 }
+
+void RockSampleModel::drawState(StateVals &s, std::ostream &os) {
+    dispState(s, os);
+    os << endl;
+    for (int i = 0; i < envMap.size(); i++) {
+        for (int j = 0; j < envMap[0].size(); j++) {
+            if (i == s[0] && j == s[1]) {
+                os << "x";
+                continue;
+            }
+            dispCell(envMap[i][j], os);
+        }
+        os << endl;
+    }
+}

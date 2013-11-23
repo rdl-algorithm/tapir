@@ -233,7 +233,7 @@ bool TagModel::getNextState(StateVals &sVals, unsigned long actId, double *immed
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
     obs.resize(2);
-    makeObs(sVals, actId, obs);
+    makeObs(nxtSVals, actId, obs);
     return isTerm(nxtSVals);
 }
 
@@ -349,6 +349,32 @@ void TagModel::drawEnv(std::ostream &os) {
         for (int &cellType : row) {
             dispCell(cellType, os);
             os << " ";
+        }
+        os << endl;
+    }
+}
+
+void TagModel::drawState(StateVals &s, std::ostream &os) {
+    for (int i = 0; i < envMap.size(); i++) {
+        for (int j = 0; j < envMap[0].size(); j++) {
+            Coords coords(i, j);
+            bool hasRobot = (coords == decodeCoords(s[0]));
+            bool hasOpponent = (coords == decodeCoords(s[1]));
+            if (hasRobot) {
+                if (hasOpponent) {
+                    os << "#";
+                } else {
+                    os << "r";
+                }
+            } else if (hasOpponent) {
+                os << "o";
+            } else {
+                if (envMap[i][j] == WALL) {
+                    os << "X";
+                } else {
+                    os << ".";
+                }
+            }
         }
         os << endl;
     }

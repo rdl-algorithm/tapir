@@ -1185,3 +1185,49 @@ void UnderwaterNavModifModel::drawEnv(ostream &os) {
         os << " " << endl;
     }
 }
+
+void UnderwaterNavModifModel::drawState(StateVals &s, ostream &os) {
+    map<long, map<long, short> >::iterator itCellType;
+    os << endl;
+    for (long y = 0; y < nY; y++) {
+        for (long x = 0; x < nX; x++) {
+            if (x == s[0] && y == s[1]) {
+                os << "X";
+                continue;
+            }
+            itCellType = cellType.find(x);
+            if (itCellType != cellType.end()) {
+                if (itCellType->second.find(y) != itCellType->second.end()) {
+                    // 0: usual, 1: goals, 2: rocks, 3: observation, 4: spc. reward, 5: obstacle.
+                    switch (cellType[x][y]) {
+                    case 1: {
+                        os << "D";
+                        break;
+                    }
+                    case 2: {
+                        os << "R";
+                        break;
+                    }
+                    case 3: {
+                        os << "O";
+                        break;
+                    }
+                    case 5: {
+                        os << "W";
+                        break;
+                    }
+                    default: {
+                        os << cellType[x][y];
+                        break;
+                    }
+                    }
+                } else {
+                    os << " ";
+                }
+            } else {
+                os << " ";
+            }
+        }
+        os << " " << endl;
+    }
+}
