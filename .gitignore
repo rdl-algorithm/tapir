@@ -1,6 +1,6 @@
 .svn/*
 *~
-*.dep
+*.d
 *.o
 *.class
 *.pol

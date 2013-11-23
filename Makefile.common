@@ -5,15 +5,15 @@
 #
 # root directory of the package
 #
-ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
+ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
-# directories
-SOLVER_SRCDIR_REL := src
-SOLVER_OBJDIR_REL := obj
-SOLVER_DEPDIR_REL := dep
-SOLVER_SRCDIR := $(ROOT)/$(SOLVER_SRCDIR_REL)
-SOLVER_OBJDIR := $(ROOT)/$(SOLVER_OBJDIR_REL)
-SOLVER_DEPDIR := $(ROOT)/$(SOLVER_DEPDIR_REL)
+# Directories
+SOLVER_SRCDIR := $(ROOT)/src
+SOLVER_OBJDIR := $(ROOT)/obj
+SOLVER_DEPDIR := $(ROOT)/dep
+
+# Standard include directories.
+INCDIRS = -I$(SOLVER_SRCDIR)
 
 # ----------------------------------------------------------------------
 # Files
@@ -32,6 +32,5 @@ $(SOLVER_OBJS):| $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
 $(SOLVER_DEPDIR) $(SOLVER_OBJDIR):
 	mkdir -p $@
 $(SOLVER_OBJDIR)/%.o: $(SOLVER_SRCDIR)/%.cc
-	cd $(SOLVER_SRCDIR); $(CXX) $(CXXFLAGS) -MMD -MT "\$$(SOLVER_OBJDIR)/$*.o" \
-		-c $*.cc -o $(abspath $@)
-	@mv $(SOLVER_OBJDIR)/$*.d $(SOLVER_DEPDIR)/$*.dep
+	$(CXX) $(CXXFLAGS) -MMD -c $< -o $@
+	@mv $(SOLVER_OBJDIR)/$*.d $(SOLVER_DEPDIR)/$*.d

@@ -1,8 +1,6 @@
 default: all
 include Makefile.common
 
-VPATH = $(SOLVER_SRCDIR)
-
 # Compiler & linker
 # ----------------------------------------------------------------------
 CC = gcc
@@ -16,13 +14,7 @@ LINKER = g++
 CXXFLAGS = -Wall -std=c++11 -DDISTL1 $(INCDIRS)
 DEBUG_FLAGS = -DDEBUG -g -O0
 RELEASE_FLAGS = -frounding-math -O3
-INCDIRS =
-
-#---------------------------------------------------------------------#
-# Linker flags
-#---------------------------------------------------------------------#
-
-LDFLAGS = -g -w -lboost_program_options -L/usr/lib/x86_64-linux-gnu/
+# INCDIRS +=
 
 # ----------------------------------------------------------------------
 # Targets
@@ -41,9 +33,13 @@ clean:
 
 -include $(SOLVER_DEPS)
 
+.PHONY: rmdirs
+rmdirs:
+	rm -rf $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
+
 .PHONY: redo
 redo:
-	$(MAKE) clean
+	$(MAKE) rmdirs
 	$(MAKE)
 
 # DO NOT DELETE
