@@ -18,10 +18,10 @@ public:
 
     HistoryEntry* getFirstEntry();
     HistoryEntry* addEntry(long actId, ObsVals &obs, StateWrapper *s);
-    HistoryEntry* addEntry(StateWrapper *s, long actId, ObsVals &obs, double rew,
-            double disc);
-    HistoryEntry* addEntry(StateWrapper *s, long actId, ObsVals &obs, double rew,
-            double disc, long atIdx);
+    HistoryEntry* addEntry(StateWrapper *s, long actId, ObsVals &obs,
+            double rew, double disc);
+    HistoryEntry* addEntry(StateWrapper *s, long actId, ObsVals &obs,
+            double rew, double disc, long atIdx);
     void addEntry(HistoryEntry *histEntry);
 
     void updateVal(Model *m);

@@ -11,13 +11,14 @@ HistoryEntry::HistoryEntry(StateWrapper *st, unsigned long entryId) :
 
 }
 
-HistoryEntry::HistoryEntry(StateWrapper *st, unsigned long seqId, unsigned long entryId) :
+HistoryEntry::HistoryEntry(StateWrapper *st, unsigned long seqId,
+        unsigned long entryId) :
         st(st), seqId(seqId), entryId(entryId) {
     initialise();
 }
 
-HistoryEntry::HistoryEntry(unsigned long seqId, unsigned long entryId, StateWrapper *st,
-        stringstream &sstr) :
+HistoryEntry::HistoryEntry(unsigned long seqId, unsigned long entryId,
+        StateWrapper *st, stringstream &sstr) :
         st(st), seqId(seqId), entryId(entryId) {
     initialise();
     string usrStr;

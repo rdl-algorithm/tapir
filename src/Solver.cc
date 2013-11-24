@@ -24,7 +24,8 @@ Solver::Solver(Model *model, BeliefTree *policy, Histories *histories) :
 }
 
 Solver::Solver(Model *model, const char *polFile, BeliefTree *policy,
-        Histories *histories) : Solver(model, policy, histories) {
+        Histories *histories) :
+        Solver(model, policy, histories) {
     ifstream inFile;
     inFile.open(polFile);
     if (!inFile.is_open()) {
@@ -235,7 +236,8 @@ long Solver::getRolloutAct(BeliefNode *belNode, StateVals &s, double startDisc,
 //cerr << " YESPOL\n";
                 //actSelected = currNode->getBestAct();
                 actSelected = belNode->getNxtActToTry();
-                model->getNextState(s, actSelected, immediateRew, nxtSVals, obs);
+                model->getNextState(s, actSelected, immediateRew, nxtSVals,
+                        obs);
                 currNode = currNode->getChild(actSelected, obs);
                 *qVal = startDisc * rolloutPolHelper(currNode, nxtSVals, disc);
                 rolloutUsed = ROLLOUT_POL;
@@ -496,7 +498,8 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
         trajRew.push_back(rew);
         val = val + currDiscFactor * rew;
         currDiscFactor = currDiscFactor * discFactor;
-        cerr << "Discount Factor: " << currDiscFactor << "; Total Reward: " << val << endl;
+        cerr << "Discount Factor: " << currDiscFactor << "; Total Reward: "
+                << val << endl;
         if (isTerm) {
             *actualNSteps = i;
             break;
@@ -656,20 +659,20 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
                 affectedHistSeq.insert(histSeq);
             }
             /*
-            if (histSeq->endAffectedIdx >= histSeq->histSeq.size()) {
-                cerr << "AftAffectedIdx  ID " << (*itH)->seqId << " "
-                        << (*itH)->entryId << " aff "
-                        << histSeq->startAffectedIdx << " "
-                        << histSeq->endAffectedIdx << " of "
-                        << histSeq->histSeq.size() << " affST " << (*itS)->s[0]
-                        << " " << (*itS)->s[1] << endl;
-                for (unsigned long y = 0; y < histSeq->histSeq.size(); y++) {
-                    cerr << "El-" << y << " " << histSeq->histSeq[y]->st->s[0]
-                            << " " << histSeq->histSeq[y]->st->s[1] << " "
-                            << histSeq->histSeq[y]->entryId << endl;
-                }
-            }
-            */
+             if (histSeq->endAffectedIdx >= histSeq->histSeq.size()) {
+             cerr << "AftAffectedIdx  ID " << (*itH)->seqId << " "
+             << (*itH)->entryId << " aff "
+             << histSeq->startAffectedIdx << " "
+             << histSeq->endAffectedIdx << " of "
+             << histSeq->histSeq.size() << " affST " << (*itS)->s[0]
+             << " " << (*itS)->s[1] << endl;
+             for (unsigned long y = 0; y < histSeq->histSeq.size(); y++) {
+             cerr << "El-" << y << " " << histSeq->histSeq[y]->st->s[0]
+             << " " << histSeq->histSeq[y]->st->s[1] << " "
+             << histSeq->histSeq[y]->entryId << endl;
+             }
+             }
+             */
         }
 
         histSeq->chType = Change::UNDEFINED;
@@ -789,9 +792,9 @@ void Solver::removePathFrBelNode(HistorySequence *history) {
     }
 }
 
-void Solver::modifHistSeqFr(HistorySequence *history, vector<StateVals> &modifStSeq,
-        vector<long> &modifActSeq, vector<ObsVals> &modifObsSeq,
-        vector<double> &modifRewSeq) {
+void Solver::modifHistSeqFr(HistorySequence *history,
+        vector<StateVals> &modifStSeq, vector<long> &modifActSeq,
+        vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq) {
     vector<StateVals>::iterator itSt = modifStSeq.begin();
     vector<long>::iterator itAct = modifActSeq.begin();
     vector<ObsVals>::iterator itObs = modifObsSeq.begin();

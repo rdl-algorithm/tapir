@@ -32,8 +32,7 @@ private:
     StatePool *allStates;
 
     enum RolloutMode {
-        ROLLOUT_RANDHEURISTIC = 0,
-        ROLLOUT_POL = 1
+        ROLLOUT_RANDHEURISTIC = 0, ROLLOUT_POL = 1
     };
 
     RolloutMode rolloutUsed;
@@ -76,8 +75,9 @@ private:
             long timeStep);
 
     void removePathFrBelNode(HistorySequence *history);
-    void modifHistSeqFr(HistorySequence *history, std::vector<StateVals> &modifStSeq,
-            std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
+    void modifHistSeqFr(HistorySequence *history,
+            std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
+            std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
     void modifHistSeqFrTo(HistorySequence *history,
             std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,

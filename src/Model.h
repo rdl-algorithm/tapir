@@ -83,7 +83,6 @@ public:
 
     /* --------------- Start virtual getters ----------------- */
     // Subclasses are necessarily required to define these methods.
-
     /** Returns the # of actions for this POMDP. */
     virtual unsigned long getNActions()=0;
     /** Returns the # of observations f {or this POMDP. */

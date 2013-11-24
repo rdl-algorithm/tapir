@@ -18,7 +18,8 @@ public:
 
     HistoryEntry(StateWrapper *st, unsigned long entryId);
     HistoryEntry(StateWrapper *st, unsigned long seqId, unsigned long entryId);
-    HistoryEntry(unsigned long seqId, unsigned long entryId, StateWrapper *st, std::stringstream &sstr);
+    HistoryEntry(unsigned long seqId, unsigned long entryId, StateWrapper *st,
+            std::stringstream &sstr);
     void initialise();
     ~HistoryEntry();
 

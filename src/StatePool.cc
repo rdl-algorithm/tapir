@@ -50,7 +50,8 @@ void StatePool::readStates(ifstream &inFile, Model *model) {
         ret = allStates.insert(newSt);
         allStatesIdx[newSt->id] = *(ret.first);
         for (long i = 0; i < nSDim; i++) {
-            stStruct[i].insert(pair<double, StateWrapper*>(newSt->s[i], *(ret.first)));
+            stStruct[i].insert(
+                    pair<double, StateWrapper*>(newSt->s[i], *(ret.first)));
         }
         getline(inFile, tmpStr);
     }
@@ -58,7 +59,8 @@ void StatePool::readStates(ifstream &inFile, Model *model) {
 
 StateWrapper* StatePool::add(StateVals &sVals) {
     StateWrapper* newSt = new StateWrapper(sVals);
-    pair<set<StateWrapper*, CompStVals>::iterator, bool> ret = allStates.insert(newSt);
+    pair<set<StateWrapper*, CompStVals>::iterator, bool> ret = allStates.insert(
+            newSt);
     if (ret.second) {
         newSt->setId();
         allStatesIdx.push_back(newSt);
