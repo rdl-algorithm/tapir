@@ -18,14 +18,13 @@ public:
 
     StateWrapper(StateVals &s);
     StateWrapper(std::string &str, long nStVars);
-    ~StateWrapper();
+    ~StateWrapper() = default;
     StateWrapper(const StateWrapper&) = delete;
     StateWrapper(StateWrapper&) = delete;
     StateWrapper &operator=(const StateWrapper&) = delete;
     StateWrapper &operator=(StateWrapper&) = delete;
 
     void setId();
-    void addInfo(HistoryEntry *h, BeliefNode *b);
     void addInfo(HistoryEntry *h);
     void addInfo(BeliefNode *b);
     double distL1(StateWrapper *st);
@@ -49,9 +48,10 @@ private:
     static long currId;
     long id;
 
-    std::vector<HistoryEntry*> usedInHistEntries;
-    std::set<BeliefNode*> usedInBelNode;
+    std::vector<HistoryEntry*> usedInHistoryEntries;
+    std::set<BeliefNode*> usedInBeliefNodes;
 
     Change chType;
 };
+
 #endif

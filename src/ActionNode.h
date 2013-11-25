@@ -31,7 +31,7 @@ public:
     void write(std::ostream &os);
     void writeNGetChildren(std::ostream &os, std::queue<BeliefNode*> &res);
 
-    inline double getQVal() {
+    double getQVal() {
         return qVal;
     }
 

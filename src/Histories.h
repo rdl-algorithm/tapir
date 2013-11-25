@@ -24,13 +24,13 @@ public:
     void readHistories(std::ifstream &inFile, StatePool *stPool);
     void write(std::ostream &os);
 
-    inline void add(HistorySequence *histSeq) {
+    void add(HistorySequence *histSeq) {
         allHistSeq.push_back(histSeq);
     }
-    inline long getNHistSeq() {
+    long getNHistSeq() {
         return allHistSeq.size();
     }
-    inline HistoryEntry* getHistoryEntry(long seqId, long entryId) {
+    HistoryEntry* getHistoryEntry(long seqId, long entryId) {
         return allHistSeq[seqId]->histSeq[entryId];
     }
 

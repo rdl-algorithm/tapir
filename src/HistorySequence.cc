@@ -7,12 +7,16 @@ using namespace std;
 long HistorySequence::currId = 0;
 
 HistorySequence::HistorySequence(HistoryEntry *startEntry) :
-        HistorySequence(startEntry, 0) {
+            HistorySequence(startEntry, 0) {
 }
 
 HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
-        id(currId), startDepth(startDepth), startAffectedIdx(LONG_MAX),
-        endAffectedIdx(-1), histSeq(), chType(Change::UNDEFINED) {
+            id(currId),
+            startDepth(startDepth),
+            startAffectedIdx(LONG_MAX),
+            endAffectedIdx(-1),
+            histSeq(),
+            chType(Change::UNDEFINED) {
     currId++;
     startEntry->setSeqId(id);
     histSeq.push_back(startEntry);

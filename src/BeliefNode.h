@@ -53,13 +53,13 @@ public:
     long getNxtActToTry();
     void calcBestVal();
 
-    inline long getId() {
+    long getId() {
         return id;
     }
-    inline long getNParticles() {
+    long getNParticles() {
         return nParticles;
     }
-    inline long getNActChildren() {
+    long getNActChildren() {
         return nActChildren;
     }
 

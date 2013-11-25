@@ -16,7 +16,7 @@ public:
     friend class BeliefNode;
     friend class Solver;
 
-    HistoryEntry(StateWrapper *st, long entryId);
+    HistoryEntry(StateWrapper *st);
     HistoryEntry(StateWrapper *st, long seqId, long entryId);
     HistoryEntry(StateWrapper *st, long seqId, long entryId,
             std::stringstream &sstr);
@@ -33,22 +33,22 @@ public:
     void writeln(std::ostream &os);
     void writeSt(std::ostream &os);
 
-    inline void setSeqId(long seqId_) {
+    void setSeqId(long seqId_) {
         seqId = seqId_;
     }
-    inline void setNxt(long actId_, ObsVals &obs_) {
+    void setNxt(long actId_, ObsVals &obs_) {
         actId = actId_, obs = obs_;
     }
-    inline BeliefNode* getPartOfBelNode() {
+    BeliefNode* getPartOfBelNode() {
         return partOfBelNode;
     }
-    inline long getId() {
+    long getId() {
         return entryId;
     }
-    inline long getSeqId() {
+    long getSeqId() {
         return seqId;
     }
-    inline long getActId() {
+    long getActId() {
         return actId;
     }
 

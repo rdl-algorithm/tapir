@@ -7,7 +7,8 @@
 using namespace std;
 
 ObservationEdge::ObservationEdge(ObsVals &o, BeliefNode* nxtBelNode) :
-        vals(o), child(nxtBelNode) {
+            vals(o),
+            child(nxtBelNode) {
 }
 
 bool ObservationEdge::isObs(ObsVals &o) {

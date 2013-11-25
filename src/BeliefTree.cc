@@ -3,7 +3,8 @@
 using namespace std;
 
 BeliefTree::BeliefTree() :
-        root(new BeliefNode()), allNodes() {
+            root(new BeliefNode()),
+            allNodes() {
     allNodes.push_back(root);
 }
 

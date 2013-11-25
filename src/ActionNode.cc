@@ -4,13 +4,16 @@
 using namespace std;
 
 ActionNode::ActionNode(long actId, ObsVals &obs, BeliefNode* nxtBelNode) :
-        ActionNode(actId, 1, 0.0, 0.0) {
+            ActionNode(actId, 1, 0.0, 0.0) {
     obsChildren.push_back(new ObservationEdge(obs, nxtBelNode));
 }
 
 ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal) :
-        actId(actId), nParticles(nParticles), qVal(qVal), avgQVal(avgQVal),
-        obsChildren() {
+            actId(actId),
+            nParticles(nParticles),
+            qVal(qVal),
+            avgQVal(avgQVal),
+            obsChildren() {
 }
 
 ActionNode::~ActionNode() {

@@ -13,15 +13,20 @@
 using namespace std;
 
 Solver::Solver(Model *model) :
-        model(model), policy(new BeliefTree()), allHistories(new Histories()),
-        allStates(new StatePool()), rolloutUsed(ROLLOUT_RANDHEURISTIC),
-        exploreCoef(model->getExploreCoef()), cRollout { 1.0, 1.0 }, wRollout {
-            1.0, 1.0 },
-        pRollout { 0.5, 0.5 }, nUsedRollout { 1, 1 } {
+            model(model),
+            policy(new BeliefTree()),
+            allHistories(new Histories()),
+            allStates(new StatePool()),
+            rolloutUsed(ROLLOUT_RANDHEURISTIC),
+            exploreCoef(model->getExploreCoef()),
+            cRollout { 1.0, 1.0 },
+            wRollout { 1.0, 1.0 },
+            pRollout { 0.5, 0.5 },
+            nUsedRollout { 1, 1 } {
 }
 
 Solver::Solver(Model *model, const char *polFile) :
-        Solver(model) {
+            Solver(model) {
     ifstream inFile;
     inFile.open(polFile);
     if (!inFile.is_open()) {
@@ -56,11 +61,11 @@ void Solver::genPol(long maxTrials, double depthTh) {
     for (unsigned long i = 0; i < model->getNActions(); i++) {
         model->sampleAnInitState(sVals);
         st = allStates->add(sVals);
-        rootHistEntry = new HistoryEntry(st, 0);
+        rootHistEntry = new HistoryEntry(st);
         rootHistEntry->partOfBelNode = root;
         root->add(rootHistEntry);
-        st->usedInHistEntries.push_back(rootHistEntry);
-        st->usedInBelNode.insert(root);
+        st->addInfo(rootHistEntry);
+        st->addInfo(root);
         currHistSeq = new HistorySequence(rootHistEntry, 0);
         allHistories->add(currHistSeq);
         double immediateRew;
@@ -78,8 +83,8 @@ void Solver::genPol(long maxTrials, double depthTh) {
         currHistEntry->partOfBelNode = currNode;
         currHistEntry->disc = disc;
         currHistEntry->rew = 0.0;
-        st->usedInHistEntries.push_back(currHistEntry);
-        st->usedInBelNode.insert(currNode);
+        st->addInfo(currHistEntry);
+        st->addInfo(currNode);
 
         if (isTerm) {
             currHistEntry->rew = model->getReward(nxtSVals);
@@ -113,12 +118,12 @@ void Solver::singleSearch(double discount, double depthTh) {
 //cerr << "sampledInit: " << nxtSVals[0] << " " << nxtSVals[1] << endl;
     StateWrapper *nxtSt = allStates->add(nxtSVals);
 //cerr << "st: " << nxtSt->s[0] << " " << nxtSt->s[1] << endl;
-    HistoryEntry *currHistEntry = new HistoryEntry(nxtSt, 0);
+    HistoryEntry *currHistEntry = new HistoryEntry(nxtSt);
 //cerr << "currHistEntry: "  << currHistEntry->st->s[0] << " " << currHistEntry->st->s[1] << endl;
     currHistEntry->partOfBelNode = currNode;
     currNode->add(currHistEntry);
-    nxtSt->usedInHistEntries.push_back(currHistEntry);
-    nxtSt->usedInBelNode.insert(currNode);
+    nxtSt->addInfo(currHistEntry);
+    nxtSt->addInfo(currNode);
 
     double currDiscFactor = 1.0;
     currHistEntry->disc = currDiscFactor;
@@ -147,8 +152,8 @@ void Solver::singleSearch(double discount, double depthTh) {
             policy->allNodes.push_back(nxtNode);
             currHistEntry->partOfBelNode = nxtNode;
 //nxtNode->add(currHistEntry);
-            nxtSt->usedInHistEntries.push_back(currHistEntry);
-            nxtSt->usedInBelNode.insert(nxtNode);
+            nxtSt->addInfo(currHistEntry);
+            nxtSt->addInfo(nxtNode);
             currNode = nxtNode;
             if (done) {
                 currHistEntry->rew = model->getReward(nxtSVals);
@@ -174,8 +179,8 @@ void Solver::singleSearch(double discount, double depthTh) {
 //nxtNode->add(currHistEntry);
             currHistEntry->disc = currDiscFactor * discount;
             currHistEntry->qVal = qVal;
-            nxtSt->usedInHistEntries.push_back(currHistEntry);
-            nxtSt->usedInBelNode.insert(nxtNode);
+            nxtSt->addInfo(currHistEntry);
+            nxtSt->addInfo(nxtNode);
             rolloutUsed = true;
             done = true;
         }
@@ -547,7 +552,7 @@ BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, ObsVals &obs,
     for (vector<StateVals>::iterator itSt = partNxtSt.begin();
             itSt != partNxtSt.end(); itSt++) {
         st = allStates->add(*itSt);
-        histEntry = new HistoryEntry(st, 0);
+        histEntry = new HistoryEntry(st);
         histSeq = new HistorySequence(histEntry, timeStep);
         nxtNode->add(histEntry);
         histEntry->partOfBelNode = nxtNode;
@@ -638,8 +643,8 @@ void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
     HistorySequence *histSeq;
 //cerr << "last #affectedStates: " << affectedStates.size() << endl;
     for (itS = affectedStates.begin(); itS != affectedStates.end(); itS++) {
-        for (itH = (*itS)->usedInHistEntries.begin();
-                itH != (*itS)->usedInHistEntries.end(); itH++) {
+        for (itH = (*itS)->usedInHistoryEntries.begin();
+                itH != (*itS)->usedInHistoryEntries.end(); itH++) {
             if (*itH != nullptr) {
                 histSeq = allHistories->allHistSeq[(*itH)->seqId];
 
@@ -1092,7 +1097,7 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
 //cerr << "#part in startNode: " << startNode->nParticles << " " << initStartVal << endl;
     BeliefNode *currNode = startNode;
     BeliefNode *nxtNode;
-    HistoryEntry *currHistEntry = new HistoryEntry(startParticle->st, 0);
+    HistoryEntry *currHistEntry = new HistoryEntry(startParticle->st);
     currHistEntry->partOfBelNode = currNode;
     currNode->add(currHistEntry);
     long startDepth = allHistories->allHistSeq[startParticle->seqId]->startDepth
@@ -1122,8 +1127,8 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
             policy->allNodes.push_back(nxtNode);
             currHistEntry->partOfBelNode = nxtNode;
 //nxtNode->add(currHistEntry);
-            nxtSt->usedInHistEntries.push_back(currHistEntry);
-            nxtSt->usedInBelNode.insert(nxtNode);
+            nxtSt->addInfo(currHistEntry);
+            nxtSt->addInfo(nxtNode);
             currNode = nxtNode;
             if (done) {
                 currHistEntry->rew = model->getReward(nxtSVals);
@@ -1147,8 +1152,8 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
 //nxtNode->add(currHistEntry);
             currHistEntry->disc = currDiscFactor * discount;
             currHistEntry->qVal = qVal;
-            nxtSt->usedInHistEntries.push_back(currHistEntry);
-            nxtSt->usedInBelNode.insert(nxtNode);
+            nxtSt->addInfo(currHistEntry);
+            nxtSt->addInfo(nxtNode);
 
             rolloutUsed = true;
             done = true;

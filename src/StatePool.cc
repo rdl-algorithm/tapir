@@ -9,7 +9,11 @@
 using namespace std;
 
 StatePool::StatePool() :
-        nStates(0), nSDim(-1), allStates(), allStatesIdx(), stStruct() {
+            nStates(0),
+            nSDim(-1),
+            allStates(),
+            allStatesIdx(),
+            stStruct() {
 }
 
 StatePool::~StatePool() {

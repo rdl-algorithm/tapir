@@ -64,41 +64,41 @@ public:
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    inline double getDiscount() {
+    double getDiscount() {
         return discount;
     }
-    inline unsigned long getNActions() {
+    unsigned long getNActions() {
         return nActions;
     }
-    inline unsigned long getNObservations() {
+    unsigned long getNObservations() {
         return nObservations;
     }
-    inline unsigned long getNStVars() {
+    unsigned long getNStVars() {
         return nStVars;
     }
-    inline double getMinVal() {
+    double getMinVal() {
         return minVal;
     }
-    inline double getMaxVal() {
+    double getMaxVal() {
         return maxVal;
     }
 
-    inline unsigned long getNParticles() {
+    unsigned long getNParticles() {
         return nParticles;
     }
-    inline long getMaxTrials() {
+    long getMaxTrials() {
         return maxTrials;
     }
-    inline double getDepthTh() {
+    double getDepthTh() {
         return depthTh;
     }
-    inline double getExploreCoef() {
+    double getExploreCoef() {
         return exploreCoef;
     }
-    inline long getMaxDistTry() {
+    long getMaxDistTry() {
         return maxDistTry;
     }
-    inline double getDistTh() {
+    double getDistTh() {
         return distTh;
     }
 

@@ -5,7 +5,7 @@
 using namespace std;
 
 Histories::Histories() :
-        allHistSeq() {
+            allHistSeq() {
 }
 
 Histories::~Histories() {

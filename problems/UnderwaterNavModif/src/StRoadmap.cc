@@ -8,9 +8,20 @@ using namespace std;
 StRoadmap::StRoadmap(vector<StateVals> &goals, long maxVerts, long nGoalsSamp,
         long nTryCon, long maxDistCon, map<long, map<long, short> > &env,
         long nX, long nY) :
-        nX(nX), nY(nY), env(env), weight(), totW(0), maxTryCon(nTryCon),
-        maxDistCon(maxDistCon), nVerts(0), maxVerts(maxVerts), lastGoalIdx(0),
-        V(), outEdges(), inEdges(), shortestDistToGoal() {
+            nX(nX),
+            nY(nY),
+            env(env),
+            weight(),
+            totW(0),
+            maxTryCon(nTryCon),
+            maxDistCon(maxDistCon),
+            nVerts(0),
+            maxVerts(maxVerts),
+            lastGoalIdx(0),
+            V(),
+            outEdges(),
+            inEdges(),
+            shortestDistToGoal() {
     setWeight();
     insertGoalMilestones(goals, nGoalsSamp);
     long i = lastGoalIdx;

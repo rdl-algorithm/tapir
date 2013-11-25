@@ -13,13 +13,23 @@ long BeliefNode::maxParticles = 0;
 long BeliefNode::nStVars = 0;
 
 BeliefNode::BeliefNode() :
-        BeliefNode(currId) {
+            BeliefNode(currId) {
 }
 
 BeliefNode::BeliefNode(long id) :
-        distChecked(false), id(id), nParticles(0), nActChildren(0),
-        nxtActToTry(-1), bestAvgQVal(0), bestAct(-1), tLastAddedParticle(0),
-        tNNComp(-1.0), tEmdSig(-1.0), nnBel(nullptr), particles(), actChildren() {
+            distChecked(false),
+            id(id),
+            nParticles(0),
+            nActChildren(0),
+            nxtActToTry(-1),
+            bestAvgQVal(0),
+            bestAct(-1),
+            tLastAddedParticle(0),
+            tNNComp(-1.0),
+            tEmdSig(-1.0),
+            nnBel(nullptr),
+            particles(),
+            actChildren() {
     if (currId <= id) {
         currId = id + 1;
     }

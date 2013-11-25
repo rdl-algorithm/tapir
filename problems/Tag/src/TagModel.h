@@ -19,10 +19,12 @@ struct Coords {
     long i;
     long j;
     Coords() :
-            i(0), j(0) {
+                i(0),
+                j(0) {
     }
     Coords(long i, long j) :
-            i(i), j(j) {
+                i(i),
+                j(j) {
     }
 
     double distance(Coords &other) {
@@ -34,11 +36,9 @@ inline std::ostream &operator<<(std::ostream &os, const Coords &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";
     return os;
 }
-
 inline bool operator==(const Coords &lhs, const Coords &rhs) {
     return lhs.i == rhs.i && lhs.j == rhs.j;
 }
-
 inline bool operator!=(const Coords &lhs, const Coords &rhs) {
     return !(lhs == rhs);
 }
@@ -129,41 +129,41 @@ public:
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    inline double getDiscount() {
+    double getDiscount() {
         return discount;
     }
-    inline unsigned long getNActions() {
+    unsigned long getNActions() {
         return nActions;
     }
-    inline unsigned long getNObservations() {
+    unsigned long getNObservations() {
         return nObservations;
     }
-    inline unsigned long getNStVars() {
+    unsigned long getNStVars() {
         return nStVars;
     }
-    inline double getMinVal() {
+    double getMinVal() {
         return minVal;
     }
-    inline double getMaxVal() {
+    double getMaxVal() {
         return maxVal;
     }
 
-    inline unsigned long getNParticles() {
+    unsigned long getNParticles() {
         return nParticles;
     }
-    inline long getMaxTrials() {
+    long getMaxTrials() {
         return maxTrials;
     }
-    inline double getDepthTh() {
+    double getDepthTh() {
         return depthTh;
     }
-    inline double getExploreCoef() {
+    double getExploreCoef() {
         return exploreCoef;
     }
-    inline long getMaxDistTry() {
+    long getMaxDistTry() {
         return maxDistTry;
     }
-    inline double getDistTh() {
+    double getDistTh() {
         return distTh;
     }
 

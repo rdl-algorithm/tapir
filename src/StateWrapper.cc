@@ -13,23 +13,26 @@ using namespace std;
 long StateWrapper::currId = 0;
 
 StateWrapper::StateWrapper() :
-        s(), id(0), usedInHistEntries(), usedInBelNode(),
-        chType(Change::UNDEFINED) {
+            s(),
+            id(0),
+            usedInHistoryEntries(),
+            usedInBeliefNodes(),
+            chType(Change::UNDEFINED) {
 }
 
 StateWrapper::StateWrapper(StateVals &s) :
-        StateWrapper() {
+            StateWrapper() {
     this->s = s;
 }
 
 StateWrapper::StateWrapper(string &str, long nStVars) :
-        StateWrapper() {
+            StateWrapper() {
     // Load info from the string.
     stringstream sstr(str);
     string tmpStr;
-    double tmpDouble = -1;
     sstr >> tmpStr >> id >> tmpStr;
     for (long i = 0; i < nStVars; i++) {
+        double tmpDouble;
         sstr >> tmpDouble;
         s.push_back(tmpDouble);
     }
@@ -38,26 +41,17 @@ StateWrapper::StateWrapper(string &str, long nStVars) :
     }
 }
 
-StateWrapper::~StateWrapper() {
-    s.clear();
-}
-
 void StateWrapper::setId() {
     id = currId;
     currId++;
 }
 
-void StateWrapper::addInfo(HistoryEntry *h, BeliefNode *b) {
-    usedInHistEntries.push_back(h);
-    usedInBelNode.insert(b);
-}
-
 void StateWrapper::addInfo(HistoryEntry *h) {
-    usedInHistEntries.push_back(h);
+    usedInHistoryEntries.push_back(h);
 }
 
 void StateWrapper::addInfo(BeliefNode *b) {
-    usedInBelNode.insert(b);
+    usedInBeliefNodes.insert(b);
 }
 
 double StateWrapper::distL1(StateWrapper *st) {
@@ -70,8 +64,8 @@ double StateWrapper::distL1(StateWrapper *st) {
 }
 
 void StateWrapper::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
-    vector<HistoryEntry*>::iterator it = find(usedInHistEntries.begin(),
-            usedInHistEntries.end(), toBeDeleted);
+    vector<HistoryEntry*>::iterator it = find(usedInHistoryEntries.begin(),
+            usedInHistoryEntries.end(), toBeDeleted);
     (*it) = nullptr;
 }
 

@@ -5,18 +5,26 @@
 
 using namespace std;
 
-HistoryEntry::HistoryEntry(StateWrapper *st, long entryId) :
-        HistoryEntry(st, -1, entryId) {
+HistoryEntry::HistoryEntry(StateWrapper *st) :
+            HistoryEntry(st, 0, 0) {
 }
 
 HistoryEntry::HistoryEntry(StateWrapper *st, long seqId, long entryId) :
-        st(st), hasBeenBackup(false), seqId(seqId), entryId(entryId), disc(1.0),
-        rew(0), qVal(0), actId(-1), obs(), partOfBelNode(nullptr) {
+            st(st),
+            hasBeenBackup(false),
+            seqId(seqId),
+            entryId(entryId),
+            disc(1.0),
+            rew(0),
+            qVal(0),
+            actId(-1),
+            obs(),
+            partOfBelNode(nullptr) {
 }
 
 HistoryEntry::HistoryEntry(StateWrapper *st, long seqId, long entryId,
         stringstream &sstr) :
-        HistoryEntry(st, seqId, entryId) {
+            HistoryEntry(st, seqId, entryId) {
     string usrStr;
     sstr >> actId >> usrStr >> usrStr;
     obs.clear();
