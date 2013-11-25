@@ -13,8 +13,7 @@ namespace po = boost::program_options;
 
 using namespace std;
 
-UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) :
-        Model(vm) {
+UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) {
     ifstream inFile;
 
     const char* mapPath = vm["problem.mapPath"].as<string>().c_str();
@@ -28,7 +27,7 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) :
     inFile >> nX >> nY;
     getline(inFile, tmp);
 
-    for (long i = 0; i < nY; i++) {
+    for (unsigned long i = 0; i < nY; i++) {
         getline(inFile, tmp);
         envMap.push_back(tmp);
     }
@@ -41,6 +40,15 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) :
 
     inFile.close();
 
+    nParticles = vm["SBT.nParticles"].as<long>();
+    maxTrials = vm["SBT.maxTrials"].as<long>();
+    maxDistTry = vm["SBT.maxDistTry"].as<long>();
+
+    exploreCoef = vm["SBT.exploreCoef"].as<double>();
+    depthTh = vm["SBT.depthTh"].as<double>();
+    distTh = vm["SBT.distTh"].as<double>();
+
+    discount = vm["problem.discount"].as<double>();
     goalReward = vm["problem.goalReward"].as<double>();
     crashPenalty = vm["problem.crashPenalty"].as<double>();
     moveCost = vm["problem.moveCost"].as<double>();
@@ -63,23 +71,7 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) :
 }
 
 UnderwaterNavModifModel::~UnderwaterNavModifModel() {
-    // There is no need to clear all these vectors as they will go out of scope
-    // and be properly deallocated anyway.
-    /*
-     vector<StateVals>::iterator it;
-     for (it = initBel.begin(); it != initBel.end(); it++) {
-     it->clear();
-     }
-     initBel.clear();
-     envMap.clear();
-     goals.clear();
-     rocks.clear();
-     map< long, map<long, short> >::iterator itMap;
-     for (itMap = cellType.begin(); itMap != cellType.end(); itMap ++) {
-     itMap->second.clear();
-     }
-     cellType.clear();
-     */
+    delete roadmap;
 }
 
 void UnderwaterNavModifModel::setInitObsGoal() {
@@ -91,7 +83,7 @@ void UnderwaterNavModifModel::setInitObsGoal() {
     nGoals = 0;
     long i = 0;
     for (string &line : envMap) {
-        for (long j = 0; j < nX; j++) {
+        for (unsigned long j = 0; j < nX; j++) {
             if (line[j] == 'S') {
                 StateVals s(2);
                 s[0] = j;
@@ -423,7 +415,7 @@ bool UnderwaterNavModifModel::inRock(StateVals &st) {
  }
  */
 double UnderwaterNavModifModel::getReward(StateVals &sVals) {
-    double totRew;
+    double totRew = 0.0;
     short ct = 0;
 
     map<long, map<long, short> >::iterator itCellType = cellType.find(sVals[0]);
@@ -456,8 +448,9 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals) {
     return totRew;
 }
 
-double UnderwaterNavModifModel::getReward(StateVals &sVals, unsigned long actId) {
-    double totRew;
+double UnderwaterNavModifModel::getReward(StateVals &sVals,
+        unsigned long actId) {
+    double totRew = 0.0;
     short ct = 0;
 
     map<long, map<long, short> >::iterator itCellType = cellType.find(sVals[0]);
@@ -499,9 +492,9 @@ double UnderwaterNavModifModel::getReward(StateVals &sVals, unsigned long actId)
     return totRew;
 }
 
-bool UnderwaterNavModifModel::getNextState(StateVals &sVals, unsigned long actId,
-        double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
-    bool isTerm;
+bool UnderwaterNavModifModel::getNextState(StateVals &sVals,
+        unsigned long actId, double *immediateRew, StateVals &nxtSVals,
+        ObsVals &obs) {
     getNextState(sVals, actId, nxtSVals);
     inObsRegion(nxtSVals, obs);
 //cerr << "GettingNxtState from " << sVals[0] << " " << sVals[1] << " act " << actId << endl;
@@ -859,8 +852,8 @@ void UnderwaterNavModifModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
     }
 }
 
-void UnderwaterNavModifModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
-        vector<StateVals> &partNxtSt) {
+void UnderwaterNavModifModel::getStatesSeeObs(unsigned long /*actId*/,
+        ObsVals &obs, vector<StateVals> &partNxtSt) {
     StateVals s(2);
     s[0] = obs[0];
     s[1] = obs[1];
@@ -894,7 +887,7 @@ int UnderwaterNavModifModel::findCollision(StateVals &s) {
 }
 
 bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals,
-        unsigned long startAffectedIdx, unsigned long endAffectedIdx,
+        long startAffectedIdx, long endAffectedIdx,
         vector<StateVals> &modifStSeq, vector<long> &modifActSeq,
         vector<ObsVals> &modifObsSeq, vector<double> &modifRewSeq) {
 
@@ -964,7 +957,7 @@ bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals,
 //cerr << "ok2 subGoal: " << subGoal[0] << " " << subGoal[1] << "\n";
     // Get sequence of actions to move from startAffectedIdx-1 to the nearest vertex of affected region.
     long tmpAct;
-    long nAct;
+    long nAct = 0;
     StateVals sStart;
     if (startAffectedIdx > 0) {
         sStart = seqStVals[startAffectedIdx - 1];
@@ -1034,7 +1027,7 @@ bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals,
      cerr << "ok3ok3\n";
      */
     // Fix the rest of the path.
-    if (endAffectedIdx > -1) {
+    if (endAffectedIdx >= 0) {
         StateVals endS = seqStVals[endAffectedIdx + 1];
         sStart = prevS;
         if (getDist(sStart, endS) == 0) {
@@ -1134,7 +1127,7 @@ bool UnderwaterNavModifModel::modifStSeq(vector<StateVals> &seqStVals,
 }
 
 bool UnderwaterNavModifModel::isTerm(StateVals &sVals) {
-    short ct;
+    short ct = 0;
     map<long, map<long, short> >::iterator itCellType = cellType.find(sVals[0]);
     if (itCellType != cellType.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
@@ -1147,8 +1140,8 @@ bool UnderwaterNavModifModel::isTerm(StateVals &sVals) {
 void UnderwaterNavModifModel::drawEnv(ostream &os) {
     map<long, map<long, short> >::iterator itCellType;
     os << endl;
-    for (long y = 0; y < nY; y++) {
-        for (long x = 0; x < nX; x++) {
+    for (unsigned long y = 0; y < nY; y++) {
+        for (unsigned long x = 0; x < nX; x++) {
             itCellType = cellType.find(x);
             if (itCellType != cellType.end()) {
                 if (itCellType->second.find(y) != itCellType->second.end()) {
@@ -1189,8 +1182,8 @@ void UnderwaterNavModifModel::drawEnv(ostream &os) {
 void UnderwaterNavModifModel::drawState(StateVals &s, ostream &os) {
     map<long, map<long, short> >::iterator itCellType;
     os << endl;
-    for (long y = 0; y < nY; y++) {
-        for (long x = 0; x < nX; x++) {
+    for (unsigned long y = 0; y < nY; y++) {
+        for (unsigned long x = 0; x < nX; x++) {
             if (x == s[0] && y == s[1]) {
                 os << "X";
                 continue;

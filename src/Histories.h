@@ -14,6 +14,10 @@ public:
 
     Histories();
     ~Histories();
+    Histories(const Histories&) = delete;
+    Histories(Histories&) = delete;
+    Histories &operator=(const Histories&) = delete;
+    Histories &operator=(Histories&) = delete;
 
     HistorySequence* addHistorySeq(StateWrapper *s);
     HistorySequence* addHistorySeq(StateWrapper *s, long startDepth);

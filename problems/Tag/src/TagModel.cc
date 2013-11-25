@@ -14,8 +14,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-TagModel::TagModel(po::variables_map vm) :
-        Model(vm) {
+TagModel::TagModel(po::variables_map vm) {
     // Read the map from the file.
     std::ifstream inFile;
     const char *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -33,6 +32,15 @@ TagModel::TagModel(po::variables_map vm) :
     }
     inFile.close();
 
+    nParticles = vm["SBT.nParticles"].as<long>();
+    maxTrials = vm["SBT.maxTrials"].as<long>();
+    maxDistTry = vm["SBT.maxDistTry"].as<long>();
+
+    exploreCoef = vm["SBT.exploreCoef"].as<double>();
+    depthTh = vm["SBT.depthTh"].as<double>();
+    distTh = vm["SBT.distTh"].as<double>();
+
+    discount = vm["problem.discount"].as<double>();
     moveCost = vm["problem.moveCost"].as<double>();
     tagReward = vm["problem.tagReward"].as<double>();
     failedTagPenalty = vm["problem.failedTagPenalty"].as<double>();
@@ -58,11 +66,6 @@ TagModel::TagModel(po::variables_map vm) :
     cout << "nParticles: " << nParticles << endl;
     cout << "Environment:" << endl;
     drawEnv(cout);
-}
-
-TagModel::~TagModel() {
-    // We don't neeed to do anything here - the vectors go out of scope
-    // and are automatically deallocated.
 }
 
 void TagModel::initialise() {
@@ -219,7 +222,8 @@ bool TagModel::isValid(Coords &coords) {
     return true;
 }
 
-void TagModel::makeObs(StateVals &nxtSVals, unsigned long actId, ObsVals &obsVals) {
+void TagModel::makeObs(StateVals &nxtSVals, unsigned long /*actId*/,
+        ObsVals &obsVals) {
     obsVals[0] = nxtSVals[0];
     if (nxtSVals[0] == nxtSVals[1]) {
         obsVals[1] = SEEN;
@@ -228,8 +232,8 @@ void TagModel::makeObs(StateVals &nxtSVals, unsigned long actId, ObsVals &obsVal
     }
 }
 
-bool TagModel::getNextState(StateVals &sVals, unsigned long actId, double *immediateRew,
-        StateVals &nxtSVals, ObsVals &obs) {
+bool TagModel::getNextState(StateVals &sVals, unsigned long actId,
+        double *immediateRew, StateVals &nxtSVals, ObsVals &obs) {
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
     obs.resize(2);
@@ -237,7 +241,7 @@ bool TagModel::getNextState(StateVals &sVals, unsigned long actId, double *immed
     return isTerm(nxtSVals);
 }
 
-double TagModel::getReward(StateVals &sVals) {
+double TagModel::getReward(StateVals& /*sVals*/) {
     return 0;
 }
 
@@ -259,7 +263,6 @@ void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
     double weightTotal = 0;
     Coords newRobotPos = decodeCoords(obs[0]);
     if (obs[1] == SEEN) {
-        Coords newOpponentPos = newRobotPos;
         StateVals nxtSVals(nStVars);
         nxtSVals[0] = nxtSVals[1] = obs[0];
         nxtSVals[2] = (actId == TAG ? TAGGED : UNTAGGED);
@@ -276,22 +279,21 @@ void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         std::vector<long> actions;
         makeOpponentActions(oldRobotPos, oldOpponentPos, actions);
         std::vector<long> newActions(actions.size());
-        std::vector<long>::iterator newActionsEnd = (
-                std::copy_if(actions.begin(), actions.end(),
-                        newActions.begin(),
-                        [&oldOpponentPos, &newRobotPos, this] (long action) {
-            return getMovedPos(oldOpponentPos, action) != newRobotPos;
-        }));
+        std::vector<long>::iterator newActionsEnd = (std::copy_if(
+                actions.begin(), actions.end(), newActions.begin(),
+                [&oldOpponentPos, &newRobotPos, this] (long action) {
+                    return getMovedPos(oldOpponentPos, action) != newRobotPos;
+                }));
         newActions.resize(std::distance(newActions.begin(), newActionsEnd));
-		double probabilityFactor = 1.0 / newActions.size();
+        double probabilityFactor = 1.0 / newActions.size();
         for (long &action : newActions) {
-			Coords newOpponentPos = getMovedPos(oldOpponentPos, action);
-			StateVals sVals(nStVars);
-			sVals[0] = obs[0];
+            Coords newOpponentPos = getMovedPos(oldOpponentPos, action);
+            StateVals sVals(nStVars);
+            sVals[0] = obs[0];
             sVals[1] = encodeCoords(newOpponentPos);
-			sVals[2] = UNTAGGED;
-			weights[sVals] += probabilityFactor;
-			weightTotal += probabilityFactor;
+            sVals[2] = UNTAGGED;
+            weights[sVals] += probabilityFactor;
+            weightTotal += probabilityFactor;
         }
     }
     double scale = nParticles / weightTotal;
@@ -309,7 +311,6 @@ void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
 void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         std::vector<StateVals> &partNxtSt) {
     if (obs[1] == SEEN) {
-        Coords newOpponentPos = decodeCoords(obs[0]);
         StateVals nxtSVals(nStVars);
         nxtSVals[0] = nxtSVals[1] = obs[0];
         nxtSVals[2] = (actId == TAG ? TAGGED : UNTAGGED);
@@ -317,7 +318,7 @@ void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
         return;
     }
 
-	while (partNxtSt.size() < nParticles) {
+    while (partNxtSt.size() < nParticles) {
         StateVals sVals;
         sampleStateUniform(sVals);
         StateVals nxtStVals;
@@ -330,17 +331,20 @@ void TagModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
     }
 }
 
-void TagModel::setChanges(const char *chName, std::vector<long> &chTime) {
+void TagModel::setChanges(const char */*chName*/,
+        std::vector<long> &/*chTime*/) {
 }
 
-void TagModel::update(long tCh, std::vector<StateVals> &affectedRange,
-        std::vector<Change> &typeOfChanges) {
+void TagModel::update(long /*tCh*/, std::vector<StateVals> &/*affectedRange*/,
+        std::vector<Change> &/*typeOfChanges*/) {
 }
 
-bool TagModel::modifStSeq(std::vector<StateVals> &seqStVals,
-        unsigned long startAffectedIdx, unsigned long endAffectedIdx,
-        std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
-        std::vector<ObsVals> &modifObsSeq, std::vector<double> &modifRewSeq) {
+bool TagModel::modifStSeq(std::vector<StateVals> &/*seqStVals*/,
+        long /*startAffectedIdx*/, long /*endAffectedIdx*/,
+        std::vector<StateVals> &/*modifStSeq*/,
+        std::vector<long> &/*modifActSeq*/,
+        std::vector<ObsVals> &/*modifObsSeq*/,
+        std::vector<double> &/*modifRewSeq*/) {
     return false;
 }
 
@@ -355,8 +359,8 @@ void TagModel::drawEnv(std::ostream &os) {
 }
 
 void TagModel::drawState(StateVals &s, std::ostream &os) {
-    for (int i = 0; i < envMap.size(); i++) {
-        for (int j = 0; j < envMap[0].size(); j++) {
+    for (size_t i = 0; i < envMap.size(); i++) {
+        for (size_t j = 0; j < envMap[0].size(); j++) {
             Coords coords(i, j);
             bool hasRobot = (coords == decodeCoords(s[0]));
             bool hasOpponent = (coords == decodeCoords(s[1]));

@@ -1,5 +1,5 @@
-#ifndef RockSampleModel_H
-#define RockSampleModel_H
+#ifndef ROCKSAMPLEMODEL_H
+#define ROCKSAMPLEMODEL_H
 
 #include <ostream>
 #include <vector>
@@ -41,7 +41,11 @@ inline bool operator==(const Coords &lhs, const Coords &rhs) {
 class RockSampleModel: public Model {
 public:
     RockSampleModel(po::variables_map vm);
-    ~RockSampleModel();
+    ~RockSampleModel() = default;
+    RockSampleModel(const RockSampleModel&) = delete;
+    RockSampleModel(RockSampleModel&) = delete;
+    RockSampleModel &operator=(const RockSampleModel&) = delete;
+    RockSampleModel &operator=(RockSampleModel&) = delete;
 
     /**
      * Enumerates the possible actions. Note that there are actually
@@ -124,7 +128,7 @@ public:
         os << Coords(s[0], s[1]) << " GOOD: {";
         std::vector<int> goodRocks;
         std::vector<int> badRocks;
-        for (int i = 2; i < s.size(); i++) {
+        for (size_t i = 2; i < s.size(); i++) {
             if (s[i] == GOOD) {
                 goodRocks.push_back(i - 2);
             } else {
@@ -156,8 +160,11 @@ public:
         }
     }
 
-    /***** Start implementation of Model's virtual functions *****/
+    /***** Start implementation of Model's virtual methods *****/
     // Simple getters
+    inline double getDiscount() {
+        return discount;
+    }
     inline unsigned long getNActions() {
         return nActions;
     }
@@ -174,13 +181,33 @@ public:
         return maxVal;
     }
 
+    inline unsigned long getNParticles() {
+        return nParticles;
+    }
+    inline long getMaxTrials() {
+        return maxTrials;
+    }
+    inline double getDepthTh() {
+        return depthTh;
+    }
+    inline double getExploreCoef() {
+        return exploreCoef;
+    }
+    inline long getMaxDistTry() {
+        return maxDistTry;
+    }
+    inline double getDistTh() {
+        return distTh;
+    }
+
+    // Other virtual methods
     void sampleAnInitState(StateVals &sVals);
     bool isTerm(StateVals &sVals);
     void solveHeuristic(StateVals &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(StateVals &sVals, unsigned long actIdx, double *immediateRew,
-            StateVals &nxtSVals, ObsVals &obs);
+    bool getNextState(StateVals &sVals, unsigned long actIdx,
+            double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
     double getReward(StateVals &sVals);
     double getReward(StateVals &sVals, unsigned long actId);
 
@@ -192,8 +219,8 @@ public:
     void setChanges(const char *chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<StateVals> &affectedRange,
             std::vector<Change> &typeOfChanges);
-    bool modifStSeq(std::vector<StateVals> &seqStVals, unsigned long startAffectedIdx,
-            unsigned long endAffectedIdx, std::vector<StateVals> &modifStSeq,
+    bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx,
+            long endAffectedIdx, std::vector<StateVals> &modifStSeq,
             std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
@@ -201,9 +228,19 @@ public:
     void drawState(StateVals &s, std::ostream &os);
 
 private:
-    // Values for the required getters
+    // Problem parameters.
+    double discount;
     unsigned long nActions, nObservations, nStVars;
     double minVal, maxVal;
+
+    // SBT parameters
+    unsigned long nParticles;
+    long maxTrials;
+    double depthTh;
+    double exploreCoef;
+
+    long maxDistTry;
+    double distTh;
 
     /** The number of state particles in the initial belief. */
     long nInitBel;

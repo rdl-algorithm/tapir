@@ -14,8 +14,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-RockSampleModel::RockSampleModel(po::variables_map vm) :
-        Model(vm) {
+RockSampleModel::RockSampleModel(po::variables_map vm) {
     // Read the map from the file.
     std::ifstream inFile;
     const char *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -33,6 +32,15 @@ RockSampleModel::RockSampleModel(po::variables_map vm) :
     }
     inFile.close();
 
+    nParticles = vm["SBT.nParticles"].as<long>();
+    maxTrials = vm["SBT.maxTrials"].as<long>();
+    maxDistTry = vm["SBT.maxDistTry"].as<long>();
+
+    exploreCoef = vm["SBT.exploreCoef"].as<double>();
+    depthTh = vm["SBT.depthTh"].as<double>();
+    distTh = vm["SBT.distTh"].as<double>();
+
+    discount = vm["problem.discount"].as<double>();
     goodRockReward = vm["problem.goodRockReward"].as<double>();
     badRockPenalty = vm["problem.badRockPenalty"].as<double>();
     exitReward = vm["problem.exitReward"].as<double>();
@@ -64,11 +72,6 @@ RockSampleModel::RockSampleModel(po::variables_map vm) :
     cout << "nParticles: " << nParticles << endl;
     cout << "Environment:" << endl;
     drawEnv(cout);
-}
-
-RockSampleModel::~RockSampleModel() {
-    // We don't neeed to do anything here - the vectors go out of scope
-    // and are automatically deallocated.
 }
 
 void RockSampleModel::initialise() {
@@ -125,7 +128,7 @@ void RockSampleModel::sampleStateUniform(StateVals &sVals) {
 }
 
 void RockSampleModel::sampleRocks(StateVals &sVals) {
-    decodeRocks(GlobalResources::randIntBetween(0, 1 << nRocks - 1), sVals);
+    decodeRocks(GlobalResources::randIntBetween(0, (1 << nRocks) - 1), sVals);
 }
 
 void RockSampleModel::decodeRocks(long val, StateVals &sVals) {
@@ -242,7 +245,7 @@ bool RockSampleModel::getNextState(StateVals &sVals, unsigned long actId,
     return isTerm(nxtSVals);
 }
 
-double RockSampleModel::getReward(StateVals &sVals) {
+double RockSampleModel::getReward(StateVals &/*sVals*/) {
     return 0;
 }
 
@@ -320,18 +323,21 @@ void RockSampleModel::getStatesSeeObs(unsigned long actId, ObsVals &obs,
     }
 }
 
-void RockSampleModel::setChanges(const char *chName,
-        std::vector<long> &chTime) {
+void RockSampleModel::setChanges(const char */*chName*/,
+        std::vector<long> &/*chTime*/) {
 }
 
-void RockSampleModel::update(long tCh, std::vector<StateVals> &affectedRange,
-        std::vector<Change> &typeOfChanges) {
+void RockSampleModel::update(long /*tCh*/,
+        std::vector<StateVals> &/*affectedRange*/,
+        std::vector<Change> &/*typeOfChanges*/) {
 }
 
-bool RockSampleModel::modifStSeq(std::vector<StateVals> &seqStVals,
-        unsigned long startAffectedIdx, unsigned long endAffectedIdx,
-        std::vector<StateVals> &modifStSeq, std::vector<long> &modifActSeq,
-        std::vector<ObsVals> &modifObsSeq, std::vector<double> &modifRewSeq) {
+bool RockSampleModel::modifStSeq(std::vector<StateVals> &/*seqStVals*/,
+        long/*startAffectedIdx*/, long/*endAffectedIdx*/,
+        std::vector<StateVals> &/*modifStSeq*/,
+        std::vector<long> &/*modifActSeq*/,
+        std::vector<ObsVals> &/*modifObsSeq*/,
+        std::vector<double> &/*modifRewSeq*/) {
     return false;
 }
 
@@ -347,8 +353,8 @@ void RockSampleModel::drawEnv(std::ostream &os) {
 void RockSampleModel::drawState(StateVals &s, std::ostream &os) {
     dispState(s, os);
     os << endl;
-    for (int i = 0; i < envMap.size(); i++) {
-        for (int j = 0; j < envMap[0].size(); j++) {
+    for (size_t i = 0; i < envMap.size(); i++) {
+        for (size_t j = 0; j < envMap[0].size(); j++) {
             if (i == s[0] && j == s[1]) {
                 os << "x";
                 continue;

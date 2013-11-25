@@ -13,10 +13,17 @@
 
 class Solver {
 public:
-    Solver(Model *model, BeliefTree *policy, Histories *histories);
-    Solver(Model *model, const char *polFile, BeliefTree *policy,
-            Histories *histories);
+    Solver(Model *model);
+    Solver(Model *model, const char *polFile);
     ~Solver();
+    Solver(const Solver&) = delete;
+    Solver(Solver&) = delete;
+    Solver &operator=(const Solver&) = delete;
+    Solver &operator=(Solver&) = delete;
+
+    enum RolloutMode {
+        ROLLOUT_RANDHEURISTIC = 0, ROLLOUT_POL = 1
+    };
 
     void genPol(long maxTrials, double depthTh);
     double runSim(long nSteps, std::vector<long> &tChanges,
@@ -31,16 +38,10 @@ private:
     Histories *allHistories;
     StatePool *allStates;
 
-    enum RolloutMode {
-        ROLLOUT_RANDHEURISTIC = 0, ROLLOUT_POL = 1
-    };
-
     RolloutMode rolloutUsed;
     double exploreCoef;
     double cRollout[2], wRollout[2], pRollout[2];
     long nUsedRollout[2];
-
-    //enum ModeModif { MODIF_REACHPOL, MODIF_UNREACHPOL, MODIF_ADDSEQ };
 
     void singleSearch(double discount, double depthTh);
     void singleSearch(BeliefNode *startNode, double discount, double depthTh,
@@ -64,7 +65,7 @@ private:
      std::set<long> &reachAffectedHistSeq, std::set<long> &notReachAffectedHistSeq);
      */
     void identifyAffectedPol(std::vector<StateVals> &affectedRage,
-            std::vector<Change> &chTypes, BeliefNode *currNode,
+            std::vector<Change> &chTypes,
             std::set<HistorySequence*> &affectedHistSeq);
 
     void resetAffected(std::set<HistorySequence*> affectedHistSeq);

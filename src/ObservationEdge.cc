@@ -6,17 +6,8 @@
 
 using namespace std;
 
-ObservationEdge::ObservationEdge() {
-    child = nullptr;
-}
-
-ObservationEdge::ObservationEdge(ObsVals &o, BeliefNode* nxtBelNode) {
-    vals = o;
-    child = nxtBelNode;
-}
-
-ObservationEdge::~ObservationEdge() {
-    vals.clear();
+ObservationEdge::ObservationEdge(ObsVals &o, BeliefNode* nxtBelNode) :
+        vals(o), child(nxtBelNode) {
 }
 
 bool ObservationEdge::isObs(ObsVals &o) {

@@ -4,7 +4,8 @@
 
 using namespace std;
 
-Histories::Histories() {
+Histories::Histories() :
+        allHistSeq() {
 }
 
 Histories::~Histories() {
@@ -33,7 +34,7 @@ void Histories::readHistories(ifstream &inFile, StatePool *stPool) {
         sstr >> usrStr >> usrStr >> seqId >> entryId >> usrStr >> usrStr
                 >> stId;
         stPtr = stPool->getStPtr(stId);
-        HistoryEntry* histEntry = new HistoryEntry(seqId, entryId, stPtr, sstr);
+        HistoryEntry* histEntry = new HistoryEntry(stPtr, seqId, entryId, sstr);
         stPtr->addInfo(histEntry);
         if (entryId == 0) {
             HistorySequence* histSeq = new HistorySequence(histEntry);

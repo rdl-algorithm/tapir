@@ -1,5 +1,5 @@
-#ifndef ACTION_H
-#define ACTION_H
+#ifndef ACTIONNODE_H
+#define ACTIONNODE_H
 
 #include <vector>
 #include <queue>
@@ -16,6 +16,10 @@ public:
     ActionNode(long actId, ObsVals &obs, BeliefNode *nxtBelNode);
     ActionNode(long actId, long nParticles, double qVal, double avgQVal);
     ~ActionNode();
+    ActionNode(const ActionNode&) = delete;
+    ActionNode(ActionNode&) = delete;
+    ActionNode &operator=(const ActionNode&) = delete;
+    ActionNode &operator=(ActionNode&) = delete;
 
     void updateQVal(double newVal);
     void updateQVal(double prevVal, double newVal, bool reduceParticles);

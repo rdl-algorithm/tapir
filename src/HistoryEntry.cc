@@ -5,22 +5,18 @@
 
 using namespace std;
 
-HistoryEntry::HistoryEntry(StateWrapper *st, unsigned long entryId) :
-        st(st), entryId(entryId) {
-    initialise();
-
+HistoryEntry::HistoryEntry(StateWrapper *st, long entryId) :
+        HistoryEntry(st, -1, entryId) {
 }
 
-HistoryEntry::HistoryEntry(StateWrapper *st, unsigned long seqId,
-        unsigned long entryId) :
-        st(st), seqId(seqId), entryId(entryId) {
-    initialise();
+HistoryEntry::HistoryEntry(StateWrapper *st, long seqId, long entryId) :
+        st(st), hasBeenBackup(false), seqId(seqId), entryId(entryId), disc(1.0),
+        rew(0), qVal(0), actId(-1), obs(), partOfBelNode(nullptr) {
 }
 
-HistoryEntry::HistoryEntry(unsigned long seqId, unsigned long entryId,
-        StateWrapper *st, stringstream &sstr) :
-        st(st), seqId(seqId), entryId(entryId) {
-    initialise();
+HistoryEntry::HistoryEntry(StateWrapper *st, long seqId, long entryId,
+        stringstream &sstr) :
+        HistoryEntry(st, seqId, entryId) {
     string usrStr;
     sstr >> actId >> usrStr >> usrStr;
     obs.clear();
@@ -32,29 +28,10 @@ HistoryEntry::HistoryEntry(unsigned long seqId, unsigned long entryId,
     sstr >> disc >> rew >> qVal;
 }
 
-HistoryEntry::~HistoryEntry() {
-}
-
-void HistoryEntry::initialise() {
-    // Many of these values must be overridden later!
-    actId = -1;
-    hasBeenBackup = false;
-    disc = 1.0;
-    partOfBelNode = nullptr;
-    rew = 0;
-    qVal = 0;
-}
-
 void HistoryEntry::setBelNode(BeliefNode *bel) {
     partOfBelNode = bel;
 }
-/*
- void HistoryEntry::prepareDel() {
- if (actId != -1) {
- partOfBelNode->delParticle(this, actId, qVal);
- }
- }
- */
+
 void HistoryEntry::write(ostream &os) {
 //StateVals tmpVals; st->getVals(tmpVals);
 //cout << "Entry ( " << tmpVals[0] << " " << tmpVals[1] << " ) ";

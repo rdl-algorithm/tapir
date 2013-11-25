@@ -1,5 +1,5 @@
-#ifndef UnderwaterNavModifModel_H
-#define UnderwaterNavModifModel_H
+#ifndef UNDERWATERNAVMODIFMODEL_H
+#define UNDERWATERNAVMODIFMODEL_H
 
 #include <ostream>
 #include <vector>
@@ -57,9 +57,16 @@ public:
 
     UnderwaterNavModifModel(po::variables_map vm);
     ~UnderwaterNavModifModel();
+    UnderwaterNavModifModel(const UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel(UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel &operator=(const UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel&) = delete;
 
-    /***** Start implementation of Model's virtual functions *****/
+    /***** Start implementation of Model's virtual methods *****/
     // Simple getters
+    inline double getDiscount() {
+        return discount;
+    }
     inline unsigned long getNActions() {
         return nActions;
     }
@@ -76,13 +83,33 @@ public:
         return maxVal;
     }
 
+    inline unsigned long getNParticles() {
+        return nParticles;
+    }
+    inline long getMaxTrials() {
+        return maxTrials;
+    }
+    inline double getDepthTh() {
+        return depthTh;
+    }
+    inline double getExploreCoef() {
+        return exploreCoef;
+    }
+    inline long getMaxDistTry() {
+        return maxDistTry;
+    }
+    inline double getDistTh() {
+        return distTh;
+    }
+
+    // Other virtual methods
     void sampleAnInitState(StateVals &tmpStVals);
     bool isTerm(StateVals &sVals);
     void solveHeuristic(StateVals &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(StateVals &currStVals, unsigned long actId, double *immediateRew,
-            StateVals &nxtSVals, ObsVals &obs);
+    bool getNextState(StateVals &currStVals, unsigned long actId,
+            double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
     double getReward(StateVals &sVals);
     double getReward(StateVals &sVals, unsigned long actId);
 
@@ -94,8 +121,8 @@ public:
     void setChanges(const char* chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<StateVals> &affectedRange,
             std::vector<Change> &typeOfChanges);
-    bool modifStSeq(std::vector<StateVals> &seqStVals, unsigned long startAffectedIdx,
-            unsigned long endAffectedIdx, std::vector<StateVals> &modifStSeq,
+    bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx,
+            long endAffectedIdx, std::vector<StateVals> &modifStSeq,
             std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
@@ -106,9 +133,19 @@ public:
     void setInitObsGoal();
 
 private:
-    // Values for the required getters
+    // Problem parameters.
+    double discount;
     unsigned long nActions, nObservations, nStVars;
     double minVal, maxVal;
+
+    // SBT parameters
+    unsigned long nParticles;
+    long maxTrials;
+    double depthTh;
+    double exploreCoef;
+
+    long maxDistTry;
+    double distTh;
 
     /** The number of state particles in the initial belief. */
     unsigned long nInitBel;
@@ -146,7 +183,8 @@ private:
     double getDistToNearestObs(StateVals &st, StateVals &nxtSt);
     bool inGoal(StateVals &st);
     bool inRock(StateVals &st);
-    void getReachableSt(StateVals &s, unsigned long actId, std::vector<StateVals> &nxtS);
+    void getReachableSt(StateVals &s, unsigned long actId,
+            std::vector<StateVals> &nxtS);
     std::vector<StateVals>::iterator getIterator(
             std::vector<StateVals> &vecStVals, long x, long y);
 

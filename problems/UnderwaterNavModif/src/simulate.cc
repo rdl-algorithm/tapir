@@ -58,11 +58,7 @@ int main(int argc, const char* argv[]) {
     GlobalResources::randGen.seed(seed);
 
     Model* model = new UnderwaterNavModifModel(vm);
-    BeliefNode::maxParticles = model->getNParticles();
-    BeliefNode::nStVars = model->getNStVars();
-    BeliefTree* policy = new BeliefTree();
-    Histories* histories = new Histories();
-    Solver* solver = new Solver(model, polPath.c_str(), policy, histories);
+    Solver* solver = new Solver(model, polPath.c_str());
 
     vector<long> modelCh;
     model->setChanges(changesPath.c_str(), modelCh);
@@ -80,47 +76,45 @@ int main(int argc, const char* argv[]) {
     ofstream os;
     os.open(logPath.c_str());
 
-    //for (long i = 0; i < nRuns; i++) {
-    clock_t tStart;
-    long actualNSteps;
-    double totT;
-    double totChTime, totImpTime;
-    tStart = clock();
-    val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs, trajRew,
-            &actualNSteps, &totChTime, &totImpTime);
-    totT = (clock() - tStart) * 1000 / CLOCKS_PER_SEC;
+    for (long i = 0; i < nRuns; i++) {
+        clock_t tStart;
+        long actualNSteps;
+        double totT;
+        double totChTime, totImpTime;
+        tStart = clock();
+        val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs,
+                trajRew, &actualNSteps, &totChTime, &totImpTime);
+        totT = (clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
-    os << "Val:  " << val << endl;
-    itS = trajSt.begin();
-    os << "Init: ( ";
-    for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
-        os << *itD << " ";
-    }
-    os << " )\n";
-    itS++;
-    for (itA = trajActId.begin(), itO = trajObs.begin(), itR = trajRew.begin(), j =
-            0; itA != trajActId.end(); itS++, itA++, itO++, itR++, j++) {
-        os << "Step-" << j << " " << *itA;
-        os << " ( ";
+        os << "Val:  " << val << endl;
+        itS = trajSt.begin();
+        os << "Init: ( ";
         for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
             os << *itD << " ";
         }
-        os << " ) < ";
-        for (itD = (*itO).begin(); itD != (*itO).end(); itD++) {
-            os << *itD << " ";
+        os << " )\n";
+        itS++;
+        for (itA = trajActId.begin(), itO = trajObs.begin(), itR =
+                trajRew.begin(), j = 0; itA != trajActId.end();
+                itS++, itA++, itO++, itR++, j++) {
+            os << "Step-" << j << " " << *itA;
+            os << " ( ";
+            for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
+                os << *itD << " ";
+            }
+            os << " ) < ";
+            for (itD = (*itO).begin(); itD != (*itO).end(); itD++) {
+                os << *itD << " ";
+            }
+            os << " > " << *itR << endl;
         }
-        os << " > " << *itR << endl;
+        cout << val << " " << actualNSteps << " " << totChTime << " "
+                << totImpTime << " " << totT << endl;
     }
-    //}
     os.close();
 
     //solver->write(cout);
 
-    cout << val << " " << actualNSteps << " " << totChTime << " " << totImpTime
-            << " " << totT << endl;
-
-    delete policy;
-    delete histories;
     delete solver;
     delete model;
 }

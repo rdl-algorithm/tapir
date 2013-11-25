@@ -12,20 +12,16 @@
 
 using namespace std;
 
-Solver::Solver(Model *model, BeliefTree *policy, Histories *histories) :
-        model(model), policy(policy), allHistories(histories) {
-    allStates = new StatePool();
-    exploreCoef = model->getExploreCoef();
-    cRollout[0] = cRollout[1] = 1.0;
-    wRollout[0] = wRollout[1] = 1.0;
-    pRollout[0] = pRollout[1] = 0.5;
-    nUsedRollout[0] = nUsedRollout[1] = 1;
-    rolloutUsed = ROLLOUT_RANDHEURISTIC;
+Solver::Solver(Model *model) :
+        model(model), policy(new BeliefTree()), allHistories(new Histories()),
+        allStates(new StatePool()), rolloutUsed(ROLLOUT_RANDHEURISTIC),
+        exploreCoef(model->getExploreCoef()), cRollout { 1.0, 1.0 }, wRollout {
+            1.0, 1.0 },
+        pRollout { 0.5, 0.5 }, nUsedRollout { 1, 1 } {
 }
 
-Solver::Solver(Model *model, const char *polFile, BeliefTree *policy,
-        Histories *histories) :
-        Solver(model, policy, histories) {
+Solver::Solver(Model *model, const char *polFile) :
+        Solver(model) {
     ifstream inFile;
     inFile.open(polFile);
     if (!inFile.is_open()) {
@@ -40,6 +36,8 @@ Solver::Solver(Model *model, const char *polFile, BeliefTree *policy,
 
 Solver::~Solver() {
     delete allStates;
+    delete allHistories;
+    delete policy;
 }
 
 void Solver::genPol(long maxTrials, double depthTh) {
@@ -467,8 +465,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
             affectedHistSeq.clear();
 
             model->update(*itCh, affectedRange, typeOfChanges); // Add typeOfChanges
-            identifyAffectedPol(affectedRange, typeOfChanges, currNode,
-                    affectedHistSeq);
+            identifyAffectedPol(affectedRange, typeOfChanges, affectedHistSeq);
             updatePol(affectedHistSeq);
             chTimeEnd = clock();
             *totChTime = *totChTime
@@ -608,8 +605,7 @@ bool Solver::simAStep(StateVals& currStVals, StateVals &nxtStVals,
 }
 
 void Solver::identifyAffectedPol(vector<StateVals> &affectedRange,
-        vector<Change> &chTypes, BeliefNode *currNode,
-        set<HistorySequence*> &affectedHistSeq) {
+        vector<Change> &chTypes, set<HistorySequence*> &affectedHistSeq) {
     // Get affected states
     set<StateWrapper*> affectedStates;
     vector<StateVals>::iterator it1, it2;
@@ -691,14 +687,15 @@ void Solver::updatePol(set<HistorySequence*> &affectedHistSeq) {
         switch ((*itHistSeq)->chType) {
         case Change::REWARD: {
 //cerr << "endAffIdx: " << (*itHistSeq)->endAffectedIdx << " seq size: " << (*itHistSeq)->histSeq.size() << endl;
-            if ((*itHistSeq)->endAffectedIdx >= (*itHistSeq)->histSeq.size()) {
+            if ((*itHistSeq)->endAffectedIdx
+                    >= (long) (*itHistSeq)->histSeq.size()) {
                 (*itHistSeq)->writeln(cerr);
             }
             currHistEntry = (*itHistSeq)->histSeq[(*itHistSeq)->endAffectedIdx];
 //cerr << "LastAffected " << currHistEntry->st->s[0] << " " << currHistEntry->st->s[1] << endl;
             // Update last affected history entry.
             if ((*itHistSeq)->endAffectedIdx
-                    == (*itHistSeq)->histSeq.size() - 1) {
+                    == (long) (*itHistSeq)->histSeq.size() - 1) {
                 long actSelected = GlobalResources::randIntBetween(0,
                         model->getNActions() - 1);
                 StateVals nxtSVals;
@@ -749,7 +746,7 @@ void Solver::updatePol(set<HistorySequence*> &affectedHistSeq) {
             vector<double> modifRewSeq;
             vector<HistoryEntry*>::iterator itHistEntry;
             (*itHistSeq)->getStValsSeq(seqStVals);
-            if ((*itHistSeq)->endAffectedIdx == seqStVals.size() - 1) {
+            if ((*itHistSeq)->endAffectedIdx == (long) seqStVals.size() - 1) {
                 if (model->modifStSeq(seqStVals, (*itHistSeq)->startAffectedIdx,
                         -1, modifStSeq, modifActSeq, modifObsSeq,
                         modifRewSeq)) {

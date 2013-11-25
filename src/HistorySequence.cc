@@ -11,15 +11,11 @@ HistorySequence::HistorySequence(HistoryEntry *startEntry) :
 }
 
 HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
-        startDepth(startDepth) {
-    id = currId;
+        id(currId), startDepth(startDepth), startAffectedIdx(LONG_MAX),
+        endAffectedIdx(-1), histSeq(), chType(Change::UNDEFINED) {
     currId++;
-    startAffectedIdx = LONG_MAX;
-    endAffectedIdx = -1;
     startEntry->setSeqId(id);
     histSeq.push_back(startEntry);
-
-    chType = Change::UNDEFINED;
 }
 
 HistorySequence::~HistorySequence() {

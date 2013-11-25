@@ -48,6 +48,10 @@ public:
 
     StatePool();
     ~StatePool();
+    StatePool(const StatePool&) = delete;
+    StatePool(StatePool&) = delete;
+    StatePool &operator=(const StatePool&) = delete;
+    StatePool &operator=(StatePool&) = delete;
 
     void readStates(std::ifstream &inFile, Model *model);
     StateWrapper* add(StateVals &sVals);

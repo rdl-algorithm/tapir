@@ -11,20 +11,25 @@ LINKER = g++
 # Compiler flags
 #---------------------------------------------------------------------#
 
-CXXFLAGS = -Wall -std=c++11 -DDISTL1 $(INCDIRS)
-DEBUG_FLAGS = -DDEBUG -g -O0
-RELEASE_FLAGS = -frounding-math -O3
-# INCDIRS +=
+CPPFLAGS = -DDISTL1 $(INCDIRS)
+CPPFLAGS_RELEASE =
+CPPFLAGS_DEBUG = -DDEBUG
+
+CXXFLAGS = -Wall -Wextra -Weffc++ -std=c++11
+CXXFLAGS_RELEASE = -frounding-math -O3
+CXXFLAGS_DEBUG = -g -O0
 
 # ----------------------------------------------------------------------
 # Targets
 # ----------------------------------------------------------------------/
 .PHONY: all
-all: CXXFLAGS += $(RELEASE_FLAGS)
+all: CPPFLAGS += $(CPPFLAGS_RELEASE)
+all: CXXFLAGS += $(CXXFLAGS_RELEASE)
 all: $(SOLVER_OBJS)
 
 .PHONY: debug
-debug: CXXFLAGS += $(DEBUG_FLAGS)
+debug: CPPFLAGS += $(CPPFLAGS_DEBUG)
+debug: CXXFLAGS += $(CXXFLAGS_DEBUG)
 debug: $(SOLVER_OBJS)
 
 .PHONY: clean

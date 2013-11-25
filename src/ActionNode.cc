@@ -9,7 +9,8 @@ ActionNode::ActionNode(long actId, ObsVals &obs, BeliefNode* nxtBelNode) :
 }
 
 ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal) :
-        actId(actId), nParticles(nParticles), qVal(qVal), avgQVal(avgQVal) {
+        actId(actId), nParticles(nParticles), qVal(qVal), avgQVal(avgQVal),
+        obsChildren() {
 }
 
 ActionNode::~ActionNode() {

@@ -49,11 +49,7 @@ int main(int argc, const char* argv[]) {
     GlobalResources::randGen.seed(seed);
 
     Model* model = new UnderwaterNavModifModel(vm);
-    BeliefNode::maxParticles = model->getNParticles();
-    BeliefNode::nStVars = model->getNStVars();
-    BeliefTree* policy = new BeliefTree();
-    Histories* histories = new Histories();
-    Solver* solver = new Solver(model, policy, histories);
+    Solver* solver = new Solver(model);
 
     double totT;
     clock_t tStart;
@@ -68,8 +64,6 @@ int main(int argc, const char* argv[]) {
 
     cout << "SolvingTime: " << totT << endl;
 
-    delete policy;
-    delete histories;
     delete solver;
     delete model;
 }

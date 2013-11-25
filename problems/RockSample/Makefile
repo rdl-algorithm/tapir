@@ -26,16 +26,26 @@ LINKER = g++
 # Compiler flags
 #---------------------------------------------------------------------#
 
-CXXFLAGS = -std=c++11 -DDISTL1 $(INCDIRS)
-DEBUG_FLAGS = -DDEBUG -g -O0
-RELEASE_FLAGS = -frounding-math -O3
 INCDIRS += -I$(PROBLEM_SRCDIR)
+
+CPPFLAGS = -DDISTL1 $(INCDIRS)
+CPPFLAGS_RELEASE =
+CPPFLAGS_DEBUG = -DDEBUG
+
+CXXFLAGS = -Wall -Wextra -Weffc++ -std=c++11
+CXXFLAGS_RELEASE = -frounding-math -O3
+CXXFLAGS_DEBUG = -g -O0
 
 #---------------------------------------------------------------------#
 # Linker flags
 #---------------------------------------------------------------------#
 
-LDFLAGS = -g -w -lboost_program_options -L/usr/lib/x86_64-linux-gnu/
+LIBDIRS += -L/usr/lib/x86_64-linux-gnu/
+LDLIBS += -lboost_program_options
+
+LDFLAGS = $(LIBDIRS)
+LDFLAGS_DEBUG = -g
+LDFLAGS_RELEASE =
 
 # ----------------------------------------------------------------------
 # Files
@@ -61,22 +71,26 @@ DEPS := $(SOLVER_DEPS) $(PROBLEM_DEPS) $(MAIN_DEPS)
 # ----------------------------------------------------------------------
 .SECONDEXPANSION:
 .PHONY: all
-all: CXXFLAGS += $(RELEASE_FLAGS)
+all: CPPFLAGS += $(CPPFLAGS_RELEASE)
+all: CXXFLAGS += $(CXXFLAGS_RELEASE)
+all: LDFLAGS += $(LDFLAGS_RELEASE)
 all: $(MAINS)
 
 .PHONY: debug
-debug: CXXFLAGS += $(DEBUG_FLAGS)
+debug: CPPFLAGS += $(CPPFLAGS_DEBUG)
+debug: CXXFLAGS += $(CXXFLAGS_DEBUG)
+debug: LDFLAGS += $(LDFLAGS_DEBUG)
 debug: $(MAINS)
 
 $(MAINS): $(PROBLEM_OBJDIR)/$$(notdir $$@).o $(SOLVER_OBJS) $(PROBLEM_OBJS)
-	$(LINKER) $^ $(LDFLAGS) -o $@
+	$(LINKER) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 $(PROBLEM_OBJS) $(MAIN_OBJS): | $(PROBLEM_OBJDIR) $(PROBLEM_DEPDIR)
 $(PROBLEM_DEPDIR) $(PROBLEM_OBJDIR):
 	mkdir -p $@
 
 $(PROBLEM_OBJDIR)/%.o: $(PROBLEM_SRCDIR)/%.cc
-	$(CXX) $(CXXFLAGS) -MMD -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MD -c $< -o $@
 	@mv $(PROBLEM_OBJDIR)/$*.d $(PROBLEM_DEPDIR)/$*.d
 
 .PHONY: clean

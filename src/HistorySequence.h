@@ -1,5 +1,5 @@
-#ifndef HISTORYSEQ_H
-#define HISTORYSEQ_H
+#ifndef HISTORYSEQUENCE_H
+#define HISTORYSEQUENCE_H
 
 #include <iostream>
 #include <vector>
@@ -15,6 +15,10 @@ public:
     HistorySequence(HistoryEntry* startEntry);
     HistorySequence(HistoryEntry* startEntry, long startDepth);
     ~HistorySequence();
+    HistorySequence(const HistorySequence&) = delete;
+    HistorySequence(HistorySequence&) = delete;
+    HistorySequence &operator=(const HistorySequence&) = delete;
+    HistorySequence &operator=(HistorySequence&) = delete;
 
     HistoryEntry* getFirstEntry();
     HistoryEntry* addEntry(long actId, ObsVals &obs, StateWrapper *s);
@@ -39,10 +43,9 @@ private:
     static long currId;
 
     long id;
-    unsigned long startDepth, startAffectedIdx, endAffectedIdx;
+    long startDepth, startAffectedIdx, endAffectedIdx;
     std::vector<HistoryEntry*> histSeq;
 
     Change chType;
-
 };
 #endif

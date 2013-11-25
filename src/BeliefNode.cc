@@ -17,22 +17,12 @@ BeliefNode::BeliefNode() :
 }
 
 BeliefNode::BeliefNode(long id) :
-        id(id) {
+        distChecked(false), id(id), nParticles(0), nActChildren(0),
+        nxtActToTry(-1), bestAvgQVal(0), bestAct(-1), tLastAddedParticle(0),
+        tNNComp(-1.0), tEmdSig(-1.0), nnBel(nullptr), particles(), actChildren() {
     if (currId <= id) {
         currId = id + 1;
     }
-    nParticles = 0;
-    nActChildren = 0;
-    distChecked = false;
-    tNNComp = -1.0;
-    nnBel = nullptr;
-    tEmdSig = -1;
-
-    // Initially invalid values:
-    nxtActToTry = -1;
-    bestAct = -1;
-    bestAvgQVal = 0;
-    tLastAddedParticle = 0;
 }
 
 BeliefNode::~BeliefNode() {
@@ -40,7 +30,6 @@ BeliefNode::~BeliefNode() {
     for (it = actChildren.begin(); it != actChildren.end(); it++) {
         delete it->second;
     }
-    actChildren.clear();
 }
 
 void BeliefNode::set(stringstream &sstr, Histories *allHist) {

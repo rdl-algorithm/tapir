@@ -1,5 +1,5 @@
-#ifndef OBSERVATION_H
-#define OBSERVATION_H
+#ifndef OBSERVATIONEDGE_H
+#define OBSERVATIONEDGE_H
 
 #include <ostream>
 #include <queue>
@@ -12,7 +12,12 @@ class ObservationEdge {
 public:
     ObservationEdge();
     ObservationEdge(ObsVals &o, BeliefNode* nxtBelNode);
-    ~ObservationEdge();
+
+    ~ObservationEdge() = default;
+    ObservationEdge(const ObservationEdge&) = delete;
+    ObservationEdge(ObservationEdge&) = delete;
+    ObservationEdge &operator=(const ObservationEdge&) = delete;
+    ObservationEdge &operator=(ObservationEdge&) = delete;
 
     bool isObs(ObsVals &o);
     BeliefNode* getNodeChild();
@@ -23,6 +28,5 @@ public:
 private:
     ObsVals vals;
     BeliefNode* child;
-
 };
 #endif

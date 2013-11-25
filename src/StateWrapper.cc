@@ -12,20 +12,19 @@ using namespace std;
 
 long StateWrapper::currId = 0;
 
-StateWrapper::StateWrapper(StateVals &s) :
-        s(s) {
-    // Default values; should be overridden later.
-    id = 0;
-    chType = Change::UNDEFINED;
+StateWrapper::StateWrapper() :
+        s(), id(0), usedInHistEntries(), usedInBelNode(),
+        chType(Change::UNDEFINED) {
 }
 
-StateWrapper::StateWrapper(string &str, long nStVars) {
-    // Default values; should be overridden later.
-    id = 0;
-    chType = Change::UNDEFINED;
+StateWrapper::StateWrapper(StateVals &s) :
+        StateWrapper() {
+    this->s = s;
+}
 
+StateWrapper::StateWrapper(string &str, long nStVars) :
+        StateWrapper() {
     // Load info from the string.
-    s.clear();
     stringstream sstr(str);
     string tmpStr;
     double tmpDouble = -1;
@@ -37,7 +36,6 @@ StateWrapper::StateWrapper(string &str, long nStVars) {
     if (id > currId) {
         currId = id + 1;
     }
-    chType = Change::UNDEFINED;
 }
 
 StateWrapper::~StateWrapper() {

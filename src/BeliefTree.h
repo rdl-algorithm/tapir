@@ -16,6 +16,10 @@ public:
     BeliefTree();
     ~BeliefTree();
     void deleteHelper(std::queue<BeliefNode*> &tmpNodes);
+    BeliefTree(const BeliefTree&) = delete;
+    BeliefTree(BeliefTree&) = delete;
+    BeliefTree &operator=(const BeliefTree&) = delete;
+    BeliefTree &operator=(BeliefTree&) = delete;
 
     void readPolicy(std::ifstream &inFile, Histories *allHist);
     void write(std::ostream &os);
@@ -28,6 +32,5 @@ public:
 private:
     BeliefNode *root;
     std::vector<BeliefNode*> allNodes;
-
 };
 #endif

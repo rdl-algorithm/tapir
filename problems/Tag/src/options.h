@@ -1,5 +1,5 @@
-#ifndef ROCKSAMPLE_OPTIONS_H
-#define ROCKSAMPLE_OPTIONS_H
+#ifndef TAG_OPTIONS_H
+#define TAG_OPTIONS_H
 
 #include <string>
 

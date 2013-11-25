@@ -1,5 +1,5 @@
-#ifndef TagModel_H
-#define TagModel_H
+#ifndef TAGMODEL_H
+#define TAGMODEL_H
 
 #include <ostream>
 #include <iomanip>
@@ -46,7 +46,11 @@ inline bool operator!=(const Coords &lhs, const Coords &rhs) {
 class TagModel: public Model {
 public:
     TagModel(po::variables_map vm);
-    virtual ~TagModel();
+    ~TagModel() = default;
+    TagModel(const TagModel&) = delete;
+    TagModel(TagModel&) = delete;
+    TagModel &operator=(const TagModel&) = delete;
+    TagModel &operator=(TagModel&) = delete;
 
     /** Enumerates the possible actions */
     enum Action
@@ -123,8 +127,11 @@ public:
         }
     }
 
-    /***** Start implementation of Model's virtual functions *****/
+    /***** Start implementation of Model's virtual methods *****/
     // Simple getters
+    inline double getDiscount() {
+        return discount;
+    }
     inline unsigned long getNActions() {
         return nActions;
     }
@@ -141,13 +148,33 @@ public:
         return maxVal;
     }
 
+    inline unsigned long getNParticles() {
+        return nParticles;
+    }
+    inline long getMaxTrials() {
+        return maxTrials;
+    }
+    inline double getDepthTh() {
+        return depthTh;
+    }
+    inline double getExploreCoef() {
+        return exploreCoef;
+    }
+    inline long getMaxDistTry() {
+        return maxDistTry;
+    }
+    inline double getDistTh() {
+        return distTh;
+    }
+
+    // Other virtual methods
     void sampleAnInitState(StateVals &sVals);
     bool isTerm(StateVals &sVals);
     void solveHeuristic(StateVals &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(StateVals &sVals, unsigned long actId, double *immediateRew,
-            StateVals &nxtSVals, ObsVals &obs);
+    bool getNextState(StateVals &sVals, unsigned long actId,
+            double *immediateRew, StateVals &nxtSVals, ObsVals &obs);
     double getReward(StateVals &sVals);
     double getReward(StateVals &sVals, unsigned long actId);
 
@@ -159,8 +186,8 @@ public:
     void setChanges(const char *chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<StateVals> &affectedRange,
             std::vector<Change> &typeOfChanges);
-    bool modifStSeq(std::vector<StateVals> &seqStVals, unsigned long startAffectedIdx,
-            unsigned long endAffectedIdx, std::vector<StateVals> &modifStSeq,
+    bool modifStSeq(std::vector<StateVals> &seqStVals, long startAffectedIdx,
+            long endAffectedIdx, std::vector<StateVals> &modifStSeq,
             std::vector<long> &modifActSeq, std::vector<ObsVals> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
@@ -168,9 +195,19 @@ public:
     void drawState(StateVals &s, std::ostream &os);
 
 private:
-    // Values for the required getters
+    // Problem parameters.
+    double discount;
     unsigned long nActions, nObservations, nStVars;
     double minVal, maxVal;
+
+    // SBT parameters
+    unsigned long nParticles;
+    long maxTrials;
+    double depthTh;
+    double exploreCoef;
+
+    long maxDistTry;
+    double distTh;
 
     /** Initialises the required data structures and variables */
     void initialise();
@@ -182,7 +219,8 @@ private:
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
      */
-    bool makeNextState(StateVals &sVals, unsigned long actId, StateVals &nxtSVals);
+    bool makeNextState(StateVals &sVals, unsigned long actId,
+            StateVals &nxtSVals);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */

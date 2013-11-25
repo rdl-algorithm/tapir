@@ -8,10 +8,10 @@ using namespace std;
 StRoadmap::StRoadmap(vector<StateVals> &goals, long maxVerts, long nGoalsSamp,
         long nTryCon, long maxDistCon, map<long, map<long, short> > &env,
         long nX, long nY) :
-        maxVerts(maxVerts), maxTryCon(nTryCon), maxDistCon(maxDistCon), env(
-                env), nX(nX), nY(nY) {
+        nX(nX), nY(nY), env(env), weight(), totW(0), maxTryCon(nTryCon),
+        maxDistCon(maxDistCon), nVerts(0), maxVerts(maxVerts), lastGoalIdx(0),
+        V(), outEdges(), inEdges(), shortestDistToGoal() {
     setWeight();
-    nVerts = 0;
     insertGoalMilestones(goals, nGoalsSamp);
     long i = lastGoalIdx;
 
@@ -27,7 +27,7 @@ StRoadmap::StRoadmap(vector<StateVals> &goals, long maxVerts, long nGoalsSamp,
     /*
      vector<StateVals>::iterator itV;
      cerr << "Vertices: (lastGoal "  << lastGoalIdx << ")\n";
-     i=0;
+     i = 0;
      for (itV = V.begin(); itV != V.end(); itV++, i++) {
      cerr << "v-" << i << " " << (*itV)[0] << " " << (*itV)[1] << endl;
      }

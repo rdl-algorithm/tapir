@@ -1,5 +1,5 @@
-#ifndef StRoadmap_H
-#define StRoadmap_H
+#ifndef STROADMAP_H
+#define STROADMAP_H
 
 #include <ostream>
 #include <utility>
@@ -15,6 +15,10 @@ public:
             long nTryCon, long maxDistCon,
             std::map<long, std::map<long, short> > &env, long nX, long nY);
     ~StRoadmap();
+    StRoadmap(const StRoadmap&) = delete;
+    StRoadmap(StRoadmap&) = delete;
+    StRoadmap &operator=(const StRoadmap&) = delete;
+    StRoadmap &operator=(StRoadmap&) = delete;
 
     void updateRoadmap(std::map<long, std::map<long, short> > &env_,
             std::vector<StateVals> &goals, long nGoalsSamp);

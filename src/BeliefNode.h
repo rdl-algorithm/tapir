@@ -27,6 +27,10 @@ public:
     BeliefNode();
     BeliefNode(long id);
     ~BeliefNode();
+    BeliefNode(const BeliefNode&) = delete;
+    BeliefNode(BeliefNode&) = delete;
+    BeliefNode &operator=(const BeliefNode&) = delete;
+    BeliefNode &operator=(BeliefNode&) = delete;
 
     void set(std::stringstream &sstr, Histories *allHist);
     void setAct(std::string str, std::vector<BeliefNode*> &tmpNodes);
@@ -72,7 +76,6 @@ private:
     BeliefNode *nnBel;
 
     std::vector<HistoryEntry*> particles;
-    std::map<long, ActionNode*> actChildren, invalidActChildren;
-
+    std::map<long, ActionNode*> actChildren;
 };
 #endif

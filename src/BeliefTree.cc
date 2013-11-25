@@ -2,9 +2,8 @@
 
 using namespace std;
 
-BeliefTree::BeliefTree() {
-    // Set root
-    root = new BeliefNode();
+BeliefTree::BeliefTree() :
+        root(new BeliefNode()), allNodes() {
     allNodes.push_back(root);
 }
 

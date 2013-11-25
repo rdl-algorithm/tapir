@@ -16,12 +16,15 @@ public:
     friend class BeliefNode;
     friend class Solver;
 
-    HistoryEntry(StateWrapper *st, unsigned long entryId);
-    HistoryEntry(StateWrapper *st, unsigned long seqId, unsigned long entryId);
-    HistoryEntry(unsigned long seqId, unsigned long entryId, StateWrapper *st,
+    HistoryEntry(StateWrapper *st, long entryId);
+    HistoryEntry(StateWrapper *st, long seqId, long entryId);
+    HistoryEntry(StateWrapper *st, long seqId, long entryId,
             std::stringstream &sstr);
-    void initialise();
-    ~HistoryEntry();
+    ~HistoryEntry() = default;
+    HistoryEntry(const HistoryEntry&) = delete;
+    HistoryEntry(HistoryEntry&) = delete;
+    HistoryEntry &operator=(const HistoryEntry&) = delete;
+    HistoryEntry &operator=(HistoryEntry&) = delete;
 
     void setBelNode(BeliefNode *bel);
     //void prepareDel();
@@ -52,12 +55,13 @@ public:
 private:
     StateWrapper *st;
     bool hasBeenBackup;
-    unsigned long seqId, entryId;
-    double disc, rew, qVal; // disc: discount factor for the immediate reward, rew: not discounted immediate reward, qVal: discounted total reward.
+    long seqId, entryId;
+    double disc; // Net discount factor for the immediate reward
+    double rew; // Non-discounted immediate reward
+    double qVal; // Discounted total reward
     long actId;
     ObsVals obs;
 
     BeliefNode* partOfBelNode;
-
 };
 #endif
