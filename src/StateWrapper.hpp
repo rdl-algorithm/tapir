@@ -1,7 +1,6 @@
 #ifndef STATEWRAPPER_HPP
 #define STATEWRAPPER_HPP
 
-#include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
@@ -10,6 +9,7 @@
 #include "State.hpp"
 class BeliefNode;
 class HistoryEntry;
+class TextSerializer;
 
 class StateWrapper {
 public:
@@ -18,7 +18,6 @@ public:
     friend class Solver;
 
     StateWrapper(State &s);
-    StateWrapper(std::string &str, long nStVars);
     ~StateWrapper() = default;
     StateWrapper(const StateWrapper&) = delete;
     StateWrapper(StateWrapper&) = delete;
@@ -32,11 +31,8 @@ public:
 
     void delUsedInHistEntry(HistoryEntry *toBeDeleted);
 
-    void write(std::ostream &os);
-    void writeln(std::ostream &os);
-
     void getVals(State &res) const {
-        res = s;
+        res = state;
     }
     long getId() const {
         return id;
@@ -45,7 +41,7 @@ public:
 private:
     StateWrapper();
 
-    State s;
+    State state;
     static long currId;
     long id;
 

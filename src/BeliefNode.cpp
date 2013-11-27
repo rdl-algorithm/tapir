@@ -279,11 +279,3 @@ void BeliefNode::writeNGetChildren(ostream &os, queue<BeliefNode*> &res) {
         itAct->second->writeNGetChildren(os, res);
     }
 }
-
-void BeliefNode::writeStParticles(ostream &os) {
-    vector<HistoryEntry*>::iterator it;
-    for (it = particles.begin(); it != particles.end(); it++) {
-        (*it)->writeSt(os);
-    }
-    os << endl;
-}

@@ -5,15 +5,16 @@
 
 # Directory for this problem
 PROBLEM := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-default: all
+.PHONY: default
+default: release
 include $(PROBLEM)/../../Makefile.common
 
 # Directories
-PROBLEM_SRCDIR = $(PROBLEM)/src
-PROBLEM_OBJDIR = $(PROBLEM)/obj
-PROBLEM_DEPDIR = $(PROBLEM)/dep
-DESTDIR = $(PROBLEM)
-
+SRCDIR = $(PROBLEM)/src
+OUTDIR_RELEASE = $(PROBLEM)/release
+DIRS_RELEASE = $(OUTDIR_RELEASE)/bin $(OUTDIR_RELEASE)/obj $(OUTDIR_RELEASE)/dep
+OUTDIR_DEBUG = $(PROBLEM)/debug
+DIRS_DEBUG = $(OUTDIR_DEBUG)/bin $(OUTDIR_DEBUG)/obj $(OUTDIR_DEBUG)/dep
 
 # ----------------------------------------------------------------------
 # Compiler & linker
@@ -26,7 +27,7 @@ LINKER = g++
 # Compiler flags
 #---------------------------------------------------------------------#
 
-INCDIRS += -I$(PROBLEM_SRCDIR)
+INCDIRS += -I$(SRCDIR)
 
 CPPFLAGS = -DDISTL1 $(INCDIRS)
 CPPFLAGS_RELEASE =
@@ -51,63 +52,89 @@ LDFLAGS_RELEASE =
 # Files
 # ----------------------------------------------------------------------
 
-MAINS     := $(DESTDIR)/solve $(DESTDIR)/simulate
-MAIN_SRCS := $(patsubst $(DESTDIR)/%, $(PROBLEM_SRCDIR)/%.cpp, $(MAINS))
-MAIN_OBJS := $(patsubst $(DESTDIR)/%, $(PROBLEM_OBJDIR)/%.o,   $(MAINS))
-MAIN_DEPS := $(patsubst $(DESTDIR)/%, $(PROBLEM_DEPDIR)/%.d,   $(MAINS))
+MAINS := $(PROBLEM)/solve $(PROBLEM)/simulate
+MAIN_SRCS := $(patsubst $(PROBLEM)/%, $(SRCDIR)/%.cpp, $(MAINS))
+PROBLEM_SRCS := $(filter-out $(MAIN_SRCS), $(wildcard $(SRCDIR)/*.cpp))
 
-PROBLEM_SRCS := $(filter-out $(MAIN_SRCS), $(wildcard $(PROBLEM_SRCDIR)/*.cpp))
-PROBLEM_HDRS := $(wildcard $(PROBLEM_SRCDIR)/*.hpp)
-PROBLEM_OBJS := $(patsubst $(PROBLEM_SRCDIR)/%.cpp, $(PROBLEM_OBJDIR)/%.o, $(PROBLEM_SRCS))
-PROBLEM_DEPS := $(patsubst $(PROBLEM_SRCDIR)/%.cpp, $(PROBLEM_DEPDIR)/%.d, $(PROBLEM_SRCS))
+BINS_RELEASE :=      $(patsubst $(PROBLEM)/%, $(OUTDIR_RELEASE)/bin/%,   $(MAINS))
+MAIN_OBJS_RELEASE := $(patsubst $(PROBLEM)/%, $(OUTDIR_RELEASE)/obj/%.o, $(MAINS))
+MAIN_DEPS_RELEASE := $(patsubst $(PROBLEM)/%, $(OUTDIR_RELEASE)/dep/%.d, $(MAINS))
+PROBLEM_OBJS_RELEASE := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_RELEASE)/obj/%.o, $(PROBLEM_SRCS))
+PROBLEM_DEPS_RELEASE := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_RELEASE)/dep/%.d, $(PROBLEM_SRCS))
+OBJS_RELEASE := $(MAIN_OBJS_RELEASE) $(PROBLEM_OBJS_RELEASE)
+DEPS_RELEASE := $(MAIN_DEPS_RELEASE) $(PROBLEM_DEPS_RELEASE)
 
-SRCS := $(SOLVER_SRCS) $(PROBLEM_SRCS) $(MAIN_SRCS)
-HDRS := $(SOLVER_HDRS) $(PROBLEM_HDRS)
-OBJS := $(SOLVER_OBJS) $(PROBLEM_OBJS) $(MAIN_OBJS)
-DEPS := $(SOLVER_DEPS) $(PROBLEM_DEPS) $(MAIN_DEPS)
+BINS_DEBUG :=      $(patsubst $(PROBLEM)/%, $(OUTDIR_DEBUG)/bin/%,   $(MAINS))
+MAIN_OBJS_DEBUG := $(patsubst $(PROBLEM)/%, $(OUTDIR_DEBUG)/obj/%.o, $(MAINS))
+MAIN_DEPS_DEBUG := $(patsubst $(PROBLEM)/%, $(OUTDIR_DEBUG)/dep/%.d, $(MAINS))
+PROBLEM_OBJS_DEBUG := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_DEBUG)/obj/%.o, $(PROBLEM_SRCS))
+PROBLEM_DEPS_DEBUG := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_DEBUG)/dep/%.d, $(PROBLEM_SRCS))
+OBJS_DEBUG := $(MAIN_OBJS_DEBUG) $(PROBLEM_OBJS_DEBUG)
+DEPS_DEBUG := $(MAIN_DEPS_DEBUG) $(PROBLEM_DEPS_DEBUG)
 
 # ----------------------------------------------------------------------
 # Targets
 # ----------------------------------------------------------------------
-.SECONDEXPANSION:
-.PHONY: all
-all: CPPFLAGS += $(CPPFLAGS_RELEASE)
-all: CXXFLAGS += $(CXXFLAGS_RELEASE)
-all: LDFLAGS += $(LDFLAGS_RELEASE)
-all: $(MAINS)
+#
+.PHONY: release
+release: CPPFLAGS += $(CPPFLAGS_RELEASE)
+release: CXXFLAGS += $(CXXFLAGS_RELEASE)
+release: LDFLAGS += $(LDFLAGS_RELEASE)
+release: $(BINS_RELEASE)
+	cp $(BINS_RELEASE) $(PROBLEM)
 
 .PHONY: debug
 debug: CPPFLAGS += $(CPPFLAGS_DEBUG)
 debug: CXXFLAGS += $(CXXFLAGS_DEBUG)
 debug: LDFLAGS += $(LDFLAGS_DEBUG)
-debug: $(MAINS)
+debug: $(BINS_DEBUG)
+	cp $(BINS_DEBUG) $(PROBLEM)
 
-$(MAINS): $(PROBLEM_OBJDIR)/$$(notdir $$@).o $(SOLVER_OBJS) $(PROBLEM_OBJS)
+$(OUTDIR_RELEASE)/bin/%: $(OUTDIR_RELEASE)/obj/%.o $(SOLVER_OBJS_RELEASE) $(PROBLEM_OBJS_RELEASE)
+	$(LINKER) $(LDFLAGS) $^ $(LDLIBS) -o $@
+$(OUTDIR_DEBUG)/bin/%: $(OUTDIR_DEBUG)/obj/%.o $(SOLVER_OBJS_DEBUG) $(PROBLEM_OBJS_DEBUG)
 	$(LINKER) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-$(PROBLEM_OBJS) $(MAIN_OBJS): | $(PROBLEM_OBJDIR) $(PROBLEM_DEPDIR)
-$(PROBLEM_DEPDIR) $(PROBLEM_OBJDIR):
+$(BINS_RELEASE): | $(OUTDIR_RELEASE)/bin
+$(OBJS_RELEASE): | $(OUTDIR_RELEASE)/obj $(OUTDIR_RELEASE)/dep
+$(DIRS_RELEASE): | $(OUTDIR_RELEASE)
+$(BINS_DEBUG): | $(OUTDIR_DEBUG)/bin
+$(OBJS_DEBUG): | $(OUTDIR_DEBUG)/obj $(OUTDIR_DEBUG)/dep
+$(DIRS_DEBUG): | $(OUTDIR_DEBUG)
+$(DIRS_RELEASE) $(DIRS_DEBUG) $(OUTDIR_RELEASE) $(OUTDIR_DEBUG):
 	mkdir -p $@
 
-$(PROBLEM_OBJDIR)/%.o: $(PROBLEM_SRCDIR)/%.cpp
+$(OUTDIR_RELEASE)/obj/%.o $(OUTDIR_DEBUG)/obj/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MD -c $< -o $@
-	@mv $(PROBLEM_OBJDIR)/$*.d $(PROBLEM_DEPDIR)/$*.d
+	@mv $(basename $@).d $(dir $@)/../dep/$*.d
+
+.PHONY: clean-release
+clean-release:
+	rm -f $(MAINS) $(BINS_RELEASE)
+	rm -f $(OBJS_RELEASE) $(DEPS_RELEASE)
+	rm -f $(SOLVER_OBJS_RELEASE) $(SOLVER_DEPS_RELEASE)
+
+.PHONY: clean-debug
+clean-debug:
+	rm -f $(MAINS) $(BINS_DEBUG)
+	rm -f $(OBJS_DEBUG) $(DEPS_DEBUG)
+	rm -f $(SOLVER_OBJS_DEBUG) $(SOLVER_DEPS_DEBUG)
 
 .PHONY: clean
-clean:
-	rm -f $(MAINS)
-	rm -f $(OBJS)
-	rm -f $(DEPS)
+clean: clean-release clean-debug
 
 .PHONY: rmdirs
-rmdirs:
-	rm -rf $(PROBLEM_OBJDIR) $(PROBLEM_DEPDIR) $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
+rmdirs: clean
+	rm -fd $(DIRS_RELEASE) $(DIRS_DEBUG)
+	rm -fd $(OUTDIR_RELEASE) $(OUTDIR_DEBUG)
+	rm -fd $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
 
 .PHONY: redo
 redo:
 	$(MAKE) rmdirs
 	$(MAKE)
 
--include $(DEPS)
+-include $(MAIN_DEPS_RELEASE) $(PROBLEM_DEPS_RELEASE) $(SOLVER_DEPS_RELEASE)
+-include $(MAIN_DEPS_DEBUG) $(PROBLEM_DEPS_DEBUG) $(SOLVER_DEPS_DEBUG)
 
 # DO NOT DELETE

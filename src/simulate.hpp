@@ -106,21 +106,14 @@ int simulate(int argc, const char* argv[], ProgramOptions *options) {
 
         os << "Val:  " << val << endl;
         itS = trajSt.begin();
-        os << "Init: ( ";
-        for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
-            os << *itD << " ";
-        }
+        os << "Init: ( " << *itS << endl;
         os << " )\n";
         itS++;
         for (itA = trajActId.begin(), itO = trajObs.begin(), itR =
                 trajRew.begin(), j = 0; itA != trajActId.end();
                 itS++, itA++, itO++, itR++, j++) {
             os << "Step-" << j << " " << *itA;
-            os << " ( ";
-            for (itD = (*itS).begin(); itD != (*itS).end(); itD++) {
-                os << *itD << " ";
-            }
-            os << " ) < ";
+            os << " ( " << *itS << ") < ";
             for (itD = (*itO).begin(); itD != (*itO).end(); itD++) {
                 os << *itD << " ";
             }

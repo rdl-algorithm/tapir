@@ -9,14 +9,14 @@ class StateWrapper;
 
 class HistoryEntry {
 public:
-    friend class HistorySequence;
     friend class BeliefNode;
+    friend class HistorySequence;
     friend class Solver;
+    friend class TextSerializer;
 
+    HistoryEntry();
     HistoryEntry(StateWrapper *st);
     HistoryEntry(StateWrapper *st, long seqId, long entryId);
-    HistoryEntry(StateWrapper *st, long seqId, long entryId,
-            std::stringstream &sstr);
     ~HistoryEntry() = default;
     HistoryEntry(const HistoryEntry&) = delete;
     HistoryEntry(HistoryEntry&) = delete;
@@ -24,11 +24,6 @@ public:
     HistoryEntry &operator=(HistoryEntry&) = delete;
 
     void setBelNode(BeliefNode *bel);
-    //void prepareDel();
-
-    void write(std::ostream &os);
-    void writeln(std::ostream &os);
-    void writeSt(std::ostream &os);
 
     void setSeqId(long seqId_) {
         seqId = seqId_;

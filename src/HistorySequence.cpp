@@ -11,14 +11,14 @@ using std::vector;
 
 #include "HistoryEntry.hpp"
 #include "StateWrapper.hpp"
+#include "TextSerializer.hpp"
 
 long HistorySequence::currId = 0;
 
-HistorySequence::HistorySequence(HistoryEntry *startEntry) :
-            HistorySequence(startEntry, 0) {
+HistorySequence::HistorySequence() : HistorySequence(0) {
 }
 
-HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
+HistorySequence::HistorySequence(long startDepth) :
             id(currId),
             startDepth(startDepth),
             startAffectedIdx(LONG_MAX),
@@ -26,6 +26,10 @@ HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
             histSeq(),
             chType(ChangeType::UNDEFINED) {
     currId++;
+}
+
+HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
+        HistorySequence(startDepth) {
     startEntry->setSeqId(id);
     histSeq.push_back(startEntry);
 }
@@ -92,19 +96,4 @@ void HistorySequence::fixEntryId() {
     for (itH = histSeq.begin(); itH != histSeq.end(); itH++, i++) {
         (*itH)->entryId = i;
     }
-}
-
-void HistorySequence::write(ostream &os) {
-    vector<HistoryEntry*>::iterator it;
-    for (it = histSeq.begin(); it != histSeq.end(); it++) {
-        (*it)->writeln(os);
-    }
-}
-
-void HistorySequence::writeln(ostream &os) {
-    vector<HistoryEntry*>::iterator it;
-    for (it = histSeq.begin(); it != histSeq.end(); it++) {
-        (*it)->writeln(os);
-    }
-    os << endl;
 }

@@ -109,9 +109,9 @@ public:
     };
 
     void dispState(State &s, std::ostream &os) {
-        os << "ROBOT: " << decodeCoords(s[0]) << " OPPONENT: "
-                << decodeCoords(s[1]);
-        if (s[2] == TAGGED) {
+        os << "ROBOT: " << decodeCoords(s.vals[0]) << " OPPONENT: "
+                << decodeCoords(s.vals[1]);
+        if (s.vals[2] == TAGGED) {
             os << " TAGGED!";
         }
     }

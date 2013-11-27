@@ -35,6 +35,7 @@ using std::vector;
 #include "Model.hpp"
 #include "StatePool.hpp"
 #include "StateWrapper.hpp"
+#include "TextSerializer.hpp"
 
 Solver::Solver(Model *model) :
             model(model),
@@ -57,8 +58,9 @@ Solver::Solver(Model *model, const char *polFile) :
         cerr << "Fail to open " << polFile << "\n";
         exit(1);
     }
-    allStates->readStates(inFile, model);
-    allHistories->readHistories(inFile, allStates);
+    TextSerializer serializer(allStates);
+    serializer.load(*allStates, inFile);
+    serializer.load(*allHistories, inFile);
     policy->readPolicy(inFile, allHistories);
     inFile.close();
 }
@@ -161,9 +163,9 @@ void Solver::singleSearch(double discount, double depthTh) {
         if (model->getNActions() == currNode->actChildren.size()) {
 //cerr << "Start UCB act\n";
             actIdx = currNode->getUCBAct();
-            nxtSVals.clear();
+            nxtSVals.vals.clear();
             obs.clear();
-            done = model->getNextState(currHistEntry->st->s, actIdx,
+            done = model->getNextState(currHistEntry->st->state, actIdx,
                     &immediateRew, nxtSVals, obs);
             currHistEntry->rew = immediateRew;
             nxtSt = allStates->add(nxtSVals);
@@ -186,10 +188,10 @@ void Solver::singleSearch(double discount, double depthTh) {
         } else {
 //cerr << "Start rolloutAct\n";
             double qVal;
-            nxtSVals.clear();
+            nxtSVals.vals.clear();
             obs.clear();
 //cerr << "About to rollout from " << currHistEntry->st->s[0] << " " << currHistEntry->st->s[1] << endl;
-            actIdx = getRolloutAct(currNode, currHistEntry->st->s,
+            actIdx = getRolloutAct(currNode, currHistEntry->st->state,
                     currDiscFactor, discount, nxtSVals, obs, &immediateRew,
                     &qVal);
             currHistEntry->rew = immediateRew;
@@ -548,7 +550,7 @@ BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, Observation &obs,
     vector<HistoryEntry*>::iterator it;
     for (it = currNode->particles.begin(); it != currNode->particles.end();
             it++) {
-        partSt.push_back((*it)->st->s);
+        partSt.push_back((*it)->st->state);
     }
 
     double disc = model->getDiscount();
@@ -717,7 +719,8 @@ void Solver::updatePol(set<HistorySequence*> &affectedHistSeq) {
 //cerr << "endAffIdx: " << (*itHistSeq)->endAffectedIdx << " seq size: " << (*itHistSeq)->histSeq.size() << endl;
             if ((*itHistSeq)->endAffectedIdx
                     >= (long) (*itHistSeq)->histSeq.size()) {
-                (*itHistSeq)->writeln(cerr);
+                TextSerializer serializer(allStates);
+                serializer.save(**itHistSeq, cerr);
             }
             currHistEntry = (*itHistSeq)->histSeq[(*itHistSeq)->endAffectedIdx];
 //cerr << "LastAffected " << currHistEntry->st->s[0] << " " << currHistEntry->st->s[1] << endl;
@@ -729,7 +732,7 @@ void Solver::updatePol(set<HistorySequence*> &affectedHistSeq) {
                 State nxtSVals;
                 Observation obs;
                 double immediateRew;
-                bool isTerm = model->getNextState(currHistEntry->st->s,
+                bool isTerm = model->getNextState(currHistEntry->st->state,
                         actSelected, &immediateRew, nxtSVals, obs);
                 if (isTerm) {
 //cerr << "in 0 " << currHistEntry->qVal << " becomes ";
@@ -748,7 +751,7 @@ void Solver::updatePol(set<HistorySequence*> &affectedHistSeq) {
                 }
             } else {
 //cerr << "in 2 " << currHistEntry->qVal << " becomes ";
-                currHistEntry->rew = model->getReward(currHistEntry->st->s,
+                currHistEntry->rew = model->getReward(currHistEntry->st->state,
                         currHistEntry->actId);
                 double prevRew = currHistEntry->qVal;
 //cerr << "histSeq: " << (*itHistSeq)->histSeq.size() << " endAff " << (*itHistSeq)->endAffectedIdx << endl;
@@ -1074,7 +1077,7 @@ void Solver::updateVal(HistorySequence *histSeq) {
         currHistEntry = histSeq->histSeq[i];
         prevRew = currHistEntry->qVal;
 //cerr << "histEntry " << currHistEntry->st->s[0] << " " << currHistEntry->st->s[1] << " qVal " << currHistEntry->qVal << " ";
-        currHistEntry->rew = model->getReward(currHistEntry->st->s,
+        currHistEntry->rew = model->getReward(currHistEntry->st->state,
                 currHistEntry->actId);
         totRew = currHistEntry->qVal = currHistEntry->disc * currHistEntry->rew
                 + totRew;
@@ -1135,9 +1138,9 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
     while (!done && currDiscFactor > depthTh) {
         if (model->getNActions() == currNode->actChildren.size()) {
             actIdx = currNode->getUCBAct();
-            nxtSVals.clear();
+            nxtSVals.vals.clear();
             obs.clear();
-            done = model->getNextState(currHistEntry->st->s, actIdx,
+            done = model->getNextState(currHistEntry->st->state, actIdx,
                     &immediateRew, nxtSVals, obs);
             currHistEntry->rew = immediateRew;
             nxtSt = allStates->add(nxtSVals);
@@ -1159,9 +1162,9 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
             }
         } else {
             double qVal;
-            nxtSVals.clear();
+            nxtSVals.vals.clear();
             obs.clear();
-            actIdx = getRolloutAct(currNode, currHistEntry->st->s,
+            actIdx = getRolloutAct(currNode, currHistEntry->st->state,
                     currDiscFactor, discount, nxtSVals, obs, &immediateRew,
                     &qVal);
 //cerr << "getRolloutImmediateRew: " << immediateRew << endl;
@@ -1192,11 +1195,10 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
 }
 
 void Solver::write(ostream &os) {
-    os << "STATESPOOL-BEGIN\n";
-    allStates->write(os);
-    os << "STATESPOOL-END\nHISTORIES-BEGIN\n";
-    allHistories->write(os);
-    os << "HISTORIES-END\nBELIEFTREE-BEGIN\n";
+    TextSerializer serializer(allStates);
+    serializer.save(*allStates, os);
+    serializer.save(*allHistories, os);
+    os << "BELIEFTREE-BEGIN\n";
     policy->write(os);
     os << "BELIEFTREE-END\n";
 }

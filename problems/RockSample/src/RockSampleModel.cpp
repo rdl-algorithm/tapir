@@ -345,7 +345,7 @@ bool RockSampleModel::modifStSeq(std::vector<State> &/*seqStVals*/,
 
 void RockSampleModel::drawEnv(std::ostream &os) {
     for (std::vector<int> &row : envMap) {
-        for (int &cellValue : row) {
+        for (int cellValue : row) {
             dispCell(cellValue, os);
         }
         os << endl;

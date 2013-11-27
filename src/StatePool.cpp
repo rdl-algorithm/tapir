@@ -5,17 +5,10 @@ using std::max;
 using std::set_intersection;
 #include <iterator>
 using std::insert_iterator;
-#include <fstream>
-using std::ifstream;
-#include <ostream>
-using std::endl;
-using std::ostream;
 #include <map>
 using std::multimap;
 #include <set>
 using std::set;
-#include <sstream>
-using std::stringstream;
 #include <string>
 using std::string;
 using std::getline;
@@ -23,6 +16,8 @@ using std::getline;
 using std::pair;
 #include <vector>
 using std::vector;
+
+#include <iostream>
 
 #include "Model.hpp"
 #include "TextSerializer.hpp"
@@ -36,9 +31,13 @@ StatePool::StatePool() :
 }
 
 StatePool::~StatePool() {
-    set<StateWrapper*>::iterator it;
-    for (it = allStates.begin(); it != allStates.end(); it++) {
-        delete (*it);
+    clear();
+}
+
+void StatePool::clear() {
+    nStates = 0;
+    for (StateWrapper *wrappedState : allStates) {
+        delete wrappedState;
     }
     allStates.clear();
     allStatesIdx.clear();
@@ -48,38 +47,11 @@ StatePool::~StatePool() {
     stStruct.clear();
 }
 
-void StatePool::readStates(ifstream &inFile, Model *model) {
-    nSDim = model->getNStVars();
-    stStruct.resize(nSDim);
-
-    string tmpStr, usrStr;
-    getline(inFile, tmpStr);
-    while (tmpStr.find("STATESPOOL-BEGIN") == string::npos) {
-        getline(inFile, tmpStr);
-    }
-
-    getline(inFile, tmpStr);
-    stringstream sstr(tmpStr);
-    sstr >> usrStr >> nStates;
-    getline(inFile, tmpStr);
-
-    for (long i = 0; i < nStates; i++) {
-        allStatesIdx.push_back(nullptr);
-    }
-    pair<set<StateWrapper*, CompStVals>::iterator, bool> ret;
-    while (tmpStr.find("STATESPOOL-END") == string::npos) {
-        StateWrapper *newSt = new StateWrapper(tmpStr, nSDim);
-        ret = allStates.insert(newSt);
-        allStatesIdx[newSt->id] = *(ret.first);
-        for (long i = 0; i < nSDim; i++) {
-            stStruct[i].insert(
-                    pair<double, StateWrapper*>(newSt->s[i], *(ret.first)));
-        }
-        getline(inFile, tmpStr);
-    }
-}
-
 StateWrapper* StatePool::add(State &sVals) {
+    if (nSDim == -1) {
+        nSDim = sVals.vals.size();
+        stStruct.resize(nSDim);
+    }
     StateWrapper* newSt = new StateWrapper(sVals);
     pair<set<StateWrapper*, CompStVals>::iterator, bool> ret = allStates.insert(
             newSt);
@@ -94,8 +66,8 @@ StateWrapper* StatePool::add(State &sVals) {
     }
 }
 
-StateWrapper* StatePool::getStPtr(long stId) {
-    return allStatesIdx[stId];
+StateWrapper* StatePool::getStateById(long id) {
+    return allStatesIdx[id];
 }
 
 void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
@@ -107,8 +79,8 @@ void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
      cerr << "stStruct " << start->first << " " << start->second->s[0] << " " << start->second->s[1] << endl;
      }
      */
-    start = stStruct[0].lower_bound(lowLeft[0]);
-    end = stStruct[0].lower_bound(upRight[0]);
+    start = stStruct[0].lower_bound(lowLeft.vals[0]);
+    end = stStruct[0].lower_bound(upRight.vals[0]);
     /*
      if (start == stStruct[0].end()) { cerr << "No Start\n"; }
      if (end == stStruct[0].end()) { cerr << "No End\n"; }
@@ -127,8 +99,8 @@ void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
     //cerr << "#affectedSt: " << affectedSt.size() << endl;
     //cerr << "ok1\n";
     for (long i = 1; i < nSDim; i++) {
-        start = stStruct[i].lower_bound(lowLeft[i]);
-        end = stStruct[i].lower_bound(upRight[i]);
+        start = stStruct[i].lower_bound(lowLeft.vals[i]);
+        end = stStruct[i].lower_bound(upRight.vals[i]);
         set<StateWrapper*> posAffectedSt, tmpSet;
         for (it = start; it != end; it++) {
             posAffectedSt.insert(it->second);
@@ -149,14 +121,4 @@ void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
         allAffectedSt.insert(*itSt);
     }
     //cerr << "ok3\n";
-}
-
-void StatePool::write(ostream &os) {
-    os << "nStates: " << nStates << endl;
-    set<StateWrapper*, CompStVals>::iterator it;
-    TextSerializer serializer;
-    for (it = allStates.begin(); it != allStates.end(); it++) {
-        serializer.save(**it, os);
-        os << endl;
-    }
 }

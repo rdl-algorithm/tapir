@@ -14,8 +14,10 @@ class HistorySequence {
 public:
     friend class Histories;
     friend class Solver;
+    friend class TextSerializer;
 
-    HistorySequence(HistoryEntry* startEntry);
+    HistorySequence();
+    HistorySequence(long startDepth);
     HistorySequence(HistoryEntry* startEntry, long startDepth);
     ~HistorySequence();
     HistorySequence(const HistorySequence&) = delete;

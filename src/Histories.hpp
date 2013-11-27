@@ -8,10 +8,12 @@
 class HistoryEntry;
 class StatePool;
 class StateWrapper;
+class TextSerializer;
 
 class Histories {
 public:
     friend class Solver;
+    friend class TextSerializer;
 
     Histories();
     ~Histories();
@@ -20,10 +22,7 @@ public:
     Histories &operator=(const Histories&) = delete;
     Histories &operator=(Histories&) = delete;
 
-    HistorySequence* addHistorySeq(StateWrapper *s);
-    HistorySequence* addHistorySeq(StateWrapper *s, long startDepth);
-    void readHistories(std::ifstream &inFile, StatePool *stPool);
-    void write(std::ostream &os);
+    void clear();
 
     void add(HistorySequence *histSeq) {
         allHistSeq.push_back(histSeq);

@@ -1,4 +1,5 @@
-default: all
+.PHONY: release
+default: release
 include Makefile.common
 
 # Compiler & linker
@@ -22,25 +23,35 @@ CXXFLAGS_DEBUG = -g -O0
 # ----------------------------------------------------------------------
 # Targets
 # ----------------------------------------------------------------------/
-.PHONY: all
-all: CPPFLAGS += $(CPPFLAGS_RELEASE)
-all: CXXFLAGS += $(CXXFLAGS_RELEASE)
-all: $(SOLVER_OBJS)
+.PHONY: release
+release: CPPFLAGS += $(CPPFLAGS_RELEASE)
+release: CXXFLAGS += $(CXXFLAGS_RELEASE)
+release: $(SOLVER_OBJS_RELEASE)
 
 .PHONY: debug
 debug: CPPFLAGS += $(CPPFLAGS_DEBUG)
 debug: CXXFLAGS += $(CXXFLAGS_DEBUG)
-debug: $(SOLVER_OBJS)
+debug: $(SOLVER_OBJS_DEBUG)
+
+-include $(SOLVER_DEPS_RELEASE)
+-include $(SOLVER_DEPS_DEBUG)
+
+.PHONY: clean-release
+clean-release:
+	rm -f $(SOLVER_OBJS_RELEASE) $(SOLVER_DEPS_RELEASE)
+
+.PHONY: clean-debug
+clean-debug:
+	rm -f $(SOLVER_OBJS_DEBUG) $(SOLVER_DEPS_DEBUG)
 
 .PHONY: clean
-clean:
-	rm -f $(SOLVER_OBJS) $(SOLVER_DEPS)
-
--include $(SOLVER_DEPS)
+clean: clean-release clean-debug
 
 .PHONY: rmdirs
-rmdirs:
-	rm -rf $(SOLVER_OBJDIR) $(SOLVER_DEPDIR) $(ROOT)/problems/*/obj $(ROOT)/problems/*/dep
+rmdirs: clean
+	rm -fd $(SOLVER_DIRS_RELEASE) $(SOLVER_DIRS_DEBUG)
+	rm -fd $(SOLVER_OUTDIR_RELEASE) $(SOLVER_OUTDIR_DEBUG)
+	rm -rf $(ROOT)/problems/*/release $(ROOT)/problems/*/debug
 
 .PHONY: redo
 redo:
