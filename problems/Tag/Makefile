@@ -52,14 +52,14 @@ LDFLAGS_RELEASE =
 # ----------------------------------------------------------------------
 
 MAINS     := $(DESTDIR)/solve $(DESTDIR)/simulate
-MAIN_SRCS := $(patsubst $(DESTDIR)/%, $(PROBLEM_SRCDIR)/%.cc,  $(MAINS))
+MAIN_SRCS := $(patsubst $(DESTDIR)/%, $(PROBLEM_SRCDIR)/%.cpp, $(MAINS))
 MAIN_OBJS := $(patsubst $(DESTDIR)/%, $(PROBLEM_OBJDIR)/%.o,   $(MAINS))
-MAIN_DEPS := $(patsubst $(DESTDIR)/%, $(PROBLEM_DEPDIR)/%.dep, $(MAINS))
+MAIN_DEPS := $(patsubst $(DESTDIR)/%, $(PROBLEM_DEPDIR)/%.d,   $(MAINS))
 
-PROBLEM_SRCS := $(filter-out $(MAIN_SRCS), $(wildcard $(PROBLEM_SRCDIR)/*.cc))
-PROBLEM_HDRS := $(wildcard $(PROBLEM_SRCDIR)/*.h)
-PROBLEM_OBJS := $(patsubst $(PROBLEM_SRCDIR)/%.cc, $(PROBLEM_OBJDIR)/%.o,   $(PROBLEM_SRCS))
-PROBLEM_DEPS := $(patsubst $(PROBLEM_SRCDIR)/%.cc, $(PROBLEM_DEPDIR)/%.dep, $(PROBLEM_SRCS))
+PROBLEM_SRCS := $(filter-out $(MAIN_SRCS), $(wildcard $(PROBLEM_SRCDIR)/*.cpp))
+PROBLEM_HDRS := $(wildcard $(PROBLEM_SRCDIR)/*.hpp)
+PROBLEM_OBJS := $(patsubst $(PROBLEM_SRCDIR)/%.cpp, $(PROBLEM_OBJDIR)/%.o, $(PROBLEM_SRCS))
+PROBLEM_DEPS := $(patsubst $(PROBLEM_SRCDIR)/%.cpp, $(PROBLEM_DEPDIR)/%.d, $(PROBLEM_SRCS))
 
 SRCS := $(SOLVER_SRCS) $(PROBLEM_SRCS) $(MAIN_SRCS)
 HDRS := $(SOLVER_HDRS) $(PROBLEM_HDRS)
@@ -89,7 +89,7 @@ $(PROBLEM_OBJS) $(MAIN_OBJS): | $(PROBLEM_OBJDIR) $(PROBLEM_DEPDIR)
 $(PROBLEM_DEPDIR) $(PROBLEM_OBJDIR):
 	mkdir -p $@
 
-$(PROBLEM_OBJDIR)/%.o: $(PROBLEM_SRCDIR)/%.cc
+$(PROBLEM_OBJDIR)/%.o: $(PROBLEM_SRCDIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MD -c $< -o $@
 	@mv $(PROBLEM_OBJDIR)/$*.d $(PROBLEM_DEPDIR)/$*.d
 

@@ -40,7 +40,7 @@ clean:
 
 .PHONY: rmdirs
 rmdirs:
-	rm -rf $(SOLVER_OBJDIR) $(SOLVER_DEPDIR)
+	rm -rf $(SOLVER_OBJDIR) $(SOLVER_DEPDIR) $(ROOT)/problems/*/obj $(ROOT)/problems/*/dep
 
 .PHONY: redo
 redo:
