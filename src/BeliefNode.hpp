@@ -3,21 +3,19 @@
 
 #include <ctime>
 
-#include <iosfwd>
 #include <map>
 #include <queue>
-#include <string>
 #include <vector>
 
 #include "Observation.hpp"
 class ActionNode;
-class Histories;
 class HistoryEntry;
 
 class BeliefNode {
 public:
     friend class BeliefTree;
     friend class Solver;
+    friend class TextSerializer;
 
     bool distChecked;
     static long maxParticles;
@@ -31,8 +29,6 @@ public:
     BeliefNode &operator=(const BeliefNode&) = delete;
     BeliefNode &operator=(BeliefNode&) = delete;
 
-    void set(std::stringstream &sstr, Histories *allHist);
-    void setAct(std::string str, std::vector<BeliefNode*> &tmpNodes);
     long getUCBAct();
     long getBestAct();
     void add(HistoryEntry *newHistEntry);
@@ -45,10 +41,7 @@ public:
     double distL1Independent(BeliefNode *b);
 
     BeliefNode* getChild(long actIdx, Observation &obs);
-    void getChildren(std::queue<BeliefNode*> &res);
-    void write(std::ostream &os);
-    void writeNGetChildren(std::ostream &os, std::queue<BeliefNode*> &res);
-    void writeStParticles(std::ostream &os);
+    void enqueueChildren(std::queue<BeliefNode*> &res);
 
     long getNxtActToTry();
     void calcBestVal();

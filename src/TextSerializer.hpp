@@ -2,10 +2,11 @@
 #define TEXTSERIALIZER_HPP
 
 #include <iosfwd>
+#include <queue>
+#include <vector>
 
 #include "Observation.hpp"
 #include "Serializer.hpp"
-#include "State.hpp"
 class ActionNode;
 class BeliefNode;
 class BeliefTree;
@@ -13,13 +14,14 @@ class Histories;
 class HistoryEntry;
 class HistorySequence;
 class ObservationEdge;
+class State;
 class StatePool;
 class StateWrapper;
 
 class TextSerializer: public Serializer {
 public:
     TextSerializer();
-    TextSerializer(StatePool *statePool);
+    TextSerializer(Solver *solver);
     virtual ~TextSerializer() = default;
     TextSerializer(const TextSerializer&) = delete;
     TextSerializer(TextSerializer&) = delete;
@@ -51,7 +53,13 @@ public:
     virtual void save(BeliefTree &tree, std::ostream &os);
     virtual void load(BeliefTree &tree, std::istream &is);
 private:
-    StatePool *statePool;
+    std::vector<BeliefNode *> nodeIndex;
+    void saveWithChildren(ObservationEdge &edge, std::ostream &os,
+            std::queue<BeliefNode *> &queue);
+    void saveWithChildren(ActionNode &node, std::ostream &os,
+            std::queue<BeliefNode *> &queue);
+    void saveWithChildren(BeliefNode &node, std::ostream &os,
+            std::queue<BeliefNode *> &queue);
 };
 
 #endif /* TEXTSERIALIZER_HPP */

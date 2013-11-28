@@ -9,18 +9,10 @@ using std::insert_iterator;
 using std::multimap;
 #include <set>
 using std::set;
-#include <string>
-using std::string;
-using std::getline;
 #include <utility>
 using std::pair;
 #include <vector>
 using std::vector;
-
-#include <iostream>
-
-#include "Model.hpp"
-#include "TextSerializer.hpp"
 
 StatePool::StatePool() :
             nStates(0),
@@ -31,10 +23,10 @@ StatePool::StatePool() :
 }
 
 StatePool::~StatePool() {
-    clear();
+    reset();
 }
 
-void StatePool::clear() {
+void StatePool::reset() {
     nStates = 0;
     for (StateWrapper *wrappedState : allStates) {
         delete wrappedState;

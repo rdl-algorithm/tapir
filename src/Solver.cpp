@@ -33,6 +33,7 @@ using std::vector;
 #include "HistoryEntry.hpp"
 #include "HistorySequence.hpp"
 #include "Model.hpp"
+#include "State.hpp"
 #include "StatePool.hpp"
 #include "StateWrapper.hpp"
 #include "TextSerializer.hpp"
@@ -48,21 +49,6 @@ Solver::Solver(Model *model) :
             wRollout { 1.0, 1.0 },
             pRollout { 0.5, 0.5 },
             nUsedRollout { 1, 1 } {
-}
-
-Solver::Solver(Model *model, const char *polFile) :
-            Solver(model) {
-    ifstream inFile;
-    inFile.open(polFile);
-    if (!inFile.is_open()) {
-        cerr << "Fail to open " << polFile << "\n";
-        exit(1);
-    }
-    TextSerializer serializer(allStates);
-    serializer.load(*allStates, inFile);
-    serializer.load(*allHistories, inFile);
-    policy->readPolicy(inFile, allHistories);
-    inFile.close();
 }
 
 Solver::~Solver() {
@@ -719,7 +705,7 @@ void Solver::updatePol(set<HistorySequence*> &affectedHistSeq) {
 //cerr << "endAffIdx: " << (*itHistSeq)->endAffectedIdx << " seq size: " << (*itHistSeq)->histSeq.size() << endl;
             if ((*itHistSeq)->endAffectedIdx
                     >= (long) (*itHistSeq)->histSeq.size()) {
-                TextSerializer serializer(allStates);
+                TextSerializer serializer(this);
                 serializer.save(**itHistSeq, cerr);
             }
             currHistEntry = (*itHistSeq)->histSeq[(*itHistSeq)->endAffectedIdx];
@@ -1192,13 +1178,4 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
         updWeightRolloutAct(startNode->bestAvgQVal - initStartVal);
     }
     rolloutUsed = false;
-}
-
-void Solver::write(ostream &os) {
-    TextSerializer serializer(allStates);
-    serializer.save(*allStates, os);
-    serializer.save(*allHistories, os);
-    os << "BELIEFTREE-BEGIN\n";
-    policy->write(os);
-    os << "BELIEFTREE-END\n";
 }

@@ -1,15 +1,15 @@
 #ifndef OBSERVATIONEDGE_HPP
 #define OBSERVATIONEDGE_HPP
 
-#include <ostream>
 #include <queue>
 
 #include "Observation.hpp"
-
 class BeliefNode;
 
 class ObservationEdge {
 public:
+    friend class TextSerializer;
+
     ObservationEdge();
     ObservationEdge(Observation &o, BeliefNode* nxtBelNode);
 
@@ -21,12 +21,10 @@ public:
 
     bool isObs(Observation &o);
     BeliefNode* getNodeChild();
-    void getChildren(std::queue<BeliefNode*> &res);
-    void write(std::ostream &os);
-    void writeNGetChildren(std::ostream &os, std::queue<BeliefNode*> &res);
+    void enqueueChildren(std::queue<BeliefNode*> &queue);
 
 private:
-    Observation vals;
+    Observation obs;
     BeliefNode* child;
 };
 

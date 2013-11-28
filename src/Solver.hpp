@@ -7,19 +7,21 @@
 
 #include "ChangeType.hpp"
 #include "Observation.hpp"
-#include "State.hpp"
 class BeliefNode;
 class BeliefTree;
 class Histories;
 class HistoryEntry;
 class HistorySequence;
 class Model;
+class State;
 class StatePool;
 
 class Solver {
 public:
+    friend class Serializer;
+    friend class TextSerializer;
+
     Solver(Model *model);
-    Solver(Model *model, const char *polFile);
     ~Solver();
     Solver(const Solver&) = delete;
     Solver(Solver&) = delete;
@@ -35,7 +37,6 @@ public:
             std::vector<State> &trajSt, std::vector<long> &trajActId,
             std::vector<Observation> &trajObs, std::vector<double> &trajRew,
             long *actualNSteps, double *totChTime, double *totImpTime);
-    void write(std::ostream &os);
 
 private:
     Model *model;

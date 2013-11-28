@@ -17,17 +17,12 @@ using std::endl;
 using std::map;
 #include <queue>
 using std::queue;
-#include <sstream>
-using std::stringstream;
-#include <string>
-using std::string;
 #include <utility>
 #include <vector>
 using std::vector;
 
 #include "ActionNode.hpp"
 #include "GlobalResources.hpp"
-#include "Histories.hpp"
 #include "HistoryEntry.hpp"
 #include "Observation.hpp"
 #include "StateWrapper.hpp"
@@ -65,43 +60,6 @@ BeliefNode::~BeliefNode() {
     map<long, ActionNode*>::iterator it;
     for (it = actChildren.begin(); it != actChildren.end(); it++) {
         delete it->second;
-    }
-}
-
-void BeliefNode::set(stringstream &sstr, Histories *allHist) {
-    string tmpStr;
-    long seqId, entryId;
-    sstr >> nParticles >> nActChildren >> tmpStr;
-    for (long i = 0; i < nParticles; i++) {
-        sstr >> tmpStr >> seqId >> entryId >> tmpStr;
-        HistoryEntry *tmpHistEntry = allHist->getHistoryEntry(seqId, entryId);
-        tmpHistEntry->setBelNode(this);
-        particles.push_back(tmpHistEntry);
-    }
-}
-
-void BeliefNode::setAct(string str, vector<BeliefNode*> &tmpNodes) {
-    stringstream sstr(str);
-    string tmpStr;
-    Observation o;
-    long actId, nActParticles, nObs, nxtNodeId;
-    double qVal, qValAvg;
-    sstr >> tmpStr >> actId >> nActParticles >> qVal >> qValAvg >> nObs;
-    actChildren[actId] = new ActionNode(actId, nActParticles, qVal, qValAvg);
-    for (long i = 0; i < nObs; i++) {
-        sstr >> tmpStr >> tmpStr >> tmpStr;
-        o.clear();
-        while (tmpStr != ")") {
-            o.push_back(atof(tmpStr.c_str()));
-            sstr >> tmpStr;
-        }
-        sstr >> nxtNodeId;
-        BeliefNode* nxtNode = tmpNodes[nxtNodeId];
-        if (nxtNode == nullptr) {
-            nxtNode = new BeliefNode(nxtNodeId);
-            tmpNodes[nxtNodeId] = nxtNode;
-        }
-        actChildren[actId]->addChild(o, nxtNode);
     }
 }
 
@@ -237,10 +195,10 @@ BeliefNode* BeliefNode::getChild(long actIdx, Observation &obs) {
     return actChildren[actIdx]->getObsChild(obs);
 }
 
-void BeliefNode::getChildren(queue<BeliefNode*> &res) {
+void BeliefNode::enqueueChildren(queue<BeliefNode*> &res) {
     map<long, ActionNode*>::iterator itAct;
     for (itAct = actChildren.begin(); itAct != actChildren.end(); itAct++) {
-        itAct->second->getChildren(res);
+        itAct->second->enqueueChildren(res);
     }
 }
 
@@ -261,21 +219,4 @@ double BeliefNode::distL1Independent(BeliefNode *b) {
 long BeliefNode::getNxtActToTry() {
     nxtActToTry++;
     return nxtActToTry;
-}
-
-void BeliefNode::write(ostream &os) {
-    os << "Node " << id << " " << nParticles << " " << nActChildren << " : ";
-    vector<HistoryEntry*>::iterator it;
-    for (it = particles.begin(); it != particles.end(); it++) {
-        os << "( " << (*it)->getSeqId() << " " << (*it)->getId() << " ) ";
-    }
-    os << endl;
-}
-
-void BeliefNode::writeNGetChildren(ostream &os, queue<BeliefNode*> &res) {
-    write(os);
-    map<long, ActionNode*>::iterator itAct;
-    for (itAct = actChildren.begin(); itAct != actChildren.end(); itAct++) {
-        itAct->second->writeNGetChildren(os, res);
-    }
 }

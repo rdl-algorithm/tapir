@@ -1,8 +1,6 @@
 #ifndef HISTORYENTRY_HPP
 #define HISTORYENTRY_HPP
 
-#include <iosfwd>
-
 #include "Observation.hpp"
 class BeliefNode;
 class StateWrapper;

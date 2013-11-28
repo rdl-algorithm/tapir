@@ -2,14 +2,12 @@
 #define STATEWRAPPER_HPP
 
 #include <set>
-#include <string>
 #include <vector>
 
 #include "ChangeType.hpp"
 #include "State.hpp"
 class BeliefNode;
 class HistoryEntry;
-class TextSerializer;
 
 class StateWrapper {
 public:

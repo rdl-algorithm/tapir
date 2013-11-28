@@ -1,8 +1,5 @@
 #include "ActionNode.hpp"
 
-#include <ostream>
-using std::endl;
-using std::ostream;
 #include <queue>
 using std::queue;
 #include <vector>
@@ -11,6 +8,10 @@ using std::vector;
 #include "Observation.hpp"
 #include "ObservationEdge.hpp"
 class BeliefNode;
+
+ActionNode::ActionNode() :
+            ActionNode(-1, 0, 0.0, 0.0) {
+}
 
 ActionNode::ActionNode(long actId, Observation &obs, BeliefNode* nxtBelNode) :
             ActionNode(actId, 1, 0.0, 0.0) {
@@ -57,18 +58,16 @@ void ActionNode::updateQVal(double prevVal, double newVal,
     //cerr << " become " << qVal << " " << avgQVal << endl;
 }
 
-void ActionNode::delParticle(double delVal) {
-    qVal = qVal - delVal;
-    nParticles--;
-    avgQVal = qVal / (double) nParticles;
-}
-
 bool ActionNode::isAct(long aIdx) {
     if (aIdx == actId) {
         return true;
     } else {
         return false;
     }
+}
+
+void ActionNode::addChild(ObservationEdge *edge) {
+    obsChildren.push_back(edge);
 }
 
 void ActionNode::addChild(Observation &obs, BeliefNode* nxtBelNode) {
@@ -85,23 +84,9 @@ BeliefNode* ActionNode::getObsChild(Observation &obs) {
     return nullptr;
 }
 
-void ActionNode::getChildren(queue<BeliefNode*> &res) {
+void ActionNode::enqueueChildren(queue<BeliefNode*> &res) {
     vector<ObservationEdge*>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
-        (*it)->getChildren(res);
+        (*it)->enqueueChildren(res);
     }
-}
-
-void ActionNode::write(ostream &os) {
-    os << "A " << actId << " " << nParticles << " " << qVal << " " << avgQVal
-            << " " << obsChildren.size() << " ";
-}
-
-void ActionNode::writeNGetChildren(ostream &os, queue<BeliefNode*> &res) {
-    write(os);
-    vector<ObservationEdge*>::iterator it;
-    for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
-        (*it)->writeNGetChildren(os, res);
-    }
-    os << endl;
 }

@@ -20,9 +20,10 @@ namespace po = boost::program_options;
 #include "GlobalResources.hpp"
 #include "Model.hpp"
 #include "ProgramOptions.hpp"
+#include "Serializer.hpp"
 #include "Solver.hpp"
 
-template<typename ModelType>
+template<typename ModelType, typename SerializerType>
 int solve(int argc, const char* argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
@@ -67,7 +68,8 @@ int solve(int argc, const char* argv[], ProgramOptions *options) {
 
     ofstream os;
     os.open(polPath.c_str());
-    solver->write(os);
+    Serializer *serializer = new SerializerType(solver);
+    serializer->save(os);
     os.close();
 
     cout << "SolvingTime: " << totT << endl;

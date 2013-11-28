@@ -8,7 +8,6 @@
 #include "ChangeType.hpp"
 #include "State.hpp"
 #include "StateWrapper.hpp"
-class Model;
 
 struct CompStVals {
     bool operator()(const StateWrapper* s1, const StateWrapper* s2) const {
@@ -18,8 +17,8 @@ struct CompStVals {
         //cout << "s1Size: " << s1Vals.size() << " " << s2Vals.size() << endl;
         //cout << "compare: ( " << s1Vals[0] << " " << s1Vals[1] << " ) ( " << s2Vals[0] << " " << s2Vals[1] << ")\n";
         std::vector<double>::iterator it1, it2;
-        for (it1 = state1.vals.begin(), it2 = state2.vals.begin(); it1 != state1.vals.end();
-                it1++, it2++) {
+        for (it1 = state1.vals.begin(), it2 = state2.vals.begin();
+                it1 != state1.vals.end(); it1++, it2++) {
             //cout << "it1: " << *it1 << " it2: " << *it2 << " min: " << *it1 - *it2 << endl;
             if (*it1 - *it2 < 0) {
                 return true;
@@ -53,7 +52,7 @@ public:
     StatePool &operator=(const StatePool&) = delete;
     StatePool &operator=(StatePool&) = delete;
 
-    void clear();
+    void reset();
     StateWrapper* add(State &sVals);
     StateWrapper* getStateById(long stId);
     void identifyAffectedStates(State &lowLeft, State &upRight,

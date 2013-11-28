@@ -1,14 +1,10 @@
 #ifndef HISTORIES_HPP
 #define HISTORIES_HPP
 
-#include <iosfwd>
 #include <vector>
 
 #include "HistorySequence.hpp"
 class HistoryEntry;
-class StatePool;
-class StateWrapper;
-class TextSerializer;
 
 class Histories {
 public:
@@ -22,7 +18,7 @@ public:
     Histories &operator=(const Histories&) = delete;
     Histories &operator=(Histories&) = delete;
 
-    void clear();
+    void reset();
 
     void add(HistorySequence *histSeq) {
         allHistSeq.push_back(histSeq);

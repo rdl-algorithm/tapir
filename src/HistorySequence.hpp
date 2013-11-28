@@ -6,8 +6,8 @@
 
 #include "ChangeType.hpp"
 #include "Observation.hpp"
-#include "State.hpp"
 class HistoryEntry;
+class State;
 class StateWrapper;
 
 class HistorySequence {

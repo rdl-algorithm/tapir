@@ -2,20 +2,17 @@
 
 #include <climits>
 
-#include <iostream>
-using std::cerr;
-using std::endl;
-using std::ostream;
 #include <vector>
 using std::vector;
 
 #include "HistoryEntry.hpp"
+#include "State.hpp"
 #include "StateWrapper.hpp"
-#include "TextSerializer.hpp"
 
 long HistorySequence::currId = 0;
 
-HistorySequence::HistorySequence() : HistorySequence(0) {
+HistorySequence::HistorySequence() :
+            HistorySequence(0) {
 }
 
 HistorySequence::HistorySequence(long startDepth) :
@@ -29,7 +26,7 @@ HistorySequence::HistorySequence(long startDepth) :
 }
 
 HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
-        HistorySequence(startDepth) {
+            HistorySequence(startDepth) {
     startEntry->setSeqId(id);
     histSeq.push_back(startEntry);
 }

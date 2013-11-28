@@ -6,7 +6,7 @@
 
 #include "ChangeType.hpp"
 #include "Observation.hpp"
-#include "State.hpp"
+class State;
 
 class Model {
 public:

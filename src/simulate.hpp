@@ -6,6 +6,7 @@ using std::clock;
 using std::clock_t;
 
 #include <fstream>
+using std::ifstream;
 using std::ofstream;
 #include <iostream>
 using std::cerr;
@@ -23,10 +24,11 @@ namespace po = boost::program_options;
 #include "Model.hpp"
 #include "Observation.hpp"
 #include "ProgramOptions.hpp"
+#include "Serializer.hpp"
 #include "Solver.hpp"
 #include "State.hpp"
 
-template<typename ModelType>
+template<typename ModelType, typename SerializerType>
 int simulate(int argc, const char* argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
@@ -73,8 +75,17 @@ int simulate(int argc, const char* argv[], ProgramOptions *options) {
     cerr << "Seed: " << seed << endl;
     GlobalResources::seed(seed);
 
+    ifstream inFile;
+    inFile.open(polPath);
+    if (!inFile.is_open()) {
+        cerr << "Failed to open " << polPath << endl;
+        return 1;
+    }
     Model* model = new ModelType(vm);
-    Solver* solver = new Solver(model, polPath.c_str());
+    Solver *solver = new Solver(model);
+    Serializer *serializer = new SerializerType(solver);
+    serializer->load(inFile);
+    inFile.close();
 
     vector<long> modelCh;
     if (hasChanges) {

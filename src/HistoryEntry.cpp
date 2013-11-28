@@ -3,21 +3,11 @@
 #include <cstdlib>
 using std::atof;
 
-#include <ostream>
-using std::endl;
-using std::ostream;
-#include <string>
-using std::string;
-#include <sstream>
-using std::stringstream;
 #include <vector>
 using std::vector;
 
-#include "StateWrapper.hpp"
-#include "TextSerializer.hpp"
-
 HistoryEntry::HistoryEntry() :
-        HistoryEntry(nullptr, 0, 0) {
+            HistoryEntry(nullptr, 0, 0) {
 }
 
 HistoryEntry::HistoryEntry(StateWrapper *st) :

@@ -7,12 +7,8 @@ using std::abs;
 using std::find;
 #include <set>
 using std::set;
-#include <string>
-using std::string;
 #include <vector>
 using std::vector;
-
-#include "TextSerializer.hpp"
 
 long StateWrapper::currId = 0;
 
@@ -45,7 +41,8 @@ void StateWrapper::addInfo(BeliefNode *b) {
 double StateWrapper::distL1(StateWrapper *st) {
     vector<double>::iterator it1, it2;
     double distUse = 0.0;
-    for (it1 = state.vals.begin(), it2 = st->state.vals.begin(); it1 != state.vals.end(); it1++, it2++) {
+    for (it1 = state.vals.begin(), it2 = st->state.vals.begin();
+            it1 != state.vals.end(); it1++, it2++) {
         distUse = distUse + abs(*it1 - *it2);
     }
     return distUse;
