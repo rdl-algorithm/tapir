@@ -1,12 +1,10 @@
 #ifndef SOLVER_HPP
 #define SOLVER_HPP
 
-#include <ostream>
-#include <vector>
-#include <set>
-
-#include "ChangeType.hpp"
-#include "Observation.hpp"
+#include <set>                          // for set
+#include <vector>                       // for vector
+#include "ChangeType.hpp"               // for ChangeType
+#include "Observation.hpp"              // for Observation
 class BeliefNode;
 class BeliefTree;
 class Histories;

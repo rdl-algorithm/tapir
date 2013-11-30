@@ -8,43 +8,23 @@ PROBLEM := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # Directories
 SRCDIR = $(PROBLEM)/src
+
 OUTDIR_RELEASE = $(PROBLEM)/release
-DIRS_RELEASE = $(OUTDIR_RELEASE)/bin $(OUTDIR_RELEASE)/obj
+BINDIR_RELEASE = $(OUTDIR_RELEASE)/bin
+OBJDIR_RELEASE = $(OUTDIR_RELEASE)/obj
+DIRS_RELEASE = $(BINDIR_RELEASE) $(OBJDIR_RELEASE)
+
 OUTDIR_DEBUG = $(PROBLEM)/debug
-DIRS_DEBUG = $(OUTDIR_DEBUG)/bin $(OUTDIR_DEBUG)/obj
-
-# ----------------------------------------------------------------------
-# Compiler & linker
-# ----------------------------------------------------------------------
-
-CC = gcc
-CXX = g++
-LINKER = g++
+BINDIR_DEBUG = $(OUTDIR_DEBUG)/bin
+OBJDIR_DEBUG = $(OUTDIR_DEBUG)/obj
+DIRS_DEBUG = $(BINDIR_DEBUG) $(OBJDIR_DEBUG)
+DIRS_DEBUG = $(BINDIR_DEBUG) $(OBJDIR_DEBUG)
 
 # ----------------------------------------------------------------------
 # Compiler flags
 # ----------------------------------------------------------------------
 
 INCDIRS += -I$(SRCDIR)
-
-CPPFLAGS = -DDISTL1 $(INCDIRS)
-CPPFLAGS_RELEASE =
-CPPFLAGS_DEBUG = -DDEBUG
-
-CXXFLAGS = -Wall -Wextra -Weffc++ -std=c++11
-CXXFLAGS_RELEASE = -frounding-math -O3
-CXXFLAGS_DEBUG = -g -O0
-
-# ----------------------------------------------------------------------
-# Linker flags
-# ----------------------------------------------------------------------
-
-LIBDIRS += -L/usr/lib/x86_64-linux-gnu/
-LDLIBS += -lboost_program_options
-
-LDFLAGS = $(LIBDIRS)
-LDFLAGS_DEBUG = -g
-LDFLAGS_RELEASE =
 
 # ----------------------------------------------------------------------
 # Files
@@ -57,19 +37,19 @@ HDRS := $(wildcard $(SRCDIR)/*.hpp)
 MAIN_SRCS := $(patsubst $(PROBLEM)/%, $(SRCDIR)/%.cpp, $(MAINS))
 PROBLEM_SRCS := $(filter-out $(MAIN_SRCS), $(SRCS))
 
-BINS_RELEASE :=      $(patsubst $(PROBLEM)/%, $(OUTDIR_RELEASE)/bin/%,   $(MAINS))
-MAIN_OBJS_RELEASE := $(patsubst $(PROBLEM)/%, $(OUTDIR_RELEASE)/obj/%.o, $(MAINS))
-MAIN_DEPS_RELEASE := $(patsubst $(PROBLEM)/%, $(OUTDIR_RELEASE)/obj/%.d, $(MAINS))
-PROBLEM_OBJS_RELEASE := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_RELEASE)/obj/%.o, $(PROBLEM_SRCS))
-PROBLEM_DEPS_RELEASE := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_RELEASE)/obj/%.d, $(PROBLEM_SRCS))
+BINS_RELEASE :=      $(patsubst $(PROBLEM)/%, $(BINDIR_RELEASE)/%,   $(MAINS))
+MAIN_OBJS_RELEASE := $(patsubst $(PROBLEM)/%, $(OBJDIR_RELEASE)/%.o, $(MAINS))
+MAIN_DEPS_RELEASE := $(patsubst $(PROBLEM)/%, $(OBJDIR_RELEASE)/%.d, $(MAINS))
+PROBLEM_OBJS_RELEASE := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR_RELEASE)/%.o, $(PROBLEM_SRCS))
+PROBLEM_DEPS_RELEASE := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR_RELEASE)/%.d, $(PROBLEM_SRCS))
 OBJS_RELEASE := $(MAIN_OBJS_RELEASE) $(PROBLEM_OBJS_RELEASE)
 DEPS_RELEASE := $(MAIN_DEPS_RELEASE) $(PROBLEM_DEPS_RELEASE)
 
-BINS_DEBUG :=      $(patsubst $(PROBLEM)/%, $(OUTDIR_DEBUG)/bin/%,   $(MAINS))
-MAIN_OBJS_DEBUG := $(patsubst $(PROBLEM)/%, $(OUTDIR_DEBUG)/obj/%.o, $(MAINS))
-MAIN_DEPS_DEBUG := $(patsubst $(PROBLEM)/%, $(OUTDIR_DEBUG)/obj/%.d, $(MAINS))
-PROBLEM_OBJS_DEBUG := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_DEBUG)/obj/%.o, $(PROBLEM_SRCS))
-PROBLEM_DEPS_DEBUG := $(patsubst $(SRCDIR)/%.cpp, $(OUTDIR_DEBUG)/obj/%.d, $(PROBLEM_SRCS))
+BINS_DEBUG :=      $(patsubst $(PROBLEM)/%, $(BINDIR_DEBUG)/%,   $(MAINS))
+MAIN_OBJS_DEBUG := $(patsubst $(PROBLEM)/%, $(OBJDIR_DEBUG)/%.o, $(MAINS))
+MAIN_DEPS_DEBUG := $(patsubst $(PROBLEM)/%, $(OBJDIR_DEBUG)/%.d, $(MAINS))
+PROBLEM_OBJS_DEBUG := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR_DEBUG)/%.o, $(PROBLEM_SRCS))
+PROBLEM_DEPS_DEBUG := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR_DEBUG)/%.d, $(PROBLEM_SRCS))
 OBJS_DEBUG := $(MAIN_OBJS_DEBUG) $(PROBLEM_OBJS_DEBUG)
 DEPS_DEBUG := $(MAIN_DEPS_DEBUG) $(PROBLEM_DEPS_DEBUG)
 
@@ -86,7 +66,7 @@ include $(PROBLEM)/../../Makefile.common
 all: release
 
 .PHONY: clean
-clean: clean-release clean-debug
+clean: clean-release clean-debug clean-iwyu
 
 .PHONY: release
 release: CPPFLAGS += $(CPPFLAGS_RELEASE)
@@ -114,23 +94,25 @@ clean-debug:
 	rm -f $(OBJS_DEBUG) $(DEPS_DEBUG)
 	rm -f $(SOLVER_OBJS_RELEASE) $(SOLVER_DEPS_RELEASE)
 
-$(OUTDIR_RELEASE)/bin/%: $(OUTDIR_RELEASE)/obj/%.o $(SOLVER_OBJS_RELEASE) $(PROBLEM_OBJS_RELEASE)
-	$(LINKER) $(LDFLAGS) $^ $(LDLIBS) -o $@
-$(OUTDIR_DEBUG)/bin/%: $(OUTDIR_DEBUG)/obj/%.o $(SOLVER_OBJS_DEBUG) $(PROBLEM_OBJS_DEBUG)
-	$(LINKER) $(LDFLAGS) $^ $(LDLIBS) -o $@
+$(BINDIR_RELEASE)/%: $(OBJDIR_RELEASE)/%.o $(SOLVER_OBJS_RELEASE) $(PROBLEM_OBJS_RELEASE)
+	$(LINK_RECIPE)
+$(BINDIR_DEBUG)/%: $(OBJDIR_DEBUG)/%.o $(SOLVER_OBJS_DEBUG) $(PROBLEM_OBJS_DEBUG)
+	$(LINK_RECIPE)
 
-$(BINS_RELEASE): | $(OUTDIR_RELEASE)/bin
-$(OBJS_RELEASE): | $(OUTDIR_RELEASE)/obj
+$(OBJDIR_RELEASE)/%.o $(OBJDIR_DEBUG)/%.o: $(SRCDIR)/%.cpp
+	$(COMPILE_RECIPE)
+
+# Rules for making directories
+$(BINS_RELEASE): | $(BINDIR_RELEASE)
+$(OBJS_RELEASE): | $(OBJDIR_RELEASE)
 $(DIRS_RELEASE): | $(OUTDIR_RELEASE)
-$(BINS_DEBUG): | $(OUTDIR_DEBUG)/bin
-$(OBJS_DEBUG): | $(OUTDIR_DEBUG)/obj
+$(BINS_DEBUG): | $(BINDIR_DEBUG)
+$(OBJS_DEBUG): | $(OBJDIR_DEBUG)
 $(DIRS_DEBUG): | $(OUTDIR_DEBUG)
 $(DIRS_RELEASE) $(DIRS_DEBUG) $(OUTDIR_RELEASE) $(OUTDIR_DEBUG):
-	mkdir -p $@
+	$(MKDIR_RECIPE)
 
-$(OUTDIR_RELEASE)/obj/%.o $(OUTDIR_DEBUG)/obj/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MD -c $< -o $@
-
+# Inclusion of automatic dependencies
 -include $(MAIN_DEPS_RELEASE) $(PROBLEM_DEPS_RELEASE) $(SOLVER_DEPS_RELEASE)
 -include $(MAIN_DEPS_DEBUG) $(PROBLEM_DEPS_DEBUG) $(SOLVER_DEPS_DEBUG)
 
@@ -146,9 +128,9 @@ HDRS_LONE := $(filter-out $(HDRS_PAIRED), $(HDRS))
 IWYU_PAIRED := $(patsubst $(SRCDIR)/%.cpp, $(DIR_IWYU)/%.cpp.iwyu, $(SRCS_PAIRED))
 IWYU_LONE := $(patsubst $(SRCDIR)/%pp, $(DIR_IWYU)/%pp.iwyu, $(SRCS_LONE) $(HDRS_LONE))
 IWYU := $(IWYU_PAIRED) $(IWYU_LONE)
-IWYU_FIX := $(addsuffix .FIX, $(IWYU))
+IWYU_FIX := $(addsuffix .FIXED, $(IWYU))
 
-.PHONY: iwyu-fix $(IWYU_FIX)
+.PHONY: iwyu-fix
 iwyu-fix: $(IWYU_FIX)
 
 .PHONY: iwyu
@@ -156,18 +138,18 @@ iwyu: $(IWYU)
 
 .PHONY: clean-iwyu
 clean-iwyu:
-	rm -f $(IWYU)
+	rm -f $(IWYU) $(IWYU_FIX)
 
+$(IWYU_PAIRED) : $(DIR_IWYU)/%.cpp.iwyu: $(SRCDIR)/%.cpp $(SRCDIR)/%.hpp $(IWYU_MAPPING_FILE)
+	$(IWYU_RECIPE)
+$(IWYU_LONE) : $(DIR_IWYU)/%pp.iwyu: $(SRCDIR)/%pp $(IWYU_MAPPING_FILE)
+	$(IWYU_RECIPE)
+$(IWYU_FIX): %.FIXED : %
+	$(IWYU_FIX_RECIPE)
+
+# Folder structure
 $(IWYU) : | $(DIR_IWYU)
 $(DIR_IWYU):
-	mkdir -p $@
-
-$(IWYU_PAIRED) : $(DIR_IWYU)/%.cpp.iwyu: $(SRCDIR)/%.cpp $(SRCDIR)/%.hpp
-	include-what-you-use -Xiwyu --verbose=3 $(CPPFLAGS) $(CXXFLAGS) $< > $@ 2>&1 || exit 0
-$(IWYU_LONE) : $(DIR_IWYU)/%pp.iwyu: $(SRCDIR)/%pp
-	include-what-you-use -Xiwyu --verbose=3 $(CPPFLAGS) $(CXXFLAGS) $< > $@ 2>&1 || exit 0
-
-$(IWYU_FIX): %.FIX : %
-	fix-includes --nosafe_headers --comments $(INCDIRS) < $< || exit 0
+	$(MKDIR_RECIPE)
 
 # DO NOT DELETE

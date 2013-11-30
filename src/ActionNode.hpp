@@ -1,11 +1,9 @@
 #ifndef ACTIONNODE_HPP
 #define ACTIONNODE_HPP
 
-#include <cstdlib>
-#include <queue>
-#include <vector>
-
-#include "Observation.hpp"
+#include <queue>                        // for queue
+#include <vector>                       // for vector
+#include "Observation.hpp"              // for Observation
 class BeliefNode;
 class ObservationEdge;
 

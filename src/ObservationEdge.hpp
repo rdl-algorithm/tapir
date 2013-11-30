@@ -1,9 +1,8 @@
 #ifndef OBSERVATIONEDGE_HPP
 #define OBSERVATIONEDGE_HPP
 
-#include <queue>
-
-#include "Observation.hpp"
+#include <queue>                        // for queue
+#include "Observation.hpp"              // for Observation
 class BeliefNode;
 
 class ObservationEdge {

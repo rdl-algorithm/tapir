@@ -1,8 +1,10 @@
 #ifndef STATE_HPP
 #define STATE_HPP
 
-#include <ostream>
-#include <vector>
+#include <cstddef>                      // for size_t
+#include <ostream>                      // for operator<<, basic_ostream<>::__ostream_type
+#include <vector>                       // for vector, operator<, vector<>::iterator
+using std::size_t;
 
 class State {
 public:
@@ -10,7 +12,7 @@ public:
                 vals() {
     }
 
-    State(std::size_t nVals) :
+    State(size_t nVals) :
                 vals(nVals) {
     }
 

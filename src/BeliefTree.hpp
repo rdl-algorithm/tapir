@@ -1,8 +1,7 @@
 #ifndef BELIEFTREE_HPP
 #define BELIEFTREE_HPP
 
-#include <vector>
-
+#include <vector>                       // for vector
 class BeliefNode;
 
 class BeliefTree {

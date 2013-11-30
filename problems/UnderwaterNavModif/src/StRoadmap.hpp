@@ -1,13 +1,11 @@
 #ifndef STROADMAP_HPP
 #define STROADMAP_HPP
 
-#include <map>
-#include <iosfwd>
-#include <utility>
-#include <vector>
-
-#include "State.hpp"
-
+#include <map>                          // for map
+#include <ostream>                      // for ostream
+#include <utility>                      // for pair
+#include <vector>                       // for vector
+#include "State.hpp"                    // for State
 class StRoadmap {
 public:
     StRoadmap(std::vector<State> &goals, long nVerts, long nGoalsSamp,

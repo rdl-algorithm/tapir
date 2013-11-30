@@ -1,11 +1,10 @@
 #ifndef STATEWRAPPER_HPP
 #define STATEWRAPPER_HPP
 
-#include <set>
-#include <vector>
-
-#include "ChangeType.hpp"
-#include "State.hpp"
+#include <set>                          // for set
+#include <vector>                       // for vector
+#include "ChangeType.hpp"               // for ChangeType
+#include "State.hpp"                    // for State
 class BeliefNode;
 class HistoryEntry;
 

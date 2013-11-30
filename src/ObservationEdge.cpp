@@ -1,13 +1,9 @@
 #include "ObservationEdge.hpp"
 
-#include <cmath>
-using std::abs;
-
-#include <queue>
-using std::queue;
-#include <vector>
-using std::vector;
-
+#include <cmath>                        // for abs
+#include <queue>                        // for queue
+#include <vector>                       // for vector, vector<>::iterator
+#include "Observation.hpp"              // for Observation
 class BeliefNode;
 
 ObservationEdge::ObservationEdge() :
@@ -21,10 +17,10 @@ ObservationEdge::ObservationEdge(Observation &o, BeliefNode* nxtBelNode) :
 }
 
 bool ObservationEdge::isObs(Observation &o) {
-    vector<double>::iterator thisObs, otherObs;
+    std::vector<double>::iterator thisObs, otherObs;
     for (thisObs = obs.begin(), otherObs = o.begin(); thisObs != obs.end();
             thisObs++, otherObs++) {
-        if (abs(*thisObs - *otherObs) > 1e-7) {
+        if (std::abs(*thisObs - *otherObs) > 1e-7) {
             return false;
         }
     }
@@ -35,6 +31,6 @@ BeliefNode* ObservationEdge::getNodeChild() {
     return child;
 }
 
-void ObservationEdge::enqueueChildren(queue<BeliefNode*> &queue) {
+void ObservationEdge::enqueueChildren(std::queue<BeliefNode*> &queue) {
     queue.push(child);
 }

@@ -1,14 +1,12 @@
 #ifndef STATEPOOL_HPP
 #define STATEPOOL_HPP
 
-#include <map>
-#include <set>
-#include <vector>
-
-#include "ChangeType.hpp"
-#include "State.hpp"
-#include "StateWrapper.hpp"
-
+#include <map>                          // for multimap
+#include <set>                          // for set
+#include <vector>                       // for vector, vector<>::iterator
+#include "ChangeType.hpp"               // for ChangeType
+#include "State.hpp"                    // for State
+#include "StateWrapper.hpp"             // for StateWrapper
 struct CompStVals {
     bool operator()(const StateWrapper* s1, const StateWrapper* s2) const {
         State state1, state2;

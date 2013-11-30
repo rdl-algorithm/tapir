@@ -1,19 +1,20 @@
 #ifndef TAGMODEL_HPP
 #define TAGMODEL_HPP
 
-#include <cstdlib>
+#include <cstdlib>                      // for abs
 
-#include <iomanip>
-#include <ostream>
-#include <string>
-#include <vector>
+#include <iomanip>                      // for operator<<, setw
+#include <ostream>                      // for operator<<, ostream, basic_ostream, basic_ostream::operator<<, basic_ostream<>::__ostream_type
+#include <string>                       // for string
+#include <vector>                       // for vector
 
-#include "ChangeType.hpp"
-#include "Model.hpp"
-#include "Observation.hpp"
-#include "State.hpp"
+#include <boost/program_options.hpp>    // for program_options, variables_map
 
-#include <boost/program_options.hpp>
+#include "ChangeType.hpp"               // for ChangeType
+#include "Model.hpp"                    // for Model
+#include "Observation.hpp"              // for Observation
+#include "State.hpp"                    // for State
+
 namespace po = boost::program_options;
 
 struct Coords {

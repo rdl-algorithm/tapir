@@ -1,27 +1,21 @@
 #ifndef SOLVE_HPP
 #define SOLVE_HPP
 
-#include <ctime>
-using std::clock;
-using std::clock_t;
-
-#include <fstream>
-using std::ofstream;
-#include <iostream>
+#include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
+#include <fstream>                      // for basic_ofstream, ofstream
+#include <iostream>                     // for operator<<, endl, ostream, cout, basic_ostream, basic_ostream<>::__ostream_type, cerr
+#include <string>                       // for string
+#include <boost/program_options.hpp>    // for variables_map, options_description, etc.
+#include "GlobalResources.hpp"          // for GlobalResources
+#include "Model.hpp"                    // for Model
+#include "ProgramOptions.hpp"           // for ProgramOptions
+#include "Serializer.hpp"               // for Serializer
+#include "Solver.hpp"                   // for Solver
 using std::cerr;
 using std::cout;
 using std::endl;
-#include <string>
 using std::string;
-
-#include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-#include "GlobalResources.hpp"
-#include "Model.hpp"
-#include "ProgramOptions.hpp"
-#include "Serializer.hpp"
-#include "Solver.hpp"
 
 template<typename ModelType, typename SerializerType>
 int solve(int argc, const char* argv[], ProgramOptions *options) {
@@ -61,12 +55,12 @@ int solve(int argc, const char* argv[], ProgramOptions *options) {
     Solver* solver = new Solver(model);
 
     double totT;
-    clock_t tStart;
-    tStart = clock();
+    std::clock_t tStart;
+    tStart = std::clock();
     solver->genPol(model->getMaxTrials(), model->getDepthTh());
-    totT = (clock() - tStart) * 1000 / CLOCKS_PER_SEC;
+    totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
-    ofstream os;
+    std::ofstream os;
     os.open(polPath.c_str());
     Serializer *serializer = new SerializerType(solver);
     serializer->save(os);

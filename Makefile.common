@@ -9,14 +9,63 @@ ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 SOLVER_SRCDIR := $(ROOT)/src
 SOLVER_OUTDIR_RELEASE := $(ROOT)/release
 SOLVER_OUTDIR_DEBUG := $(ROOT)/debug
-SOLVER_DIRS_RELEASE := $(SOLVER_OUTDIR_RELEASE)/obj
-SOLVER_DIRS_DEBUG := $(SOLVER_OUTDIR_DEBUG)/obj
+SOLVER_OBJDIR_RELEASE := $(SOLVER_OUTDIR_RELEASE)/obj
+SOLVER_OBJDIR_DEBUG := $(SOLVER_OUTDIR_DEBUG)/obj
+SOLVER_DIRS_RELEASE := $(SOLVER_OBJDIR_RELEASE)
+SOLVER_DIRS_DEBUG := $(SOLVER_OBJDIR_DEBUG)
+
+# ----------------------------------------------------------------------
+# Compiler & linker
+# ----------------------------------------------------------------------
+
+CC = clang
+CXX = clang++
+
+# ----------------------------------------------------------------------
+# Compiler flags
+# ----------------------------------------------------------------------
 
 # Standard include directories.
 INCDIRS += -I$(SOLVER_SRCDIR)
+
+override CPPFLAGS += -DDISTL1 $(INCDIRS)
+CPPFLAGS_RELEASE +=
+CPPFLAGS_DEBUG += -DDEBUG
+
+CXXFLAGS_BASE = -std=c++11
+CXXFLAGS_RELEASE += -O3
+CXXFLAGS_DEBUG += -g -O0
+ifeq ($(CXX), g++)
+	CXXFLAGS_RELEASE += -frounding-math
+    override WARN += -Wall -Wextra -Weffc++
+else
+    override WARN += -Weverything -Wno-c++98-compat
+endif
+override CXXFLAGS += $(CXXFLAGS_BASE) $(WARN)
+
+# ----------------------------------------------------------------------
+# Linker flags
+# ----------------------------------------------------------------------
+
 # Required libraries.
-LIBDIRS +=
-LDLIBS +=
+LIBDIRS += -L/usr/lib/x86_64-linux-gnu/
+LDLIBS += -lboost_program_options
+
+LDFLAGS = $(LIBDIRS)
+LDFLAGS_DEBUG = -g
+LDFLAGS_RELEASE =
+
+# ----------------------------------------------------------------------
+# IWYU Configuration
+# ----------------------------------------------------------------------
+
+IWYU_MAPPING_FILE = $(ROOT)/mappings.imp
+IWYU_CMD = include-what-you-use
+IWYU_FLAGS = -Xiwyu --mapping_file=$(IWYU_MAPPING_FILE) -Xiwyu --verbose=3
+IWYU_FLAGS += $(CPPFLAGS) $(CXXFLAGS_BASE)
+IWYU_FIX_CMD = fix-includes
+IWYU_FIX_FLAGS = --separate_project_includes --separate_c_cxx
+IWYU_FIX_FLAGS += --nosafe_headers --comments $(INCDIRS)
 
 # ----------------------------------------------------------------------
 # Files
@@ -24,21 +73,30 @@ LDLIBS +=
 
 SOLVER_SRCS := $(wildcard $(SOLVER_SRCDIR)/*.cpp)
 SOLVER_HDRS := $(wildcard $(SOLVER_SRCDIR)/*.hpp)
-SOLVER_OBJS_RELEASE := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_RELEASE)/obj/%.o, $(SOLVER_SRCS))
-SOLVER_DEPS_RELEASE := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_RELEASE)/obj/%.d, $(SOLVER_SRCS))
-SOLVER_OBJS_DEBUG := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_DEBUG)/obj/%.o, $(SOLVER_SRCS))
-SOLVER_DEPS_DEBUG := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_DEBUG)/obj/%.d, $(SOLVER_SRCS))
+SOLVER_OBJS_RELEASE := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OBJDIR_RELEASE)/%.o, $(SOLVER_SRCS))
+SOLVER_DEPS_RELEASE := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OBJDIR_RELEASE)/%.d, $(SOLVER_SRCS))
+SOLVER_OBJS_DEBUG := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OBJDIR_DEBUG)/%.o, $(SOLVER_SRCS))
+SOLVER_DEPS_DEBUG := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OBJDIR_DEBUG)/%.d, $(SOLVER_SRCS))
 
 # ----------------------------------------------------------------------
 # Targets
 # ----------------------------------------------------------------------
 
-$(SOLVER_OBJS_RELEASE): | $(SOLVER_OUTDIR_RELEASE)/obj
+# General-purpose compilation rules!
+COMPILE_RECIPE = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $< -o $@
+LINK_RECIPE = $(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+IWYU_RECIPE = $(IWYU_CMD) $(IWYU_FLAGS) $< 2>&1 | tee $@
+IWYU_FIX_RECIPE = $(IWYU_FIX_CMD) $(IWYU_FIX_FLAGS) < $< 2>&1 | tee $@
+MKDIR_RECIPE = mkdir -p $@
+
+# Specifies the correspondence between the .o and .cpp files
+$(SOLVER_OBJDIR_RELEASE)/%.o $(SOLVER_OBJDIR_DEBUG)/%.o: $(SOLVER_SRCDIR)/%.cpp
+	$(COMPILE_RECIPE)
+
+# Folder structure recipes
+$(SOLVER_OBJS_RELEASE): | $(SOLVER_OBJDIR_RELEASE)
 $(SOLVER_DIRS_RELEASE): | $(SOLVER_OUTDIR_RELEASE)
-$(SOLVER_OBJS_DEBUG): | $(SOLVER_OUTDIR_DEBUG)/obj
+$(SOLVER_OBJS_DEBUG): | $(SOLVER_OBJDIR_DEBUG)
 $(SOLVER_DIRS_DEBUG): | $(SOLVER_OUTDIR_DEBUG)
 $(SOLVER_DIRS_RELEASE) $(SOLVER_OUTDIR_RELEASE) $(SOLVER_DIRS_DEBUG) $(SOLVER_OUTDIR_DEBUG):
-	mkdir -p $@
-
-$(SOLVER_OUTDIR_RELEASE)/obj/%.o $(SOLVER_OUTDIR_DEBUG)/obj/%.o: $(SOLVER_SRCDIR)/%.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $< -o $@
+	$(MKDIR_RECIPE)

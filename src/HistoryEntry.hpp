@@ -1,7 +1,7 @@
 #ifndef HISTORYENTRY_HPP
 #define HISTORYENTRY_HPP
 
-#include "Observation.hpp"
+#include "Observation.hpp"              // for Observation
 class BeliefNode;
 class StateWrapper;
 

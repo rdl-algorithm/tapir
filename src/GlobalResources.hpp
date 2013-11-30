@@ -1,8 +1,7 @@
 #ifndef GLOBALRESOURCES_HPP
 #define GLOBALRESOURCES_HPP
 
-#include <random>
-
+#include <random>                       // for default_random_engine, uniform_int_distribution, uniform_real_distribution
 class GlobalResources {
 public:
     static std::default_random_engine randGen;

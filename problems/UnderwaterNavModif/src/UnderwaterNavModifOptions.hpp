@@ -1,12 +1,11 @@
 #ifndef UNDERWATERNAVMODIFOPTIONS_HPP
 #define UNDERWATERNAVMODIFOPTIONS_HPP
 
-#include <string>
-
-#include <boost/program_options.hpp>
+#include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
+#include <string>                       // for string
+#include <boost/program_options.hpp>    // for value, options_description_easy_init, typed_value, options_description
+#include "ProgramOptions.hpp"           // for ProgramOptions
 namespace po = boost::program_options;
-
-#include "ProgramOptions.hpp"
 
 class UnderwaterNavModifOptions: public ProgramOptions {
     /** Returns configurations options for the UnderwaterNavModif POMDP */

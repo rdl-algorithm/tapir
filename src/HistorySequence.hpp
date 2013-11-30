@@ -1,11 +1,9 @@
 #ifndef HISTORYSEQUENCE_HPP
 #define HISTORYSEQUENCE_HPP
 
-#include <ostream>
-#include <vector>
-
-#include "ChangeType.hpp"
-#include "Observation.hpp"
+#include <vector>                       // for vector
+#include "ChangeType.hpp"               // for ChangeType
+#include "Observation.hpp"              // for Observation
 class HistoryEntry;
 class State;
 class StateWrapper;
@@ -34,9 +32,6 @@ public:
     void addEntry(HistoryEntry *histEntry);
 
     void getStValsSeq(std::vector<State> &seqStVals);
-
-    void write(std::ostream &os);
-    void writeln(std::ostream &os);
 
     long getId() {
         return id;

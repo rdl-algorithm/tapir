@@ -1,13 +1,11 @@
 #ifndef BELIEFNODE_HPP
 #define BELIEFNODE_HPP
 
-#include <ctime>
-
-#include <map>
-#include <queue>
-#include <vector>
-
-#include "Observation.hpp"
+#include <ctime>                        // for clock_t
+#include <map>                          // for map
+#include <queue>                        // for queue
+#include <vector>                       // for vector
+#include "Observation.hpp"              // for Observation
 class ActionNode;
 class HistoryEntry;
 

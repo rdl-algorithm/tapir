@@ -1,11 +1,10 @@
 #ifndef MODEL_HPP
 #define MODEL_HPP
 
-#include <iosfwd>
-#include <vector>
-
-#include "ChangeType.hpp"
-#include "Observation.hpp"
+#include <ostream>                      // for ostream
+#include <vector>                       // for vector
+#include "ChangeType.hpp"               // for ChangeType
+#include "Observation.hpp"              // for Observation
 class State;
 
 class Model {

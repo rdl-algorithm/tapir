@@ -1,27 +1,18 @@
 #include "StRoadmap.hpp"
 
-#include <climits>
-#include <cmath>
-using std::fabs;
-using std::floor;
-
-#include <map>
-using std::map;
-using std::multimap;
-#include <ostream>
+#include <climits>                      // for LONG_MAX
+#include <cmath>                        // for fabs, floor
+#include <map>                          // for map, _Rb_tree_iterator, map<>::iterator, map<>::mapped_type, multimap, multimap<>::iterator, __alloc_traits<>::value_type
+#include <ostream>                      // for operator<<, ostream, endl, basic_ostream::operator<<, basic_ostream
+#include <utility>                      // for pair, make_pair
+#include <vector>                       // for vector, vector<>::iterator, vector<>::reference
+#include "GlobalResources.hpp"          // for GlobalResources
+#include "State.hpp"                    // for State
 using std::endl;
-using std::ostream;
-#include <utility>
-using std::make_pair;
-using std::pair;
-#include <vector>
-using std::vector;
 
-#include "GlobalResources.hpp"
-
-StRoadmap::StRoadmap(vector<State> &goals, long maxVerts, long nGoalsSamp,
-        long nTryCon, long maxDistCon, map<long, map<long, short> > &env,
-        long nX, long nY) :
+StRoadmap::StRoadmap(std::vector<State> &goals, long maxVerts, long nGoalsSamp,
+        long nTryCon, long maxDistCon,
+        std::map<long, std::map<long, short> > &env, long nX, long nY) :
             nX(nX),
             nY(nY),
             env(env),
@@ -50,15 +41,15 @@ StRoadmap::StRoadmap(vector<State> &goals, long maxVerts, long nGoalsSamp,
         }
     }
     /*
-     vector<State>::iterator itV;
+     std::vector<State>::iterator itV;
      cerr << "Vertices: (lastGoal "  << lastGoalIdx << ")\n";
      i = 0;
      for (itV = V.begin(); itV != V.end(); itV++, i++) {
      cerr << "v-" << i << " " << (*itV)[0] << " " << (*itV)[1] << endl;
      }
      cerr << "Edges:\n";
-     map< long, vector< pair<long, long> > >::iterator it1;
-     vector< pair<long, long> >::iterator it2;
+     std::map< long, std::vector< std::pair<long, long> > >::iterator it1;
+     std::vector< std::pair<long, long> >::iterator it2;
      for (it1 = outEdges.begin(); it1 != outEdges.end(); it1++) {
      cerr << "From " << it1->first;
      for (it2 = it1->second.begin(); it2 != it1->second.end(); it2++) {
@@ -70,7 +61,7 @@ StRoadmap::StRoadmap(vector<State> &goals, long maxVerts, long nGoalsSamp,
      */
     getDistToGoal();
     /*
-     map<long, long>::iterator itM;
+     std::map<long, long>::iterator itM;
      for (itM = shortestDistToGoal.begin(); itM != shortestDistToGoal.end(); itM++) {
      cerr << "distToGoal From " << itM->first << " cost " << itM->second << endl;
      }
@@ -82,8 +73,8 @@ StRoadmap::~StRoadmap() {
 }
 
 void StRoadmap::setWeight() {
-    map<long, map<long, short> >::iterator itX;
-    map<long, short>::iterator itY;
+    std::map<long, std::map<long, short> >::iterator itX;
+    std::map<long, short>::iterator itY;
     totW = 0;
     long prevX = 0;
     long prevY, pivIdx;
@@ -155,10 +146,11 @@ void StRoadmap::setWeight() {
     }
 }
 
-void StRoadmap::insertGoalMilestones(vector<State> &goals, long nGoalsSamp) {
+void StRoadmap::insertGoalMilestones(std::vector<State> &goals,
+        long nGoalsSamp) {
     long nGoals = goals.size();
     //for (long i = 0; i < nGoalsSamp; i++) {
-    vector<State>::iterator itV;
+    std::vector<State>::iterator itV;
     bool inserted;
     while (nVerts < nGoalsSamp) {
         long rawIdx = GlobalResources::randIntBetween(0, nGoals - 1);
@@ -181,7 +173,7 @@ void StRoadmap::insertGoalMilestones(vector<State> &goals, long nGoalsSamp) {
 }
 
 void StRoadmap::insertMyMilestones() {
-    vector<State> s;
+    std::vector<State> s;
     State st(2);
 
     st[0] = 14;
@@ -203,7 +195,7 @@ void StRoadmap::insertMyMilestones() {
     st[1] = 18;
     s.push_back(st);
 
-    vector<State>::iterator it;
+    std::vector<State>::iterator it;
     for (it = s.begin(); it != s.end(); it++) {
         insertMilestone(*it);
     }
@@ -211,7 +203,7 @@ void StRoadmap::insertMyMilestones() {
 
 void StRoadmap::sampleAMilestone(State &st) {
     long rawIdx = GlobalResources::randIntBetween(1, totW);
-    st[0] = (long) floor(weight[rawIdx] / nY);
+    st[0] = (long) std::floor(weight[rawIdx] / nY);
     st[1] = weight[rawIdx] % nY;
     /*
      if (st[0] >= 35 && st[0] < 39 && st[1] >= 20 && st[1] < 52) {
@@ -224,7 +216,7 @@ void StRoadmap::sampleAMilestone(State &st) {
 
 bool StRoadmap::insertMilestone(State &st) {
     long c, i;
-    vector<State>::iterator itV;
+    std::vector<State>::iterator itV;
     for (itV = V.begin(), i = 0; itV != V.end(); itV++, i++) {
         if ((c = dist(st, *itV)) == 0) {
             return false;
@@ -235,8 +227,8 @@ bool StRoadmap::insertMilestone(State &st) {
     for (itV = V.begin(), i = 0; itV != V.end(); itV++, i++) {
         if (dist(st, *itV) < maxDistCon && nTry < maxTryCon
                 && (c = lineSegOk(st, *itV)) > -1) {
-            outEdges[nVerts].push_back(make_pair(i, c));
-            inEdges[i].push_back(make_pair(nVerts, c));
+            outEdges[nVerts].push_back(std::make_pair(i, c));
+            inEdges[i].push_back(std::make_pair(nVerts, c));
         }
         nTry++;
     }
@@ -246,12 +238,12 @@ bool StRoadmap::insertMilestone(State &st) {
 }
 
 double StRoadmap::dist(State &s1, State &s2) {
-    return (fabs(s2[0] - s1[0]) + fabs(s2[1] - s1[1]));
+    return (std::fabs(s2[0] - s1[0]) + std::fabs(s2[1] - s1[1]));
 }
 
 long StRoadmap::lineSegOk(State &st1, State &st2) {
-    map<long, map<long, short> >::iterator itX;
-    map<long, short>::iterator itY;
+    std::map<long, std::map<long, short> >::iterator itX;
+    std::map<long, short>::iterator itY;
 
     // Move until Y = end Y position, and then move in X direction.
     if ((itX = env.find(st1[0])) == env.end()) {
@@ -265,7 +257,7 @@ long StRoadmap::lineSegOk(State &st1, State &st2) {
                 }
             }
         }
-        return (fabs(st2[0] - st1[0]) + fabs(st2[1] - st1[1]));
+        return (std::fabs(st2[0] - st1[0]) + std::fabs(st2[1] - st1[1]));
     } else {
         for (long y = st1[1]; y < st2[2]; y++) {
             if ((itY = itX->second.find(y)) != itX->second.end()) {
@@ -284,7 +276,7 @@ long StRoadmap::lineSegOk(State &st1, State &st2) {
                 }
             }
         }
-        return (fabs(st2[0] - st1[0]) + fabs(st2[1] - st1[1]));
+        return (std::fabs(st2[0] - st1[0]) + std::fabs(st2[1] - st1[1]));
     }
 
     // Move until Y = end Y position, and then move in X direction.
@@ -299,7 +291,7 @@ long StRoadmap::lineSegOk(State &st1, State &st2) {
                 }
             }
         }
-        return (fabs(st2[0] - st1[0]) + fabs(st2[1] - st1[1]));
+        return (std::fabs(st2[0] - st1[0]) + std::fabs(st2[1] - st1[1]));
     } else {
         for (long y = st1[1]; y < st2[2]; y++) {
             if ((itY = itX->second.find(y)) != itX->second.end()) {
@@ -318,21 +310,21 @@ long StRoadmap::lineSegOk(State &st1, State &st2) {
                 }
             }
         }
-        return (fabs(st2[0] - st1[0]) + fabs(st2[1] - st1[1]));
+        return (std::fabs(st2[0] - st1[0]) + std::fabs(st2[1] - st1[1]));
     }
 }
 
 // Dijkstra shortest path.
 void StRoadmap::getDistToGoal() {
-    vector<pair<long, long> >::iterator itNxt;
+    std::vector<std::pair<long, long> >::iterator itNxt;
     long tmpDist;
 
     // Find shortest path to each goal
-    vector<vector<long> > allDist;
+    std::vector<std::vector<long> > allDist;
     for (long i = 0; i <= lastGoalIdx; i++) {
-        vector<long> dist(nVerts, LONG_MAX);
-        vector<long> prev(nVerts);
-        vector<bool> visited(nVerts, false);
+        std::vector<long> dist(nVerts, LONG_MAX);
+        std::vector<long> prev(nVerts);
+        std::vector<bool> visited(nVerts, false);
 
         for (long j = 0; j <= lastGoalIdx; j++) {
             dist[j] = 0;
@@ -340,10 +332,10 @@ void StRoadmap::getDistToGoal() {
         }
 
         // Iteration
-        multimap<long, long> q;
-        map<long, multimap<long, long>::iterator> ptrToIdx;
+        std::multimap<long, long> q;
+        std::map<long, std::multimap<long, long>::iterator> ptrToIdx;
         for (int j = lastGoalIdx + 1; j < nVerts; j++) {
-            ptrToIdx[j] = q.insert(pair<long, long>(LONG_MAX, j));
+            ptrToIdx[j] = q.insert(std::pair<long, long>(LONG_MAX, j));
         }
         for (int j = 0; j <= lastGoalIdx; j++) {
             ptrToIdx[j] = q.end();
@@ -352,12 +344,12 @@ void StRoadmap::getDistToGoal() {
 //cerr << "About to erase " << itNxt->first << " of v " << i << endl;
             q.erase(ptrToIdx[itNxt->first]);
             ptrToIdx[itNxt->first] = q.insert(
-                    pair<long, long>(itNxt->second, itNxt->first));
+                    std::pair<long, long>(itNxt->second, itNxt->first));
             dist[itNxt->first] = itNxt->second;
             //nxt[itNxt->first] = i;
         }
         long currIdx;
-        multimap<long, long>::iterator itQ;
+        std::multimap<long, long>::iterator itQ;
         while (!q.empty()) {
             itQ = q.begin();
             currIdx = itQ->second;
@@ -368,7 +360,7 @@ void StRoadmap::getDistToGoal() {
                                 < ptrToIdx[itNxt->first]->first) {
                     q.erase(ptrToIdx[itNxt->first]);
                     ptrToIdx[itNxt->first] = q.insert(
-                            pair<long, long>(tmpDist, itNxt->first));
+                            std::pair<long, long>(tmpDist, itNxt->first));
                     dist[itNxt->first] = tmpDist;
                     //nxt[itNxt->first] = currIdx;
                 }
@@ -377,7 +369,7 @@ void StRoadmap::getDistToGoal() {
             q.erase(itQ);
         }
         /*
-         vector<long>::iterator itD;
+         std::vector<long>::iterator itD;
          cerr << "Dist ";
          for (itD = dist.begin(); itD != dist.end(); itD++) {
          cerr << *itD << " ";
@@ -387,8 +379,8 @@ void StRoadmap::getDistToGoal() {
         allDist.push_back(dist);
     }
 
-    vector<vector<long> >::iterator itVecVecL = allDist.begin();
-    vector<long>::iterator itVecL;
+    std::vector<std::vector<long> >::iterator itVecVecL = allDist.begin();
+    std::vector<long>::iterator itVecL;
     for (long i = 0; i < nVerts; i++) {
         shortestDistToGoal[i] = LONG_MAX;
     }
@@ -417,7 +409,7 @@ double StRoadmap::getDistToGoal(State &st) {
     long minIdx = 0;
     long tmpDist;
 
-    map<long, long>::iterator itM;
+    std::map<long, long>::iterator itM;
     for (itM = shortestDistToGoal.begin(); itM != shortestDistToGoal.end();
             itM++) {
         if ((tmpDist = dist(st, V[itM->first])) < minDist) {
@@ -429,13 +421,13 @@ double StRoadmap::getDistToGoal(State &st) {
     return shortestDistToGoal[minIdx];
 }
 
-void StRoadmap::updateRoadmap(map<long, map<long, short> > &env_,
-        vector<State> &goals, long nGoalsSamp) {
+void StRoadmap::updateRoadmap(std::map<long, std::map<long, short> > &env_,
+        std::vector<State> &goals, long nGoalsSamp) {
     env = env_;
 
     V.clear();
     weight.clear();
-    map<long, vector<pair<long, long> > >::iterator itMap;
+    std::map<long, std::vector<std::pair<long, long> > >::iterator itMap;
     for (itMap = outEdges.begin(); itMap != outEdges.end(); itMap++) {
         itMap->second.clear();
     }
@@ -459,7 +451,7 @@ bool StRoadmap::VContains(long x, long y) {
     State st(2);
     st[0] = x;
     st[1] = y;
-    vector<State>::iterator itV;
+    std::vector<State>::iterator itV;
     for (itV = V.begin(); itV != V.end(); itV++) {
         if (dist(st, *itV) == 0) {
             return true;
@@ -468,8 +460,8 @@ bool StRoadmap::VContains(long x, long y) {
     return false;
 }
 
-void StRoadmap::draw(ostream &os) {
-    map<long, map<long, short> >::iterator itCellType;
+void StRoadmap::draw(std::ostream &os) {
+    std::map<long, std::map<long, short> >::iterator itCellType;
     os << endl;
     for (long y = 0; y < nY; y++) {
         for (long x = 0; x < nX; x++) {

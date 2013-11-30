@@ -1,11 +1,9 @@
 #include "ActionNode.hpp"
 
-#include <cstdlib>
-#include <queue>
-#include <vector>
-
-#include "Observation.hpp"
-#include "ObservationEdge.hpp"
+#include <queue>                        // for queue
+#include <vector>                       // for vector, vector<>::iterator
+#include "Observation.hpp"              // for Observation
+#include "ObservationEdge.hpp"          // for ObservationEdge
 class BeliefNode;
 
 ActionNode::ActionNode() :

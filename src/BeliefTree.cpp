@@ -1,12 +1,8 @@
 #include "BeliefTree.hpp"
 
-#include <queue>
-using std::queue;
-#include <vector>
-using std::vector;
-
-#include "BeliefNode.hpp"
-
+#include <queue>                        // for queue
+#include <vector>                       // for vector
+#include "BeliefNode.hpp"               // for BeliefNode
 BeliefTree::BeliefTree() :
             root(new BeliefNode()),
             allNodes() {
@@ -19,7 +15,7 @@ BeliefTree::~BeliefTree() {
 }
 
 void BeliefTree::reset() {
-    queue<BeliefNode*> tmpNodes;
+    std::queue<BeliefNode*> tmpNodes;
     tmpNodes.push(root);
     while (!tmpNodes.empty()) {
         BeliefNode *node = tmpNodes.front();

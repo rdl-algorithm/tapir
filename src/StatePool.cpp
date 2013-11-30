@@ -1,19 +1,13 @@
 #include "StatePool.hpp"
 
-#include <algorithm>
-using std::max;
-using std::set_intersection;
-#include <iterator>
-using std::insert_iterator;
-#include <map>
-using std::multimap;
-#include <set>
-using std::set;
-#include <utility>
-using std::pair;
-#include <vector>
-using std::vector;
-
+#include <algorithm>                    // for max, set_intersection
+#include <iterator>                     // for insert_iterator
+#include <map>                          // for _Rb_tree_const_iterator, multimap, multimap<>::iterator, __alloc_traits<>::value_type, _Rb_tree_iterator
+#include <set>                          // for set, set<>::iterator
+#include <utility>                      // for pair
+#include "ChangeType.hpp"               // for ChangeType
+#include "State.hpp"                    // for State
+#include "StateWrapper.hpp"             // for StateWrapper
 StatePool::StatePool() :
             nStates(0),
             nSDim(-1),
@@ -45,8 +39,8 @@ StateWrapper* StatePool::add(State &sVals) {
         stStruct.resize(nSDim);
     }
     StateWrapper* newSt = new StateWrapper(sVals);
-    pair<set<StateWrapper*, CompStVals>::iterator, bool> ret = allStates.insert(
-            newSt);
+    std::pair<std::set<StateWrapper*, CompStVals>::iterator, bool> ret =
+            allStates.insert(newSt);
     if (ret.second) {
         newSt->setId();
         allStatesIdx.push_back(newSt);
@@ -63,8 +57,8 @@ StateWrapper* StatePool::getStateById(long id) {
 }
 
 void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
-        ChangeType chType, set<StateWrapper*> &allAffectedSt) {
-    multimap<double, StateWrapper*>::iterator start, end, it;
+        ChangeType chType, std::set<StateWrapper*> &allAffectedSt) {
+    std::multimap<double, StateWrapper*>::iterator start, end, it;
     /*
      cerr << "InStPool size of StStruct: " << stStruct.size() << " " << stStruct[0].size() << " low " << lowLeft[0] << " " << upRight[0] << endl;
      for (start = stStruct[0].begin(); start != stStruct[0].end(); start++) {
@@ -79,7 +73,7 @@ void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
      cerr << "StartEndStVals " << start->second->s[0] << " " << start->second->s[1] << " to " <<
      end->second->s[0] << " " << end->second->s[1] << endl;
      */
-    set<StateWrapper*> affectedSt;
+    std::set<StateWrapper*> affectedSt;
     for (it = start; it != end; it++) {
         /*
          if (it->first == 15) {
@@ -93,21 +87,22 @@ void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
     for (long i = 1; i < nSDim; i++) {
         start = stStruct[i].lower_bound(lowLeft.vals[i]);
         end = stStruct[i].lower_bound(upRight.vals[i]);
-        set<StateWrapper*> posAffectedSt, tmpSet;
+        std::set<StateWrapper*> posAffectedSt, tmpSet;
         for (it = start; it != end; it++) {
             posAffectedSt.insert(it->second);
         }
         //cerr << "#affectedSt for dim-" << i << " : " << posAffectedSt.size() << endl;
-        set_intersection(affectedSt.begin(), affectedSt.end(),
+        std::set_intersection(affectedSt.begin(), affectedSt.end(),
                 posAffectedSt.begin(), posAffectedSt.end(),
-                insert_iterator<set<StateWrapper*> >(tmpSet, tmpSet.begin()));
+                std::insert_iterator<std::set<StateWrapper*> >(tmpSet,
+                        tmpSet.begin()));
         affectedSt = tmpSet;
         //cerr << "#IntersectAffectedSt for dim-" << i << " : " << affectedSt.size() << endl;
     }
     //cerr << "ok2\n";
-    set<StateWrapper*>::iterator itSt;
+    std::set<StateWrapper*>::iterator itSt;
     for (itSt = affectedSt.begin(); itSt != affectedSt.end(); itSt++) {
-        (*itSt)->chType = max((*itSt)->chType, chType);
+        (*itSt)->chType = std::max((*itSt)->chType, chType);
     }
     for (itSt = affectedSt.begin(); itSt != affectedSt.end(); itSt++) {
         allAffectedSt.insert(*itSt);

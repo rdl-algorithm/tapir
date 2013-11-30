@@ -1,12 +1,11 @@
 #ifndef TEXTSERIALIZER_HPP
 #define TEXTSERIALIZER_HPP
 
-#include <iosfwd>
-#include <queue>
-#include <vector>
-
-#include "Observation.hpp"
-#include "Serializer.hpp"
+#include <iosfwd>                       // for ostream, istream
+#include <queue>                        // for queue
+#include <vector>                       // for vector
+#include "Observation.hpp"              // for Observation
+#include "Serializer.hpp"               // for Serializer
 class ActionNode;
 class BeliefNode;
 class BeliefTree;
@@ -14,6 +13,7 @@ class Histories;
 class HistoryEntry;
 class HistorySequence;
 class ObservationEdge;
+class Solver;
 class State;
 class StatePool;
 class StateWrapper;

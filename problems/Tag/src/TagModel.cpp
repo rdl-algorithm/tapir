@@ -1,26 +1,24 @@
 #include "TagModel.hpp"
 
-#include <cmath>
-#include <cstddef>
+#include <cmath>                        // for floor, pow
+#include <cstddef>                      // for size_t
 
-#include <algorithm>
-#include <fstream>
-#include <iostream>
+#include <fstream>                      // for ifstream, basic_istream, basic_istream<>::__istream_type
+#include <iostream>                     // for cout, cerr
+#include <map>                          // for map, _Rb_tree_iterator, map<>::iterator
+#include <utility>                      // for pair
+
+#include <boost/program_options.hpp>    // for variables_map, variable_value
+
+#include "ChangeType.hpp"               // for ChangeType
+#include "GlobalResources.hpp"          // for GlobalResources
+#include "Observation.hpp"              // for Observation
+#include "State.hpp"                    // for State
+
 using std::cerr;
 using std::cout;
 using std::endl;
-#include <iterator>
-#include <map>
-#include <utility>
-
-#include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-#include "ChangeType.hpp"
-#include "GlobalResources.hpp"
-#include "Model.hpp"
-#include "Observation.hpp"
-#include "State.hpp"
 
 TagModel::TagModel(po::variables_map vm) {
     // Read the map from the file.
@@ -287,13 +285,12 @@ void TagModel::getStatesSeeObs(unsigned long actId, Observation &obs,
         Coords oldOpponentPos = decodeCoords(sVals.vals[1]);
         std::vector<long> actions;
         makeOpponentActions(oldRobotPos, oldOpponentPos, actions);
-        std::vector<long> newActions(actions.size());
-        std::vector<long>::iterator newActionsEnd = (std::copy_if(
-                actions.begin(), actions.end(), newActions.begin(),
-                [&oldOpponentPos, &newRobotPos, this] (long action) {
-                    return getMovedPos(oldOpponentPos, action) != newRobotPos;
-                }));
-        newActions.resize(std::distance(newActions.begin(), newActionsEnd));
+        std::vector<long> newActions;
+        for (long actionId : actions) {
+            if (getMovedPos(oldOpponentPos, actionId) != newRobotPos) {
+                newActions.push_back(actionId);
+            }
+        }
         double probabilityFactor = 1.0 / newActions.size();
         for (long action : newActions) {
             Coords newOpponentPos = getMovedPos(oldOpponentPos, action);

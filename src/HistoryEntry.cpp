@@ -1,10 +1,7 @@
 #include "HistoryEntry.hpp"
 
-#include <cstdlib>
-using std::atof;
-
-#include <vector>
-using std::vector;
+class BeliefNode;
+class StateWrapper;
 
 HistoryEntry::HistoryEntry() :
             HistoryEntry(nullptr, 0, 0) {

@@ -1,24 +1,4 @@
 # ----------------------------------------------------------------------
-# Compiler & linker
-# ----------------------------------------------------------------------
-
-CC = gcc
-CXX = g++
-LINKER = g++
-
-# ----------------------------------------------------------------------
-# Compiler flags
-# ----------------------------------------------------------------------
-
-CPPFLAGS = -DDISTL1 $(INCDIRS)
-CPPFLAGS_RELEASE =
-CPPFLAGS_DEBUG = -DDEBUG
-
-CXXFLAGS = -Wall -Wextra -Weffc++ -std=c++11
-CXXFLAGS_RELEASE = -frounding-math -O3
-CXXFLAGS_DEBUG = -g -O0
-
-# ----------------------------------------------------------------------
 # Targets
 # ----------------------------------------------------------------------
 
@@ -59,7 +39,6 @@ debug: $(SOLVER_OBJS_DEBUG)
 clean-debug:
 	rm -f $(SOLVER_OBJS_DEBUG) $(SOLVER_DEPS_DEBUG)
 
-
 # ----------------------------------------------------------------------
 # Automatic management of #include directives
 # ----------------------------------------------------------------------
@@ -73,7 +52,7 @@ SOLVER_HDRS_LONE := $(filter-out $(SOLVER_HDRS_PAIRED), $(SOLVER_HDRS))
 SOLVER_IWYU_PAIRED := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_DIR_IWYU)/%.cpp.iwyu, $(SOLVER_SRCS_PAIRED))
 SOLVER_IWYU_LONE := $(patsubst $(SOLVER_SRCDIR)/%pp, $(SOLVER_DIR_IWYU)/%pp.iwyu, $(SOLVER_SRCS_LONE) $(SOLVER_HDRS_LONE))
 SOLVER_IWYU := $(SOLVER_IWYU_PAIRED) $(SOLVER_IWYU_LONE)
-SOLVER_IWYU_FIX := $(addsuffix .FIX, $(SOLVER_IWYU))
+SOLVER_IWYU_FIX := $(addsuffix .FIXED, $(SOLVER_IWYU))
 
 .PHONY: iwyu-fix-all
 iwyu-fix-all: iwyu-fix
@@ -81,7 +60,7 @@ iwyu-fix-all: iwyu-fix
 	$(MAKE) -C $(ROOT)/problems/RockSample iwyu-fix
 	$(MAKE) -C $(ROOT)/problems/UnderwaterNavModif iwyu-fix
 
-.PHONY: iwyu-fix $(SOLVER_IWYU_FIX)
+.PHONY: iwyu-fix
 iwyu-fix: $(SOLVER_IWYU_FIX)
 
 .PHONY: iwyu
@@ -89,18 +68,27 @@ iwyu: $(SOLVER_IWYU)
 
 .PHONY: clean-iwyu
 clean-iwyu:
-	rm -f $(SOLVER_IWYU)
-
-$(SOLVER_IWYU) : | $(SOLVER_DIR_IWYU)
-$(SOLVER_DIR_IWYU):
-	mkdir -p $@
+	rm -f $(SOLVER_IWYU) $(SOLVER_IWYU_FIX)
 
 $(SOLVER_IWYU_PAIRED) : $(SOLVER_DIR_IWYU)/%.cpp.iwyu: $(SOLVER_SRCDIR)/%.cpp $(SOLVER_SRCDIR)/%.hpp
-	include-what-you-use -Xiwyu --verbose=3 $(CPPFLAGS) $(CXXFLAGS) $< > $@ 2>&1 || exit 0
+	$(IWYU_RECIPE)
 $(SOLVER_IWYU_LONE) : $(SOLVER_DIR_IWYU)/%pp.iwyu: $(SOLVER_SRCDIR)/%pp
-	include-what-you-use -Xiwyu --verbose=3 $(CPPFLAGS) $(CXXFLAGS) $< > $@ 2>&1 || exit 0
+	$(IWYU_RECIPE)
+$(SOLVER_IWYU_FIX) : %.FIXED : %
+	$(IWYU_FIX_RECIPE)
 
-$(SOLVER_IWYU_FIX) : %.FIX : %
-	fix-includes --nosafe_headers --comments $(INCDIRS) < $< || exit 0
+# Folder structure
+$(SOLVER_IWYU) : $(IWYU_MAPPING_FILE) | $(SOLVER_DIR_IWYU)
+$(SOLVER_DIR_IWYU):
+	$(MKDIR_RECIPE)
+
+.PHONY: rmdirs
+rmdirs: clean
+	rm -df $(SOLVER_DIRS_RELEASE) $(SOLVER_DIRS_DEBUG)
+	rm -df $(SOLVER_OUTDIR_RELEASE) $(SOLVER_OUTDIR_DEBUG) $(SOLVER_DIR_IWYU)
+	rm -df $(ROOT)/problems/*/release/obj $(ROOT)/problems/*/release/bin
+	rm -df $(ROOT)/problems/*/debug/obj $(ROOT)/problems/*/debug/bin
+	rm -df $(ROOT)/problems/*/release $(ROOT)/problems/*/debug
+	rm -df $(ROOT)/problems/*/iwyu
 
 # DO NOT DELETE

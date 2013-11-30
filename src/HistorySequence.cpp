@@ -1,14 +1,12 @@
 #include "HistorySequence.hpp"
 
-#include <climits>
-
-#include <vector>
-using std::vector;
-
-#include "HistoryEntry.hpp"
-#include "State.hpp"
-#include "StateWrapper.hpp"
-
+#include <climits>                      // for LONG_MAX
+#include <vector>                       // for vector, vector<>::iterator
+#include "ChangeType.hpp"               // for ChangeType
+#include "HistoryEntry.hpp"             // for HistoryEntry
+#include "Observation.hpp"              // for Observation
+#include "State.hpp"                    // for State
+#include "StateWrapper.hpp"             // for StateWrapper
 long HistorySequence::currId = 0;
 
 HistorySequence::HistorySequence() :
@@ -32,7 +30,7 @@ HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
 }
 
 HistorySequence::~HistorySequence() {
-    vector<HistoryEntry*>::iterator it;
+    std::vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
         delete (*it);
     }
@@ -77,9 +75,9 @@ void HistorySequence::addEntry(HistoryEntry *histEntry) {
     histSeq.push_back(histEntry);
 }
 
-void HistorySequence::getStValsSeq(vector<State> &seqStVals) {
+void HistorySequence::getStValsSeq(std::vector<State> &seqStVals) {
     seqStVals.clear();
-    vector<HistoryEntry*>::iterator it;
+    std::vector<HistoryEntry*>::iterator it;
     for (it = histSeq.begin(); it != histSeq.end(); it++) {
         State s;
         (*it)->st->getVals(s);
@@ -88,7 +86,7 @@ void HistorySequence::getStValsSeq(vector<State> &seqStVals) {
 }
 
 void HistorySequence::fixEntryId() {
-    vector<HistoryEntry*>::iterator itH;
+    std::vector<HistoryEntry*>::iterator itH;
     long i = 0;
     for (itH = histSeq.begin(); itH != histSeq.end(); itH++, i++) {
         (*itH)->entryId = i;

@@ -1,15 +1,16 @@
 #ifndef PROGRAMOPTIONS_HPP
 #define PROGRAMOPTIONS_HPP
 
-#include <ctime>
-
-#include <string>
-
-#include <boost/program_options.hpp>
+#include <ctime>                        // for time
+#include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
+#include <string>                       // for basic_string, string
+#include <boost/program_options.hpp>    // for value, typed_value, options_description_easy_init, options_description, program_options
 namespace po = boost::program_options;
 
 class ProgramOptions {
 public:
+    virtual ~ProgramOptions() = default;
+
     /** Returns generic configuration options - I/O and help. */
     virtual po::options_description getGenericOptions() {
         po::options_description generic("Generic options");

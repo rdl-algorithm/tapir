@@ -1,22 +1,23 @@
 #ifndef ROCKSAMPLEMODEL_HPP
 #define ROCKSAMPLEMODEL_HPP
 
-#include <cstddef>
-#include <cstdlib>
+#include <cstddef>                      // for size_t
+#include <cstdlib>                      // for abs
 
-#include <algorithm>
-#include <iosfwd>
-#include <iterator>
-#include <ostream>
-#include <string>
-#include <vector>
+#include <algorithm>                    // for copy
+#include <ios>                          // for dec, hex
+#include <iterator>                     // for ostream_iterator
+#include <ostream>                      // for ostream, operator<<, basic_ostream, basic_ostream::operator<<, basic_ostream<>::__ostream_type
+#include <string>                       // for string
+#include <vector>                       // for vector
 
-#include "ChangeType.hpp"
-#include "Model.hpp"
-#include "Observation.hpp"
-#include "State.hpp"
+#include <boost/program_options.hpp>    // for program_options, variables_map
 
-#include <boost/program_options.hpp>
+#include "ChangeType.hpp"               // for ChangeType
+#include "Model.hpp"                    // for Model
+#include "Observation.hpp"              // for Observation
+#include "State.hpp"                    // for State
+
 namespace po = boost::program_options;
 
 struct Coords {

@@ -1,19 +1,18 @@
 #ifndef UNDERWATERNAVMODIFMODEL_HPP
 #define UNDERWATERNAVMODIFMODEL_HPP
 
-#include <map>
-#include <ostream>
-#include <string>
-#include <vector>
-
-#include <boost/program_options.hpp>
-namespace po = boost::program_options;
-
-#include "ChangeType.hpp"
-#include "Model.hpp"
-#include "Observation.hpp"
-#include "State.hpp"
+#include <map>                          // for map
+#include <ostream>                      // for operator<<, ostream, basic_ostream, basic_ostream<>::__ostream_type
+#include <string>                       // for string
+#include <vector>                       // for vector, vector<>::iterator
+#include <boost/program_options.hpp>    // for program_options, variables_map
+#include "ChangeType.hpp"               // for ChangeType
+#include "Model.hpp"                    // for Model
+#include "Observation.hpp"              // for Observation
+#include "State.hpp"                    // for State
 class StRoadmap;
+
+namespace po = boost::program_options;
 
 class UnderwaterNavModifModel: public Model {
 public:

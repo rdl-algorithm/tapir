@@ -1,25 +1,31 @@
 #include "TextSerializer.hpp"
 
-#include <iostream>
-using std::endl;
-#include <map>
-#include <set>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <utility>
+#include <cstddef>                      // for size_t
 
-#include "ActionNode.hpp"
-#include "BeliefNode.hpp"
-#include "BeliefTree.hpp"
-#include "Histories.hpp"
-#include "HistoryEntry.hpp"
-#include "HistorySequence.hpp"
-#include "Observation.hpp"
-#include "ObservationEdge.hpp"
-#include "State.hpp"
-#include "StatePool.hpp"
-#include "StateWrapper.hpp"
+#include <iostream>                     // for ostream, istream, endl, cerr, etc.
+#include <map>                          // for multimap, _Rb_tree_const_iterator, map
+#include <queue>                        // for queue, __alloc_traits<>::value_type
+#include <set>                          // for set<>::iterator, set
+#include <sstream>                      // for stringstream
+#include <string>                       // for operator>>, getline, string, operator<<
+#include <utility>                      // for pair, make_pair
+#include <vector>                       // for vector
+
+#include "ActionNode.hpp"               // for ActionNode
+#include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::currId
+#include "BeliefTree.hpp"               // for BeliefTree
+#include "Histories.hpp"                // for Histories
+#include "HistoryEntry.hpp"             // for HistoryEntry
+#include "HistorySequence.hpp"          // for HistorySequence
+#include "Observation.hpp"              // for Observation
+#include "ObservationEdge.hpp"          // for ObservationEdge
+#include "Serializer.hpp"               // for Serializer
+#include "Solver.hpp"                   // for Solver
+#include "State.hpp"                    // for State
+#include "StatePool.hpp"                // for StatePool, CompStVals
+#include "StateWrapper.hpp"             // for StateWrapper, StateWrapper::currId
+
+using std::endl;
 
 TextSerializer::TextSerializer() :
             TextSerializer(nullptr) {
@@ -41,7 +47,7 @@ void TextSerializer::load(State &state, std::istream &is) {
     state.vals.clear();
     std::size_t nStVars;
     is >> nStVars;
-    for (size_t i = 0; i < nStVars; i++) {
+    for (std::size_t i = 0; i < nStVars; i++) {
         double tmpDouble;
         is >> tmpDouble;
         state.vals.push_back(tmpDouble);
@@ -123,7 +129,7 @@ void TextSerializer::load(Observation &obs, std::istream &is) {
     obs.clear();
     std::size_t nStVars;
     is >> nStVars;
-    for (size_t i = 0; i < nStVars; i++) {
+    for (std::size_t i = 0; i < nStVars; i++) {
         double tmpDouble;
         is >> tmpDouble;
         obs.push_back(tmpDouble);

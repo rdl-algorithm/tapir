@@ -1,32 +1,25 @@
 #ifndef SIMULATE_HPP
 #define SIMULATE_HPP
 
-#include <ctime>
-using std::clock;
-using std::clock_t;
-
-#include <fstream>
-using std::ifstream;
-using std::ofstream;
-#include <iostream>
+#include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
+#include <fstream>                      // for basic_ifstream, basic_ofstream, ifstream, ofstream
+#include <iostream>                     // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, endl, ostream, cout, cerr
+#include <string>                       // for string
+#include <vector>                       // for vector, vector<>::iterator
+#include <boost/program_options.hpp>    // for variables_map, options_description, etc.
+#include "GlobalResources.hpp"          // for GlobalResources
+#include "Model.hpp"                    // for Model
+#include "Observation.hpp"              // for Observation
+#include "ProgramOptions.hpp"           // for ProgramOptions
+#include "Solver.hpp"                   // for Solver
+#include "Serializer.hpp"               // for Serializer
+#include "State.hpp"                    // for State
 using std::cerr;
 using std::cout;
 using std::endl;
-#include <string>
 using std::string;
-#include <vector>
 using std::vector;
-
-#include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-#include "GlobalResources.hpp"
-#include "Model.hpp"
-#include "Observation.hpp"
-#include "ProgramOptions.hpp"
-#include "Serializer.hpp"
-#include "Solver.hpp"
-#include "State.hpp"
 
 template<typename ModelType, typename SerializerType>
 int simulate(int argc, const char* argv[], ProgramOptions *options) {
@@ -75,7 +68,7 @@ int simulate(int argc, const char* argv[], ProgramOptions *options) {
     cerr << "Seed: " << seed << endl;
     GlobalResources::seed(seed);
 
-    ifstream inFile;
+    std::ifstream inFile;
     inFile.open(polPath);
     if (!inFile.is_open()) {
         cerr << "Failed to open " << polPath << endl;
@@ -102,18 +95,18 @@ int simulate(int argc, const char* argv[], ProgramOptions *options) {
     vector<Observation>::iterator itO;
     vector<double>::iterator itR;
     vector<double>::iterator itD;
-    ofstream os;
+    std::ofstream os;
     os.open(logPath.c_str());
 
     for (long i = 0; i < nRuns; i++) {
-        clock_t tStart;
+        std::clock_t tStart;
         long actualNSteps;
         double totT;
         double totChTime, totImpTime;
-        tStart = clock();
+        tStart = std::clock();
         val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs,
                 trajRew, &actualNSteps, &totChTime, &totImpTime);
-        totT = (clock() - tStart) * 1000 / CLOCKS_PER_SEC;
+        totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
         os << "Val:  " << val << endl;
         itS = trajSt.begin();

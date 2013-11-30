@@ -1,12 +1,6 @@
 #include "Histories.hpp"
 
-#include <set>
-using std::set;
-#include <utility>
-using std::pair;
-#include <vector>
-using std::vector;
-
+#include "HistorySequence.hpp"          // for HistorySequence
 Histories::Histories() :
             allHistSeq() {
 }

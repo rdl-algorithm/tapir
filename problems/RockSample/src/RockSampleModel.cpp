@@ -1,22 +1,26 @@
 #include "RockSampleModel.hpp"
 
-#include <cmath>
-#include <cstddef>
+#include <cmath>                        // for pow, floor
+#include <cstddef>                      // for size_t
 
-#include <fstream>
-#include <iostream>
+#include <fstream>                      // for ifstream, basic_istream, basic_istream<>::__istream_type
+#include <iostream>                     // for cout, cerr
+#include <map>                          // for _Rb_tree_const_iterator, map, map<>::value_type
+#include <set>                          // for set, set<>::iterator
+#include <string>                       // for string, getline, char_traits, basic_string
+#include <vector>                       // for vector, __alloc_traits<>::value_type, operator==
+
+#include <boost/program_options.hpp>    // for variables_map, variable_value
+
+#include "ChangeType.hpp"               // for ChangeType
+#include "GlobalResources.hpp"          // for GlobalResources
+#include "Observation.hpp"              // for Observation
+#include "State.hpp"                    // for State, operator<
+
 using std::cerr;
 using std::cout;
 using std::endl;
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
-
-#include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-#include "GlobalResources.hpp"
 
 RockSampleModel::RockSampleModel(po::variables_map vm) {
     // Read the map from the file.

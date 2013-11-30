@@ -1,10 +1,9 @@
 #ifndef SERIALIZER_HPP
 #define SERIALIZER_HPP
 
-#include <iosfwd>
-
-#include "Observation.hpp"
-#include "Solver.hpp"
+#include <istream>                      // for istream, ostream
+#include "Observation.hpp"              // for Observation
+#include "Solver.hpp"                   // for Solver
 class ActionNode;
 class BeliefNode;
 class BeliefTree;

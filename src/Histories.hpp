@@ -1,9 +1,8 @@
 #ifndef HISTORIES_HPP
 #define HISTORIES_HPP
 
-#include <vector>
-
-#include "HistorySequence.hpp"
+#include <vector>                       // for vector
+#include "HistorySequence.hpp"          // for HistorySequence
 class HistoryEntry;
 
 class Histories {

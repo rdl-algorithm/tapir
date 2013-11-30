@@ -1,42 +1,33 @@
 #include "Solver.hpp"
 
-#include <cfloat>
-#include <climits>
-#include <cmath>
-using std::exp;
-using std::pow;
-#include <cstdlib>
-using std::exit;
-#include <ctime>
-using std::clock;
-using std::clock_t;
-
-#include <algorithm>
-using std::max;
-#include <fstream>
-using std::ifstream;
-#include <iostream>
+#include <cfloat>                       // for DBL_MAX
+#include <cmath>                        // for pow, exp
+#include <ctime>                        // for clock, clock_t, CLOCKS_PER_SEC
+#include <algorithm>                    // for max
+#include <climits>                      // for LONG_MAX
+#include <iostream>                     // for operator<<, cerr, ostream, basic_ostream, endl, basic_ostream<>::__ostream_type, cout
+#include <map>                          // for map
+#include <set>                          // for _Rb_tree_const_iterator, set, set<>::iterator
+#include <vector>                       // for vector, vector<>::iterator, vector<>::reverse_iterator
+#include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
+#include "BeliefTree.hpp"               // for BeliefTree
+#include "ChangeType.hpp"               // for ChangeType
+#include "GlobalResources.hpp"          // for GlobalResources
+#include "Histories.hpp"                // for Histories
+#include "HistoryEntry.hpp"             // for HistoryEntry
+#include "HistorySequence.hpp"          // for HistorySequence
+#include "Model.hpp"                    // for Model
+#include "Observation.hpp"              // for Observation
+#include "State.hpp"                    // for State
+#include "StatePool.hpp"                // for StatePool
+#include "StateWrapper.hpp"             // for StateWrapper
+#include "TextSerializer.hpp"           // for TextSerializer
 using std::cerr;
+using std::cout;
 using std::endl;
-using std::ostream;
-#include <map>
 using std::map;
-#include <set>
 using std::set;
-#include <vector>
 using std::vector;
-
-#include "BeliefNode.hpp"
-#include "BeliefTree.hpp"
-#include "GlobalResources.hpp"
-#include "Histories.hpp"
-#include "HistoryEntry.hpp"
-#include "HistorySequence.hpp"
-#include "Model.hpp"
-#include "State.hpp"
-#include "StatePool.hpp"
-#include "StateWrapper.hpp"
-#include "TextSerializer.hpp"
 
 Solver::Solver(Model *model) :
             model(model),
@@ -210,7 +201,7 @@ long Solver::getRolloutAct(BeliefNode *belNode, State &s, double startDisc,
         double *qVal) {
     double randMode = GlobalResources::rand01();
     long actSelected;
-    clock_t timeStart, timeEnd;
+    std::clock_t timeStart, timeEnd;
     bool tryAgain = true;
 //cerr << "Rollout ";
 //int z = 0;
@@ -218,7 +209,7 @@ long Solver::getRolloutAct(BeliefNode *belNode, State &s, double startDisc,
 //cerr << "randMode-" << z << " : " << randMode << " " << pRollout[ROLLOUT_RANDHEURISTIC] << " " << pRollout[ROLLOUT_POL] << endl;
         if (randMode < pRollout[ROLLOUT_RANDHEURISTIC]) {
 //cerr << "RandHeuristic\n";
-            timeStart = clock();
+            timeStart = std::clock();
             actSelected = belNode->getNxtActToTry();
 //cerr << "actSelected: " << actSelected << endl;
             bool isTerm = model->getNextState(s, actSelected, immediateRew,
@@ -232,13 +223,13 @@ long Solver::getRolloutAct(BeliefNode *belNode, State &s, double startDisc,
                 model->solveHeuristic(nxtSVals, qVal);
                 *qVal = startDisc * disc * (*qVal);
             }
-            timeEnd = clock();
+            timeEnd = std::clock();
             rolloutUsed = ROLLOUT_RANDHEURISTIC;
             tryAgain = false;
 //cerr << "Time randHeuristic: " << (timeEnd-timeStart) << " " << (timeEnd-timeStart)/(double) CLOCKS_PER_SEC << endl;
         } else {
 //cerr << "PolHeuristic\n";
-            timeStart = clock();
+            timeStart = std::clock();
 #if defined(DISTL1)
             BeliefNode *currNode = getNNBelNode(belNode);
 #elif defined(DISTEMD)
@@ -258,7 +249,7 @@ long Solver::getRolloutAct(BeliefNode *belNode, State &s, double startDisc,
                 rolloutUsed = ROLLOUT_POL;
                 tryAgain = false;
             }
-            timeEnd = clock();
+            timeEnd = std::clock();
         }
 
 //z++;
@@ -320,8 +311,8 @@ double Solver::rolloutPolHelper(BeliefNode *currNode, State &s, double disc) {
  }
  }
  //cerr << "tNNComp: " << b->tNNComp << " tLast " << b->tLastAddedParticle << " minDist: " << minDist << " aftComp: " << nComp << " from " << policy->allNodes.size() << endl;
- //cerr << "time: " << clock() << " " << BeliefNode::startTime << endl;
- b->tNNComp = (double) (clock() - BeliefNode::startTime)*10000 / CLOCKS_PER_SEC;
+ //cerr << "time: " << std::clock() << " " << BeliefNode::startTime << endl;
+ b->tNNComp = (double) (std::clock() - BeliefNode::startTime)*10000 / CLOCKS_PER_SEC;
  //cerr << "new tNNComp: " << b->tNNComp << endl;
  b->nnBel = nnBel;
  cerr << "Done getNNEMD ";
@@ -354,8 +345,8 @@ BeliefNode* Solver::getNNBelNode(BeliefNode *b) {
         }
     }
 //cerr << "tNNComp: " << b->tNNComp << " tLast " << b->tLastAddedParticle << " minDist: " << minDist << " aftComp: " << nComp << " from " << policy->allNodes.size() << endl;
-//cerr << "time: " << clock() << " " << BeliefNode::startTime << endl;
-    b->tNNComp = (double) (clock() - BeliefNode::startTime)
+//cerr << "time: " << std::clock() << " " << BeliefNode::startTime << endl;
+    b->tNNComp = (double) (std::clock() - BeliefNode::startTime)
             * 1000/ CLOCKS_PER_SEC;
 //cerr << "new tNNComp: " << b->tNNComp << endl;
     b->nnBel = nnBel;
@@ -376,7 +367,7 @@ void Solver::updWeightRolloutAct(double valImprovement) {
         valImprovement = 0.0;
     }
     wRollout[rolloutUsed] = wRollout[rolloutUsed]
-            * exp(
+            * std::exp(
                     exploreCoef * (valImprovement / model->getMaxVal())
                             / (2 * pRollout[rolloutUsed]));
 //cerr << "newW " << wRollout[0] << " " << wRollout[1] << endl;
@@ -434,7 +425,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
 
     *totChTime = 0.0;
     *totImpTime = 0.0;
-    clock_t chTimeStart, chTimeEnd, impSolTimeStart, impSolTimeEnd;
+    std::clock_t chTimeStart, chTimeEnd, impSolTimeStart, impSolTimeEnd;
     *actualNSteps = nSteps;
 
     long maxTrials = model->getMaxTrials();
@@ -470,7 +461,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
             //  write(cerr);
             //}
 
-            chTimeStart = clock();
+            chTimeStart = std::clock();
             // Reset Affected data structures.
             affectedRange.clear();
             typeOfChanges.clear();
@@ -483,7 +474,7 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
             model->update(*itCh, affectedRange, typeOfChanges); // Add typeOfChanges
             identifyAffectedPol(affectedRange, typeOfChanges, affectedHistSeq);
             updatePol(affectedHistSeq);
-            chTimeEnd = clock();
+            chTimeEnd = std::clock();
             *totChTime = *totChTime
                     + ((chTimeEnd - chTimeStart) * 1000 / CLOCKS_PER_SEC);
             /*
@@ -500,9 +491,9 @@ double Solver::runSim(long nSteps, vector<long> &tChanges,
                 last = true;
             }
         }
-        impSolTimeStart = clock();
+        impSolTimeStart = std::clock();
         improveSol(currNode, maxTrials, depthTh);
-        impSolTimeEnd = clock();
+        impSolTimeEnd = std::clock();
         *totImpTime = *totImpTime
                 + ((impSolTimeEnd - impSolTimeStart) * 1000 / CLOCKS_PER_SEC);
 
@@ -540,7 +531,7 @@ BeliefNode* Solver::addChild(BeliefNode *currNode, long actId, Observation &obs,
     }
 
     double disc = model->getDiscount();
-    double d = pow(disc, timeStep);
+    double d = std::pow(disc, timeStep);
     // Attempt to generate particles for next state based on the current belief,
     // the observation, and the action.
     vector<State> partNxtSt;
@@ -667,7 +658,7 @@ void Solver::identifyAffectedPol(vector<State> &affectedRange,
                 if ((*itH)->entryId > histSeq->endAffectedIdx) {
                     histSeq->endAffectedIdx = (*itH)->entryId;
                 }
-                histSeq->chType = max(histSeq->chType, (*itS)->chType);
+                histSeq->chType = std::max(histSeq->chType, (*itS)->chType);
                 affectedHistSeq.insert(histSeq);
             }
             /*
@@ -1114,7 +1105,7 @@ void Solver::singleSearch(BeliefNode *startNode, double discount,
     currNode->add(currHistEntry);
     long startDepth = allHistories->allHistSeq[startParticle->seqId]->startDepth
             + startParticle->entryId;
-    double currDiscFactor = pow(discount, startDepth);
+    double currDiscFactor = std::pow(discount, startDepth);
     currHistEntry->disc = currDiscFactor;
     currHistSeq = new HistorySequence(currHistEntry, startDepth);
     allHistories->add(currHistSeq);
