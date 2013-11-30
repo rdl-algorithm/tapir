@@ -1,9 +1,8 @@
 #include "ActionNode.hpp"
 
+#include <cstdlib>
 #include <queue>
-using std::queue;
 #include <vector>
-using std::vector;
 
 #include "Observation.hpp"
 #include "ObservationEdge.hpp"
@@ -27,7 +26,7 @@ ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal)
 }
 
 ActionNode::~ActionNode() {
-    vector<ObservationEdge*>::iterator it;
+    std::vector<ObservationEdge*>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
         delete (*it);
     }
@@ -75,7 +74,7 @@ void ActionNode::addChild(Observation &obs, BeliefNode* nxtBelNode) {
 }
 
 BeliefNode* ActionNode::getObsChild(Observation &obs) {
-    vector<ObservationEdge*>::iterator itObs;
+    std::vector<ObservationEdge*>::iterator itObs;
     for (itObs = obsChildren.begin(); itObs != obsChildren.end(); itObs++) {
         if ((*itObs)->isObs(obs)) {
             return (*itObs)->getNodeChild();
@@ -84,8 +83,8 @@ BeliefNode* ActionNode::getObsChild(Observation &obs) {
     return nullptr;
 }
 
-void ActionNode::enqueueChildren(queue<BeliefNode*> &res) {
-    vector<ObservationEdge*>::iterator it;
+void ActionNode::enqueueChildren(std::queue<BeliefNode*> &res) {
+    std::vector<ObservationEdge*>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
         (*it)->enqueueChildren(res);
     }

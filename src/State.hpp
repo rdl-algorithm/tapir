@@ -31,7 +31,7 @@ public:
         return vals.begin();
     }
     std::vector<double>::iterator end() {
-            return vals.end();
+        return vals.end();
     }
     void push_back(double v) {
         vals.push_back(v);

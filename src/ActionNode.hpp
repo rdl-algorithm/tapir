@@ -1,6 +1,7 @@
 #ifndef ACTIONNODE_HPP
 #define ACTIONNODE_HPP
 
+#include <cstdlib>
 #include <queue>
 #include <vector>
 

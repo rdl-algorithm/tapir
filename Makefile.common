@@ -2,17 +2,15 @@
 # Customizations
 # ----------------------------------------------------------------------
 
-#
-# root directory of the package
-#
+# Root directory of the package
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # Directories
 SOLVER_SRCDIR := $(ROOT)/src
 SOLVER_OUTDIR_RELEASE := $(ROOT)/release
 SOLVER_OUTDIR_DEBUG := $(ROOT)/debug
-SOLVER_DIRS_RELEASE := $(SOLVER_OUTDIR_RELEASE)/obj $(SOLVER_OUTDIR_RELEASE)/dep
-SOLVER_DIRS_DEBUG := $(SOLVER_OUTDIR_DEBUG)/obj $(SOLVER_OUTDIR_DEBUG)/dep
+SOLVER_DIRS_RELEASE := $(SOLVER_OUTDIR_RELEASE)/obj
+SOLVER_DIRS_DEBUG := $(SOLVER_OUTDIR_DEBUG)/obj
 
 # Standard include directories.
 INCDIRS += -I$(SOLVER_SRCDIR)
@@ -23,24 +21,24 @@ LDLIBS +=
 # ----------------------------------------------------------------------
 # Files
 # ----------------------------------------------------------------------
-#
+
 SOLVER_SRCS := $(wildcard $(SOLVER_SRCDIR)/*.cpp)
+SOLVER_HDRS := $(wildcard $(SOLVER_SRCDIR)/*.hpp)
 SOLVER_OBJS_RELEASE := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_RELEASE)/obj/%.o, $(SOLVER_SRCS))
-SOLVER_DEPS_RELEASE := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_RELEASE)/dep/%.d, $(SOLVER_SRCS))
+SOLVER_DEPS_RELEASE := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_RELEASE)/obj/%.d, $(SOLVER_SRCS))
 SOLVER_OBJS_DEBUG := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_DEBUG)/obj/%.o, $(SOLVER_SRCS))
-SOLVER_DEPS_DEBUG := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_DEBUG)/dep/%.d, $(SOLVER_SRCS))
+SOLVER_DEPS_DEBUG := $(patsubst $(SOLVER_SRCDIR)/%.cpp, $(SOLVER_OUTDIR_DEBUG)/obj/%.d, $(SOLVER_SRCS))
 
 # ----------------------------------------------------------------------
 # Targets
-# ----------------------------------------------------------------------/
+# ----------------------------------------------------------------------
 
-$(SOLVER_OBJS_RELEASE): | $(SOLVER_OUTDIR_RELEASE)/obj $(SOLVER_OUTDIR_RELEASE)/dep
+$(SOLVER_OBJS_RELEASE): | $(SOLVER_OUTDIR_RELEASE)/obj
 $(SOLVER_DIRS_RELEASE): | $(SOLVER_OUTDIR_RELEASE)
-$(SOLVER_OBJS_DEBUG): | $(SOLVER_OUTDIR_DEBUG)/obj $(SOLVER_OUTDIR_DEBUG)/dep
+$(SOLVER_OBJS_DEBUG): | $(SOLVER_OUTDIR_DEBUG)/obj
 $(SOLVER_DIRS_DEBUG): | $(SOLVER_OUTDIR_DEBUG)
 $(SOLVER_DIRS_RELEASE) $(SOLVER_OUTDIR_RELEASE) $(SOLVER_DIRS_DEBUG) $(SOLVER_OUTDIR_DEBUG):
 	mkdir -p $@
 
 $(SOLVER_OUTDIR_RELEASE)/obj/%.o $(SOLVER_OUTDIR_DEBUG)/obj/%.o: $(SOLVER_SRCDIR)/%.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MD -c $< -o $@
-	@mv $(basename $@).d $(dir $@)/../dep/$*.d
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $< -o $@

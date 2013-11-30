@@ -18,7 +18,8 @@ class StateWrapper;
 
 class Serializer {
 public:
-    Serializer(Solver *solver) : solver(solver) {
+    Serializer(Solver *solver) :
+                solver(solver) {
     }
     virtual ~Serializer() = default;
     Serializer(const Serializer&) = delete;

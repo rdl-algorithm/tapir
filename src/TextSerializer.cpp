@@ -290,7 +290,8 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
     for (long i = 0; i < node.nParticles; i++) {
         long seqId, entryId;
         sstr >> tmpStr >> seqId >> entryId >> tmpStr;
-        HistoryEntry *entry = solver->allHistories->getHistoryEntry(seqId, entryId);
+        HistoryEntry *entry = solver->allHistories->getHistoryEntry(seqId,
+                entryId);
         entry->setBelNode(&node);
         node.particles.push_back(entry);
     }
