@@ -26,9 +26,9 @@ WARN                 :=
 override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
 ifeq ($(CXX), g++)
   override CXXFLAGS  += -frounding-math
-  override WARN      += -Wall -Wextra -Weffc++
+  WARN               += -Wall -Wextra -Weffc++
 else
-  override WARN      += -Weverything -Wno-c++98-compat
+  WARN               += -Weverything -Wno-c++98-compat
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3
 CXXFLAGS_debug       := $(CXXFLAGS) -O0 -g
