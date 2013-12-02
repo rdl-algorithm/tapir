@@ -1,6 +1,6 @@
 .svn/*
 *.iwyu
-*.iwyu.FIXED
+*.iwyu.FIX
 *~
 *.d
 *.o

@@ -267,6 +267,7 @@ double Solver::rolloutPolHelper(BeliefNode *currNode, State &s, double disc) {
         return 0.0;
     } else if (currNode->nParticles == 0) {
         cerr << "nParticles == 0 in rolloutPolHelper" << endl;
+        return 0.0;
     } else if (currNode->actChildren.size() == 0) {
         // cerr << "No children in rolloutPolHelper" << endl;
         return 0.0;
