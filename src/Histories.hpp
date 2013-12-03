@@ -13,9 +13,9 @@ public:
     Histories();
     ~Histories();
     Histories(const Histories&) = delete;
-    Histories(Histories&) = delete;
+    Histories(Histories&&) = delete;
     Histories &operator=(const Histories&) = delete;
-    Histories &operator=(Histories&) = delete;
+    Histories &operator=(Histories&&) = delete;
 
     void reset();
 

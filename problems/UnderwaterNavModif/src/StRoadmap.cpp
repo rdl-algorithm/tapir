@@ -10,7 +10,7 @@
 #include "State.hpp"                    // for State
 using std::endl;
 
-StRoadmap::StRoadmap(std::vector<State> &goals, long maxVerts, long nGoalsSamp,
+StRoadmap::StRoadmap(std::vector<VectorState> &goals, long maxVerts, long nGoalsSamp,
         long nTryCon, long maxDistCon,
         std::map<long, std::map<long, short> > &env, long nX, long nY) :
             nX(nX),
@@ -34,7 +34,7 @@ StRoadmap::StRoadmap(std::vector<State> &goals, long maxVerts, long nGoalsSamp,
     //insertMyMilestones();
 
     while (i < maxVerts) {
-        State s(2);
+        VectorState s(2);
         sampleAMilestone(s);
         if (insertMilestone(s)) {
             i++;
@@ -146,15 +146,15 @@ void StRoadmap::setWeight() {
     }
 }
 
-void StRoadmap::insertGoalMilestones(std::vector<State> &goals,
+void StRoadmap::insertGoalMilestones(std::vector<VectorState> &goals,
         long nGoalsSamp) {
     long nGoals = goals.size();
     //for (long i = 0; i < nGoalsSamp; i++) {
-    std::vector<State>::iterator itV;
+    std::vector<VectorState>::iterator itV;
     bool inserted;
     while (nVerts < nGoalsSamp) {
-        long rawIdx = GlobalResources::randIntBetween(0, nGoals - 1);
-        State st(2);
+        long rawIdx = global_resources::randIntBetween(0, nGoals - 1);
+        VectorState st(2);
         st[0] = goals[rawIdx][0];
         st[1] = goals[rawIdx][1];
         inserted = true;
@@ -173,8 +173,8 @@ void StRoadmap::insertGoalMilestones(std::vector<State> &goals,
 }
 
 void StRoadmap::insertMyMilestones() {
-    std::vector<State> s;
-    State st(2);
+    std::vector<VectorState> s;
+    VectorState st(2);
 
     st[0] = 14;
     st[1] = 20;
@@ -195,14 +195,14 @@ void StRoadmap::insertMyMilestones() {
     st[1] = 18;
     s.push_back(st);
 
-    std::vector<State>::iterator it;
+    std::vector<VectorState>::iterator it;
     for (it = s.begin(); it != s.end(); it++) {
         insertMilestone(*it);
     }
 }
 
-void StRoadmap::sampleAMilestone(State &st) {
-    long rawIdx = GlobalResources::randIntBetween(1, totW);
+void StRoadmap::sampleAMilestone(VectorState &st) {
+    long rawIdx = global_resources::randIntBetween(1, totW);
     st[0] = (long) std::floor(weight[rawIdx] / nY);
     st[1] = weight[rawIdx] % nY;
     /*
@@ -214,9 +214,9 @@ void StRoadmap::sampleAMilestone(State &st) {
      */
 }
 
-bool StRoadmap::insertMilestone(State &st) {
+bool StRoadmap::insertMilestone(VectorState &st) {
     long c, i;
-    std::vector<State>::iterator itV;
+    std::vector<VectorState>::iterator itV;
     for (itV = V.begin(), i = 0; itV != V.end(); itV++, i++) {
         if ((c = dist(st, *itV)) == 0) {
             return false;
@@ -237,11 +237,11 @@ bool StRoadmap::insertMilestone(State &st) {
     return true;
 }
 
-double StRoadmap::dist(State &s1, State &s2) {
+double StRoadmap::dist(VectorState &s1, VectorState &s2) {
     return (std::fabs(s2[0] - s1[0]) + std::fabs(s2[1] - s1[1]));
 }
 
-long StRoadmap::lineSegOk(State &st1, State &st2) {
+long StRoadmap::lineSegOk(VectorState &st1, VectorState &st2) {
     std::map<long, std::map<long, short> >::iterator itX;
     std::map<long, short>::iterator itY;
 
@@ -404,7 +404,7 @@ void StRoadmap::getDistToGoal() {
     }
 }
 
-double StRoadmap::getDistToGoal(State &st) {
+double StRoadmap::getDistToGoal(VectorState &st) {
     long minDist = LONG_MAX;
     long minIdx = 0;
     long tmpDist;
@@ -422,7 +422,7 @@ double StRoadmap::getDistToGoal(State &st) {
 }
 
 void StRoadmap::updateRoadmap(std::map<long, std::map<long, short> > &env_,
-        std::vector<State> &goals, long nGoalsSamp) {
+        std::vector<VectorState> &goals, long nGoalsSamp) {
     env = env_;
 
     V.clear();
@@ -440,7 +440,7 @@ void StRoadmap::updateRoadmap(std::map<long, std::map<long, short> > &env_,
     setWeight();
     for (long i = 0; i < maxVerts; i++) {
         insertGoalMilestones(goals, nGoalsSamp);
-        State s(2);
+        VectorState s(2);
         sampleAMilestone(s);
         insertMilestone(s);
     }
@@ -448,10 +448,10 @@ void StRoadmap::updateRoadmap(std::map<long, std::map<long, short> > &env_,
 }
 
 bool StRoadmap::VContains(long x, long y) {
-    State st(2);
+    VectorState st(2);
     st[0] = x;
     st[1] = y;
-    std::vector<State>::iterator itV;
+    std::vector<VectorState>::iterator itV;
     for (itV = V.begin(); itV != V.end(); itV++) {
         if (dist(st, *itV) == 0) {
             return true;

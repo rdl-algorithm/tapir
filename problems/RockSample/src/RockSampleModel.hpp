@@ -54,9 +54,9 @@ public:
     RockSampleModel(po::variables_map vm);
     ~RockSampleModel() = default;
     RockSampleModel(const RockSampleModel&) = delete;
-    RockSampleModel(RockSampleModel&) = delete;
+    RockSampleModel(RockSampleModel&&) = delete;
     RockSampleModel &operator=(const RockSampleModel&) = delete;
-    RockSampleModel &operator=(RockSampleModel&) = delete;
+    RockSampleModel &operator=(RockSampleModel&&) = delete;
 
     /**
      * Enumerates the possible actions. Note that there are actually
@@ -135,7 +135,7 @@ public:
         }
     }
 
-    void dispState(State &s, std::ostream &os) {
+    void dispState(VectorState &s, std::ostream &os) {
         os << Coords(s[0], s[1]) << " GOOD: {";
         std::vector<int> goodRocks;
         std::vector<int> badRocks;
@@ -212,32 +212,32 @@ public:
     }
 
     // Other virtual methods
-    void sampleAnInitState(State &sVals);
-    bool isTerm(State &sVals);
-    void solveHeuristic(State &s, double *qVal);
+    void sampleAnInitState(VectorState &sVals);
+    bool isTerm(VectorState &sVals);
+    void solveHeuristic(VectorState &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(State &sVals, unsigned long actIdx, double *immediateRew,
-            State &nxtSVals, Observation &obs);
-    double getReward(State &sVals);
-    double getReward(State &sVals, unsigned long actId);
+    bool getNextState(VectorState &sVals, unsigned long actIdx, double *immediateRew,
+            VectorState &nxtSVals, Observation &obs);
+    double getReward(VectorState &sVals);
+    double getReward(VectorState &sVals, unsigned long actId);
 
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partSt, std::vector<State> &partNxtSt);
+            std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partNxtSt);
+            std::vector<VectorState> &partNxtSt);
 
-    void setChanges(const char *chName, std::vector<long> &chTime);
-    void update(long tCh, std::vector<State> &affectedRange,
+    void getChangeTimes(const char *chName, std::vector<long> &chTime);
+    void update(long tCh, std::vector<VectorState> &affectedRange,
             std::vector<ChangeType> &typeOfChanges);
-    bool modifStSeq(std::vector<State> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<State> &modifStSeq,
+    bool modifStSeq(std::vector<VectorState> &seqStVals, long startAffectedIdx,
+            long endAffectedIdx, std::vector<VectorState> &modifStSeq,
             std::vector<long> &modifActSeq,
             std::vector<Observation> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
-    void drawState(State &s, std::ostream &os);
+    void drawState(VectorState &s, std::ostream &os);
 
 private:
     // Problem parameters.
@@ -257,7 +257,7 @@ private:
     /** The number of state particles in the initial belief. */
     long nInitBel;
     /** A vector of all the states in the initial belief. */
-    std::vector<State> initBel;
+    std::vector<VectorState> initBel;
 
     /**
      * Finds and counts the rocks on the map, and initialisese the required
@@ -266,21 +266,21 @@ private:
     void initialise();
 
     /** Generates a state uniformly at random. */
-    void sampleStateUniform(State &sVals);
+    void sampleStateUniform(VectorState &sVals);
     /** Generates the state of the rocks uniformly at random. */
-    void sampleRocks(State &sVals);
+    void sampleRocks(VectorState &sVals);
     /** Decodes rocks from an integer. */
-    void decodeRocks(long val, State &sVals);
+    void decodeRocks(long val, VectorState &sVals);
 
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
      */
-    bool makeNextState(State &sVals, long actId, State &nxtSVals);
+    bool makeNextState(VectorState &sVals, long actId, VectorState &nxtSVals);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    int makeObs(State &nxtSVals, long actId);
+    int makeObs(VectorState &nxtSVals, long actId);
 
     /** The number of rows in the map. */
     long nRows;

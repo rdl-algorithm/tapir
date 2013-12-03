@@ -22,8 +22,8 @@
 #include "Serializer.hpp"               // for Serializer
 #include "Solver.hpp"                   // for Solver
 #include "State.hpp"                    // for State
-#include "StatePool.hpp"                // for StatePool, CompStVals
-#include "StateWrapper.hpp"             // for StateWrapper, StateWrapper::currId
+#include "StatePool.hpp"                // for StatePool, CompStVal
+#include "StateInfo.hpp"             // for StateInfo, StateInfo::currId
 
 using std::endl;
 
@@ -36,35 +36,17 @@ TextSerializer::TextSerializer(Solver *solver) :
             nodeIndex() {
 }
 
-void TextSerializer::save(State &state, std::ostream &os) {
-    os << state.vals.size() << " ";
-    for (double v : state.vals) {
-        os << v << " ";
-    }
+void TextSerializer::save(StateInfo &info, std::ostream &os) {
+    os << "s " << info.id << " : ";
+    save(*(info.state), os);
 }
 
-void TextSerializer::load(State &state, std::istream &is) {
-    state.vals.clear();
-    std::size_t nStVars;
-    is >> nStVars;
-    for (std::size_t i = 0; i < nStVars; i++) {
-        double tmpDouble;
-        is >> tmpDouble;
-        state.vals.push_back(tmpDouble);
-    }
-}
-
-void TextSerializer::save(StateWrapper &wrapper, std::ostream &os) {
-    os << "s " << wrapper.id << " : ";
-    save(wrapper.state, os);
-}
-
-void TextSerializer::load(StateWrapper &wrapper, std::istream &is) {
+void TextSerializer::load(StateInfo &info, std::istream &is) {
     std::string tmpStr;
-    is >> tmpStr >> wrapper.id >> tmpStr;
-    load(wrapper.state, is);
-    if (wrapper.id > StateWrapper::currId) {
-        StateWrapper::currId = wrapper.id + 1;
+    is >> tmpStr >> info.id >> tmpStr;
+    load(*(info.state), is);
+    if (info.id > StateInfo::currId) {
+        StateInfo::currId = info.id + 1;
     }
 }
 
@@ -72,7 +54,7 @@ void TextSerializer::save(StatePool &pool, std::ostream &os) {
     os << "STATESPOOL-BEGIN" << endl;
     os << "nStates: " << pool.nStates << endl;
     os << "nStVars: " << pool.nSDim << endl;
-    for (StateWrapper *st : pool.allStates) {
+    for (StateInfo *st : pool.allStates) {
         save(*st, os);
         os << endl;
     }
@@ -103,10 +85,10 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
 
     std::getline(is, line);
     while (line.find("STATESPOOL-END") == std::string::npos) {
-        StateWrapper *newSt = new StateWrapper();
+        StateInfo *newSt = new StateInfo();
         std::stringstream sstr(line);
         load(*newSt, sstr);
-        typedef std::pair<std::set<StateWrapper*, CompStVals>::iterator, bool> ResultType;
+        typedef std::pair<std::set<StateInfo*, CompStVals>::iterator, bool> ResultType;
         ResultType insertResult = pool.allStates.insert(newSt);
         pool.allStatesIdx[newSt->id] = *(insertResult.first);
         for (long i = 0; i < pool.nSDim; i++) {
@@ -138,10 +120,10 @@ void TextSerializer::load(Observation &obs, std::istream &is) {
 
 void TextSerializer::save(HistoryEntry &entry, std::ostream &os) {
     os << "HistoryEntry < " << entry.seqId << " " << entry.entryId << " >: ( "
-            << entry.st->getId() << " " << entry.actId << " < ";
+            << entry.stateInfo->getId() << " " << entry.actId << " < ";
     save(entry.obs, os);
-    os << " > " << entry.disc << " " << entry.rew << " " << entry.qVal << " ) ";
-    save(*(entry.st), os);
+    os << " > " << entry.discount << " " << entry.immediateReward << " " << entry.qVal << " ) ";
+    save(*(entry.stateInfo), os);
 }
 
 void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
@@ -150,10 +132,10 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     is >> tmpStr >> tmpStr >> entry.seqId >> entry.entryId >> tmpStr >> tmpStr
             >> stateId >> entry.actId >> tmpStr;
     load(entry.obs, is);
-    is >> tmpStr >> entry.disc >> entry.rew >> entry.qVal >> tmpStr;
+    is >> tmpStr >> entry.discount >> entry.immediateReward >> entry.qVal >> tmpStr;
     entry.hasBeenBackup = true;
-    entry.st = solver->allStates->getStateById(stateId);
-    entry.st->addInfo(&entry);
+    entry.stateInfo = solver->allStates->getStateById(stateId);
+    entry.stateInfo->addHistoryEntry(&entry);
 }
 
 void TextSerializer::save(HistorySequence &seq, std::ostream &os) {

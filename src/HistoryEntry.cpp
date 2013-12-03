@@ -1,23 +1,23 @@
 #include "HistoryEntry.hpp"
 
 class BeliefNode;
-class StateWrapper;
+class StateInfo;
 
 HistoryEntry::HistoryEntry() :
             HistoryEntry(nullptr, 0, 0) {
 }
 
-HistoryEntry::HistoryEntry(StateWrapper *st) :
-            HistoryEntry(st, 0, 0) {
+HistoryEntry::HistoryEntry(StateInfo *stateInfo) :
+            HistoryEntry(stateInfo, 0, 0) {
 }
 
-HistoryEntry::HistoryEntry(StateWrapper *st, long seqId, long entryId) :
-            st(st),
+HistoryEntry::HistoryEntry(StateInfo *stateInfo, long seqId, long entryId) :
+            stateInfo(stateInfo),
             hasBeenBackup(false),
             seqId(seqId),
             entryId(entryId),
-            disc(1.0),
-            rew(0),
+            discount(1.0),
+            immediateReward(0),
             qVal(0),
             actId(-1),
             obs(),

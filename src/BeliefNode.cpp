@@ -11,7 +11,7 @@
 #include "GlobalResources.hpp"          // for GlobalResources
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "Observation.hpp"              // for Observation
-#include "StateWrapper.hpp"             // for StateWrapper
+#include "StateInfo.hpp"             // for StateInfo
 using std::cerr;
 using std::endl;
 
@@ -138,7 +138,7 @@ BeliefNode* BeliefNode::addChild(long actIdx, Observation &obs) {
 }
 
 HistoryEntry* BeliefNode::sampleAParticle() {
-    return particles[GlobalResources::randIntBetween(0, nParticles - 1)];
+    return particles[global_resources::randIntBetween(0, nParticles - 1)];
 }
 
 void BeliefNode::updateVal(long actIdx, double newVal) {
@@ -200,7 +200,7 @@ double BeliefNode::distL1Independent(BeliefNode *b) {
             itPart1++) {
         for (itPart2 = particles.begin(); itPart2 != particles.end();
                 itPart2++) {
-            dist = dist + (*itPart1)->st->distL1((*itPart2)->st);
+            dist = dist + (*itPart1)->stateInfo->distL1(*((*itPart2)->stateInfo));
         }
         dist = dist / (nParticles * b->nParticles);
     }

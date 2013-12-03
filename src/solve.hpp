@@ -49,7 +49,7 @@ int solve(int argc, const char* argv[], ProgramOptions *options) {
     string polPath = vm["policy"].as<string>();
     long seed = vm["seed"].as<long>();
     cerr << "Seed: " << seed << endl;
-    GlobalResources::seed(seed);
+    global_resources::seed(seed);
 
     Model* model = new ModelType(vm);
     Solver* solver = new Solver(model);

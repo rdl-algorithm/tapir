@@ -44,7 +44,7 @@ public:
         }
     }
 
-    void dispState(State &s, std::ostream &os) {
+    void dispState(VectorState &s, std::ostream &os) {
         os << "(" << s[0] << ", " << s[1] << ")";
     }
 
@@ -59,9 +59,9 @@ public:
     UnderwaterNavModifModel(po::variables_map vm);
     ~UnderwaterNavModifModel();
     UnderwaterNavModifModel(const UnderwaterNavModifModel&) = delete;
-    UnderwaterNavModifModel(UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel(UnderwaterNavModifModel&&) = delete;
     UnderwaterNavModifModel &operator=(const UnderwaterNavModifModel&) = delete;
-    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel&&) = delete;
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
@@ -104,32 +104,32 @@ public:
     }
 
     // Other virtual methods
-    void sampleAnInitState(State &tmpStVals);
-    bool isTerm(State &sVals);
-    void solveHeuristic(State &s, double *qVal);
+    void sampleAnInitState(VectorState &tmpStVals);
+    bool isTerm(VectorState &sVals);
+    void solveHeuristic(VectorState &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(State &currStVals, unsigned long actId,
-            double *immediateRew, State &nxtSVals, Observation &obs);
-    double getReward(State &sVals);
-    double getReward(State &sVals, unsigned long actId);
+    bool getNextState(VectorState &currStVals, unsigned long actId,
+            double *immediateRew, VectorState &nxtSVals, Observation &obs);
+    double getReward(VectorState &sVals);
+    double getReward(VectorState &sVals, unsigned long actId);
 
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partSt, std::vector<State> &partNxtSt);
+            std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partNxtSt);
+            std::vector<VectorState> &partNxtSt);
 
-    void setChanges(const char* chName, std::vector<long> &chTime);
-    void update(long tCh, std::vector<State> &affectedRange,
+    void getChangeTimes(const char* chName, std::vector<long> &chTime);
+    void update(long tCh, std::vector<VectorState> &affectedRange,
             std::vector<ChangeType> &typeOfChanges);
-    bool modifStSeq(std::vector<State> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<State> &modifStSeq,
+    bool modifStSeq(std::vector<VectorState> &seqStVals, long startAffectedIdx,
+            long endAffectedIdx, std::vector<VectorState> &modifStSeq,
             std::vector<long> &modifActSeq,
             std::vector<Observation> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
-    void drawState(State &s, std::ostream &os);
+    void drawState(VectorState &s, std::ostream &os);
 
     // Additional initialisation.
     void setInitObsGoal();
@@ -152,16 +152,16 @@ private:
     /** The number of state particles in the initial belief. */
     unsigned long nInitBel;
     /** A vector of all the states in the initial belief. */
-    std::vector<State> initBel;
+    std::vector<VectorState> initBel;
 
     unsigned long nX, nY, nGoals, nRocks;
     double goalReward, crashPenalty, moveCost, moveDiagCost;
     double ctrlCorrectProb, ctrlErrProb1;
     double rolloutExploreTh;
     std::vector<std::string> envMap;
-    std::vector<State> goals;
-    std::vector<State> rocks;
-    std::vector<State> allObservations;
+    std::vector<VectorState> goals;
+    std::vector<VectorState> rocks;
+    std::vector<VectorState> allObservations;
     std::map<long, std::map<long, short> > cellType;
     // 0: usual
     // 1: goals
@@ -172,25 +172,25 @@ private:
     short nSpcRew;
     std::vector<double> spcRew;
     std::map<long, std::vector<std::string> > changes;
-    std::vector<State> obstacleRegion;
+    std::vector<VectorState> obstacleRegion;
 
     StRoadmap *roadmap;
     long nTryCon, maxDistCon, nVerts;
 
     //double getExpDist(State &s, long firstAct);
-    double getDist(State &s1, State &s2);
-    void getNextState(State &s, unsigned long actId, State &sp);
-    void inObsRegion(State &st, Observation &obs);
-    double getDistToNearestGoal(State &st);
-    double getDistToNearestObs(State &st, State &nxtSt);
-    bool inGoal(State &st);
-    bool inRock(State &st);
-    void getReachableSt(State &s, unsigned long actId,
-            std::vector<State> &nxtS);
-    std::vector<State>::iterator getIterator(std::vector<State> &vecStVals,
+    double getDist(VectorState &s1, VectorState &s2);
+    void getNextState(VectorState &s, unsigned long actId, VectorState &sp);
+    void inObsRegion(VectorState &st, Observation &obs);
+    double getDistToNearestGoal(VectorState &st);
+    double getDistToNearestObs(VectorState &st, VectorState &nxtSt);
+    bool inGoal(VectorState &st);
+    bool inRock(VectorState &st);
+    void getReachableSt(VectorState &s, unsigned long actId,
+            std::vector<VectorState> &nxtS);
+    std::vector<VectorState>::iterator getIterator(std::vector<VectorState> &vecStVals,
             long x, long y);
 
-    int findCollision(State &s);
+    int findCollision(VectorState &s);
 
 };
 

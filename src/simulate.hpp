@@ -66,7 +66,7 @@ int simulate(int argc, const char* argv[], ProgramOptions *options) {
     long nRuns = vm["simulation.nRuns"].as<long>();
     long seed = vm["seed"].as<long>();
     cerr << "Seed: " << seed << endl;
-    GlobalResources::seed(seed);
+    global_resources::seed(seed);
 
     std::ifstream inFile;
     inFile.open(polPath);
@@ -80,9 +80,9 @@ int simulate(int argc, const char* argv[], ProgramOptions *options) {
     serializer->load(inFile);
     inFile.close();
 
-    vector<long> modelCh;
+    vector<long> changeTimes;
     if (hasChanges) {
-        model->setChanges(changesPath.c_str(), modelCh);
+        changeTimes = model->loadChanges(changesPath.c_str());
     }
     vector<State> trajSt;
     vector<long> trajActId;

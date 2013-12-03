@@ -6,7 +6,7 @@
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"                    // for State
-#include "StateWrapper.hpp"             // for StateWrapper
+#include "StateInfo.hpp"             // for StateInfo
 long HistorySequence::currId = 0;
 
 HistorySequence::HistorySequence() :
@@ -19,7 +19,7 @@ HistorySequence::HistorySequence(long startDepth) :
             startAffectedIdx(LONG_MAX),
             endAffectedIdx(-1),
             histSeq(),
-            chType(ChangeType::UNDEFINED) {
+            changeType(ChangeType::UNDEFINED) {
     currId++;
 }
 
@@ -42,31 +42,31 @@ HistoryEntry* HistorySequence::getFirstEntry() {
 }
 
 HistoryEntry* HistorySequence::addEntry(long actId, Observation &obs,
-        StateWrapper *s) {
+        StateInfo *s) {
     histSeq.back()->setNxt(actId, obs);
     HistoryEntry* newEntry = new HistoryEntry(s, id, histSeq.size());
     histSeq.push_back(newEntry);
     return newEntry;
 }
 
-HistoryEntry* HistorySequence::addEntry(StateWrapper *s, long actId,
+HistoryEntry* HistorySequence::addEntry(StateInfo *s, long actId,
         Observation &obs, double rew, double disc) {
     HistoryEntry* newEntry = new HistoryEntry(s, id, histSeq.size());
     newEntry->actId = actId;
     newEntry->obs = obs;
-    newEntry->rew = rew;
-    newEntry->disc = disc;
+    newEntry->immediateReward = rew;
+    newEntry->discount = disc;
     histSeq.push_back(newEntry);
     return newEntry;
 }
 
-HistoryEntry* HistorySequence::addEntry(StateWrapper *s, long actId,
+HistoryEntry* HistorySequence::addEntry(StateInfo *s, long actId,
         Observation &obs, double rew, double disc, long atIdx) {
     HistoryEntry* newEntry = new HistoryEntry(s, id, atIdx);
     newEntry->actId = actId;
     newEntry->obs = obs;
-    newEntry->rew = rew;
-    newEntry->disc = disc;
+    newEntry->immediateReward = rew;
+    newEntry->discount = disc;
     histSeq.insert(histSeq.begin() + atIdx, newEntry);
     return newEntry;
 }
@@ -75,14 +75,12 @@ void HistorySequence::addEntry(HistoryEntry *histEntry) {
     histSeq.push_back(histEntry);
 }
 
-void HistorySequence::getStValsSeq(std::vector<State> &seqStVals) {
-    seqStVals.clear();
-    std::vector<HistoryEntry*>::iterator it;
-    for (it = histSeq.begin(); it != histSeq.end(); it++) {
-        State s;
-        (*it)->st->getVals(s);
-        seqStVals.push_back(s);
+std::vector<State*> HistorySequence::getStates() {
+    std::vector<State*> states;
+    for (HistoryEntry *entry : histSeq) {
+        states.push_back(entry->stateInfo->getState());
     }
+    return states;
 }
 
 void HistorySequence::fixEntryId() {

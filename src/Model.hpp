@@ -1,8 +1,10 @@
 #ifndef MODEL_HPP
 #define MODEL_HPP
 
+#include <memory>                       // for unique_ptr
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
+
 #include "ChangeType.hpp"               // for ChangeType
 #include "Observation.hpp"              // for Observation
 class State;
@@ -11,6 +13,10 @@ class Model {
 public:
     /** Destructor must be virtual */
     virtual ~Model() = default;
+    Model(const Model&) = delete;
+    Model(Model&&) = delete;
+    Model &operator=(const Model&) = delete;
+    Model &operator=(Model&&) = delete;
 
     /* ---------- Virtual getters for important model parameters  ---------- */
     // POMDP parameters
@@ -49,49 +55,65 @@ public:
 
     /* --------------- Start virtual functions ----------------- */
     /** Samples an initial state from the belief vector. */
-    virtual void sampleAnInitState(State &sVals) = 0;
+    virtual std::unique_ptr<State> sampleAnInitState() = 0;
     /** Returns true iff the given state is terminal. */
-    virtual bool isTerm(State &sVals) = 0;
+    virtual bool isTerm(State &state) = 0;
     /** Approximates the q-value of a state */
-    virtual void solveHeuristic(State &sVals, double *qVal) = 0;
+    virtual double solveHeuristic(State &state) = 0;
     /** Returns the default q-value */
     virtual double getDefaultVal() = 0;
 
+    /** Represents the results of a step in the model, including the next state,
+     * observation, and reward.
+     */
+    struct StepResult {
+        long action;
+        Observation observation;
+        double immediateReward;
+        std::unique_ptr<State> nextState;
+        bool isTerminal;
+    };
     /** Generates the next state, an observation, and the reward. */
-    virtual bool getNextState(State &sVals, unsigned long actId,
-            double *immediateRew, State &nxtSVals, Observation &obs) = 0;
+    virtual StepResult generateStep(State &state, unsigned long action) = 0;
     /** Returns the reward for the given state. */
-    virtual double getReward(State &sVals) = 0;
+    virtual double getReward(State &state) = 0;
     /** Returns the reward for the given state and action. */
-    virtual double getReward(State &sVals, unsigned long actId) = 0;
+    virtual double getReward(State &state, unsigned long action) = 0;
 
-    /** Creates a new belief node based on the state particles of the
+    /** Generates new state particles based on the state particles of the
      * previous node, as well as on the action and observation.
      */
-    virtual void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partSt, std::vector<State> &partNxtSt) = 0;
-    /** Creates a new belief node based only on the previous action and
+    virtual std::vector<std::unique_ptr<State>> generateParticles(unsigned long action,
+            Observation &obs, std::vector<State*> &previousParticles) = 0;
+    /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
      *
      * This should only be used if the previous belief turns out to be
      * incompatible with the current observation.
      */
-    virtual void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partNxtSt) = 0;
+    virtual std::vector<std::unique_ptr<State>> generateParticles(unsigned long action,
+            Observation &obs) = 0;
 
     /** Loads model changes from the given file. */
-    virtual void setChanges(const char *chName, std::vector<long> &chTime) = 0;
-    /** Retrieves the states that are affected*/
-    virtual void update(long tCh, std::vector<State> &affectedRange,
+    virtual std::vector<long> loadChanges(const char *chName) = 0;
+
+    /** Retrieves the range of states that is affected by the change. */
+    virtual void update(long tCh, std::vector<std::unique_ptr<State> > &affectedRange,
             std::vector<ChangeType> &typeOfChanges) = 0;
-    virtual bool modifStSeq(std::vector<State> &seqStVals,
+
+    /** Generates a modified version of the given sequence of states, between
+     * the start and end indices.
+     *
+     * Should return true if modifications have actually been made, and false
+     * otherwise.
+     */
+    virtual bool modifStSeq(std::vector<State*> &states,
             long startAffectedIdx, long endAffectedIdx,
-            std::vector<State> &modifStSeq, std::vector<long> &modifActSeq,
+            std::vector<std::unique_ptr<State> > &modifStSeq, std::vector<long> &modifActSeq,
             std::vector<Observation> &modifObsSeq,
             std::vector<double> &modifRewSeq) = 0;
 
     virtual void dispAct(unsigned long actId, std::ostream &os) = 0;
-    virtual void dispState(State &s, std::ostream &os) = 0;
     virtual void dispObs(Observation &o, std::ostream &os) = 0;
     virtual void drawEnv(std::ostream &os) = 0;
     virtual void drawState(State &s, std::ostream &os) = 0;

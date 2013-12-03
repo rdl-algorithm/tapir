@@ -23,9 +23,9 @@ public:
     BeliefNode(long id);
     ~BeliefNode();
     BeliefNode(const BeliefNode&) = delete;
-    BeliefNode(BeliefNode&) = delete;
+    BeliefNode(BeliefNode&&) = delete;
     BeliefNode &operator=(const BeliefNode&) = delete;
-    BeliefNode &operator=(BeliefNode&) = delete;
+    BeliefNode &operator=(BeliefNode&&) = delete;
 
     long getUCBAct();
     long getBestAct();

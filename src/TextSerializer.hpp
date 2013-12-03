@@ -16,7 +16,7 @@ class ObservationEdge;
 class Solver;
 class State;
 class StatePool;
-class StateWrapper;
+class StateInfo;
 
 class TextSerializer: public Serializer {
 public:
@@ -24,14 +24,14 @@ public:
     TextSerializer(Solver *solver);
     virtual ~TextSerializer() = default;
     TextSerializer(const TextSerializer&) = delete;
-    TextSerializer(TextSerializer&) = delete;
+    TextSerializer(TextSerializer&&) = delete;
     TextSerializer &operator=(const TextSerializer&) = delete;
-    TextSerializer &operator=(TextSerializer&) = delete;
+    TextSerializer &operator=(TextSerializer&&) = delete;
 
-    virtual void save(State &state, std::ostream &os);
-    virtual void load(State &state, std::istream &is);
-    virtual void save(StateWrapper &wrapper, std::ostream &os);
-    virtual void load(StateWrapper &wrapper, std::istream &is);
+    virtual void save(State &state, std::ostream &os) = 0;
+    virtual void load(State &state, std::istream &is) = 0;
+    virtual void save(StateInfo &wrapper, std::ostream &os);
+    virtual void load(StateInfo &wrapper, std::istream &is);
     virtual void save(StatePool &pool, std::ostream &os);
     virtual void load(StatePool &pool, std::istream &is);
 

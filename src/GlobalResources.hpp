@@ -2,19 +2,12 @@
 #define GLOBALRESOURCES_HPP
 
 #include <random>                       // for default_random_engine, uniform_int_distribution, uniform_real_distribution
-class GlobalResources {
-public:
-    static std::default_random_engine randGen;
-    static std::uniform_real_distribution<double> dist01;
-    static double rand01() {
-        return dist01(randGen);
-    }
-    static long randIntBetween(long min, long max) {
-        return std::uniform_int_distribution<long>(min, max)(randGen);
-    }
-    static void seed(long seed) {
-        randGen.seed(seed);
-    }
-};
+namespace global_resources {
+
+void seed(long seed);
+double rand01();
+long randIntBetween(long min, long max);
+
+}  // namespace global_resources
 
 #endif /* GLOBALRESOURCES_HPP */

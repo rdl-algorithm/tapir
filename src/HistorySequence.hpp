@@ -6,7 +6,7 @@
 #include "Observation.hpp"              // for Observation
 class HistoryEntry;
 class State;
-class StateWrapper;
+class StateInfo;
 
 class HistorySequence {
 public:
@@ -14,24 +14,23 @@ public:
     friend class Solver;
     friend class TextSerializer;
 
-    HistorySequence();
     HistorySequence(long startDepth);
     HistorySequence(HistoryEntry* startEntry, long startDepth);
     ~HistorySequence();
     HistorySequence(const HistorySequence&) = delete;
-    HistorySequence(HistorySequence&) = delete;
+    HistorySequence(HistorySequence&&) = delete;
     HistorySequence &operator=(const HistorySequence&) = delete;
-    HistorySequence &operator=(HistorySequence&) = delete;
+    HistorySequence &operator=(HistorySequence&&) = delete;
 
     HistoryEntry* getFirstEntry();
-    HistoryEntry* addEntry(long actId, Observation &obs, StateWrapper *s);
-    HistoryEntry* addEntry(StateWrapper *s, long actId, Observation &obs,
+    HistoryEntry* addEntry(long actId, Observation &obs, StateInfo *s);
+    HistoryEntry* addEntry(StateInfo *s, long actId, Observation &obs,
             double rew, double disc);
-    HistoryEntry* addEntry(StateWrapper *s, long actId, Observation &obs,
+    HistoryEntry* addEntry(StateInfo *s, long actId, Observation &obs,
             double rew, double disc, long atIdx);
     void addEntry(HistoryEntry *histEntry);
 
-    void getStValsSeq(std::vector<State> &seqStVals);
+    std::vector<State*> getStates();
 
     long getId() {
         return id;
@@ -39,13 +38,15 @@ public:
     void fixEntryId();
 
 private:
+    HistorySequence();
+
     static long currId;
 
     long id;
     long startDepth, startAffectedIdx, endAffectedIdx;
     std::vector<HistoryEntry*> histSeq;
 
-    ChangeType chType;
+    ChangeType changeType;
 };
 
 #endif /* HISTORYSEQUENCE_HPP */

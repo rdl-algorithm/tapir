@@ -13,7 +13,7 @@ class HistorySequence;
 class ObservationEdge;
 class State;
 class StatePool;
-class StateWrapper;
+class StateInfo;
 
 class Serializer {
 public:
@@ -22,9 +22,9 @@ public:
     }
     virtual ~Serializer() = default;
     Serializer(const Serializer&) = delete;
-    Serializer(Serializer&) = delete;
+    Serializer(Serializer&&) = delete;
     Serializer &operator=(const Serializer&) = delete;
-    Serializer &operator=(Serializer&) = delete;
+    Serializer &operator=(Serializer&&) = delete;
 
     virtual void save(std::ostream &os) {
         save(*(solver->allStates), os);
@@ -39,8 +39,8 @@ public:
 
     virtual void save(State &state, std::ostream &os) = 0;
     virtual void load(State &state, std::istream &is) = 0;
-    virtual void save(StateWrapper &wrapper, std::ostream &os) = 0;
-    virtual void load(StateWrapper &wrapper, std::istream &is) = 0;
+    virtual void save(StateInfo &wrapper, std::ostream &os) = 0;
+    virtual void load(StateInfo &wrapper, std::istream &is) = 0;
     virtual void save(StatePool &pool, std::ostream &os) = 0;
     virtual void load(StatePool &pool, std::istream &is) = 0;
 

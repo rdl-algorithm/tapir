@@ -50,9 +50,9 @@ public:
     TagModel(po::variables_map vm);
     ~TagModel() = default;
     TagModel(const TagModel&) = delete;
-    TagModel(TagModel&) = delete;
+    TagModel(TagModel&&) = delete;
     TagModel &operator=(const TagModel&) = delete;
-    TagModel &operator=(TagModel&) = delete;
+    TagModel &operator=(TagModel&&) = delete;
 
     /** Enumerates the possible actions */
     enum Action
@@ -109,7 +109,7 @@ public:
             UNTAGGED = 0, TAGGED = 1
     };
 
-    void dispState(State &s, std::ostream &os) {
+    void dispState(VectorState &s, std::ostream &os) {
         os << "ROBOT: " << decodeCoords(s.vals[0]) << " OPPONENT: "
                 << decodeCoords(s.vals[1]);
         if (s.vals[2] == TAGGED) {
@@ -170,32 +170,32 @@ public:
     }
 
     // Other virtual methods
-    void sampleAnInitState(State &sVals);
-    bool isTerm(State &sVals);
-    void solveHeuristic(State &s, double *qVal);
+    void sampleAnInitState(VectorState &sVals);
+    bool isTerm(VectorState &sVals);
+    void solveHeuristic(VectorState &s, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(State &sVals, unsigned long actId, double *immediateRew,
-            State &nxtSVals, Observation &obs);
-    double getReward(State &sVals);
-    double getReward(State &sVals, unsigned long actId);
+    bool getNextState(VectorState &sVals, unsigned long actId, double *immediateRew,
+            VectorState &nxtSVals, Observation &obs);
+    double getReward(VectorState &sVals);
+    double getReward(VectorState &sVals, unsigned long actId);
 
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partSt, std::vector<State> &partNxtSt);
+            std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partNxtSt);
+            std::vector<VectorState> &partNxtSt);
 
-    void setChanges(const char *chName, std::vector<long> &chTime);
-    void update(long tCh, std::vector<State> &affectedRange,
+    void getChangeTimes(const char *chName, std::vector<long> &chTime);
+    void update(long tCh, std::vector<VectorState> &affectedRange,
             std::vector<ChangeType> &typeOfChanges);
-    bool modifStSeq(std::vector<State> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<State> &modifStSeq,
+    bool modifStSeq(std::vector<VectorState> &seqStVals, long startAffectedIdx,
+            long endAffectedIdx, std::vector<VectorState> &modifStSeq,
             std::vector<long> &modifActSeq,
             std::vector<Observation> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
-    void drawState(State &s, std::ostream &os);
+    void drawState(VectorState &s, std::ostream &os);
 
 private:
     // Problem parameters.
@@ -216,17 +216,17 @@ private:
     void initialise();
 
     /** Generates an untagged state uniformly at random. */
-    void sampleStateUniform(State &sVals);
+    void sampleStateUniform(VectorState &sVals);
 
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
      */
-    bool makeNextState(State &sVals, unsigned long actId, State &nxtSVals);
+    bool makeNextState(VectorState &sVals, unsigned long actId, VectorState &nxtSVals);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    void makeObs(State &nxtSVals, unsigned long actId, Observation &obsVals);
+    void makeObs(VectorState &nxtSVals, unsigned long actId, Observation &obsVals);
     /** Moves the opponent. */
     void moveOpponent(Coords &robotPos, Coords &opponentPos);
     /** Generates the distribution for the opponent's actions. */

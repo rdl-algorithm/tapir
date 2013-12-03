@@ -12,9 +12,9 @@ public:
     BeliefTree();
     ~BeliefTree();
     BeliefTree(const BeliefTree&) = delete;
-    BeliefTree(BeliefTree&) = delete;
+    BeliefTree(BeliefTree&&) = delete;
     BeliefTree &operator=(const BeliefTree&) = delete;
-    BeliefTree &operator=(BeliefTree&) = delete;
+    BeliefTree &operator=(BeliefTree&&) = delete;
     void reset();
 
     BeliefNode* getRoot() {

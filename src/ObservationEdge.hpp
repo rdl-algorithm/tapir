@@ -9,20 +9,20 @@ class ObservationEdge {
 public:
     friend class TextSerializer;
 
-    ObservationEdge();
     ObservationEdge(Observation &o, BeliefNode* nxtBelNode);
 
     ~ObservationEdge() = default;
     ObservationEdge(const ObservationEdge&) = delete;
-    ObservationEdge(ObservationEdge&) = delete;
+    ObservationEdge(ObservationEdge&&) = delete;
     ObservationEdge &operator=(const ObservationEdge&) = delete;
-    ObservationEdge &operator=(ObservationEdge&) = delete;
+    ObservationEdge &operator=(ObservationEdge&&) = delete;
 
     bool isObs(Observation &o);
     BeliefNode* getNodeChild();
     void enqueueChildren(std::queue<BeliefNode*> &queue);
 
 private:
+    ObservationEdge();
     Observation obs;
     BeliefNode* child;
 };
