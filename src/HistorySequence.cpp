@@ -37,21 +37,21 @@ HistorySequence::~HistorySequence() {
     histSeq.resize(0);
 }
 
-HistoryEntry* HistorySequence::getFirstEntry() {
+HistoryEntry *HistorySequence::getFirstEntry() {
     return histSeq[0];
 }
 
-HistoryEntry* HistorySequence::addEntry(long actId, Observation &obs,
+HistoryEntry *HistorySequence::addEntry(long actId, Observation &obs,
         StateInfo *s) {
     histSeq.back()->setNxt(actId, obs);
-    HistoryEntry* newEntry = new HistoryEntry(s, id, histSeq.size());
+    HistoryEntry *newEntry = new HistoryEntry(s, id, histSeq.size());
     histSeq.push_back(newEntry);
     return newEntry;
 }
 
-HistoryEntry* HistorySequence::addEntry(StateInfo *s, long actId,
+HistoryEntry *HistorySequence::addEntry(StateInfo *s, long actId,
         Observation &obs, double rew, double disc) {
-    HistoryEntry* newEntry = new HistoryEntry(s, id, histSeq.size());
+    HistoryEntry *newEntry = new HistoryEntry(s, id, histSeq.size());
     newEntry->actId = actId;
     newEntry->obs = obs;
     newEntry->immediateReward = rew;
@@ -60,9 +60,9 @@ HistoryEntry* HistorySequence::addEntry(StateInfo *s, long actId,
     return newEntry;
 }
 
-HistoryEntry* HistorySequence::addEntry(StateInfo *s, long actId,
+HistoryEntry *HistorySequence::addEntry(StateInfo *s, long actId,
         Observation &obs, double rew, double disc, long atIdx) {
-    HistoryEntry* newEntry = new HistoryEntry(s, id, atIdx);
+    HistoryEntry *newEntry = new HistoryEntry(s, id, atIdx);
     newEntry->actId = actId;
     newEntry->obs = obs;
     newEntry->immediateReward = rew;

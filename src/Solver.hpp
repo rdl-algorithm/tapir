@@ -100,13 +100,24 @@ private:
     void improveSol(BeliefNode *startNode, long maxTrials, double depthTh);
 
     /* ------------------ Methods for handling model changes ------------------- */
-    void updatePol(std::set<HistorySequence*> &affectedHistSeq);
+    /** Identifies which parts of which history sequences are affected by the
+     * changes to the model.
+     */
     void identifyAffectedPol(std::vector<std::unique_ptr<State> > &affectedRage,
-            std::vector<ChangeType> &chTypes,
-            std::set<HistorySequence*> &affectedHistSeq);
+                std::vector<ChangeType> &chTypes,
+                std::set<HistorySequence*> &affectedHistSeq);
+    /** Updates the affected history sequences */
+    void updatePol(std::set<HistorySequence*> &affectedHistSeq);
+    /** Resets the affeted history sequences */
     void resetAffected(std::set<HistorySequence*> affectedHistSeq);
+
+    /** Updates the q-values based on the changes to reward values
+     * within a history sequence.
+     */
     void updateVal(HistorySequence *histSeq);
+    /** Undoes the effects of backing up a history sequence */
     void removePathFrBelNode(HistorySequence *history);
+
     void modifHistSeqFr(HistorySequence *history,
             std::vector<std::unique_ptr<State> > &modifStSeq,
             std::vector<long> &modifActSeq,

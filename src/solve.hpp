@@ -51,8 +51,8 @@ int solve(int argc, const char* argv[], ProgramOptions *options) {
     cerr << "Seed: " << seed << endl;
     global_resources::seed(seed);
 
-    Model* model = new ModelType(vm);
-    Solver* solver = new Solver(model);
+    Model *model = new ModelType(vm);
+    Solver *solver = new Solver(model);
 
     double totT;
     std::clock_t tStart;

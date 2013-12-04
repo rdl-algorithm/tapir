@@ -83,7 +83,7 @@ public:
     /** Generates new state particles based on the state particles of the
      * previous node, as well as on the action and observation.
      */
-    virtual std::vector<std::unique_ptr<State>> generateParticles(unsigned long action,
+    virtual std::vector<std::unique_ptr<State> > generateParticles(unsigned long action,
             Observation &obs, std::vector<State*> &previousParticles) = 0;
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
@@ -91,14 +91,14 @@ public:
      * This should only be used if the previous belief turns out to be
      * incompatible with the current observation.
      */
-    virtual std::vector<std::unique_ptr<State>> generateParticles(unsigned long action,
+    virtual std::vector<std::unique_ptr<State> > generateParticles(unsigned long action,
             Observation &obs) = 0;
 
     /** Loads model changes from the given file. */
-    virtual std::vector<long> loadChanges(const char *chName) = 0;
+    virtual std::vector<long> loadChanges(const char *changeFilename) = 0;
 
     /** Retrieves the range of states that is affected by the change. */
-    virtual void update(long tCh, std::vector<std::unique_ptr<State> > &affectedRange,
+    virtual void update(long time, std::vector<std::unique_ptr<State> > &affectedRange,
             std::vector<ChangeType> &typeOfChanges) = 0;
 
     /** Generates a modified version of the given sequence of states, between
@@ -113,10 +113,10 @@ public:
             std::vector<Observation> &modifObsSeq,
             std::vector<double> &modifRewSeq) = 0;
 
-    virtual void dispAct(unsigned long actId, std::ostream &os) = 0;
-    virtual void dispObs(Observation &o, std::ostream &os) = 0;
+    virtual void dispAct(unsigned long action, std::ostream &os) = 0;
+    virtual void dispObs(Observation &obs, std::ostream &os) = 0;
     virtual void drawEnv(std::ostream &os) = 0;
-    virtual void drawState(State &s, std::ostream &os) = 0;
+    virtual void drawState(State &sstate, std::ostream &os) = 0;
 };
 
 #endif

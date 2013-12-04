@@ -2,6 +2,7 @@
 
 #include <queue>                        // for queue
 #include <vector>                       // for vector, vector<>::iterator
+
 #include "Observation.hpp"              // for Observation
 #include "ObservationEdge.hpp"          // for ObservationEdge
 class BeliefNode;

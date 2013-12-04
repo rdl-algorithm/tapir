@@ -15,7 +15,7 @@ CXX  := g++
 # ----------------------------------------------------------------------
 # Compiler flags
 # ----------------------------------------------------------------------
-override INCDIRS     += -I$(ROOT)/src
+override INCDIRS     += -I$(ROOT)/src -I$(ROOT)/problems
 
 override CPPFLAGS    += -DDISTL1 $(INCDIRS)
 CPPFLAGS_release     := $(CPPFLAGS)

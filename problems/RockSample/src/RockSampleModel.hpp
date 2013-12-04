@@ -7,6 +7,7 @@
 #include <algorithm>                    // for copy
 #include <ios>                          // for dec, hex
 #include <iterator>                     // for ostream_iterator
+#include <memory>                       // for unique_ptr
 #include <ostream>                      // for ostream, operator<<, basic_ostream, basic_ostream::operator<<, basic_ostream<>::__ostream_type
 #include <string>                       // for string
 #include <vector>                       // for vector
@@ -14,40 +15,12 @@
 #include <boost/program_options.hpp>    // for program_options, variables_map
 
 #include "ChangeType.hpp"               // for ChangeType
+#include "GridPosition.hpp"             // for GridPosition
 #include "Model.hpp"                    // for Model
 #include "Observation.hpp"              // for Observation
-#include "State.hpp"                    // for State
+#include "RockSampleState.hpp"          // for RockSampleState
 
 namespace po = boost::program_options;
-
-struct Coords {
-    long i;
-    long j;
-    Coords() :
-                i(0),
-                j(0) {
-    }
-    Coords(long i, long j) :
-                i(i),
-                j(j) {
-    }
-
-    double distance(Coords &other) {
-        return std::abs(i - other.i) + std::abs(j - other.j);
-    }
-
-};
-
-inline std::ostream &operator<<(std::ostream &os, const Coords &obj) {
-    os << "(" << obj.i << ", " << obj.j << ")";
-    return os;
-}
-inline bool operator==(const Coords &lhs, const Coords &rhs) {
-    return lhs.i == rhs.i && lhs.j == rhs.j;
-}
-inline bool operator!=(const Coords &lhs, const Coords &rhs) {
-    return !(lhs == rhs);
-}
 
 class RockSampleModel: public Model {
 public:
@@ -69,12 +42,12 @@ public:
             NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, SAMPLE = 4, CHECK = 5
     };
 
-    void dispAct(unsigned long actId, std::ostream &os) {
-        if (actId >= CHECK) {
-            os << "CHECK-" << actId - CHECK;
+    void dispAct(unsigned long action, std::ostream &os) {
+        if (action >= CHECK) {
+            os << "CHECK-" << action - CHECK;
             return;
         }
-        switch (actId) {
+        switch (action) {
         case NORTH:
             os << "NORTH";
             break;
@@ -91,7 +64,7 @@ public:
             os << "SAMPLE";
             break;
         default:
-            os << "ERROR-" << actId;
+            os << "ERROR-" << action;
             break;
         }
     }
@@ -133,25 +106,6 @@ public:
             os << "ERROR-" << cellType;
             break;
         }
-    }
-
-    void dispState(VectorState &s, std::ostream &os) {
-        os << Coords(s[0], s[1]) << " GOOD: {";
-        std::vector<int> goodRocks;
-        std::vector<int> badRocks;
-        for (std::size_t i = 2; i < s.size(); i++) {
-            if (s[i] == GOOD) {
-                goodRocks.push_back(i - 2);
-            } else {
-                badRocks.push_back(i - 2);
-            }
-        }
-        std::copy(goodRocks.begin(), goodRocks.end(),
-                std::ostream_iterator<double>(os, " "));
-        os << "}; BAD: {";
-        std::copy(badRocks.begin(), badRocks.end(),
-                std::ostream_iterator<double>(os, " "));
-        os << "}";
     }
 
     void dispObs(Observation &o, std::ostream &os) {
@@ -212,32 +166,31 @@ public:
     }
 
     // Other virtual methods
-    void sampleAnInitState(VectorState &sVals);
-    bool isTerm(VectorState &sVals);
-    void solveHeuristic(VectorState &s, double *qVal);
+    std::unique_ptr<State> sampleAnInitState();
+    bool isTerm(State &state);
+    double solveHeuristic(State &state, double *qVal);
     double getDefaultVal();
 
-    bool getNextState(VectorState &sVals, unsigned long actIdx, double *immediateRew,
-            VectorState &nxtSVals, Observation &obs);
-    double getReward(VectorState &sVals);
-    double getReward(VectorState &sVals, unsigned long actId);
+    Model::StepResult generateStep(State &state, unsigned long action);
+    double getReward(State &state);
+    double getReward(State &state, unsigned long action);
 
-    void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
-    void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<VectorState> &partNxtSt);
+    std::vector<std::unique_ptr<State>> generateParticles(unsigned long action, Observation &obs,
+            std::vector<State*> &previousParticles);
+    std::vector<std::unique_ptr<State>> getStatesSeeObs(unsigned long action, Observation &obs);
 
-    void getChangeTimes(const char *chName, std::vector<long> &chTime);
-    void update(long tCh, std::vector<VectorState> &affectedRange,
-            std::vector<ChangeType> &typeOfChanges);
-    bool modifStSeq(std::vector<VectorState> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<VectorState> &modifStSeq,
-            std::vector<long> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq);
+    std::vector<long> loadChanges(const char *changeFilename);
+    void update(long tCh, std::vector<std::unique_ptr<State> > &affectedRange,
+                std::vector<ChangeType> &typeOfChanges) = 0;
 
-    void drawEnv(std::ostream &os);
-    void drawState(VectorState &s, std::ostream &os);
+    virtual bool modifStSeq(std::vector<State*> &states,
+                long startAffectedIdx, long endAffectedIdx,
+                std::vector<std::unique_ptr<State> > &modifStSeq, std::vector<long> &modifActSeq,
+                std::vector<Observation> &modifObsSeq,
+                std::vector<double> &modifRewSeq) = 0;
+
+    virtual void drawEnv(std::ostream &os) = 0;
+    virtual void drawState(State &s, std::ostream &os) = 0;
 
 private:
     // Problem parameters.
@@ -254,33 +207,28 @@ private:
     long maxDistTry;
     double distTh;
 
-    /** The number of state particles in the initial belief. */
-    long nInitBel;
-    /** A vector of all the states in the initial belief. */
-    std::vector<VectorState> initBel;
-
     /**
-     * Finds and counts the rocks on the map, and initialisese the required
+     * Finds and counts the rocks on the map, and initialises the required
      * data structures and variables.
      */
     void initialise();
 
     /** Generates a state uniformly at random. */
-    void sampleStateUniform(VectorState &sVals);
+    std::unique_ptr<State>  sampleStateUniform();
     /** Generates the state of the rocks uniformly at random. */
-    void sampleRocks(VectorState &sVals);
+    std::vector<bool> sampleRocks(State &state);
     /** Decodes rocks from an integer. */
-    void decodeRocks(long val, VectorState &sVals);
+    std::vector<bool> decodeRocks(long val, State &state);
 
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
      */
-    bool makeNextState(VectorState &sVals, long actId, VectorState &nxtSVals);
+    bool makeNextState(RockSampleState &state, long action, RockSampleState &nextState);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    int makeObs(VectorState &nxtSVals, long actId);
+    int makeObs(RockSampleState &nextState, long action);
 
     /** The number of rows in the map. */
     long nRows;
@@ -289,9 +237,9 @@ private:
     /** The number of rocks on the map. */
     long nRocks;
     /** The starting position. */
-    Coords startPos;
+    GridPosition startPos;
     /** The coordinates of the rocks. */
-    std::vector<Coords> rockCoords;
+    std::vector<GridPosition> rockGridPosition;
 
     /** The reward for sampling a good rock. */
     double goodRockReward;

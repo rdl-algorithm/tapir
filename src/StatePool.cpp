@@ -42,7 +42,7 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
         stStruct.resize(nSDim);
     }
     */
-    StateInfo *newInfo = new StateInfo(state);
+    StateInfo *newInfo = new StateInfo(std::move(state));
     std::pair<SetType::iterator, bool> ret = allStates.insert(newInfo);
     if (ret.second) {
         newInfo->setId();

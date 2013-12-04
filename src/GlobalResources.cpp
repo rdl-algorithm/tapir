@@ -14,6 +14,10 @@ long randIntBetween(long min, long max) {
     return std::uniform_int_distribution<long>(min, max)(randGen);
 }
 
+bool randBernoulli(double p) {
+    return std::bernoulli_distribution(p)(randGen);
+}
+
 void seed(long seed) {
     randGen.seed(seed);
 }

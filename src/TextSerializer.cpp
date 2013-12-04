@@ -88,13 +88,13 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
         StateInfo *newSt = new StateInfo();
         std::stringstream sstr(line);
         load(*newSt, sstr);
-        typedef std::pair<std::set<StateInfo*, CompStVals>::iterator, bool> ResultType;
+        typedef std::pair<StatePool::SetType::iterator, bool> ResultType;
         ResultType insertResult = pool.allStates.insert(newSt);
         pool.allStatesIdx[newSt->id] = *(insertResult.first);
         for (long i = 0; i < pool.nSDim; i++) {
-            pool.stStruct[i].insert(
-                    std::make_pair(newSt->state.vals[i],
-                            *(insertResult.first)));
+//            pool.stStruct[i].insert(
+//                    std::make_pair(newSt->state.vals[i],
+//                            *(insertResult.first)));
         }
         std::getline(is, line);
     }

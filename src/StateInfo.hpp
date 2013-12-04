@@ -48,10 +48,6 @@ public:
     long getId() const {
         return id;
     }
-
-    double distL1(StateInfo &other) {
-        return state->distL1(*other.state);
-    }
 private:
     StateInfo();
 

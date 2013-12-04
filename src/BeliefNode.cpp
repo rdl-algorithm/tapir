@@ -195,16 +195,13 @@ void BeliefNode::enqueueChildren(std::queue<BeliefNode*> &res) {
 
 double BeliefNode::distL1Independent(BeliefNode *b) {
     double dist = 0.0;
-    std::vector<HistoryEntry*>::iterator itPart1, itPart2;
-    for (itPart1 = b->particles.begin(); itPart1 != b->particles.end();
-            itPart1++) {
-        for (itPart2 = particles.begin(); itPart2 != particles.end();
-                itPart2++) {
-            dist = dist + (*itPart1)->stateInfo->distL1(*((*itPart2)->stateInfo));
+    for (HistoryEntry *entry1 : particles) {
+        for (HistoryEntry *entry2 : b->particles) {
+            dist += entry1->stateInfo->getState()->distanceTo(
+                    *entry2->stateInfo->getState());
         }
-        dist = dist / (nParticles * b->nParticles);
     }
-    return dist;
+    return dist / (nParticles * b->nParticles);
 }
 
 long BeliefNode::getNxtActToTry() {

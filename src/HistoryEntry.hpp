@@ -5,6 +5,7 @@
 class BeliefNode;
 class StateInfo;
 
+
 class HistoryEntry {
 public:
     friend class BeliefNode;
@@ -31,6 +32,7 @@ public:
     BeliefNode* getPartOfBelNode() {
         return partOfBelNode;
     }
+
     long getId() {
         return entryId;
     }
@@ -52,7 +54,7 @@ private:
     long actId;
     Observation obs;
 
-    BeliefNode* partOfBelNode;
+    BeliefNode *partOfBelNode;
 };
 
 #endif /* HISTORYENTRY_HPP */
