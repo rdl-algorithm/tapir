@@ -2,15 +2,18 @@
 #define BELIEFNODE_HPP
 
 #include <ctime>                        // for clock_t
+
 #include <map>                          // for map
 #include <queue>                        // for queue
 #include <vector>                       // for vector
+
 #include "Observation.hpp"              // for Observation
 class ActionNode;
 class HistoryEntry;
+class State;
 
 class BeliefNode {
-public:
+  public:
     friend class BeliefTree;
     friend class Solver;
     friend class TextSerializer;
@@ -22,24 +25,25 @@ public:
     BeliefNode();
     BeliefNode(long id);
     ~BeliefNode();
-    BeliefNode(const BeliefNode&) = delete;
-    BeliefNode(BeliefNode&) = delete;
-    BeliefNode &operator=(const BeliefNode&) = delete;
-    BeliefNode &operator=(BeliefNode&) = delete;
+    BeliefNode(BeliefNode const &) = delete;
+    BeliefNode(BeliefNode &&) = delete;
+    BeliefNode &operator=(BeliefNode const &) = delete;
+    BeliefNode &operator=(BeliefNode &&) = delete;
 
     long getUCBAct();
     long getBestAct();
     void add(HistoryEntry *newHistEntry);
-    BeliefNode* addChild(long actIdx, Observation &obs,
-            HistoryEntry* nxtHistEntry);
-    BeliefNode* addChild(long actIdx, Observation &obs);
-    HistoryEntry* sampleAParticle();
+    BeliefNode *addChild(long actIdx, Observation &obs,
+                         HistoryEntry *nxtHistEntry);
+    BeliefNode *addChild(long actIdx, Observation &obs);
+    HistoryEntry *sampleAParticle();
     void updateVal(long actIdx, double newVal);
     void updateVal(long actIdx, double prevVal, double newVal, bool cutPart);
     double distL1Independent(BeliefNode *b);
+    State particleMean();
 
-    BeliefNode* getChild(long actIdx, Observation &obs);
-    void enqueueChildren(std::queue<BeliefNode*> &res);
+    BeliefNode *getChild(long actIdx, Observation &obs);
+    void enqueueChildren(std::queue<BeliefNode *> &res);
 
     long getNxtActToTry();
     void calcBestVal();
@@ -54,7 +58,7 @@ public:
         return nActChildren;
     }
 
-private:
+  private:
     static long currId;
     static double exploreParam;
     static std::clock_t startTime;
@@ -66,8 +70,8 @@ private:
     double tLastAddedParticle, tNNComp, tEmdSig;
     BeliefNode *nnBel;
 
-    std::vector<HistoryEntry*> particles;
-    std::map<long, ActionNode*> actChildren;
+    std::vector<HistoryEntry *> particles;
+    std::map<long, ActionNode *> actChildren;
 };
 
 #endif /* BELIEFNODE_HPP */

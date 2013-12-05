@@ -17,7 +17,7 @@ CXX  := g++
 # ----------------------------------------------------------------------
 override INCDIRS     += -I$(ROOT)/src -I$(ROOT)/problems
 
-override CPPFLAGS    += -DDISTL1 $(INCDIRS)
+override CPPFLAGS    += $(INCDIRS)
 CPPFLAGS_release     := $(CPPFLAGS)
 CPPFLAGS_debug       := $(CPPFLAGS) -DDEBUG
 

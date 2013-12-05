@@ -25,7 +25,7 @@ namespace po = boost::program_options;
 UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) {
     std::ifstream inFile;
 
-    const char* mapPath = vm["problem.mapPath"].as<string>().c_str();
+    char const *mapPath = vm["problem.mapPath"].as<string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
         cerr << "Fail to open " << mapPath << "\n";
@@ -76,7 +76,7 @@ UnderwaterNavModifModel::UnderwaterNavModifModel(po::variables_map vm) {
     maxVal = goalReward;
 
     roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon,
-            cellType, nX, nY);
+                            cellType, nX, nY);
 }
 
 UnderwaterNavModifModel::~UnderwaterNavModifModel() {
@@ -200,7 +200,7 @@ void UnderwaterNavModifModel::solveHeuristic(State &s, double *qVal) {
     if (dist < LONG_MAX) {
         *qVal = *qVal + std::pow(discount, dist) * goalReward
                 + moveCost * (1 - std::pow(discount, dist + 1))
-                        / (1 - discount);
+                / (1 - discount);
     } else {
         *qVal = *qVal + crashPenalty / (1 - discount);
     }
@@ -346,7 +346,7 @@ void UnderwaterNavModifModel::getNextState(State &s, unsigned long actId,
      }
      */
     std::map<long, std::map<long, short> >::iterator itCellType = cellType.find(
-            sp[0]);
+                sp[0]);
     if (itCellType != cellType.end()) {
         if (itCellType->second.find(sp[1]) != itCellType->second.end()) {
             if (cellType[sp[0]][sp[1]] == 5) {
@@ -379,7 +379,7 @@ void UnderwaterNavModifModel::inObsRegion(State &sVals, Observation &obs) {
      }
      */
     std::map<long, std::map<long, short> >::iterator itCellType = cellType.find(
-            sVals[0]);
+                sVals[0]);
 
     if (itCellType != cellType.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
@@ -430,7 +430,7 @@ double UnderwaterNavModifModel::getReward(State &sVals) {
     short ct = 0;
 
     std::map<long, std::map<long, short> >::iterator itCellType = cellType.find(
-            sVals[0]);
+                sVals[0]);
 
     if (itCellType != cellType.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
@@ -465,7 +465,7 @@ double UnderwaterNavModifModel::getReward(State &sVals, unsigned long actId) {
     short ct = 0;
 
     std::map<long, std::map<long, short> >::iterator itCellType = cellType.find(
-            sVals[0]);
+                sVals[0]);
 
     if (itCellType != cellType.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
@@ -514,7 +514,7 @@ bool UnderwaterNavModifModel::getNextState(State &sVals, unsigned long actId,
     return inGoal(nxtSVals);
 }
 
-void UnderwaterNavModifModel::setChanges(const char* chName,
+void UnderwaterNavModifModel::setChanges(char const *chName,
         std::vector<long> &chTime) {
     std::ifstream inFile;
 
@@ -544,8 +544,8 @@ void UnderwaterNavModifModel::setChanges(const char* chName,
 }
 
 void UnderwaterNavModifModel::update(long tCh,
-        std::vector<State> &affectedRange,
-        std::vector<ChangeType> &typeOfChanges) {
+                                     std::vector<State> &affectedRange,
+                                     std::vector<ChangeType> &typeOfChanges) {
     affectedRange.clear();
     std::vector<State>::iterator itStVals;
     string cmd, var, tmpStr;
@@ -557,7 +557,7 @@ void UnderwaterNavModifModel::update(long tCh,
             if (var.compare("Rocks") == 0) {
                 double xl, yl, xu, yu;
                 ss >> tmpStr >> xl >> tmpStr >> yl >> tmpStr >> tmpStr >> xu
-                        >> tmpStr >> yu >> tmpStr;
+                   >> tmpStr >> yu >> tmpStr;
                 State sl;
                 sl.push_back(xl);
                 sl.push_back(yl);
@@ -596,7 +596,7 @@ void UnderwaterNavModifModel::update(long tCh,
             } else if (var.compare("Obstacles") == 0) {
                 double xl, yl, xu, yu;
                 ss >> tmpStr >> xl >> tmpStr >> yl >> tmpStr >> tmpStr >> xu
-                        >> tmpStr >> yu >> tmpStr;
+                   >> tmpStr >> yu >> tmpStr;
                 State sl;
                 sl.push_back(xl);
                 sl.push_back(yl);
@@ -631,7 +631,7 @@ void UnderwaterNavModifModel::update(long tCh,
             } else if (var.compare("Observations") == 0) {
                 double xl, yl, xu, yu;
                 ss >> tmpStr >> xl >> tmpStr >> yl >> tmpStr >> tmpStr >> xu
-                        >> tmpStr >> yu >> tmpStr;
+                   >> tmpStr >> yu >> tmpStr;
                 State sl;
                 sl.push_back(xl);
                 sl.push_back(yl);
@@ -677,7 +677,7 @@ void UnderwaterNavModifModel::update(long tCh,
             if (var.compare("Rocks") == 0) {
                 double xl, yl, xu, yu;
                 ss >> tmpStr >> xl >> tmpStr >> yl >> tmpStr >> tmpStr >> xu
-                        >> tmpStr >> yu >> tmpStr;
+                   >> tmpStr >> yu >> tmpStr;
                 State sl;
                 sl.push_back(xl);
                 sl.push_back(yl);
@@ -706,7 +706,7 @@ void UnderwaterNavModifModel::update(long tCh,
             if (var.compare("Rewards") == 0) {
                 double xl, yl, xu, yu;
                 ss >> tmpStr >> xl >> tmpStr >> yl >> tmpStr >> tmpStr >> xu
-                        >> tmpStr >> yu >> tmpStr;
+                   >> tmpStr >> yu >> tmpStr;
                 State sl;
                 sl.push_back(xl);
                 sl.push_back(yl);
@@ -750,7 +750,7 @@ void UnderwaterNavModifModel::update(long tCh,
     }
     delete roadmap;
     roadmap = new StRoadmap(goals, nVerts, nGoals, nTryCon, maxDistCon,
-            cellType, nX, nY);
+                            cellType, nX, nY);
     //roadmap->updateRoadmap(cellType, goals, nGoals);
 
 //cerr << "#affected: " << affectedRange.size() << " #type: " << typeOfChanges.size() << endl;
@@ -768,7 +768,7 @@ double UnderwaterNavModifModel::getDefaultVal() {
 }
 
 std::vector<State>::iterator UnderwaterNavModifModel::getIterator(
-        std::vector<State> &vecStVals, long x, long y) {
+    std::vector<State> &vecStVals, long x, long y) {
     std::vector<State>::iterator it;
     for (it = vecStVals.begin(); it != vecStVals.end(); it++) {
         if ((*it)[0] == x && (*it)[1] == y) {
@@ -1143,7 +1143,7 @@ bool UnderwaterNavModifModel::modifStSeq(std::vector<State> &seqStVals,
 bool UnderwaterNavModifModel::isTerm(State &sVals) {
     short ct = 0;
     std::map<long, std::map<long, short> >::iterator itCellType = cellType.find(
-            sVals[0]);
+                sVals[0]);
     if (itCellType != cellType.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
             ct = cellType[sVals[0]][sVals[1]];

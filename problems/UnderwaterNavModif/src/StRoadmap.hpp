@@ -7,22 +7,22 @@
 #include <vector>                       // for vector
 #include "State.hpp"                    // for State
 class StRoadmap {
-public:
+  public:
     StRoadmap(std::vector<State> &goals, long nVerts, long nGoalsSamp,
-            long nTryCon, long maxDistCon,
-            std::map<long, std::map<long, short> > &env, long nX, long nY);
+              long nTryCon, long maxDistCon,
+              std::map<long, std::map<long, short> > &env, long nX, long nY);
     ~StRoadmap();
-    StRoadmap(const StRoadmap&) = delete;
-    StRoadmap(StRoadmap&) = delete;
-    StRoadmap &operator=(const StRoadmap&) = delete;
-    StRoadmap &operator=(StRoadmap&) = delete;
+    StRoadmap(StRoadmap const &) = delete;
+    StRoadmap(StRoadmap &&) = delete;
+    StRoadmap &operator=(StRoadmap const &) = delete;
+    StRoadmap &operator=(StRoadmap &&) = delete;
 
     void updateRoadmap(std::map<long, std::map<long, short> > &env_,
-            std::vector<State> &goals, long nGoalsSamp);
+                       std::vector<State> &goals, long nGoalsSamp);
     double getDistToGoal(State &startSt);
     void draw(std::ostream &os);
 
-private:
+  private:
     long nX, nY;
     std::map<long, std::map<long, short> > env;
     std::map<long, long> weight;

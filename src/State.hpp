@@ -7,17 +7,17 @@
 using std::size_t;
 
 class State {
-public:
+  public:
     State() :
-                vals() {
+        vals() {
     }
 
     State(size_t nVals) :
-                vals(nVals) {
+        vals(nVals) {
     }
 
     State(std::vector<double> vals) :
-                vals(vals) {
+        vals(vals) {
     }
 
     virtual ~State() = default;
@@ -26,7 +26,7 @@ public:
     double &operator[](size_t idx) {
         return vals[idx];
     }
-    const double &operator[](size_t idx) const {
+    double const &operator[](size_t idx) const {
         return vals[idx];
     }
     std::vector<double>::iterator begin() {
@@ -45,9 +45,9 @@ public:
         vals.resize(newSize);
     }
 
-    friend bool operator<(const State &lhs, const State &rhs);
-    friend std::ostream &operator<<(std::ostream &os, const State &state);
-protected:
+    friend bool operator<(State const &lhs, State const &rhs);
+    friend std::ostream &operator<<(std::ostream &os, State const &state);
+  protected:
     virtual void print(std::ostream &os) const {
         for (double v : vals) {
             os << v << " ";
@@ -55,12 +55,12 @@ protected:
     }
 };
 
-inline std::ostream &operator<<(std::ostream &os, const State &state) {
+inline std::ostream &operator<<(std::ostream &os, State const &state) {
     state.print(os);
     return os;
 }
 
-inline bool operator<(const State &lhs, const State &rhs) {
+inline bool operator<(State const &lhs, State const &rhs) {
     return lhs.vals < rhs.vals;
 }
 

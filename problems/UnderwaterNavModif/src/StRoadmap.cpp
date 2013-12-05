@@ -11,22 +11,22 @@
 using std::endl;
 
 StRoadmap::StRoadmap(std::vector<State> &goals, long maxVerts, long nGoalsSamp,
-        long nTryCon, long maxDistCon,
-        std::map<long, std::map<long, short> > &env, long nX, long nY) :
-            nX(nX),
-            nY(nY),
-            env(env),
-            weight(),
-            totW(0),
-            maxTryCon(nTryCon),
-            maxDistCon(maxDistCon),
-            nVerts(0),
-            maxVerts(maxVerts),
-            lastGoalIdx(0),
-            V(),
-            outEdges(),
-            inEdges(),
-            shortestDistToGoal() {
+                     long nTryCon, long maxDistCon,
+                     std::map<long, std::map<long, short> > &env, long nX, long nY) :
+    nX(nX),
+    nY(nY),
+    env(env),
+    weight(),
+    totW(0),
+    maxTryCon(nTryCon),
+    maxDistCon(maxDistCon),
+    nVerts(0),
+    maxVerts(maxVerts),
+    lastGoalIdx(0),
+    V(),
+    outEdges(),
+    inEdges(),
+    shortestDistToGoal() {
     setWeight();
     insertGoalMilestones(goals, nGoalsSamp);
     long i = lastGoalIdx;
@@ -147,7 +147,7 @@ void StRoadmap::setWeight() {
 }
 
 void StRoadmap::insertGoalMilestones(std::vector<State> &goals,
-        long nGoalsSamp) {
+                                     long nGoalsSamp) {
     long nGoals = goals.size();
     //for (long i = 0; i < nGoalsSamp; i++) {
     std::vector<State>::iterator itV;
@@ -344,7 +344,7 @@ void StRoadmap::getDistToGoal() {
 //cerr << "About to erase " << itNxt->first << " of v " << i << endl;
             q.erase(ptrToIdx[itNxt->first]);
             ptrToIdx[itNxt->first] = q.insert(
-                    std::pair<long, long>(itNxt->second, itNxt->first));
+                                         std::pair<long, long>(itNxt->second, itNxt->first));
             dist[itNxt->first] = itNxt->second;
             //nxt[itNxt->first] = i;
         }
@@ -357,10 +357,10 @@ void StRoadmap::getDistToGoal() {
                     itNxt != inEdges[currIdx].end(); itNxt++) {
                 if (!visited[itNxt->first]
                         && (tmpDist = itQ->first + itNxt->second)
-                                < ptrToIdx[itNxt->first]->first) {
+                        < ptrToIdx[itNxt->first]->first) {
                     q.erase(ptrToIdx[itNxt->first]);
                     ptrToIdx[itNxt->first] = q.insert(
-                            std::pair<long, long>(tmpDist, itNxt->first));
+                                                 std::pair<long, long>(tmpDist, itNxt->first));
                     dist[itNxt->first] = tmpDist;
                     //nxt[itNxt->first] = currIdx;
                 }
@@ -422,7 +422,7 @@ double StRoadmap::getDistToGoal(State &st) {
 }
 
 void StRoadmap::updateRoadmap(std::map<long, std::map<long, short> > &env_,
-        std::vector<State> &goals, long nGoalsSamp) {
+                              std::vector<State> &goals, long nGoalsSamp) {
     env = env_;
 
     V.clear();

@@ -3,7 +3,7 @@
 
 #include <random>                       // for default_random_engine, uniform_int_distribution, uniform_real_distribution
 class GlobalResources {
-public:
+  public:
     static std::default_random_engine randGen;
     static std::uniform_real_distribution<double> dist01;
     static double rand01() {

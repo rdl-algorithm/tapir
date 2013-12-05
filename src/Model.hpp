@@ -8,7 +8,7 @@
 class State;
 
 class Model {
-public:
+  public:
     /** Destructor must be virtual */
     virtual ~Model() = default;
 
@@ -59,7 +59,7 @@ public:
 
     /** Generates the next state, an observation, and the reward. */
     virtual bool getNextState(State &sVals, unsigned long actId,
-            double *immediateRew, State &nxtSVals, Observation &obs) = 0;
+                              double *immediateRew, State &nxtSVals, Observation &obs) = 0;
     /** Returns the reward for the given state. */
     virtual double getReward(State &sVals) = 0;
     /** Returns the reward for the given state and action. */
@@ -69,7 +69,7 @@ public:
      * previous node, as well as on the action and observation.
      */
     virtual void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partSt, std::vector<State> &partNxtSt) = 0;
+                                 std::vector<State> &partSt, std::vector<State> &partNxtSt) = 0;
     /** Creates a new belief node based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
      *
@@ -77,18 +77,18 @@ public:
      * incompatible with the current observation.
      */
     virtual void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<State> &partNxtSt) = 0;
+                                 std::vector<State> &partNxtSt) = 0;
 
     /** Loads model changes from the given file. */
-    virtual void setChanges(const char *chName, std::vector<long> &chTime) = 0;
+    virtual void setChanges(char const *chName, std::vector<long> &chTime) = 0;
     /** Retrieves the states that are affected*/
     virtual void update(long tCh, std::vector<State> &affectedRange,
-            std::vector<ChangeType> &typeOfChanges) = 0;
+                        std::vector<ChangeType> &typeOfChanges) = 0;
     virtual bool modifStSeq(std::vector<State> &seqStVals,
-            long startAffectedIdx, long endAffectedIdx,
-            std::vector<State> &modifStSeq, std::vector<long> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq) = 0;
+                            long startAffectedIdx, long endAffectedIdx,
+                            std::vector<State> &modifStSeq, std::vector<long> &modifActSeq,
+                            std::vector<Observation> &modifObsSeq,
+                            std::vector<double> &modifRewSeq) = 0;
 
     virtual void dispAct(unsigned long actId, std::ostream &os) = 0;
     virtual void dispState(State &s, std::ostream &os) = 0;

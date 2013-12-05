@@ -2,7 +2,7 @@
 
 #include "HistorySequence.hpp"          // for HistorySequence
 Histories::Histories() :
-            allHistSeq() {
+    allHistSeq() {
 }
 
 Histories::~Histories() {
