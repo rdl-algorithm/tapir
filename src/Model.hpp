@@ -5,18 +5,33 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
+#include "defs.hpp"                     // for RandomGenerator
 #include "ChangeType.hpp"               // for ChangeType
 #include "Observation.hpp"              // for Observation
 class State;
 
 class Model {
-public:
+  public:
+    /** Represents the results of a step in the model, including the next state,
+     * observation, and reward.
+     */
+    struct StepResult {
+        long action;
+        Observation observation;
+        double immediateReward;
+        std::unique_ptr<State> nextState;
+        bool isTerminal;
+    };
+
+    Model(RandomGenerator *randGen) : randGen(randGen) {
+    }
+
     /** Destructor must be virtual */
     virtual ~Model() = default;
-    Model(const Model&) = delete;
-    Model(Model&&) = delete;
-    Model &operator=(const Model&) = delete;
-    Model &operator=(Model&&) = delete;
+    Model(Model const &) = delete;
+    Model(Model &&) = delete;
+    Model &operator=(Model const &) = delete;
+    Model &operator=(Model &&) = delete;
 
     /* ---------- Virtual getters for important model parameters  ---------- */
     // POMDP parameters
@@ -57,34 +72,24 @@ public:
     /** Samples an initial state from the belief vector. */
     virtual std::unique_ptr<State> sampleAnInitState() = 0;
     /** Returns true iff the given state is terminal. */
-    virtual bool isTerm(State &state) = 0;
+    virtual bool isTerm(State const &state) = 0;
     /** Approximates the q-value of a state */
-    virtual double solveHeuristic(State &state) = 0;
+    virtual double solveHeuristic(State const &state) = 0;
     /** Returns the default q-value */
     virtual double getDefaultVal() = 0;
 
-    /** Represents the results of a step in the model, including the next state,
-     * observation, and reward.
-     */
-    struct StepResult {
-        long action;
-        Observation observation;
-        double immediateReward;
-        std::unique_ptr<State> nextState;
-        bool isTerminal;
-    };
     /** Generates the next state, an observation, and the reward. */
-    virtual StepResult generateStep(State &state, unsigned long action) = 0;
+    virtual StepResult generateStep(State const &state, unsigned long action) = 0;
     /** Returns the reward for the given state. */
-    virtual double getReward(State &state) = 0;
+    virtual double getReward(State const &state) = 0;
     /** Returns the reward for the given state and action. */
-    virtual double getReward(State &state, unsigned long action) = 0;
+    virtual double getReward(State const &state, unsigned long action) = 0;
 
     /** Generates new state particles based on the state particles of the
      * previous node, as well as on the action and observation.
      */
     virtual std::vector<std::unique_ptr<State> > generateParticles(unsigned long action,
-            Observation &obs, std::vector<State*> &previousParticles) = 0;
+            Observation const &obs, std::vector<State *> const &previousParticles) = 0;
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
      *
@@ -92,14 +97,14 @@ public:
      * incompatible with the current observation.
      */
     virtual std::vector<std::unique_ptr<State> > generateParticles(unsigned long action,
-            Observation &obs) = 0;
+            Observation const &obs) = 0;
 
     /** Loads model changes from the given file. */
-    virtual std::vector<long> loadChanges(const char *changeFilename) = 0;
+    virtual std::vector<long> loadChanges(char const *changeFilename) = 0;
 
     /** Retrieves the range of states that is affected by the change. */
-    virtual void update(long time, std::vector<std::unique_ptr<State> > &affectedRange,
-            std::vector<ChangeType> &typeOfChanges) = 0;
+    virtual void update(long time, std::vector<std::unique_ptr<State> > *affectedRange,
+                        std::vector<ChangeType> *typeOfChanges) = 0;
 
     /** Generates a modified version of the given sequence of states, between
      * the start and end indices.
@@ -107,16 +112,18 @@ public:
      * Should return true if modifications have actually been made, and false
      * otherwise.
      */
-    virtual bool modifStSeq(std::vector<State*> &states,
-            long startAffectedIdx, long endAffectedIdx,
-            std::vector<std::unique_ptr<State> > &modifStSeq, std::vector<long> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq) = 0;
+    virtual bool modifStSeq(std::vector<State const *> const &states,
+                            long startAffectedIdx, long endAffectedIdx,
+                            std::vector<std::unique_ptr<State> > *modifStSeq, std::vector<long> *modifActSeq,
+                            std::vector<Observation> *modifObsSeq,
+                            std::vector<double> *modifRewSeq) = 0;
 
     virtual void dispAct(unsigned long action, std::ostream &os) = 0;
-    virtual void dispObs(Observation &obs, std::ostream &os) = 0;
+    virtual void dispObs(Observation const &obs, std::ostream &os) = 0;
     virtual void drawEnv(std::ostream &os) = 0;
-    virtual void drawState(State &sstate, std::ostream &os) = 0;
+    virtual void drawState(State const &state, std::ostream &os) = 0;
+  protected:
+    RandomGenerator *randGen;
 };
 
 #endif

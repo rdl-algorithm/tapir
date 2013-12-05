@@ -2,8 +2,8 @@
 
 #include "RockSampleModel.hpp"          // for RockSampleModel
 #include "RockSampleOptions.hpp"        // for RockSampleOptions
-#include "TextSerializer.hpp"           // for TextSerializer
-int main(int argc, const char* argv[]) {
+#include "RockSampleTextSerializer.hpp" // for RockSampleTextSerializer
+int main(int argc, char const *argv[]) {
     RockSampleOptions options;
-    return solve<RockSampleModel, TextSerializer>(argc, argv, &options);
+    return solve<RockSampleModel, RockSampleTextSerializer>(argc, argv, &options);
 }

@@ -6,27 +6,30 @@
 #include <ostream>                      // for operator<<, ostream, endl, basic_ostream::operator<<, basic_ostream
 #include <utility>                      // for pair, make_pair
 #include <vector>                       // for vector, vector<>::iterator, vector<>::reference
-#include "GlobalResources.hpp"          // for GlobalResources
+
+#include "defs.hpp"                     // for RandomGenerator
 #include "State.hpp"                    // for State
 using std::endl;
 
-StRoadmap::StRoadmap(std::vector<VectorState> &goals, long maxVerts, long nGoalsSamp,
-        long nTryCon, long maxDistCon,
-        std::map<long, std::map<long, short> > &env, long nX, long nY) :
-            nX(nX),
-            nY(nY),
-            env(env),
-            weight(),
-            totW(0),
-            maxTryCon(nTryCon),
-            maxDistCon(maxDistCon),
-            nVerts(0),
-            maxVerts(maxVerts),
-            lastGoalIdx(0),
-            V(),
-            outEdges(),
-            inEdges(),
-            shortestDistToGoal() {
+StRoadmap::StRoadmap(RandomGenerator *randGen,
+        std::vector<VectorState> &goals, long maxVerts, long nGoalsSamp,
+                     long nTryCon, long maxDistCon,
+                     std::map<long, std::map<long, short> > &env, long nX, long nY) :
+                             randGen(randGen)
+    nX(nX),
+    nY(nY),
+    env(env),
+    weight(),
+    totW(0),
+    maxTryCon(nTryCon),
+    maxDistCon(maxDistCon),
+    nVerts(0),
+    maxVerts(maxVerts),
+    lastGoalIdx(0),
+    V(),
+    outEdges(),
+    inEdges(),
+    shortestDistToGoal() {
     setWeight();
     insertGoalMilestones(goals, nGoalsSamp);
     long i = lastGoalIdx;
@@ -147,13 +150,13 @@ void StRoadmap::setWeight() {
 }
 
 void StRoadmap::insertGoalMilestones(std::vector<VectorState> &goals,
-        long nGoalsSamp) {
+                                     long nGoalsSamp) {
     long nGoals = goals.size();
     //for (long i = 0; i < nGoalsSamp; i++) {
     std::vector<VectorState>::iterator itV;
     bool inserted;
     while (nVerts < nGoalsSamp) {
-        long rawIdx = global_resources::randIntBetween(0, nGoals - 1);
+        long rawIdx = std::uniform_int_distribution<llong>(0, nGoals - 1)(*randGen);
         VectorState st(2);
         st[0] = goals[rawIdx][0];
         st[1] = goals[rawIdx][1];
@@ -202,7 +205,7 @@ void StRoadmap::insertMyMilestones() {
 }
 
 void StRoadmap::sampleAMilestone(VectorState &st) {
-    long rawIdx = global_resources::randIntBetween(1, totW);
+    long rawIdx = std::uniform_int_distribution<llong>(0, totW)(*randGen);
     st[0] = (long) std::floor(weight[rawIdx] / nY);
     st[1] = weight[rawIdx] % nY;
     /*
@@ -344,7 +347,7 @@ void StRoadmap::getDistToGoal() {
 //cerr << "About to erase " << itNxt->first << " of v " << i << endl;
             q.erase(ptrToIdx[itNxt->first]);
             ptrToIdx[itNxt->first] = q.insert(
-                    std::pair<long, long>(itNxt->second, itNxt->first));
+                                         std::pair<long, long>(itNxt->second, itNxt->first));
             dist[itNxt->first] = itNxt->second;
             //nxt[itNxt->first] = i;
         }
@@ -357,10 +360,10 @@ void StRoadmap::getDistToGoal() {
                     itNxt != inEdges[currIdx].end(); itNxt++) {
                 if (!visited[itNxt->first]
                         && (tmpDist = itQ->first + itNxt->second)
-                                < ptrToIdx[itNxt->first]->first) {
+                        < ptrToIdx[itNxt->first]->first) {
                     q.erase(ptrToIdx[itNxt->first]);
                     ptrToIdx[itNxt->first] = q.insert(
-                            std::pair<long, long>(tmpDist, itNxt->first));
+                                                 std::pair<long, long>(tmpDist, itNxt->first));
                     dist[itNxt->first] = tmpDist;
                     //nxt[itNxt->first] = currIdx;
                 }
@@ -422,7 +425,7 @@ double StRoadmap::getDistToGoal(VectorState &st) {
 }
 
 void StRoadmap::updateRoadmap(std::map<long, std::map<long, short> > &env_,
-        std::vector<VectorState> &goals, long nGoalsSamp) {
+                              std::vector<VectorState> &goals, long nGoalsSamp) {
     env = env_;
 
     V.clear();

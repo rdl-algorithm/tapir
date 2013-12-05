@@ -10,23 +10,23 @@ using std::size_t;
 
 /** Dodgy wrapped vector */
 class VectorState : public State {
-public:
+  public:
     VectorState() :
-                vals() {
+        vals() {
     }
 
     VectorState(size_t nVals) :
-                vals(nVals) {
+        vals(nVals) {
     }
 
     VectorState(std::vector<double> vals) :
-                vals(vals) {
+        vals(vals) {
     }
 
     virtual ~VectorState() = default;
 
     virtual double distanceTo(State &otherState) const {
-        VectorState *otherVectorState = dynamic_cast<VectorState*>(&otherState);
+        VectorState *otherVectorState = static_cast<VectorState *>(&otherState);
         double distance = 0.0;
         typedef std::vector<double>::const_iterator DoubleIt;
         DoubleIt it1 = this->vals.cbegin();
@@ -37,8 +37,8 @@ public:
         return distance;
     }
 
-    virtual bool equals(const State &otherState) const {
-        const VectorState *otherVectorState = dynamic_cast<const VectorState*>(&otherState);
+    virtual bool equals(State const &otherState) const {
+        VectorState const *otherVectorState = static_cast<VectorState const *>(&otherState);
         return this->vals == otherVectorState->vals;
     }
 
@@ -63,35 +63,35 @@ public:
 
 
 
-     double &operator[](size_t idx) {
-         return vals[idx];
-     }
+    double &operator[](size_t idx) {
+        return vals[idx];
+    }
 
-     const double &operator[](size_t idx) const {
-         return vals[idx];
-     }
+    double const &operator[](size_t idx) const {
+        return vals[idx];
+    }
 
-     std::vector<double>::iterator begin() {
-         return vals.begin();
-     }
+    std::vector<double>::iterator begin() {
+        return vals.begin();
+    }
 
-     std::vector<double>::iterator end() {
-         return vals.end();
-     }
+    std::vector<double>::iterator end() {
+        return vals.end();
+    }
 
-     void push_back(double v) {
-         vals.push_back(v);
-     }
+    void push_back(double v) {
+        vals.push_back(v);
+    }
 
-     size_t size() {
-         return vals.size();
-     }
+    size_t size() {
+        return vals.size();
+    }
 
-     void resize(size_t newSize) {
-         vals.resize(newSize);
-     }
+    void resize(size_t newSize) {
+        vals.resize(newSize);
+    }
 
-     std::vector<double> vals;
+    std::vector<double> vals;
 };
 
 #endif /* VECTORSTATE_HPP */

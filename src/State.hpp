@@ -6,29 +6,39 @@
 #include <ostream>                      // for ostream
 
 class State {
-public:
+  public:
+    struct Hash {
+        size_t operator()(State const *s1) const {
+            return s1->hash();
+        }
+    };
+    struct Same {
+        bool operator()(State const *s1, State const *s2) const {
+            return *s1 == *s2;
+        }
+    };
     State() = default;
     virtual ~State() = default;
-    State(const State&) = delete;
-    State(State&&) = delete;
-    virtual State &operator=(const State&) = delete;
-    virtual State &operator=(State&&) = delete;
+    State(State const &) = delete;
+    State(State &&) = delete;
+    virtual State &operator=(State const &) = delete;
+    virtual State &operator=(State &&) = delete;
 
-    virtual double distanceTo(const State &otherState) const = 0;
-    virtual bool equals(const State &otherState) const = 0;
+    virtual double distanceTo(State const &otherState) const = 0;
+    virtual bool equals(State const &otherState) const = 0;
     virtual std::size_t hash() const = 0;
     virtual void print(std::ostream &os) const = 0;
 
-    friend std::ostream &operator<<(std::ostream &os, const State &state);
-    friend bool operator==(const State &s1, const State &s2);
+    friend std::ostream &operator<<(std::ostream &os, State const &state);
+    friend bool operator==(State const &s1, State const &s2);
 };
 
-inline std::ostream &operator<<(std::ostream &os, const State &state) {
+inline std::ostream &operator<<(std::ostream &os, State const &state) {
     state.print(os);
     return os;
 }
 
-inline bool operator==(const State &s1, const State &s2) {
+inline bool operator==(State const &s1, State const &s2) {
     return s1.equals(s2); // && s2.equals(s1); (symmetry)
 }
 

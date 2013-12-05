@@ -10,6 +10,7 @@
 
 #include <boost/program_options.hpp>    // for program_options, variables_map
 
+#include "defs.hpp"                     // for RandomGenerator
 #include "ChangeType.hpp"               // for ChangeType
 #include "Model.hpp"                    // for Model
 #include "Observation.hpp"              // for Observation
@@ -21,12 +22,12 @@ struct Coords {
     long i;
     long j;
     Coords() :
-                i(0),
-                j(0) {
+        i(0),
+        j(0) {
     }
     Coords(long i, long j) :
-                i(i),
-                j(j) {
+        i(i),
+        j(j) {
     }
 
     double distance(Coords &other) {
@@ -34,30 +35,30 @@ struct Coords {
     }
 };
 
-inline std::ostream &operator<<(std::ostream &os, const Coords &obj) {
+inline std::ostream &operator<<(std::ostream &os, Coords const &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";
     return os;
 }
-inline bool operator==(const Coords &lhs, const Coords &rhs) {
+inline bool operator==(Coords const &lhs, Coords const &rhs) {
     return lhs.i == rhs.i && lhs.j == rhs.j;
 }
-inline bool operator!=(const Coords &lhs, const Coords &rhs) {
+inline bool operator!=(Coords const &lhs, Coords const &rhs) {
     return !(lhs == rhs);
 }
 
 class TagModel: public Model {
-public:
-    TagModel(po::variables_map vm);
+  public:
+    TagModel(RandomGenerator *randGen, po::variables_map vm);
     ~TagModel() = default;
-    TagModel(const TagModel&) = delete;
-    TagModel(TagModel&&) = delete;
-    TagModel &operator=(const TagModel&) = delete;
-    TagModel &operator=(TagModel&&) = delete;
+    TagModel(TagModel const &) = delete;
+    TagModel(TagModel &&) = delete;
+    TagModel &operator=(TagModel const &) = delete;
+    TagModel &operator=(TagModel &&) = delete;
 
     /** Enumerates the possible actions */
     enum Action
-        : int {
-            NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, TAG = 4
+    : int {
+        NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, TAG = 4
     };
 
     void dispAct(unsigned long actId, std::ostream &os) {
@@ -84,8 +85,8 @@ public:
      * starting at 0
      */
     enum CellType
-        : int {
-            EMPTY = 0, WALL = -1
+    : int {
+        EMPTY = 0, WALL = -1
     };
 
     void dispCell(int cellType, std::ostream &os) {
@@ -105,21 +106,21 @@ public:
     }
 
     enum TaggedState
-        : int {
-            UNTAGGED = 0, TAGGED = 1
+    : int {
+        UNTAGGED = 0, TAGGED = 1
     };
 
     void dispState(VectorState &s, std::ostream &os) {
         os << "ROBOT: " << decodeCoords(s.vals[0]) << " OPPONENT: "
-                << decodeCoords(s.vals[1]);
+           << decodeCoords(s.vals[1]);
         if (s.vals[2] == TAGGED) {
             os << " TAGGED!";
         }
     }
 
     enum Obs
-        : int {
-            UNSEEN = 0, SEEN = 1
+    : int {
+        UNSEEN = 0, SEEN = 1
     };
 
     void dispObs(Observation &o, std::ostream &os) {
@@ -176,28 +177,28 @@ public:
     double getDefaultVal();
 
     bool getNextState(VectorState &sVals, unsigned long actId, double *immediateRew,
-            VectorState &nxtSVals, Observation &obs);
+                      VectorState &nxtSVals, Observation &obs);
     double getReward(VectorState &sVals);
     double getReward(VectorState &sVals, unsigned long actId);
 
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
+                         std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<VectorState> &partNxtSt);
+                         std::vector<VectorState> &partNxtSt);
 
-    void getChangeTimes(const char *chName, std::vector<long> &chTime);
+    void getChangeTimes(char const *chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<VectorState> &affectedRange,
-            std::vector<ChangeType> &typeOfChanges);
+                std::vector<ChangeType> &typeOfChanges);
     bool modifStSeq(std::vector<VectorState> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<VectorState> &modifStSeq,
-            std::vector<long> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq);
+                    long endAffectedIdx, std::vector<VectorState> &modifStSeq,
+                    std::vector<long> &modifActSeq,
+                    std::vector<Observation> &modifObsSeq,
+                    std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
     void drawState(VectorState &s, std::ostream &os);
 
-private:
+  private:
     // Problem parameters.
     double discount;
     unsigned long nActions, nObservations, nStVars;
@@ -231,7 +232,7 @@ private:
     void moveOpponent(Coords &robotPos, Coords &opponentPos);
     /** Generates the distribution for the opponent's actions. */
     void makeOpponentActions(Coords &robotPos, Coords &opponentPos,
-            std::vector<long> &actions);
+                             std::vector<long> &actions);
 
     /** Gets the expected coordinates after taking the given action;
      *  this may result in invalid coordinates.

@@ -26,7 +26,7 @@ WARN                 :=
 override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
 ifeq ($(CXX), g++)
   override CXXFLAGS  += -frounding-math
-  WARN               += -Wall -Wextra -Weffc++
+  WARN               += -Wall -Wextra
 else
   WARN               += -Weverything -Wno-c++98-compat
 endif
@@ -76,13 +76,20 @@ MKDIR_RECIPE    = mkdir -p $@
 # ----------------------------------------------------------------------
 
 .PHONY: default nothing all build clean rmdirs iwyu iwyu-fix iwyu-clean
-default: build-$(DEFAULT_CFG)-solver
-all: build-$(DEFAULT_CFG)
-build: build-$(DEFAULT_CFG)
+.PHONY: build-all clean-all rmdirs-all iwyu-all iwyu-fix-all iwyu-clean-all
+default: build-$(DEFAULT_CFG)-solver ;
+all build build-all: build-$(DEFAULT_CFG)-all ;
+clean: clean-all ;
+rmdirs: rmdirs-all ;
+iwyu: iwyu-all ;
+iwyu-fix: iwyu-fix-all ;
+iwyu-clean: iwyu-clean-all ;
 
 define phonies_template
 .PHONY: $(1) build-$(1) clean-$(1)
-$(1): build-$(1) ;
+.PHONY: $(1)-all build-$(1)-all clean-$(1)-all
+$(1) build-$(1) $(1)-all: build-$(1)-all ;
+clean-$(1): clean-$(1)-all ;
 endef
 $(foreach cfg,$(CFGS),$(eval $(call phonies_template,$(cfg))))
 

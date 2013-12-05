@@ -5,6 +5,7 @@
 #include <set>                          // for set
 #include <vector>                       // for vector
 
+#include "defs.hpp"                     // for RandomGenerator
 #include "ChangeType.hpp"               // for ChangeType
 #include "Model.hpp"                    // for Model and Model::StepResult
 #include "Observation.hpp"              // for Observation
@@ -18,16 +19,16 @@ class StateInfo;
 class StatePool;
 
 class Solver {
-public:
+  public:
     friend class Serializer;
     friend class TextSerializer;
 
-    Solver(Model *model);
+    Solver(RandomGenerator *randGen, Model *model);
     ~Solver();
-    Solver(const Solver&) = delete;
-    Solver(Solver&&) = delete;
-    Solver &operator=(const Solver&) = delete;
-    Solver &operator=(Solver&&) = delete;
+    Solver(Solver const &) = delete;
+    Solver(Solver &&) = delete;
+    Solver &operator=(Solver const &) = delete;
+    Solver &operator=(Solver &&) = delete;
 
     enum RolloutMode {
         ROLLOUT_RANDHEURISTIC = 0, ROLLOUT_POL = 1
@@ -50,13 +51,14 @@ public:
      * totImpTime will be the total amount of time spent on generating new
      * episodes to improve the policy.
      */
-    double runSim(long nSteps, std::vector<long> &tChanges,
-            std::vector<std::unique_ptr<State> > &trajSt,
-            std::vector<long> &trajActId, std::vector<Observation> &trajObs,
-            std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
-            double *totImpTime);
+    double runSim(long nSteps, std::vector<long> &changeTimes,
+                  std::vector<std::unique_ptr<State> > &trajSt,
+                  std::vector<long> &trajActId, std::vector<Observation> &trajObs,
+                  std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
+                  double *totImpTime);
 
-private:
+  private:
+    RandomGenerator *randGen;
     Model *model;
     BeliefTree *policy;
     Histories *allHistories;
@@ -72,7 +74,7 @@ private:
     void singleSearch(double discountFactor, double depthTh);
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-            long startDepth, double discountFactor, double depthTh);
+                      long startDepth, double discountFactor, double depthTh);
     /** Performs a backup on the given history sequence. */
     void backup(HistorySequence *history);
 
@@ -94,8 +96,8 @@ private:
     /** Simulates a single step. */
     Model::StepResult simAStep(BeliefNode *currentBelief, State &currentState);
     /** Handles particle depletion during the simulation. */
-    BeliefNode* addChild(BeliefNode *currNode, long actId, Observation &obs,
-            long timeStep);
+    BeliefNode *addChild(BeliefNode *currNode, long actId, Observation &obs,
+                         long timeStep);
     /** Improves the solution, with the root at the given node. */
     void improveSol(BeliefNode *startNode, long maxTrials, double depthTh);
 
@@ -104,12 +106,12 @@ private:
      * changes to the model.
      */
     void identifyAffectedPol(std::vector<std::unique_ptr<State> > &affectedRage,
-                std::vector<ChangeType> &chTypes,
-                std::set<HistorySequence*> &affectedHistSeq);
+                             std::vector<ChangeType> &chTypes,
+                             std::set<HistorySequence *> &affectedHistSeq);
     /** Updates the affected history sequences */
-    void updatePol(std::set<HistorySequence*> &affectedHistSeq);
+    void updatePol(std::set<HistorySequence *> &affectedHistSeq);
     /** Resets the affeted history sequences */
-    void resetAffected(std::set<HistorySequence*> affectedHistSeq);
+    void resetAffected(std::set<HistorySequence *> affectedHistSeq);
 
     /** Updates the q-values based on the changes to reward values
      * within a history sequence.
@@ -119,15 +121,15 @@ private:
     void removePathFrBelNode(HistorySequence *history);
 
     void modifHistSeqFr(HistorySequence *history,
-            std::vector<std::unique_ptr<State> > &modifStSeq,
-            std::vector<long> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq);
+                        std::vector<std::unique_ptr<State> > &modifStSeq,
+                        std::vector<long> &modifActSeq,
+                        std::vector<Observation> &modifObsSeq,
+                        std::vector<double> &modifRewSeq);
     void modifHistSeqFrTo(HistorySequence *history,
-            std::vector<std::unique_ptr<State> > &modifStSeq,
-            std::vector<long> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq);
+                          std::vector<std::unique_ptr<State> > &modifStSeq,
+                          std::vector<long> &modifActSeq,
+                          std::vector<Observation> &modifObsSeq,
+                          std::vector<double> &modifRewSeq);
 };
 
 #endif /* SOLVER_HPP */

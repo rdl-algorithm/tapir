@@ -5,24 +5,28 @@
 #include <ostream>                      // for ostream
 #include <utility>                      // for pair
 #include <vector>                       // for vector
+
+#include "defs.hpp"                     // for RandomGenerator
 #include "State.hpp"                    // for State
+
 class StRoadmap {
-public:
-    StRoadmap(std::vector<VectorState> &goals, long nVerts, long nGoalsSamp,
-            long nTryCon, long maxDistCon,
-            std::map<long, std::map<long, short> > &env, long nX, long nY);
+  public:
+    StRoadmap(RandomGenerator *randGen, std::vector<VectorState> &goals, long nVerts, long nGoalsSamp,
+              long nTryCon, long maxDistCon,
+              std::map<long, std::map<long, short> > &env, long nX, long nY);
     ~StRoadmap();
-    StRoadmap(const StRoadmap&) = delete;
-    StRoadmap(StRoadmap&) = delete;
-    StRoadmap &operator=(const StRoadmap&) = delete;
-    StRoadmap &operator=(StRoadmap&) = delete;
+    StRoadmap(StRoadmap const &) = delete;
+    StRoadmap(StRoadmap &) = delete;
+    StRoadmap &operator=(StRoadmap const &) = delete;
+    StRoadmap &operator=(StRoadmap &) = delete;
 
     void updateRoadmap(std::map<long, std::map<long, short> > &env_,
-            std::vector<VectorState> &goals, long nGoalsSamp);
+                       std::vector<VectorState> &goals, long nGoalsSamp);
     double getDistToGoal(VectorState &startSt);
     void draw(std::ostream &os);
 
-private:
+  private:
+    RandomGenerator *randGen;
     long nX, nY;
     std::map<long, std::map<long, short> > env;
     std::map<long, long> weight;

@@ -6,25 +6,25 @@
 class BeliefNode;
 
 class ObservationEdge {
-public:
+  public:
     friend class TextSerializer;
 
-    ObservationEdge(Observation &o, BeliefNode* nxtBelNode);
+    ObservationEdge(Observation &o, BeliefNode *nxtBelNode);
 
     ~ObservationEdge() = default;
-    ObservationEdge(const ObservationEdge&) = delete;
-    ObservationEdge(ObservationEdge&&) = delete;
-    ObservationEdge &operator=(const ObservationEdge&) = delete;
-    ObservationEdge &operator=(ObservationEdge&&) = delete;
+    ObservationEdge(ObservationEdge const &) = delete;
+    ObservationEdge(ObservationEdge &&) = delete;
+    ObservationEdge &operator=(ObservationEdge const &) = delete;
+    ObservationEdge &operator=(ObservationEdge &&) = delete;
 
     bool isObs(Observation &o);
-    BeliefNode* getNodeChild();
-    void enqueueChildren(std::queue<BeliefNode*> &queue);
+    BeliefNode *getNodeChild();
+    void enqueueChildren(std::queue<BeliefNode *> &queue);
 
-private:
+  private:
     ObservationEdge();
     Observation obs;
-    BeliefNode* child;
+    BeliefNode *child;
 };
 
 #endif /* OBSERVATIONEDGE_HPP */

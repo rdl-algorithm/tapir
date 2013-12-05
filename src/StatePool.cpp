@@ -10,12 +10,14 @@
 #include "State.hpp"                    // for State
 #include "StateInfo.hpp"                // for StateInfo
 
+#include <iostream> //temp. for cerr
+
 StatePool::StatePool() :
-            nStates(0),
-            nSDim(-1),
-            allStates(),
-            allStatesIdx(),
-            stStruct() {
+    nStates(0),
+    nSDim(-1),
+    allStates(),
+    allStatesIdx(),
+    stStruct() {
 }
 
 StatePool::~StatePool() {
@@ -36,14 +38,12 @@ void StatePool::reset() {
 }
 
 StateInfo *StatePool::add(std::unique_ptr<State> state) {
-    /*
-    if (nSDim == -1) {
-        nSDim = sVals.vals.size();
-        stStruct.resize(nSDim);
-    }
-    */
+//    if (nSDim == -1) {
+//        nSDim = sVals.vals.size();
+//        stStruct.resize(nSDim);
+//    }
     StateInfo *newInfo = new StateInfo(std::move(state));
-    std::pair<SetType::iterator, bool> ret = allStates.insert(newInfo);
+    std::pair<StateInfoSet::iterator, bool> ret = allStates.insert(newInfo);
     if (ret.second) {
         newInfo->setId();
         allStatesIdx.push_back(newInfo);
@@ -60,8 +60,8 @@ StateInfo *StatePool::getStateById(long id) {
 }
 
 void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
-        ChangeType chType, std::set<StateInfo*> &allAffectedSt) {
-//    std::multimap<double, StateInfo*>::iterator start, end, it;
+                                       ChangeType chType, std::set<StateInfo *> &allAffectedSt) {
+//    std::multimap<double, StateInfo *>::iterator start, end, it;
 //    /*
 //     cerr << "InStPool size of StStruct: " << stStruct.size() << " " << stStruct[0].size() << " low " << lowLeft[0] << " " << upRight[0] << endl;
 //     for (start = stStruct[0].begin(); start != stStruct[0].end(); start++) {
@@ -76,7 +76,7 @@ void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
 //     cerr << "StartEndStVals " << start->second->s[0] << " " << start->second->s[1] << " to " <<
 //     end->second->s[0] << " " << end->second->s[1] << endl;
 //     */
-//    std::set<StateInfo*> affectedSt;
+//    std::set<StateInfo *> affectedSt;
 //    for (it = start; it != end; it++) {
 //        /*
 //         if (it->first == 15) {
@@ -90,20 +90,20 @@ void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
 //    for (long i = 1; i < nSDim; i++) {
 //        start = stStruct[i].lower_bound(lowLeft.vals[i]);
 //        end = stStruct[i].lower_bound(upRight.vals[i]);
-//        std::set<StateInfo*> posAffectedSt, tmpSet;
+//        std::set<StateInfo *> posAffectedSt, tmpSet;
 //        for (it = start; it != end; it++) {
 //            posAffectedSt.insert(it->second);
 //        }
 //        //cerr << "#affectedSt for dim-" << i << " : " << posAffectedSt.size() << endl;
 //        std::set_intersection(affectedSt.begin(), affectedSt.end(),
 //                posAffectedSt.begin(), posAffectedSt.end(),
-//                std::insert_iterator<std::set<StateInfo*> >(tmpSet,
+//                std::insert_iterator<std::set<StateInfo *> >(tmpSet,
 //                        tmpSet.begin()));
 //        affectedSt = tmpSet;
 //        //cerr << "#IntersectAffectedSt for dim-" << i << " : " << affectedSt.size() << endl;
 //    }
 //    //cerr << "ok2\n";
-//    std::set<StateInfo*>::iterator itSt;
+//    std::set<StateInfo *>::iterator itSt;
 //    for (itSt = affectedSt.begin(); itSt != affectedSt.end(); itSt++) {
 //        (*itSt)->chType = std::max((*itSt)->chType, chType);
 //    }

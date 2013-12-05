@@ -2,11 +2,13 @@
 #define SOLVE_HPP
 
 #include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
+
 #include <fstream>                      // for basic_ofstream, ofstream
 #include <iostream>                     // for operator<<, endl, ostream, cout, basic_ostream, basic_ostream<>::__ostream_type, cerr
 #include <string>                       // for string
 #include <boost/program_options.hpp>    // for variables_map, options_description, etc.
-#include "GlobalResources.hpp"          // for GlobalResources
+
+#include "defs.hpp"                     // for RandomGenerator
 #include "Model.hpp"                    // for Model
 #include "ProgramOptions.hpp"           // for ProgramOptions
 #include "Serializer.hpp"               // for Serializer
@@ -18,11 +20,11 @@ using std::string;
 namespace po = boost::program_options;
 
 template<typename ModelType, typename SerializerType>
-int solve(int argc, const char* argv[], ProgramOptions *options) {
+int solve(int argc, char const *argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
     visibleOptions.add(options->getGenericOptions()).add(
-            options->getSBTOptions()).add(options->getProblemOptions()).add(
+        options->getSBTOptions()).add(options->getProblemOptions()).add(
             options->getHeuristicOptions());
     allOptions.add(visibleOptions).add(options->getSimulationOptions());
 
@@ -34,8 +36,8 @@ int solve(int argc, const char* argv[], ProgramOptions *options) {
 
     po::variables_map vm;
     po::store(
-            po::command_line_parser(argc, argv).options(allOptions).positional(
-                    positional).run(), vm);
+        po::command_line_parser(argc, argv).options(allOptions).positional(
+            positional).run(), vm);
     if (vm.count("help")) {
         cout << "Usage: solve [mapPath] [cfgPath] [policyPath]" << endl;
         cout << visibleOptions << endl;
@@ -49,10 +51,12 @@ int solve(int argc, const char* argv[], ProgramOptions *options) {
     string polPath = vm["policy"].as<string>();
     long seed = vm["seed"].as<long>();
     cerr << "Seed: " << seed << endl;
-    global_resources::seed(seed);
+    RandomGenerator randGen;
+    randGen.seed(seed);
+    randGen.discard(10);
 
-    Model *model = new ModelType(vm);
-    Solver *solver = new Solver(model);
+    Model *model = new ModelType(&randGen, vm);
+    Solver *solver = new Solver(&randGen, model);
 
     double totT;
     std::clock_t tStart;

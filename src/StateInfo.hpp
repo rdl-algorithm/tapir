@@ -12,16 +12,17 @@
 class BeliefNode;
 class HistoryEntry;
 
+#include <iostream> //temporarily for cerr
+
 class StateInfo {
-public:
+  public:
     struct StateHash {
-        size_t operator()(const StateInfo *s1) const {
+        size_t operator()(StateInfo const *s1) const {
             return s1->state->hash();
         }
     };
-
     struct SameState {
-        bool operator()(const StateInfo *s1, const StateInfo *s2) const{
+        bool operator()(StateInfo const *s1, StateInfo const *s2) const {
             return *(s1->state) == *(s2->state);
         }
     };
@@ -31,10 +32,10 @@ public:
 
     StateInfo(std::unique_ptr<State> state);
     ~StateInfo() = default;
-    StateInfo(const StateInfo&) = delete;
-    StateInfo(StateInfo&&) = delete;
-    StateInfo &operator=(const StateInfo&) = delete;
-    StateInfo &operator=(StateInfo&&) = delete;
+    StateInfo(StateInfo const &) = delete;
+    StateInfo(StateInfo &&) = delete;
+    StateInfo &operator=(StateInfo const &) = delete;
+    StateInfo &operator=(StateInfo &&) = delete;
 
     void setId();
     void addHistoryEntry(HistoryEntry *h);
@@ -48,15 +49,15 @@ public:
     long getId() const {
         return id;
     }
-private:
+  private:
     StateInfo();
 
     std::unique_ptr<State> state;
     static long currId;
     long id;
 
-    std::vector<HistoryEntry*> usedInHistoryEntries;
-    std::set<BeliefNode*> usedInBeliefNodes;
+    std::vector<HistoryEntry *> usedInHistoryEntries;
+    std::set<BeliefNode *> usedInBeliefNodes;
 
     ChangeType chType;
 };

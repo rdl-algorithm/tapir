@@ -9,42 +9,42 @@ class State;
 class StateInfo;
 
 class HistorySequence {
-public:
+  public:
     friend class Histories;
     friend class Solver;
     friend class TextSerializer;
 
     HistorySequence(long startDepth);
-    HistorySequence(HistoryEntry* startEntry, long startDepth);
+    HistorySequence(HistoryEntry *startEntry, long startDepth);
     ~HistorySequence();
-    HistorySequence(const HistorySequence&) = delete;
-    HistorySequence(HistorySequence&&) = delete;
-    HistorySequence &operator=(const HistorySequence&) = delete;
-    HistorySequence &operator=(HistorySequence&&) = delete;
+    HistorySequence(HistorySequence const &) = delete;
+    HistorySequence(HistorySequence &&) = delete;
+    HistorySequence &operator=(HistorySequence const &) = delete;
+    HistorySequence &operator=(HistorySequence &&) = delete;
 
-    HistoryEntry* getFirstEntry();
-    HistoryEntry* addEntry(long actId, Observation &obs, StateInfo *s);
-    HistoryEntry* addEntry(StateInfo *s, long actId, Observation &obs,
-            double rew, double disc);
-    HistoryEntry* addEntry(StateInfo *s, long actId, Observation &obs,
-            double rew, double disc, long atIdx);
+    HistoryEntry *getFirstEntry();
+    HistoryEntry *addEntry(long actId, Observation &obs, StateInfo *s);
+    HistoryEntry *addEntry(StateInfo *s, long actId, Observation &obs,
+                           double rew, double disc);
+    HistoryEntry *addEntry(StateInfo *s, long actId, Observation &obs,
+                           double rew, double disc, long atIdx);
     void addEntry(HistoryEntry *histEntry);
 
-    std::vector<State*> getStates();
+    std::vector<State const *> getStates();
 
     long getId() {
         return id;
     }
     void fixEntryId();
 
-private:
+  private:
     HistorySequence();
 
     static long currId;
 
     long id;
     long startDepth, startAffectedIdx, endAffectedIdx;
-    std::vector<HistoryEntry*> histSeq;
+    std::vector<HistoryEntry *> histSeq;
 
     ChangeType changeType;
 };

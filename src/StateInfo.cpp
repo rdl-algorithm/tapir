@@ -18,15 +18,15 @@ long StateInfo::currId = 0;
 
 // Private constructor for serialization
 StateInfo::StateInfo() :
-            state(nullptr),
-            id(0),
-            usedInHistoryEntries(),
-            usedInBeliefNodes(),
-            chType(ChangeType::UNDEFINED) {
+    state(nullptr),
+    id(0),
+    usedInHistoryEntries(),
+    usedInBeliefNodes(),
+    chType(ChangeType::UNDEFINED) {
 }
 
 StateInfo::StateInfo(std::unique_ptr<State> state) :
-            StateInfo() {
+    StateInfo() {
     this->state = std::move(state);
 }
 
@@ -44,8 +44,8 @@ void StateInfo::addBeliefNode(BeliefNode *b) {
 }
 
 void StateInfo::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
-    std::vector<HistoryEntry*>::iterator it = std::find(
-            usedInHistoryEntries.begin(), usedInHistoryEntries.end(),
-            toBeDeleted);
+    std::vector<HistoryEntry *>::iterator it = std::find(
+                usedInHistoryEntries.begin(), usedInHistoryEntries.end(),
+                toBeDeleted);
     (*it) = nullptr;
 }

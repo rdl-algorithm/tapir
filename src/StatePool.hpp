@@ -12,29 +12,29 @@
 #include "StateInfo.hpp"                // for StateInfo
 
 class StatePool {
-public:
-    typedef std::unordered_set<StateInfo*, StateInfo::StateHash, StateInfo::SameState> SetType;
+  public:
+    typedef std::unordered_set<StateInfo *, StateInfo::StateHash, StateInfo::SameState> StateInfoSet;
 
     friend class TextSerializer;
 
     StatePool();
     ~StatePool();
-    StatePool(const StatePool&) = delete;
-    StatePool(StatePool&&) = delete;
-    StatePool &operator=(const StatePool&) = delete;
-    StatePool &operator=(StatePool&&) = delete;
+    StatePool(StatePool const &) = delete;
+    StatePool(StatePool &&) = delete;
+    StatePool &operator=(StatePool const &) = delete;
+    StatePool &operator=(StatePool &&) = delete;
 
     void reset();
     StateInfo *add(std::unique_ptr<State> state);
     StateInfo *getStateById(long stId);
     void identifyAffectedStates(State &lowLeft, State &upRight,
-            ChangeType chType, std::set<StateInfo*> &affectedSt);
+                                ChangeType chType, std::set<StateInfo *> &affectedSt);
 
-private:
+  private:
     long nStates, nSDim;
-    SetType allStates;
-    std::vector<StateInfo*> allStatesIdx;
-    std::vector<std::multimap<double, StateInfo*> > stStruct;
+    StateInfoSet allStates;
+    std::vector<StateInfo *> allStatesIdx;
+    std::vector<std::multimap<double, StateInfo *> > stStruct;
 };
 
 #endif /* STATEPOOL_HPP */

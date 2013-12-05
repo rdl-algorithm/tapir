@@ -7,7 +7,7 @@ class StateInfo;
 
 
 class HistoryEntry {
-public:
+  public:
     friend class BeliefNode;
     friend class HistorySequence;
     friend class Solver;
@@ -16,10 +16,10 @@ public:
     HistoryEntry(StateInfo *stateInfo);
     HistoryEntry(StateInfo *stateInfo, long seqId, long entryId);
     ~HistoryEntry() = default;
-    HistoryEntry(const HistoryEntry&) = delete;
-    HistoryEntry(HistoryEntry&&) = delete;
-    HistoryEntry &operator=(const HistoryEntry&) = delete;
-    HistoryEntry &operator=(HistoryEntry&&) = delete;
+    HistoryEntry(HistoryEntry const &) = delete;
+    HistoryEntry(HistoryEntry &&) = delete;
+    HistoryEntry &operator=(HistoryEntry const &) = delete;
+    HistoryEntry &operator=(HistoryEntry &&) = delete;
 
     void setBelNode(BeliefNode *bel);
 
@@ -29,7 +29,7 @@ public:
     void setNxt(long actId_, Observation &obs_) {
         actId = actId_, obs = obs_;
     }
-    BeliefNode* getPartOfBelNode() {
+    BeliefNode *getPartOfBelNode() {
         return partOfBelNode;
     }
 
@@ -43,7 +43,7 @@ public:
         return actId;
     }
 
-private:
+  private:
     HistoryEntry();
     StateInfo *stateInfo;
     bool hasBeenBackup;

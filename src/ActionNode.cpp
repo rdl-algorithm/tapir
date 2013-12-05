@@ -8,24 +8,24 @@
 class BeliefNode;
 
 ActionNode::ActionNode() :
-            ActionNode(-1, 0, 0.0, 0.0) {
+    ActionNode(-1, 0, 0.0, 0.0) {
 }
 
-ActionNode::ActionNode(long actId, Observation &obs, BeliefNode* nxtBelNode) :
-            ActionNode(actId, 1, 0.0, 0.0) {
+ActionNode::ActionNode(long actId, Observation &obs, BeliefNode *nxtBelNode) :
+    ActionNode(actId, 1, 0.0, 0.0) {
     obsChildren.push_back(new ObservationEdge(obs, nxtBelNode));
 }
 
 ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal) :
-            actId(actId),
-            nParticles(nParticles),
-            qVal(qVal),
-            avgQVal(avgQVal),
-            obsChildren() {
+    actId(actId),
+    nParticles(nParticles),
+    qVal(qVal),
+    avgQVal(avgQVal),
+    obsChildren() {
 }
 
 ActionNode::~ActionNode() {
-    std::vector<ObservationEdge*>::iterator it;
+    std::vector<ObservationEdge *>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
         delete (*it);
     }
@@ -42,7 +42,7 @@ void ActionNode::updateQVal(double newVal) {
 }
 
 void ActionNode::updateQVal(double prevVal, double newVal,
-        bool reduceParticles) {
+                            bool reduceParticles) {
     if (reduceParticles) {
         nParticles--;
     }
@@ -68,12 +68,12 @@ void ActionNode::addChild(ObservationEdge *edge) {
     obsChildren.push_back(edge);
 }
 
-void ActionNode::addChild(Observation &obs, BeliefNode* nxtBelNode) {
+void ActionNode::addChild(Observation &obs, BeliefNode *nxtBelNode) {
     obsChildren.push_back(new ObservationEdge(obs, nxtBelNode));
 }
 
-BeliefNode* ActionNode::getObsChild(Observation &obs) {
-    std::vector<ObservationEdge*>::iterator itObs;
+BeliefNode *ActionNode::getObsChild(Observation &obs) {
+    std::vector<ObservationEdge *>::iterator itObs;
     for (itObs = obsChildren.begin(); itObs != obsChildren.end(); itObs++) {
         if ((*itObs)->isObs(obs)) {
             return (*itObs)->getNodeChild();
@@ -82,8 +82,8 @@ BeliefNode* ActionNode::getObsChild(Observation &obs) {
     return nullptr;
 }
 
-void ActionNode::enqueueChildren(std::queue<BeliefNode*> &res) {
-    std::vector<ObservationEdge*>::iterator it;
+void ActionNode::enqueueChildren(std::queue<BeliefNode *> &res) {
+    std::vector<ObservationEdge *>::iterator it;
     for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
         (*it)->enqueueChildren(res);
     }

@@ -19,14 +19,14 @@ class StatePool;
 class StateInfo;
 
 class TextSerializer: public Serializer {
-public:
+  public:
     TextSerializer();
     TextSerializer(Solver *solver);
     virtual ~TextSerializer() = default;
-    TextSerializer(const TextSerializer&) = delete;
-    TextSerializer(TextSerializer&&) = delete;
-    TextSerializer &operator=(const TextSerializer&) = delete;
-    TextSerializer &operator=(TextSerializer&&) = delete;
+    TextSerializer(TextSerializer const &) = delete;
+    TextSerializer(TextSerializer &&) = delete;
+    TextSerializer &operator=(TextSerializer const &) = delete;
+    TextSerializer &operator=(TextSerializer &&) = delete;
 
     virtual void save(State &state, std::ostream &os) = 0;
     virtual void load(State &state, std::istream &is) = 0;
@@ -52,14 +52,14 @@ public:
     virtual void load(BeliefNode &node, std::istream &is);
     virtual void save(BeliefTree &tree, std::ostream &os);
     virtual void load(BeliefTree &tree, std::istream &is);
-private:
+  private:
     std::vector<BeliefNode *> nodeIndex;
     void saveWithChildren(ObservationEdge &edge, std::ostream &os,
-            std::queue<BeliefNode *> &queue);
+                          std::queue<BeliefNode *> &queue);
     void saveWithChildren(ActionNode &node, std::ostream &os,
-            std::queue<BeliefNode *> &queue);
+                          std::queue<BeliefNode *> &queue);
     void saveWithChildren(BeliefNode &node, std::ostream &os,
-            std::queue<BeliefNode *> &queue);
+                          std::queue<BeliefNode *> &queue);
 };
 
 #endif /* TEXTSERIALIZER_HPP */

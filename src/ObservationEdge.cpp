@@ -7,13 +7,13 @@
 class BeliefNode;
 
 ObservationEdge::ObservationEdge() :
-            obs(),
-            child(nullptr) {
+    obs(),
+    child(nullptr) {
 }
 
-ObservationEdge::ObservationEdge(Observation &o, BeliefNode* nxtBelNode) :
-            obs(o),
-            child(nxtBelNode) {
+ObservationEdge::ObservationEdge(Observation &o, BeliefNode *nxtBelNode) :
+    obs(o),
+    child(nxtBelNode) {
 }
 
 bool ObservationEdge::isObs(Observation &o) {
@@ -27,10 +27,10 @@ bool ObservationEdge::isObs(Observation &o) {
     return true;
 }
 
-BeliefNode* ObservationEdge::getNodeChild() {
+BeliefNode *ObservationEdge::getNodeChild() {
     return child;
 }
 
-void ObservationEdge::enqueueChildren(std::queue<BeliefNode*> &queue) {
+void ObservationEdge::enqueueChildren(std::queue<BeliefNode *> &queue) {
     queue.push(child);
 }

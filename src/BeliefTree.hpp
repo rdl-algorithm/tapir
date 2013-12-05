@@ -5,25 +5,25 @@
 class BeliefNode;
 
 class BeliefTree {
-public:
+  public:
     friend class Solver;
     friend class TextSerializer;
 
     BeliefTree();
     ~BeliefTree();
-    BeliefTree(const BeliefTree&) = delete;
-    BeliefTree(BeliefTree&&) = delete;
-    BeliefTree &operator=(const BeliefTree&) = delete;
-    BeliefTree &operator=(BeliefTree&&) = delete;
+    BeliefTree(BeliefTree const &) = delete;
+    BeliefTree(BeliefTree &&) = delete;
+    BeliefTree &operator=(BeliefTree const &) = delete;
+    BeliefTree &operator=(BeliefTree &&) = delete;
     void reset();
 
-    BeliefNode* getRoot() {
+    BeliefNode *getRoot() {
         return root;
     }
 
-private:
+  private:
     BeliefNode *root;
-    std::vector<BeliefNode*> allNodes;
+    std::vector<BeliefNode *> allNodes;
 };
 
 #endif /* BELIEFTREE_HPP */

@@ -5,7 +5,10 @@
 #include <ostream>                      // for operator<<, ostream, basic_ostream, basic_ostream<>::__ostream_type
 #include <string>                       // for string
 #include <vector>                       // for vector, vector<>::iterator
+
 #include <boost/program_options.hpp>    // for program_options, variables_map
+
+#include "defs.hpp"                     // for RandomGenerator
 #include "ChangeType.hpp"               // for ChangeType
 #include "Model.hpp"                    // for Model
 #include "Observation.hpp"              // for Observation
@@ -15,10 +18,10 @@ class StRoadmap;
 namespace po = boost::program_options;
 
 class UnderwaterNavModifModel: public Model {
-public:
+  public:
     enum Action
-        : int {
-            EAST = 0, NORTH = 1, SOUTH = 2, NORTHEAST = 3, SOUTHEAST = 4
+    : int {
+        EAST = 0, NORTH = 1, SOUTH = 2, NORTHEAST = 3, SOUTHEAST = 4
     };
 
     void dispAct(unsigned long actId, std::ostream &os) {
@@ -56,12 +59,12 @@ public:
         os << "(" << o[0] << ", " << o[1] << ")";
     }
 
-    UnderwaterNavModifModel(po::variables_map vm);
+    UnderwaterNavModifModel(RandomGenerator *randGen, po::variables_map vm);
     ~UnderwaterNavModifModel();
-    UnderwaterNavModifModel(const UnderwaterNavModifModel&) = delete;
-    UnderwaterNavModifModel(UnderwaterNavModifModel&&) = delete;
-    UnderwaterNavModifModel &operator=(const UnderwaterNavModifModel&) = delete;
-    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel&&) = delete;
+    UnderwaterNavModifModel(UnderwaterNavModifModel const &) = delete;
+    UnderwaterNavModifModel(UnderwaterNavModifModel &&) = delete;
+    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel const &) = delete;
+    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel &&) = delete;
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
@@ -110,23 +113,23 @@ public:
     double getDefaultVal();
 
     bool getNextState(VectorState &currStVals, unsigned long actId,
-            double *immediateRew, VectorState &nxtSVals, Observation &obs);
+                      double *immediateRew, VectorState &nxtSVals, Observation &obs);
     double getReward(VectorState &sVals);
     double getReward(VectorState &sVals, unsigned long actId);
 
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
+                         std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-            std::vector<VectorState> &partNxtSt);
+                         std::vector<VectorState> &partNxtSt);
 
-    void getChangeTimes(const char* chName, std::vector<long> &chTime);
+    void getChangeTimes(char const *chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<VectorState> &affectedRange,
-            std::vector<ChangeType> &typeOfChanges);
+                std::vector<ChangeType> &typeOfChanges);
     bool modifStSeq(std::vector<VectorState> &seqStVals, long startAffectedIdx,
-            long endAffectedIdx, std::vector<VectorState> &modifStSeq,
-            std::vector<long> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq);
+                    long endAffectedIdx, std::vector<VectorState> &modifStSeq,
+                    std::vector<long> &modifActSeq,
+                    std::vector<Observation> &modifObsSeq,
+                    std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
     void drawState(VectorState &s, std::ostream &os);
@@ -134,7 +137,7 @@ public:
     // Additional initialisation.
     void setInitObsGoal();
 
-private:
+  private:
     // Problem parameters.
     double discount;
     unsigned long nActions, nObservations, nStVars;
@@ -186,7 +189,7 @@ private:
     bool inGoal(VectorState &st);
     bool inRock(VectorState &st);
     void getReachableSt(VectorState &s, unsigned long actId,
-            std::vector<VectorState> &nxtS);
+                        std::vector<VectorState> &nxtS);
     std::vector<VectorState>::iterator getIterator(std::vector<VectorState> &vecStVals,
             long x, long y);
 
