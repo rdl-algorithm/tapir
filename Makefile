@@ -17,7 +17,7 @@ CXX  := g++
 # ----------------------------------------------------------------------
 override INCDIRS     += -I$(ROOT)/src -I$(ROOT)/problems
 
-override CPPFLAGS    += -DDISTL1 $(INCDIRS)
+override CPPFLAGS    += $(INCDIRS)
 CPPFLAGS_release     := $(CPPFLAGS)
 CPPFLAGS_debug       := $(CPPFLAGS) -DDEBUG
 
@@ -31,7 +31,7 @@ else
   WARN               += -Weverything -Wno-c++98-compat
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3
-CXXFLAGS_debug       := $(CXXFLAGS) -O0 -g
+CXXFLAGS_debug       := $(CXXFLAGS) -O0 -ggdb
 
 # ----------------------------------------------------------------------
 # Linker flags

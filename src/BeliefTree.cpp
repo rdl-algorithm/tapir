@@ -2,7 +2,10 @@
 
 #include <queue>                        // for queue
 #include <vector>                       // for vector
+
+#include "ActionNode.hpp"               // for ActionNode
 #include "BeliefNode.hpp"               // for BeliefNode
+
 BeliefTree::BeliefTree() :
     root(new BeliefNode()),
     allNodes() {
@@ -24,6 +27,6 @@ void BeliefTree::reset() {
         delete node;
     }
     allNodes.clear();
-    root = new BeliefNode();
+    root = std::make_unique<BeliefNode>();
     allNodes.push_back(root);
 }

@@ -9,6 +9,9 @@
 #include "GridPosition.hpp"             // for GridPosition
 #include "State.hpp"                    // for State
 
+
+#include <iostream> // temp debug
+
 template<class T>
 void hash_combine(std::size_t &seed, T const &v) {
     std::hash<T> hasher;

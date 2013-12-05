@@ -5,11 +5,14 @@
 
 #include <iostream>                     // for cerr, endl, operator<<, basic_ostream, ostream
 #include <map>                          // for map, _Rb_tree_iterator, map<>::iterator
+#include <memory>                       // for unique_ptr
 #include <queue>                        // for queue
 #include <utility>                      // for pair
+#include <tuple>                        // for ignore
 #include <vector>                       // for vector, vector<>::iterator
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "defs.hpp"                     // for make_unique, RandomGenerator
+#include "Action.hpp"                   // for Action
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "Observation.hpp"              // for Observation
@@ -32,10 +35,9 @@ BeliefNode::BeliefNode(long id) :
     distChecked(false),
     id(id),
     nParticles(0),
-    nActChildren(0),
-    nxtActToTry(-1),
-    bestAvgQVal(0),
-    bestAct(-1),
+    nextActionToTry(0),
+    bestMeanQValue(0),
+    bestAction(-1),
     tLastAddedParticle(0),
     tNNComp(-1.0),
     tEmdSig(-1.0),
@@ -47,167 +49,125 @@ BeliefNode::BeliefNode(long id) :
     }
 }
 
-BeliefNode::~BeliefNode() {
-    std::map<long, ActionNode *>::iterator it;
-    for (it = actChildren.begin(); it != actChildren.end(); it++) {
-        delete it->second;
-    }
-}
-
-long BeliefNode::getUCBAct() {
+Action BeliefNode::getUCBAction() {
     double tmpVal;
-    std::map<long, ActionNode *>::iterator itAct = actChildren.begin();
-    double maxVal = itAct->second->avgQVal
-                    + exploreParam
-                    * std::sqrt(
-                        std::log(nParticles) / itAct->second->nParticles);
-    long bestActId = itAct->first;
-    itAct++;
-    for (; itAct != actChildren.end(); itAct++) {
-        tmpVal = itAct->second->avgQVal
-                 + exploreParam
-                 * std::sqrt(
-                     std::log(nParticles)
-                     / itAct->second->nParticles);
+    ActionMap::iterator actionIter = actChildren.begin();
+    double maxVal = (actionIter->second->meanQValue + exploreParam *
+            std::sqrt(std::log(nParticles) / actionIter->second->nParticles));
+    Action bestActId = actionIter->first;
+    actionIter++;
+    for (; actionIter != actChildren.end(); actionIter++) {
+        tmpVal = (actionIter->second->meanQValue + exploreParam * std::sqrt(
+                     std::log(nParticles) / actionIter->second->nParticles));
         if (maxVal < tmpVal) {
             maxVal = tmpVal;
-            bestActId = itAct->first;
+            bestActId = actionIter->first;
         }
     }
     return bestActId;
 }
 
-long BeliefNode::getBestAct() {
-    if (actChildren.size() == 0) {
-        cerr << "No children - could not retrieve best action." << endl;
+Action BeliefNode::getBestAction() {
+    if (getNActChildren() == 0) {
+        cerr << "No children - could not retrieve best action!!" << endl;
         return -1;
     }
-    std::map<long, ActionNode *>::iterator itAct = actChildren.begin();
-    double bestQVal = itAct->second->avgQVal;
-    long bestActId = itAct->first;
-    itAct++;
-    for (; itAct != actChildren.end(); itAct++) {
-        if (bestQVal < itAct->second->avgQVal) {
-            bestQVal = itAct->second->avgQVal;
-            bestActId = itAct->first;
+    updateBestValue();
+    return bestAction;
+}
+
+double BeliefNode::getBestMeanQValue() {
+    updateBestValue();
+    return bestMeanQValue;
+}
+
+void BeliefNode::updateBestValue() {
+    if (getNActChildren() == 0) {
+        return;
+    }
+    ActionMap::iterator actionIter = actChildren.begin();
+    double bestQVal = actionIter->second->meanQValue;
+    Action bestActId = actionIter->first;
+    actionIter++;
+    for (; actionIter != actChildren.end(); actionIter++) {
+        if (bestQVal < actionIter->second->meanQValue) {
+            bestQVal = actionIter->second->meanQValue;
+            bestActId = actionIter->first;
         }
     }
-    return bestActId;
 }
 
 void BeliefNode::add(HistoryEntry *newHistEntry) {
     tLastAddedParticle = (double) (std::clock() - startTime)
                          * 10000/ CLOCKS_PER_SEC;
-
     particles.push_back(newHistEntry);
     nParticles++;
-
 }
 
-BeliefNode *BeliefNode::addChild(long actIdx, Observation &obs,
-                                 HistoryEntry *nxtHistEntry) {
-    BeliefNode *res;
-    if (actChildren.find(actIdx) == actChildren.end()) {
-        res = new BeliefNode();
-        actChildren[actIdx] = new ActionNode(actIdx, obs, res);
-        nActChildren++;
-    } else {
-        res = actChildren[actIdx]->getObsChild(obs);
-        if (res == nullptr) {
-            res = new BeliefNode();
-            actChildren[actIdx]->addChild(obs, res);
-        }
-        actChildren[actIdx]->nParticles++;
-    }
-    res->add(nxtHistEntry);
-    return res;
-}
-
-BeliefNode *BeliefNode::addChild(long actIdx, Observation &obs) {
-    BeliefNode *res;
-    if (actChildren.find(actIdx) == actChildren.end()) {
-        res = new BeliefNode();
-        actChildren[actIdx] = new ActionNode(actIdx, obs, res);
-        nActChildren++;
-    } else {
-        res = actChildren[actIdx]->getObsChild(obs);
-        if (res == nullptr) {
-            res = new BeliefNode();
-            actChildren[actIdx]->addChild(obs, res);
-        }
-        actChildren[actIdx]->nParticles++;
-    }
-    return res;
+BeliefNode *BeliefNode::addChild(Action const &action, Observation const &obs) {
+    std::unique_ptr<ActionNode> newActionNode = std::make_unique<ActionNode>(
+            action);
+    std::map<Action, std::unique_ptr<ActionNode> >::iterator actionIter;
+    std::tie(actionIter, std::ignore) = actChildren.insert(std::make_pair(
+            action, std::move(newActionNode)));
+    ActionNode *actChild = actionIter->second.get();
+    return actChild->addChild(obs);
 }
 
 HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) {
     return particles[std::uniform_int_distribution<long>(0, nParticles - 1)(*randGen)];
 }
 
-void BeliefNode::updateVal(long actIdx, double newVal) {
-    if (actChildren.find(actIdx) == actChildren.end()) {
-        //cerr << "UpdateVal No Children Act: " << actIdx << endl;
+void BeliefNode::updateQValue(Action &action, double increase) {
+    ActionMap::iterator iter = actChildren.find(action);
+    if (iter == actChildren.end()) {
         return;
     }
-    actChildren[actIdx]->updateQVal(newVal);
-    calcBestVal();
+    iter->second->updateQValue(increase);
+    updateBestValue();
 }
 
-void BeliefNode::updateVal(long actIdx, double prevVal, double newVal,
-                           bool cutPart) {
-    if (actChildren.find(actIdx) == actChildren.end()) {
-        //cerr << "UpdateValWPart NoChildren Act: " << actIdx << endl;
+void BeliefNode::updateQValue(Action &action, double oldValue, double newValue,
+        bool reduceParticles) {
+    ActionMap::iterator iter = actChildren.find(action);
+    if (iter == actChildren.end()) {
         return;
     }
-    actChildren[actIdx]->updateQVal(prevVal, newVal, cutPart);
-    calcBestVal();
-}
-
-void BeliefNode::calcBestVal() {
-    //cerr << "inCalcBestVal: " << actChildren.size() << "\n";
-    if (actChildren.size() == 0) {
-        return;
-    }
-    std::map<long, ActionNode *>::iterator itM = actChildren.begin();
-    bestAvgQVal = itM->second->avgQVal;
-    bestAct = itM->first;
-    itM++;
-    for (; itM != actChildren.end(); itM++) {
-        if (itM->second->avgQVal > bestAvgQVal) {
-            bestAvgQVal = itM->second->avgQVal;
-            bestAct = itM->first;
-        }
-    }
-}
-
-BeliefNode *BeliefNode::getChild(long actIdx, Observation &obs) {
-    //cerr <<" In BeliefNode->getChild for act " << actIdx << " " << actChildren.size() << endl;
-    //cerr << "This Belief Node: "; writeStParticles(cerr);
-    if (actChildren.find(actIdx) == actChildren.end()) {
-        return nullptr;
-    }
-    return actChildren[actIdx]->getObsChild(obs);
-}
-
-void BeliefNode::enqueueChildren(std::queue<BeliefNode *> &res) {
-    std::map<long, ActionNode *>::iterator itAct;
-    for (itAct = actChildren.begin(); itAct != actChildren.end(); itAct++) {
-        itAct->second->enqueueChildren(res);
-    }
+    iter->second->updateQValue(oldValue, newValue, reduceParticles);
+    updateBestValue();
 }
 
 double BeliefNode::distL1Independent(BeliefNode *b) {
     double dist = 0.0;
+    long nComparisons = nParticles * b->nParticles;
+    if (nComparisons > 1000000) {
+        cerr << "Comparing belief nodes; " << nParticles << " * " << b->nParticles << endl;
+    }
     for (HistoryEntry *entry1 : particles) {
         for (HistoryEntry *entry2 : b->particles) {
-            dist += entry1->stateInfo->getState()->distanceTo(
-                        *entry2->stateInfo->getState());
+            dist += entry1->getState()->distanceTo(*entry2->getState());
         }
     }
     return dist / (nParticles * b->nParticles);
 }
 
-long BeliefNode::getNxtActToTry() {
-    nxtActToTry++;
-    return nxtActToTry;
+
+BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) {
+    ActionMap::iterator iter = actChildren.find(action);
+    if (iter == actChildren.end()) {
+        return nullptr;
+    }
+    return iter->second->getBeliefChild(obs);
+}
+
+void BeliefNode::enqueueChildren(std::queue<BeliefNode *> &queue) {
+    ActionMap::iterator actionIter;
+    for (actionIter = actChildren.begin(); actionIter != actChildren.end();
+            actionIter++) {
+        actionIter->second->enqueueChildren(queue);
+    }
+}
+
+Action BeliefNode::getNextActionToTry() {
+    return nextActionToTry++;
 }

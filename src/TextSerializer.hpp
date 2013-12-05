@@ -2,8 +2,10 @@
 #define TEXTSERIALIZER_HPP
 
 #include <iosfwd>                       // for ostream, istream
+#include <memory>                       // for unique_ptr
 #include <queue>                        // for queue
 #include <vector>                       // for vector
+
 #include "Observation.hpp"              // for Observation
 #include "Serializer.hpp"               // for Serializer
 class ActionNode;
@@ -28,8 +30,9 @@ class TextSerializer: public Serializer {
     TextSerializer &operator=(TextSerializer const &) = delete;
     TextSerializer &operator=(TextSerializer &&) = delete;
 
-    virtual void save(State &state, std::ostream &os) = 0;
-    virtual void load(State &state, std::istream &is) = 0;
+    virtual void saveState(State &state, std::ostream &os) = 0;
+    virtual std::unique_ptr<State> loadState(std::istream &is) = 0;
+
     virtual void save(StateInfo &wrapper, std::ostream &os);
     virtual void load(StateInfo &wrapper, std::istream &is);
     virtual void save(StatePool &pool, std::ostream &os);

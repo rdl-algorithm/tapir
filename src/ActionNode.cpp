@@ -1,90 +1,70 @@
 #include "ActionNode.hpp"
 
+#include <memory>                       // for unique_ptr
 #include <queue>                        // for queue
 #include <vector>                       // for vector, vector<>::iterator
 
+#include "defs.hpp"                     // for make_unique
+#include "Action.hpp"                   // for Action
+#include "BeliefNode.hpp"               // for BeliefNode
 #include "Observation.hpp"              // for Observation
 #include "ObservationEdge.hpp"          // for ObservationEdge
-class BeliefNode;
 
 ActionNode::ActionNode() :
-    ActionNode(-1, 0, 0.0, 0.0) {
+    ActionNode(-1) {
 }
 
-ActionNode::ActionNode(long actId, Observation &obs, BeliefNode *nxtBelNode) :
-    ActionNode(actId, 1, 0.0, 0.0) {
-    obsChildren.push_back(new ObservationEdge(obs, nxtBelNode));
-}
-
-ActionNode::ActionNode(long actId, long nParticles, double qVal, double avgQVal) :
-    actId(actId),
-    nParticles(nParticles),
-    qVal(qVal),
-    avgQVal(avgQVal),
+ActionNode::ActionNode(Action const &action) :
+    action(action),
+    nParticles(0),
+    totalQValue(0),
+    meanQValue(0),
     obsChildren() {
 }
 
-ActionNode::~ActionNode() {
-    std::vector<ObservationEdge *>::iterator it;
-    for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
-        delete (*it);
-    }
-    obsChildren.clear();
-}
-
-void ActionNode::updateQVal(double newVal) {
-    qVal = qVal + newVal;
+void ActionNode::updateQValue(double increase) {
+    totalQValue += increase;
     if (nParticles > 0) {
-        avgQVal = qVal / (double) nParticles;
+        meanQValue = totalQValue / nParticles;
     } else {
-        avgQVal = 0;
+        meanQValue = 0;
     }
 }
 
-void ActionNode::updateQVal(double prevVal, double newVal,
+// Default destructor
+ActionNode::~ActionNode() {
+}
+
+void ActionNode::updateQValue(double oldValue, double newValue,
                             bool reduceParticles) {
     if (reduceParticles) {
         nParticles--;
     }
-    //cerr << "nParticles: " << nParticles << " fr " << qVal << " " << avgQVal;
-    qVal = qVal - prevVal + newVal;
-    if (nParticles > 0) {
-        avgQVal = qVal / (double) nParticles;
-    } else {
-        avgQVal = 0;
+    updateQValue(newValue - oldValue);
+}
+
+BeliefNode *ActionNode::addChild(Observation const &obs) {
+    BeliefNode *beliefChild = getBeliefChild(obs);
+    if (beliefChild == nullptr) {
+        std::unique_ptr<ObservationEdge> newEdge = std::make_unique<ObservationEdge>(obs);
+        beliefChild = newEdge->getBeliefChild();
+        obsChildren.push_back(std::move(newEdge));
     }
-    //cerr << " become " << qVal << " " << avgQVal << endl;
+    nParticles++;
+    return beliefChild;
 }
 
-bool ActionNode::isAct(long aIdx) {
-    if (aIdx == actId) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void ActionNode::addChild(ObservationEdge *edge) {
-    obsChildren.push_back(edge);
-}
-
-void ActionNode::addChild(Observation &obs, BeliefNode *nxtBelNode) {
-    obsChildren.push_back(new ObservationEdge(obs, nxtBelNode));
-}
-
-BeliefNode *ActionNode::getObsChild(Observation &obs) {
-    std::vector<ObservationEdge *>::iterator itObs;
-    for (itObs = obsChildren.begin(); itObs != obsChildren.end(); itObs++) {
-        if ((*itObs)->isObs(obs)) {
-            return (*itObs)->getNodeChild();
+BeliefNode *ActionNode::getBeliefChild(Observation const &obs) {
+    for (std::unique_ptr<ObservationEdge> &child : obsChildren) {
+        if (child->obsEquals(obs)){
+            return child->getBeliefChild();
         }
     }
     return nullptr;
 }
 
-void ActionNode::enqueueChildren(std::queue<BeliefNode *> &res) {
-    std::vector<ObservationEdge *>::iterator it;
-    for (it = obsChildren.begin(); it != obsChildren.end(); it++) {
-        (*it)->enqueueChildren(res);
+void ActionNode::enqueueChildren(std::queue<BeliefNode *> &queue) {
+    for (std::unique_ptr<ObservationEdge> &child : obsChildren) {
+        child->enqueueChildren(queue);
     }
 }

@@ -3,6 +3,8 @@
 #include <iostream>                     // for cerr, endl
 #include <string>                       // for string
 
+#include "defs.hpp"                     // for make_unique
+#include "GridPosition.hpp"             // for GridPosition
 #include "RockSampleState.hpp"          // for RockSampleState
 #include "TextSerializer.hpp"           // for TextSerializer
 
@@ -15,7 +17,7 @@ RockSampleTextSerializer::RockSampleTextSerializer(Solver *solver) :
 }
 
 
-void RockSampleTextSerializer::save(State &state, std::ostream &os) {
+void RockSampleTextSerializer::saveState(State &state, std::ostream &os) {
     RockSampleState *rockSampleState =
         static_cast<RockSampleState *>(&state);
     os << rockSampleState->position.i << " " << rockSampleState->position.j << " ";
@@ -28,22 +30,20 @@ void RockSampleTextSerializer::save(State &state, std::ostream &os) {
     }
 }
 
-void RockSampleTextSerializer::load(State &state, std::istream &is) {
-    RockSampleState *rockSampleState =
-        static_cast<RockSampleState *>(&state);
-    is >> rockSampleState->position.i;
-    is >> rockSampleState->position.j;
-    std::string rocks;
-    is >> rocks;
-    rockSampleState->rockStates.clear();
-    for (char c : rocks) {
+std::unique_ptr<State> RockSampleTextSerializer::loadState(std::istream &is) {
+    long i, j;
+    std::string rockString;
+    std::vector<bool> rockStates;
+    is >> i >> j >> rockString;
+    for (char c : rockString) {
         if (c == 'G') {
-            rockSampleState->rockStates.push_back(true);
+            rockStates.push_back(true);
         } else if (c == 'B') {
-            rockSampleState->rockStates.push_back(false);
+            rockStates.push_back(false);
         } else {
             std::cerr << "Error; invalid rock state: " << c << std::endl;
         }
     }
+    return std::make_unique<RockSampleState>(GridPosition(i, j), rockStates);
 }
 

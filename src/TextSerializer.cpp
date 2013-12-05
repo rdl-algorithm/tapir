@@ -25,6 +25,7 @@
 #include "StatePool.hpp"                // for StatePool, CompStVal
 #include "StateInfo.hpp"             // for StateInfo, StateInfo::currId
 
+using std::cerr;
 using std::endl;
 
 TextSerializer::TextSerializer() :
@@ -38,13 +39,13 @@ TextSerializer::TextSerializer(Solver *solver) :
 
 void TextSerializer::save(StateInfo &info, std::ostream &os) {
     os << "s " << info.id << " : ";
-    save(*(info.state), os);
+    saveState(*(info.state), os);
 }
 
 void TextSerializer::load(StateInfo &info, std::istream &is) {
     std::string tmpStr;
     is >> tmpStr >> info.id >> tmpStr;
-    load(*(info.state), is);
+    info.state = loadState(is);
     if (info.id > StateInfo::currId) {
         StateInfo::currId = info.id + 1;
     }
@@ -80,7 +81,7 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
     sstr.str(line);
     sstr >> tmpStr >> pool.nSDim;
     sstr.clear();
-    pool.stStruct.resize(pool.nSDim);
+//    pool.stStruct.resize(pool.nSDim);
     pool.allStatesIdx.assign(pool.nStates, nullptr);
 
     std::getline(is, line);
@@ -227,8 +228,8 @@ void TextSerializer::load(ObservationEdge &edge, std::istream &is) {
 }
 
 void TextSerializer::save(ActionNode &node, std::ostream &os) {
-    os << "A " << node.actId << " " << node.nParticles << " " << node.qVal
-       << " " << node.avgQVal << " " << node.obsChildren.size() << " ";
+    os << "A " << node.action << " " << node.nParticles << " " << node.totalQValue
+       << " " << node.meanQValue << " " << node.obsChildren.size() << " ";
 }
 
 void TextSerializer::saveWithChildren(ActionNode &node, std::ostream &os,
@@ -243,7 +244,7 @@ void TextSerializer::saveWithChildren(ActionNode &node, std::ostream &os,
 void TextSerializer::load(ActionNode &node, std::istream &is) {
     std::string tmpStr;
     long nObs;
-    is >> tmpStr >> node.actId >> node.nParticles >> node.qVal >> node.avgQVal
+    is >> tmpStr >> node.action >> node.nParticles >> node.totalQValue >> node.meanQValue
        >> nObs;
     for (long i = 0; i < nObs; i++) {
         ObservationEdge *edge = new ObservationEdge();
@@ -288,7 +289,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
         std::stringstream sstr(line);
         ActionNode *actionNode = new ActionNode();
         load(*actionNode, sstr);
-        node.actChildren[actionNode->actId] = actionNode;
+        node.actChildren[actionNode->action] = actionNode;
     }
 }
 
@@ -331,7 +332,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         sstr >> tmpStr >> nodeId;
         BeliefNode *node = nodeIndex[nodeId];
         load(*node, is);
-        node->calcBestVal();
+        node->updateBestValue();
         std::getline(is, line);
     }
 }

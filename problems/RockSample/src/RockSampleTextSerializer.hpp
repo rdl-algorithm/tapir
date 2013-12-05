@@ -13,8 +13,8 @@ public:
     RockSampleTextSerializer &operator=(RockSampleTextSerializer const &) = delete;
     RockSampleTextSerializer &operator=(RockSampleTextSerializer &&) = delete;
 
-    void save(State &state, std::ostream &os);
-    void load(State &state, std::istream &is);
+    void saveState(State &state, std::ostream &os);
+    std::unique_ptr<State> loadState(std::istream &is);
 };
 
 #endif /* ROCKSAMPLETEXTSERIALIZER_HPP */

@@ -193,7 +193,6 @@ std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState
     std::vector<bool> rockStates(state.getRockStates());
     bool isValid = true;
     if (action >= CHECK + nRocks) {
-        int a = *(int*)nullptr;
         cerr << "Invalid action: " << action << endl;
     } else if (action >= CHECK) {
         // Do nothing - the state remains the same.
@@ -202,7 +201,7 @@ std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState
         if (0 <= rockNo && rockNo < nRocks) {
             rockStates[rockNo] = false;
         } else {
-            cerr << "Cannot sample at " << pos << " - no rock!" << endl;
+            // cerr << "Cannot sample at " << pos << " - no rock!" << endl;
             isValid = false;
         }
     } else {
@@ -249,15 +248,14 @@ Model::StepResult RockSampleModel::generateStep(State const &state, unsigned lon
             static_cast<RockSampleState const *>(&state);
     Model::StepResult result;
     result.action = action;
-    result.immediateReward = getReward(state, action);
+
     std::unique_ptr<RockSampleState> nextState;
     bool isValid;
     std::tie(nextState, isValid) = makeNextState(*rockSampleState, action);
-    Observation obs;
-    obs.push_back((double)makeObs(action, *nextState));
-    State const *baseNextState =
-            static_cast<State const *>(nextState.get());
-    result.isTerminal = isTerm(*baseNextState);
+
+    result.observation.push_back((double)makeObs(action, *nextState));
+    result.immediateReward = getReward(state, action);
+    result.isTerminal = isTerm(*static_cast<State const *>(nextState.get()));
     result.nextState = std::move(nextState);
     return result;
 }
@@ -421,14 +419,14 @@ void RockSampleModel::dispCell(CellType cellType, std::ostream &os) {
 }
 
 void RockSampleModel::dispObs(Observation const &obs, std::ostream &os) {
-    switch ((RSObservation) obs[0]) {
-    case RSObservation::NONE:
+    switch ((int)obs[0]) {
+    case (int)RSObservation::NONE:
         os << "NONE";
         break;
-    case RSObservation::GOOD:
+    case (int)RSObservation::GOOD:
         os << "GOOD";
         break;
-    case RSObservation::BAD:
+    case (int)RSObservation::BAD:
         os << "BAD";
         break;
     default:
@@ -453,7 +451,7 @@ void RockSampleModel::drawState(State const &state, std::ostream &os) {
     GridPosition pos(rockSampleState->getPosition());
     for (std::size_t i = 0; i < envMap.size(); i++) {
         for (std::size_t j = 0; j < envMap[0].size(); j++) {
-            if (i == pos.i && j == pos.j) {
+            if ((long)i == pos.i && (long)j == pos.j) {
                 os << "x";
                 continue;
             }

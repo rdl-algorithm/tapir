@@ -1,12 +1,18 @@
 #include "HistorySequence.hpp"
 
 #include <climits>                      // for LONG_MAX
+
+#include <memory>                       // for unique_ptr
 #include <vector>                       // for vector, vector<>::iterator
+
+#include "defs.hpp"                     // for make_unique
+#include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"                    // for State
-#include "StateInfo.hpp"             // for StateInfo
+#include "StateInfo.hpp"                // for StateInfo
+
 long HistorySequence::currId = 0;
 
 HistorySequence::HistorySequence() :
@@ -23,70 +29,73 @@ HistorySequence::HistorySequence(long startDepth) :
     currId++;
 }
 
-HistorySequence::HistorySequence(HistoryEntry *startEntry, long startDepth) :
+HistorySequence::HistorySequence(std::unique_ptr<HistoryEntry> startEntry,
+        long startDepth) :
     HistorySequence(startDepth) {
     startEntry->setSeqId(id);
-    histSeq.push_back(startEntry);
-}
-
-HistorySequence::~HistorySequence() {
-    std::vector<HistoryEntry *>::iterator it;
-    for (it = histSeq.begin(); it != histSeq.end(); it++) {
-        delete (*it);
-    }
-    histSeq.resize(0);
+    histSeq.push_back(std::move(startEntry));
 }
 
 HistoryEntry *HistorySequence::getFirstEntry() {
-    return histSeq[0];
+    return histSeq.begin()->get();
 }
 
-HistoryEntry *HistorySequence::addEntry(long actId, Observation &obs,
-                                        StateInfo *s) {
-    histSeq.back()->setNxt(actId, obs);
-    HistoryEntry *newEntry = new HistoryEntry(s, id, histSeq.size());
-    histSeq.push_back(newEntry);
-    return newEntry;
+HistoryEntry *HistorySequence::addEntry(Action const &action,
+        Observation const &obs, StateInfo *stateInfo) {
+    histSeq.back()->setNext(action, obs);
+    std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
+            stateInfo, id, histSeq.size());
+    HistoryEntry *newEntryReturn = newEntry.get();
+    histSeq.push_back(std::move(newEntry));
+    return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *s, long actId,
-                                        Observation &obs, double rew, double disc) {
-    HistoryEntry *newEntry = new HistoryEntry(s, id, histSeq.size());
-    newEntry->actId = actId;
+HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, Action const &action,
+        Observation const &obs, double rew, double disc) {
+    std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
+            stateInfo, id, histSeq.size());
+    newEntry->action = action;
     newEntry->obs = obs;
     newEntry->immediateReward = rew;
     newEntry->discount = disc;
-    histSeq.push_back(newEntry);
-    return newEntry;
+    HistoryEntry *newEntryReturn = newEntry.get();
+    histSeq.push_back(std::move(newEntry));
+    return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *s, long actId,
-                                        Observation &obs, double rew, double disc, long atIdx) {
-    HistoryEntry *newEntry = new HistoryEntry(s, id, atIdx);
-    newEntry->actId = actId;
+HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, Action const &action,
+                                        Observation const &obs, double rew, double disc, long atIdx) {
+    std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
+                stateInfo, id, histSeq.size());
+    newEntry->action = action;
     newEntry->obs = obs;
     newEntry->immediateReward = rew;
     newEntry->discount = disc;
-    histSeq.insert(histSeq.begin() + atIdx, newEntry);
-    return newEntry;
+    HistoryEntry *newEntryReturn = newEntry.get();
+    histSeq.insert(histSeq.begin() + atIdx, std::move(newEntry));
+    return newEntryReturn;
 }
 
-void HistorySequence::addEntry(HistoryEntry *histEntry) {
-    histSeq.push_back(histEntry);
+void HistorySequence::addEntry(std::unique_ptr<HistoryEntry> histEntry) {
+    histSeq.push_back(std::move(histEntry));
+}
+
+HistoryEntry *HistorySequence::get(int entryId) {
+    return histSeq[entryId].get();
 }
 
 std::vector<State const *> HistorySequence::getStates() {
     std::vector<State const *> states;
-    for (HistoryEntry *entry : histSeq) {
+    for (std::unique_ptr<HistoryEntry> &entry : histSeq) {
         states.push_back(entry->stateInfo->getState());
     }
     return states;
 }
 
-void HistorySequence::fixEntryId() {
-    std::vector<HistoryEntry *>::iterator itH;
+void HistorySequence::fixEntryIds() {
     long i = 0;
-    for (itH = histSeq.begin(); itH != histSeq.end(); itH++, i++) {
-        (*itH)->entryId = i;
+    for (auto &entry : histSeq) {
+        entry->entryId = i;
+        i++;
     }
 }

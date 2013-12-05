@@ -23,8 +23,8 @@ class Solver {
     friend class Serializer;
     friend class TextSerializer;
 
-    Solver(RandomGenerator *randGen, Model *model);
-    ~Solver();
+    Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
+    ~Solver() = default;
     Solver(Solver const &) = delete;
     Solver(Solver &&) = delete;
     Solver &operator=(Solver const &) = delete;
@@ -59,12 +59,12 @@ class Solver {
 
   private:
     RandomGenerator *randGen;
-    Model *model;
-    BeliefTree *policy;
-    Histories *allHistories;
-    StatePool *allStates;
+    std::unique_ptr<Model> model;
+    std::unique_ptr<BeliefTree> policy;
+    std::unique_ptr<Histories> allHistories;
+    std::unique_ptr<StatePool> allStates;
 
-    RolloutMode rolloutUsed;
+    RolloutMode lastRolloutMode;
     double exploreCoef;
     double cRollout[2], wRollout[2], pRollout[2];
     long nUsedRollout[2];

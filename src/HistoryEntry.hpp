@@ -1,20 +1,21 @@
 #ifndef HISTORYENTRY_HPP
 #define HISTORYENTRY_HPP
 
+#include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
 class BeliefNode;
+class State;
 class StateInfo;
-
 
 class HistoryEntry {
   public:
-    friend class BeliefNode;
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
 
-    HistoryEntry(StateInfo *stateInfo);
     HistoryEntry(StateInfo *stateInfo, long seqId, long entryId);
+    HistoryEntry(StateInfo *stateInfo);
+
     ~HistoryEntry() = default;
     HistoryEntry(HistoryEntry const &) = delete;
     HistoryEntry(HistoryEntry &&) = delete;
@@ -23,14 +24,24 @@ class HistoryEntry {
 
     void setBelNode(BeliefNode *bel);
 
-    void setSeqId(long seqId_) {
-        seqId = seqId_;
+    void setSeqId(long seqId) {
+        this->seqId = seqId;
     }
-    void setNxt(long actId_, Observation &obs_) {
-        actId = actId_, obs = obs_;
+
+    void setNext(Action const &action, Observation const &obs) {
+        this->action = action;
+        this->obs = obs;
     }
+
     BeliefNode *getPartOfBelNode() {
         return partOfBelNode;
+    }
+
+
+    State *getState();
+
+    StateInfo *getStateInfo() {
+        return stateInfo;
     }
 
     long getId() {
@@ -39,8 +50,8 @@ class HistoryEntry {
     long getSeqId() {
         return seqId;
     }
-    long getActId() {
-        return actId;
+    Action getAction() {
+        return action;
     }
 
   private:
@@ -51,7 +62,7 @@ class HistoryEntry {
     double discount; // Net discount factor for the immediate reward
     double immediateReward; // Non-discounted immediate reward
     double qVal; // Discounted total reward
-    long actId;
+    Action action;
     Observation obs;
 
     BeliefNode *partOfBelNode;

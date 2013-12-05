@@ -1,7 +1,7 @@
 #include "HistoryEntry.hpp"
 
+#include "StateInfo.hpp"
 class BeliefNode;
-class StateInfo;
 
 HistoryEntry::HistoryEntry() :
     HistoryEntry(nullptr, 0, 0) {
@@ -19,11 +19,15 @@ HistoryEntry::HistoryEntry(StateInfo *stateInfo, long seqId, long entryId) :
     discount(1.0),
     immediateReward(0),
     qVal(0),
-    actId(-1),
+    action(-1),
     obs(),
     partOfBelNode(nullptr) {
 }
 
 void HistoryEntry::setBelNode(BeliefNode *bel) {
     partOfBelNode = bel;
+}
+
+State *HistoryEntry::getState() {
+    return stateInfo->getState();
 }

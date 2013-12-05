@@ -59,8 +59,8 @@ StateInfo *StatePool::getStateById(long id) {
     return allStatesIdx[id];
 }
 
-void StatePool::identifyAffectedStates(State &lowLeft, State &upRight,
-                                       ChangeType chType, std::set<StateInfo *> &allAffectedSt) {
+void StatePool::identifyAffectedStates(State &/*lowLeft*/, State &/*upRight*/,
+                                       ChangeType /*chType*/, std::set<StateInfo *> &/*allAffectedSt*/) {
 //    std::multimap<double, StateInfo *>::iterator start, end, it;
 //    /*
 //     cerr << "InStPool size of StStruct: " << stStruct.size() << " " << stStruct[0].size() << " low " << lowLeft[0] << " " << upRight[0] << endl;
