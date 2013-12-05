@@ -88,12 +88,13 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
         std::unique_ptr<StateInfo> newStateInfo(new StateInfo());
         std::stringstream sstr(line);
         load(*newStateInfo, sstr);
+        StateInfo *stateInfo = newStateInfo.get();
         typedef std::pair<StatePool::StateInfoSet::iterator, bool> ResultType;
         ResultType insertResult = pool.allStates.insert(std::move(newStateInfo));
-        pool.allStatesIdx[newStateInfo->id] = insertResult.first->get();
         if (!insertResult.second) {
             std::cerr << "Already inserted!?" << *(*insertResult.first)->state << endl;
         }
+        pool.allStatesIdx[stateInfo->id] = insertResult.first->get();
         for (long i = 0; i < pool.nSDim; i++) {
 //            pool.stStruct[i].insert(
 //                    std::make_pair(newSt->state.vals[i],
@@ -101,6 +102,7 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
         }
         std::getline(is, line);
     }
+    StateInfo::currId = nStates;
 }
 
 void TextSerializer::save(Observation &obs, std::ostream &os) {

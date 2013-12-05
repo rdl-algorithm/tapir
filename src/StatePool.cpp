@@ -48,6 +48,8 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
             std::cerr << "Error: wrong size in StatePool" << std::endl;
         }
         allStatesIdx.push_back(stateInfo);
+    } else {
+        stateInfo = ret.first->get();
     }
     return stateInfo;
 }

@@ -11,40 +11,13 @@
 #include <boost/program_options.hpp>    // for program_options, variables_map
 
 #include "defs.hpp"                     // for RandomGenerator
+#include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
 #include "Model.hpp"                    // for Model
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"                    // for State
 
 namespace po = boost::program_options;
-
-struct Coords {
-    long i;
-    long j;
-    Coords() :
-        i(0),
-        j(0) {
-    }
-    Coords(long i, long j) :
-        i(i),
-        j(j) {
-    }
-
-    double distance(Coords &other) {
-        return std::abs(i - other.i) + std::abs(j - other.j);
-    }
-};
-
-inline std::ostream &operator<<(std::ostream &os, Coords const &obj) {
-    os << "(" << obj.i << ", " << obj.j << ")";
-    return os;
-}
-inline bool operator==(Coords const &lhs, Coords const &rhs) {
-    return lhs.i == rhs.i && lhs.j == rhs.j;
-}
-inline bool operator!=(Coords const &lhs, Coords const &rhs) {
-    return !(lhs == rhs);
-}
 
 class TagModel: public Model {
   public:
@@ -56,79 +29,31 @@ class TagModel: public Model {
     TagModel &operator=(TagModel &&) = delete;
 
     /** Enumerates the possible actions */
-    enum Action
-    : int {
-        NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, TAG = 4
+    enum class TagAction : unsigned long {
+        NORTH = 0,
+        EAST = 1,
+        SOUTH = 2,
+        WEST = 3,
+        TAG = 4
     };
-
-    void dispAct(unsigned long actId, std::ostream &os) {
-        switch (actId) {
-        case NORTH:
-            os << "NORTH";
-            break;
-        case EAST:
-            os << "EAST";
-            break;
-        case SOUTH:
-            os << "SOUTH";
-            break;
-        case WEST:
-            os << "WEST";
-            break;
-        case TAG:
-            os << "TAG";
-            break;
-        }
-    }
 
     /** The cells are either empty or walls; empty cells are numbered
      * starting at 0
      */
-    enum CellType
-    : int {
-        EMPTY = 0, WALL = -1
+    enum CellType : int {
+        EMPTY = 0,
+        WALL = -1
     };
-
-    void dispCell(int cellType, std::ostream &os) {
-        if (cellType >= EMPTY) {
-            os << std::setw(2);
-            os << cellType;
-            return;
-        }
-        switch (cellType) {
-        case WALL:
-            os << "XX";
-            break;
-        default:
-            os << "ERROR-" << cellType;
-            break;
-        }
-    }
 
     enum TaggedState
     : int {
         UNTAGGED = 0, TAGGED = 1
     };
 
-    void dispState(VectorState &s, std::ostream &os) {
-        os << "ROBOT: " << decodeCoords(s.vals[0]) << " OPPONENT: "
-           << decodeCoords(s.vals[1]);
-        if (s.vals[2] == TAGGED) {
-            os << " TAGGED!";
-        }
-    }
-
     enum Obs
     : int {
         UNSEEN = 0, SEEN = 1
     };
-
-    void dispObs(Observation &o, std::ostream &os) {
-        os << decodeCoords(o[0]);
-        if (o[1] == SEEN) {
-            os << " SEEN!";
-        }
-    }
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
@@ -195,8 +120,11 @@ class TagModel: public Model {
                     std::vector<Observation> &modifObsSeq,
                     std::vector<double> &modifRewSeq);
 
+    void dispAct(Action &action, std::ostream &os);
+    void dispCell(CellType cellType, std::ostream &os);
+    void dispObs(Observation const &obs, std::ostream &os);
     void drawEnv(std::ostream &os);
-    void drawState(VectorState &s, std::ostream &os);
+    void drawState(State const &state, std::ostream &os);
 
   private:
     // Problem parameters.
@@ -229,22 +157,22 @@ class TagModel: public Model {
      */
     void makeObs(VectorState &nxtSVals, unsigned long actId, Observation &obsVals);
     /** Moves the opponent. */
-    void moveOpponent(Coords &robotPos, Coords &opponentPos);
+    void moveOpponent(GridPosition &robotPos, GridPosition &opponentPos);
     /** Generates the distribution for the opponent's actions. */
-    void makeOpponentActions(Coords &robotPos, Coords &opponentPos,
+    void makeOpponentActions(GridPosition &robotPos, GridPosition &opponentPos,
                              std::vector<long> &actions);
 
     /** Gets the expected coordinates after taking the given action;
      *  this may result in invalid coordinates.
      */
-    Coords getMovedPos(Coords &coords, unsigned long actId);
-    /** Returns true iff the given coords form a valid position. */
-    bool isValid(Coords &sVals);
+    GridPosition getMovedPos(GridPosition &GridPosition, unsigned long actId);
+    /** Returns true iff the given GridPosition form a valid position. */
+    bool isValid(GridPosition &sVals);
 
     /** Encodes the coordinates as an integer. */
-    long encodeCoords(Coords c);
+    long encodeGridPosition(GridPosition c);
     /** Decodes the coordinates from an integer. */
-    Coords decodeCoords(long code);
+    GridPosition decodeGridPosition(long code);
 
     /** The number of rows in the map. */
     long nRows;
@@ -254,7 +182,7 @@ class TagModel: public Model {
     /** The number of empty cells in the map. */
     long nEmptyCells;
     /** The empty cells, numbered; */
-    std::vector<Coords> emptyCells;
+    std::vector<GridPosition> emptyCells;
 
     /** The penalty for each movement. */
     double moveCost;

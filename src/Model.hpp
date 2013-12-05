@@ -6,6 +6,7 @@
 #include <vector>                       // for vector
 
 #include "defs.hpp"                     // for RandomGenerator
+#include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
 #include "Observation.hpp"              // for Observation
 class State;
@@ -16,7 +17,7 @@ class Model {
      * observation, and reward.
      */
     struct StepResult {
-        long action;
+        Action action;
         Observation observation;
         double immediateReward;
         std::unique_ptr<State> nextState;
@@ -79,16 +80,16 @@ class Model {
     virtual double getDefaultVal() = 0;
 
     /** Generates the next state, an observation, and the reward. */
-    virtual StepResult generateStep(State const &state, unsigned long action) = 0;
+    virtual StepResult generateStep(State const &state, Action const &action) = 0;
     /** Returns the reward for the given state. */
     virtual double getReward(State const &state) = 0;
     /** Returns the reward for the given state and action. */
-    virtual double getReward(State const &state, unsigned long action) = 0;
+    virtual double getReward(State const &state, Action const &action) = 0;
 
     /** Generates new state particles based on the state particles of the
      * previous node, as well as on the action and observation.
      */
-    virtual std::vector<std::unique_ptr<State> > generateParticles(unsigned long action,
+    virtual std::vector<std::unique_ptr<State> > generateParticles(Action const &action,
             Observation const &obs, std::vector<State *> const &previousParticles) = 0;
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
@@ -96,7 +97,7 @@ class Model {
      * This should only be used if the previous belief turns out to be
      * incompatible with the current observation.
      */
-    virtual std::vector<std::unique_ptr<State> > generateParticles(unsigned long action,
+    virtual std::vector<std::unique_ptr<State> > generateParticles(Action const &,
             Observation const &obs) = 0;
 
     /** Loads model changes from the given file. */
@@ -114,11 +115,12 @@ class Model {
      */
     virtual bool modifStSeq(std::vector<State const *> const &states,
                             long startAffectedIdx, long endAffectedIdx,
-                            std::vector<std::unique_ptr<State> > *modifStSeq, std::vector<long> *modifActSeq,
+                            std::vector<std::unique_ptr<State> > *modifStSeq,
+                            std::vector<Action> *modifActSeq,
                             std::vector<Observation> *modifObsSeq,
                             std::vector<double> *modifRewSeq) = 0;
 
-    virtual void dispAct(unsigned long action, std::ostream &os) = 0;
+    virtual void dispAct(Action const &action, std::ostream &os) = 0;
     virtual void dispObs(Observation const &obs, std::ostream &os) = 0;
     virtual void drawEnv(std::ostream &os) = 0;
     virtual void drawState(State const &state, std::ostream &os) = 0;

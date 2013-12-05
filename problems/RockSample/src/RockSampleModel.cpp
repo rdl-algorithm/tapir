@@ -16,6 +16,7 @@
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
 #include "defs.hpp"                     // for RandomGenerator
+#include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
 #include "Observation.hpp"              // for Observation
 #include "RockSampleState.hpp"          // for RockSampleState
@@ -162,10 +163,10 @@ double RockSampleModel::solveHeuristic(State const &state) {
     while (!goodRocks.empty()) {
         std::set<int>::iterator it = goodRocks.begin();
         int bestRock = *it;
-        long lowestDist = rockPositions[bestRock].distanceTo(currentPos);
+        long lowestDist = rockPositions[bestRock].manHattanDistanceTo(currentPos);
         ++it;
         for (; it != goodRocks.end(); ++it) {
-            long dist = rockPositions[*it].distanceTo(currentPos);
+            long dist = rockPositions[*it].manHattanDistanceTo(currentPos);
             if (dist < lowestDist) {
                 bestRock = *it;
                 lowestDist = dist;
@@ -188,7 +189,7 @@ double RockSampleModel::getDefaultVal() {
 }
 
 std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState(
-        RockSampleState const &state, unsigned long action) {
+        RockSampleState const &state, Action const &action) {
     GridPosition pos(state.getPosition());
     std::vector<bool> rockStates(state.getRockStates());
     bool isValid = true;
@@ -226,14 +227,14 @@ std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState
             isValid);
 }
 
-RockSampleModel::RSObservation RockSampleModel::makeObs(unsigned long action, RockSampleState const &nextState) {
+RockSampleModel::RSObservation RockSampleModel::makeObs(Action const &action, RockSampleState const &nextState) {
     if (action < CHECK) {
         return RSObservation::NONE;
     }
     int rockNo = action - CHECK;
     GridPosition pos(nextState.getPosition());
     std::vector<bool> rockStates(nextState.getRockStates());
-    double dist = pos.distanceTo(rockPositions[rockNo]);
+    double dist = pos.euclideanDistanceTo(rockPositions[rockNo]);
     double efficiency = (1 + std::pow(2, -dist / halfEfficiencyDistance)) * 0.5;
     // cerr << "D: " << dist << " E:" << efficiency << endl;
     if (std::bernoulli_distribution(efficiency)(*randGen)) {
@@ -243,7 +244,7 @@ RockSampleModel::RSObservation RockSampleModel::makeObs(unsigned long action, Ro
     }
 }
 
-Model::StepResult RockSampleModel::generateStep(State const &state, unsigned long action) {
+Model::StepResult RockSampleModel::generateStep(State const &state, Action const &action) {
     RockSampleState const *rockSampleState =
             static_cast<RockSampleState const *>(&state);
     Model::StepResult result;
@@ -264,7 +265,7 @@ double RockSampleModel::getReward(State const &/*state*/) {
     return 0;
 }
 
-double RockSampleModel::getReward(State const &state, unsigned long action) {
+double RockSampleModel::getReward(State const &state, Action const &action) {
     RockSampleState const *rockSampleState =
             static_cast<RockSampleState const *>(&state);
 
@@ -293,7 +294,7 @@ double RockSampleModel::getReward(State const &state, unsigned long action) {
 }
 
 std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
-        unsigned long action, Observation const &obs,
+        Action const &action, Observation const &obs,
         std::vector<State *> const &previousParticles) {
     std::vector<std::unique_ptr<State> > newParticles;
     // If it's a CHECK action, we condition on the observation.
@@ -306,7 +307,7 @@ std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
             RockSampleState const *rockSampleState =
                         static_cast<RockSampleState const *>(state);
             GridPosition pos(rockSampleState->getPosition());
-            double dist = pos.distanceTo(rockPositions[rockNo]);
+            double dist = pos.euclideanDistanceTo(rockPositions[rockNo]);
             double efficiency = ((1
                     + std::pow(2, -dist / halfEfficiencyDistance)) * 0.5);
             bool rockIsGood = rockSampleState->getRockStates()[rockNo];
@@ -343,7 +344,7 @@ std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
 }
 
 std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
-        unsigned long action, Observation const &obs) {
+        Action const &action, Observation const &obs) {
     std::vector<std::unique_ptr<State> > particles;
     while (particles.size() < nParticles) {
         std::unique_ptr<State> state = sampleStateUniform();
@@ -367,12 +368,12 @@ void RockSampleModel::update(long /*time*/, std::vector<std::unique_ptr<State> >
 bool RockSampleModel::modifStSeq(std::vector<State const *> const &/*states*/,
         long /*startAffectedIdx*/, long /*endAffectedIdx*/,
         std::vector<std::unique_ptr<State> > */*modifStSeq*/,
-        std::vector<long> */*modifActSeq*/, std::vector<Observation> */*modifObsSeq*/,
+        std::vector<Action> */*modifActSeq*/, std::vector<Observation> */*modifObsSeq*/,
         std::vector<double> */*modifRewSeq*/) {
     return false;
 }
 
-void RockSampleModel::dispAct(unsigned long action, std::ostream &os) {
+void RockSampleModel::dispAct(Action const &action, std::ostream &os) {
     if (action >= CHECK) {
         os << "CHECK-" << action - CHECK;
         return;

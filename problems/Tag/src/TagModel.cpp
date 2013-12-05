@@ -75,7 +75,7 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) : Model(randG
 }
 
 void TagModel::initialise() {
-    Coords p;
+    GridPosition p;
     nEmptyCells = 0;
     envMap.resize(nRows);
     for (p.i = nRows - 1; p.i >= 0; p.i--) {
@@ -101,11 +101,11 @@ void TagModel::initialise() {
     maxVal = tagReward;
 }
 
-long TagModel::encodeCoords(Coords c) {
+long TagModel::encodeGridPosition(GridPosition c) {
     return envMap[c.i][c.j];
 }
 
-Coords TagModel::decodeCoords(long code) {
+GridPosition TagModel::decodeGridPosition(long code) {
     return emptyCells[code];
 }
 
@@ -125,8 +125,8 @@ bool TagModel::isTerm(VectorState &sVals) {
 }
 
 void TagModel::solveHeuristic(VectorState &s, double *qVal) {
-    Coords robotPos = decodeCoords(s.vals[0]);
-    Coords opponentPos = decodeCoords(s.vals[1]);
+    GridPosition robotPos = decodeGridPosition(s.vals[0]);
+    GridPosition opponentPos = decodeGridPosition(s.vals[1]);
     if (s.vals[2] == TAGGED) {
         *qVal = 0;
         return;
@@ -148,23 +148,23 @@ bool TagModel::makeNextState(VectorState &sVals, unsigned long actId,
     if (sVals.vals[2] == TAGGED) {
         return false;
     }
-    Coords robotPos = decodeCoords(sVals.vals[0]);
-    Coords opponentPos = decodeCoords(sVals.vals[1]);
+    GridPosition robotPos = decodeGridPosition(sVals.vals[0]);
+    GridPosition opponentPos = decodeGridPosition(sVals.vals[1]);
     if (actId == TAG && robotPos == opponentPos) {
         nxtSVals.vals[2] = TAGGED;
         return true;
     }
     moveOpponent(robotPos, opponentPos);
-    nxtSVals.vals[1] = encodeCoords(opponentPos);
+    nxtSVals.vals[1] = encodeGridPosition(opponentPos);
     robotPos = getMovedPos(robotPos, actId);
     if (!isValid(robotPos)) {
         return false;
     }
-    nxtSVals.vals[0] = encodeCoords(robotPos);
+    nxtSVals.vals[0] = encodeGridPosition(robotPos);
     return true;
 }
 
-void TagModel::makeOpponentActions(Coords &robotPos, Coords &opponentPos,
+void TagModel::makeOpponentActions(GridPosition &robotPos, GridPosition &opponentPos,
                                    std::vector<long> &actions) {
     if (robotPos.i > opponentPos.i) {
         actions.push_back(NORTH);
@@ -188,22 +188,22 @@ void TagModel::makeOpponentActions(Coords &robotPos, Coords &opponentPos,
     }
 }
 
-void TagModel::moveOpponent(Coords &robotPos, Coords &opponentPos) {
+void TagModel::moveOpponent(GridPosition &robotPos, GridPosition &opponentPos) {
     // Randomize to see if the opponent stays still.
     if (global_resources::rand01() < opponentStayProbability) {
         return;
     }
     std::vector<long> actions;
     makeOpponentActions(robotPos, opponentPos, actions);
-    Coords newOpponentPos = getMovedPos(opponentPos,
+    GridPosition newOpponentPos = getMovedPos(opponentPos,
                                         actions[global_resources::randIntBetween(0, actions.size() - 1)]);
     if (isValid(newOpponentPos)) {
         opponentPos = newOpponentPos;
     }
 }
 
-Coords TagModel::getMovedPos(Coords &coords, unsigned long actId) {
-    Coords movedPos = coords;
+GridPosition TagModel::getMovedPos(GridPosition &GridPosition, unsigned long actId) {
+    GridPosition movedPos = GridPosition;
     switch (actId) {
     case NORTH:
         movedPos.i -= 1;
@@ -220,9 +220,9 @@ Coords TagModel::getMovedPos(Coords &coords, unsigned long actId) {
     return movedPos;
 }
 
-bool TagModel::isValid(Coords &coords) {
-    if (coords.i < 0 || coords.i >= nRows || coords.j < 0 || coords.j >= nCols
-            || envMap[coords.i][coords.j] == WALL) {
+bool TagModel::isValid(GridPosition &GridPosition) {
+    if (GridPosition.i < 0 || GridPosition.i >= nRows || GridPosition.j < 0 || GridPosition.j >= nCols
+            || envMap[GridPosition.i][GridPosition.j] == WALL) {
         return false;
     }
     return true;
@@ -267,7 +267,7 @@ void TagModel::getStatesSeeObs(unsigned long actId, Observation &obs,
                                std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt) {
     std::map<std::vector<double>, double> weights;
     double weightTotal = 0;
-    Coords newRobotPos = decodeCoords(obs[0]);
+    GridPosition newRobotPos = decodeGridPosition(obs[0]);
     if (obs[1] == SEEN) {
         VectorState nxtSVals;
         nxtSVals.vals.resize(nStVars);
@@ -277,12 +277,12 @@ void TagModel::getStatesSeeObs(unsigned long actId, Observation &obs,
         return;
     }
     for (VectorState &sVals : partSt) {
-        Coords oldRobotPos = decodeCoords(sVals.vals[0]);
+        GridPosition oldRobotPos = decodeGridPosition(sVals.vals[0]);
         // Ignore states that do not match knowledge of the robot's position.
         if (newRobotPos != getMovedPos(oldRobotPos, actId)) {
             continue;
         }
-        Coords oldOpponentPos = decodeCoords(sVals.vals[1]);
+        GridPosition oldOpponentPos = decodeGridPosition(sVals.vals[1]);
         std::vector<long> actions;
         makeOpponentActions(oldRobotPos, oldOpponentPos, actions);
         std::vector<long> newActions;
@@ -293,11 +293,11 @@ void TagModel::getStatesSeeObs(unsigned long actId, Observation &obs,
         }
         double probabilityFactor = 1.0 / newActions.size();
         for (long action : newActions) {
-            Coords newOpponentPos = getMovedPos(oldOpponentPos, action);
+            GridPosition newOpponentPos = getMovedPos(oldOpponentPos, action);
             VectorState sVals;
             sVals.vals.resize(nStVars);
             sVals.vals[0] = obs[0];
-            sVals.vals[1] = encodeCoords(newOpponentPos);
+            sVals.vals[1] = encodeGridPosition(newOpponentPos);
             sVals.vals[2] = UNTAGGED;
             weights[sVals.vals] += probabilityFactor;
             weightTotal += probabilityFactor;
@@ -357,6 +357,49 @@ bool TagModel::modifStSeq(std::vector<VectorState> &/*seqStVals*/,
     return false;
 }
 
+void TagModel::dispAct(Action &action, std::ostream &os) {
+    switch (action) {
+    case NORTH:
+        os << "NORTH";
+        break;
+    case EAST:
+        os << "EAST";
+        break;
+    case SOUTH:
+        os << "SOUTH";
+        break;
+    case WEST:
+        os << "WEST";
+        break;
+    case TAG:
+        os << "TAG";
+        break;
+    }
+}
+
+void dispObs(Observation const &obs, std::ostream &os) {
+    os << decodeGridPosition(obs[0]);
+    if (obs[1] == SEEN) {
+        os << " SEEN!";
+    }
+}
+
+void TagModel::dispCell(CellType cellType, std::ostream &os) {
+        if (cellType >= EMPTY) {
+            os << std::setw(2);
+            os << cellType;
+            return;
+        }
+        switch (cellType) {
+        case WALL:
+            os << "XX";
+            break;
+        default:
+            os << "ERROR-" << cellType;
+            break;
+        }
+    }
+
 void TagModel::drawEnv(std::ostream &os) {
     for (std::vector<int> &row : envMap) {
         for (int cellType : row) {
@@ -367,12 +410,12 @@ void TagModel::drawEnv(std::ostream &os) {
     }
 }
 
-void TagModel::drawState(VectorState &s, std::ostream &os) {
+void TagModel::drawState(TagState &state, std::ostream &os) {
     for (std::size_t i = 0; i < envMap.size(); i++) {
         for (std::size_t j = 0; j < envMap[0].size(); j++) {
-            Coords coords(i, j);
-            bool hasRobot = (coords == decodeCoords(s.vals[0]));
-            bool hasOpponent = (coords == decodeCoords(s.vals[1]));
+            GridPosition pos(i, j);
+            bool hasRobot = (pos == state.getRobotPosition());
+            bool hasOpponent = (pos == state.getOpponentPosition());
             if (hasRobot) {
                 if (hasOpponent) {
                     os << "#";
@@ -392,3 +435,4 @@ void TagModel::drawState(VectorState &s, std::ostream &os) {
         os << endl;
     }
 }
+

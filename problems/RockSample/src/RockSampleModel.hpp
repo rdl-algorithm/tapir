@@ -15,6 +15,7 @@
 #include <boost/program_options.hpp>    // for program_options, variables_map
 
 #include "defs.hpp"                     // for RandomGenerator
+#include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
 #include "GridPosition.hpp"             // for GridPosition
 #include "Model.hpp"                    // for Model
@@ -38,7 +39,7 @@ class RockSampleModel: public Model {
      * where i is the rock number from 0..k-1 and k is the number
      * of rocks.
      */
-    enum Action : unsigned long {
+    enum RSAction : long {
         NORTH = 0,
         EAST = 1,
         SOUTH = 2,
@@ -115,14 +116,14 @@ class RockSampleModel: public Model {
     double solveHeuristic(State const &state);
     double getDefaultVal();
 
-    Model::StepResult generateStep(State const &state, unsigned long action);
+    Model::StepResult generateStep(State const &state, Action const &action);
     double getReward(State const &state);
-    double getReward(State const &state, unsigned long action);
+    double getReward(State const &state, Action const &action);
 
-    std::vector<std::unique_ptr<State>> generateParticles(unsigned long action,
+    std::vector<std::unique_ptr<State>> generateParticles(Action const &action,
                                      Observation const &obs,
                                      std::vector<State *> const &previousParticles);
-    std::vector<std::unique_ptr<State>> generateParticles(unsigned long action,
+    std::vector<std::unique_ptr<State>> generateParticles(Action const &action,
                                      Observation const &obs);
 
     std::vector<long> loadChanges(char const *changeFilename);
@@ -132,11 +133,11 @@ class RockSampleModel: public Model {
     bool modifStSeq(std::vector<State const *> const &states, long startAffectedIdx,
                     long endAffectedIdx,
                     std::vector<std::unique_ptr<State> > *modifStSeq,
-                    std::vector<long> *modifActSeq,
+                    std::vector<Action> *modifActSeq,
                     std::vector<Observation> *modifObsSeq,
                     std::vector<double> *modifRewSeq);
 
-    void dispAct(unsigned long action, std::ostream &os);
+    void dispAct(Action const &action, std::ostream &os);
     void dispCell(CellType cellType, std::ostream &os);
     void dispObs(Observation const &obs, std::ostream &os);
     void drawEnv(std::ostream &os);
@@ -177,11 +178,11 @@ class RockSampleModel: public Model {
      * returns true if the action was legal, and false if it was illegal.
      */
     std::pair<std::unique_ptr<RockSampleState>, bool> makeNextState(
-        RockSampleState const &state, unsigned long action);
+        RockSampleState const &state, Action const &action);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    RSObservation makeObs(unsigned long action, RockSampleState const &nextState);
+    RSObservation makeObs(Action const &action, RockSampleState const &nextState);
 
     /** The number of rows in the map. */
     long nRows;
