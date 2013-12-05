@@ -20,6 +20,10 @@ ObservationEdge::ObservationEdge(Observation const &obs) :
     child(std::make_unique<BeliefNode>()) {
 }
 
+// Do nothing!
+ObservationEdge::~ObservationEdge() {
+}
+
 bool ObservationEdge::obsEquals(Observation const &otherObs) {
     Observation::const_iterator itThis, itOther;
     for (itThis = obs.cbegin(), itOther = otherObs.cbegin();

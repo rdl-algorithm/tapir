@@ -6,14 +6,14 @@
 #include <set>                          // for set, set<>::iterator
 #include <utility>                      // for pair
 
+#include "defs.hpp"                     // for make_unique
 #include "ChangeType.hpp"               // for ChangeType
 #include "State.hpp"                    // for State
 #include "StateInfo.hpp"                // for StateInfo
 
-#include <iostream> //temp. for cerr
+#include <iostream>                     // for cerr & endl (temp.)
 
 StatePool::StatePool() :
-    nStates(0),
     nSDim(-1),
     allStates(),
     allStatesIdx(),
@@ -21,20 +21,16 @@ StatePool::StatePool() :
 }
 
 StatePool::~StatePool() {
-    reset();
 }
 
 void StatePool::reset() {
-    nStates = 0;
-    for (StateInfo *wrappedState : allStates) {
-        delete wrappedState;
-    }
     allStates.clear();
     allStatesIdx.clear();
     for (long i = 0; i < nSDim; i++) {
         stStruct[i].clear();
     }
     stStruct.clear();
+    StateInfo::currId = 0;
 }
 
 StateInfo *StatePool::add(std::unique_ptr<State> state) {
@@ -42,17 +38,18 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
 //        nSDim = sVals.vals.size();
 //        stStruct.resize(nSDim);
 //    }
-    StateInfo *newInfo = new StateInfo(std::move(state));
-    std::pair<StateInfoSet::iterator, bool> ret = allStates.insert(newInfo);
+    std::unique_ptr<StateInfo> newInfo = std::make_unique<StateInfo>(
+            std::move(state));
+    StateInfo *stateInfo = newInfo.get();
+    std::pair<StateInfoSet::iterator, bool> ret = allStates.insert(std::move(newInfo));
     if (ret.second) {
-        newInfo->setId();
-        allStatesIdx.push_back(newInfo);
-        nStates++;
-        return newInfo;
-    } else {
-        delete newInfo;
-        return *(ret.first);
+        stateInfo->setId();
+        if (stateInfo->getId() != (long)allStatesIdx.size()) {
+            std::cerr << "Error: wrong size in StatePool" << std::endl;
+        }
+        allStatesIdx.push_back(stateInfo);
     }
+    return stateInfo;
 }
 
 StateInfo *StatePool::getStateById(long id) {

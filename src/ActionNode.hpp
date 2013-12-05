@@ -3,6 +3,7 @@
 
 #include <memory>                       // for unique_ptr
 #include <queue>                        // for queue
+#include <utility>                      // for pair
 #include <vector>                       // for vector
 
 #include "Action.hpp"                   // for Action
@@ -42,7 +43,7 @@ class ActionNode {
     /** Adds a new ObservationEdge with the given observation, creating
      * a new belief node if necessary.
      */
-    BeliefNode *addChild(Observation const &obs);
+    std::pair<BeliefNode *, bool> addChild(Observation const &obs);
 
     /** Returns the child corresponding to the given observation, based on
      * sufficient proximity.

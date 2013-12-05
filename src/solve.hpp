@@ -55,25 +55,24 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     randGen.seed(seed);
     randGen.discard(10);
 
-    Model *model = new ModelType(&randGen, vm);
-    Solver *solver = new Solver(&randGen, model);
+    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen, vm);
+    ModelType *model = newModel.get();
+    Solver solver(&randGen, std::move(newModel));
 
     double totT;
     std::clock_t tStart;
     tStart = std::clock();
-    solver->genPol(model->getMaxTrials(), model->getDepthTh());
+    solver.genPol(model->getMaxTrials(), model->getDepthTh());
     totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
     std::ofstream os;
     os.open(polPath.c_str());
-    Serializer *serializer = new SerializerType(solver);
+    Serializer *serializer = new SerializerType(&solver);
     serializer->save(os);
+    delete serializer;
     os.close();
 
     cout << "SolvingTime: " << totT << endl;
-
-    delete solver;
-    delete model;
     return 0;
 }
 

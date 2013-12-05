@@ -36,6 +36,10 @@ HistorySequence::HistorySequence(std::unique_ptr<HistoryEntry> startEntry,
     histSeq.push_back(std::move(startEntry));
 }
 
+// Do nothing!
+HistorySequence::~HistorySequence() {
+}
+
 HistoryEntry *HistorySequence::getFirstEntry() {
     return histSeq.begin()->get();
 }

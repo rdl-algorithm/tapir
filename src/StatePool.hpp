@@ -10,10 +10,21 @@
 #include "ChangeType.hpp"               // for ChangeType
 #include "State.hpp"                    // for State
 #include "StateInfo.hpp"                // for StateInfo
-
 class StatePool {
-  public:
-    typedef std::unordered_set<StateInfo *, StateInfo::StateHash, StateInfo::SameState> StateInfoSet;
+public:
+    struct StateInfoHash {
+        size_t operator()(std::unique_ptr<StateInfo> const &stateInfo) const {
+            return stateInfo->getState()->hash();
+        }
+    };
+    struct SameStateInfo {
+        bool operator()(std::unique_ptr<StateInfo> const &s1,
+                std::unique_ptr<StateInfo> const &s2) const {
+            return *(s1->getState()) == *(s2->getState());
+        }
+    };
+    typedef std::unordered_set<std::unique_ptr<StateInfo>, StateInfoHash,
+            SameStateInfo> StateInfoSet;
 
     friend class TextSerializer;
 
@@ -31,7 +42,7 @@ class StatePool {
                                 ChangeType chType, std::set<StateInfo *> &affectedSt);
 
   private:
-    long nStates, nSDim;
+    long nSDim;
     StateInfoSet allStates;
     std::vector<StateInfo *> allStatesIdx;
     std::vector<std::multimap<double, StateInfo *> > stStruct;

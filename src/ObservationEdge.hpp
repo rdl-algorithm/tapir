@@ -17,7 +17,7 @@ class ObservationEdge {
     ObservationEdge(Observation const &obs);
 
     /** Default destructor. */
-    ~ObservationEdge() = default;
+    ~ObservationEdge();
 
     /* Copying and moving is disallowed. */
     ObservationEdge(ObservationEdge const &) = delete;

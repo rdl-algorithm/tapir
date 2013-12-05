@@ -30,7 +30,7 @@ class BeliefNode {
     /** Constructs a new belief node with the given ID. */
     BeliefNode(long id);
     /** Default destructor. */
-    ~BeliefNode() = default;
+    ~BeliefNode();
 
     /* Copying and moving is disallowed. */
     BeliefNode(BeliefNode const &) = delete;
@@ -50,8 +50,11 @@ class BeliefNode {
     /** Adds the given history entry to this belief node. */
     void add(HistoryEntry *newHistEntry);
 
-    /** Adds a child for the given action and observation. */
-    BeliefNode *addChild(Action const &action, Observation const &obs);
+    /** Adds a child for the given action and observation;
+     * returns the child node, and a boolean representing
+     */
+    std::pair<BeliefNode *, bool> addChild(Action const &action,
+            Observation const &obs);
     /** Samples a particle from this node. */
     HistoryEntry *sampleAParticle(RandomGenerator *randGen);
 
@@ -112,7 +115,7 @@ class BeliefNode {
     /** The best mean q-value of any action child. */
     double bestMeanQValue;
     /** The action corresponding to the highest expected value. */
-    long bestAction;
+    Action bestAction;
 
     /** The time at which the last particle was added. */
     double tLastAddedParticle;

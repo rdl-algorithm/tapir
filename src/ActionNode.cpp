@@ -2,6 +2,7 @@
 
 #include <memory>                       // for unique_ptr
 #include <queue>                        // for queue
+#include <utility>                      // for pair, make_pair
 #include <vector>                       // for vector, vector<>::iterator
 
 #include "defs.hpp"                     // for make_unique
@@ -43,15 +44,17 @@ void ActionNode::updateQValue(double oldValue, double newValue,
     updateQValue(newValue - oldValue);
 }
 
-BeliefNode *ActionNode::addChild(Observation const &obs) {
+std::pair<BeliefNode *, bool> ActionNode::addChild(Observation const &obs) {
     BeliefNode *beliefChild = getBeliefChild(obs);
+    bool added = false;
     if (beliefChild == nullptr) {
         std::unique_ptr<ObservationEdge> newEdge = std::make_unique<ObservationEdge>(obs);
         beliefChild = newEdge->getBeliefChild();
         obsChildren.push_back(std::move(newEdge));
+        added = true;
     }
     nParticles++;
-    return beliefChild;
+    return std::make_pair(beliefChild, added);
 }
 
 BeliefNode *ActionNode::getBeliefChild(Observation const &obs) {

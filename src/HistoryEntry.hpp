@@ -1,6 +1,10 @@
 #ifndef HISTORYENTRY_HPP
 #define HISTORYENTRY_HPP
 
+
+#include <memory>                       // for unique_ptr
+
+#include "defs.hpp"                     // for make_unique
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
 class BeliefNode;

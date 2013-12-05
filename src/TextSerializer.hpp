@@ -56,7 +56,7 @@ class TextSerializer: public Serializer {
     virtual void save(BeliefTree &tree, std::ostream &os);
     virtual void load(BeliefTree &tree, std::istream &is);
   private:
-    std::vector<BeliefNode *> nodeIndex;
+    //std::vector<std::unique_ptr<BeliefNode> > nodeStore;
     void saveWithChildren(ObservationEdge &edge, std::ostream &os,
                           std::queue<BeliefNode *> &queue);
     void saveWithChildren(ActionNode &node, std::ostream &os,

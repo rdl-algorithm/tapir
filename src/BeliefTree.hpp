@@ -1,7 +1,9 @@
 #ifndef BELIEFTREE_HPP
 #define BELIEFTREE_HPP
 
+#include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
+
 class BeliefNode;
 
 class BeliefTree {
@@ -18,11 +20,11 @@ class BeliefTree {
     void reset();
 
     BeliefNode *getRoot() {
-        return root;
+        return root.get();
     }
 
   private:
-    BeliefNode *root;
+    std::unique_ptr<BeliefNode> root;
     std::vector<BeliefNode *> allNodes;
 };
 

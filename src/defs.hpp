@@ -7,7 +7,7 @@
 
 typedef std::default_random_engine RandomGenerator;
 
-namespace std{
+namespace std {
     template<typename T, typename... Args>
     std::unique_ptr<T> make_unique(Args&&... args)
     {

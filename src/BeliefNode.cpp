@@ -49,6 +49,10 @@ BeliefNode::BeliefNode(long id) :
     }
 }
 
+// Do-nothing destructor
+BeliefNode::~BeliefNode() {
+}
+
 Action BeliefNode::getUCBAction() {
     double tmpVal;
     ActionMap::iterator actionIter = actChildren.begin();
@@ -87,12 +91,12 @@ void BeliefNode::updateBestValue() {
     }
     ActionMap::iterator actionIter = actChildren.begin();
     double bestQVal = actionIter->second->meanQValue;
-    Action bestActId = actionIter->first;
+    bestAction = actionIter->first;
     actionIter++;
     for (; actionIter != actChildren.end(); actionIter++) {
         if (bestQVal < actionIter->second->meanQValue) {
             bestQVal = actionIter->second->meanQValue;
-            bestActId = actionIter->first;
+            bestAction = actionIter->first;
         }
     }
 }
@@ -104,12 +108,14 @@ void BeliefNode::add(HistoryEntry *newHistEntry) {
     nParticles++;
 }
 
-BeliefNode *BeliefNode::addChild(Action const &action, Observation const &obs) {
+std::pair<BeliefNode *, bool> BeliefNode::addChild(Action const &action, Observation const &obs) {
     std::unique_ptr<ActionNode> newActionNode = std::make_unique<ActionNode>(
             action);
+    bool added = false;
     std::map<Action, std::unique_ptr<ActionNode> >::iterator actionIter;
-    std::tie(actionIter, std::ignore) = actChildren.insert(std::make_pair(
+    std::tie(actionIter, added) = actChildren.insert(std::make_pair(
             action, std::move(newActionNode)));
+
     ActionNode *actChild = actionIter->second.get();
     return actChild->addChild(obs);
 }

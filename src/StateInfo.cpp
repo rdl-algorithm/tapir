@@ -30,6 +30,10 @@ StateInfo::StateInfo(std::unique_ptr<State> state) :
     this->state = std::move(state);
 }
 
+// Do nothing!
+StateInfo::~StateInfo() {
+}
+
 void StateInfo::setId() {
     id = currId;
     currId++;

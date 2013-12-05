@@ -6,6 +6,7 @@
 #include <vector>                       // for vector
 
 #include "defs.hpp"                     // for RandomGenerator
+#include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
 #include "Model.hpp"                    // for Model and Model::StepResult
 #include "Observation.hpp"              // for Observation
@@ -24,7 +25,7 @@ class Solver {
     friend class TextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
-    ~Solver() = default;
+    ~Solver();
     Solver(Solver const &) = delete;
     Solver(Solver &&) = delete;
     Solver &operator=(Solver const &) = delete;
@@ -53,7 +54,7 @@ class Solver {
      */
     double runSim(long nSteps, std::vector<long> &changeTimes,
                   std::vector<std::unique_ptr<State> > &trajSt,
-                  std::vector<long> &trajActId, std::vector<Observation> &trajObs,
+                  std::vector<Action> &trajActId, std::vector<Observation> &trajObs,
                   std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
                   double *totImpTime);
 
@@ -86,7 +87,7 @@ class Solver {
      */
     BeliefNode *getNNBelNode(BeliefNode *b);
     /** Helper method for policy-based rollout. */
-    double rolloutPolHelper(BeliefNode *currNode, State &s, double disc);
+    double rolloutPolHelper(BeliefNode *currNode, State &state, double disc);
     /** Updates the overall weighting of the different heuristic strategies
      * based on their performance.
      */
@@ -96,7 +97,7 @@ class Solver {
     /** Simulates a single step. */
     Model::StepResult simAStep(BeliefNode *currentBelief, State &currentState);
     /** Handles particle depletion during the simulation. */
-    BeliefNode *addChild(BeliefNode *currNode, long actId, Observation &obs,
+    BeliefNode *addChild(BeliefNode *currNode, Action &action, Observation &obs,
                          long timeStep);
     /** Improves the solution, with the root at the given node. */
     void improveSol(BeliefNode *startNode, long maxTrials, double depthTh);
@@ -122,12 +123,12 @@ class Solver {
 
     void modifHistSeqFr(HistorySequence *history,
                         std::vector<std::unique_ptr<State> > &modifStSeq,
-                        std::vector<long> &modifActSeq,
+                        std::vector<Action> &modifActSeq,
                         std::vector<Observation> &modifObsSeq,
                         std::vector<double> &modifRewSeq);
     void modifHistSeqFrTo(HistorySequence *history,
                           std::vector<std::unique_ptr<State> > &modifStSeq,
-                          std::vector<long> &modifActSeq,
+                          std::vector<Action> &modifActSeq,
                           std::vector<Observation> &modifObsSeq,
                           std::vector<double> &modifRewSeq);
 };

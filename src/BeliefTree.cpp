@@ -1,32 +1,25 @@
 #include "BeliefTree.hpp"
 
+#include <memory>                       // for unique_ptr
 #include <queue>                        // for queue
 #include <vector>                       // for vector
 
+#include "defs.hpp"                     // for make_unique
 #include "ActionNode.hpp"               // for ActionNode
 #include "BeliefNode.hpp"               // for BeliefNode
 
 BeliefTree::BeliefTree() :
-    root(new BeliefNode()),
+    root(std::make_unique<BeliefNode>()),
     allNodes() {
-    allNodes.push_back(root);
+    allNodes.push_back(root.get());
 }
 
+// Do nothing!
 BeliefTree::~BeliefTree() {
-    reset();
-    delete root;
 }
 
 void BeliefTree::reset() {
-    std::queue<BeliefNode *> tmpNodes;
-    tmpNodes.push(root);
-    while (!tmpNodes.empty()) {
-        BeliefNode *node = tmpNodes.front();
-        tmpNodes.pop();
-        node->enqueueChildren(tmpNodes);
-        delete node;
-    }
     allNodes.clear();
     root = std::make_unique<BeliefNode>();
-    allNodes.push_back(root);
+    allNodes.push_back(root.get());
 }

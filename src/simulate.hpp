@@ -81,10 +81,12 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         return 1;
     }
 
-    Model *model = new ModelType(&randGen, vm);
-    Solver *solver = new Solver(&randGen, model);
-    Serializer *serializer = new SerializerType(solver);
+    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen, vm);
+    ModelType *model = newModel.get();
+    Solver solver(&randGen, std::move(newModel));
+    Serializer *serializer = new SerializerType(&solver);
     serializer->load(inFile);
+    delete serializer;
     inFile.close();
 
     vector<long> changeTimes;
@@ -111,7 +113,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         double totT;
         double totChTime, totImpTime;
         tStart = std::clock();
-        val = solver->runSim(nSteps, changeTimes, trajSt, trajActId, trajObs,
+        val = solver.runSim(nSteps, changeTimes, trajSt, trajActId, trajObs,
                              trajRew, &actualNSteps, &totChTime, &totImpTime);
         totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
@@ -135,8 +137,6 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     }
     os.close();
 
-    delete solver;
-    delete model;
     return 0;
 }
 

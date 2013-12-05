@@ -16,22 +16,12 @@ class HistoryEntry;
 
 class StateInfo {
   public:
-    struct StateHash {
-        size_t operator()(StateInfo const *s1) const {
-            return s1->state->hash();
-        }
-    };
-    struct SameState {
-        bool operator()(StateInfo const *s1, StateInfo const *s2) const {
-            return *(s1->state) == *(s2->state);
-        }
-    };
     friend class TextSerializer;
     friend class StatePool;
     friend class Solver;
 
     StateInfo(std::unique_ptr<State> state);
-    ~StateInfo() = default;
+    ~StateInfo();
     StateInfo(StateInfo const &) = delete;
     StateInfo(StateInfo &&) = delete;
     StateInfo &operator=(StateInfo const &) = delete;

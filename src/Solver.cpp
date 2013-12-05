@@ -33,17 +33,21 @@ using std::cout;
 using std::endl;
 
 Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
-    randGen(randGen),
-    model(std::move(model)),
-    policy(new BeliefTree()),
-    allHistories(new Histories()),
-    allStates(new StatePool()),
-    lastRolloutMode(ROLLOUT_RANDHEURISTIC),
-    exploreCoef(model->getExploreCoef()),
-    cRollout { 1.0, 1.0 },
-         wRollout { 1.0, 1.0 },
-         pRollout { 0.5, 0.5 },
-nUsedRollout { 1, 1 } {
+            randGen(randGen),
+            model(std::move(model)),
+            policy(std::make_unique<BeliefTree>()),
+            allHistories(std::make_unique<Histories>()),
+            allStates(std::make_unique<StatePool>()),
+            lastRolloutMode(ROLLOUT_RANDHEURISTIC),
+            exploreCoef(this->model->getExploreCoef()),
+            cRollout { 1.0, 1.0 },
+            wRollout { 1.0, 1.0 },
+            pRollout { 0.5, 0.5 },
+            nUsedRollout { 1, 1 } {
+}
+
+// Default destructor, not in .hpp
+Solver::~Solver() {
 }
 
 void Solver::genPol(long maxTrials, double depthTh) {
@@ -51,9 +55,9 @@ void Solver::genPol(long maxTrials, double depthTh) {
     BeliefNode *root = policy->getRoot();
 
     // Set root to have at least one particle for each possible action.
-    for (Action action = 0; action < model->getNActions(); action++) {
-        std::unique_ptr<State> statePtr = model->sampleAnInitState();
-        StateInfo *stateInfo = allStates->add(std::move(statePtr));
+    for (Action action = 0; action < (long)model->getNActions(); action++) {
+        std::unique_ptr<State> newState = model->sampleAnInitState();
+        StateInfo *stateInfo = allStates->add(std::move(newState));
         State *state = stateInfo->getState();
 
         std::unique_ptr<HistoryEntry> newHistEntry = std::make_unique<HistoryEntry>(stateInfo);
@@ -75,12 +79,15 @@ void Solver::genPol(long maxTrials, double depthTh) {
 
         currHistEntry->discount = 1.0;
         currHistEntry->immediateReward = result.immediateReward;
-        currHistEntry = newHistSeq->addEntry(action, result.observation,
+        currHistEntry = currHistSeq->addEntry(action, result.observation,
                 stateInfo);
-        BeliefNode *currNode = root->addChild(action, result.observation);
+        BeliefNode *currNode;
+        bool isNew;
+        std::tie(currNode, isNew) = root->addChild(action, result.observation);
         currNode->add(currHistEntry);
-
-        policy->allNodes.push_back(currNode);
+        if (isNew) {
+            policy->allNodes.push_back(currNode);
+        }
         currHistEntry->partOfBelNode = currNode;
         currHistEntry->discount = disc;
         currHistEntry->immediateReward = 0.0;
@@ -95,8 +102,8 @@ void Solver::genPol(long maxTrials, double depthTh) {
             currHistEntry->qVal = disc * currHistEntry->immediateReward;
         }
 
-        newHistEntry->qVal = result.immediateReward + currHistEntry->qVal;
-        root->updateQValue(action, newHistEntry->qVal);
+        currHistEntry->qVal = result.immediateReward + currHistEntry->qVal;
+        root->updateQValue(action, currHistEntry->qVal);
     }
 
     // Start expanding the tree.
@@ -133,7 +140,7 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
     while (!done && currentDiscount > depthTh) {
         Model::StepResult result;
         double qVal = 0;
-        if (model->getNActions() == currNode->getNActChildren()) {
+        if (model->getNActions() == (unsigned long)currNode->getNActChildren()) {
             // If all actions have been attempted, use UCB
             long action = currNode->getUCBAction();
             result = model->generateStep(*currHistEntry->stateInfo->getState(),
@@ -155,9 +162,13 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
         currentDiscount *= discountFactor;
         currHistEntry->discount = currentDiscount;
 
-        currNode = currNode->addChild(result.action, result.observation);
+        bool isNew;
+        std::tie(currNode, isNew) = currNode->addChild(result.action,
+                result.observation);
         currNode->add(currHistEntry);
-        policy->allNodes.push_back(currNode);
+        if (isNew) {
+            policy->allNodes.push_back(currNode);
+        }
         currHistEntry->partOfBelNode = currNode;
 
         nextStateInfo->addHistoryEntry(currHistEntry);
@@ -211,7 +222,7 @@ void Solver::backup(HistorySequence *history) {
 
 std::pair<Model::StepResult, double> Solver::getRolloutAction(
     BeliefNode *belNode, State &state, double startDisc, double disc) {
-    long action;
+    Action action;
     Model::StepResult result;
     double qVal;
 
@@ -335,11 +346,11 @@ void Solver::updWeightRolloutAct(double valImprovement) {
 
 double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
                       std::vector<std::unique_ptr<State>> &trajSt,
-                      std::vector<long> &trajActId, std::vector<Observation> &trajObs,
+                      std::vector<Action> &trajAction, std::vector<Observation> &trajObs,
                       std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
                       double *totImpTime) {
     trajSt.clear();
-    trajActId.clear();
+    trajAction.clear();
     trajObs.clear();
     trajRew.clear();
 
@@ -396,7 +407,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
         Model::StepResult result = simAStep(currNode, *currentState);
         currentState = result.nextState.get();
 
-        trajActId.push_back(result.action);
+        trajAction.push_back(result.action);
         trajObs.push_back(result.observation);
         trajSt.push_back(std::move(result.nextState)); // trajSt is responsible for ownership
         trajRew.push_back(result.immediateReward);
@@ -412,7 +423,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
         BeliefNode *nextNode = currNode->getChild(result.action,
                                result.observation);
         if (nextNode == nullptr) {
-            nextNode = addChild(currNode, trajActId.back(), trajObs.back(), i);
+            nextNode = addChild(currNode, trajAction.back(), trajObs.back(), i);
         }
         currNode = nextNode;
     }
@@ -452,7 +463,7 @@ void Solver::improveSol(BeliefNode *startNode, long maxTrials, double depthTh) {
     }
 }
 
-BeliefNode *Solver::addChild(BeliefNode *currNode, long actId, Observation &obs,
+BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action, Observation &obs,
                              long timeStep) {
     cerr << "In add particle due to depletion" << endl;
     BeliefNode *nextNode = nullptr;
@@ -468,18 +479,23 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, long actId, Observation &obs,
 // Attempt to generate particles for next state based on the current belief,
 // the observation, and the action.
     std::vector<std::unique_ptr<State> > nextParticles(
-        model->generateParticles(actId, obs, particles));
+        model->generateParticles(action, obs, particles));
     if (nextParticles.empty()) {
         cerr << "Could not generate based on belief!" << endl;
         // If that fails, ignore the current belief.
-        nextParticles = model->generateParticles(actId, obs);
+        nextParticles = model->generateParticles(action, obs);
     }
     if (nextParticles.empty()) {
         cerr << "Could not generate new particles!" << endl;
     }
 
-    nextNode = currNode->addChild(actId, obs);
-    policy->allNodes.push_back(nextNode);
+    bool isNew;
+    std::tie(nextNode, isNew) = currNode->addChild(action, obs);
+    if (isNew) {
+        policy->allNodes.push_back(nextNode);
+    } else {
+        cerr << "Child should not have existed..." << endl;
+    }
 
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
         State *state = uniqueStatePtr.get();
@@ -618,7 +634,7 @@ void Solver::updatePol(std::set<HistorySequence *> &affectedHistSeq) {
         case ChangeType::ADDOBSTACLE: {
             std::vector<State const *> states = sequence->getStates();
             std::vector<std::unique_ptr<State>> modifStSeq;
-            std::vector<long> modifActSeq;
+            std::vector<Action> modifActSeq;
             std::vector<Observation> modifObsSeq;
             std::vector<double> modifRewSeq;
             if (sequence->endAffectedIdx == (long) states.size() - 1) {
@@ -665,12 +681,12 @@ void Solver::removePathFrBelNode(HistorySequence *history) {
 }
 
 void Solver::modifHistSeqFr(HistorySequence *history,
-                            std::vector<std::unique_ptr<State> > &modifStSeq, std::vector<long> &modifActSeq,
+                            std::vector<std::unique_ptr<State> > &modifStSeq, std::vector<Action> &modifActSeq,
                             std::vector<Observation> &modifObsSeq,
                             std::vector<double> &modifRewSeq) {
 
     std::vector<std::unique_ptr<State> >::iterator itSt = modifStSeq.begin();
-    std::vector<long>::iterator itAct = modifActSeq.begin();
+    std::vector<Action>::iterator itAct = modifActSeq.begin();
     std::vector<Observation>::iterator itObs = modifObsSeq.begin();
     std::vector<double>::iterator itRew = modifRewSeq.begin();
 
@@ -687,7 +703,7 @@ void Solver::modifHistSeqFr(HistorySequence *history,
      for (itH1 = history->histSeq.begin(); itH1 != history->histSeq.end(); itH1++, hIdx1++) {
      cerr << "OrghistEntry-" << hIdx1 << " ";
      cerr << (*itH1)->st->s[0] << " " << (*itH1)->st->s[1];
-     cerr << " act " << (*itH1)->actId;
+     cerr << " act " << (*itH1)->action;
      //cerr << " obs " << (*itH1)->obs[0] << " " << (*itH1)->obs[1];
      cerr << " rew " << (*itH1)->rew << endl;
      }
@@ -701,10 +717,10 @@ void Solver::modifHistSeqFr(HistorySequence *history,
         hEntry->action = *itAct;
         hEntry->obs = *itObs;
         hEntry->immediateReward = *itRew;
-        b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
-        if (b == nullptr) {
-//cerr << "ADDCHILD1\n";
-            b = hEntry->partOfBelNode->addChild(*itAct, *itObs);
+        bool isNew;
+        std::tie(b, isNew) = hEntry->partOfBelNode->addChild(*itAct, *itObs);
+        if (isNew) {
+            policy->allNodes.push_back(b);
         }
         hIdx++;
         itSt++;
@@ -731,14 +747,10 @@ void Solver::modifHistSeqFr(HistorySequence *history,
                 b->add(hEntry);
                 hEntry->hasBeenBackup = false;
             }
-            b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
-            if (b == nullptr) {
-                /*
-                 cerr << "ADDCHILD2 from " << (*itSt)[0] << " " << (*itSt)[1];
-                 if (*itAct != -1) { cerr << " act " << *itAct;  }
-                 cerr << "\n";
-                 */
-                b = hEntry->partOfBelNode->addChild(*itAct, *itObs);
+            std::tie(b, isNew) = hEntry->partOfBelNode->addChild(*itAct,
+                    *itObs);
+            if (isNew) {
+                policy->allNodes.push_back(b);
             }
         }
         if (itSt != modifStSeq.end()) {
@@ -775,7 +787,7 @@ void Solver::modifHistSeqFr(HistorySequence *history,
      hIdx = 0;
      cerr << "Size new hist: " << history->histSeq.size() << endl;
      for (itH = history->histSeq.begin(); itH != history->histSeq.end(); itH++, hIdx++) {
-     cerr << "histEntry-" << hIdx << " " << (*itH)->st->s[0] << " " << (*itH)->st->s[1] << " act " << (*itH)->actId << endl;
+     cerr << "histEntry-" << hIdx << " " << (*itH)->st->s[0] << " " << (*itH)->st->s[1] << " act " << (*itH)->action << endl;
      //" obs " << (*itH)->obs[0] << " " << (*itH)->obs[1] << " rew " << (*itH)->rew << endl;
      }
      cerr << "About to backup\n";
@@ -787,11 +799,11 @@ void Solver::modifHistSeqFr(HistorySequence *history,
 
 void Solver::modifHistSeqFrTo(HistorySequence *history,
                               std::vector<std::unique_ptr<State> > &modifStSeq,
-                              std::vector<long> &modifActSeq, std::vector<Observation> &modifObsSeq,
+                              std::vector<Action> &modifActSeq, std::vector<Observation> &modifObsSeq,
                               std::vector<double> &modifRewSeq) {
 
     std::vector<std::unique_ptr<State> >::iterator itSt = modifStSeq.begin();
-    std::vector<long>::iterator itAct = modifActSeq.begin();
+    std::vector<Action>::iterator itAct = modifActSeq.begin();
     std::vector<Observation>::iterator itObs = modifObsSeq.begin();
     std::vector<double>::iterator itRew = modifRewSeq.begin();
 
@@ -808,11 +820,12 @@ void Solver::modifHistSeqFrTo(HistorySequence *history,
         hEntry->action = *itAct;
         hEntry->obs = *itObs;
         hEntry->immediateReward = *itRew;
-        b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
+
         hEntry->hasBeenBackup = false;
-        if (b == nullptr) {
-            b = hEntry->partOfBelNode->addChild(*itAct, *itObs);
-            b->add(hEntry);
+        bool isNew;
+        std::tie(b, isNew) = hEntry->partOfBelNode->addChild(*itAct, *itObs);
+        if (isNew) {
+            policy->allNodes.push_back(b);
         }
         hIdx++;
         itSt++;
@@ -835,14 +848,15 @@ void Solver::modifHistSeqFrTo(HistorySequence *history,
             } else {
                 s = allStates->add(std::move(*itSt));
                 hEntry = history->addEntry(s, *itAct, *itObs, *itRew, currDisc,
-                                           hIdx);
+                        hIdx);
                 hEntry->partOfBelNode = b;
                 b->add(hEntry);
                 hEntry->hasBeenBackup = false;
             }
-            b = hEntry->partOfBelNode->getChild(*itAct, *itObs);
-            if (b == nullptr) {
-                b = hEntry->partOfBelNode->addChild(*itAct, *itObs);
+            std::tie(b, isNew) = hEntry->partOfBelNode->addChild(*itAct,
+                    *itObs);
+            if (isNew) {
+                policy->allNodes.push_back(b);
             }
         }
 
@@ -867,11 +881,11 @@ void Solver::modifHistSeqFrTo(HistorySequence *history,
             b->add(itH->get());
             (*itH)->hasBeenBackup = false;
             if ((*itH)->action >= 0) {
-                b = hEntry->partOfBelNode->getChild((*itH)->action,
-                        (*itH)->obs);
-                if (b == nullptr) {
-                    b = hEntry->partOfBelNode->addChild((*itH)->action,
-                            (*itH)->obs);
+                bool isNew;
+                std::tie(b, isNew) = hEntry->partOfBelNode->addChild(*itAct,
+                        *itObs);
+                if (isNew) {
+                    policy->allNodes.push_back(b);
                 }
             }
         }
@@ -889,7 +903,7 @@ void Solver::modifHistSeqFrTo(HistorySequence *history,
      long hIdx = 0;
      cerr << "Size new hist: " << history->histSeq.size() << endl;
      for (std::vector<HistoryEntry *>::iterator itH = history->histSeq.begin(); itH != history->histSeq.end(); itH++, hIdx++) {
-     cerr << "histEntry-" << hIdx << " " << (*itH)->st->s[0] << " " << (*itH)->st->s[1] << " act " << (*itH)->actId;
+     cerr << "histEntry-" << hIdx << " " << (*itH)->st->s[0] << " " << (*itH)->st->s[1] << " act " << (*itH)->action;
      //" obs " << (*itH)->obs[0] << " " << (*itH)->obs[1]
      cerr << " rew " << (*itH)->rew << endl;
      }
