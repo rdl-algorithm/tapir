@@ -75,11 +75,11 @@ $(IWYU_$(n)) $(IWYU_FIX_$(n)): | $(IWYUDIR_$(n))
 $(n) build-$(n): build-$(DEFAULT_CFG)-$(n) ;
 
 # Add local targets as prerequisites for the grouped targets
-clean: clean-$(n)
-rmdirs: rmdirs-$(n)
-iwyu: iwyu-$(n)
-iwyu-fix: iwyu-fix-$(n)
-iwyu-clean: iwyu-clean-$(n)
+clean-all: clean-$(n)
+rmdirs-all: rmdirs-$(n)
+iwyu-all: iwyu-$(n)
+iwyu-fix-all: iwyu-fix-$(n)
+iwyu-clean-all: iwyu-clean-$(n)
 
 # Directory recipe
 $(ALL_DIRS_$(n)):
@@ -102,8 +102,8 @@ $(OBJS_$(n)_$(1)): $(_O_$(n)_$(1)): $(_CPP_$(n))
 
 .PHONY: $(1)-$(n) build-$(1)-$(n) clean-$(1)-$(n)
 # Add local targets as prerequisites for the grouped targets
-clean-$(1): clean-$(1)-$(n)
-build-$(1): build-$(1)-$(n)
+clean-$(1)-all: clean-$(1)-$(n)
+build-$(1)-all: build-$(1)-$(n)
 
 # Use "build" as the default command
 $(1)-$(n): build-$(1)-$(n)
