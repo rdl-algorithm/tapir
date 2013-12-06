@@ -6,6 +6,7 @@
 #include <iomanip>                      // for operator<<, setw
 #include <ostream>                      // for operator<<, ostream, basic_ostream, basic_ostream::operator<<, basic_ostream<>::__ostream_type
 #include <string>                       // for string
+#include <utility>                      // for pair
 #include <vector>                       // for vector
 
 #include <boost/program_options.hpp>    // for program_options, variables_map
@@ -13,9 +14,11 @@
 #include "defs.hpp"                     // for RandomGenerator
 #include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
+#include "GridPosition.hpp"             // for GridPosition
 #include "Model.hpp"                    // for Model
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"                    // for State
+#include "TagState.hpp"                 // for TagState
 
 namespace po = boost::program_options;
 
@@ -29,7 +32,7 @@ class TagModel: public Model {
     TagModel &operator=(TagModel &&) = delete;
 
     /** Enumerates the possible actions */
-    enum class TagAction : unsigned long {
+    enum TagAction : long {
         NORTH = 0,
         EAST = 1,
         SOUTH = 2,
@@ -45,14 +48,9 @@ class TagModel: public Model {
         WALL = -1
     };
 
-    enum TaggedState
-    : int {
-        UNTAGGED = 0, TAGGED = 1
-    };
-
-    enum Obs
-    : int {
-        UNSEEN = 0, SEEN = 1
+    enum TagObservation : int {
+        UNSEEN = 0,
+        SEEN = 1
     };
 
     /***** Start implementation of Model's virtual methods *****/
@@ -96,37 +94,42 @@ class TagModel: public Model {
     }
 
     // Other virtual methods
-    void sampleAnInitState(VectorState &sVals);
-    bool isTerm(VectorState &sVals);
-    void solveHeuristic(VectorState &s, double *qVal);
+    std::unique_ptr<State> sampleAnInitState();
+    /** Generates an untagged state uniformly at random. */
+    std::unique_ptr<State> sampleStateUniform();
+
+    bool isTerm(State const &state);
+    double solveHeuristic(State const &state);
     double getDefaultVal();
 
-    bool getNextState(VectorState &sVals, unsigned long actId, double *immediateRew,
-                      VectorState &nxtSVals, Observation &obs);
-    double getReward(VectorState &sVals);
-    double getReward(VectorState &sVals, unsigned long actId);
+    Model::StepResult generateStep(State const &state, Action const &action);
+    double getReward(State const &state);
+    double getReward(State const &state, Action const &action);
 
-    void getStatesSeeObs(unsigned long actId, Observation &obs,
-                         std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt);
-    void getStatesSeeObs(unsigned long actId, Observation &obs,
-                         std::vector<VectorState> &partNxtSt);
+    std::vector<std::unique_ptr<State>> generateParticles(Action const &action,
+                                     Observation const &obs,
+            std::vector<State *> const &previousParticles);
+    std::vector<std::unique_ptr<State>> generateParticles(Action const &action,
+            Observation const &obs);
 
-    void getChangeTimes(char const *chName, std::vector<long> &chTime);
-    void update(long tCh, std::vector<VectorState> &affectedRange,
-                std::vector<ChangeType> &typeOfChanges);
-    bool modifStSeq(std::vector<VectorState> &seqStVals, long startAffectedIdx,
-                    long endAffectedIdx, std::vector<VectorState> &modifStSeq,
-                    std::vector<long> &modifActSeq,
-                    std::vector<Observation> &modifObsSeq,
-                    std::vector<double> &modifRewSeq);
+    std::vector<long> loadChanges(char const *changeFilename);
+    void update(long time, std::vector<std::unique_ptr<State> > *affectedRange,
+            std::vector<ChangeType> *typeOfChanges);
 
-    void dispAct(Action &action, std::ostream &os);
+    bool modifStSeq(std::vector<State const *> const &states,
+            long startAffectedIdx, long endAffectedIdx,
+            std::vector<std::unique_ptr<State> > *modifStSeq,
+            std::vector<Action> *modifActSeq,
+            std::vector<Observation> *modifObsSeq,
+            std::vector<double> *modifRewSeq);
+
+    void dispAct(Action const &action, std::ostream &os);
     void dispCell(CellType cellType, std::ostream &os);
     void dispObs(Observation const &obs, std::ostream &os);
     void drawEnv(std::ostream &os);
     void drawState(State const &state, std::ostream &os);
 
-  private:
+private:
     // Problem parameters.
     double discount;
     unsigned long nActions, nObservations, nStVars;
@@ -144,33 +147,32 @@ class TagModel: public Model {
     /** Initialises the required data structures and variables */
     void initialise();
 
-    /** Generates an untagged state uniformly at random. */
-    void sampleStateUniform(VectorState &sVals);
-
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
      */
-    bool makeNextState(VectorState &sVals, unsigned long actId, VectorState &nxtSVals);
+    std::pair<std::unique_ptr<TagState>, bool> makeNextState(
+            State const &state, Action const &action);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    void makeObs(VectorState &nxtSVals, unsigned long actId, Observation &obsVals);
+    Observation makeObs(Action const &action, TagState const &state);
     /** Moves the opponent. */
-    void moveOpponent(GridPosition &robotPos, GridPosition &opponentPos);
+    GridPosition getMovedOpponentPos(GridPosition const &robotPos,
+            GridPosition const &opponentPos);
     /** Generates the distribution for the opponent's actions. */
-    void makeOpponentActions(GridPosition &robotPos, GridPosition &opponentPos,
-                             std::vector<long> &actions);
+    std::vector<TagAction> makeOpponentActions(GridPosition const &robotPos,
+            GridPosition const &opponentPos);
 
     /** Gets the expected coordinates after taking the given action;
      *  this may result in invalid coordinates.
      */
-    GridPosition getMovedPos(GridPosition &GridPosition, unsigned long actId);
+    GridPosition getMovedPos(GridPosition const &position, Action const &action);
     /** Returns true iff the given GridPosition form a valid position. */
-    bool isValid(GridPosition &sVals);
+    bool isValid(GridPosition const &pos);
 
     /** Encodes the coordinates as an integer. */
-    long encodeGridPosition(GridPosition c);
+    long encodeGridPosition(GridPosition pos);
     /** Decodes the coordinates from an integer. */
     GridPosition decodeGridPosition(long code);
 
@@ -196,7 +198,7 @@ class TagModel: public Model {
     /** The environment map in text form. */
     std::vector<std::string> mapText;
     /** The environment map in vector form. */
-    std::vector<std::vector<int> > envMap;
+    std::vector<std::vector<CellType> > envMap;
 };
 
 #endif

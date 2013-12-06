@@ -5,15 +5,18 @@
 
 #include <fstream>                      // for ifstream, basic_istream, basic_istream<>::__istream_type
 #include <iostream>                     // for cout, cerr
-#include <map>                          // for map, _Rb_tree_iterator, map<>::iterator
+#include <random>                       // for uniform_int_distribution, etc.
+#include <unordered_map>                // for unordered_map
 #include <utility>                      // for pair
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
 #include "defs.hpp"                     // for RandomGenerator
 #include "ChangeType.hpp"               // for ChangeType
+#include "GridPosition.hpp"             // for GridPosition
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"                    // for State
+#include "TagState.hpp"                 // for TagState
 
 using std::cerr;
 using std::cout;
@@ -60,14 +63,10 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) : Model(randG
     cout << "nActions: " << nActions << endl;
     cout << "nObservations: " << nObservations << endl;
     cout << "nStVars: " << nStVars << endl;
-    VectorState s;
     cout << "Example States: " << endl;
     for (int i = 0; i < 5; i++) {
-        sampleAnInitState(s);
-        double q;
-        solveHeuristic(s, &q);
-        dispState(s, cout);
-        cout << " Heuristic: " << q << endl;
+        std::unique_ptr<State> state = sampleAnInitState();
+        cout << *state << " Heuristic: " << solveHeuristic(*state) << endl;
     }
     cout << "nParticles: " << nParticles << endl;
     cout << "Environment:" << endl;
@@ -82,11 +81,11 @@ void TagModel::initialise() {
         envMap[p.i].resize(nCols);
         for (p.j = 0; p.j < nCols; p.j++) {
             char c = mapText[p.i][p.j];
-            long cellType;
+            CellType cellType;
             if (c == 'X') {
                 cellType = WALL;
             } else {
-                cellType = EMPTY + nEmptyCells;
+                cellType = (CellType)(EMPTY + nEmptyCells);
                 emptyCells.push_back(p);
                 nEmptyCells++;
             }
@@ -101,71 +100,76 @@ void TagModel::initialise() {
     maxVal = tagReward;
 }
 
-long TagModel::encodeGridPosition(GridPosition c) {
-    return envMap[c.i][c.j];
+long TagModel::encodeGridPosition(GridPosition pos) {
+    return envMap[pos.i][pos.j];
 }
 
 GridPosition TagModel::decodeGridPosition(long code) {
     return emptyCells[code];
 }
 
-void TagModel::sampleAnInitState(VectorState &sVals) {
-    sampleStateUniform(sVals);
+std::unique_ptr<State> TagModel::sampleAnInitState() {
+    return sampleStateUniform();
 }
 
-void TagModel::sampleStateUniform(VectorState &sVals) {
-    sVals.vals.resize(nStVars);
-    sVals.vals[0] = global_resources::randIntBetween(0, nEmptyCells - 1);
-    sVals.vals[1] = global_resources::randIntBetween(0, nEmptyCells - 1);
-    sVals.vals[2] = UNTAGGED;
+std::unique_ptr<State> TagModel::sampleStateUniform() {
+    std::uniform_int_distribution<long> randomCell(0, nEmptyCells - 1);
+    GridPosition robotPos = decodeGridPosition(randomCell(*randGen));
+    GridPosition opponentPos = decodeGridPosition(randomCell(*randGen));
+    return std::make_unique<TagState>(robotPos, opponentPos, false);
 }
 
-bool TagModel::isTerm(VectorState &sVals) {
-    return sVals.vals[2] == TAGGED;
+bool TagModel::isTerm(State const &state) {
+    return static_cast<TagState const *>(&state)->isTagged();
 }
 
-void TagModel::solveHeuristic(VectorState &s, double *qVal) {
-    GridPosition robotPos = decodeGridPosition(s.vals[0]);
-    GridPosition opponentPos = decodeGridPosition(s.vals[1]);
-    if (s.vals[2] == TAGGED) {
-        *qVal = 0;
-        return;
+double TagModel::solveHeuristic(State const &state) {
+    TagState const *tagState = static_cast<TagState const *>(&state);
+    if (tagState->isTagged()) {
+        return 0;
     }
-    int dist = robotPos.distance(opponentPos);
+    GridPosition robotPos = tagState->getRobotPosition();
+    GridPosition opponentPos = tagState->getOpponentPosition();
+    int dist = robotPos.manhattanDistanceTo(opponentPos);
     double nSteps = dist / opponentStayProbability;
     double finalDiscount = std::pow(discount, nSteps);
-    *qVal = -moveCost * (1 - finalDiscount) / (1 - discount);
-    *qVal += finalDiscount * tagReward;
+    double qVal = -moveCost * (1 - finalDiscount) / (1 - discount);
+    qVal += finalDiscount * tagReward;
+    return qVal;
 }
 
 double TagModel::getDefaultVal() {
     return minVal;
 }
 
-bool TagModel::makeNextState(VectorState &sVals, unsigned long actId,
-                             VectorState &nxtSVals) {
-    nxtSVals = sVals;
-    if (sVals.vals[2] == TAGGED) {
-        return false;
+std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
+        State const &state, Action const &action) {
+    TagState const *tagState = static_cast<TagState const *>(&state);
+    if (tagState->isTagged()) {
+        return std::make_pair(std::make_unique<TagState>(*tagState), false);
     }
-    GridPosition robotPos = decodeGridPosition(sVals.vals[0]);
-    GridPosition opponentPos = decodeGridPosition(sVals.vals[1]);
-    if (actId == TAG && robotPos == opponentPos) {
-        nxtSVals.vals[2] = TAGGED;
-        return true;
+
+    GridPosition robotPos = tagState->getRobotPosition();
+    GridPosition opponentPos = tagState->getOpponentPosition();
+    if (action == TagAction::TAG && robotPos == opponentPos) {
+        return std::make_pair(
+                std::make_unique<TagState>(robotPos, opponentPos, true), true);
     }
-    moveOpponent(robotPos, opponentPos);
-    nxtSVals.vals[1] = encodeGridPosition(opponentPos);
-    robotPos = getMovedPos(robotPos, actId);
-    if (!isValid(robotPos)) {
-        return false;
+
+    GridPosition newOpponentPos = getMovedOpponentPos(robotPos, opponentPos);
+    GridPosition newRobotPos = getMovedPos(robotPos, action);
+    if (!isValid(newRobotPos)) {
+        return std::make_pair(
+                std::make_unique<TagState>(robotPos, newOpponentPos, false),
+                false);
     }
-    nxtSVals.vals[0] = encodeGridPosition(robotPos);
-    return true;
+    return std::make_pair(std::make_unique<TagState>(
+            newRobotPos, newOpponentPos, false), true);
 }
 
-void TagModel::makeOpponentActions(GridPosition &robotPos, GridPosition &opponentPos,
-                                   std::vector<long> &actions) {
+std::vector<TagModel::TagAction> TagModel::makeOpponentActions(GridPosition const &robotPos,
+        GridPosition const &opponentPos) {
+    std::vector<TagAction> actions;
     if (robotPos.i > opponentPos.i) {
         actions.push_back(NORTH);
         actions.push_back(NORTH);
@@ -186,25 +190,29 @@ void TagModel::makeOpponentActions(GridPosition &robotPos, GridPosition &opponen
         actions.push_back(EAST);
         actions.push_back(WEST);
     }
+    return actions;
 }
 
-void TagModel::moveOpponent(GridPosition &robotPos, GridPosition &opponentPos) {
+GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
+           GridPosition const &opponentPos) {
     // Randomize to see if the opponent stays still.
-    if (global_resources::rand01() < opponentStayProbability) {
-        return;
+    if (std::bernoulli_distribution(opponentStayProbability)(*randGen)) {
+        return opponentPos;
     }
-    std::vector<long> actions;
-    makeOpponentActions(robotPos, opponentPos, actions);
-    GridPosition newOpponentPos = getMovedPos(opponentPos,
-                                        actions[global_resources::randIntBetween(0, actions.size() - 1)]);
-    if (isValid(newOpponentPos)) {
-        opponentPos = newOpponentPos;
+    std::vector<TagAction> actions(makeOpponentActions(robotPos, opponentPos));;
+    Action action = actions[std::uniform_int_distribution<long>(
+            0, actions.size() - 1)(*randGen)];
+    GridPosition newOpponentPos = getMovedPos(opponentPos, action);
+    if (!isValid(newOpponentPos)) {
+        newOpponentPos = opponentPos;
     }
+    return newOpponentPos;
 }
 
-GridPosition TagModel::getMovedPos(GridPosition &GridPosition, unsigned long actId) {
-    GridPosition movedPos = GridPosition;
-    switch (actId) {
+GridPosition TagModel::getMovedPos(GridPosition const &position,
+        Action const &action) {
+    GridPosition movedPos = position;
+    switch (action) {
     case NORTH:
         movedPos.i -= 1;
         break;
@@ -220,40 +228,42 @@ GridPosition TagModel::getMovedPos(GridPosition &GridPosition, unsigned long act
     return movedPos;
 }
 
-bool TagModel::isValid(GridPosition &GridPosition) {
-    if (GridPosition.i < 0 || GridPosition.i >= nRows || GridPosition.j < 0 || GridPosition.j >= nCols
-            || envMap[GridPosition.i][GridPosition.j] == WALL) {
-        return false;
-    }
-    return true;
+bool TagModel::isValid(GridPosition const &position) {
+    return (position.i >= 0 && position.i < nRows && position.j >= 0 &&
+            position.j < nCols && envMap[position.i][position.j] != WALL);
 }
 
-void TagModel::makeObs(VectorState &nxtSVals, unsigned long /*actId*/,
-                       Observation &obsVals) {
-    obsVals[0] = nxtSVals.vals[0];
-    if (nxtSVals.vals[0] == nxtSVals.vals[1]) {
-        obsVals[1] = SEEN;
+Observation TagModel::makeObs(Action const &/*action*/, TagState const &state) {
+    Observation obs(2);
+    obs[0] = encodeGridPosition(state.getRobotPosition());
+    if (state.getRobotPosition() == state.getOpponentPosition()) {
+        obs[1] = SEEN;
     } else {
-        obsVals[1] = UNSEEN;
+        obs[1] = UNSEEN;
     }
+    return obs;
 }
 
-bool TagModel::getNextState(VectorState &sVals, unsigned long actId,
-                            double *immediateRew, VectorState &nxtSVals, Observation &obs) {
-    *immediateRew = getReward(sVals, actId);
-    makeNextState(sVals, actId, nxtSVals);
-    obs.resize(2);
-    makeObs(nxtSVals, actId, obs);
-    return isTerm(nxtSVals);
+Model::StepResult TagModel::generateStep(State const &state, Action const &action) {
+    Model::StepResult result;
+    result.action = action;
+    std::unique_ptr<TagState> nextState = makeNextState(state, action).first;
+
+    result.observation = makeObs(action, *nextState);
+    result.immediateReward = getReward(state, action);
+    result.isTerminal = isTerm(*nextState);
+    result.nextState = std::move(nextState);
+    return result;
 }
 
-double TagModel::getReward(VectorState &/*sVals*/) {
+double TagModel::getReward(State const &/*state*/) {
     return 0;
 }
 
-double TagModel::getReward(VectorState &sVals, unsigned long actId) {
-    if (actId == TAG) {
-        if (sVals.vals[0] == sVals.vals[1]) {
+double TagModel::getReward(State const &state, Action const &action) {
+    if (action == TAG) {
+        TagState const *tagState = static_cast<TagState const *>(&state);
+        if (tagState->getRobotPosition() == tagState->getOpponentPosition()) {
             return tagReward;
         } else {
             return -failedTagPenalty;
@@ -263,101 +273,102 @@ double TagModel::getReward(VectorState &sVals, unsigned long actId) {
     }
 }
 
-void TagModel::getStatesSeeObs(unsigned long actId, Observation &obs,
-                               std::vector<VectorState> &partSt, std::vector<VectorState> &partNxtSt) {
-    std::map<std::vector<double>, double> weights;
+
+std::vector<std::unique_ptr<State>> TagModel::generateParticles(
+        Action const &action, Observation const &obs,
+        std::vector<State *> const &previousParticles) {
+    std::vector<std::unique_ptr<State> > newParticles;
+
+    typedef std::unordered_map<TagState, double, State::Hash> WeightMap;
+    WeightMap weights;
     double weightTotal = 0;
     GridPosition newRobotPos = decodeGridPosition(obs[0]);
     if (obs[1] == SEEN) {
-        VectorState nxtSVals;
-        nxtSVals.vals.resize(nStVars);
-        nxtSVals.vals[0] = nxtSVals.vals[1] = obs[0];
-        nxtSVals.vals[2] = (actId == TAG ? TAGGED : UNTAGGED);
-        partNxtSt.push_back(nxtSVals);
-        return;
-    }
-    for (VectorState &sVals : partSt) {
-        GridPosition oldRobotPos = decodeGridPosition(sVals.vals[0]);
-        // Ignore states that do not match knowledge of the robot's position.
-        if (newRobotPos != getMovedPos(oldRobotPos, actId)) {
-            continue;
-        }
-        GridPosition oldOpponentPos = decodeGridPosition(sVals.vals[1]);
-        std::vector<long> actions;
-        makeOpponentActions(oldRobotPos, oldOpponentPos, actions);
-        std::vector<long> newActions;
-        for (long actionId : actions) {
-            if (getMovedPos(oldOpponentPos, actionId) != newRobotPos) {
-                newActions.push_back(actionId);
+        // If we saw the opponent, we must be in the same place.
+        newParticles.push_back(std::make_unique<TagState>(newRobotPos,
+                newRobotPos, action == TAG));
+    } else {
+        // We didn't see the opponent, so we must be in different places.
+        for (State const *state : previousParticles) {
+            TagState const *tagState = static_cast<TagState const *>(state);
+            GridPosition oldRobotPos(tagState->getRobotPosition());
+            // Ignore states that do not match knowledge of the robot's position.
+            if (newRobotPos != getMovedPos(oldRobotPos, action)) {
+                continue;
+            }
+            GridPosition oldOpponentPos(tagState->getOpponentPosition());
+            std::vector<TagAction> actions(makeOpponentActions(oldRobotPos,
+                    oldOpponentPos));
+            std::vector<TagAction> newActions;
+            for (TagAction action : actions) {
+                if (getMovedPos(oldOpponentPos, action) != newRobotPos) {
+                    newActions.push_back(action);
+                }
+            }
+            double probability = 1.0 / newActions.size();
+            for (Action action : newActions) {
+                GridPosition newOpponentPos = getMovedPos(oldOpponentPos,
+                        action);
+                TagState state(newRobotPos, newOpponentPos, false);
+                weights[state] += probability;
+                weightTotal += probability;
             }
         }
-        double probabilityFactor = 1.0 / newActions.size();
-        for (long action : newActions) {
-            GridPosition newOpponentPos = getMovedPos(oldOpponentPos, action);
-            VectorState sVals;
-            sVals.vals.resize(nStVars);
-            sVals.vals[0] = obs[0];
-            sVals.vals[1] = encodeGridPosition(newOpponentPos);
-            sVals.vals[2] = UNTAGGED;
-            weights[sVals.vals] += probabilityFactor;
-            weightTotal += probabilityFactor;
+        double scale = nParticles / weightTotal;
+        for (WeightMap::iterator it = weights.begin(); it != weights.end();
+                it++) {
+            double proportion = it->second * scale;
+            int numToAdd = std::floor(proportion);
+            if (std::bernoulli_distribution(proportion-numToAdd)(*randGen)) {
+                numToAdd += 1;
+            }
+            for (int i = 0; i < numToAdd; i++) {
+                newParticles.push_back(std::make_unique<TagState>(it->first));
+            }
         }
     }
-    double scale = nParticles / weightTotal;
-    for (std::map<std::vector<double>, double>::iterator it = weights.begin();
-            it != weights.end(); it++) {
-        double proportion = it->second * scale;
-        int numToAdd = std::floor(proportion);
-        if (global_resources::rand01() <= (proportion - numToAdd)) {
-            numToAdd += 1;
-        }
-        for (int i = 0; i < numToAdd; i++) {
-            partNxtSt.emplace_back(it->first);
-        }
-    }
+    return newParticles;
 }
 
-void TagModel::getStatesSeeObs(unsigned long actId, Observation &obs,
-                               std::vector<VectorState> &partNxtSt) {
+std::vector<std::unique_ptr<State>> TagModel::generateParticles(
+        Action const &action, Observation const &obs) {
+    std::vector<std::unique_ptr<State> > newParticles;
+    GridPosition newRobotPos = decodeGridPosition(obs[0]);
     if (obs[1] == SEEN) {
-        VectorState nxtSVals;
-        nxtSVals.vals.resize(nStVars);
-        nxtSVals.vals[0] = nxtSVals.vals[1] = obs[0];
-        nxtSVals.vals[2] = (actId == TAG ? TAGGED : UNTAGGED);
-        partNxtSt.push_back(nxtSVals);
-        return;
-    }
-
-    while (partNxtSt.size() < nParticles) {
-        VectorState sVals;
-        sampleStateUniform(sVals);
-        VectorState nxtStVals;
-        Observation obs2;
-        double reward;
-        getNextState(sVals, actId, &reward, nxtStVals, obs2);
-        if (obs == obs2) {
-            partNxtSt.push_back(nxtStVals);
+        // If we saw the opponent, we must be in the same place.
+        newParticles.push_back(
+                std::make_unique<TagState>(newRobotPos, newRobotPos,
+                        action == TAG));
+    } else {
+        while (newParticles.size() < nParticles) {
+            std::unique_ptr<State> state = sampleStateUniform();
+            Model::StepResult result = generateStep(*state, action);
+            if (obs == result.observation) {
+                newParticles.push_back(std::move(result.nextState));
+            }
         }
     }
+    return newParticles;
 }
 
-void TagModel::getChangeTimes(char const */*chName*/,
-                              std::vector<long> &/*chTime*/) {
+std::vector<long> TagModel::loadChanges(char const */*changeFilename*/) {
+    std::vector<long> result;
+    return result;
 }
 
-void TagModel::update(long /*tCh*/, std::vector<VectorState> &/*affectedRange*/,
-                      std::vector<ChangeType> &/*typeOfChanges*/) {
+void TagModel::update(long /*time*/, std::vector<std::unique_ptr<State> > */*affectedRange*/,
+            std::vector<ChangeType> */*typeOfChanges*/) {
 }
 
-bool TagModel::modifStSeq(std::vector<VectorState> &/*seqStVals*/,
-                          long /*startAffectedIdx*/, long /*endAffectedIdx*/,
-                          std::vector<VectorState> &/*modifStSeq*/, std::vector<long> &/*modifActSeq*/,
-                          std::vector<Observation> &/*modifObsSeq*/,
-                          std::vector<double> &/*modifRewSeq*/) {
+bool TagModel::modifStSeq(std::vector<State const *> const &/*states*/,
+        long /*startAffectedIdx*/, long /*endAffectedIdx*/,
+        std::vector<std::unique_ptr<State> > */*modifStSeq*/,
+        std::vector<Action> */*modifActSeq*/, std::vector<Observation> */*modifObsSeq*/,
+        std::vector<double> */*modifRewSeq*/) {
     return false;
 }
 
-void TagModel::dispAct(Action &action, std::ostream &os) {
+void TagModel::dispAct(Action const &action, std::ostream &os) {
     switch (action) {
     case NORTH:
         os << "NORTH";
@@ -377,7 +388,7 @@ void TagModel::dispAct(Action &action, std::ostream &os) {
     }
 }
 
-void dispObs(Observation const &obs, std::ostream &os) {
+void TagModel::dispObs(Observation const &obs, std::ostream &os) {
     os << decodeGridPosition(obs[0]);
     if (obs[1] == SEEN) {
         os << " SEEN!";
@@ -385,24 +396,24 @@ void dispObs(Observation const &obs, std::ostream &os) {
 }
 
 void TagModel::dispCell(CellType cellType, std::ostream &os) {
-        if (cellType >= EMPTY) {
-            os << std::setw(2);
-            os << cellType;
-            return;
-        }
-        switch (cellType) {
-        case WALL:
-            os << "XX";
-            break;
-        default:
-            os << "ERROR-" << cellType;
-            break;
-        }
+    if (cellType >= EMPTY) {
+        os << std::setw(2);
+        os << cellType;
+        return;
     }
+    switch (cellType) {
+    case WALL:
+        os << "XX";
+        break;
+    default:
+        os << "ERROR-" << cellType;
+        break;
+    }
+}
 
 void TagModel::drawEnv(std::ostream &os) {
-    for (std::vector<int> &row : envMap) {
-        for (int cellType : row) {
+    for (std::vector<CellType> &row : envMap) {
+        for (CellType cellType : row) {
             dispCell(cellType, os);
             os << " ";
         }
@@ -410,12 +421,13 @@ void TagModel::drawEnv(std::ostream &os) {
     }
 }
 
-void TagModel::drawState(TagState &state, std::ostream &os) {
+void TagModel::drawState(State const &state, std::ostream &os) {
+    TagState const *tagState = static_cast<TagState const *>(&state);
     for (std::size_t i = 0; i < envMap.size(); i++) {
         for (std::size_t j = 0; j < envMap[0].size(); j++) {
             GridPosition pos(i, j);
-            bool hasRobot = (pos == state.getRobotPosition());
-            bool hasOpponent = (pos == state.getOpponentPosition());
+            bool hasRobot = (pos == tagState->getRobotPosition());
+            bool hasOpponent = (pos == tagState->getOpponentPosition());
             if (hasRobot) {
                 if (hasOpponent) {
                     os << "#";

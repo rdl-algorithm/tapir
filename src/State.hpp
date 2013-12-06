@@ -8,13 +8,8 @@
 class State {
   public:
     struct Hash {
-        size_t operator()(State const *s1) const {
-            return s1->hash();
-        }
-    };
-    struct Same {
-        bool operator()(State const *s1, State const *s2) const {
-            return *s1 == *s2;
+        size_t operator()(State const &state) const {
+            return state.hash();
         }
     };
     State() = default;

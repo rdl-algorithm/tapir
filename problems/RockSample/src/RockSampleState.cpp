@@ -34,7 +34,7 @@ RockSampleState::RockSampleState(RockSampleState const &other) :
 double RockSampleState::distanceTo(State const &otherState) const {
     RockSampleState const *otherRockSampleState =
             static_cast<RockSampleState const *>(&otherState);
-    double distance = position.manHattanDistanceTo(otherRockSampleState->position) / 10.0;
+    double distance = position.manhattanDistanceTo(otherRockSampleState->position) / 10.0;
     typedef std::vector<bool>::const_iterator BoolIt;
     BoolIt it1 = rockStates.cbegin();
     BoolIt it2 = otherRockSampleState->rockStates.cbegin();

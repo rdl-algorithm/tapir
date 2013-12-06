@@ -10,7 +10,7 @@
 #include "State.hpp"                    // for State
 
 class TagState: public State {
-    friend class RockSampleTextSerializer;
+    friend class TagTextSerializer;
   public:
     TagState(GridPosition robotPos, GridPosition opponentPos, bool isTagged);
 
@@ -30,7 +30,7 @@ class TagState: public State {
     }
 
     GridPosition getOpponentPosition() const {
-        return opponentPo;
+        return opponentPos;
     }
 
     bool isTagged() const {

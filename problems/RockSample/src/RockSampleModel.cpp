@@ -163,10 +163,10 @@ double RockSampleModel::solveHeuristic(State const &state) {
     while (!goodRocks.empty()) {
         std::set<int>::iterator it = goodRocks.begin();
         int bestRock = *it;
-        long lowestDist = rockPositions[bestRock].manHattanDistanceTo(currentPos);
+        long lowestDist = rockPositions[bestRock].manhattanDistanceTo(currentPos);
         ++it;
         for (; it != goodRocks.end(); ++it) {
-            long dist = rockPositions[*it].manHattanDistanceTo(currentPos);
+            long dist = rockPositions[*it].manhattanDistanceTo(currentPos);
             if (dist < lowestDist) {
                 bestRock = *it;
                 lowestDist = dist;
@@ -250,13 +250,12 @@ Model::StepResult RockSampleModel::generateStep(State const &state, Action const
     Model::StepResult result;
     result.action = action;
 
-    std::unique_ptr<RockSampleState> nextState;
-    bool isValid;
-    std::tie(nextState, isValid) = makeNextState(*rockSampleState, action);
+    std::unique_ptr<RockSampleState> nextState = makeNextState(
+            *rockSampleState, action).first;
 
     result.observation.push_back((double)makeObs(action, *nextState));
     result.immediateReward = getReward(state, action);
-    result.isTerminal = isTerm(*static_cast<State const *>(nextState.get()));
+    result.isTerminal = isTerm(*nextState);
     result.nextState = std::move(nextState);
     return result;
 }
@@ -300,7 +299,7 @@ std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
     // If it's a CHECK action, we condition on the observation.
     if (action >= CHECK) {
         int rockNo = action - CHECK;
-        typedef std::unordered_map<RockSampleState const *, double, State::Hash, State::Same> WeightMap;
+        typedef std::unordered_map<RockSampleState, double, State::Hash> WeightMap;
         WeightMap weights;
         double weightTotal = 0;
         for (State *state : previousParticles) {
@@ -317,7 +316,7 @@ std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
             } else {
                 probability = obs[0] == (double)RSObservation::BAD ? efficiency : 1 - efficiency;
             }
-            weights[rockSampleState] += probability;
+            weights[*rockSampleState] += probability;
             weightTotal += probability;
         }
         double scale = nParticles / weightTotal;
@@ -328,7 +327,7 @@ std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
                 numToAdd += 1;
             }
             for (int i = 0; i < numToAdd; i++) {
-                newParticles.push_back(std::make_unique<RockSampleState>(*it.first));
+                newParticles.push_back(std::make_unique<RockSampleState>(it.first));
             }
         }
 

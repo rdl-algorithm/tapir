@@ -19,7 +19,7 @@ struct GridPosition {
         return std::sqrt(std::pow(i - other.i, 2) + std::pow(j - other.j, 2));
     }
 
-    double manHattanDistanceTo(GridPosition const &other) const {
+    double manhattanDistanceTo(GridPosition const &other) const {
         return std::abs(i - other.i) + std::abs(j - other.j);
     }
 };

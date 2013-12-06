@@ -112,6 +112,9 @@ class RockSampleModel: public Model {
 
     // Other methods
     std::unique_ptr<State> sampleAnInitState();
+    /** Generates a state uniformly at random. */
+    std::unique_ptr<State> sampleStateUniform();
+
     bool isTerm(State const &state);
     double solveHeuristic(State const &state);
     double getDefaultVal();
@@ -163,9 +166,6 @@ class RockSampleModel: public Model {
      * data structures and variables.
      */
     void initialise();
-
-    /** Generates a state uniformly at random. */
-    std::unique_ptr<State> sampleStateUniform();
 
     /** Generates a random position within the problem space. */
     GridPosition samplePosition();
