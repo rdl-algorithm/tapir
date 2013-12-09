@@ -1,11 +1,10 @@
 core
+EMPTY_HEADER.hpp
+
 .svn/*
-*.iwyu
-*.iwyu.FIX
-*~
-*.d
-*.o
-*.class
+builds/*
+iwyu-out/*
+
 *.pol
 *.log
 *solve
