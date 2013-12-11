@@ -9,17 +9,17 @@ class BeliefNode;
 class HistoryEntry;
 
 class StateWrapper {
-  public:
+public:
     friend class TextSerializer;
     friend class StatePool;
     friend class Solver;
 
     StateWrapper(State &s);
     ~StateWrapper() = default;
-    StateWrapper(StateWrapper const &) = delete;
-    StateWrapper(StateWrapper &&) = delete;
-    StateWrapper &operator=(StateWrapper const &) = delete;
-    StateWrapper &operator=(StateWrapper &&) = delete;
+    StateWrapper(const StateWrapper&) = delete;
+    StateWrapper(StateWrapper&) = delete;
+    StateWrapper &operator=(const StateWrapper&) = delete;
+    StateWrapper &operator=(StateWrapper&) = delete;
 
     void setId();
     void addInfo(HistoryEntry *h);
@@ -35,15 +35,15 @@ class StateWrapper {
         return id;
     }
 
-  private:
+private:
     StateWrapper();
 
     State state;
     static long currId;
     long id;
 
-    std::vector<HistoryEntry *> usedInHistoryEntries;
-    std::set<BeliefNode *> usedInBeliefNodes;
+    std::vector<HistoryEntry*> usedInHistoryEntries;
+    std::set<BeliefNode*> usedInBeliefNodes;
 
     ChangeType chType;
 };

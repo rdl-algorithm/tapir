@@ -12,15 +12,15 @@ class HistoryEntry;
 long StateWrapper::currId = 0;
 
 StateWrapper::StateWrapper() :
-    state(),
-    id(0),
-    usedInHistoryEntries(),
-    usedInBeliefNodes(),
-    chType(ChangeType::UNDEFINED) {
+            state(),
+            id(0),
+            usedInHistoryEntries(),
+            usedInBeliefNodes(),
+            chType(ChangeType::UNDEFINED) {
 }
 
 StateWrapper::StateWrapper(State &s) :
-    StateWrapper() {
+            StateWrapper() {
     this->state = s;
 }
 
@@ -48,8 +48,8 @@ double StateWrapper::distL1(StateWrapper *st) {
 }
 
 void StateWrapper::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
-    std::vector<HistoryEntry *>::iterator it = std::find(
-                usedInHistoryEntries.begin(), usedInHistoryEntries.end(),
-                toBeDeleted);
+    std::vector<HistoryEntry*>::iterator it = std::find(
+            usedInHistoryEntries.begin(), usedInHistoryEntries.end(),
+            toBeDeleted);
     (*it) = nullptr;
 }

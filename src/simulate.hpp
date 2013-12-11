@@ -22,13 +22,13 @@ using std::vector;
 namespace po = boost::program_options;
 
 template<typename ModelType, typename SerializerType>
-int simulate(int argc, char const *argv[], ProgramOptions *options) {
+int simulate(int argc, const char* argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
     visibleOptions.add(options->getGenericOptions()).add(
-        options->getSBTOptions()).add(options->getProblemOptions()).add(
+            options->getSBTOptions()).add(options->getProblemOptions()).add(
             options->getHeuristicOptions().add(
-                options->getSimulationOptions()));
+                    options->getSimulationOptions()));
     allOptions.add(visibleOptions);
 
     // Set up positional options
@@ -43,11 +43,11 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
     po::variables_map vm;
     po::store(
-        po::command_line_parser(argc, argv).options(allOptions).positional(
-            positional).run(), vm);
+            po::command_line_parser(argc, argv).options(allOptions).positional(
+                    positional).run(), vm);
     if (vm.count("help")) {
         cout << "Usage: solve [options] [mapPath] [cfgPath] [policyPath]"
-             " [changesPath] [nSteps] [nRuns] [logPath]" << endl;
+                " [changesPath] [nSteps] [nRuns] [logPath]" << endl;
         cout << visibleOptions << endl;
         return 0;
     }
@@ -74,7 +74,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         cerr << "Failed to open " << polPath << endl;
         return 1;
     }
-    Model *model = new ModelType(vm);
+    Model* model = new ModelType(vm);
     Solver *solver = new Solver(model);
     Serializer *serializer = new SerializerType(solver);
     serializer->load(inFile);
@@ -105,7 +105,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         double totChTime, totImpTime;
         tStart = std::clock();
         val = solver->runSim(nSteps, modelCh, trajSt, trajActId, trajObs,
-                             trajRew, &actualNSteps, &totChTime, &totImpTime);
+                trajRew, &actualNSteps, &totChTime, &totImpTime);
         totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
         os << "Val:  " << val << endl;
@@ -114,7 +114,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         os << " )\n";
         itS++;
         for (itA = trajActId.begin(), itO = trajObs.begin(), itR =
-                    trajRew.begin(), j = 0; itA != trajActId.end();
+                trajRew.begin(), j = 0; itA != trajActId.end();
                 itS++, itA++, itO++, itR++, j++) {
             os << "Step-" << j << " " << *itA;
             os << " ( " << *itS << ") < ";
@@ -124,7 +124,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             os << " > " << *itR << endl;
         }
         cout << val << " " << actualNSteps << " " << totChTime << " "
-             << totImpTime << " " << totT << endl;
+                << totImpTime << " " << totT << endl;
     }
     os.close();
 

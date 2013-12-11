@@ -24,12 +24,12 @@ struct Coords {
     long i;
     long j;
     Coords() :
-        i(0),
-        j(0) {
+                i(0),
+                j(0) {
     }
     Coords(long i, long j) :
-        i(i),
-        j(j) {
+                i(i),
+                j(j) {
     }
 
     double distance(Coords &other) {
@@ -38,25 +38,25 @@ struct Coords {
 
 };
 
-inline std::ostream &operator<<(std::ostream &os, Coords const &obj) {
+inline std::ostream &operator<<(std::ostream &os, const Coords &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";
     return os;
 }
-inline bool operator==(Coords const &lhs, Coords const &rhs) {
+inline bool operator==(const Coords &lhs, const Coords &rhs) {
     return lhs.i == rhs.i && lhs.j == rhs.j;
 }
-inline bool operator!=(Coords const &lhs, Coords const &rhs) {
+inline bool operator!=(const Coords &lhs, const Coords &rhs) {
     return !(lhs == rhs);
 }
 
 class RockSampleModel: public Model {
-  public:
+public:
     RockSampleModel(po::variables_map vm);
     ~RockSampleModel() = default;
-    RockSampleModel(RockSampleModel const &) = delete;
-    RockSampleModel(RockSampleModel &&) = delete;
-    RockSampleModel &operator=(RockSampleModel const &) = delete;
-    RockSampleModel &operator=(RockSampleModel &&) = delete;
+    RockSampleModel(const RockSampleModel&) = delete;
+    RockSampleModel(RockSampleModel&) = delete;
+    RockSampleModel &operator=(const RockSampleModel&) = delete;
+    RockSampleModel &operator=(RockSampleModel&) = delete;
 
     /**
      * Enumerates the possible actions. Note that there are actually
@@ -65,8 +65,8 @@ class RockSampleModel: public Model {
      * of rocks.
      */
     enum Action
-    : long {
-        NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, SAMPLE = 4, CHECK = 5
+        : long {
+            NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3, SAMPLE = 4, CHECK = 5
     };
 
     void dispAct(unsigned long actId, std::ostream &os) {
@@ -103,8 +103,8 @@ class RockSampleModel: public Model {
      * they are meaningless otherwise.
      */
     enum Obs
-    : int {
-        NONE = 0, BAD = 1, GOOD = 2
+        : int {
+            NONE = 0, BAD = 1, GOOD = 2
     };
 
     /**
@@ -112,8 +112,8 @@ class RockSampleModel: public Model {
      * other cell types should be negative.
      */
     enum CellType
-    : int {
-        ROCK = 0, EMPTY = -1, GOAL = -2,
+        : int {
+            ROCK = 0, EMPTY = -1, GOAL = -2,
     };
 
     void dispCell(int cellType, std::ostream &os) {
@@ -147,10 +147,10 @@ class RockSampleModel: public Model {
             }
         }
         std::copy(goodRocks.begin(), goodRocks.end(),
-                  std::ostream_iterator<double>(os, " "));
+                std::ostream_iterator<double>(os, " "));
         os << "}; BAD: {";
         std::copy(badRocks.begin(), badRocks.end(),
-                  std::ostream_iterator<double>(os, " "));
+                std::ostream_iterator<double>(os, " "));
         os << "}";
     }
 
@@ -218,28 +218,28 @@ class RockSampleModel: public Model {
     double getDefaultVal();
 
     bool getNextState(State &sVals, unsigned long actIdx, double *immediateRew,
-                      State &nxtSVals, Observation &obs);
+            State &nxtSVals, Observation &obs);
     double getReward(State &sVals);
     double getReward(State &sVals, unsigned long actId);
 
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-                         std::vector<State> &partSt, std::vector<State> &partNxtSt);
+            std::vector<State> &partSt, std::vector<State> &partNxtSt);
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-                         std::vector<State> &partNxtSt);
+            std::vector<State> &partNxtSt);
 
-    void setChanges(char const *chName, std::vector<long> &chTime);
+    void setChanges(const char *chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<State> &affectedRange,
-                std::vector<ChangeType> &typeOfChanges);
+            std::vector<ChangeType> &typeOfChanges);
     bool modifStSeq(std::vector<State> &seqStVals, long startAffectedIdx,
-                    long endAffectedIdx, std::vector<State> &modifStSeq,
-                    std::vector<long> &modifActSeq,
-                    std::vector<Observation> &modifObsSeq,
-                    std::vector<double> &modifRewSeq);
+            long endAffectedIdx, std::vector<State> &modifStSeq,
+            std::vector<long> &modifActSeq,
+            std::vector<Observation> &modifObsSeq,
+            std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
     void drawState(State &s, std::ostream &os);
 
-  private:
+private:
     // Problem parameters.
     double discount;
     unsigned long nActions, nObservations, nStVars;

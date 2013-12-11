@@ -28,12 +28,12 @@
 using std::endl;
 
 TextSerializer::TextSerializer() :
-    TextSerializer(nullptr) {
+            TextSerializer(nullptr) {
 }
 
 TextSerializer::TextSerializer(Solver *solver) :
-    Serializer(solver),
-    nodeIndex() {
+            Serializer(solver),
+            nodeIndex() {
 }
 
 void TextSerializer::save(State &state, std::ostream &os) {
@@ -106,13 +106,13 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
         StateWrapper *newSt = new StateWrapper();
         std::stringstream sstr(line);
         load(*newSt, sstr);
-        typedef std::pair<std::set<StateWrapper *, CompStVals>::iterator, bool> ResultType;
+        typedef std::pair<std::set<StateWrapper*, CompStVals>::iterator, bool> ResultType;
         ResultType insertResult = pool.allStates.insert(newSt);
         pool.allStatesIdx[newSt->id] = *(insertResult.first);
         for (long i = 0; i < pool.nSDim; i++) {
             pool.stStruct[i].insert(
-                std::make_pair(newSt->state.vals[i],
-                               *(insertResult.first)));
+                    std::make_pair(newSt->state.vals[i],
+                            *(insertResult.first)));
         }
         std::getline(is, line);
     }
@@ -138,7 +138,7 @@ void TextSerializer::load(Observation &obs, std::istream &is) {
 
 void TextSerializer::save(HistoryEntry &entry, std::ostream &os) {
     os << "HistoryEntry < " << entry.seqId << " " << entry.entryId << " >: ( "
-       << entry.st->getId() << " " << entry.actId << " < ";
+            << entry.st->getId() << " " << entry.actId << " < ";
     save(entry.obs, os);
     os << " > " << entry.disc << " " << entry.rew << " " << entry.qVal << " ) ";
     save(*(entry.st), os);
@@ -148,7 +148,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     std::string tmpStr;
     long stateId;
     is >> tmpStr >> tmpStr >> entry.seqId >> entry.entryId >> tmpStr >> tmpStr
-       >> stateId >> entry.actId >> tmpStr;
+            >> stateId >> entry.actId >> tmpStr;
     load(entry.obs, is);
     is >> tmpStr >> entry.disc >> entry.rew >> entry.qVal >> tmpStr;
     entry.hasBeenBackup = true;
@@ -158,7 +158,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
 
 void TextSerializer::save(HistorySequence &seq, std::ostream &os) {
     os << "HistorySequence " << seq.id << " - length " << seq.histSeq.size()
-       << endl;
+            << endl;
     for (HistoryEntry *entry : seq.histSeq) {
         save(*entry, os);
         os << endl;
@@ -226,7 +226,7 @@ void TextSerializer::save(ObservationEdge &edge, std::ostream &os) {
 }
 
 void TextSerializer::saveWithChildren(ObservationEdge &edge, std::ostream &os,
-                                      std::queue<BeliefNode *> &queue) {
+        std::queue<BeliefNode *> &queue) {
     save(edge, os);
     edge.enqueueChildren(queue);
 }
@@ -246,11 +246,11 @@ void TextSerializer::load(ObservationEdge &edge, std::istream &is) {
 
 void TextSerializer::save(ActionNode &node, std::ostream &os) {
     os << "A " << node.actId << " " << node.nParticles << " " << node.qVal
-       << " " << node.avgQVal << " " << node.obsChildren.size() << " ";
+            << " " << node.avgQVal << " " << node.obsChildren.size() << " ";
 }
 
 void TextSerializer::saveWithChildren(ActionNode &node, std::ostream &os,
-                                      std::queue<BeliefNode *> &queue) {
+        std::queue<BeliefNode *> &queue) {
     save(node, os);
     for (ObservationEdge *edge : node.obsChildren) {
         saveWithChildren(*edge, os, queue);
@@ -262,7 +262,7 @@ void TextSerializer::load(ActionNode &node, std::istream &is) {
     std::string tmpStr;
     long nObs;
     is >> tmpStr >> node.actId >> node.nParticles >> node.qVal >> node.avgQVal
-       >> nObs;
+            >> nObs;
     for (long i = 0; i < nObs; i++) {
         ObservationEdge *edge = new ObservationEdge();
         load(*edge, is);
@@ -280,7 +280,7 @@ void TextSerializer::save(BeliefNode &node, std::ostream &os) {
 }
 
 void TextSerializer::saveWithChildren(BeliefNode &node, std::ostream &os,
-                                      std::queue<BeliefNode *> &queue) {
+        std::queue<BeliefNode *> &queue) {
     save(node, os);
     for (std::pair<long, ActionNode *> actionChild : node.actChildren) {
         saveWithChildren(*(actionChild.second), os, queue);
@@ -297,7 +297,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
         long seqId, entryId;
         sstr >> tmpStr >> seqId >> entryId >> tmpStr;
         HistoryEntry *entry = solver->allHistories->getHistoryEntry(seqId,
-                              entryId);
+                entryId);
         entry->setBelNode(&node);
         node.particles.push_back(entry);
     }

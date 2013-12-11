@@ -16,15 +16,15 @@ class StatePool;
 class StateWrapper;
 
 class Serializer {
-  public:
+public:
     Serializer(Solver *solver) :
-        solver(solver) {
+                solver(solver) {
     }
     virtual ~Serializer() = default;
-    Serializer(Serializer const &) = delete;
-    Serializer(Serializer &&) = delete;
-    Serializer &operator=(Serializer const &) = delete;
-    Serializer &operator=(Serializer &&) = delete;
+    Serializer(const Serializer&) = delete;
+    Serializer(Serializer&) = delete;
+    Serializer &operator=(const Serializer&) = delete;
+    Serializer &operator=(Serializer&) = delete;
 
     virtual void save(std::ostream &os) {
         save(*(solver->allStates), os);
@@ -61,7 +61,7 @@ class Serializer {
     virtual void load(BeliefNode &node, std::istream &is) = 0;
     virtual void save(BeliefTree &tree, std::ostream &os) = 0;
     virtual void load(BeliefTree &tree, std::istream &is) = 0;
-  protected:
+protected:
     Solver *solver;
 };
 

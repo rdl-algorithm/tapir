@@ -6,16 +6,16 @@
 class HistoryEntry;
 
 class Histories {
-  public:
+public:
     friend class Solver;
     friend class TextSerializer;
 
     Histories();
     ~Histories();
-    Histories(Histories const &) = delete;
-    Histories(Histories &&) = delete;
-    Histories &operator=(Histories const &) = delete;
-    Histories &operator=(Histories &&) = delete;
+    Histories(const Histories&) = delete;
+    Histories(Histories&) = delete;
+    Histories &operator=(const Histories&) = delete;
+    Histories &operator=(Histories&) = delete;
 
     void reset();
 
@@ -25,12 +25,12 @@ class Histories {
     long getNHistSeq() {
         return allHistSeq.size();
     }
-    HistoryEntry *getHistoryEntry(long seqId, long entryId) {
+    HistoryEntry* getHistoryEntry(long seqId, long entryId) {
         return allHistSeq[seqId]->histSeq[entryId];
     }
 
-  private:
-    std::vector<HistorySequence *> allHistSeq;
+private:
+    std::vector<HistorySequence*> allHistSeq;
 };
 
 #endif /* HISTORIES_HPP */

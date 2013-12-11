@@ -18,11 +18,11 @@ using std::string;
 namespace po = boost::program_options;
 
 template<typename ModelType, typename SerializerType>
-int solve(int argc, char const *argv[], ProgramOptions *options) {
+int solve(int argc, const char* argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
     visibleOptions.add(options->getGenericOptions()).add(
-        options->getSBTOptions()).add(options->getProblemOptions()).add(
+            options->getSBTOptions()).add(options->getProblemOptions()).add(
             options->getHeuristicOptions());
     allOptions.add(visibleOptions).add(options->getSimulationOptions());
 
@@ -34,8 +34,8 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
 
     po::variables_map vm;
     po::store(
-        po::command_line_parser(argc, argv).options(allOptions).positional(
-            positional).run(), vm);
+            po::command_line_parser(argc, argv).options(allOptions).positional(
+                    positional).run(), vm);
     if (vm.count("help")) {
         cout << "Usage: solve [mapPath] [cfgPath] [policyPath]" << endl;
         cout << visibleOptions << endl;
@@ -51,8 +51,8 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     cerr << "Seed: " << seed << endl;
     GlobalResources::seed(seed);
 
-    Model *model = new ModelType(vm);
-    Solver *solver = new Solver(model);
+    Model* model = new ModelType(vm);
+    Solver* solver = new Solver(model);
 
     double totT;
     std::clock_t tStart;

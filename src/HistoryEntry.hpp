@@ -6,7 +6,7 @@ class BeliefNode;
 class StateWrapper;
 
 class HistoryEntry {
-  public:
+public:
     friend class BeliefNode;
     friend class HistorySequence;
     friend class Solver;
@@ -16,10 +16,10 @@ class HistoryEntry {
     HistoryEntry(StateWrapper *st);
     HistoryEntry(StateWrapper *st, long seqId, long entryId);
     ~HistoryEntry() = default;
-    HistoryEntry(HistoryEntry const &) = delete;
-    HistoryEntry(HistoryEntry &&) = delete;
-    HistoryEntry &operator=(HistoryEntry const &) = delete;
-    HistoryEntry &operator=(HistoryEntry &&) = delete;
+    HistoryEntry(const HistoryEntry&) = delete;
+    HistoryEntry(HistoryEntry&) = delete;
+    HistoryEntry &operator=(const HistoryEntry&) = delete;
+    HistoryEntry &operator=(HistoryEntry&) = delete;
 
     void setBelNode(BeliefNode *bel);
 
@@ -29,7 +29,7 @@ class HistoryEntry {
     void setNxt(long actId_, Observation &obs_) {
         actId = actId_, obs = obs_;
     }
-    BeliefNode *getPartOfBelNode() {
+    BeliefNode* getPartOfBelNode() {
         return partOfBelNode;
     }
     long getId() {
@@ -42,7 +42,7 @@ class HistoryEntry {
         return actId;
     }
 
-  private:
+private:
     StateWrapper *st;
     bool hasBeenBackup;
     long seqId, entryId;
@@ -52,7 +52,7 @@ class HistoryEntry {
     long actId;
     Observation obs;
 
-    BeliefNode *partOfBelNode;
+    BeliefNode* partOfBelNode;
 };
 
 #endif /* HISTORYENTRY_HPP */

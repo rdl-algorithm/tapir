@@ -25,7 +25,7 @@ namespace po = boost::program_options;
 RockSampleModel::RockSampleModel(po::variables_map vm) {
     // Read the map from the file.
     std::ifstream inFile;
-    char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
+    const char *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
         std::cerr << "Fail to open " << mapPath << "\n";
@@ -67,19 +67,15 @@ RockSampleModel::RockSampleModel(po::variables_map vm) {
     cout << "nObservations: " << nObservations << endl;
     cout << "nStVars: " << nStVars << endl;
     cout << "nInitBel: " << nInitBel << endl;
-    State s;
-    cout << "Random initial states: " << endl;
-    sampleAnInitState(s);
-    dispState(s, cout);
+    dispState(initBel[0], cout);
     cout << endl;
-    sampleAnInitState(s);
-    dispState(s, cout);
+    dispState(initBel[1], cout);
     cout << endl;
-    sampleAnInitState(s);
-    dispState(s, cout);
+    dispState(initBel[2], cout);
     cout << endl;
-    sampleAnInitState(s);
-    dispState(s, cout);
+    dispState(initBel[3], cout);
+    cout << endl;
+    dispState(initBel[255], cout);
     cout << endl;
     cout << "nParticles: " << nParticles << endl;
     cout << "Environment:" << endl;
@@ -248,7 +244,7 @@ int RockSampleModel::makeObs(State &nxtSVals, long actId) {
 }
 
 bool RockSampleModel::getNextState(State &sVals, unsigned long actId,
-                                   double *immediateRew, State &nxtSVals, Observation &obs) {
+        double *immediateRew, State &nxtSVals, Observation &obs) {
     *immediateRew = getReward(sVals, actId);
     makeNextState(sVals, actId, nxtSVals);
     obs.resize(1);
@@ -283,7 +279,7 @@ double RockSampleModel::getReward(State &sVals, unsigned long actId) {
 }
 
 void RockSampleModel::getStatesSeeObs(unsigned long actId, Observation &obs,
-                                      std::vector<State> &partSt, std::vector<State> &partNxtSt) {
+        std::vector<State> &partSt, std::vector<State> &partNxtSt) {
     // If it's a CHECK action, we condition on the observation.
     if (actId >= CHECK) {
         int rockNo = actId - CHECK;
@@ -293,10 +289,10 @@ void RockSampleModel::getStatesSeeObs(unsigned long actId, Observation &obs,
             Coords pos(sv[0], sv[1]);
             double dist = pos.distance(rockCoords[rockNo]);
             double efficiency = ((1
-                                  + std::pow(2, -dist / halfEfficiencyDistance)) * 0.5);
+                    + std::pow(2, -dist / halfEfficiencyDistance)) * 0.5);
             int rockState = sv[2 + rockNo];
             double probabilityFactor = (
-                                           rockState == obs[0] ? efficiency : 1 - efficiency);
+                    rockState == obs[0] ? efficiency : 1 - efficiency);
             weights[sv] += probabilityFactor;
             weightTotal += probabilityFactor;
         }
@@ -320,7 +316,7 @@ void RockSampleModel::getStatesSeeObs(unsigned long actId, Observation &obs,
 }
 
 void RockSampleModel::getStatesSeeObs(unsigned long actId, Observation &obs,
-                                      std::vector<State> &partNxtSt) {
+        std::vector<State> &partNxtSt) {
     while (partNxtSt.size() < nParticles) {
         State sVals;
         sampleStateUniform(sVals);
@@ -334,20 +330,20 @@ void RockSampleModel::getStatesSeeObs(unsigned long actId, Observation &obs,
     }
 }
 
-void RockSampleModel::setChanges(char const */*chName*/,
-                                 std::vector<long> &/*chTime*/) {
+void RockSampleModel::setChanges(const char */*chName*/,
+        std::vector<long> &/*chTime*/) {
 }
 
 void RockSampleModel::update(long /*tCh*/,
-                             std::vector<State> &/*affectedRange*/,
-                             std::vector<ChangeType> &/*typeOfChanges*/) {
+        std::vector<State> &/*affectedRange*/,
+        std::vector<ChangeType> &/*typeOfChanges*/) {
 }
 
 bool RockSampleModel::modifStSeq(std::vector<State> &/*seqStVals*/,
-                                 long/*startAffectedIdx*/, long/*endAffectedIdx*/,
-                                 std::vector<State> &/*modifStSeq*/, std::vector<long> &/*modifActSeq*/,
-                                 std::vector<Observation> &/*modifObsSeq*/,
-                                 std::vector<double> &/*modifRewSeq*/) {
+        long/*startAffectedIdx*/, long/*endAffectedIdx*/,
+        std::vector<State> &/*modifStSeq*/, std::vector<long> &/*modifActSeq*/,
+        std::vector<Observation> &/*modifObsSeq*/,
+        std::vector<double> &/*modifRewSeq*/) {
     return false;
 }
 

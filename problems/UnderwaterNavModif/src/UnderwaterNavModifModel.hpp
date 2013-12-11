@@ -15,10 +15,10 @@ class StRoadmap;
 namespace po = boost::program_options;
 
 class UnderwaterNavModifModel: public Model {
-  public:
+public:
     enum Action
-    : int {
-        EAST = 0, NORTH = 1, SOUTH = 2, NORTHEAST = 3, SOUTHEAST = 4
+        : int {
+            EAST = 0, NORTH = 1, SOUTH = 2, NORTHEAST = 3, SOUTHEAST = 4
     };
 
     void dispAct(unsigned long actId, std::ostream &os) {
@@ -58,10 +58,10 @@ class UnderwaterNavModifModel: public Model {
 
     UnderwaterNavModifModel(po::variables_map vm);
     ~UnderwaterNavModifModel();
-    UnderwaterNavModifModel(UnderwaterNavModifModel const &) = delete;
-    UnderwaterNavModifModel(UnderwaterNavModifModel &&) = delete;
-    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel const &) = delete;
-    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel &&) = delete;
+    UnderwaterNavModifModel(const UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel(UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel &operator=(const UnderwaterNavModifModel&) = delete;
+    UnderwaterNavModifModel &operator=(UnderwaterNavModifModel&) = delete;
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
@@ -110,23 +110,23 @@ class UnderwaterNavModifModel: public Model {
     double getDefaultVal();
 
     bool getNextState(State &currStVals, unsigned long actId,
-                      double *immediateRew, State &nxtSVals, Observation &obs);
+            double *immediateRew, State &nxtSVals, Observation &obs);
     double getReward(State &sVals);
     double getReward(State &sVals, unsigned long actId);
 
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-                         std::vector<State> &partSt, std::vector<State> &partNxtSt);
+            std::vector<State> &partSt, std::vector<State> &partNxtSt);
     void getStatesSeeObs(unsigned long actId, Observation &obs,
-                         std::vector<State> &partNxtSt);
+            std::vector<State> &partNxtSt);
 
-    void setChanges(char const *chName, std::vector<long> &chTime);
+    void setChanges(const char* chName, std::vector<long> &chTime);
     void update(long tCh, std::vector<State> &affectedRange,
-                std::vector<ChangeType> &typeOfChanges);
+            std::vector<ChangeType> &typeOfChanges);
     bool modifStSeq(std::vector<State> &seqStVals, long startAffectedIdx,
-                    long endAffectedIdx, std::vector<State> &modifStSeq,
-                    std::vector<long> &modifActSeq,
-                    std::vector<Observation> &modifObsSeq,
-                    std::vector<double> &modifRewSeq);
+            long endAffectedIdx, std::vector<State> &modifStSeq,
+            std::vector<long> &modifActSeq,
+            std::vector<Observation> &modifObsSeq,
+            std::vector<double> &modifRewSeq);
 
     void drawEnv(std::ostream &os);
     void drawState(State &s, std::ostream &os);
@@ -134,7 +134,7 @@ class UnderwaterNavModifModel: public Model {
     // Additional initialisation.
     void setInitObsGoal();
 
-  private:
+private:
     // Problem parameters.
     double discount;
     unsigned long nActions, nObservations, nStVars;
@@ -186,7 +186,7 @@ class UnderwaterNavModifModel: public Model {
     bool inGoal(State &st);
     bool inRock(State &st);
     void getReachableSt(State &s, unsigned long actId,
-                        std::vector<State> &nxtS);
+            std::vector<State> &nxtS);
     std::vector<State>::iterator getIterator(std::vector<State> &vecStVals,
             long x, long y);
 

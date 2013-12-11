@@ -8,7 +8,7 @@
 #include "State.hpp"                    // for State
 #include "StateWrapper.hpp"             // for StateWrapper
 struct CompStVals {
-    bool operator()(StateWrapper const *s1, StateWrapper const *s2) const {
+    bool operator()(const StateWrapper* s1, const StateWrapper* s2) const {
         State state1, state2;
         s1->getVals(state1);
         s2->getVals(state2);
@@ -29,7 +29,7 @@ struct CompStVals {
 };
 
 struct CompIdVals {
-    bool operator()(StateWrapper const *s1, StateWrapper const *s2) const {
+    bool operator()(const StateWrapper* s1, const StateWrapper* s2) const {
         if ((s1->getId() - s2->getId()) < 0) {
             return true;
         } else if ((s1->getId() - s2->getId()) > 0) {
@@ -40,27 +40,27 @@ struct CompIdVals {
 };
 
 class StatePool {
-  public:
+public:
     friend class TextSerializer;
 
     StatePool();
     ~StatePool();
-    StatePool(StatePool const &) = delete;
-    StatePool(StatePool &&) = delete;
-    StatePool &operator=(StatePool const &) = delete;
-    StatePool &operator=(StatePool &&) = delete;
+    StatePool(const StatePool&) = delete;
+    StatePool(StatePool&) = delete;
+    StatePool &operator=(const StatePool&) = delete;
+    StatePool &operator=(StatePool&) = delete;
 
     void reset();
-    StateWrapper *add(State &sVals);
-    StateWrapper *getStateById(long stId);
+    StateWrapper* add(State &sVals);
+    StateWrapper* getStateById(long stId);
     void identifyAffectedStates(State &lowLeft, State &upRight,
-                                ChangeType chType, std::set<StateWrapper *> &affectedSt);
+            ChangeType chType, std::set<StateWrapper*> &affectedSt);
 
-  private:
+private:
     long nStates, nSDim;
-    std::set<StateWrapper *, CompStVals> allStates;
-    std::vector<StateWrapper *> allStatesIdx;
-    std::vector<std::multimap<double, StateWrapper *> > stStruct;
+    std::set<StateWrapper*, CompStVals> allStates;
+    std::vector<StateWrapper*> allStatesIdx;
+    std::vector<std::multimap<double, StateWrapper*> > stStruct;
 };
 
 #endif /* STATEPOOL_HPP */

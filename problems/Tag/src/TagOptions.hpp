@@ -12,15 +12,15 @@ class TagOptions: public ProgramOptions {
     po::options_description getProblemOptions() {
         po::options_description problem("Settings specific to the Tag POMDP");
         problem.add_options()("problem.discount,d", po::value<double>(),
-                              "discount factor")("problem.mapPath,m",
-                                      po::value<std::string>(), "path to map file")(
-                                          "problem.moveCost", po::value<double>(), "movement cost")(
-                                              "problem.tagReward", po::value<double>(),
-                                              "reward for tagging the opponent")("problem.failedTagPenalty",
-                                                      po::value<double>(),
-                                                      "penalty for attempting to tag the opponent but failing")(
-                                                              "problem.opponentStayProbability", po::value<double>(),
-                                                              "probability that the opponent will stay in place");
+                "discount factor")("problem.mapPath,m",
+                po::value<std::string>(), "path to map file")(
+                "problem.moveCost", po::value<double>(), "movement cost")(
+                "problem.tagReward", po::value<double>(),
+                "reward for tagging the opponent")("problem.failedTagPenalty",
+                po::value<double>(),
+                "penalty for attempting to tag the opponent but failing")(
+                "problem.opponentStayProbability", po::value<double>(),
+                "probability that the opponent will stay in place");
         return problem;
     }
 
