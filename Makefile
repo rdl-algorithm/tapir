@@ -17,7 +17,7 @@ CXX  := g++
 # ----------------------------------------------------------------------
 override INCDIRS     += -I$(ROOT)/src
 
-override CPPFLAGS    += -DDISTL1 $(INCDIRS)
+override CPPFLAGS    += $(INCDIRS)
 CPPFLAGS_release     := $(CPPFLAGS)
 CPPFLAGS_debug       := $(CPPFLAGS) -DDEBUG
 
@@ -26,12 +26,12 @@ WARN                 :=
 override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
 ifeq ($(CXX), g++)
   override CXXFLAGS  += -frounding-math
-  WARN               += -Wall -Wextra -Weffc++
+  WARN               += -Wall -Wextra
 else
   WARN               += -Weverything -Wno-c++98-compat
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3
-CXXFLAGS_debug       := $(CXXFLAGS) -O0 -g
+CXXFLAGS_debug       := $(CXXFLAGS) -O0 -ggdb
 
 # ----------------------------------------------------------------------
 # Linker flags
@@ -46,16 +46,25 @@ LDFLAGS_debug     = $(LDFLAGS) -g
 LDFLAGS_release   = $(LDFLAGS)
 
 # ----------------------------------------------------------------------
-# IWYU Configuration
+# Configuration of code cleaners.
 # ----------------------------------------------------------------------
 
-IWYU_MAPPING_FILE = $(ROOT)/mappings.imp
+BEAUTIFY_EXCLUDES  = ./src/solver/ProgramOptions.hpp
+BEAUTIFY_EXCLUDES += ./src/problems/RockSample/RockSampleOptions.hpp
+BEAUTIFY_EXCLUDES += ./src/problems/Tag/TagOptions.hpp
+BEAUTIFY_CFG = $(ROOT)/mk/uncrustify.cfg
+BEAUTIFY_CMD = uncrustify -c $(BEAUTIFY_CFG)
+BEAUTIFY_FLAGS = --no-backup
+
+IWYU_MAPPING_FILE = $(ROOT)/mk/mappings.imp
 IWYU_CMD = include-what-you-use
 IWYU_FLAGS = -Xiwyu --mapping_file=$(IWYU_MAPPING_FILE) -Xiwyu --verbose=3
 IWYU_FLAGS += $(CPPFLAGS) $(CXXFLAGS_BASE)
+
 IWYU_FIX_CMD = fix-includes
-IWYU_FIX_FLAGS  = --separate_project_includes --separate_c_cxx
+IWYU_FIX_FLAGS  = --separate_c_cxx
 IWYU_FIX_FLAGS += --nosafe_headers --comments $(INCDIRS)
+IWYU_FIX_FLAGS += -o $(dir $@)
 
 # ----------------------------------------------------------------------
 # General-purpose recipes
@@ -67,25 +76,50 @@ LINK_RECIPE_$(1)    = $$(CXX) $$(LDFLAGS_$(1)) $$^ $$(LDLIBS) -o $$@
 endef
 $(foreach cfg,$(CFGS),$(eval $(call recipe_template,$(cfg))))
 
-IWYU_RECIPE     = $(IWYU_CMD) $(IWYU_FLAGS) $< 2>&1 | tee $@
+MKDIR_RECIPE = mkdir -p $@
+
+# Code cleaning recipes.
+BEAUTIFY_RECIPE = $(BEAUTIFY_CMD) $(BEAUTIFY_FLAGS) $<
+IWYU_RECIPE = $(IWYU_CMD) $(IWYU_FLAGS) $< 2>&1 | tee $@
 IWYU_FIX_RECIPE = $(IWYU_FIX_CMD) $(IWYU_FIX_FLAGS) < $< 2>&1 | tee $@
-MKDIR_RECIPE    = mkdir -p $@
+IWYU_FORCE_RECIPE = echo "\#include \"../EMPTY_HEADER.hpp\"" >> $<
+IWYU_DOFIX_RECIPE = cp -p $(dir $@)/$* $<
 
 # ----------------------------------------------------------------------
 # Universal grouping targets
 # ----------------------------------------------------------------------
 
-.PHONY: default nothing all build clean rmdirs iwyu iwyu-fix iwyu-clean
-default: build-$(DEFAULT_CFG)-solver
-all: build-$(DEFAULT_CFG)
-build: build-$(DEFAULT_CFG)
+.PHONY: default nothing all build clean
+.PHONY: build-all clean-all
+default: build-$(DEFAULT_CFG)-solver ;
+all build build-all: build-$(DEFAULT_CFG)-all ;
+clean: clean-all ;
+
+.PHONY: beautify-all iwyu-all iwyu-fix-all iwyu-force-all iwyu-dofix-all iwyu-clean-all
+.PHONY: beautify iwyu iwyu-fix iwyu-force iwyu-dofix iwyu-clean
+
+beautify: beautify-all ;
+iwyu: iwyu-all ;
+iwyu-fix: iwyu-fix-all ;
+iwyu-force: iwyu-force-all ;
+iwyu-dofix: iwyu-dofix-all ;
+iwyu-clean: iwyu-clean-all ;
+
+clean-all:
+	rm -rf builds iwyu-out
+iwyu-clean-all:
+	rm -rf iwyu-out
 
 define phonies_template
 .PHONY: $(1) build-$(1) clean-$(1)
-$(1): build-$(1) ;
+.PHONY: $(1)-all build-$(1)-all clean-$(1)-all
+$(1) build-$(1) $(1)-all: build-$(1)-all ;
+clean-$(1): clean-$(1)-all ;
+clean-$(1)-all:
+	rm -rf builds/$(1)
 endef
 $(foreach cfg,$(CFGS),$(eval $(call phonies_template,$(cfg))))
 
 # Start including other makefiles.
-dir := $(ROOT)
+dir := $(ROOT)/src
 include mk/stack.mk
