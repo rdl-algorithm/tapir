@@ -14,7 +14,6 @@ class StateInfo;
 
 class HistorySequence {
   public:
-    friend class Histories;
     friend class Solver;
     friend class TextSerializer;
 
@@ -29,8 +28,7 @@ class HistorySequence {
     HistorySequence &operator=(HistorySequence &&) = delete;
 
     HistoryEntry *getFirstEntry();
-    HistoryEntry *addEntry(Action const &action, Observation const &obs,
-            StateInfo *stateInfo);
+    HistoryEntry *addEntry(StateInfo *stateInfo);
     HistoryEntry *addEntry(StateInfo *stateInfo, Action const &action,
             Observation const &obs, double immediateReward, double discount);
     HistoryEntry *addEntry(StateInfo *stateInfo, Action const &action,

@@ -33,7 +33,7 @@ double TagState::distanceTo(State const &otherState) const {
         static_cast<TagState const *>(&otherState);
     double distance = robotPos.manhattanDistanceTo(otherTagState->robotPos);
     distance += opponentPos.manhattanDistanceTo(otherTagState->opponentPos);
-    distance += (isTagged_ == otherTagState->isTagged_) ? 1 : 0;
+    distance += (isTagged_ == otherTagState->isTagged_) ? 0 : 1;
     return distance;
 }
 

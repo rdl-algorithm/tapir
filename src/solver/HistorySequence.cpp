@@ -33,7 +33,7 @@ HistorySequence::HistorySequence(long startDepth) :
 HistorySequence::HistorySequence(std::unique_ptr<HistoryEntry> startEntry,
         long startDepth) :
     HistorySequence(startDepth) {
-    startEntry->setSeqId(id);
+    startEntry->seqId = id;
     histSeq.push_back(std::move(startEntry));
 }
 
@@ -45,9 +45,7 @@ HistoryEntry *HistorySequence::getFirstEntry() {
     return histSeq.begin()->get();
 }
 
-HistoryEntry *HistorySequence::addEntry(Action const &action,
-        Observation const &obs, StateInfo *stateInfo) {
-    histSeq.back()->setNext(action, obs);
+HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
                 stateInfo, id, histSeq.size());
     HistoryEntry *newEntryReturn = newEntry.get();
@@ -61,7 +59,7 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo,
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
                 stateInfo, id, histSeq.size());
     newEntry->action = action;
-    newEntry->obs = obs;
+    newEntry->observation = obs;
     newEntry->immediateReward = rew;
     newEntry->discount = disc;
     HistoryEntry *newEntryReturn = newEntry.get();
@@ -75,7 +73,7 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo,
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
                 stateInfo, id, histSeq.size());
     newEntry->action = action;
-    newEntry->obs = obs;
+    newEntry->observation = obs;
     newEntry->immediateReward = rew;
     newEntry->discount = disc;
     HistoryEntry *newEntryReturn = newEntry.get();

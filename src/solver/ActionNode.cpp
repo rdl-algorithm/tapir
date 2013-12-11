@@ -1,7 +1,6 @@
 #include "ActionNode.hpp"
 
 #include <memory>                       // for unique_ptr
-#include <queue>                        // for queue
 #include <utility>                      // for make_pair, move, pair
 #include <vector>                       // for vector
 
@@ -65,10 +64,4 @@ BeliefNode *ActionNode::getBeliefChild(Observation const &obs) {
         }
     }
     return nullptr;
-}
-
-void ActionNode::enqueueChildren(std::queue<BeliefNode *> &queue) {
-    for (std::unique_ptr<ObservationEdge> &child : obsChildren) {
-        child->enqueueChildren(queue);
-    }
 }

@@ -15,6 +15,7 @@
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
 #include "problems/GridPosition.hpp"    // for GridPosition, operator==, operator!=, operator<<
+#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
 #include "solver/Model.hpp"             // for Model::StepResult, Model
@@ -28,8 +29,16 @@ using std::cout;
 using std::endl;
 namespace po = boost::program_options;
 
-TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) : Model(
-            randGen) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
+    ModelWithProgramOptions(randGen, vm),
+    moveCost(vm["problem.moveCost"].as<double>()),
+    tagReward(vm["problem.tagReward"].as<double>()),
+    failedTagPenalty(vm["problem.failedTagPenalty"].as<double>()),
+    opponentStayProbability(
+            vm["problem.opponentStayProbability"].as<double>()) {
+#pragma GCC diagnostic pop
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -47,23 +56,9 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) : Model(
     }
     inFile.close();
 
-    nParticles = vm["SBT.nParticles"].as<long>();
-    maxTrials = vm["SBT.maxTrials"].as<long>();
-    maxDistTry = vm["SBT.maxDistTry"].as<long>();
-
-    exploreCoef = vm["SBT.exploreCoef"].as<double>();
-    depthTh = vm["SBT.depthTh"].as<double>();
-    distTh = vm["SBT.distTh"].as<double>();
-
-    discount = vm["problem.discount"].as<double>();
-    moveCost = vm["problem.moveCost"].as<double>();
-    tagReward = vm["problem.tagReward"].as<double>();
-    failedTagPenalty = vm["problem.failedTagPenalty"].as<double>();
-    opponentStayProbability =
-        vm["problem.opponentStayProbability"].as<double>();
     initialise();
     cout << "Constructed the TagModel" << endl;
-    cout << "Discount: " << discount << endl;
+    cout << "Discount: " << getDiscountFactor() << endl;
     cout << "Size: " << nRows << " by " << nCols << endl;
     cout << "move cost: " << moveCost << endl;
     cout << "nActions: " << nActions << endl;
@@ -74,7 +69,7 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) : Model(
         std::unique_ptr<State> state = sampleAnInitState();
         cout << *state << " Heuristic: " << solveHeuristic(*state) << endl;
     }
-    cout << "nParticles: " << nParticles << endl;
+    cout << "nParticles: " << getNParticles() << endl;
     cout << "Environment:" << endl;
     drawEnv(cout);
 }
@@ -102,7 +97,7 @@ void TagModel::initialise() {
     nActions = 5;
     nObservations = nEmptyCells * 2;
     nStVars = 3;
-    minVal = -failedTagPenalty / (1 - discount);
+    minVal = -failedTagPenalty / (1 - getDiscountFactor());
     maxVal = tagReward;
 }
 
@@ -138,8 +133,8 @@ double TagModel::solveHeuristic(State const &state) {
     GridPosition opponentPos = tagState->getOpponentPosition();
     int dist = robotPos.manhattanDistanceTo(opponentPos);
     double nSteps = dist / opponentStayProbability;
-    double finalDiscount = std::pow(discount, nSteps);
-    double qVal = -moveCost * (1 - finalDiscount) / (1 - discount);
+    double finalDiscount = std::pow(getDiscountFactor(), nSteps);
+    double qVal = -moveCost * (1 - finalDiscount) / (1 - getDiscountFactor());
     qVal += finalDiscount * tagReward;
     return qVal;
 }
@@ -323,7 +318,7 @@ std::vector<std::unique_ptr<State>> TagModel::generateParticles(
                 weightTotal += probability;
             }
         }
-        double scale = nParticles / weightTotal;
+        double scale = getNParticles() / weightTotal;
         for (WeightMap::iterator it = weights.begin(); it != weights.end();
              it++) {
             double proportion = it->second * scale;
@@ -349,7 +344,7 @@ std::vector<std::unique_ptr<State>> TagModel::generateParticles(
                 std::make_unique<TagState>(newRobotPos, newRobotPos,
                         action == TAG));
     } else {
-        while (newParticles.size() < nParticles) {
+        while (newParticles.size() < getNParticles()) {
             std::unique_ptr<State> state = sampleStateUniform();
             Model::StepResult result = generateStep(*state, action);
             if (obs == result.observation) {

@@ -3,7 +3,6 @@
 #include <cmath>                        // for abs
 
 #include <memory>                       // for unique_ptr
-#include <queue>                        // for queue
 #include <vector>                       // for vector, vector<>::const_iterator
 
 #include "defs.hpp"                     // for make_unique
@@ -38,8 +37,4 @@ bool ObservationEdge::obsEquals(Observation const &otherObs) {
 
 BeliefNode *ObservationEdge::getBeliefChild() {
     return child.get();
-}
-
-void ObservationEdge::enqueueChildren(std::queue<BeliefNode *> &queue) {
-    queue.push(child.get());
 }

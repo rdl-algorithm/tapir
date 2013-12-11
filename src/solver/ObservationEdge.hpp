@@ -2,7 +2,6 @@
 #define OBSERVATIONEDGE_HPP
 
 #include <memory>                       // for unique_ptr
-#include <queue>                        // for queue
 
 #include "Observation.hpp"              // for Observation
 
@@ -32,8 +31,6 @@ class ObservationEdge {
 
     /** Returns the belief child of this node */
     BeliefNode *getBeliefChild();
-    /** Enqueues the child of this node on the given queue. */
-    void enqueueChildren(std::queue<BeliefNode *> &queue);
 
   private:
     /** Creates an observation edge without an observation or child! */

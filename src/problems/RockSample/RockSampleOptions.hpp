@@ -4,9 +4,9 @@
 #include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
 #include <string>                       // for string
 
-#include <boost/program_options.hpp>    // for value, options_description_easy_init, typed_value, options_description
+#include <boost/program_options.hpp>    // for value, options_description, options_description_easy_init, typed_value
 
-#include "solver/ProgramOptions.hpp"    // for ProgramOptions
+#include "problems/ProgramOptions.hpp"  // for ProgramOptions
 
 namespace po = boost::program_options;
 
@@ -15,8 +15,8 @@ class RockSampleOptions : public ProgramOptions {
     po::options_description getProblemOptions() {
         po::options_description problem(
                 "Settings specific to the RockSample POMDP");
+        problem.add(ProgramOptions::getProblemOptions());
         problem.add_options()
-            ("problem.discount,d", po::value<double>(), "discount factor")
             ("problem.mapPath,m", po::value<std::string>(), "path to map file")
             ("problem.goodRockReward", po::value<double>(),
                 "reward for sampling a good rock")
@@ -34,6 +34,7 @@ class RockSampleOptions : public ProgramOptions {
     /** Returns configuration options for the RockSample heuristic */
     po::options_description getHeuristicOptions() {
         po::options_description heuristic("RockSample heuristic configuration");
+        heuristic.add(ProgramOptions::getHeuristicOptions());
         return heuristic;
     }
 };

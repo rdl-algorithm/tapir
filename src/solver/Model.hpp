@@ -10,8 +10,7 @@
 #include "Action.hpp"                   // for Action
 #include "ChangeType.hpp"               // for ChangeType
 #include "Observation.hpp"              // for Observation
-
-class State;
+#include "State.hpp"                    // for State
 
 class Model {
   public:
@@ -19,18 +18,20 @@ class Model {
      * observation, and reward.
      */
     struct StepResult {
-        Action action;
-        Observation observation;
-        double immediateReward;
-        std::unique_ptr<State> nextState;
-        bool isTerminal;
+        Action action = 0;
+        Observation observation = Observation();
+        double immediateReward = 0;
+        std::unique_ptr<State> nextState = std::unique_ptr<State>();
+        bool isTerminal = false;
     };
 
+    /** Constructor - stores the RandomGenerator for this model. */
     Model(RandomGenerator *randGen) : randGen(randGen) {
     }
 
     /** Destructor must be virtual */
     virtual ~Model() = default;
+    /** Moving and copying is disallowed. */
     Model(Model const &) = delete;
     Model(Model &&) = delete;
     Model &operator=(Model const &) = delete;
@@ -39,7 +40,8 @@ class Model {
     /* ---------- Virtual getters for important model parameters  ---------- */
     // POMDP parameters
     /** Returns the POMDP discount factor. */
-    virtual double getDiscount() = 0;
+    virtual double getDiscountFactor() = 0;
+
     /** Returns the # of actions for this POMDP. */
     virtual unsigned long getNActions() = 0;
     /** Returns the # of observations f {or this POMDP. */
@@ -52,16 +54,21 @@ class Model {
     virtual double getMaxVal() = 0;
 
     // SBT algorithm parameters
-    /** Returns the maximum number of particles */
+    /** Returns the default number of particles per belief - this number will
+     * be generated if particle depletion occurs.
+     */
     virtual unsigned long getNParticles() = 0;
     /** Returns the maximum number of trials to run. */
-    virtual long getMaxTrials() = 0;
+    virtual unsigned long getMaxTrials() = 0;
     /** Returns the lowest cumulative discount before the  */
     virtual double getDepthTh() = 0;
     /** Returns the exploration coefficient used for rollouts.
      * ??
      */
     virtual double getExploreCoef() = 0;
+    /** Returns the exploration/exploitation ratio for UCB; higher
+     * values mean more exploration.*/
+    virtual double getCoefUCB() = 0;
     /** Returns the maximum number of nodes to check when searching
      * for a nearest-neighbour belief node.
      */
@@ -106,10 +113,12 @@ class Model {
             Action const &,
             Observation const &obs) = 0;
 
-    /** Loads model changes from the given file. */
+    /** Loads future model changes from the given file. */
     virtual std::vector<long> loadChanges(char const *changeFilename) = 0;
 
-    /** Retrieves the range of states that is affected by the change. */
+    /** Updates the model to reflect the changes at the given time, and
+     * returns the range of states that is affected by the change.
+     */
     virtual void update(long time,
             std::vector<std::unique_ptr<State>> *affectedRange,
             std::vector<ChangeType> *typeOfChanges) = 0;
@@ -127,11 +136,18 @@ class Model {
             std::vector<Observation> *modifObsSeq,
             std::vector<double> *modifRewSeq) = 0;
 
+    /** Displays the given action on the given output stream. */
     virtual void dispAct(Action const &action, std::ostream &os) = 0;
+    /** Displays the given observation to the given output stream. */
     virtual void dispObs(Observation const &obs, std::ostream &os) = 0;
+    /** Draws the environment map onto the given output stream. */
     virtual void drawEnv(std::ostream &os) = 0;
+    /** Draws the current state in the context of the overall map onto
+     * the given output stream.
+     */
     virtual void drawState(State const &state, std::ostream &os) = 0;
   protected:
+    /** The random number generator for this model. */
     RandomGenerator *randGen;
 };
 

@@ -16,6 +16,7 @@
 class BeliefNode;
 class BeliefTree;
 class Histories;
+class HistoryEntry;
 class HistorySequence;
 class State;
 class StateInfo;
@@ -69,8 +70,15 @@ class Solver {
 
     RolloutMode lastRolloutMode;
     double exploreCoef;
-    double cRollout[2], wRollout[2], pRollout[2];
-    long nUsedRollout[2];
+    double timeUsedPerStrategy[2], strategyWeight[2], strategyProbability[2];
+    long strategyUseCount[2];
+
+    /** Adds the given history entry as a particle in the given belief node,
+     * and updates the StateInfo to be informed of its usage in the given
+     * belief node and history entry.
+     */
+    void addParticle(BeliefNode *node, HistoryEntry *entry,
+            StateInfo *stateInfo);
 
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
@@ -93,7 +101,7 @@ class Solver {
     /** Updates the overall weighting of the different heuristic strategies
      * based on their performance.
      */
-    void updWeightRolloutAct(double valImprovement);
+    void updateStrategyProbabilities(double valImprovement);
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */

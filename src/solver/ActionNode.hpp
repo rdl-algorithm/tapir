@@ -2,7 +2,6 @@
 #define ACTIONNODE_HPP
 
 #include <memory>                       // for unique_ptr
-#include <queue>                        // for queue
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
@@ -11,9 +10,6 @@
 
 class BeliefNode;
 class ObservationEdge;
-
-//#include "ObservationEdge.hpp"          // for ObservationEdge
-
 
 class ActionNode {
   public:
@@ -51,16 +47,9 @@ class ActionNode {
      */
     BeliefNode *getBeliefChild(Observation const &obs);
 
-    /** Enqueues all belief children onto the given queue */
-    void enqueueChildren(std::queue<BeliefNode *> &queue);
-
   private:
     /** Constructs an action node without an action! */
     ActionNode();
-    /** Adds the given ObservationEdge as a child, and takes possession of
-     * it.
-     */
-    void addChild(std::unique_ptr<ObservationEdge> edge);
 
     /** The action for this node. */
     Action action;

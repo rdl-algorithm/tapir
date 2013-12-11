@@ -17,6 +17,11 @@ BeliefTree::BeliefTree() :
 BeliefTree::~BeliefTree() {
 }
 
+// Add a node to the list
+void BeliefTree::enlistNode(BeliefNode *node) {
+    allNodes.push_back(node);
+}
+
 void BeliefTree::reset() {
     allNodes.clear();
     root = std::make_unique<BeliefNode>();

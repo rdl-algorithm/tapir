@@ -126,8 +126,8 @@ void TextSerializer::load(Observation &obs, std::istream &is) {
 
 void TextSerializer::save(HistoryEntry &entry, std::ostream &os) {
     os << "HistoryEntry < " << entry.seqId << " " << entry.entryId << " >: ( "
-       << entry.stateInfo->getId() << " " << entry.action << " < ";
-    save(entry.obs, os);
+       << entry.stateInfo->id << " " << entry.action << " < ";
+    save(entry.observation, os);
     os << " > " << entry.discount << " " << entry.immediateReward << " "
        << entry.qVal << " ) ";
     save(*(entry.stateInfo), os);
@@ -138,10 +138,10 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     long stateId;
     is >> tmpStr >> tmpStr >> entry.seqId >> entry.entryId >> tmpStr >> tmpStr
     >> stateId >> entry.action >> tmpStr;
-    load(entry.obs, is);
+    load(entry.observation, is);
     is >> tmpStr >> entry.discount >> entry.immediateReward >> entry.qVal
     >> tmpStr;
-    entry.hasBeenBackup = true;
+    entry.hasBeenBackedUp = true;
     entry.stateInfo = solver->allStates->getStateById(stateId);
     entry.stateInfo->addHistoryEntry(&entry);
 }
@@ -256,7 +256,7 @@ void TextSerializer::save(BeliefNode &node, std::ostream &os) {
     os << "Node " << node.id << endl;
     os << " " << node.nParticles << " " << node.getNActChildren() << " : ";
     for (HistoryEntry *entry : node.particles) {
-        os << "( " << entry->getSeqId() << " " << entry->getId() << " ) ";
+        os << "( " << entry->seqId << " " << entry->entryId << " ) ";
     }
     os << endl;
     for (auto actionNodeIter = node.actChildren.begin();
@@ -277,7 +277,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
         sstr >> tmpStr >> seqId >> entryId >> tmpStr;
         HistoryEntry *entry = solver->allHistories->getHistoryEntry(seqId,
                     entryId);
-        entry->setBelNode(&node);
+        entry->owningBeliefNode = &node;
         node.particles.push_back(entry);
     }
     for (long i = 0; i < nActChildren; i++) {

@@ -7,13 +7,14 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include <boost/program_options.hpp>    // for program_options, variables_map
+#include <boost/program_options.hpp>    // for variables_map
 
 #include "defs.hpp"                     // for RandomGenerator
 #include "problems/GridPosition.hpp"    // for GridPosition
+#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
-#include "solver/Model.hpp"             // for Model, Model::StepResult
+#include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
 
 class State;
@@ -21,7 +22,7 @@ class TagState;
 
 namespace po = boost::program_options;
 
-class TagModel : public Model {
+class TagModel : public ModelWithProgramOptions {
   public:
     TagModel(RandomGenerator *randGen, po::variables_map vm);
     ~TagModel() = default;
@@ -54,9 +55,6 @@ class TagModel : public Model {
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    double getDiscount() {
-        return discount;
-    }
     unsigned long getNActions() {
         return nActions;
     }
@@ -71,25 +69,6 @@ class TagModel : public Model {
     }
     double getMaxVal() {
         return maxVal;
-    }
-
-    unsigned long getNParticles() {
-        return nParticles;
-    }
-    long getMaxTrials() {
-        return maxTrials;
-    }
-    double getDepthTh() {
-        return depthTh;
-    }
-    double getExploreCoef() {
-        return exploreCoef;
-    }
-    long getMaxDistTry() {
-        return maxDistTry;
-    }
-    double getDistTh() {
-        return distTh;
     }
 
     // Other virtual methods
@@ -129,19 +108,9 @@ class TagModel : public Model {
     void drawState(State const &state, std::ostream &os);
 
   private:
-    // Problem parameters.
-    double discount;
+    // Problem parameters
     unsigned long nActions, nObservations, nStVars;
     double minVal, maxVal;
-
-    // SBT parameters
-    unsigned long nParticles;
-    long maxTrials;
-    double depthTh;
-    double exploreCoef;
-
-    long maxDistTry;
-    double distTh;
 
     /** Initialises the required data structures and variables */
     void initialise();

@@ -68,7 +68,7 @@ class UnderwaterNavModifModel: public Model {
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    double getDiscount() {
+    double getDiscountFactor() {
         return discount;
     }
     unsigned long getNActions() {

@@ -19,6 +19,7 @@
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
 #include "problems/GridPosition.hpp"    // for GridPosition, operator<<
+#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
 #include "solver/Model.hpp"             // for Model::StepResult, Model
@@ -32,8 +33,18 @@ using std::cout;
 using std::endl;
 namespace po = boost::program_options;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 RockSampleModel::RockSampleModel(RandomGenerator *randGen,
-        po::variables_map vm) : Model(randGen) {
+        po::variables_map vm) : ModelWithProgramOptions(randGen, vm),
+    goodRockReward(vm["problem.goodRockReward"].as<double>()),
+    badRockPenalty(vm["problem.badRockPenalty"].as<double>()),
+    exitReward(vm["problem.exitReward"].as<double>()),
+    illegalMovePenalty(
+            vm["problem.illegalMovePenalty"].as<double>()),
+    halfEfficiencyDistance(
+            vm["problem.halfEfficiencyDistance"].as<double>()) {
+#pragma GCC diagnostic pop
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -51,23 +62,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     }
     inFile.close();
 
-    nParticles = vm["SBT.nParticles"].as<long>();
-    maxTrials = vm["SBT.maxTrials"].as<long>();
-    maxDistTry = vm["SBT.maxDistTry"].as<long>();
-
-    exploreCoef = vm["SBT.exploreCoef"].as<double>();
-    depthTh = vm["SBT.depthTh"].as<double>();
-    distTh = vm["SBT.distTh"].as<double>();
-
-    discount = vm["problem.discount"].as<double>();
-    goodRockReward = vm["problem.goodRockReward"].as<double>();
-    badRockPenalty = vm["problem.badRockPenalty"].as<double>();
-    exitReward = vm["problem.exitReward"].as<double>();
-    illegalMovePenalty = vm["problem.illegalMovePenalty"].as<double>();
-    halfEfficiencyDistance = vm["problem.halfEfficiencyDistance"].as<double>();
     initialise();
     cout << "Constructed the RockSampleModel" << endl;
-    cout << "Discount: " << discount << endl;
+    cout << "Discount: " << getDiscountFactor() << endl;
     cout << "Size: " << nRows << " by " << nCols << endl;
     cout << "Start: " << startPos.i << " " << startPos.j << endl;
     cout << "nRocks: " << nRocks << endl;
@@ -83,7 +80,7 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     cout << *sampleAnInitState() << endl;
     cout << *sampleAnInitState() << endl;
 
-    cout << "nParticles: " << nParticles << endl;
+    cout << "nParticles: " << getNParticles() << endl;
     cout << "Environment:" << endl;
     drawEnv(cout);
 }
@@ -115,7 +112,7 @@ void RockSampleModel::initialise() {
     nActions = 5 + nRocks;
     nObservations = 2;
     nStVars = 2 + nRocks;
-    minVal = -illegalMovePenalty / (1 - discount);
+    minVal = -illegalMovePenalty / (1 - getDiscountFactor());
     maxVal = goodRockReward * nRocks + exitReward;
 }
 
@@ -180,12 +177,12 @@ double RockSampleModel::solveHeuristic(State const &state) {
                 lowestDist = dist;
             }
         }
-        currentDiscount *= std::pow(discount, lowestDist);
+        currentDiscount *= std::pow(getDiscountFactor(), lowestDist);
         qVal += currentDiscount * goodRockReward;
         goodRocks.erase(bestRock);
         currentPos = rockPositions[bestRock];
     }
-    currentDiscount *= std::pow(discount, nCols - currentPos.j);
+    currentDiscount *= std::pow(getDiscountFactor(), nCols - currentPos.j);
     qVal += currentDiscount * exitReward;
     // dispState(s, cerr);
     // cerr << endl << "Heuristic: " << *qVal << endl;
@@ -334,7 +331,7 @@ std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
             weights[*rockSampleState] += probability;
             weightTotal += probability;
         }
-        double scale = nParticles / weightTotal;
+        double scale = getNParticles() / weightTotal;
         for (WeightMap::value_type &it : weights) {
             double proportion = it.second * scale;
             int numToAdd = std::floor(proportion);
@@ -362,7 +359,7 @@ std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
 std::vector<std::unique_ptr<State>> RockSampleModel::generateParticles(
         Action const &action, Observation const &obs) {
     std::vector<std::unique_ptr<State>> particles;
-    while (particles.size() < nParticles) {
+    while (particles.size() < getNParticles()) {
         std::unique_ptr<State> state = sampleStateUniform();
         Model::StepResult result = generateStep(*state, action);
         if (obs == result.observation) {

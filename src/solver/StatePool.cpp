@@ -44,7 +44,7 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
             bool> ret = allStates.insert(std::move(newInfo));
     if (ret.second) {
         stateInfo->setId();
-        if (stateInfo->getId() != (long)allStatesIdx.size()) {
+        if (stateInfo->id != (long)allStatesIdx.size()) {
             std::cerr << "Error: wrong size in StatePool" << std::endl;
         }
         allStatesIdx.push_back(stateInfo);

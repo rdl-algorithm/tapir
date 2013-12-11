@@ -7,13 +7,14 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include <boost/program_options.hpp>    // for program_options, variables_map
+#include <boost/program_options.hpp>    // for variables_map
 
 #include "defs.hpp"                     // for RandomGenerator
 #include "problems/GridPosition.hpp"    // for GridPosition
+#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
-#include "solver/Model.hpp"             // for Model, Model::StepResult
+#include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
 
 class RockSampleState;
@@ -21,7 +22,7 @@ class State;
 
 namespace po = boost::program_options;
 
-class RockSampleModel : public Model {
+class RockSampleModel : public ModelWithProgramOptions {
   public:
     RockSampleModel(RandomGenerator *randGen, po::variables_map vm);
     ~RockSampleModel() = default;
@@ -69,9 +70,6 @@ class RockSampleModel : public Model {
 
     /***** Start implementation of Model's methods *****/
     // Simple getters
-    double getDiscount() {
-        return discount;
-    }
     unsigned long getNActions() {
         return nActions;
     }
@@ -86,25 +84,6 @@ class RockSampleModel : public Model {
     }
     double getMaxVal() {
         return maxVal;
-    }
-
-    unsigned long getNParticles() {
-        return nParticles;
-    }
-    long getMaxTrials() {
-        return maxTrials;
-    }
-    double getDepthTh() {
-        return depthTh;
-    }
-    double getExploreCoef() {
-        return exploreCoef;
-    }
-    long getMaxDistTry() {
-        return maxDistTry;
-    }
-    double getDistTh() {
-        return distTh;
     }
 
     // Other methods
@@ -145,19 +124,9 @@ class RockSampleModel : public Model {
     void drawState(State const &state, std::ostream &os);
 
   private:
-    // Problem parameters.
-    double discount;
+    // Problem parameters
     unsigned long nActions, nObservations, nStVars;
     double minVal, maxVal;
-
-    // SBT parameters
-    unsigned long nParticles;
-    long maxTrials;
-    double depthTh;
-    double exploreCoef;
-
-    long maxDistTry;
-    double distTh;
 
     /**
      * Finds and counts the rocks on the map, and initialises the required

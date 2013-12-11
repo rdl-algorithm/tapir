@@ -23,50 +23,35 @@ class HistoryEntry {
     HistoryEntry &operator=(HistoryEntry const &) = delete;
     HistoryEntry &operator=(HistoryEntry &&) = delete;
 
-    void setBelNode(BeliefNode *bel);
-
-    void setSeqId(long seqId) {
-        this->seqId = seqId;
-    }
-
-    void setNext(Action const &action, Observation const &obs) {
-        this->action = action;
-        this->obs = obs;
-    }
-
-    BeliefNode *getPartOfBelNode() {
-        return partOfBelNode;
-    }
-
-
     State *getState();
-
-    StateInfo *getStateInfo() {
-        return stateInfo;
-    }
-
-    long getId() {
-        return entryId;
-    }
-    long getSeqId() {
-        return seqId;
-    }
-    Action getAction() {
-        return action;
-    }
 
   private:
     HistoryEntry();
+    /** The state information for this history entry. */
     StateInfo *stateInfo;
-    bool hasBeenBackup;
-    long seqId, entryId;
-    double discount; // Net discount factor for the immediate reward
-    double immediateReward; // Non-discounted immediate reward
-    double qVal; // Discounted total reward
-    Action action;
-    Observation obs;
 
-    BeliefNode *partOfBelNode;
+    /** Action performed in this entry. */
+    Action action;
+    /** Observation received in this entry. */
+    Observation observation;
+
+    /** True iff this entry has been processed in a Bellman backup,
+     * false otherwise.
+     */
+    bool hasBeenBackedUp;
+    /** The id of the sequence. */
+    long seqId;
+    /** The id of the specific entry within the sequence. */
+    long entryId;
+    /** Net discount factor, as applies to the immediate reward. */
+    double discount;
+    /** Non-discounted immediate reward. */
+    double immediateReward;
+    /** Discounted expected total reward. */
+    double qVal;
+
+    /** The belief node this entry belong to. */
+    BeliefNode *owningBeliefNode;
 };
 
 #endif /* HISTORYENTRY_HPP */

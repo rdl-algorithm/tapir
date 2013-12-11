@@ -5,7 +5,6 @@
 
 #include <map>                          // for map, map<>::value_compare
 #include <memory>                       // for unique_ptr
-#include <queue>                        // for queue
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
@@ -16,19 +15,13 @@
 
 class ActionNode;
 class HistoryEntry;
-//#include "ActionNode.hpp"               // for ActionNode
 
 class BeliefNode {
   public:
-    friend class BeliefTree;
     friend class Solver;
     friend class TextSerializer;
 
-    bool distChecked;
-    static long maxParticles;
-    static long nStVars;
-
-    /** Constructs a new belief node. */
+    /** Constructs a new belief node with an auto-generated ID. */
     BeliefNode();
     /** Constructs a new belief node with the given ID. */
     BeliefNode(long id);
@@ -42,7 +35,7 @@ class BeliefNode {
     BeliefNode &operator=(BeliefNode &&) = delete;
 
     /** Chooses a next action with the UCB algorithm. */
-    Action getUCBAction();
+    Action getUCBAction(double coefUCB);
     /** Chooses the action with the best expected value */
     Action getBestAction();
     /** Updates the calculation of which action is optimal. */
@@ -81,9 +74,6 @@ class BeliefNode {
      */
     BeliefNode *getChild(Action const &action, Observation const &obs);
 
-    /** Adds all the belief node children of this node to the queue. */
-    void enqueueChildren(std::queue<BeliefNode *> &queue);
-
     /** Returns the next action to attempt. */
     Action getNextActionToTry();
 
@@ -97,15 +87,13 @@ class BeliefNode {
         return nParticles;
     }
     /** Returns the current number of action children of this node. */
-    long getNActChildren() {
+    unsigned long getNActChildren() {
         return actChildren.size();
     }
 
   private:
     /** The ID for the next belief node. */
     static long currId;
-    /** The exploration parameter for UCB. */
-    static double exploreParam;
     /** The startup time */
     static std::clock_t startTime;
 

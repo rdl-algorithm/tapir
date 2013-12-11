@@ -26,7 +26,7 @@ WARN                 :=
 override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
 ifeq ($(CXX), g++)
   override CXXFLAGS  += -frounding-math
-  WARN               += -Wall -Wextra
+  WARN               += -Wall -Wextra -Weffc++
 else
   WARN               += -Weverything -Wno-c++98-compat
 endif
@@ -49,9 +49,10 @@ LDFLAGS_release   = $(LDFLAGS)
 # Configuration of code cleaners.
 # ----------------------------------------------------------------------
 
-BEAUTIFY_EXCLUDES  = ./src/solver/ProgramOptions.hpp
+BEAUTIFY_EXCLUDES  = ./src/problems/ProgramOptions.hpp
 BEAUTIFY_EXCLUDES += ./src/problems/RockSample/RockSampleOptions.hpp
 BEAUTIFY_EXCLUDES += ./src/problems/Tag/TagOptions.hpp
+BEAUTIFY_EXCLUDES += ./src/problems/UnderwaterNavModif/UnderwaterNavModifOptions.hpp
 BEAUTIFY_CFG = $(ROOT)/mk/uncrustify.cfg
 BEAUTIFY_CMD = uncrustify -c $(BEAUTIFY_CFG)
 BEAUTIFY_FLAGS = --no-backup

@@ -1,4 +1,4 @@
-#include "solver/simulate.hpp"
+#include "problems/simulate.hpp"
 
 #include "RockSampleModel.hpp"          // for RockSampleModel
 #include "RockSampleOptions.hpp"        // for RockSampleOptions

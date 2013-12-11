@@ -33,9 +33,6 @@ class StateInfo {
         return state.get();
     }
 
-    long getId() const {
-        return id;
-    }
   private:
     StateInfo();
 

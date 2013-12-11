@@ -13,12 +13,12 @@
 #include <boost/program_options.hpp>    // for variables_map, options_description, positional_options_description, variable_value, store, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
+#include "solver/Observation.hpp"       // for Observation
+#include "solver/Serializer.hpp"        // for Serializer
+#include "solver/Solver.hpp"            // for Solver
+#include "solver/State.hpp"             // for operator<<, State
 
-#include "Observation.hpp"              // for Observation
 #include "ProgramOptions.hpp"           // for ProgramOptions
-#include "Serializer.hpp"               // for Serializer
-#include "Solver.hpp"                   // for Solver
-#include "State.hpp"                    // for operator<<, State
 
 using std::cerr;
 using std::cout;
