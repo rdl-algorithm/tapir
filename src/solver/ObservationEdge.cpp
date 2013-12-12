@@ -10,14 +10,15 @@
 #include "BeliefNode.hpp"               // for BeliefNode
 #include "Observation.hpp"              // for Observation
 
+namespace solver {
 ObservationEdge::ObservationEdge() :
-    obs(),
-    child(nullptr) {
+    observation_(),
+    child_(nullptr) {
 }
 
 ObservationEdge::ObservationEdge(Observation const &obs) :
-    obs(obs),
-    child(std::make_unique<BeliefNode>()) {
+    observation_(obs),
+    child_(std::make_unique<BeliefNode>()) {
 }
 
 // Do nothing!
@@ -26,8 +27,8 @@ ObservationEdge::~ObservationEdge() {
 
 bool ObservationEdge::obsEquals(Observation const &otherObs) {
     Observation::const_iterator itThis, itOther;
-    for (itThis = obs.cbegin(), itOther = otherObs.cbegin();
-         itThis != obs.cend(); itThis++, itOther++) {
+    for (itThis = observation_.cbegin(), itOther = otherObs.cbegin();
+         itThis != observation_.cend(); itThis++, itOther++) {
         if (std::abs(*itThis - *itOther) > 1e-7) {
             return false;
         }
@@ -36,5 +37,6 @@ bool ObservationEdge::obsEquals(Observation const &otherObs) {
 }
 
 BeliefNode *ObservationEdge::getBeliefChild() {
-    return child.get();
+    return child_.get();
 }
+} /* namespace solver */

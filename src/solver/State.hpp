@@ -1,10 +1,11 @@
-#ifndef STATE_HPP
-#define STATE_HPP
+#ifndef SOLVER_STATE_HPP_
+#define SOLVER_STATE_HPP_
 
 #include <cstddef>                      // for size_t
 
 #include <ostream>                      // for ostream
 
+namespace solver {
 class State {
   public:
     struct Hash {
@@ -36,5 +37,6 @@ inline std::ostream &operator<<(std::ostream &os, State const &state) {
 inline bool operator==(State const &s1, State const &s2) {
     return s1.equals(s2); // && s2.equals(s1); (symmetry)
 }
+} /* namespace solver */
 
-#endif /* STATE_HPP */
+#endif /* SOLVER_STATE_HPP_ */

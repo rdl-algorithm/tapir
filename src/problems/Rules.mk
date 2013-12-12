@@ -2,7 +2,7 @@ n = problems
 
 include mk/template.mk
 
-CHILD_MODULES := RockSample Tag
+CHILD_MODULES := rocksample tag
 
 %-$(n): $(d)/%
 	@echo

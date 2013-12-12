@@ -10,25 +10,26 @@
 #include "ChangeType.hpp"               // for ChangeType
 #include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
 
+namespace solver {
 class State;
 
 StatePool::StatePool() :
-    nSDim(-1),
-    allStates(),
-    allStatesIdx(),
-    stStruct() {
+    nSDim_(-1),
+    allStates_(),
+    allStatesIdx_(),
+    stStruct_() {
 }
 
 StatePool::~StatePool() {
 }
 
 void StatePool::reset() {
-    allStates.clear();
-    allStatesIdx.clear();
-    for (long i = 0; i < nSDim; i++) {
-        stStruct[i].clear();
+    allStates_.clear();
+    allStatesIdx_.clear();
+    for (long i = 0; i < nSDim_; i++) {
+        stStruct_[i].clear();
     }
-    stStruct.clear();
+    stStruct_.clear();
     StateInfo::currId = 0;
 }
 
@@ -41,13 +42,13 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
                 std::move(state));
     StateInfo *stateInfo = newInfo.get();
     std::pair<StateInfoSet::iterator,
-            bool> ret = allStates.insert(std::move(newInfo));
+            bool> ret = allStates_.insert(std::move(newInfo));
     if (ret.second) {
         stateInfo->setId();
-        if (stateInfo->id != (long)allStatesIdx.size()) {
+        if (stateInfo->id_ != (long)allStatesIdx_.size()) {
             std::cerr << "Error: wrong size in StatePool" << std::endl;
         }
-        allStatesIdx.push_back(stateInfo);
+        allStatesIdx_.push_back(stateInfo);
     } else {
         stateInfo = ret.first->get();
     }
@@ -55,7 +56,7 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
 }
 
 StateInfo *StatePool::getStateById(long id) {
-    return allStatesIdx[id];
+    return allStatesIdx_[id];
 }
 
 void StatePool::identifyAffectedStates(State & /*lowLeft*/, State & /*upRight*/,
@@ -111,3 +112,4 @@ void StatePool::identifyAffectedStates(State & /*lowLeft*/, State & /*upRight*/,
 //    }
 //    //cerr << "ok3\n";
 }
+} /* namespace solver */

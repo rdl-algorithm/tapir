@@ -2,6 +2,7 @@
 
 #include "StateInfo.hpp"                // for StateInfo
 
+namespace solver {
 HistoryEntry::HistoryEntry() :
     HistoryEntry(nullptr, 0, 0) {
 }
@@ -11,18 +12,19 @@ HistoryEntry::HistoryEntry(StateInfo *stateInfo) :
 }
 
 HistoryEntry::HistoryEntry(StateInfo *stateInfo, long seqId, long entryId) :
-    stateInfo(stateInfo),
-    action(-1),
-    observation(),
-    hasBeenBackedUp(false),
-    seqId(seqId),
-    entryId(entryId),
-    discount(1.0),
-    immediateReward(0),
-    qVal(0),
-    owningBeliefNode(nullptr) {
+    stateInfo_(stateInfo),
+    action_(-1),
+    observation_(),
+    hasBeenBackedUp_(false),
+    seqId_(seqId),
+    entryId_(entryId),
+    discount_(1.0),
+    immediateReward_(0),
+    qVal_(0),
+    owningBeliefNode_(nullptr) {
 }
 
 State *HistoryEntry::getState() {
-    return stateInfo->getState();
+    return stateInfo_->getState();
 }
+} /* namespace solver */

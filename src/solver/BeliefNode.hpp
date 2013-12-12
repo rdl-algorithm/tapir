@@ -1,5 +1,5 @@
-#ifndef BELIEFNODE_HPP
-#define BELIEFNODE_HPP
+#ifndef SOLVER_BELIEFNODE_HPP_
+#define SOLVER_BELIEFNODE_HPP_
 
 #include <ctime>                        // for clock_t
 
@@ -13,6 +13,7 @@
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
 
+namespace solver {
 class ActionNode;
 class HistoryEntry;
 
@@ -35,7 +36,7 @@ class BeliefNode {
     BeliefNode &operator=(BeliefNode &&) = delete;
 
     /** Chooses a next action with the UCB algorithm. */
-    Action getUCBAction(double coefUCB);
+    Action getUcbAction(double ucbExploreCoefficient);
     /** Chooses the action with the best expected value */
     Action getBestAction();
     /** Updates the calculation of which action is optimal. */
@@ -80,15 +81,15 @@ class BeliefNode {
 
     /** Returns the ID of this node. */
     long getId() {
-        return id;
+        return id_;
     }
     /** Returns the number of particles in this node. */
     long getNParticles() {
-        return nParticles;
+        return nParticles_;
     }
     /** Returns the current number of action children of this node. */
     unsigned long getNActChildren() {
-        return actChildren.size();
+        return actChildren_.size();
     }
 
   private:
@@ -98,31 +99,30 @@ class BeliefNode {
     static std::clock_t startTime;
 
     /** The ID of this node. */
-    long id;
+    long id_;
     /** The number of particles in this node. */
-    long nParticles;
-    /** The next un-tried action to explore. */
-    Action nextActionToTry;
+    long nParticles_;
+    /** The next untried action to explore. */
+    Action nextActionToTry_;
     /** The best mean q-value of any action child. */
-    double bestMeanQValue;
+    double bestMeanQValue_;
     /** The action corresponding to the highest expected value. */
-    Action bestAction;
+    Action bestAction_;
 
     /** The time at which the last particle was added. */
-    double tLastAddedParticle;
+    double tLastAddedParticle_;
     /** The time at which the last belief node comparison was done. */
-    double tNNComp;
-    /** ??? */
-    double tEmdSig;
+    double tNNComp_;
     /** A previously found near neighbor for this belief node. */
-    BeliefNode *nnBel;
+    BeliefNode *nnBel_;
 
     /** The particles for this belief node. */
-    std::vector<HistoryEntry *> particles;
+    std::vector<HistoryEntry *> particles_;
 
     typedef std::map<Action, std::unique_ptr<ActionNode>> ActionMap;
     /** A mapping of actions to action children for this node. */
-    ActionMap actChildren;
+    ActionMap actChildren_;
 };
+} /* namespace solver */
 
-#endif /* BELIEFNODE_HPP */
+#endif /* SOLVER_BELIEFNODE_HPP_ */

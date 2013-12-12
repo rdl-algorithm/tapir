@@ -1,5 +1,5 @@
-#ifndef SIMULATE_HPP
-#define SIMULATE_HPP
+#ifndef SIMULATE_HPP_
+#define SIMULATE_HPP_
 
 #include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
 
@@ -23,8 +23,6 @@
 using std::cerr;
 using std::cout;
 using std::endl;
-using std::string;
-using std::vector;
 namespace po = boost::program_options;
 
 template<typename ModelType, typename SerializerType>
@@ -57,20 +55,20 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         cout << visibleOptions << endl;
         return 0;
     }
-    string cfgPath = vm["cfg"].as<string>();
+    std::string cfgPath = vm["cfg"].as<std::string>();
     po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
     po::notify(vm);
 
-    string polPath = vm["policy"].as<string>();
+    std::string polPath = vm["policy"].as<std::string>();
     bool hasChanges = vm["changes.hasChanges"].as<bool>();
-    string changesPath;
+    std::string changesPath;
     if (hasChanges) {
-        changesPath = vm["changes.changesPath"].as<string>();
+        changesPath = vm["changes.changesPath"].as<std::string>();
     }
-    string logPath = vm["log"].as<string>();
+    std::string logPath = vm["log"].as<std::string>();
     long nSteps = vm["simulation.nSteps"].as<long>();
     long nRuns = vm["simulation.nRuns"].as<long>();
-    long seed = vm["seed"].as<long>();
+    unsigned long seed = vm["seed"].as<unsigned long>();
     cerr << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
@@ -86,27 +84,27 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
                 vm);
     ModelType *model = newModel.get();
-    Solver solver(&randGen, std::move(newModel));
-    Serializer *serializer = new SerializerType(&solver);
+    solver::Solver solver(&randGen, std::move(newModel));
+    solver::Serializer *serializer = new SerializerType(&solver);
     serializer->load(inFile);
     delete serializer;
     inFile.close();
 
-    vector<long> changeTimes;
+    std::vector<long> changeTimes;
     if (hasChanges) {
         changeTimes = model->loadChanges(changesPath.c_str());
     }
-    vector<std::unique_ptr<State>> trajSt;
-    vector<long> trajActId;
-    vector<Observation> trajObs;
-    vector<double> trajRew;
+    std::vector<std::unique_ptr<solver::State>> trajSt;
+    std::vector<long> trajActId;
+    std::vector<solver::Observation> trajObs;
+    std::vector<double> trajRew;
     double val;
     long j;
-    vector<std::unique_ptr<State>>::iterator itS;
-    vector<long>::iterator itA;
-    vector<Observation>::iterator itO;
-    vector<double>::iterator itR;
-    vector<double>::iterator itD;
+    std::vector<std::unique_ptr<solver::State>>::iterator itS;
+    std::vector<long>::iterator itA;
+    std::vector<solver::Observation>::iterator itO;
+    std::vector<double>::iterator itR;
+    std::vector<double>::iterator itD;
     std::ofstream os;
     os.open(logPath.c_str());
 
@@ -118,7 +116,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         tStart = std::clock();
         val = solver.runSim(nSteps, changeTimes, trajSt, trajActId, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
-        totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
+        totT = (double)(std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
         os << "Val:  " << val << endl;
         itS = trajSt.begin();
@@ -143,4 +141,4 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     return 0;
 }
 
-#endif /* SIMULATE_HPP */
+#endif /* SIMULATE_HPP_ */

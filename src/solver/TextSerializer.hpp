@@ -1,5 +1,5 @@
-#ifndef TEXTSERIALIZER_HPP
-#define TEXTSERIALIZER_HPP
+#ifndef SOLVER_TEXTSERIALIZER_HPP_
+#define SOLVER_TEXTSERIALIZER_HPP_
 
 #include <iosfwd>                       // for ostream, istream
 #include <memory>                       // for unique_ptr
@@ -8,6 +8,7 @@
 #include "Observation.hpp"              // for Observation
 #include "Serializer.hpp"               // for Serializer
 
+namespace solver {
 class ActionNode;
 class BeliefNode;
 class BeliefTree;
@@ -64,5 +65,6 @@ class TextSerializer : public Serializer {
     void saveWithChildren(BeliefNode &node, std::ostream &os,
             std::queue<BeliefNode *> &queue);
 };
+} /* namespace solver */
 
-#endif /* TEXTSERIALIZER_HPP */
+#endif /* SOLVER_TEXTSERIALIZER_HPP_ */

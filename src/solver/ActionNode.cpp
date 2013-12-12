@@ -10,24 +10,25 @@
 #include "Observation.hpp"              // for Observation
 #include "ObservationEdge.hpp"          // for ObservationEdge
 
+namespace solver {
 ActionNode::ActionNode() :
     ActionNode(-1) {
 }
 
 ActionNode::ActionNode(Action const &action) :
-    action(action),
-    nParticles(0),
-    totalQValue(0),
-    meanQValue(0),
+    action_(action),
+    nParticles_(0),
+    totalQValue_(0),
+    meanQValue_(0),
     obsChildren() {
 }
 
 void ActionNode::updateQValue(double increase) {
-    totalQValue += increase;
-    if (nParticles > 0) {
-        meanQValue = totalQValue / nParticles;
+    totalQValue_ += increase;
+    if (nParticles_ > 0) {
+        meanQValue_ = totalQValue_ / nParticles_;
     } else {
-        meanQValue = 0;
+        meanQValue_ = 0;
     }
 }
 
@@ -38,7 +39,7 @@ ActionNode::~ActionNode() {
 void ActionNode::updateQValue(double oldValue, double newValue,
         bool reduceParticles) {
     if (reduceParticles) {
-        nParticles--;
+        nParticles_--;
     }
     updateQValue(newValue - oldValue);
 }
@@ -53,7 +54,7 @@ std::pair<BeliefNode *, bool> ActionNode::addChild(Observation const &obs) {
         obsChildren.push_back(std::move(newEdge));
         added = true;
     }
-    nParticles++;
+    nParticles_++;
     return std::make_pair(beliefChild, added);
 }
 
@@ -65,3 +66,4 @@ BeliefNode *ActionNode::getBeliefChild(Observation const &obs) {
     }
     return nullptr;
 }
+} /* namespace solver */

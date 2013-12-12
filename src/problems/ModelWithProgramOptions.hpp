@@ -1,5 +1,5 @@
-#ifndef MODELWITHPROGRAMOPTIONS_HPP
-#define MODELWITHPROGRAMOPTIONS_HPP
+#ifndef MODELWITHPROGRAMOPTIONS_HPP_
+#define MODELWITHPROGRAMOPTIONS_HPP_
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value, program_options
 
@@ -8,62 +8,63 @@
 
 namespace po = boost::program_options;
 
-class ModelWithProgramOptions : public Model {
+class ModelWithProgramOptions : public solver::Model {
   public:
     ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
-        Model(randGen),
-        discount(vm["problem.discount"].as<double>()),
-        nParticles(vm["SBT.nParticles"].as<long>()),
-        maxTrials(vm["SBT.maxTrials"].as<long>()),
-        depthTh(vm["SBT.depthTh"].as<double>()),
-        coefUCB(vm["SBT.coefUCB"].as<double>()),
-        exploreCoef(vm["SBT.exploreCoef"].as<double>()),
-        maxDistTry(vm["SBT.maxDistTry"].as<long>()),
-        distTh(vm["SBT.distTh"].as<double>()) {
+        solver::Model(randGen),
+        discountFactor_(vm["problem.discountFactor"].as<double>()),
+        nParticles_(vm["SBT.nParticles"].as<unsigned long>()),
+        maxTrials_(vm["SBT.maxTrials"].as<unsigned long>()),
+        minimumDiscount_(vm["SBT.minimumDiscount"].as<double>()),
+        heuristicExploreCoefficient_(
+                vm["SBT.heuristicExploreCoefficient"].as<double>()),
+        ucbExploreCoefficient_(vm["SBT.ucbExploreCoefficient"].as<double>()),
+        maxNnComparisons_(vm["SBT.maxNnComparisons"].as<long>()),
+        maxNnDistance_(vm["SBT.maxNnDistance"].as<double>()) {
     }
 
     virtual ~ModelWithProgramOptions() = default;
 
     // Simple getters
     virtual double getDiscountFactor() final {
-        return discount;
+        return discountFactor_;
     }
-
     virtual unsigned long getNParticles() final {
-        return nParticles;
+        return nParticles_;
     }
     virtual unsigned long getMaxTrials() final {
-        return maxTrials;
+        return maxTrials_;
     }
-    virtual double getDepthTh() final {
-        return depthTh;
+    virtual double getMinimumDiscount() final {
+        return minimumDiscount_;
     }
-    virtual double getCoefUCB() final {
-        return coefUCB;
+    virtual double getUcbExploreCoefficient() final {
+        return ucbExploreCoefficient_;
     }
-    virtual double getExploreCoef() final {
-        return exploreCoef;
+    virtual double getHeuristicExploreCoefficient() final {
+        return heuristicExploreCoefficient_;
     }
-    virtual long getMaxDistTry() final {
-        return maxDistTry;
+    virtual long getMaxNnComparisons() final {
+        return maxNnComparisons_;
     }
-    virtual double getDistTh() final {
-        return distTh;
+    virtual double getMaxNnDistance() final {
+        return maxNnDistance_;
     }
 
   private:
     // Problem parameters.
-    double discount;
+    double discountFactor_;
 
     // SBT parameters
-    unsigned long nParticles;
-    unsigned long maxTrials;
-    double depthTh;
-    double coefUCB;
-    double exploreCoef;
+    unsigned long nParticles_;
+    unsigned long maxTrials_;
+    double minimumDiscount_;
 
-    long maxDistTry;
-    double distTh;
+    double heuristicExploreCoefficient_;
+    double ucbExploreCoefficient_;
+
+    long maxNnComparisons_;
+    double maxNnDistance_;
 };
 
-#endif /* MODELWITHPROGRAMOPTIONS_HPP */
+#endif /* MODELWITHPROGRAMOPTIONS_HPP_ */

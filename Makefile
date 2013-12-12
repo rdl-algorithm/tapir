@@ -24,11 +24,12 @@ CPPFLAGS_debug       := $(CPPFLAGS) -DDEBUG
 CXXFLAGS_BASE        := -std=c++11
 WARN                 :=
 override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
-ifeq ($(CXX), g++)
-  override CXXFLAGS  += -frounding-math
-  WARN               += -Wall -Wextra -Weffc++
+ifeq ($(CXX), clang++)
+WARN               += -Weverything -Wno-c++98-compat
 else
-  WARN               += -Weverything -Wno-c++98-compat
+override CXXFLAGS  += -frounding-math
+WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
+WARN               += -Wswitch-default
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3
 CXXFLAGS_debug       := $(CXXFLAGS) -O0 -ggdb

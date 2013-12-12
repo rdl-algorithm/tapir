@@ -4,22 +4,24 @@
 
 #include "HistorySequence.hpp"          // for HistorySequence
 
+namespace solver {
 Histories::Histories() :
-    allHistSeq() {
+    allHistSeq_() {
 }
 
 void Histories::reset() {
-    allHistSeq.clear();
+    allHistSeq_.clear();
 }
 
 void Histories::add(std::unique_ptr<HistorySequence> histSeq) {
-    allHistSeq.push_back(std::move(histSeq));
+    allHistSeq_.push_back(std::move(histSeq));
 }
 
 HistoryEntry *Histories::getHistoryEntry(long seqId, long entryId) {
-    return allHistSeq[seqId]->get(entryId);
+    return allHistSeq_[seqId]->get(entryId);
 }
 
 HistorySequence *Histories::getHistorySequence(long seqId) {
-    return allHistSeq[seqId].get();
+    return allHistSeq_[seqId].get();
 }
+} /* namespace solver */

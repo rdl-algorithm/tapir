@@ -1,5 +1,5 @@
-#ifndef SOLVER_HPP
-#define SOLVER_HPP
+#ifndef SOLVER_SOLVER_HPP_
+#define SOLVER_SOLVER_HPP_
 
 #include <memory>                       // for unique_ptr
 #include <set>                          // for set
@@ -13,6 +13,7 @@
 #include "Model.hpp"                    // for Model, Model::StepResult
 #include "Observation.hpp"              // for Observation
 
+namespace solver {
 class BeliefNode;
 class BeliefTree;
 class Histories;
@@ -40,9 +41,9 @@ class Solver {
 
     /** Generates a starting policy for the solver, by generating the given
      * number (maxTrials) of episodes, and terminating episodes when the
-     * current discount reaches the maximum (depthTh).
+     * current discount reaches the lowest allowed value (minimumDiscount).
      */
-    void genPol(long maxTrials, double depthTh);
+    void genPol(unsigned long maxTrials, double minimumDiscount);
     /** Runs a single simulation up to a maximum of nSteps steps, returning
      * the total discounted reward.
      *
@@ -62,30 +63,38 @@ class Solver {
             double *totImpTime);
 
   private:
-    RandomGenerator *randGen;
-    std::unique_ptr<Model> model;
-    std::unique_ptr<BeliefTree> policy;
-    std::unique_ptr<Histories> allHistories;
-    std::unique_ptr<StatePool> allStates;
+    RandomGenerator *randGen_;
+    std::unique_ptr<Model> model_;
+    std::unique_ptr<BeliefTree> policy_;
+    std::unique_ptr<Histories> allHistories_;
+    std::unique_ptr<StatePool> allStates_;
 
-    RolloutMode lastRolloutMode;
-    double exploreCoef;
-    double timeUsedPerStrategy[2], strategyWeight[2], strategyProbability[2];
-    long strategyUseCount[2];
+    RolloutMode lastRolloutMode_;
+    double heuristicExploreCoefficient_;
+    double timeUsedPerHeuristic_[2], heuristicWeight_[2],
+           heuristicProbability_[2];
+    long heuristicUseCount_[2];
 
-    /** Adds the given history entry as a particle in the given belief node,
+    /** Registers the given history entry with the given belief node,
      * and updates the StateInfo to be informed of its usage in the given
      * belief node and history entry.
      */
-    void addParticle(BeliefNode *node, HistoryEntry *entry,
+    void registerParticle(BeliefNode *node, HistoryEntry *entry,
+            StateInfo *stateInfo);
+
+    /** Deregisters the given history entry with the given belief node,
+     * and updates the StateInfo to be informed of its usage in the given
+     * belief node and history entry.
+     */
+    void deregisterParticle(BeliefNode *node, HistoryEntry *entry,
             StateInfo *stateInfo);
 
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
-    void singleSearch(double discountFactor, double depthTh);
+    void singleSearch(double discountFactor, double minimumDiscount);
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-            long startDepth, double discountFactor, double depthTh);
+            long startDepth, double discountFactor, double minimumDiscount);
     /** Performs a backup on the given history sequence. */
     void backup(HistorySequence *history);
 
@@ -98,10 +107,10 @@ class Solver {
     BeliefNode *getNNBelNode(BeliefNode *b);
     /** Helper method for policy-based rollout. */
     double rolloutPolHelper(BeliefNode *currNode, State &state, double disc);
-    /** Updates the overall weighting of the different heuristic strategies
+    /** Updates the overall weighting of the different heuristic heuristics
      * based on their performance.
      */
-    void updateStrategyProbabilities(double valImprovement);
+    void updateHeuristicProbabilities(double valImprovement);
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
@@ -110,7 +119,8 @@ class Solver {
     BeliefNode *addChild(BeliefNode *currNode, Action &action, Observation &obs,
             long timeStep);
     /** Improves the solution, with the root at the given node. */
-    void improveSol(BeliefNode *startNode, long maxTrials, double depthTh);
+    void improveSol(BeliefNode *startNode, unsigned long maxTrials,
+            double minimumDiscount);
 
     /* ------------------ Methods for handling model changes ------------------- */
     /** Identifies which parts of which history sequences are affected by the
@@ -142,5 +152,6 @@ class Solver {
             std::vector<Observation> &modifObsSeq,
             std::vector<double> &modifRewSeq);
 };
+} /* namespace solver */
 
-#endif /* SOLVER_HPP */
+#endif /* SOLVER_SOLVER_HPP_ */

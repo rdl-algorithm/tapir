@@ -1,10 +1,11 @@
-#ifndef OBSERVATIONEDGE_HPP
-#define OBSERVATIONEDGE_HPP
+#ifndef SOLVER_OBSERVATIONEDGE_HPP_
+#define SOLVER_OBSERVATIONEDGE_HPP_
 
 #include <memory>                       // for unique_ptr
 
 #include "Observation.hpp"              // for Observation
 
+namespace solver {
 class BeliefNode;
 
 class ObservationEdge {
@@ -36,9 +37,10 @@ class ObservationEdge {
     /** Creates an observation edge without an observation or child! */
     ObservationEdge();
     /** The observation for this edge. */
-    Observation obs;
+    Observation observation_;
     /** The child belief node of this edge. */
-    std::unique_ptr<BeliefNode> child;
+    std::unique_ptr<BeliefNode> child_;
 };
+} /* namespace solver */
 
-#endif /* OBSERVATIONEDGE_HPP */
+#endif /* SOLVER_OBSERVATIONEDGE_HPP_ */

@@ -1,5 +1,5 @@
-#ifndef STATEINFO_HPP
-#define STATEINFO_HPP
+#ifndef SOLVER_STATEINFO_HPP_
+#define SOLVER_STATEINFO_HPP_
 
 #include <memory>                       // for unique_ptr
 #include <set>                          // for set
@@ -7,6 +7,7 @@
 
 #include "ChangeType.hpp"               // for ChangeType
 
+namespace solver {
 class BeliefNode;
 class HistoryEntry;
 class State;
@@ -30,20 +31,22 @@ class StateInfo {
     void delUsedInHistEntry(HistoryEntry *toBeDeleted);
 
     State *getState() const {
-        return state.get();
+        return state_.get();
     }
 
   private:
     StateInfo();
 
-    std::unique_ptr<State> state;
     static long currId;
-    long id;
 
-    std::vector<HistoryEntry *> usedInHistoryEntries;
-    std::set<BeliefNode *> usedInBeliefNodes;
+    std::unique_ptr<State> state_;
+    long id_;
 
-    ChangeType chType;
+    std::vector<HistoryEntry *> usedInHistoryEntries_;
+    std::set<BeliefNode *> usedInBeliefNodes_;
+
+    ChangeType changeType_;
 };
+} /* namespace solver */
 
-#endif /* STATEINFO_HPP */
+#endif /* SOLVER_STATEINFO_HPP_ */

@@ -1,5 +1,5 @@
-#ifndef STATEPOOL_HPP
-#define STATEPOOL_HPP
+#ifndef SOLVER_STATEPOOL_HPP_
+#define SOLVER_STATEPOOL_HPP_
 
 #include <cstddef>                      // for size_t
 
@@ -13,6 +13,7 @@
 #include "State.hpp"                    // for State, operator==
 #include "StateInfo.hpp"                // for StateInfo
 
+namespace solver {
 class StatePool {
   public:
     struct StateInfoHash {
@@ -46,10 +47,11 @@ class StatePool {
             ChangeType chType, std::set<StateInfo *> &affectedSt);
 
   private:
-    long nSDim;
-    StateInfoSet allStates;
-    std::vector<StateInfo *> allStatesIdx;
-    std::vector<std::multimap<double, StateInfo * >> stStruct;
+    long nSDim_;
+    StateInfoSet allStates_;
+    std::vector<StateInfo *> allStatesIdx_;
+    std::vector<std::multimap<double, StateInfo * >> stStruct_;
 };
+} /* namespace solver */
 
-#endif /* STATEPOOL_HPP */
+#endif /* SOLVER_STATEPOOL_HPP_ */

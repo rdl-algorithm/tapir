@@ -1,5 +1,5 @@
-#ifndef SERIALIZER_HPP
-#define SERIALIZER_HPP
+#ifndef SOLVER_SERIALIZER_HPP_
+#define SOLVER_SERIALIZER_HPP_
 
 #include <istream>                      // for istream, ostream
 #include <memory>                       // for unique_ptr
@@ -7,6 +7,7 @@
 #include "Observation.hpp"              // for Observation
 #include "Solver.hpp"                   // for Solver
 
+namespace solver {
 class ActionNode;
 class BeliefNode;
 class BeliefTree;
@@ -20,32 +21,44 @@ class StatePool;
 
 class Serializer {
   public:
+    /** Constructs a serializer for the given solver. */
     Serializer(Solver *solver) :
-        solver(solver) {
+        solver_(solver) {
     }
+    /** Default destructor. */
     virtual ~Serializer() = default;
+
+    /* Copying and moving is disallowed. */
     Serializer(Serializer const &) = delete;
     Serializer(Serializer &&) = delete;
     Serializer &operator=(Serializer const &) = delete;
     Serializer &operator=(Serializer &&) = delete;
 
+    /** Saves the sate of the solver. */
     virtual void save(std::ostream &os) {
-        save(*(solver->allStates), os);
-        save(*(solver->allHistories), os);
-        save(*(solver->policy), os);
+        save(*(solver_->allStates_), os);
+        save(*(solver_->allHistories_), os);
+        save(*(solver_->policy_), os);
     }
+    /** Loads the state of the solver. */
     virtual void load(std::istream &is) {
-        load(*(solver->allStates), is);
-        load(*(solver->allHistories), is);
-        load(*(solver->policy), is);
+        load(*(solver_->allStates_), is);
+        load(*(solver_->allHistories_), is);
+        load(*(solver_->policy_), is);
     }
 
+    /** Saves a State. */
     virtual void saveState(State &state, std::ostream &os) = 0;
+    /** Loads a State. */
     virtual std::unique_ptr<State> loadState(std::istream &is) = 0;
 
+    /** Saves a StateInfo. */
     virtual void save(StateInfo &wrapper, std::ostream &os) = 0;
+    /** Loads a StateInfo. */
     virtual void load(StateInfo &wrapper, std::istream &is) = 0;
+    /** Saves a StatePool. */
     virtual void save(StatePool &pool, std::ostream &os) = 0;
+    /** Loads a StatePool. */
     virtual void load(StatePool &pool, std::istream &is) = 0;
 
     virtual void save(Observation &obs, std::ostream &os) = 0;
@@ -66,7 +79,8 @@ class Serializer {
     virtual void save(BeliefTree &tree, std::ostream &os) = 0;
     virtual void load(BeliefTree &tree, std::istream &is) = 0;
   protected:
-    Solver *solver;
+    Solver *solver_;
 };
+} /* namespace solver */
 
-#endif /* SERIALIZER_HPP */
+#endif /* SOLVER_SERIALIZER_HPP_ */

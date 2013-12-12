@@ -1,5 +1,5 @@
-#ifndef MODEL_HPP
-#define MODEL_HPP
+#ifndef SOLVER_MODEL_HPP_
+#define SOLVER_MODEL_HPP_
 
 #include <memory>                       // for unique_ptr
 #include <ostream>                      // for ostream
@@ -12,6 +12,7 @@
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"                    // for State
 
+namespace solver {
 class Model {
   public:
     /** Represents the results of a step in the model, including the next state,
@@ -26,7 +27,7 @@ class Model {
     };
 
     /** Constructor - stores the RandomGenerator for this model. */
-    Model(RandomGenerator *randGen) : randGen(randGen) {
+    Model(RandomGenerator *randGen) : randGen_(randGen) {
     }
 
     /** Destructor must be virtual */
@@ -44,7 +45,7 @@ class Model {
 
     /** Returns the # of actions for this POMDP. */
     virtual unsigned long getNActions() = 0;
-    /** Returns the # of observations f {or this POMDP. */
+    /** Returns the # of observations for this POMDP. */
     virtual unsigned long getNObservations() = 0;
     /** Returns the number of state variables for this PODMP. */
     virtual unsigned long getNStVars() = 0;
@@ -53,30 +54,44 @@ class Model {
     /** Returns an upper bound on the q-value. */
     virtual double getMaxVal() = 0;
 
+
     // SBT algorithm parameters
     /** Returns the default number of particles per belief - this number will
      * be generated if particle depletion occurs.
      */
     virtual unsigned long getNParticles() = 0;
-    /** Returns the maximum number of trials to run. */
+    /** Returns the maximum number of trials (i.e. simulated episodes) to run
+     * in a single time step.
+     */
     virtual unsigned long getMaxTrials() = 0;
-    /** Returns the lowest cumulative discount before the  */
-    virtual double getDepthTh() = 0;
-    /** Returns the exploration coefficient used for rollouts.
-     * ??
+    /** Returns the lowest net discount allowed; tree searching will not go
+     * deeper than this threshold.
      */
-    virtual double getExploreCoef() = 0;
+    virtual double getMinimumDiscount() = 0;
+
+
+    /** Returns the exploration coefficient used for selecting a rollout
+     * heuristic - this should be a value between 0 and 1, where a 1 results in
+     * both heuristics being equally probable.
+     * A reasonable default value is 0.5.
+     */
+    virtual double getHeuristicExploreCoefficient() = 0;
     /** Returns the exploration/exploitation ratio for UCB; higher
-     * values mean more exploration.*/
-    virtual double getCoefUCB() = 0;
+     * values mean more exploration.
+     * A reasonable default value is 1.0.
+     */
+    virtual double getUcbExploreCoefficient() = 0;
+
+
     /** Returns the maximum number of nodes to check when searching
-     * for a nearest-neighbour belief node.
+     * for a nearest-neighbor belief node.
      */
-    virtual long getMaxDistTry() = 0;
-    /** Returns the smallest allowable distance when searching for
-     * a nearest-neighbour belief node.
+    virtual long getMaxNnComparisons() = 0;
+    /** Returns the maximum allowable distance when searching for
+     * a nearest-neighbor belief node.
      */
-    virtual double getDistTh() = 0;
+    virtual double getMaxNnDistance() = 0;
+
 
     /* --------------- Start virtual functions ----------------- */
     /** Samples an initial state from the belief vector. */
@@ -148,7 +163,8 @@ class Model {
     virtual void drawState(State const &state, std::ostream &os) = 0;
   protected:
     /** The random number generator for this model. */
-    RandomGenerator *randGen;
+    RandomGenerator *randGen_;
 };
+} /* namespace solver */
 
-#endif
+#endif /* SOLVER_MODEL_HPP_ */

@@ -1,5 +1,5 @@
-#ifndef ACTIONNODE_HPP
-#define ACTIONNODE_HPP
+#ifndef SOLVER_ACTIONNODE_HPP_
+#define SOLVER_ACTIONNODE_HPP_
 
 #include <memory>                       // for unique_ptr
 #include <utility>                      // for pair
@@ -8,6 +8,7 @@
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
 
+namespace solver {
 class BeliefNode;
 class ObservationEdge;
 
@@ -52,16 +53,17 @@ class ActionNode {
     ActionNode();
 
     /** The action for this node. */
-    Action action;
+    Action action_;
     /** The number of particles for this node. */
-    unsigned long nParticles;
+    unsigned long nParticles_;
     /** The total q-value of this node. */
-    double totalQValue;
+    double totalQValue_;
     /** The mean q-value of this node. */
-    double meanQValue;
+    double meanQValue_;
 
     /** The vector of this node's children. */
     std::vector<std::unique_ptr<ObservationEdge>> obsChildren;
 };
+} /* namespace solver */
 
-#endif /* ACTIONNODE_HPP */
+#endif /* SOLVER_ACTIONNODE_HPP_ */

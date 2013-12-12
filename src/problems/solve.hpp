@@ -1,5 +1,5 @@
-#ifndef SOLVE_HPP
-#define SOLVE_HPP
+#ifndef SOLVE_HPP_
+#define SOLVE_HPP_
 
 #include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
 
@@ -20,7 +20,6 @@
 using std::cerr;
 using std::cout;
 using std::endl;
-using std::string;
 namespace po = boost::program_options;
 
 template<typename ModelType, typename SerializerType>
@@ -48,12 +47,12 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
         return 0;
     }
 
-    string cfgPath = vm["cfg"].as<string>();
+    std::string cfgPath = vm["cfg"].as<std::string>();
     po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
     po::notify(vm);
 
-    string polPath = vm["policy"].as<string>();
-    long seed = vm["seed"].as<long>();
+    std::string polPath = vm["policy"].as<std::string>();
+    unsigned long seed = vm["seed"].as<unsigned long>();
     cerr << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
@@ -62,17 +61,17 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
                 vm);
     ModelType *model = newModel.get();
-    Solver solver(&randGen, std::move(newModel));
+    solver::Solver solver(&randGen, std::move(newModel));
 
     double totT;
     std::clock_t tStart;
     tStart = std::clock();
-    solver.genPol(model->getMaxTrials(), model->getDepthTh());
+    solver.genPol(model->getMaxTrials(), model->getMinimumDiscount());
     totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
     std::ofstream os;
     os.open(polPath.c_str());
-    Serializer *serializer = new SerializerType(&solver);
+    solver::Serializer *serializer = new SerializerType(&solver);
     serializer->save(os);
     delete serializer;
     os.close();
@@ -81,4 +80,4 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     return 0;
 }
 
-#endif /* SOLVE_HPP */
+#endif /* SOLVE_HPP_ */

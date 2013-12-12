@@ -1,6 +1,7 @@
-#ifndef CHANGETYPE_HPP
-#define CHANGETYPE_HPP
+#ifndef SOLVER_CHANGETYPE_HPP_
+#define SOLVER_CHANGETYPE_HPP_
 
+namespace solver {
 enum class ChangeType {
     UNDEFINED = 0,
     ADDSTATE = 1,
@@ -10,5 +11,6 @@ enum class ChangeType {
     ADDOBSERVATION = 5,
     ADDOBSTACLE = 6
 };
+} /* namespace solver */
 
-#endif /* CHANGETYPE_HPP */
+#endif /* SOLVER_CHANGETYPE_HPP_ */

@@ -1,0 +1,15 @@
+nParticles: 2500
+maxTrials: 2500
+minimumDiscount: 0.001
+rolloutExploreTh: 0.5
+ctrlCorrectProb: 0.8
+discountFactor: 0.99
+goalReward: 10000
+crashPenalty: -10000
+moveCost: -1
+heuristicExploreCoefficient: 0.5
+maxNnDistance: 3
+maxNnComparisons: 100
+nVerts: 150
+nTryCon: 100
+maxDistCon: 50

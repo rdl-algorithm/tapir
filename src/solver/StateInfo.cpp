@@ -9,6 +9,7 @@
 #include "ChangeType.hpp"               // for ChangeType, ChangeType::UNDEFINED
 #include "State.hpp"                    // for State
 
+namespace solver {
 class BeliefNode;
 class HistoryEntry;
 
@@ -16,16 +17,16 @@ long StateInfo::currId = 0;
 
 // Private constructor for serialization
 StateInfo::StateInfo() :
-    state(nullptr),
-    id(0),
-    usedInHistoryEntries(),
-    usedInBeliefNodes(),
-    chType(ChangeType::UNDEFINED) {
+    state_(nullptr),
+    id_(0),
+    usedInHistoryEntries_(),
+    usedInBeliefNodes_(),
+    changeType_(ChangeType::UNDEFINED) {
 }
 
 StateInfo::StateInfo(std::unique_ptr<State> state) :
     StateInfo() {
-    this->state = std::move(state);
+    this->state_ = std::move(state);
 }
 
 // Do nothing!
@@ -33,21 +34,22 @@ StateInfo::~StateInfo() {
 }
 
 void StateInfo::setId() {
-    id = currId;
+    id_ = currId;
     currId++;
 }
 
 void StateInfo::addHistoryEntry(HistoryEntry *h) {
-    usedInHistoryEntries.push_back(h);
+    usedInHistoryEntries_.push_back(h);
 }
 
 void StateInfo::addBeliefNode(BeliefNode *b) {
-    usedInBeliefNodes.insert(b);
+    usedInBeliefNodes_.insert(b);
 }
 
 void StateInfo::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
     std::vector<HistoryEntry *>::iterator it = std::find(
-                usedInHistoryEntries.begin(), usedInHistoryEntries.end(),
+                usedInHistoryEntries_.begin(), usedInHistoryEntries_.end(),
                 toBeDeleted);
     (*it) = nullptr;
 }
+} /* namespace solver */

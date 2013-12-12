@@ -1,5 +1,5 @@
-#ifndef DEFS_HPP
-#define DEFS_HPP
+#ifndef DEFS_HPP_
+#define DEFS_HPP_
 
 #include <memory>                       // for unique_ptr
 #include <random>                       // for default_random_engine
@@ -14,4 +14,4 @@ std::unique_ptr<T> make_unique(Args && ... args) {
 }
 }
 
-#endif /* DEFS_HPP */
+#endif /* DEFS_HPP_ */

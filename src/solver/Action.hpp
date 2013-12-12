@@ -1,6 +1,8 @@
-#ifndef ACTION_HPP
-#define ACTION_HPP
+#ifndef SOLVER_ACTION_HPP_
+#define SOLVER_ACTION_HPP_
 
+namespace solver {
 typedef long Action;
+} /* namespace solver */
 
-#endif /* ACTION_HPP */
+#endif /* SOLVER_ACTION_HPP_ */
