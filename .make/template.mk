@@ -2,6 +2,8 @@
 # Directories, file patterns, and directory dependencies
 # ----------------------------------------------------------------------
 
+n := $(MODULE_NAME)
+
 DIR_RELATIVE_$(n) := $(subst $(ROOT)/src,,$(d))
 
 # Source and IWYU folders

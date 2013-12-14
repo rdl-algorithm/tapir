@@ -1,8 +1,11 @@
-# Edit Rules.mk to change settings for this subdirectory, or
-# edit the root Makefile to change overall settings.
-.PHONY: build $(MAKECMDGOALS) call-top
-build: MAKECMDGOALS += build
+MODULE_NAME = rocksample
 
-build $(MAKECMDGOALS): call-top
-call-top:
-	@$(MAKE) -C ../../.. $(addsuffix -rocksample,$(MAKECMDGOALS))
+ifdef HAS_ROOT_MAKEFILE
+
+TARGET_NAMES := solve simulate
+include .make/problem-template.mk
+
+else
+ROOT = ../../..
+include $(ROOT)/.make/redirect.mk
+endif

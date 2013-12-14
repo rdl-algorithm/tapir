@@ -1,5 +1,7 @@
 include .make/template.mk
 
+TARGET_NAMES_$(n) := $(TARGET_NAMES)
+
 # ----------------------------------------------------------------------
 # Directories, file patterns, and directory dependencies
 # ----------------------------------------------------------------------

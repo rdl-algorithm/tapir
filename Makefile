@@ -1,6 +1,8 @@
 # Root project folder
 ROOT := .
 
+HAS_ROOT_MAKEFILE = true
+
 # Build configurations
 CFGS := release debug
 DEFAULT_CFG := release
@@ -125,3 +127,11 @@ $(foreach cfg,$(CFGS),$(eval $(call phonies_template,$(cfg))))
 # Start including other makefiles.
 dir := $(ROOT)/src
 include .make/stack.mk
+
+# ----------------------------------------------------------------------
+# Redirection handling.
+# ----------------------------------------------------------------------
+ifdef REDIRECT
+%-$(REDIRECT): $(PATH_$(REDIRECT))/% ;
+$(PATH_$(REDIRECT))/% : % ;
+endif

@@ -1,8 +1,10 @@
-# Edit Rules.mk to change settings for this subdirectory, or
-# edit the root Makefile to change overall settings.
-.PHONY: all $(MAKECMDGOALS) call-top
-all: MAKECMDGOALS += build
+MODULE_NAME = shared
 
-all $(MAKECMDGOALS): call-top
-call-top:
-	@$(MAKE) -C ../.. $(addsuffix -shared,$(MAKECMDGOALS))
+ifdef HAS_ROOT_MAKEFILE
+
+include .make/template.mk
+
+else
+ROOT = ../../..
+include $(ROOT)/.make/redirect.mk
+endif
