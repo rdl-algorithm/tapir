@@ -1,4 +1,4 @@
-include mk/template.mk
+include .make/template.mk
 
 # ----------------------------------------------------------------------
 # Directories, file patterns, and directory dependencies

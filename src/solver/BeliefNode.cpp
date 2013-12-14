@@ -14,6 +14,7 @@
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
 
+#warning Action and Observation should be classes!
 #include "Action.hpp"                   // for Action
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry

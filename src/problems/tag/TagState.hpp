@@ -5,7 +5,7 @@
 
 #include <ostream>                      // for ostream
 
-#include "problems/GridPosition.hpp"    // for GridPosition
+#include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/State.hpp"             // for State
 
 namespace tag {

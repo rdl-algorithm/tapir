@@ -50,15 +50,15 @@ LDFLAGS_release   = $(LDFLAGS)
 # Configuration of code cleaners.
 # ----------------------------------------------------------------------
 
-BEAUTIFY_EXCLUDES  = ./src/problems/ProgramOptions.hpp
-BEAUTIFY_EXCLUDES += ./src/problems/RockSample/RockSampleOptions.hpp
-BEAUTIFY_EXCLUDES += ./src/problems/Tag/TagOptions.hpp
-BEAUTIFY_EXCLUDES += ./src/problems/UnderwaterNavModif/UnderwaterNavModifOptions.hpp
-BEAUTIFY_CFG = $(ROOT)/mk/uncrustify.cfg
+BEAUTIFY_EXCLUDES  = ./src/problems/shared/ProgramOptions.hpp
+BEAUTIFY_EXCLUDES += ./src/problems/rocksample/RockSampleOptions.hpp
+BEAUTIFY_EXCLUDES += ./src/problems/tag/TagOptions.hpp
+BEAUTIFY_EXCLUDES += ./src/problems/uwnav/UnderwaterNavModifOptions.hpp
+BEAUTIFY_CFG = $(ROOT)/.make/uncrustify.cfg
 BEAUTIFY_CMD = uncrustify -c $(BEAUTIFY_CFG)
 BEAUTIFY_FLAGS = --no-backup
 
-IWYU_MAPPING_FILE = $(ROOT)/mk/mappings.imp
+IWYU_MAPPING_FILE = $(ROOT)/.make/mappings.imp
 IWYU_CMD = include-what-you-use
 IWYU_FLAGS = -Xiwyu --mapping_file=$(IWYU_MAPPING_FILE) -Xiwyu --verbose=3
 IWYU_FLAGS += $(CPPFLAGS) $(CXXFLAGS_BASE)
@@ -124,4 +124,4 @@ $(foreach cfg,$(CFGS),$(eval $(call phonies_template,$(cfg))))
 
 # Start including other makefiles.
 dir := $(ROOT)/src
-include mk/stack.mk
+include .make/stack.mk

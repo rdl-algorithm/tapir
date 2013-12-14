@@ -5,7 +5,7 @@
 #include <ostream>                      // for operator<<, ostream, basic_ostream
 #include <unordered_map>                // for hash
 
-#include "problems/GridPosition.hpp"    // for GridPosition, operator==, operator<<
+#include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
 
 namespace tag {

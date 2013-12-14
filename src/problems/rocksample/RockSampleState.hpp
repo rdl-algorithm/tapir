@@ -6,7 +6,7 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "problems/GridPosition.hpp"    // for GridPosition
+#include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/State.hpp"             // for State
 
 namespace rocksample {

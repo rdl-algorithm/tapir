@@ -6,7 +6,7 @@
 
 #include <boost/program_options.hpp>    // for value, options_description, options_description_easy_init, typed_value
 
-#include "problems/ProgramOptions.hpp"  // for ProgramOptions
+#include "problems/shared/ProgramOptions.hpp"  // for ProgramOptions
 
 namespace po = boost::program_options;
 

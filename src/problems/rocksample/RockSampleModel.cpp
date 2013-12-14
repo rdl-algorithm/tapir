@@ -18,8 +18,8 @@
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
-#include "problems/GridPosition.hpp"    // for GridPosition, operator<<
-#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
+#include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
+#include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
 #include "solver/Model.hpp"             // for Model::StepResult, Model
@@ -93,10 +93,10 @@ void RockSampleModel::initialise() {
         envMap_.emplace_back();
         for (p.j = 0; p.j < nCols_; p.j++) {
             char c = mapText_[p.i][p.j];
-            CellType cellType;
+            RSCellType cellType;
             if (c == 'o') {
                 rockPositions_.push_back(p);
-                cellType = (CellType)(ROCK + nRocks_);
+                cellType = (RSCellType)(ROCK + nRocks_);
                 nRocks_++;
             } else if (c == 'G') {
                 cellType = GOAL;
@@ -423,7 +423,7 @@ void RockSampleModel::dispAct(solver::Action const &action, std::ostream &os) {
     }
 }
 
-void RockSampleModel::dispCell(CellType cellType, std::ostream &os) {
+void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
     if (cellType >= ROCK) {
         os << std::hex << cellType - ROCK;
         os << std::dec;
@@ -461,8 +461,8 @@ void RockSampleModel::dispObs(solver::Observation const &obs,
 }
 
 void RockSampleModel::drawEnv(std::ostream &os) {
-    for (std::vector<CellType> &row : envMap_) {
-        for (CellType cellValue : row) {
+    for (std::vector<RSCellType> &row : envMap_) {
+        for (RSCellType cellValue : row) {
             dispCell(cellValue, os);
         }
         os << endl;

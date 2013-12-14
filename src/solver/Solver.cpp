@@ -462,7 +462,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         State *s2 = currentBelief->sampleAParticle(randGen_)->getState();
         totalDistance += s1->distanceTo(*s2);
     }
-    cerr << "Mean sampled distance: " << totalDistance / 100 << endl;
+    cerr << "Est. mean inter-particle distance: " << totalDistance / 100 << endl;
 
     Action action = currentBelief->getBestAction();
     if (action == -1) {

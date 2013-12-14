@@ -10,18 +10,18 @@
 #include <boost/program_options.hpp>    // for variables_map
 
 #include "defs.hpp"                     // for RandomGenerator
-#include "problems/GridPosition.hpp"    // for GridPosition
-#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
+#include "problems/shared/GridPosition.hpp"  // for GridPosition
+#include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
 
+namespace po = boost::program_options;
+
 namespace solver {
 class State;
 } /* namespace solver */
-
-namespace po = boost::program_options;
 
 namespace tag {
 class TagState;
@@ -47,7 +47,7 @@ class TagModel : public ModelWithProgramOptions {
     /** The cells are either empty or walls; empty cells are numbered
      * starting at 0
      */
-    enum CellType : int {
+    enum TagCellType : int {
         EMPTY = 0,
         WALL = -1
     };
@@ -110,7 +110,8 @@ class TagModel : public ModelWithProgramOptions {
             std::vector<double> *modifRewSeq);
 
     void dispAct(solver::Action const &action, std::ostream &os);
-    void dispCell(CellType cellType, std::ostream &os);
+    /** Displays a single cell of the map. */
+    void dispCell(TagCellType cellType, std::ostream &os);
     void dispObs(solver::Observation const &obs, std::ostream &os);
     void drawEnv(std::ostream &os);
     void drawState(solver::State const &state, std::ostream &os);
@@ -176,7 +177,7 @@ class TagModel : public ModelWithProgramOptions {
     /** The environment map in text form. */
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
-    std::vector<std::vector<CellType>> envMap_;
+    std::vector<std::vector<TagCellType>> envMap_;
 };
 } /* namespace tag */
 

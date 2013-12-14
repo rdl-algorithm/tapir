@@ -1,6 +1,6 @@
 n = solver
 
-include mk/template.mk
+include .make/template.mk
 
 # ----------------------------------------------------------------------
 # Targets

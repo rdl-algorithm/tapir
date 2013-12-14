@@ -7,7 +7,7 @@ include $(d)/Rules.mk
 
 define child_template
 dir := $(d)/$(1)
-include mk/stack.mk
+include .make/stack.mk
 endef
 $(foreach module,$(CHILD_MODULES),$(eval $(call child_template,$(module))))
 

@@ -5,7 +5,7 @@
 #include <vector>                       // for vector
 
 #include "defs.hpp"                     // for make_unique
-#include "problems/GridPosition.hpp"    // for GridPosition
+#include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/State.hpp"             // for State
 #include "solver/TextSerializer.hpp"    // for TextSerializer
 

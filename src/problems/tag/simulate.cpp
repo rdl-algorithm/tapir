@@ -1,4 +1,4 @@
-#include "problems/simulate.hpp"
+#include "problems/shared/simulate.hpp"
 
 #include "TagModel.hpp"                 // for TagModel
 #include "TagOptions.hpp"               // for TagOptions

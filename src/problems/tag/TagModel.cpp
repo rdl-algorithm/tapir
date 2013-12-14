@@ -14,8 +14,8 @@
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
-#include "problems/GridPosition.hpp"    // for GridPosition, operator==, operator!=, operator<<
-#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
+#include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
+#include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
 #include "solver/Model.hpp"             // for Model::StepResult, Model
@@ -83,11 +83,11 @@ void TagModel::initialise() {
         envMap_[p.i].resize(nCols_);
         for (p.j = 0; p.j < nCols_; p.j++) {
             char c = mapText_[p.i][p.j];
-            CellType cellType;
+            TagCellType cellType;
             if (c == 'X') {
                 cellType = WALL;
             } else {
-                cellType = (CellType)(EMPTY + nEmptyCells_);
+                cellType = (TagCellType)(EMPTY + nEmptyCells_);
                 emptyCells_.push_back(p);
                 nEmptyCells_++;
             }
@@ -414,7 +414,7 @@ void TagModel::dispObs(solver::Observation const &obs, std::ostream &os) {
     }
 }
 
-void TagModel::dispCell(CellType cellType, std::ostream &os) {
+void TagModel::dispCell(TagCellType cellType, std::ostream &os) {
     if (cellType >= EMPTY) {
         os << std::setw(2);
         os << cellType;
@@ -431,8 +431,8 @@ void TagModel::dispCell(CellType cellType, std::ostream &os) {
 }
 
 void TagModel::drawEnv(std::ostream &os) {
-    for (std::vector<CellType> &row : envMap_) {
-        for (CellType cellType : row) {
+    for (std::vector<TagCellType> &row : envMap_) {
+        for (TagCellType cellType : row) {
             dispCell(cellType, os);
             os << " ";
         }

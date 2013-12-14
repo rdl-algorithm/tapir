@@ -7,7 +7,7 @@
 #include <ostream>                      // for operator<<, ostream
 #include <vector>                       // for vector, operator==, _Bit_const_iterator, _Bit_iterator_base, hash, vector<>::const_iterator
 
-#include "problems/GridPosition.hpp"    // for GridPosition, operator==, operator<<
+#include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
 
 namespace rocksample {

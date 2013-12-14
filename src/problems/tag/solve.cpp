@@ -1,4 +1,4 @@
-#include "problems/solve.hpp"
+#include "problems/shared/solve.hpp"
 
 #include "TagModel.hpp"                 // for TagModel
 #include "TagOptions.hpp"               // for TagOptions

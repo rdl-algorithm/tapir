@@ -1,4 +1,4 @@
-#include "problems/solve.hpp"
+#include "problems/shared/solve.hpp"
 
 #include "solver/TextSerializer.hpp"      // for TextSerializer
 #include "UnderwaterNavModifModel.hpp"    // for UnderwaterNavModifModel

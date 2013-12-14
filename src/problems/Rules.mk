@@ -1,8 +1,6 @@
 n = problems
 
-include mk/template.mk
-
-CHILD_MODULES := rocksample tag
+CHILD_MODULES := shared rocksample tag
 
 %-$(n): $(d)/%
 	@echo

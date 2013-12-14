@@ -10,18 +10,18 @@
 #include <boost/program_options.hpp>    // for variables_map
 
 #include "defs.hpp"                     // for RandomGenerator
-#include "problems/GridPosition.hpp"    // for GridPosition
-#include "problems/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
+#include "problems/shared/GridPosition.hpp"  // for GridPosition
+#include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeType.hpp"        // for ChangeType
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
 
+namespace po = boost::program_options;
+
 namespace solver {
 class State;
 } /* namespace solver */
-
-namespace po = boost::program_options;
 
 namespace rocksample {
 class RockSampleState;
@@ -66,7 +66,7 @@ class RockSampleModel : public ModelWithProgramOptions {
      * Rocks are enumerated 0, 1, 2, ... ;
      * other cell types should be negative.
      */
-    enum CellType : int {
+    enum RSCellType : int {
         ROCK = 0,
         EMPTY = -1,
         GOAL = -2,
@@ -124,7 +124,8 @@ class RockSampleModel : public ModelWithProgramOptions {
             std::vector<double> *modifRewSeq);
 
     void dispAct(solver::Action const &action, std::ostream &os);
-    void dispCell(CellType cellType, std::ostream &os);
+    /** Displays an individual cell of the map. */
+    void dispCell(RSCellType cellType, std::ostream &os);
     void dispObs(solver::Observation const &obs, std::ostream &os);
     void drawEnv(std::ostream &os);
     void drawState(solver::State const &state, std::ostream &os);
@@ -184,7 +185,7 @@ class RockSampleModel : public ModelWithProgramOptions {
     /** The environment map in text form. */
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
-    std::vector<std::vector<CellType>> envMap_;
+    std::vector<std::vector<RSCellType>> envMap_;
 };
 } /* namespace rocksample */
 

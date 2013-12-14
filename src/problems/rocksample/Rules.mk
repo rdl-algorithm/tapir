@@ -1,6 +1,6 @@
 n = rocksample
 TARGET_NAMES_$(n) := solve simulate
-include $(d)/../template.mk
+include .make/problem-template.mk
 
 %-$(n): $(d)/%
 	@echo

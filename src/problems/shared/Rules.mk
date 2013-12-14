@@ -1,8 +1,8 @@
-n = src
+n = shared
 
 include .make/template.mk
 
-CHILD_MODULES := solver problems
-
+%-$(n): $(d)/%
+	@echo
 $(d)/%: %
 	@echo
