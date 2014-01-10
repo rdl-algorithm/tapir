@@ -27,6 +27,7 @@ class State {
 
     friend std::ostream &operator<<(std::ostream &os, State const &state);
     friend bool operator==(State const &s1, State const &s2);
+    friend bool operator!=(State const &s1, State const &s2);
 };
 
 inline std::ostream &operator<<(std::ostream &os, State const &state) {
@@ -36,6 +37,10 @@ inline std::ostream &operator<<(std::ostream &os, State const &state) {
 
 inline bool operator==(State const &s1, State const &s2) {
     return s1.equals(s2); // && s2.equals(s1); (symmetry)
+}
+
+inline bool operator!=(State const &s1, State const &s2) {
+    return !s1.equals(s2); // || !s2.equals(s1); (symmetry)
 }
 } /* namespace solver */
 
