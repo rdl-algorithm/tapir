@@ -86,8 +86,8 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     ModelType *model = newModel.get();
     solver::Solver solver(&randGen, std::move(newModel));
     solver::Serializer *serializer = new SerializerType(&solver);
+    solver.setSerializer(serializer);
     serializer->load(inFile);
-    delete serializer;
     inFile.close();
 
     std::vector<long> changeTimes;
@@ -137,6 +137,8 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
              << totImpTime << " " << totT << endl;
     }
     os.close();
+
+    delete serializer;
 
     return 0;
 }

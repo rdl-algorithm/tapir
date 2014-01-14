@@ -62,6 +62,8 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
                 vm);
     ModelType *model = newModel.get();
     solver::Solver solver(&randGen, std::move(newModel));
+    solver::Serializer *serializer = new SerializerType(&solver);
+    solver.setSerializer(serializer);
 
     double totT;
     std::clock_t tStart;
@@ -71,10 +73,10 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
 
     std::ofstream os;
     os.open(polPath.c_str());
-    solver::Serializer *serializer = new SerializerType(&solver);
+
     serializer->save(os);
-    delete serializer;
     os.close();
+    delete serializer;
 
     cout << "SolvingTime: " << totT << endl;
     return 0;

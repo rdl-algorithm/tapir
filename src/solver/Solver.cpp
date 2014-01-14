@@ -26,6 +26,7 @@
 #include "HistorySequence.hpp"          // for HistorySequence
 #include "Model.hpp"                    // for Model::StepResult, Model
 #include "Observation.hpp"              // for Observation
+#include "Serializer.hpp"               // for Serializer
 #include "State.hpp"                    // for State, operator<<
 #include "StateInfo.hpp"                // for StateInfo
 #include "StatePool.hpp"                // for StatePool
@@ -36,6 +37,7 @@ using std::endl;
 
 namespace solver {
 Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
+    serializer_(nullptr),
     randGen_(randGen),
     model_(std::move(model)),
     policy_(std::make_unique<BeliefTree>()),
@@ -51,6 +53,10 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
 
 // Default destructor, not in .hpp
 Solver::~Solver() {
+}
+
+void Solver::setSerializer(Serializer *serializer) {
+    serializer_ = serializer;
 }
 
 void Solver::registerParticle(BeliefNode *node, HistoryEntry *entry,
@@ -454,9 +460,13 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
 Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         State &currentState) {
+    double totalDistance = 0;
+    cerr << "Belief node: ";
+    serializer_->save(*currentBelief, cerr);
+
     State *state = currentBelief->sampleAParticle(randGen_)->getState();
     cerr << "Sampled particle: " << *state << endl;
-    double totalDistance = 0;
+
     for (int i = 0; i < 100; i++) {
         State *s1 = currentBelief->sampleAParticle(randGen_)->getState();
         State *s2 = currentBelief->sampleAParticle(randGen_)->getState();

@@ -19,6 +19,7 @@ class BeliefTree;
 class Histories;
 class HistoryEntry;
 class HistorySequence;
+class Serializer;
 class State;
 class StateInfo;
 class StatePool;
@@ -38,6 +39,9 @@ class Solver {
     enum RolloutMode {
         ROLLOUT_RANDHEURISTIC = 0, ROLLOUT_POL = 1
     };
+
+    /** Sets the serializer to be used by this solver. */
+    void setSerializer(Serializer *serializer);
 
     /** Generates a starting policy for the solver, by generating the given
      * number (maxTrials) of episodes, and terminating episodes when the
@@ -63,6 +67,7 @@ class Solver {
             double *totImpTime);
 
   private:
+    Serializer *serializer_;
     RandomGenerator *randGen_;
     std::unique_ptr<Model> model_;
     std::unique_ptr<BeliefTree> policy_;
