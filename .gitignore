@@ -1,14 +1,15 @@
-core
-EMPTY_HEADER.hpp
-
-.svn/*
-builds/*
-iwyu-out/*
-
-*.pol
-*.log
-*solve
-*simulate
+# Eclipse settings
 .cproject
 .project
 .settings
+EMPTY_HEADER.hpp
+
+# Binaries
+builds/*
+simulate
+solve
+
+# Logging outputs
+core
+*.log
+*.pol
