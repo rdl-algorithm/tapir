@@ -1,9 +1,11 @@
 #include "problems/shared/solve.hpp"
 
-#include "solver/TextSerializer.hpp"      // for TextSerializer
-#include "UnderwaterNavModifModel.hpp"    // for UnderwaterNavModifModel
-#include "UnderwaterNavModifOptions.hpp"  // for UnderwaterNavModifOptions
+#include "UnderwaterNavModel.hpp"    // for UnderwaterNavModel
+#include "UnderwaterNavOptions.hpp"  // for UnderwaterNavOptions
+#include "UnderwaterNavTextSerializer.hpp"      // for UnderwaterNavTextSerializer
+
 int main(int argc, char const *argv[]) {
-    UnderwaterNavModifOptions options;
-    return solve<UnderwaterNavModifModel, TextSerializer>(argc, argv, &options);
+    uwnav::UnderwaterNavOptions options;
+    return solve<uwnav::UnderwaterNavModel,
+            uwnav::UnderwaterNavTextSerializer>(argc, argv, &options);
 }

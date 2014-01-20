@@ -1,5 +1,5 @@
-#ifndef UNDERWATERNAVMODIFOPTIONS_HPP_
-#define UNDERWATERNAVMODIFOPTIONS_HPP_
+#ifndef UNDERWATERNAVOPTIONS_HPP_
+#define UNDERWATERNAVOPTIONS_HPP_
 
 #include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
 #include <string>                       // for string
@@ -10,8 +10,9 @@
 
 namespace po = boost::program_options;
 
-class UnderwaterNavModifOptions: public ProgramOptions {
-    /** Returns configurations options for the UnderwaterNavModif POMDP */
+namespace uwnav {
+class UnderwaterNavOptions: public ProgramOptions {
+    /** Returns configurations options for the UnderwaterNav POMDP */
     po::options_description getProblemOptions() {
         po::options_description problem(
             "Settings specific to the Underwater Navigation POMDP");
@@ -29,7 +30,7 @@ class UnderwaterNavModifOptions: public ProgramOptions {
         return problem;
     }
 
-    /** Returns configuration options for the UnderwaterNavModif heuristic */
+    /** Returns configuration options for the UnderwaterNav heuristic */
     po::options_description getHeuristicOptions() {
         po::options_description heuristic(
             "Underwater Navigation heuristic configuration");
@@ -42,5 +43,6 @@ class UnderwaterNavModifOptions: public ProgramOptions {
         return heuristic;
     }
 };
+} /* namespace uwnav */
 
-#endif /* UNDERWATERNAVMODIFOPTIONS_HPP_ */
+#endif /* UNDERWATERNAVOPTIONS_HPP_ */

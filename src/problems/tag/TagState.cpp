@@ -15,15 +15,12 @@ void hash_combine(std::size_t &seed, T const &v) {
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
 TagState::TagState(GridPosition robotPos, GridPosition opponentPos,
         bool isTagged) :
     robotPos_(robotPos),
     opponentPos_(opponentPos),
     isTagged_(isTagged) {
 }
-#pragma GCC diagnostic pop
 
 TagState::TagState(TagState const &other) :
     solver::State(),

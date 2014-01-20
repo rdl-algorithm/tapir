@@ -1,10 +1,11 @@
 #include "problems/shared/simulate.hpp"
 
-#include "solver/TextSerializer.hpp"      // for TextSerializer
-#include "UnderwaterNavModifModel.hpp"    // for UnderwaterNavModifModel
-#include "UnderwaterNavModifOptions.hpp"  // for UnderwaterNavModifOptions
+#include "UnderwaterNavModel.hpp"    // for UnderwaterNavModel
+#include "UnderwaterNavOptions.hpp"  // for UnderwaterNavOptions
+#include "UnderwaterNavTextSerializer.hpp"      // for UnderwaterNavTextSerializer
+
 int main(int argc, char const *argv[]) {
-    UnderwaterNavModifOptions options;
-    return simulate<UnderwaterNavModifModel, TextSerializer>(argc, argv,
-            &options);
+    uwnav::UnderwaterNavOptions options;
+    return simulate<uwnav::UnderwaterNavModel,
+            uwnav::UnderwaterNavTextSerializer>(argc, argv, &options);
 }

@@ -31,7 +31,7 @@ WARN               += -Weverything -Wno-c++98-compat
 else
 override CXXFLAGS  += -frounding-math
 WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
-WARN               += -Wswitch-default
+WARN               += -Wswitch-default -Wfatal-errors
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3
 CXXFLAGS_debug       := $(CXXFLAGS) -O0 -ggdb
@@ -55,7 +55,7 @@ LDFLAGS_release   = $(LDFLAGS)
 BEAUTIFY_EXCLUDES  = ./src/problems/shared/ProgramOptions.hpp
 BEAUTIFY_EXCLUDES += ./src/problems/rocksample/RockSampleOptions.hpp
 BEAUTIFY_EXCLUDES += ./src/problems/tag/TagOptions.hpp
-BEAUTIFY_EXCLUDES += ./src/problems/uwnav/UnderwaterNavModifOptions.hpp
+BEAUTIFY_EXCLUDES += ./src/problems/uwnav/UnderwaterNavOptions.hpp
 BEAUTIFY_CFG = $(ROOT)/.make/uncrustify.cfg
 BEAUTIFY_CMD = uncrustify -c $(BEAUTIFY_CFG)
 BEAUTIFY_FLAGS = --no-backup

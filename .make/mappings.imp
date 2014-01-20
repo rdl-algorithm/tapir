@@ -12,6 +12,7 @@
     { include: ["<ext/alloc_traits.h>", "public", "<unordered_set>", "public"] },
     { include: ["<ext/alloc_traits.h>", "public", "<vector>", "public"] },
     { include: ["<sys/time.h>", "public", "<ctime>", "public"] },
+    { symbol: ["std::hash", "private", "<functional>", "public"] },
     { symbol: ["std::move", "private", "<utility>", "public"] },
     { symbol: ["std::size_t", "private", "<cstddef>", "public"] },
     { symbol: ["std::dec", "private", "<ios>", "public"] },
