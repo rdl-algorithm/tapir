@@ -43,7 +43,7 @@ CXXFLAGS_debug       := $(CXXFLAGS) -O0 -ggdb
 # Library directories
 override LIBDIRS  += -L/usr/lib/x86_64-linux-gnu/
 
-override LDLIBS  += -lboost_program_options
+override LDLIBS  += -lboost_program_options -lspatialindex
 override LDFLAGS += $(LIBDIRS)
 LDFLAGS_debug     = $(LDFLAGS) -g
 LDFLAGS_release   = $(LDFLAGS)

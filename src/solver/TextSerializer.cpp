@@ -90,7 +90,7 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
         sstr.str(line);
         load(*newStateInfo, sstr);
         StateInfo *stateInfo = newStateInfo.get();
-        typedef std::pair<StatePool::StateInfoSet::iterator, bool> ResultType;
+        typedef std::pair<StateInfoOwningSet::iterator, bool> ResultType;
         ResultType insertResult =
             pool.allStates_.insert(std::move(newStateInfo));
         if (!insertResult.second) {

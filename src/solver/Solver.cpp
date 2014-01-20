@@ -460,13 +460,13 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
 Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         State &currentState) {
-    double totalDistance = 0;
-    cerr << "Belief node: ";
-    serializer_->save(*currentBelief, cerr);
+    // cerr << "Belief node: ";
+    // serializer_->save(*currentBelief, cerr);
 
     State *state = currentBelief->sampleAParticle(randGen_)->getState();
     cerr << "Sampled particle: " << *state << endl;
 
+    double totalDistance = 0;
     for (int i = 0; i < 100; i++) {
         State *s1 = currentBelief->sampleAParticle(randGen_)->getState();
         State *s2 = currentBelief->sampleAParticle(randGen_)->getState();

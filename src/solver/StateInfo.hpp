@@ -25,6 +25,7 @@ class StateInfo {
     StateInfo &operator=(StateInfo const &) = delete;
     StateInfo &operator=(StateInfo &&) = delete;
 
+    long getId();
     void setId();
     void addHistoryEntry(HistoryEntry *h);
     void addBeliefNode(BeliefNode *b);

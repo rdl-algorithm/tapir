@@ -41,8 +41,8 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
     std::unique_ptr<StateInfo> newInfo = std::make_unique<StateInfo>(
                 std::move(state));
     StateInfo *stateInfo = newInfo.get();
-    std::pair<StateInfoSet::iterator,
-            bool> ret = allStates_.insert(std::move(newInfo));
+    std::pair<StateInfoOwningSet::iterator,bool> ret = allStates_.insert(
+            std::move(newInfo));
     if (ret.second) {
         stateInfo->setId();
         if (stateInfo->id_ != (long)allStatesIdx_.size()) {

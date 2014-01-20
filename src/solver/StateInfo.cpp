@@ -33,6 +33,10 @@ StateInfo::StateInfo(std::unique_ptr<State> state) :
 StateInfo::~StateInfo() {
 }
 
+long StateInfo::getId() {
+    return id_;
+}
+
 void StateInfo::setId() {
     id_ = currId;
     currId++;
