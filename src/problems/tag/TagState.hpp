@@ -4,15 +4,16 @@
 #include <cstddef>                      // for size_t
 
 #include <ostream>                      // for ostream
+#include <vector>
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/State.hpp"             // for State
+#include "solver/VectorState.hpp"             // for State
 
 namespace tag {
-class TagState : public solver::State {
+class TagState : public solver::VectorState {
     friend class TagTextSerializer;
   public:
-    TagState(GridPosition robotPos, GridPosition opponentPos, bool isTagged);
+    TagState(GridPosition robotPos, GridPosition opponentPos, bool _isTagged);
 
     virtual ~TagState() = default;
     TagState(TagState const &other);
@@ -23,6 +24,8 @@ class TagState : public solver::State {
     double distanceTo(solver::State const &otherState) const;
     bool equals(solver::State const &otherState) const;
     std::size_t hash() const;
+
+    std::vector<double> asVector() const;
     void print(std::ostream &os) const;
 
     GridPosition getRobotPosition() const {

@@ -6,8 +6,8 @@
 #include <spatialindex/SpatialIndex.h>
 
 #include "StatePool.hpp"
-#include "StateQuery.hpp"
-#include "StateSpatialIndex.hpp"
+#include "StateIndexQuery.hpp"
+#include "StateIndex.hpp"
 
 namespace SpatialIndex {
 class ISpatialIndex;
@@ -16,24 +16,25 @@ class ISpatialIndex;
 namespace solver {
 class VectorState;
 
-class SpatialIndexQuery: public StateQuery {
+class BoxQuery: public StateIndexQuery {
 public:
-    SpatialIndexQuery(unsigned long nDim_, StatePool *statePool,
+    BoxQuery(unsigned long nSDim, StatePool *statePool,
             SpatialIndex::ISpatialIndex *spatialIndex);
-    virtual ~SpatialIndexQuery() = default;
-    SpatialIndexQuery(SpatialIndexQuery const &) = delete;
-    SpatialIndexQuery(SpatialIndexQuery &&) = delete;
-    virtual SpatialIndexQuery &operator=(SpatialIndexQuery const &) = delete;
-    virtual SpatialIndexQuery &operator=(SpatialIndexQuery &&) = delete;
+    virtual ~BoxQuery() = default;
+    BoxQuery(BoxQuery const &) = default;
+    BoxQuery(BoxQuery &&) = default;
+    virtual BoxQuery &operator=(BoxQuery const &) = default;
+    virtual BoxQuery &operator=(BoxQuery &&) = default;
 
     virtual StateInfoSet getStates();
     virtual void clearStates();
 
-    virtual void markStates(VectorState *corner0, VectorState *corner1);
+    virtual void markStates(std::vector<double> lowCorner,
+            std::vector<double> highCorner);
 
     class Visitor : public SpatialIndex::IVisitor {
     public:
-        Visitor(SpatialIndexQuery *query);
+        Visitor(BoxQuery *query);
         virtual ~Visitor() = default;
         Visitor(Visitor const &) = delete;
         Visitor(Visitor &&) = delete;
@@ -44,10 +45,10 @@ public:
         virtual void visitData(const SpatialIndex::IData &data);
         virtual void visitData(std::vector<const SpatialIndex::IData *> &v);
     private:
-        SpatialIndexQuery *query_;
+        BoxQuery *query_;
     };
 private:
-    unsigned long nDim_;
+    unsigned long nSDim_;
     StatePool *statePool_;
     SpatialIndex::ISpatialIndex *spatialIndex_;
     StateInfoSet states_;

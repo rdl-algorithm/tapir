@@ -30,16 +30,25 @@ using std::endl;
 namespace po = boost::program_options;
 
 namespace tag {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weffc++"
 TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
     moveCost_(vm["problem.moveCost"].as<double>()),
     tagReward_(vm["problem.tagReward"].as<double>()),
     failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
     opponentStayProbability_(
-            vm["problem.opponentStayProbability"].as<double>()) {
-#pragma GCC diagnostic pop
+            vm["problem.opponentStayProbability"].as<double>()),
+    nRows_(0), // to be updated
+    nCols_(0), // to be updated
+    nEmptyCells_(0), // will count
+    emptyCells_(), // will be pushed to
+    mapText_(), // will be pushed to
+    envMap_(), // will be pushed to
+    nActions_(5),
+    nObservations_(0), // to be updated
+    nStVars_(5),
+    minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
+    maxVal_(tagReward_)
+    {
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -95,11 +104,7 @@ void TagModel::initialise() {
         }
     }
 
-    nActions_ = 5;
     nObservations_ = nEmptyCells_ * 2;
-    nStVars_ = 3;
-    minVal_ = -failedTagPenalty_ / (1 - getDiscountFactor());
-    maxVal_ = tagReward_;
 }
 
 long TagModel::encodeGridPosition(GridPosition pos) {

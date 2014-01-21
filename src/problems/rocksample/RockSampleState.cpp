@@ -19,13 +19,13 @@ void hash_combine(std::size_t &seed, T const &v) {
 
 RockSampleState::RockSampleState(GridPosition position,
         std::vector<bool> rockStates) :
-    solver::State(),
+    solver::VectorState(),
     position_(position),
     rockStates_(rockStates) {
 }
 
 RockSampleState::RockSampleState(RockSampleState const &other) :
-    solver::State(),
+    solver::VectorState(),
     position_(other.position_),
     rockStates_(other.rockStates_) {
 }
@@ -59,6 +59,17 @@ std::size_t RockSampleState::hash() const {
     hash_combine(hashValue, position_.j);
     hash_combine(hashValue, rockStates_);
     return hashValue;
+}
+
+
+std::vector<double> RockSampleState::asVector() const {
+    std::vector<double> vec(2 + rockStates_.size());
+    vec[0] = position_.i;
+    vec[1] = position_.j;
+    for (unsigned long i = 0; i < rockStates_.size(); i++) {
+        vec[i + 2] = rockStates_[i] ? 1 : 0;
+    }
+    return vec;
 }
 
 void RockSampleState::print(std::ostream &os) const {

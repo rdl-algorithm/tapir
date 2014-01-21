@@ -85,8 +85,8 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
                 vm);
     ModelType *model = newModel.get();
     solver::Solver solver(&randGen, std::move(newModel));
-    solver::Serializer *serializer = new SerializerType(&solver);
-    solver.setSerializer(serializer);
+    std::unique_ptr<solver::Serializer> serializer(std::make_unique<SerializerType>(&solver));
+    solver.setSerializer(serializer.get());
     serializer->load(inFile);
     inFile.close();
 
@@ -137,8 +137,6 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
              << totImpTime << " " << totT << endl;
     }
     os.close();
-
-    delete serializer;
 
     return 0;
 }

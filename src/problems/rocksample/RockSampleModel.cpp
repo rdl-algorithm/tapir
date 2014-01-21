@@ -35,7 +35,7 @@ namespace po = boost::program_options;
 
 namespace rocksample {
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weffc++"
+//#pragma GCC diagnostic ignored "-Weffc++"
 RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         po::variables_map vm) : ModelWithProgramOptions(randGen, vm),
     goodRockReward_(vm["problem.goodRockReward"].as<double>()),
@@ -44,7 +44,15 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     illegalMovePenalty_(
             vm["problem.illegalMovePenalty"].as<double>()),
     halfEfficiencyDistance_(
-            vm["problem.halfEfficiencyDistance"].as<double>()) {
+            vm["problem.halfEfficiencyDistance"].as<double>()),
+    nRows_(0), // update
+    nCols_(0), // update
+    nRocks_(0), // update
+    startPos_(), // update
+    rockPositions_(), // push rocks
+    mapText_(), // push rows
+    envMap_() // push rows
+         {
 #pragma GCC diagnostic pop
     // Read the map from the file.
     std::ifstream inFile;

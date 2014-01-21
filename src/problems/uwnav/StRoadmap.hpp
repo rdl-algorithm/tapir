@@ -17,7 +17,7 @@ class StRoadmap {
     StRoadmap(RandomGenerator *randGen, std::vector<UnderwaterNavState> &goals, long nVerts, long nGoalsSamp,
               long nTryCon, long maxDistCon,
               std::map<long, std::map<long, UnderwaterNavCellType> > &env, long nX, long nY);
-    ~StRoadmap();
+    ~StRoadmap() = default;
     StRoadmap(StRoadmap const &) = delete;
     StRoadmap(StRoadmap &) = delete;
     StRoadmap &operator=(StRoadmap const &) = delete;

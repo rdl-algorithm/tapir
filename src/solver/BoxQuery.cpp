@@ -3,49 +3,49 @@
 #include <spatialindex/SpatialIndex.h>
 #include <spatialindex/RTree.h>
 
-#include "SpatialIndexQuery.hpp"
+#include "BoxQuery.hpp"
 #include "VectorState.hpp"
 
 namespace solver {
 
-SpatialIndexQuery::SpatialIndexQuery(unsigned long nDim,
+BoxQuery::BoxQuery(unsigned long nSDim,
         StatePool *statePool,
         SpatialIndex::ISpatialIndex *spatialIndex) :
-                nDim_(nDim),
+                nSDim_(nSDim),
                 statePool_(statePool),
                 spatialIndex_(spatialIndex),
                 states_() {
 }
 
-StateInfoSet SpatialIndexQuery::getStates() {
+StateInfoSet BoxQuery::getStates() {
     return states_;
 }
 
-void SpatialIndexQuery::markStates(VectorState *lowCorner, VectorState *highCorner) {
-    SpatialIndex::Region region(&lowCorner->asVector()[0],
-            &highCorner->asVector()[0], nDim_);
+void BoxQuery::markStates(std::vector<double> lowCorner,
+        std::vector<double> highCorner) {
+    SpatialIndex::Region region(&lowCorner[0], &highCorner[0], nSDim_);
     Visitor visitor(this);
     spatialIndex_->containsWhatQuery(region, visitor);
 }
 
-void SpatialIndexQuery::clearStates() {
+void BoxQuery::clearStates() {
     states_.clear();
 }
 
-SpatialIndexQuery::Visitor::Visitor(SpatialIndexQuery *query) :
+BoxQuery::Visitor::Visitor(BoxQuery *query) :
         query_(query) {
 }
 
-void SpatialIndexQuery::Visitor::visitNode(
+void BoxQuery::Visitor::visitNode(
         const SpatialIndex::INode&  /* node */) {
 }
 
-void SpatialIndexQuery::Visitor::visitData(
+void BoxQuery::Visitor::visitData(
         const SpatialIndex::IData& data) {
     query_->states_.insert(query_->statePool_->getStateById(data.getIdentifier()));
 }
 
-void SpatialIndexQuery::Visitor::visitData(
+void BoxQuery::Visitor::visitData(
         std::vector<const SpatialIndex::IData*>& /* v */) {
 }
 

@@ -6,30 +6,33 @@
 #include <spatialindex/SpatialIndex.h>
 #include <spatialindex/RTree.h>
 
-#include "StateQuery.hpp"
-#include "StateSpatialIndex.hpp"
+#include "StateIndex.hpp"
 
 
 namespace solver {
 class StateInfo;
 class StatePool;
+class BoxQuery;
 
-class RTree : public StateSpatialIndex {
+class RTree : public StateIndex {
   public:
-    RTree(unsigned long nDim, StatePool *statePool);
+    RTree(unsigned long nSDim, StatePool *statePool);
     virtual ~RTree() = default;
     RTree(RTree const &) = delete;
     RTree(RTree &&) = delete;
     virtual RTree &operator=(RTree const &) = delete;
     virtual RTree &operator=(RTree &&) = delete;
 
+    virtual void reset();
+
     virtual void addStateInfo(StateInfo *stateInfo);
     virtual void removeStateInfo(StateInfo *stateInfo);
-    virtual StateInfo *getNearestNeighbor(StateInfo *stateInfo) = 0;
-    virtual std::unique_ptr<StateQuery> makeNewQuery();
+    virtual StateInfo *getNearestNeighbor(StateInfo *stateInfo);
+    virtual std::unique_ptr<BoxQuery> makeBoxQuery();
   private:
-    unsigned long nDim_;
+    unsigned long nSDim_;
     StatePool *statePool_;
+    std::unique_ptr<Tools::PropertySet> properties_;
     std::unique_ptr<SpatialIndex::IStorageManager> storageManager_;
     std::unique_ptr<SpatialIndex::ISpatialIndex> tree_;
 };

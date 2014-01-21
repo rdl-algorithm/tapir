@@ -53,7 +53,7 @@ std::size_t UnderwaterNavState::hash() const {
     return hashValue;
 }
 
-virtual std::vector<double> asVector() const {
+virtual std::vector<double> UnderwaterNavState::asVector() const {
     std::vector<double> vec(2);
     vec[0] = position_.i;
     vec[1] = position_.j;

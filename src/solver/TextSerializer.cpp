@@ -97,12 +97,9 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
             std::cerr << "Already inserted!?"
                       << *(*insertResult.first)->state_ << endl;
         }
-        pool.allStatesIdx_[stateInfo->id_] = insertResult.first->get();
-        for (long i = 0; i < pool.nSDim_; i++) {
-//            pool.stStruct[i].insert(
-//                    std::make_pair(newSt->state.vals[i],
-//                            *(insertResult.first)));
-        }
+        stateInfo = insertResult.first->get();
+        pool.allStatesIdx_[stateInfo->id_] = stateInfo;
+        pool.addToStateIndex(stateInfo);
         std::getline(is, line);
     }
     StateInfo::currId = nStates;

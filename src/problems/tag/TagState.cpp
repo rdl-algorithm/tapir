@@ -2,8 +2,9 @@
 
 #include <cstddef>                      // for size_t
 
-#include <ostream>                      // for operator<<, ostream, basic_ostream
-#include <unordered_map>                // for hash
+#include <functional>   // for hash
+#include <ostream>                      // for operator<<, ostream, basic_ostream>
+#include <vector>
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
@@ -16,14 +17,15 @@ void hash_combine(std::size_t &seed, T const &v) {
 }
 
 TagState::TagState(GridPosition robotPos, GridPosition opponentPos,
-        bool isTagged) :
+        bool _isTagged) :
+    solver::VectorState(),
     robotPos_(robotPos),
     opponentPos_(opponentPos),
-    isTagged_(isTagged) {
+    isTagged_(_isTagged) {
 }
 
 TagState::TagState(TagState const &other) :
-    solver::State(),
+    solver::VectorState(),
     robotPos_(other.robotPos_),
     opponentPos_(other.opponentPos_),
     isTagged_(other.isTagged_) {
@@ -54,6 +56,16 @@ std::size_t TagState::hash() const {
     hash_combine(hashValue, opponentPos_.j);
     hash_combine(hashValue, isTagged_);
     return hashValue;
+}
+
+std::vector<double> TagState::asVector() const {
+    std::vector<double> vec(5);
+    vec[0] = robotPos_.i;
+    vec[1] = robotPos_.j;
+    vec[2] = opponentPos_.i;
+    vec[3] = opponentPos_.j;
+    vec[4] = isTagged_ ? 1 : 0;
+    return vec;
 }
 
 void TagState::print(std::ostream &os) const {

@@ -28,7 +28,26 @@ namespace po = boost::program_options;
 namespace uwnav {
 #pragma GCC diagnostic push
 //#pragma GCC diagnostic ignored "-Weffc++"
-UnderwaterNavModel::UnderwaterNavModel(RandomGenerator *randGen, po::variables_map vm) : Model(randGen) {
+UnderwaterNavModel::UnderwaterNavModel(RandomGenerator *randGen, po::variables_map vm) : Model(randGen),
+            goalReward_(vm["problem.goalReward"].as<double>()),
+            crashPenalty_(vm["problem.crashPenalty"].as<double>()),
+            moveCost_(vm["problem.moveCost"].as<double>()),
+            moveDiagCost_(std::sqrt(2) * moveCost_),
+            ctrlCorrectProb_(vm["problem.ctrlCorrectProb"].as<double>()),
+            ctrlErrProb1_(((1.0 - ctrlCorrectProb_) / 2.0) + ctrlCorrectProb_),
+            rolloutExploreTh_(vm["heuristic.rolloutExploreTh"].as<double>()),
+            nTryCon_(vm["heuristic.nTryCon"].as<long>()),
+            maxDistCon_(vm["heuristic.maxDistCon"].as<long>()),
+            nVerts_(vm["heuristic.nVerts"].as<long>()),
+            nActions_(5),
+            nObservations_(0), // Count later
+            nStVars_(2),
+            minVal_(crashPenalty_ / (1.0 - discountFactor_)),
+            maxVal_(goalReward_),
+            nGoals_(0), // Count later
+            nRocks_(0),  // Count later
+            nInitBel_(0) // Count later
+{
 #pragma GCC diagnostic pop
     std::ifstream inFile;
 
@@ -53,80 +72,46 @@ UnderwaterNavModel::UnderwaterNavModel(RandomGenerator *randGen, po::variables_m
     for (short i = 0; i < nSpcRew_; i++) {
         inFile >> tmp >> spcRew_[i];
     }
-
     inFile.close();
 
-    nParticles = vm["SBT.nParticles"].as<long>();
-    maxTrials = vm["SBT.maxTrials"].as<long>();
-    maxNnComparisons = vm["SBT.maxNnComparisons"].as<long>();
-
-    heuristicExploreCoefficient = vm["SBT.heuristicExploreCoefficient"].as<double>();
-    minimumDiscount = vm["SBT.minimumDiscount"].as<double>();
-    maxNnDistance = vm["SBT.maxNnDistance"].as<double>();
-
-    discount_ = vm["problem.discount"].as<double>();
-    goalReward_ = vm["problem.goalReward"].as<double>();
-    crashPenalty_ = vm["problem.crashPenalty"].as<double>();
-    moveCost_ = vm["problem.moveCost"].as<double>();
-    ctrlCorrectProb_ = vm["problem.ctrlCorrectProb"].as<double>();
-
-    rolloutExploreTh_ = vm["heuristic.rolloutExploreTh"].as<double>();
-    nVerts_ = vm["heuristic.nVerts"].as<long>();
-    nTryCon_ = vm["heuristic.nTryCon"].as<long>();
-    maxDistCon_ = vm["heuristic.maxDistCon"].as<long>();
-
     setInitObsGoal();
-
-    moveDiagCost_ = std::sqrt(2) * moveCost_;
-    ctrlErrProb1_ = ((1.0 - ctrlCorrectProb_) / 2.0) + ctrlCorrectProb_;
-    minVal_ = crashPenalty_ / (1.0 - discount_);
-    maxVal_ = goalReward_;
-
-    roadmap_ = new StRoadmap(randGen, goals_, nVerts_, nGoals_, nTryCon_, maxDistCon_,
-                            cellType_, nX_, nY_);
+    roadmap_ = std::move(std::make_unique<StRoadmap>(randGen, goals_, nVerts_, nGoals_, nTryCon_, maxDistCon_,
+                            envMap_, nX_, nY_));
 }
 
 void UnderwaterNavModel::setInitObsGoal() {
-    nActions_ = 5;
-    nObservations_ = 0;
-    nStVars_ = 2;
-    nInitBel_ = 0;
-
-    nGoals_ = 0;
     long i = 0;
     for (string &line : mapText_) {
         for (unsigned long j = 0; j < nX_; j++) {
             if (line[j] == 'S') {
-                UnderwaterNavState s(2);
-                s[0] = j;
-                s[1] = i;
+                UnderwaterNavState s(i, j);
                 initBel_.push_back(s);
                 nInitBel_++;
             } else if (line[j] == 'O') {
-                cellType_[j][i] = 3;
+                envMap_[j][i] = 3;
                 UnderwaterNavState s(2);
                 s[0] = j;
                 s[1] = i;
                 allObservations_.push_back(s);
                 nObservations_++;
             } else if (line[j] == 'D') {
-                cellType_[j][i] = 1;
+                envMap_[j][i] = 1;
                 UnderwaterNavState s(2);
                 s[0] = j;
                 s[1] = i;
                 goals_.push_back(s);
                 nGoals_++;
             } else if (line[j] == 'R') {
-                cellType_[j][i] = 2;
+                envMap_[j][i] = 2;
                 UnderwaterNavState s(2);
                 s[0] = j;
                 s[1] = i;
                 rocks_.push_back(s);
                 nRocks_++;
             } else if (line[j] == '1') {
-                cellType_[j][i] = 5;
+                envMap_[j][i] = 5;
             } else if (std::islower(line[j])) {
-                cellType_[j][i] = (short) (line[j]) - 97;
+                envMap_[j][i] = (short) (line[j]) - 97;
             }
         }
         i++;
@@ -348,11 +333,11 @@ void UnderwaterNavModel::getNextState(UnderwaterNavState &s, unsigned long actId
      cerr << "Visit rocks at " << sp[0] << " " << sp[1] << endl;
      }
      */
-    std::map<long, std::map<long, short> >::iterator itCellType = cellType_.find(
+    std::map<long, std::map<long, short> >::iterator itCellType = envMap_.find(
                 sp[0]);
-    if (itCellType != cellType_.end()) {
+    if (itCellType != envMap_.end()) {
         if (itCellType->second.find(sp[1]) != itCellType->second.end()) {
-            if (cellType_[sp[0]][sp[1]] == 5) {
+            if (envMap_[sp[0]][sp[1]] == 5) {
                 sp = s;
             }
         }
@@ -381,12 +366,12 @@ void UnderwaterNavModel::inObsRegion(UnderwaterNavState &sVals, Observation &obs
      obs[0] = -1; obs[1] = -1;
      }
      */
-    std::map<long, std::map<long, short> >::iterator itCellType = cellType_.find(
+    std::map<long, std::map<long, short> >::iterator itCellType = envMap_.find(
                 sVals[0]);
 
-    if (itCellType != cellType_.end()) {
+    if (itCellType != envMap_.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
-            if (cellType_[sVals[0]][sVals[1]] == 3) {
+            if (envMap_[sVals[0]][sVals[1]] == 3) {
                 obs[0] = sVals[0];
                 obs[1] = sVals[1];
                 return;
@@ -432,12 +417,12 @@ double UnderwaterNavModel::getReward(UnderwaterNavState &sVals) {
     double totRew = 0.0;
     short ct = 0;
 
-    std::map<long, std::map<long, short> >::iterator itCellType = cellType_.find(
+    std::map<long, std::map<long, short> >::iterator itCellType = envMap_.find(
                 sVals[0]);
 
-    if (itCellType != cellType_.end()) {
+    if (itCellType != envMap_.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
-            ct = cellType_[sVals[0]][sVals[1]];
+            ct = envMap_[sVals[0]][sVals[1]];
         }
     }
 //cout << "st: " << sVals[0] << " " << sVals[1] << " ct " << ct << endl;
@@ -467,12 +452,12 @@ double UnderwaterNavModel::getReward(UnderwaterNavState &sVals, unsigned long ac
     double totRew = 0.0;
     short ct = 0;
 
-    std::map<long, std::map<long, short> >::iterator itCellType = cellType_.find(
+    std::map<long, std::map<long, short> >::iterator itCellType = envMap_.find(
                 sVals[0]);
 
-    if (itCellType != cellType_.end()) {
+    if (itCellType != envMap_.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
-            ct = cellType_[sVals[0]][sVals[1]];
+            ct = envMap_[sVals[0]][sVals[1]];
         }
     }
 //cerr << "sVals: " << sVals[0] << " " << sVals[1] << " " << ct << endl;
@@ -574,18 +559,18 @@ void UnderwaterNavModel::update(long tCh,
                 while (x < xu) {
                     long y = (long) std::floor(yl);
                     while (y < yu) {
-                        if (cellType_[x][y] == 1) {
+                        if (envMap_[x][y] == 1) {
                             itStVals = getIterator(goals_, x, y);
                             if (itStVals != goals_.end()) {
                                 goals_.erase(itStVals);
                             }
-                        } else if (cellType_[x][y] == 3) {
+                        } else if (envMap_[x][y] == 3) {
                             itStVals = getIterator(allObservations_, x, y);
                             if (itStVals != allObservations_.end()) {
                                 allObservations_.erase(itStVals);
                             }
                         }
-                        cellType_[x][y] = 2;
+                        envMap_[x][y] = 2;
                         UnderwaterNavState s(2);
                         s[0] = x;
                         s[1] = y;
@@ -615,18 +600,18 @@ void UnderwaterNavModel::update(long tCh,
                 while (x < xu) {
                     long y = (long) std::floor(yl);
                     while (y < yu) {
-                        if (cellType_[x][y] == 1) {
+                        if (envMap_[x][y] == 1) {
                             itStVals = getIterator(goals_, x, y);
                             if (itStVals != goals_.end()) {
                                 goals_.erase(itStVals);
                             }
-                        } else if (cellType_[x][y] == 2) {
+                        } else if (envMap_[x][y] == 2) {
                             itStVals = getIterator(rocks_, x, y);
                             if (itStVals != rocks_.end()) {
                                 rocks_.erase(itStVals);
                             }
                         }
-                        cellType_[x][y] = 5;
+                        envMap_[x][y] = 5;
                         y = y + 1;
                     }
                     x = x + 1;
@@ -648,18 +633,18 @@ void UnderwaterNavModel::update(long tCh,
                 while (x < xu) {
                     long y = (long) std::floor(yl);
                     while (y < yu) {
-                        if (cellType_[x][y] == 1) {
+                        if (envMap_[x][y] == 1) {
                             itStVals = getIterator(goals_, x, y);
                             if (itStVals != goals_.end()) {
                                 goals_.erase(itStVals);
                             }
-                        } else if (cellType_[x][y] == 2) {
+                        } else if (envMap_[x][y] == 2) {
                             itStVals = getIterator(rocks_, x, y);
                             if (itStVals != rocks_.end()) {
                                 rocks_.erase(itStVals);
                             }
                         }
-                        cellType_[x][y] = 3;
+                        envMap_[x][y] = 3;
                         UnderwaterNavState s(2);
                         s[0] = x;
                         s[1] = y;
@@ -695,7 +680,7 @@ void UnderwaterNavModel::update(long tCh,
                 while (x < xu) {
                     long y = (long) std::floor(yl);
                     while (y < yu) {
-                        cellType_[x][y] = 0;
+                        envMap_[x][y] = 0;
                         nRocks_--;
                         y = y + 1;
                     }
@@ -726,7 +711,7 @@ void UnderwaterNavModel::update(long tCh,
                 while (x < xu) {
                     long y = (long) std::floor(yl);
                     while (y < yu) {
-                        cellType_[x][y] = nSpcRew_;
+                        envMap_[x][y] = nSpcRew_;
                         y = y + 1;
                     }
                     x = x + 1;
@@ -751,9 +736,8 @@ void UnderwaterNavModel::update(long tCh,
             cerr << "Invalid command: " << cmd << "\n";
         }
     }
-    delete roadmap_;
-    roadmap_ = new StRoadmap(randGen_, goals_, nVerts_, nGoals_, nTryCon_, maxDistCon_,
-                            cellType_, nX_, nY_);
+    roadmap_ = std::move(std::make_unique<StRoadmap>(randGen_, goals_, nVerts_, nGoals_, nTryCon_, maxDistCon_,
+                            envMap_, nX_, nY_));
     //roadmap->updateRoadmap(cellType, goals, nGoals);
 
 //cerr << "#affected: " << affectedRange.size() << " #type: " << typeOfChanges.size() << endl;
@@ -1145,11 +1129,11 @@ bool UnderwaterNavModel::modifStSeq(std::vector<UnderwaterNavState> &seqStVals,
 
 bool UnderwaterNavModel::isTerm(UnderwaterNavState &sVals) {
     short ct = 0;
-    std::map<long, std::map<long, short> >::iterator itCellType = cellType_.find(
+    std::map<long, std::map<long, short> >::iterator itCellType = envMap_.find(
                 sVals[0]);
-    if (itCellType != cellType_.end()) {
+    if (itCellType != envMap_.end()) {
         if (itCellType->second.find(sVals[1]) != itCellType->second.end()) {
-            ct = cellType_[sVals[0]][sVals[1]];
+            ct = envMap_[sVals[0]][sVals[1]];
         }
     }
     return (ct == 1) ? true : false;
@@ -1191,11 +1175,11 @@ void UnderwaterNavModel::drawEnv(std::ostream &os) {
     os << endl;
     for (unsigned long y = 0; y < nY_; y++) {
         for (unsigned long x = 0; x < nX_; x++) {
-            itCellType = cellType_.find(x);
-            if (itCellType != cellType_.end()) {
+            itCellType = envMap_.find(x);
+            if (itCellType != envMap_.end()) {
                 if (itCellType->second.find(y) != itCellType->second.end()) {
                     // 0: usual, 1: goals, 2: rocks, 3: observation, 4: spc. reward, 5: obstacle.
-                    switch (cellType_[x][y]) {
+                    switch (envMap_[x][y]) {
                     case 1: {
                         os << "D";
                         break;
@@ -1213,7 +1197,7 @@ void UnderwaterNavModel::drawEnv(std::ostream &os) {
                         break;
                     }
                     default: {
-                        os << cellType_[x][y];
+                        os << envMap_[x][y];
                         break;
                     }
                     }
@@ -1237,11 +1221,11 @@ void UnderwaterNavModel::drawState(UnderwaterNavState &s, std::ostream &os) {
                 os << "X";
                 continue;
             }
-            itCellType = cellType_.find(x);
-            if (itCellType != cellType_.end()) {
+            itCellType = envMap_.find(x);
+            if (itCellType != envMap_.end()) {
                 if (itCellType->second.find(y) != itCellType->second.end()) {
                     // 0: usual, 1: goals, 2: rocks, 3: observation, 4: spc. reward, 5: obstacle.
-                    switch (cellType_[x][y]) {
+                    switch (envMap_[x][y]) {
                     case 1: {
                         os << "D";
                         break;
@@ -1259,7 +1243,7 @@ void UnderwaterNavModel::drawState(UnderwaterNavState &s, std::ostream &os) {
                         break;
                     }
                     default: {
-                        os << cellType_[x][y];
+                        os << envMap_[x][y];
                         break;
                     }
                     }

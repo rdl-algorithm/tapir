@@ -16,7 +16,6 @@ public:
     virtual VectorState &operator=(VectorState const &) = delete;
     virtual VectorState &operator=(VectorState &&) = delete;
 
-
     virtual double distanceTo(State const &otherState) const;
     virtual bool equals(State const &otherState) const;
     virtual std::size_t hash() const;

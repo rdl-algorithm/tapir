@@ -8,11 +8,8 @@ struct GridPosition {
     long j;
     GridPosition() : i(0), j(0) {
     }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-    GridPosition(long i, long j) : i(i), j(j) {
+    GridPosition(long _i, long _j) : i(_i), j(_j) {
     }
-#pragma GCC diagnostic pop
 
     double euclideanDistanceTo(GridPosition const &other) const {
         return std::sqrt(std::pow(i - other.i, 2) + std::pow(j - other.j, 2));

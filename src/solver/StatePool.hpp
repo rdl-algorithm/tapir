@@ -15,28 +15,33 @@
 #include "StateSets.hpp"
 
 namespace solver {
+class StateIndex;
+
 class StatePool {
   public:
     friend class TextSerializer;
 
-    StatePool();
+    StatePool(unsigned long nSDim);
     ~StatePool();
     StatePool(StatePool const &) = delete;
     StatePool(StatePool &&) = delete;
     StatePool &operator=(StatePool const &) = delete;
     StatePool &operator=(StatePool &&) = delete;
 
+    StateIndex *getStateIndex();
+
     void reset();
     StateInfo *add(std::unique_ptr<State> state);
+    void addToStateIndex(StateInfo *stateInfo);
     StateInfo *getStateById(long stId);
     void identifyAffectedStates(State &lowLeft, State &upRight,
             ChangeType chType, std::set<StateInfo *> &affectedSt);
 
   private:
-    long nSDim_;
+    unsigned long nSDim_;
     StateInfoOwningSet allStates_;
     std::vector<StateInfo *> allStatesIdx_;
-    std::vector<std::multimap<double, StateInfo * >> stStruct_;
+    std::unique_ptr<StateIndex> stateIndex_;
 };
 } /* namespace solver */
 

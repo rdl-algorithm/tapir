@@ -31,6 +31,9 @@
 #include "StateInfo.hpp"                // for StateInfo
 #include "StatePool.hpp"                // for StatePool
 
+#include "RTree.hpp"
+#include "BoxQuery.hpp"
+
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -42,7 +45,7 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     model_(std::move(model)),
     policy_(std::make_unique<BeliefTree>()),
     allHistories_(std::make_unique<Histories>()),
-    allStates_(std::make_unique<StatePool>()),
+    allStates_(std::make_unique<StatePool>(model_->getNStVars())),
     lastRolloutMode_(ROLLOUT_RANDHEURISTIC),
     heuristicExploreCoefficient_(this->model_->getHeuristicExploreCoefficient()),
     timeUsedPerHeuristic_{1.0, 1.0},
@@ -462,6 +465,38 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         State &currentState) {
     // cerr << "Belief node: ";
     // serializer_->save(*currentBelief, cerr);
+    RTree *tree = static_cast<RTree *>(allStates_->getStateIndex());
+
+
+    clock_t startTime = std::clock();
+    std::unique_ptr<BoxQuery> query;
+    for (int i = 0; i < 1000; i++) {
+        query =  tree->makeBoxQuery();
+        std::vector<double> lowCorner(5);
+        std::vector<double> highCorner(5);
+        lowCorner[0] = 4;
+        highCorner[0] = 4;
+
+        lowCorner[1] = 0;
+        highCorner[1] = 0;
+
+        lowCorner[2] = 0;
+        highCorner[2] = 4;
+
+        lowCorner[3] = 0;
+        highCorner[3] = 9;
+
+        lowCorner[4] = 0;
+        highCorner[4] = 1;
+        query->markStates(lowCorner, highCorner);
+    }
+    clock_t ticks = std::clock() - startTime;
+
+    cerr << "Query results: " << endl;
+    for (StateInfo *info : query->getStates()) {
+        cerr << *info->getState() << endl;
+    }
+    cerr << "1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
 
     State *state = currentBelief->sampleAParticle(randGen_)->getState();
     cerr << "Sampled particle: " << *state << endl;
@@ -599,8 +634,8 @@ void Solver::identifyAffectedPol(
     it1 = affectedRange.begin();
     it2 = affectedRange.begin() + 1;
     for (; itType != chTypes.end(); itType++) {
-        allStates_->identifyAffectedStates(**it1, **it2, *itType,
-                affectedStates);
+        //allStates_->identifyAffectedStates(**it1, **it2, *itType,
+                //affectedStates);
         it1++;
         it1++;
         it2++;

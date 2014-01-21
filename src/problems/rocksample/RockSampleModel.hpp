@@ -131,10 +131,6 @@ class RockSampleModel : public ModelWithProgramOptions {
     void drawState(solver::State const &state, std::ostream &os);
 
   private:
-    // Problem parameters
-    unsigned long nActions_, nObservations_, nStVars_;
-    double minVal_, maxVal_;
-
     /**
      * Finds and counts the rocks on the map, and initialises the required
      * data structures and variables.
@@ -159,6 +155,18 @@ class RockSampleModel : public ModelWithProgramOptions {
     RSObservation makeObs(solver::Action const &action,
             RockSampleState const &nextState);
 
+
+    /** The reward for sampling a good rock. */
+    double goodRockReward_;
+    /** The penalty for sampling a bad rock. */
+    double badRockPenalty_;
+    /** The reward for exiting the map. */
+    double exitReward_;
+    /** The penalty for an illegal move. */
+    double illegalMovePenalty_;
+    /** The half efficiency distance d0 */
+    double halfEfficiencyDistance_;
+
     /** The number of rows in the map. */
     long nRows_;
     /** The number of columns in the map. */
@@ -170,22 +178,14 @@ class RockSampleModel : public ModelWithProgramOptions {
     /** The coordinates of the rocks. */
     std::vector<GridPosition> rockPositions_;
 
-    /** The reward for sampling a good rock. */
-    double goodRockReward_;
-    /** The penalty for sampling a bad rock. */
-    double badRockPenalty_;
-    /** The reward for exiting the map. */
-    double exitReward_;
-    /** The penalty for an illegal move. */
-    double illegalMovePenalty_;
-
-    /** The half efficiency distance d0 */
-    double halfEfficiencyDistance_;
-
     /** The environment map in text form. */
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
     std::vector<std::vector<RSCellType>> envMap_;
+
+    // Generic problem parameters
+    unsigned long nActions_, nObservations_, nStVars_;
+    double minVal_, maxVal_;
 };
 } /* namespace rocksample */
 

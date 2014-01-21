@@ -88,33 +88,39 @@ class UnderwaterNavModel: public ModelWithProgramOptions {
     void drawState(solver::State const &state, std::ostream &os);
 
   private:
-    // Problem parameters.
+    // uwnav-specific parameters
+    unsigned long nX_, nY_;
+    double goalReward_, crashPenalty_, moveCost_, moveDiagCost_;
+    double ctrlCorrectProb_, ctrlErrProb1_;
+    double rolloutExploreTh_;
+    long nTryCon_, maxDistCon_, nVerts_;
+
+    // General parameters.
     unsigned long nActions_, nObservations_, nStVars_;
     double minVal_, maxVal_;
 
+    unsigned long nGoals_;
+    unsigned long nRocks_;
     /** The number of state particles in the initial belief. */
     unsigned long nInitBel_;
     /** A vector of all the states in the initial belief. */
     std::vector<UnderwaterNavState> initBel_;
 
-    unsigned long nX_, nY_, nGoals_, nRocks_;
-    double goalReward_, crashPenalty_, moveCost_, moveDiagCost_;
-    double ctrlCorrectProb_, ctrlErrProb1_;
-    double rolloutExploreTh_;
+    short nSpcRew_;
+    std::vector<double> spcRew_;
+
     std::vector<std::string> mapText_;
+    std::map<long, std::map<long, UnderwaterNavCellType> > envMap_;
+    std::unique_ptr<StRoadmap> roadmap_;
+
+    std::map<long, std::vector<std::string> > changes;
+
     std::vector<UnderwaterNavState> goals_;
     std::vector<UnderwaterNavState> rocks_;
     std::vector<UnderwaterNavState> allObservations_;
-    std::map<long, std::map<long, short> > envMap_;
-
-    short nSpcRew_;
-    std::vector<double> spcRew_;
-    std::map<long, std::vector<std::string> > changes;
     std::vector<UnderwaterNavState> obstacleRegion_;
 
-    std::unique_ptr<StRoadmap> roadmap_;
-    long nTryCon_, maxDistCon_, nVerts_;
-
+    void setInitObsGoal();
     double getDist(UnderwaterNavState const &s1, UnderwaterNavState const &s2);
     UnderwaterNavState getNextState(UnderwaterNavState const &s,
             solver::Action const &action);

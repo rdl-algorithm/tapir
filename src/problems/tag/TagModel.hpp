@@ -117,10 +117,6 @@ class TagModel : public ModelWithProgramOptions {
     void drawState(solver::State const &state, std::ostream &os);
 
   private:
-    // Problem parameters
-    unsigned long nActions_, nObservations_, nStVars_;
-    double minVal_, maxVal_;
-
     /** Initialises the required data structures and variables */
     void initialise();
 
@@ -155,6 +151,15 @@ class TagModel : public ModelWithProgramOptions {
     /** Decodes the coordinates from an integer. */
     GridPosition decodeGridPosition(long code);
 
+    /** The penalty for each movement. */
+    double moveCost_;
+    /** The reward for taggint the opponent. */
+    double tagReward_;
+    /** The penalty for failing a tag attempt. */
+    double failedTagPenalty_;
+    /** The probability that the opponent will stay still. */
+    double opponentStayProbability_;
+
     /** The number of rows in the map. */
     long nRows_;
     /** The number of columns in the map. */
@@ -165,19 +170,14 @@ class TagModel : public ModelWithProgramOptions {
     /** The empty cells, numbered; */
     std::vector<GridPosition> emptyCells_;
 
-    /** The penalty for each movement. */
-    double moveCost_;
-    /** The reward for taggint the opponent. */
-    double tagReward_;
-    /** The penalty for failing a tag attempt. */
-    double failedTagPenalty_;
-    /** The probability that the opponent will stay still. */
-    double opponentStayProbability_;
-
     /** The environment map in text form. */
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
     std::vector<std::vector<TagCellType>> envMap_;
+
+    // General problem parameters
+    unsigned long nActions_, nObservations_, nStVars_;
+    double minVal_, maxVal_;
 };
 } /* namespace tag */
 

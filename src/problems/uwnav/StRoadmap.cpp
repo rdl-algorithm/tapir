@@ -22,9 +22,21 @@ StRoadmap::StRoadmap(RandomGenerator *randGen,
         long nTryCon, long maxDistCon,
         std::map<long, std::map<long, UnderwaterNavCellType> > &env, long nCols,
         long nRows) :
-        randGen_(randGen), nCols_(nCols), nRows_(nRows), env_(env), weight_(), totW_(
-                0), maxTryCon_(nTryCon), maxDistCon_(maxDistCon), nVerts_(0), maxVerts_(
-                maxVerts), lastGoalIdx_(0), milestones_(), outEdges_(), inEdges_(), shortestDistToGoal_() {
+        randGen_(randGen),
+        nCols_(nCols),
+        nRows_(nRows),
+        env_(env),
+        weight_(),
+        totW_(0),
+        maxTryCon_(nTryCon),
+        maxDistCon_(maxDistCon),
+        nVerts_(0),
+        maxVerts_(maxVerts),
+        lastGoalIdx_(0),
+        milestones_(),
+        outEdges_(),
+        inEdges_(),
+        shortestDistToGoal_() {
 #pragma GCC diagnostic pop
     setWeight();
     insertGoalMilestones(goals, nGoalsSamp);
@@ -65,9 +77,6 @@ StRoadmap::StRoadmap(RandomGenerator *randGen,
      }
      */
 //  draw(cerr);
-}
-
-StRoadmap::~StRoadmap() {
 }
 
 void StRoadmap::setWeight() {

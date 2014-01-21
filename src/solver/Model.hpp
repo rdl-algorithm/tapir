@@ -47,7 +47,7 @@ class Model {
     virtual unsigned long getNActions() = 0;
     /** Returns the # of observations for this POMDP. */
     virtual unsigned long getNObservations() = 0;
-    /** Returns the number of state variables for this PODMP. */
+    /** Returns the number of state variables */
     virtual unsigned long getNStVars() = 0;
     /** Returns a lower bound on the q-value. */
     virtual double getMinVal() = 0;
