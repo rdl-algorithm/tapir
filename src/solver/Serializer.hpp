@@ -61,22 +61,38 @@ class Serializer {
     /** Loads a StatePool. */
     virtual void load(StatePool &pool, std::istream &is) = 0;
 
+    /** Saves an Observation. */
     virtual void save(Observation &obs, std::ostream &os) = 0;
+    /** Loads an Observation. */
     virtual void load(Observation &obs, std::istream &is) = 0;
+    /** Saves a HistoryEntry. */
     virtual void save(HistoryEntry &entry, std::ostream &os) = 0;
+    /** Loads a HistoryEntry. */
     virtual void load(HistoryEntry &entry, std::istream &is) = 0;
+    /** Saves a HistorySequence. */
     virtual void save(HistorySequence &seq, std::ostream &os) = 0;
+    /** Loads a HistorySequence. */
     virtual void load(HistorySequence &seq, std::istream &is) = 0;
+    /** Saves a Histories. */
     virtual void save(Histories &histories, std::ostream &os) = 0;
+    /** Loads a Histories. */
     virtual void load(Histories &histories, std::istream &is) = 0;
 
+    /** Saves an ObservationEdge. */
     virtual void save(ObservationEdge &edge, std::ostream &os) = 0;
+    /** Loads an ObservationEdge. */
     virtual void load(ObservationEdge &edge, std::istream &is) = 0;
+    /** Saves an ActionNode. */
     virtual void save(ActionNode &node, std::ostream &os) = 0;
+    /** Loads an ActionNode. */
     virtual void load(ActionNode &node, std::istream &is) = 0;
+    /** Saves a BeliefNode. */
     virtual void save(BeliefNode &node, std::ostream &os) = 0;
+    /** Loads a BeliefNode. */
     virtual void load(BeliefNode &node, std::istream &is) = 0;
+    /** Saves a BeliefTree. */
     virtual void save(BeliefTree &tree, std::ostream &os) = 0;
+    /** Loads a BeliefTree. */
     virtual void load(BeliefTree &tree, std::istream &is) = 0;
   protected:
     Solver *solver_;

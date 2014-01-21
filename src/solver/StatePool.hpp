@@ -28,14 +28,12 @@ class StatePool {
     StatePool &operator=(StatePool const &) = delete;
     StatePool &operator=(StatePool &&) = delete;
 
-    StateIndex *getStateIndex();
-
     void reset();
     StateInfo *add(std::unique_ptr<State> state);
-    void addToStateIndex(StateInfo *stateInfo);
     StateInfo *getStateById(long stId);
-    void identifyAffectedStates(State &lowLeft, State &upRight,
-            ChangeType chType, std::set<StateInfo *> &affectedSt);
+
+    StateIndex *getStateIndex();
+    void addToStateIndex(StateInfo *stateInfo);
 
   private:
     unsigned long nSDim_;

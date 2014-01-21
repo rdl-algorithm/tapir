@@ -158,7 +158,6 @@ double BeliefNode::distL1Independent(BeliefNode *b) {
     return dist / (nParticles_ * b->nParticles_);
 }
 
-
 BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) {
     ActionMap::iterator iter = actChildren_.find(action);
     if (iter == actChildren_.end()) {

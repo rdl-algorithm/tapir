@@ -37,7 +37,8 @@ class Solver {
     Solver &operator=(Solver &&) = delete;
 
     enum RolloutMode {
-        ROLLOUT_RANDHEURISTIC = 0, ROLLOUT_POL = 1
+        ROLLOUT_RANDHEURISTIC = 0,
+        ROLLOUT_POL = 1
     };
 
     /** Sets the serializer to be used by this solver. */
@@ -67,19 +68,6 @@ class Solver {
             double *totImpTime);
 
   private:
-    Serializer *serializer_;
-    RandomGenerator *randGen_;
-    std::unique_ptr<Model> model_;
-    std::unique_ptr<BeliefTree> policy_;
-    std::unique_ptr<Histories> allHistories_;
-    std::unique_ptr<StatePool> allStates_;
-
-    RolloutMode lastRolloutMode_;
-    double heuristicExploreCoefficient_;
-    double timeUsedPerHeuristic_[2], heuristicWeight_[2],
-           heuristicProbability_[2];
-    long heuristicUseCount_[2];
-
     /** Registers the given history entry with the given belief node,
      * and updates the StateInfo to be informed of its usage in the given
      * belief node and history entry.
@@ -156,6 +144,34 @@ class Solver {
             std::vector<Action> &modifActSeq,
             std::vector<Observation> &modifObsSeq,
             std::vector<double> &modifRewSeq);
+
+    /** The serializer to be used with this solver. */
+    Serializer *serializer_;
+    /** The random number generator used. */
+    RandomGenerator *randGen_;
+    /** The POMDP model */
+    std::unique_ptr<Model> model_;
+    /** The tree that stores the policy */
+    std::unique_ptr<BeliefTree> policy_;
+    /** The full collection of simulated histories. */
+    std::unique_ptr<Histories> allHistories_;
+    /** The pool of states. */
+    std::unique_ptr<StatePool> allStates_;
+
+    /** The rollout mode that was used in the last rollout. */
+    RolloutMode lastRolloutMode_;
+    /** The coefficient that determines how much to explore heuristics
+     * vs. exploiting them.
+     */
+    double heuristicExploreCoefficient_;
+    /** The time used by each rollout heuristic. */
+    double timeUsedPerHeuristic_[2];
+    /** The weight associated with each rollout heuristic. */
+    double heuristicWeight_[2];
+    /** The calculated probability for the usage of each rollout heuristic. */
+    double heuristicProbability_[2];
+    /** The number of times each rollout heuristic has been used. */
+    long heuristicUseCount_[2];
 };
 } /* namespace solver */
 

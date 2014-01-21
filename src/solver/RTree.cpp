@@ -1,3 +1,5 @@
+#include "RTree.hpp"
+
 #include <memory>
 
 #include <spatialindex/SpatialIndex.h>
@@ -5,14 +7,14 @@
 #include <spatialindex/tools/Tools.h>
 
 #include "defs.hpp"
-#include "BoxQuery.hpp"
-#include "RTree.hpp"
+#include "SpatialIndexVisitor.hpp"
 #include "State.hpp"
 #include "StateInfo.hpp"
 #include "VectorState.hpp"
 
 namespace solver {
 RTree::RTree(unsigned long nSDim, StatePool *statePool) :
+        StateIndex(),
         nSDim_(nSDim),
         statePool_(statePool),
         properties_(nullptr),
@@ -65,12 +67,10 @@ void RTree::removeStateInfo(StateInfo *stateInfo) {
     tree_->deleteData(point, stateId);
 }
 
-StateInfo *RTree::getNearestNeighbor(StateInfo */*stateInfo*/) {
-    return nullptr;
-}
-
-std::unique_ptr<BoxQuery> RTree::makeBoxQuery() {
-    return std::make_unique<BoxQuery>(nSDim_, statePool_, tree_.get());
+void RTree::boxQuery(SpatialIndexVisitor& visitor,
+        std::vector<double> lowCorner, std::vector<double> highCorner) {
+    SpatialIndex::Region region(&lowCorner[0], &highCorner[0], nSDim_);
+    tree_->containsWhatQuery(region, visitor);
 }
 
 } /* namespace solver */

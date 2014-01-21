@@ -8,11 +8,10 @@
 
 #include "StateIndex.hpp"
 
-
 namespace solver {
+class SpatialIndexVisitor;
 class StateInfo;
 class StatePool;
-class BoxQuery;
 
 class RTree : public StateIndex {
   public:
@@ -24,11 +23,12 @@ class RTree : public StateIndex {
     virtual RTree &operator=(RTree &&) = delete;
 
     virtual void reset();
-
     virtual void addStateInfo(StateInfo *stateInfo);
     virtual void removeStateInfo(StateInfo *stateInfo);
-    virtual StateInfo *getNearestNeighbor(StateInfo *stateInfo);
-    virtual std::unique_ptr<BoxQuery> makeBoxQuery();
+    virtual void boxQuery(SpatialIndexVisitor &visitor,
+            std::vector<double> lowCorner,
+            std::vector<double> highCorner);
+
   private:
     unsigned long nSDim_;
     StatePool *statePool_;

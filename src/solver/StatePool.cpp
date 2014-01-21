@@ -31,10 +31,6 @@ void StatePool::reset() {
     StateInfo::currId = 0;
 }
 
-StateIndex *StatePool::getStateIndex() {
-    return stateIndex_.get();
-}
-
 StateInfo *StatePool::add(std::unique_ptr<State> state) {
     std::unique_ptr<StateInfo> newInfo = std::make_unique<StateInfo>(
                 std::move(state));
@@ -54,11 +50,16 @@ StateInfo *StatePool::add(std::unique_ptr<State> state) {
     return stateInfo;
 }
 
-void StatePool::addToStateIndex(StateInfo *stateInfo) {
-    stateIndex_->addStateInfo(stateInfo);
-}
-
 StateInfo *StatePool::getStateById(long id) {
     return allStatesIdx_[id];
+}
+
+
+StateIndex *StatePool::getStateIndex() {
+    return stateIndex_.get();
+}
+
+void StatePool::addToStateIndex(StateInfo *stateInfo) {
+    stateIndex_->addStateInfo(stateInfo);
 }
 } /* namespace solver */

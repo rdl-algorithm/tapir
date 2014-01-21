@@ -5,6 +5,7 @@
 #include "StateInfo.hpp"
 
 namespace solver {
+
 struct StateInfoHashUniquePtr {
     std::size_t operator()(std::unique_ptr<StateInfo> const &stateInfo) const {
         return stateInfo->getState()->hash();
@@ -19,6 +20,8 @@ struct SameStateInfoUniquePtr {
 typedef std::unordered_set<std::unique_ptr<StateInfo>, StateInfoHashUniquePtr,
         SameStateInfoUniquePtr> StateInfoOwningSet;
 
+
+
 struct StateInfoHash {
     std::size_t operator()(StateInfo * const &stateInfo) const {
         return stateInfo->getState()->hash();
@@ -30,6 +33,7 @@ struct SameStateInfo {
     }
 };
 typedef std::unordered_set<StateInfo *, StateInfoHash, SameStateInfo> StateInfoSet;
-}
+
+} /* namespace solver */
 
 #endif /* STATESETS_HPP_ */

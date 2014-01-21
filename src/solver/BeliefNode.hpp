@@ -78,7 +78,6 @@ class BeliefNode {
     /** Returns the next action to attempt. */
     Action getNextActionToTry();
 
-
     /** Returns the ID of this node. */
     long getId() {
         return id_;

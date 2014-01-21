@@ -32,7 +32,7 @@
 #include "StatePool.hpp"                // for StatePool
 
 #include "RTree.hpp"
-#include "BoxQuery.hpp"
+#include "SpatialIndexVisitor.hpp"
 
 using std::cerr;
 using std::cout;
@@ -468,35 +468,32 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     RTree *tree = static_cast<RTree *>(allStates_->getStateIndex());
 
 
+    struct MyVisitor : public SpatialIndexVisitor {
+        MyVisitor(StatePool *statePool) :
+                    SpatialIndexVisitor(statePool),
+                    states() {
+        }
+        std::vector<StateInfo *> states;
+        void visit(StateInfo *info) {
+            states.push_back(info);
+        }
+    };
+    MyVisitor visitor(allStates_.get());
+
     clock_t startTime = std::clock();
-    std::unique_ptr<BoxQuery> query;
     for (int i = 0; i < 1000; i++) {
-        query =  tree->makeBoxQuery();
-        std::vector<double> lowCorner(5);
-        std::vector<double> highCorner(5);
-        lowCorner[0] = 4;
-        highCorner[0] = 4;
-
-        lowCorner[1] = 0;
-        highCorner[1] = 0;
-
-        lowCorner[2] = 0;
-        highCorner[2] = 4;
-
-        lowCorner[3] = 0;
-        highCorner[3] = 9;
-
-        lowCorner[4] = 0;
-        highCorner[4] = 1;
-        query->markStates(lowCorner, highCorner);
+        visitor.states.clear();
+        tree->boxQuery(visitor,
+                std::vector<double> { 4,  0,  0,  0,  0,},
+                std::vector<double> { 4,  0,  4,  9,  1,});
     }
     clock_t ticks = std::clock() - startTime;
 
     cerr << "Query results: " << endl;
-    for (StateInfo *info : query->getStates()) {
+    for (StateInfo *info : visitor.states) {
         cerr << *info->getState() << endl;
     }
-    cerr << "1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
+    cerr << visitor.states.size() << " states; 1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
 
     State *state = currentBelief->sampleAParticle(randGen_)->getState();
     cerr << "Sampled particle: " << *state << endl;
@@ -560,8 +557,8 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action,
 
     double disc = model_->getDiscountFactor();
     double currentDiscount = std::pow(disc, timeStep);
-// Attempt to generate particles for next state based on the current belief,
-// the observation, and the action.
+    // Attempt to generate particles for next state based on the current belief,
+    // the observation, and the action.
     std::vector<std::unique_ptr<State>> nextParticles(
             model_->generateParticles(action, obs, particles));
     if (nextParticles.empty()) {
@@ -634,8 +631,8 @@ void Solver::identifyAffectedPol(
     it1 = affectedRange.begin();
     it2 = affectedRange.begin() + 1;
     for (; itType != chTypes.end(); itType++) {
-        //allStates_->identifyAffectedStates(**it1, **it2, *itType,
-                //affectedStates);
+//      allStates_->identifyAffectedStates(**it1, **it2, *itType,
+//          affectedStates);
         it1++;
         it1++;
         it2++;
