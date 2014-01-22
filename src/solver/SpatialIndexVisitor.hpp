@@ -1,5 +1,5 @@
-#ifndef SPATIALINDEXVISITOR_HPP_
-#define SPATIALINDEXVISITOR_HPP_
+#ifndef SOLVER_SPATIALINDEXVISITOR_HPP_
+#define SOLVER_SPATIALINDEXVISITOR_HPP_
 
 #include <vector>
 
@@ -29,4 +29,4 @@ class SpatialIndexVisitor: public SpatialIndex::IVisitor {
 
 } /* namespace solver */
 
-#endif /* SPATIALINDEXVISITOR_HPP_ */
+#endif /* SOLVER_SPATIALINDEXVISITOR_HPP_ */

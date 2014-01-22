@@ -1,5 +1,5 @@
-#ifndef STATESPATIALINDEX_HPP_
-#define STATESPATIALINDEX_HPP_
+#ifndef SOLVER_STATEINDEX_HPP_
+#define SOLVER_STATEINDEX_HPP_
 
 #include <memory>
 
@@ -24,4 +24,4 @@ class StateIndex {
 };
 } /* namespace solver */
 
-#endif /* STATESPATIALINDEX_HPP_ */
+#endif /* SOLVER_STATEINDEX_HPP_ */

@@ -1,5 +1,7 @@
-#ifndef STATESETS_HPP_
-#define STATESETS_HPP_
+#ifndef SOLVER_STATESETS_HPP_
+#define SOLVER_STATESETS_HPP_
+
+#include <unordered_set>
 
 #include "State.hpp"
 #include "StateInfo.hpp"
@@ -36,4 +38,4 @@ typedef std::unordered_set<StateInfo *, StateInfoHash, SameStateInfo> StateInfoS
 
 } /* namespace solver */
 
-#endif /* STATESETS_HPP_ */
+#endif /* SOLVER_STATESETS_HPP_ */

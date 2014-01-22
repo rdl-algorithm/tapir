@@ -1,5 +1,5 @@
-#ifndef RTREE_HPP_
-#define RTREE_HPP_
+#ifndef SOLVER_RTREE_HPP_
+#define SOLVER_RTREE_HPP_
 
 #include <memory>
 
@@ -38,4 +38,4 @@ class RTree : public StateIndex {
 };
 } /* namespace solver */
 
-#endif /* RTREE_HPP_ */
+#endif /* SOLVER_RTREE_HPP_ */

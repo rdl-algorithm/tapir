@@ -480,20 +480,22 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     };
     MyVisitor visitor(allStates_.get());
 
-    clock_t startTime = std::clock();
-    for (int i = 0; i < 1000; i++) {
-        visitor.states.clear();
-        tree->boxQuery(visitor,
-                std::vector<double> { 4,  0,  0,  0,  0,},
-                std::vector<double> { 4,  0,  4,  9,  1,});
-    }
-    clock_t ticks = std::clock() - startTime;
+    if (model_->getName() == "Tag") {
+        clock_t startTime = std::clock();
+        for (int i = 0; i < 1000; i++) {
+            visitor.states.clear();
+            tree->boxQuery(visitor,
+                    std::vector<double> { 4,  0,  0,  0,  0,},
+                    std::vector<double> { 4,  0,  4,  9,  1,});
+        }
+        clock_t ticks = std::clock() - startTime;
 
-    cerr << "Query results: " << endl;
-    for (StateInfo *info : visitor.states) {
-        cerr << *info->getState() << endl;
+        cerr << "Query results: " << endl;
+        for (StateInfo *info : visitor.states) {
+            cerr << *info->getState() << endl;
+        }
+        cerr << visitor.states.size() << " states; 1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
     }
-    cerr << visitor.states.size() << " states; 1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
 
     State *state = currentBelief->sampleAParticle(randGen_)->getState();
     cerr << "Sampled particle: " << *state << endl;

@@ -72,6 +72,10 @@ class RockSampleModel : public ModelWithProgramOptions {
         GOAL = -2,
     };
 
+    std::string getName() {
+        return "RockSample";
+    }
+
     /***** Start implementation of Model's methods *****/
     // Simple getters
     unsigned long getNActions() {

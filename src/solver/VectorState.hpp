@@ -1,5 +1,5 @@
-#ifndef VECTORSTATE_HPP_
-#define VECTORSTATE_HPP_
+#ifndef SOLVER_VECTORSTATE_HPP_
+#define SOLVER_VECTORSTATE_HPP_
 
 #include "State.hpp"
 
@@ -26,4 +26,4 @@ public:
 
 } /* namespace solver */
 
-#endif /* VECTORSTATE_HPP_ */
+#endif /* SOLVER_VECTORSTATE_HPP_ */

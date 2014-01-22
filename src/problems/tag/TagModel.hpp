@@ -57,6 +57,10 @@ class TagModel : public ModelWithProgramOptions {
         SEEN = 1
     };
 
+    std::string getName() {
+        return "Tag";
+    }
+
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
     unsigned long getNActions() {

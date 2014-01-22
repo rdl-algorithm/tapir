@@ -12,7 +12,7 @@
 #include "ChangeType.hpp"               // for ChangeType
 #include "State.hpp"                    // for State, operator==
 #include "StateInfo.hpp"                // for StateInfo
-#include "StateSets.hpp"
+#include "statesets.hpp"
 
 namespace solver {
 class StateIndex;

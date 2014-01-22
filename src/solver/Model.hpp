@@ -38,6 +38,8 @@ class Model {
     Model &operator=(Model const &) = delete;
     Model &operator=(Model &&) = delete;
 
+    virtual std::string getName() = 0;
+
     /* ---------- Virtual getters for important model parameters  ---------- */
     // POMDP parameters
     /** Returns the POMDP discount factor. */
