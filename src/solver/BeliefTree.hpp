@@ -4,6 +4,9 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
+#include "Action.hpp"
+#include "Observation.hpp"
+
 namespace solver {
 class BeliefNode;
 
@@ -31,6 +34,12 @@ class BeliefTree {
         return root_.get();
     }
 
+    /**
+     * Adds a child belief node to the given belief node; this node will be
+     * added to the flattened node list if and only if it is actually new.
+     */
+    BeliefNode *addBeliefNode(BeliefNode *node,
+            Action const &action, Observation const &observation);
     /** Adds a node to the flattened list of nodes. */
     void enlistNode(BeliefNode *node);
 

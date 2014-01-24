@@ -12,8 +12,9 @@ class Change {
     Change() = default;
     virtual ~Change() = default;
 
-    StateInfoSet findAffectedStates(StateIndex *index);
-    ChangeType getType();
+    void markAffectedStates(StateIndex *index);
+
+    StateInfoSet getAffectedStates(StateIndex *index);
 };
 
 } /* namespace solver */

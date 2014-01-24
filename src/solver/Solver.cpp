@@ -110,11 +110,7 @@ void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
         // Step forward in the history sequence, and update the belief node.
         HistoryEntry *currHistEntry = currHistSeq->addEntry(stateInfo);
         BeliefNode *currNode;
-        bool isNew;
-        std::tie(currNode, isNew) = root->addChild(action, result.observation);
-        if (isNew) {
-            policy_->enlistNode(currNode);
-        }
+        policy_->addBeliefNode(root, action, result.observation);
         registerParticle(currNode, currHistEntry, stateInfo);
 
         // We're not going any deeper, so we retrieve the immediate reward for
@@ -189,12 +185,7 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
 
         // Step forward in the history, and update the belief node.
         currHistEntry = currHistSeq->addEntry(nextStateInfo);
-        bool isNew;
-        std::tie(currNode, isNew) = currNode->addChild(result.action,
-                    result.observation);
-        if (isNew) {
-            policy_->enlistNode(currNode);
-        }
+        policy_->addBeliefNode(currNode, result.action, result.observation);
         registerParticle(currNode, currHistEntry, nextStateInfo);
 
         if (rolloutUsed) {
@@ -570,13 +561,7 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action,
         cerr << "Could not generate new particles!" << endl;
     }
 
-    bool isNew;
-    std::tie(nextNode, isNew) = currNode->addChild(action, obs);
-    if (isNew) {
-        policy_->enlistNode(nextNode);
-    } else {
-        cerr << "Child should not have existed..." << endl;
-    }
+    policy_->addBeliefNode(currNode, action, obs);
 
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
 
@@ -804,12 +789,7 @@ void Solver::modifHistSeqFr(HistorySequence *history,
         hEntry->action_ = *itAct;
         hEntry->observation_ = *itObs;
         hEntry->immediateReward_ = *itRew;
-        bool isNew;
-        std::tie(b,
-                isNew) = hEntry->owningBeliefNode_->addChild(*itAct, *itObs);
-        if (isNew) {
-            policy_->enlistNode(b);
-        }
+        policy_->addBeliefNode(hEntry->owningBeliefNode_, *itAct, *itObs);
         hIdx++;
         itSt++;
         itAct++;
@@ -831,10 +811,7 @@ void Solver::modifHistSeqFr(HistorySequence *history,
             }
             registerParticle(b, hEntry, s);
             hEntry->hasBeenBackedUp_ = false;
-            std::tie(b, isNew) = b->addChild(*itAct, *itObs);
-            if (isNew) {
-                policy_->enlistNode(b);
-            }
+            policy_->addBeliefNode(b, *itAct, *itObs);
         }
         if (itSt != modifStSeq.end()) {
             currDisc = currDisc * model_->getDiscountFactor();
@@ -901,12 +878,7 @@ void Solver::modifHistSeqFrTo(HistorySequence *history,
         hEntry->immediateReward_ = *itRew;
 
         hEntry->hasBeenBackedUp_ = false;
-        bool isNew;
-        std::tie(b,
-                isNew) = hEntry->owningBeliefNode_->addChild(*itAct, *itObs);
-        if (isNew) {
-            policy_->enlistNode(b);
-        }
+        policy_->addBeliefNode(hEntry->owningBeliefNode_, *itAct, *itObs);
         hIdx++;
         itSt++;
         itAct++;
@@ -929,11 +901,7 @@ void Solver::modifHistSeqFrTo(HistorySequence *history,
             }
             hEntry->hasBeenBackedUp_ = false;
             registerParticle(b, hEntry, s);
-            std::tie(b, isNew) = b->addChild(*itAct,
-                        *itObs);
-            if (isNew) {
-                policy_->enlistNode(b);
-            }
+            policy_->addBeliefNode(b, *itAct, *itObs);
         }
 
         if (hIdx <= nOrgEntries) {
@@ -957,11 +925,7 @@ void Solver::modifHistSeqFrTo(HistorySequence *history,
             registerParticle(b, itH->get(), (*itH)->stateInfo_);
             (*itH)->hasBeenBackedUp_ = false;
             if ((*itH)->action_ >= 0) {
-                std::tie(b, isNew) = b->addChild(*itAct,
-                            *itObs);
-                if (isNew) {
-                    policy_->enlistNode(b);
-                }
+                policy_->addBeliefNode(b, *itAct, *itObs);
             }
         }
     } else {
