@@ -78,7 +78,7 @@ class ProgramOptions {
         po::options_description problem("Problem settings");
         problem.add_options()
                     ("problem.discountFactor", po::value<double>(),
-                            "discount factor");
+                            "the discount factor for the POMDP");
         return problem;
     }
 
