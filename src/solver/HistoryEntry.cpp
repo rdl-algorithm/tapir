@@ -20,7 +20,7 @@ HistoryEntry::HistoryEntry(StateInfo *stateInfo, long seqId, long entryId) :
     entryId_(entryId),
     discount_(1.0),
     immediateReward_(0),
-    qVal_(0),
+    totalDiscountedReward_(0),
     owningBeliefNode_(nullptr) {
 }
 

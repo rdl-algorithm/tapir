@@ -56,8 +56,8 @@ class HistoryEntry {
     double discount_;
     /** Non-discounted immediate reward. */
     double immediateReward_;
-    /** Discounted expected total reward. */
-    double qVal_;
+    /** Total discounted reward. */
+    double totalDiscountedReward_;
 
     /** The belief node this entry belong to. */
     BeliefNode *owningBeliefNode_;

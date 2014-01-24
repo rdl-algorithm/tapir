@@ -121,9 +121,9 @@ void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
         // the state alone.
         currHistEntry->discount_ = discountFactor;
         currHistEntry->immediateReward_ = model_->getReward(*nextState);
-        currHistEntry->qVal_ = discountFactor * currHistEntry->immediateReward_;
-        firstHistEntry->qVal_ = result.immediateReward + currHistEntry->qVal_;
-        root->updateQValue(result.action, firstHistEntry->qVal_);
+        currHistEntry->totalDiscountedReward_ = discountFactor * currHistEntry->immediateReward_;
+        firstHistEntry->totalDiscountedReward_ = result.immediateReward + currHistEntry->totalDiscountedReward_;
+        root->updateQValue(result.action, firstHistEntry->totalDiscountedReward_);
     }
 
     // Start expanding the tree.
@@ -198,12 +198,12 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
         registerParticle(currNode, currHistEntry, nextStateInfo);
 
         if (rolloutUsed) {
-            currHistEntry->qVal_ = qVal;
+            currHistEntry->totalDiscountedReward_ = qVal;
         } else {
             if (done) {
                 currHistEntry->immediateReward_ = model_->getReward(
                             *nextStateInfo->getState());
-                currHistEntry->qVal_ = currHistEntry->discount_
+                currHistEntry->totalDiscountedReward_ = currHistEntry->discount_
                     * currHistEntry->immediateReward_;
             }
         }
@@ -221,22 +221,22 @@ void Solver::backup(HistorySequence *history) {
             history->histSeq_.rbegin());
     double totRew;
     if ((*itHist)->action_ == -1) {
-        totRew = (*itHist)->qVal_;
+        totRew = (*itHist)->totalDiscountedReward_;
     } else {
-        totRew = (*itHist)->qVal_ = (*itHist)->discount_
+        totRew = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
                 * (*itHist)->immediateReward_;
     }
     itHist++;
     for (; itHist != history->histSeq_.rend(); itHist++) {
         if ((*itHist)->hasBeenBackedUp_) {
-            double prevTotRew = (*itHist)->qVal_;
-            totRew = (*itHist)->qVal_ = (*itHist)->discount_
+            double prevTotRew = (*itHist)->totalDiscountedReward_;
+            totRew = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
                     * (*itHist)->immediateReward_ + totRew;
             (*itHist)->owningBeliefNode_->updateQValue((*itHist)->action_,
                     prevTotRew,
                     totRew, false);
         } else {
-            totRew = (*itHist)->qVal_ = (*itHist)->discount_
+            totRew = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
                     * (*itHist)->immediateReward_ + totRew;
             (*itHist)->owningBeliefNode_->updateQValue((*itHist)->action_,
                     totRew);
@@ -598,9 +598,9 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action,
         histEntry->immediateReward_ = model_->getReward(*state);
         histEntry->discount_ = currentDiscount;
         if (model_->isTerm(*state)) {
-            histEntry->qVal_ = currentDiscount * histEntry->immediateReward_;
+            histEntry->totalDiscountedReward_ = currentDiscount * histEntry->immediateReward_;
         } else {
-            histEntry->qVal_ = currentDiscount
+            histEntry->totalDiscountedReward_ = currentDiscount
                 * (histEntry->immediateReward_
                    + disc * model_->getDefaultVal());
         }
@@ -686,14 +686,14 @@ void Solver::updatePol(std::set<HistorySequence *> &affectedHistSeq) {
                             *currHistEntry->stateInfo_->getState(),
                             actSelected);
                 if (result.isTerminal) {
-                    currHistEntry->qVal_ = (currHistEntry->discount_
+                    currHistEntry->totalDiscountedReward_ = (currHistEntry->discount_
                                             * (result.immediateReward
                                                + discountFactor
                                                * model_->getReward(
                                                        *result.nextState)));
                 } else {
                     double nxtQVal = model_->solveHeuristic(*result.nextState);
-                    currHistEntry->qVal_ =
+                    currHistEntry->totalDiscountedReward_ =
                         (currHistEntry->discount_
                          * (result.immediateReward
                             + discountFactor * nxtQVal));
@@ -702,15 +702,15 @@ void Solver::updatePol(std::set<HistorySequence *> &affectedHistSeq) {
                 currHistEntry->immediateReward_ = model_->getReward(
                             *currHistEntry->stateInfo_->getState(),
                             currHistEntry->action_);
-                double prevRew = currHistEntry->qVal_;
-                currHistEntry->qVal_ =
+                double prevRew = currHistEntry->totalDiscountedReward_;
+                currHistEntry->totalDiscountedReward_ =
                     (currHistEntry->discount_
                      * currHistEntry->immediateReward_
                      + sequence->histSeq_[sequence->endAffectedIdx_
-                                          + 1]->qVal_);
+                                          + 1]->totalDiscountedReward_);
                 currHistEntry->owningBeliefNode_->updateQValue(
                         currHistEntry->action_,
-                        prevRew, currHistEntry->qVal_, false);
+                        prevRew, currHistEntry->totalDiscountedReward_, false);
             }
             updateVal(sequence);
             break;
@@ -995,15 +995,15 @@ void Solver::updateVal(HistorySequence *histSeq) {
     double prevRew;
     long startAffectedIdx = histSeq->startAffectedIdx_;
     long endAffectedIdx = histSeq->endAffectedIdx_;
-    double totRew = histSeq->histSeq_[endAffectedIdx]->qVal_;
+    double totRew = histSeq->histSeq_[endAffectedIdx]->totalDiscountedReward_;
     HistoryEntry *currHistEntry;
     for (long i = endAffectedIdx - 1; i >= startAffectedIdx; i--) {
         currHistEntry = histSeq->get(i);
-        prevRew = currHistEntry->qVal_;
+        prevRew = currHistEntry->totalDiscountedReward_;
         currHistEntry->immediateReward_ = model_->getReward(
                     *currHistEntry->stateInfo_->getState(),
                     currHistEntry->action_);
-        totRew = currHistEntry->qVal_ = currHistEntry->discount_
+        totRew = currHistEntry->totalDiscountedReward_ = currHistEntry->discount_
                 * currHistEntry->immediateReward_ + totRew;
         currHistEntry->owningBeliefNode_->updateQValue(currHistEntry->action_,
                 prevRew,
@@ -1012,8 +1012,8 @@ void Solver::updateVal(HistorySequence *histSeq) {
 
     for (long i = startAffectedIdx - 1; i >= 0; i--) {
         currHistEntry = histSeq->get(i);
-        prevRew = currHistEntry->qVal_;
-        totRew = currHistEntry->qVal_ = currHistEntry->discount_
+        prevRew = currHistEntry->totalDiscountedReward_;
+        totRew = currHistEntry->totalDiscountedReward_ = currHistEntry->discount_
                 * currHistEntry->immediateReward_ + totRew;
         currHistEntry->owningBeliefNode_->updateQValue(currHistEntry->action_,
                 prevRew,

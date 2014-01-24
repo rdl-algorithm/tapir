@@ -128,7 +128,7 @@ void TextSerializer::save(HistoryEntry &entry, std::ostream &os) {
        << entry.stateInfo_->id_ << " " << entry.action_ << " < ";
     save(entry.observation_, os);
     os << " > " << entry.discount_ << " " << entry.immediateReward_ << " "
-       << entry.qVal_ << " ) ";
+       << entry.totalDiscountedReward_ << " ) ";
     save(*(entry.stateInfo_), os);
 }
 
@@ -138,7 +138,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     is >> tmpStr >> tmpStr >> entry.seqId_ >> entry.entryId_ >> tmpStr >> tmpStr
     >> stateId >> entry.action_ >> tmpStr;
     load(entry.observation_, is);
-    is >> tmpStr >> entry.discount_ >> entry.immediateReward_ >> entry.qVal_
+    is >> tmpStr >> entry.discount_ >> entry.immediateReward_ >> entry.totalDiscountedReward_
     >> tmpStr;
     entry.hasBeenBackedUp_ = true;
     entry.stateInfo_ = solver_->allStates_->getStateById(stateId);
