@@ -54,9 +54,9 @@ Problem parameters can be changed via a config file, which can be passed to the
 executable via an argument of [-c cfg-file]; see tests/default.cfg for the
 default parameter values for each problem.
 
-Implementing a POMDP
---------------------
-Implementation of a specific POMDP requires an implementation of the following
+Implementing a POMDP Problem
+-----------------------------
+Implementation of a specific POMDP problem requires an implementation of the following
 interfaces:
 
 - **Model** (solver/Model.hpp)
