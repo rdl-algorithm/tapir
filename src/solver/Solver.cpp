@@ -109,8 +109,8 @@ void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
 
         // Step forward in the history sequence, and update the belief node.
         HistoryEntry *currHistEntry = currHistSeq->addEntry(stateInfo);
-        BeliefNode *currNode;
-        policy_->addBeliefNode(root, action, result.observation);
+        BeliefNode *currNode = (
+                policy_->addBeliefNode(root, action, result.observation));
         registerParticle(currNode, currHistEntry, stateInfo);
 
         // We're not going any deeper, so we retrieve the immediate reward for
@@ -185,7 +185,7 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
 
         // Step forward in the history, and update the belief node.
         currHistEntry = currHistSeq->addEntry(nextStateInfo);
-        policy_->addBeliefNode(currNode, result.action, result.observation);
+        currNode = policy_->addBeliefNode(currNode, result.action, result.observation);
         registerParticle(currNode, currHistEntry, nextStateInfo);
 
         if (rolloutUsed) {
@@ -538,7 +538,6 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action,
         Observation &obs,
         long timeStep) {
     cerr << "In add particle due to depletion" << endl;
-    BeliefNode *nextNode = nullptr;
 
     std::vector<State *> particles;
     std::vector<HistoryEntry *>::iterator it;
@@ -561,10 +560,8 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action,
         cerr << "Could not generate new particles!" << endl;
     }
 
-    policy_->addBeliefNode(currNode, action, obs);
-
+    BeliefNode *nextNode = policy_->addBeliefNode(currNode, action, obs);
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
-
         StateInfo *stateInfo = allStates_->add(std::move(uniqueStatePtr));
         State *state = stateInfo->getState();
 

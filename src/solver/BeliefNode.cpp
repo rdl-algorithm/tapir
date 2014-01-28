@@ -106,7 +106,7 @@ void BeliefNode::updateBestValue() {
 
 void BeliefNode::add(HistoryEntry *newHistEntry) {
     tLastAddedParticle_ = (double) (std::clock() - startTime)
-        * 10000/ CLOCKS_PER_SEC;
+        * 10000 / CLOCKS_PER_SEC;
     particles_.push_back(newHistEntry);
     nParticles_++;
 }
