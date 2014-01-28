@@ -14,6 +14,7 @@ class HistoryEntry {
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
+    friend class HistoryEntryComparator;
 
     /** Constructs a new history entry with the given state, sequence ID, and
      * entry ID.

@@ -42,18 +42,20 @@ void StateInfo::setId() {
     currId++;
 }
 
-void StateInfo::addHistoryEntry(HistoryEntry *h) {
-    usedInHistoryEntries_.push_back(h);
+void StateInfo::addHistoryEntry(HistoryEntry *entry) {
+    usedInHistoryEntries_.insert(entry);
 }
 
-void StateInfo::addBeliefNode(BeliefNode *b) {
-    usedInBeliefNodes_.insert(b);
+void StateInfo::removeHistoryEntry(HistoryEntry *entry) {
+    usedInHistoryEntries_.erase(entry);
 }
 
-void StateInfo::delUsedInHistEntry(HistoryEntry *toBeDeleted) {
-    std::vector<HistoryEntry *>::iterator it = std::find(
-                usedInHistoryEntries_.begin(), usedInHistoryEntries_.end(),
-                toBeDeleted);
-    (*it) = nullptr;
+void StateInfo::addBeliefNode(BeliefNode *node) {
+    usedInBeliefNodes_.insert(node);
 }
+
+void StateInfo::removeBeliefNode(BeliefNode *node) {
+    usedInBeliefNodes_.erase(node);
+}
+
 } /* namespace solver */

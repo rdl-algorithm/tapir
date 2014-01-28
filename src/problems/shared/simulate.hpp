@@ -138,6 +138,13 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     }
     os.close();
 
+    // Write the final policy to a file.
+    cerr << "Saving final policy" << endl;
+    std::ofstream outFile;
+    outFile.open("final.pol");
+    serializer->save(outFile);
+    outFile.close();
+
     return 0;
 }
 

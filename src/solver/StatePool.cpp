@@ -17,7 +17,7 @@ class State;
 StatePool::StatePool(unsigned long nSDim) :
     nSDim_(nSDim),
     allStates_(),
-    allStatesIdx_(),
+    statesByIndex_(),
     stateIndex_(std::make_unique<RTree>(nSDim_, this)) {
 }
 
@@ -26,34 +26,35 @@ StatePool::~StatePool() {
 
 void StatePool::reset() {
     allStates_.clear();
-    allStatesIdx_.clear();
+    statesByIndex_.clear();
     stateIndex_->reset();
     StateInfo::currId = 0;
 }
 
-StateInfo *StatePool::add(std::unique_ptr<State> state) {
-    std::unique_ptr<StateInfo> newInfo = std::make_unique<StateInfo>(
-                std::move(state));
-    StateInfo *stateInfo = newInfo.get();
-    std::pair<StateInfoOwningSet::iterator,bool> ret = allStates_.insert(
+StateInfo *StatePool::add(std::unique_ptr<StateInfo> newInfo) {
+    std::pair<StateInfoOwningSet::iterator, bool> ret = allStates_.insert(
             std::move(newInfo));
+    StateInfo *stateInfo = ret.first->get();
     if (ret.second) {
+        // New state - add its info.
         stateInfo->setId();
-        if (stateInfo->id_ != (long)allStatesIdx_.size()) {
+        if (stateInfo->id_ != (long)statesByIndex_.size()) {
             std::cerr << "Error: wrong size in StatePool" << std::endl;
         }
-        allStatesIdx_.push_back(stateInfo);
+        statesByIndex_.push_back(stateInfo);
         addToStateIndex(stateInfo);
-    } else {
-        stateInfo = ret.first->get();
     }
     return stateInfo;
 }
 
-StateInfo *StatePool::getStateById(long id) {
-    return allStatesIdx_[id];
+StateInfo *StatePool::add(std::unique_ptr<State> state) {
+    return add(std::make_unique<StateInfo>(std::move(state)));
+
 }
 
+StateInfo *StatePool::getStateById(long id) {
+    return statesByIndex_[id];
+}
 
 StateIndex *StatePool::getStateIndex() {
     return stateIndex_.get();

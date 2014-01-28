@@ -116,35 +116,9 @@ class Solver {
             double minimumDiscount);
 
     /* ------------------ Methods for handling model changes ------------------- */
-    /** Identifies which parts of which history sequences are affected by the
-     * changes to the model.
-     */
-    void identifyAffectedPol(std::vector<std::unique_ptr<State>> &affectedRage,
-            std::vector<ChangeType> &chTypes,
-            std::set<HistorySequence *> &affectedHistSeq);
-    /** Updates the affected history sequences */
-    void updatePol(std::set<HistorySequence *> &affectedHistSeq);
-    /** Resets the affeted history sequences */
-    void resetAffected(std::set<HistorySequence *> affectedHistSeq);
 
-    /** Updates the q-values based on the changes to reward values
-     * within a history sequence.
-     */
-    void updateVal(HistorySequence *histSeq);
-    /** Undoes the effects of backing up a history sequence */
-    void removePathFrBelNode(HistorySequence *history);
 
-    void modifHistSeqFr(HistorySequence *history,
-            std::vector<std::unique_ptr<State>> &modifStSeq,
-            std::vector<Action> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq);
-    void modifHistSeqFrTo(HistorySequence *history,
-            std::vector<std::unique_ptr<State>> &modifStSeq,
-            std::vector<Action> &modifActSeq,
-            std::vector<Observation> &modifObsSeq,
-            std::vector<double> &modifRewSeq);
-
+    /* ------------------ Private data fields ------------------- */
     /** The serializer to be used with this solver. */
     Serializer *serializer_;
     /** The random number generator used. */

@@ -12,13 +12,27 @@
 #include "ChangeType.hpp"               // for ChangeType
 #include "State.hpp"                    // for State, operator==
 #include "StateInfo.hpp"                // for StateInfo
-#include "statesets.hpp"
 
 namespace solver {
 class StateIndex;
 
 class StatePool {
   public:
+    struct Hash {
+        std::size_t operator()(std::unique_ptr<StateInfo> const &stateInfo) const {
+            return stateInfo->getState()->hash();
+        }
+    };
+    struct EqualityTest {
+        bool operator()(std::unique_ptr<StateInfo> const &s1,
+                std::unique_ptr<StateInfo> const &s2) const {
+            return *(s1->getState()) == *(s2->getState());
+        }
+    };
+    typedef std::unordered_set<std::unique_ptr<StateInfo>, Hash,
+            EqualityTest> StateInfoOwningSet;
+
+
     friend class TextSerializer;
 
     StatePool(unsigned long nSDim);
@@ -29,6 +43,7 @@ class StatePool {
     StatePool &operator=(StatePool &&) = delete;
 
     void reset();
+    StateInfo *add(std::unique_ptr<StateInfo> stateInfo);
     StateInfo *add(std::unique_ptr<State> state);
     StateInfo *getStateById(long stId);
 
@@ -38,7 +53,7 @@ class StatePool {
   private:
     unsigned long nSDim_;
     StateInfoOwningSet allStates_;
-    std::vector<StateInfo *> allStatesIdx_;
+    std::vector<StateInfo *> statesByIndex_;
     std::unique_ptr<StateIndex> stateIndex_;
 };
 } /* namespace solver */

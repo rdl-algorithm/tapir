@@ -5,13 +5,14 @@
 
 #include <map>                          // for map, map<>::value_compare
 #include <memory>                       // for unique_ptr
+#include <set>
 #include <utility>                      // for pair
-#include <vector>                       // for vector
 
 #include "defs.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
+#include "ParticleSet.hpp"
 
 namespace solver {
 class ActionNode;
@@ -45,7 +46,9 @@ class BeliefNode {
     double getBestMeanQValue();
 
     /** Adds the given history entry to this belief node. */
-    void add(HistoryEntry *newHistEntry);
+    void addParticle(HistoryEntry *newHistEntry);
+    /** Removes the given history entry from this belief node. */
+    void removeParticle(HistoryEntry *histEntry);
 
     /** Adds a child for the given action and observation;
      * returns the child node, and a boolean representing
@@ -84,7 +87,7 @@ class BeliefNode {
     }
     /** Returns the number of particles in this node. */
     long getNParticles() {
-        return nParticles_;
+        return particles_.size();
     }
     /** Returns the current number of action children of this node. */
     unsigned long getNActChildren() {
@@ -99,8 +102,6 @@ class BeliefNode {
 
     /** The ID of this node. */
     long id_;
-    /** The number of particles in this node. */
-    long nParticles_;
     /** The next untried action to explore. */
     Action nextActionToTry_;
     /** The best mean q-value of any action child. */
@@ -115,8 +116,8 @@ class BeliefNode {
     /** A previously found near neighbor for this belief node. */
     BeliefNode *nnBel_;
 
-    /** The particles for this belief node. */
-    std::vector<HistoryEntry *> particles_;
+    /** The set of particles belonging to this node. */
+    ParticleSet particles_;
 
     typedef std::map<Action, std::unique_ptr<ActionNode>> ActionMap;
     /** A mapping of actions to action children for this node. */

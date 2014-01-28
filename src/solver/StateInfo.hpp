@@ -27,9 +27,12 @@ class StateInfo {
 
     long getId();
     void setId();
-    void addHistoryEntry(HistoryEntry *h);
-    void addBeliefNode(BeliefNode *b);
-    void delUsedInHistEntry(HistoryEntry *toBeDeleted);
+
+    void addHistoryEntry(HistoryEntry *entry);
+    void removeHistoryEntry(HistoryEntry *entry);
+
+    void addBeliefNode(BeliefNode *node);
+    void removeBeliefNode(BeliefNode *node);
 
     State *getState() const {
         return state_.get();
@@ -43,7 +46,7 @@ class StateInfo {
     std::unique_ptr<State> state_;
     long id_;
 
-    std::vector<HistoryEntry *> usedInHistoryEntries_;
+    std::set<HistoryEntry *> usedInHistoryEntries_;
     std::set<BeliefNode *> usedInBeliefNodes_;
 
     ChangeType changeType_;

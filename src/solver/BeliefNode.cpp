@@ -7,10 +7,9 @@
 #include <map>                          // for _Rb_tree_iterator, map<>::iterator, map
 #include <memory>                       // for unique_ptr
 #include <random>                       // for uniform_int_distribution
+#include <set>
 #include <tuple>                        // for tie, tuple
-#include <type_traits>                  // for remove_reference<>::type
 #include <utility>                      // for pair, make_pair, move
-#include <vector>                       // for vector
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
 
@@ -19,6 +18,7 @@
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "Observation.hpp"              // for Observation
+#include "ParticleSet.hpp"
 #include "State.hpp"                    // for State
 
 using std::cerr;
@@ -34,7 +34,6 @@ BeliefNode::BeliefNode() :
 
 BeliefNode::BeliefNode(long id) :
     id_(id),
-    nParticles_(0),
     nextActionToTry_(0),
     bestMeanQValue_(0),
     bestAction_(-1),
@@ -56,7 +55,7 @@ Action BeliefNode::getUcbAction(double ucbExploreCoefficient) {
     double tmpVal;
     ActionMap::iterator actionIter = actChildren_.begin();
     double maxVal = (actionIter->second->meanQValue_ + ucbExploreCoefficient
-                     *std::sqrt(std::log(nParticles_)
+                     *std::sqrt(std::log(getNParticles())
                              / actionIter->second->nParticles_));
     Action bestActId = actionIter->first;
     actionIter++;
@@ -64,7 +63,7 @@ Action BeliefNode::getUcbAction(double ucbExploreCoefficient) {
         tmpVal =
             (actionIter->second->meanQValue_ + ucbExploreCoefficient
              * std::sqrt(
-                     std::log(nParticles_)
+                     std::log(getNParticles())
                      / actionIter->second->nParticles_));
         if (maxVal < tmpVal) {
             maxVal = tmpVal;
@@ -104,11 +103,14 @@ void BeliefNode::updateBestValue() {
     }
 }
 
-void BeliefNode::add(HistoryEntry *newHistEntry) {
+void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
     tLastAddedParticle_ = (double) (std::clock() - startTime)
         * 10000 / CLOCKS_PER_SEC;
-    particles_.push_back(newHistEntry);
-    nParticles_++;
+    particles_.add(newHistEntry);
+}
+
+void BeliefNode::removeParticle(HistoryEntry *histEntry) {
+    particles_.remove(histEntry);
 }
 
 std::pair<BeliefNode *, bool> BeliefNode::addChild(Action const &action,
@@ -125,8 +127,7 @@ std::pair<BeliefNode *, bool> BeliefNode::addChild(Action const &action,
 }
 
 HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) {
-    return particles_[std::uniform_int_distribution<unsigned long>(
-                          0, nParticles_ - 1)(*randGen)];
+    return particles_.getRandom(randGen);
 }
 
 void BeliefNode::updateQValue(Action &action, double increase) {
@@ -151,11 +152,11 @@ void BeliefNode::updateQValue(Action &action, double oldValue, double newValue,
 double BeliefNode::distL1Independent(BeliefNode *b) {
     double dist = 0.0;
     for (HistoryEntry *entry1 : particles_) {
-        for (HistoryEntry *entry2 : b->particles_) {
+        for (HistoryEntry *entry2 : particles_) {
             dist += entry1->getState()->distanceTo(*entry2->getState());
         }
     }
-    return dist / (nParticles_ * b->nParticles_);
+    return dist / (getNParticles() * b->getNParticles());
 }
 
 BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) {

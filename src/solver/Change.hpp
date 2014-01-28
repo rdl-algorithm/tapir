@@ -1,8 +1,9 @@
 #ifndef SOLVER_CHANGE_HPP_
 #define SOLVER_CHANGE_HPP_
 
+#include <unordered_set>
+
 #include "ChangeType.hpp"
-#include "statesets.hpp"
 
 namespace solver {
 class StateIndex;
@@ -14,7 +15,7 @@ class Change {
 
     void markAffectedStates(StateIndex *index);
 
-    StateInfoSet getAffectedStates(StateIndex *index);
+    std::unordered_set<StateInfo*> getAffectedStates(StateIndex *index);
 };
 
 } /* namespace solver */
