@@ -6,7 +6,7 @@
 #include <utility>                      // for move
 #include <vector>                       // for vector, vector<>::iterator
 
-#include "ChangeType.hpp"               // for ChangeType, ChangeType::UNDEFINED
+#include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
 #include "State.hpp"                    // for State
 
 namespace solver {
@@ -20,8 +20,7 @@ StateInfo::StateInfo() :
     state_(nullptr),
     id_(0),
     usedInHistoryEntries_(),
-    usedInBeliefNodes_(),
-    changeType_(ChangeType::UNDEFINED) {
+    changeFlags_(ChangeFlags::UNCHANGED) {
 }
 
 StateInfo::StateInfo(std::unique_ptr<State> state) :
@@ -50,12 +49,12 @@ void StateInfo::removeHistoryEntry(HistoryEntry *entry) {
     usedInHistoryEntries_.erase(entry);
 }
 
-void StateInfo::addBeliefNode(BeliefNode *node) {
-    usedInBeliefNodes_.insert(node);
+void StateInfo::resetChangeFlags() {
+    changeFlags_ = ChangeFlags::UNCHANGED;
 }
 
-void StateInfo::removeBeliefNode(BeliefNode *node) {
-    usedInBeliefNodes_.erase(node);
+void StateInfo::setChangeFlags(ChangeFlags flags) {
+    changeFlags_ |= flags;
 }
 
 } /* namespace solver */

@@ -17,7 +17,7 @@ void SpatialIndexVisitor::visitNode(const SpatialIndex::INode &/*node*/) {
 }
 
 void SpatialIndexVisitor::visitData(const SpatialIndex::IData &data) {
-        visit(statePool_->getStateById(data.getIdentifier()));
+        visit(statePool_->getInfoById(data.getIdentifier()));
 }
 
 void SpatialIndexVisitor::visitData(std::vector<const SpatialIndex::IData*> &/*v*/) {

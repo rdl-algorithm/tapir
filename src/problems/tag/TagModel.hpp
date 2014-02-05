@@ -13,7 +13,7 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
-#include "solver/ChangeType.hpp"        // for ChangeType
+#include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
 
@@ -21,6 +21,7 @@ namespace po = boost::program_options;
 
 namespace solver {
 class State;
+class StatePool;
 } /* namespace solver */
 
 namespace tag {
@@ -52,6 +53,7 @@ class TagModel : public ModelWithProgramOptions {
         WALL = -1
     };
 
+    /** Either you've seen the opponent, or you haven't. 0*/
     enum TagObservation : int {
         UNSEEN = 0,
         SEEN = 1
@@ -84,14 +86,19 @@ class TagModel : public ModelWithProgramOptions {
     /** Generates an untagged state uniformly at random. */
     std::unique_ptr<solver::State> sampleStateUniform();
 
-    bool isTerm(solver::State const &state);
+    bool isTerminal(solver::State const &state);
     double solveHeuristic(solver::State const &state);
     double getDefaultVal();
 
-    solver::Model::StepResult generateStep(solver::State const &state,
+    /* --------------- Black box dynamics ----------------- */
+    virtual std::unique_ptr<solver::State> generateNextState(
+            solver::State const &state, solver::Action const &action);
+    virtual solver::Observation generateObservation(
+            solver::Action const &action, solver::State const &nextState);
+    virtual double getReward(solver::State const &state,
+                solver::Action const &action);
+    virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action);
-    double getReward(solver::State const &state);
-    double getReward(solver::State const &state, solver::Action const &action);
 
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action,
@@ -102,16 +109,7 @@ class TagModel : public ModelWithProgramOptions {
             solver::Observation const &obs);
 
     std::vector<long> loadChanges(char const *changeFilename);
-    void update(long time,
-            std::vector<std::unique_ptr<solver::State>> *affectedRange,
-            std::vector<solver::ChangeType> *typeOfChanges);
-
-    bool modifStSeq(std::vector<solver::State const *> const &states,
-            long startAffectedIdx, long endAffectedIdx,
-            std::vector<std::unique_ptr<solver::State>> *modifStSeq,
-            std::vector<solver::Action> *modifActSeq,
-            std::vector<solver::Observation> *modifObsSeq,
-            std::vector<double> *modifRewSeq);
+    void update(long time, solver::StatePool *pool);
 
     void dispAct(solver::Action const &action, std::ostream &os);
     /** Displays a single cell of the map. */
@@ -124,6 +122,9 @@ class TagModel : public ModelWithProgramOptions {
     /** Initialises the required data structures and variables */
     void initialise();
 
+    /** Generates a random empty grid cell. */
+    GridPosition randomEmptyCell();
+
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
@@ -133,7 +134,7 @@ class TagModel : public ModelWithProgramOptions {
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    solver::Observation makeObs(solver::Action const &action,
+    solver::Observation makeObservation(solver::Action const &action,
             TagState const &state);
     /** Moves the opponent. */
     GridPosition getMovedOpponentPos(GridPosition const &robotPos,
@@ -149,11 +150,6 @@ class TagModel : public ModelWithProgramOptions {
             solver::Action const &action);
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
-
-    /** Encodes the coordinates as an integer. */
-    long encodeGridPosition(GridPosition pos);
-    /** Decodes the coordinates from an integer. */
-    GridPosition decodeGridPosition(long code);
 
     /** The penalty for each movement. */
     double moveCost_;
@@ -171,13 +167,23 @@ class TagModel : public ModelWithProgramOptions {
 
     /** The number of empty cells in the map. */
     long nEmptyCells_;
-    /** The empty cells, numbered; */
-    std::vector<GridPosition> emptyCells_;
 
     /** The environment map in text form. */
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
     std::vector<std::vector<TagCellType>> envMap_;
+
+    /** Represents a change in the Tag model. */
+    struct TagChange {
+        std::string changeType = "";
+        double i0 = 0;
+        double i1 = 0;
+        double j0 = 0;
+        double j1 = 0;
+    };
+
+    /** The changes (scheduled for simulation). */
+    std::map<long, std::vector<TagChange>> changes_;
 
     // General problem parameters
     unsigned long nActions_, nObservations_, nStVars_;

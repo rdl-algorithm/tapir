@@ -9,7 +9,7 @@
 #include "defs.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
-#include "ChangeType.hpp"               // for ChangeType
+#include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Model.hpp"                    // for Model, Model::StepResult
 #include "Observation.hpp"              // for Observation
 
@@ -68,28 +68,17 @@ class Solver {
             double *totImpTime);
 
   private:
-    /** Registers the given history entry with the given belief node,
-     * and updates the StateInfo to be informed of its usage in the given
-     * belief node and history entry.
-     */
-    void registerParticle(BeliefNode *node, HistoryEntry *entry,
-            StateInfo *stateInfo);
-
-    /** Deregisters the given history entry with the given belief node,
-     * and updates the StateInfo to be informed of its usage in the given
-     * belief node and history entry.
-     */
-    void deregisterParticle(BeliefNode *node, HistoryEntry *entry,
-            StateInfo *stateInfo);
-
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
     void singleSearch(double discountFactor, double minimumDiscount);
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
             long startDepth, double discountFactor, double minimumDiscount);
+    /** Continues a pre-existing history sequence from its endpoint. */
+    void continueSearch(HistorySequence *sequence,
+            double discountFactor, double minimumDiscount);
     /** Performs a backup on the given history sequence. */
-    void backup(HistorySequence *history);
+    void backup(HistorySequence *sequence);
 
     /** Uses a rollout method to select an action and get results. */
     std::pair<Model::StepResult, double> getRolloutAction(BeliefNode *belNode,
@@ -116,7 +105,10 @@ class Solver {
             double minimumDiscount);
 
     /* ------------------ Methods for handling model changes ------------------- */
-
+    void applyChanges();
+    void updateSequence(HistorySequence *sequence);
+    /** Negates a backup on the given history sequence. */
+    void undoBackup(HistorySequence *sequence);
 
     /* ------------------ Private data fields ------------------- */
     /** The serializer to be used with this solver. */

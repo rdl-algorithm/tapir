@@ -23,6 +23,10 @@ ActionNode::ActionNode(Action const &action) :
     obsChildren() {
 }
 
+// Default destructor
+ActionNode::~ActionNode() {
+}
+
 void ActionNode::updateQValue(double increase) {
     totalQValue_ += increase;
     if (nParticles_ > 0) {
@@ -32,16 +36,10 @@ void ActionNode::updateQValue(double increase) {
     }
 }
 
-// Default destructor
-ActionNode::~ActionNode() {
-}
-
-void ActionNode::updateQValue(double oldValue, double newValue,
-        bool reduceParticles) {
-    if (reduceParticles) {
-        nParticles_--;
-    }
-    updateQValue(newValue - oldValue);
+void ActionNode::updateQValue(double increase,
+        long deltaNParticles) {
+    nParticles_ += deltaNParticles;
+    updateQValue(increase);
 }
 
 std::pair<BeliefNode *, bool> ActionNode::addChild(Observation const &obs) {
@@ -54,7 +52,6 @@ std::pair<BeliefNode *, bool> ActionNode::addChild(Observation const &obs) {
         obsChildren.push_back(std::move(newEdge));
         added = true;
     }
-    nParticles_++;
     return std::make_pair(beliefChild, added);
 }
 

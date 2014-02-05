@@ -23,8 +23,6 @@ class ParticleSet {
     HistoryEntry *get(unsigned long index);
     bool contains(HistoryEntry *entry);
 
-    HistoryEntry *getRandom(RandomGenerator *randGen);
-
   private:
     std::unordered_map<HistoryEntry *, unsigned long> particleMap_;
     std::vector<HistoryEntry *> particles_;

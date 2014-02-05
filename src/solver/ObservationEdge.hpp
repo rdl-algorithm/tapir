@@ -12,14 +12,14 @@ class ObservationEdge {
   public:
     friend class TextSerializer;
 
+    /** Creates an observation edge without an observation or child!! */
+    ObservationEdge();
     /** Constructs an observation edge with the given observation.
      */
     ObservationEdge(Observation const &obs);
 
-    /** Default destructor. */
+    // Default destructor; copying and moving disallowed!
     ~ObservationEdge();
-
-    /* Copying and moving is disallowed. */
     ObservationEdge(ObservationEdge const &) = delete;
     ObservationEdge(ObservationEdge &&) = delete;
     ObservationEdge &operator=(ObservationEdge const &) = delete;
@@ -34,8 +34,6 @@ class ObservationEdge {
     BeliefNode *getBeliefChild();
 
   private:
-    /** Creates an observation edge without an observation or child! */
-    ObservationEdge();
     /** The observation for this edge. */
     Observation observation_;
     /** The child belief node of this edge. */

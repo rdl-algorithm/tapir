@@ -5,11 +5,11 @@
 
 #include <map>                          // for multimap
 #include <memory>                       // for unique_ptr
-#include <set>                          // for set
+#include <unordered_map>                // for unordered_map
 #include <unordered_set>                // for unordered_set
 #include <vector>                       // for vector
 
-#include "ChangeType.hpp"               // for ChangeType
+#include "ChangeFlags.hpp"               // for ChangeFlags
 #include "State.hpp"                    // for State, operator==
 #include "StateInfo.hpp"                // for StateInfo
 
@@ -17,21 +17,21 @@ namespace solver {
 class StateIndex;
 
 class StatePool {
+    friend class Solver;
   public:
     struct Hash {
-        std::size_t operator()(std::unique_ptr<StateInfo> const &stateInfo) const {
-            return stateInfo->getState()->hash();
+        std::size_t operator()(State * const &state) const {
+            return state->hash();
         }
     };
     struct EqualityTest {
-        bool operator()(std::unique_ptr<StateInfo> const &s1,
-                std::unique_ptr<StateInfo> const &s2) const {
-            return *(s1->getState()) == *(s2->getState());
+        bool operator()(State * const &s1,
+                State * const &s2) const {
+            return *s1 == *s2;
         }
     };
-    typedef std::unordered_set<std::unique_ptr<StateInfo>, Hash,
-            EqualityTest> StateInfoOwningSet;
-
+    typedef std::unordered_map<State *, StateInfo *,
+            Hash, EqualityTest> StateInfoMap;
 
     friend class TextSerializer;
 
@@ -43,18 +43,28 @@ class StatePool {
     StatePool &operator=(StatePool &&) = delete;
 
     void reset();
+
+    StateInfo *getInfo(State *state);
+    StateInfo *getInfoById(long stId);
+
     StateInfo *add(std::unique_ptr<StateInfo> stateInfo);
-    StateInfo *add(std::unique_ptr<State> state);
-    StateInfo *getStateById(long stId);
+    StateInfo *createOrGetInfo(std::unique_ptr<State> state);
 
     StateIndex *getStateIndex();
     void addToStateIndex(StateInfo *stateInfo);
 
+    void resetChangeFlags(StateInfo *stateInfo);
+    void setChangeFlags(StateInfo *stateInfo, ChangeFlags flags);
+    void resetAffectedStates();
+    std::unordered_set<StateInfo *> getAffectedStates();
+
   private:
     unsigned long nSDim_;
-    StateInfoOwningSet allStates_;
-    std::vector<StateInfo *> statesByIndex_;
+    StateInfoMap stateInfoMap_;
+    std::vector<std::unique_ptr<StateInfo>> statesByIndex_;
     std::unique_ptr<StateIndex> stateIndex_;
+
+    std::unordered_set<StateInfo *> changedStates_;
 };
 } /* namespace solver */
 

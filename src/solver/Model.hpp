@@ -8,31 +8,21 @@
 #include "defs.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
-#include "ChangeType.hpp"               // for ChangeType
+#include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"                    // for State
 
 namespace solver {
+class StatePool;
+
 class Model {
   public:
-    /** Represents the results of a step in the model, including the next state,
-     * observation, and reward.
-     */
-    struct StepResult {
-        Action action = 0;
-        Observation observation = Observation();
-        double immediateReward = 0;
-        std::unique_ptr<State> nextState = std::unique_ptr<State>();
-        bool isTerminal = false;
-    };
-
     /** Constructor - stores the RandomGenerator for this model. */
     Model(RandomGenerator *randGen) : randGen_(randGen) {
     }
 
-    /** Destructor must be virtual */
+    // Default destructor; copying and moving disallowed!
     virtual ~Model() = default;
-    /** Moving and copying is disallowed. */
     Model(Model const &) = delete;
     Model(Model &&) = delete;
     Model &operator=(Model const &) = delete;
@@ -95,30 +85,46 @@ class Model {
     virtual double getMaxNnDistance() = 0;
 
 
-    /* --------------- Start virtual functions ----------------- */
+    /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the belief vector. */
     virtual std::unique_ptr<State> sampleAnInitState() = 0;
     /** Returns true iff the given state is terminal. */
-    virtual bool isTerm(State const &state) = 0;
+    virtual bool isTerminal(State const &state) = 0;
     /** Approximates the q-value of a state */
     virtual double solveHeuristic(State const &state) = 0;
     /** Returns the default q-value */
     virtual double getDefaultVal() = 0;
 
-    /** Generates the next state, an observation, and the reward. */
-    virtual StepResult generateStep(State const &state,
+    /* --------------- Black box dynamics ----------------- */
+    /** Generates a next state from the previous state and the action taken. */
+    virtual std::unique_ptr<State> generateNextState(State const &state,
             Action const &action) = 0;
-    /** Returns the reward for the given state. */
-    virtual double getReward(State const &state) = 0;
+    /** Generates an observation, given the action and resulting next state. */
+    virtual Observation generateObservation(Action const &action,
+            State const &nextState) = 0;
     /** Returns the reward for the given state and action. */
     virtual double getReward(State const &state, Action const &action) = 0;
 
+    /** Represents the results of a complete step in the model,
+     * including the next state, observation, and reward.
+     */
+    struct StepResult {
+        Action action = 0;
+        Observation observation = Observation();
+        double immediateReward = 0;
+        std::unique_ptr<State> nextState = std::unique_ptr<State>();
+        bool isTerminal = false;
+    };
+    /** Generates the next state, an observation, and the reward. */
+     virtual StepResult generateStep(State const &state,
+            Action const &action) = 0;
+
+    /* ------------ Methods for handling particle depletion -------------- */
     /** Generates new state particles based on the state particles of the
      * previous node, as well as on the action and observation.
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
-            Action const &action,
-            Observation const &obs,
+            Action const &action, Observation const &obs,
             std::vector<State *> const &previousParticles) = 0;
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
@@ -127,32 +133,17 @@ class Model {
      * incompatible with the current observation.
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
-            Action const &,
-            Observation const &obs) = 0;
+            Action const &, Observation const &obs) = 0;
 
+    /* -------------- Methods for handling model changes ---------------- */
     /** Loads future model changes from the given file. */
     virtual std::vector<long> loadChanges(char const *changeFilename) = 0;
-
-    /** Updates the model to reflect the changes at the given time, and
-     * returns the range of states that is affected by the change.
+    /** Updates the model to reflect the changes at the given time,
+     * and marks the affected states within the state pool.
      */
-    virtual void update(long time,
-            std::vector<std::unique_ptr<State>> *affectedRange,
-            std::vector<ChangeType> *typeOfChanges) = 0;
+    virtual void update(long time, StatePool *pool) = 0;
 
-    /** Generates a modified version of the given sequence of states, between
-     * the start and end indices.
-     *
-     * Should return true if modifications have actually been made, and false
-     * otherwise.
-     */
-    virtual bool modifStSeq(std::vector<State const *> const &states,
-            long startAffectedIdx, long endAffectedIdx,
-            std::vector<std::unique_ptr<State>> *modifStSeq,
-            std::vector<Action> *modifActSeq,
-            std::vector<Observation> *modifObsSeq,
-            std::vector<double> *modifRewSeq) = 0;
-
+    /* --------------- Pretty printing methods ----------------- */
     /** Displays the given action on the given output stream. */
     virtual void dispAct(Action const &action, std::ostream &os) = 0;
     /** Displays the given observation to the given output stream. */

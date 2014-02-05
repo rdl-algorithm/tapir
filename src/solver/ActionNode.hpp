@@ -17,26 +17,27 @@ class ActionNode {
     friend class BeliefNode;
     friend class TextSerializer;
 
+    /** Constructs an action node without an action!! */
+    ActionNode();
     /** Creates an empty action node with the given action */
     ActionNode(Action const &action);
 
-    /** Default destructor. */
+    // Default destructor; copying and moving disallowed!
     ~ActionNode();
-    /* Copying and moving is disallowed. */
     ActionNode(ActionNode const &) = delete;
     ActionNode(ActionNode &&) = delete;
     ActionNode &operator=(ActionNode const &) = delete;
     ActionNode &operator=(ActionNode &&) = delete;
 
     /** Updates the q-value, as would occur on adding the given amount to the
-     * total.
+     * total (negative for a decrease).
      */
     void updateQValue(double increase);
-    /** Updates the q-value, as would occur on replacing the old value with
-     * the new value (and reducing the # of particles by 1 if reduceParticles
-     * is true).
+    /** Updates the q-value, as would occur on adding the given amount to the
+     * total, and changing the number of particles by deltaNParticles (e.g.
+     * +1 to count a new particle; -1 to remove a particle.
      */
-    void updateQValue(double oldValue, double newValue, bool reduceParticles);
+    void updateQValue(double increase, long deltaNParticles);
 
     /** Adds a new ObservationEdge with the given observation, creating
      * a new belief node if necessary.
@@ -49,12 +50,11 @@ class ActionNode {
     BeliefNode *getBeliefChild(Observation const &obs);
 
   private:
-    /** Constructs an action node without an action! */
-    ActionNode();
-
     /** The action for this node. */
     Action action_;
-    /** The number of particles for this node. */
+    /** The number of particles being counted towards the q-value for this
+     * node.
+     */
     unsigned long nParticles_;
     /** The total q-value of this node. */
     double totalQValue_;

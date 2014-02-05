@@ -17,10 +17,9 @@ class BeliefTree {
 
     /* Constructs a belief tree with only a root. */
     BeliefTree();
-    /** Default destructor. */
-    ~BeliefTree();
 
-    /* Copying and moving is disallowed. */
+    // Default destructor; copying and moving disallowed!
+    ~BeliefTree();
     BeliefTree(BeliefTree const &) = delete;
     BeliefTree(BeliefTree &&) = delete;
     BeliefTree &operator=(BeliefTree const &) = delete;
@@ -38,10 +37,8 @@ class BeliefTree {
      * Adds a child belief node to the given belief node; this node will be
      * added to the flattened node list if and only if it is actually new.
      */
-    BeliefNode *addBeliefNode(BeliefNode *node,
+    BeliefNode *createOrGetChild(BeliefNode *node,
             Action const &action, Observation const &observation);
-    /** Adds a node to the flattened list of nodes. */
-    void enlistNode(BeliefNode *node);
 
   private:
     std::unique_ptr<BeliefNode> root_;

@@ -20,6 +20,7 @@ class HistoryEntry;
 
 class BeliefNode {
   public:
+    friend class BeliefTree;
     friend class Solver;
     friend class TextSerializer;
 
@@ -27,10 +28,9 @@ class BeliefNode {
     BeliefNode();
     /** Constructs a new belief node with the given ID. */
     BeliefNode(long id);
-    /** Default destructor. */
-    ~BeliefNode();
 
-    /* Copying and moving is disallowed. */
+    // Default destructor; copying and moving disallowed!
+    ~BeliefNode();
     BeliefNode(BeliefNode const &) = delete;
     BeliefNode(BeliefNode &&) = delete;
     BeliefNode &operator=(BeliefNode const &) = delete;
@@ -49,23 +49,20 @@ class BeliefNode {
     void addParticle(HistoryEntry *newHistEntry);
     /** Removes the given history entry from this belief node. */
     void removeParticle(HistoryEntry *histEntry);
-
-    /** Adds a child for the given action and observation;
-     * returns the child node, and a boolean representing
-     */
-    std::pair<BeliefNode *, bool> addChild(Action const &action,
-            Observation const &obs);
     /** Samples a particle from this node. */
     HistoryEntry *sampleAParticle(RandomGenerator *randGen);
 
-    /** Updates the q-value for the given action, with the given increase. */
-    void updateQValue(Action &action, double increase);
-    /** Updates the q-value for the given action, as would occur if replacing
-     * the old value with the new value, and reducing the number of particles
-     * for the action node if reduceParticles is true.
+    /** Updates the q-value for the given action, with the given increase in
+     * the total q-value (negative values for a decrease).
      */
-    void updateQValue(Action &action, double oldValue, double newValue,
-            bool reduceParticles);
+    void updateQValue(Action const &action, double increase);
+    /** Updates the q-value for the given action, with the given increase in
+     * the total q-value (negative values for a decrease), and the given
+     * change in the recorded number of particles (0 for no change, -1 for a
+     * reduction, and +1 for an increase.
+     */
+    void updateQValue(Action const &action, double increase,
+            long deltaNParticles);
 
     /** Calculates the distance between this belief node and another by
      * calculating the average pairwise distance between the individual
@@ -95,6 +92,12 @@ class BeliefNode {
     }
 
   private:
+    /** Adds a child for the given action and observation;
+     * returns the child node, and a boolean representing
+     */
+    std::pair<BeliefNode *, bool> createOrGetChild(Action const &action,
+            Observation const &obs);
+
     /** The ID for the next belief node. */
     static long currId;
     /** The startup time */

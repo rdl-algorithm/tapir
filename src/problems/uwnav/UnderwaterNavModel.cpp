@@ -14,9 +14,10 @@
 #include <vector>                       // for vector, vector<>::iterator
 
 #include "defs.hpp"                     // for RandomGenerator
-#include "solver/ChangeType.hpp"               // for ChangeType, ChangeType::REWARD, ChangeType::ADDOBSERVATION, ChangeType::ADDOBSTACLE
+#include "solver/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::REWARD, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE
 #include "solver/Observation.hpp"              // for Observation
 #include "solver/State.hpp"                    // for State
+#include "solver/StatePool.hpp"
 #include "StRoadmap.hpp"                // for StRoadmap
 
 using std::cerr;
@@ -54,7 +55,7 @@ UnderwaterNavModel::UnderwaterNavModel(RandomGenerator *randGen, po::variables_m
     char const *mapPath = vm["problem.mapPath"].as<string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
-        cerr << "Fail to open " << mapPath << "\n";
+        cerr << "Failed to open " << mapPath << "\n";
         std::exit(1);
     }
 
@@ -508,7 +509,7 @@ void UnderwaterNavModel::getChangeTimes(char const *chName,
 
     inFile.open(chName);
     if (!inFile.is_open()) {
-        cerr << "Fail to open " << chName << "\n";
+        cerr << "Failed to open " << chName << "\n";
         std::exit(1);
     }
 
@@ -531,9 +532,7 @@ void UnderwaterNavModel::getChangeTimes(char const *chName,
     inFile.close();
 }
 
-void UnderwaterNavModel::update(long tCh,
-                                     std::vector<UnderwaterNavState> &affectedRange,
-                                     std::vector<ChangeType> &typeOfChanges) {
+void UnderwaterNavModel::update(long tCh, solver::StatePool */*pool*/) {
     affectedRange.clear();
     std::vector<UnderwaterNavState>::iterator itStVals;
     string cmd, var, tmpStr;
@@ -554,7 +553,7 @@ void UnderwaterNavModel::update(long tCh,
                 su.push_back(yu);
                 affectedRange.push_back(sl);
                 affectedRange.push_back(su);
-                typeOfChanges.push_back(ChangeType::REWARD);
+                typeOfChanges.push_back(ChangeFlags::REWARD);
                 long x = (long) std::floor(xl);
                 while (x < xu) {
                     long y = (long) std::floor(yl);
@@ -595,7 +594,7 @@ void UnderwaterNavModel::update(long tCh,
                 obstacleRegion_.push_back(su);
                 affectedRange.push_back(sl);
                 affectedRange.push_back(su);
-                typeOfChanges.push_back(ChangeType::ADDOBSTACLE);
+                typeOfChanges.push_back(ChangeFlags::ADDOBSTACLE);
                 long x = (long) std::floor(xl);
                 while (x < xu) {
                     long y = (long) std::floor(yl);
@@ -628,7 +627,7 @@ void UnderwaterNavModel::update(long tCh,
                 su.push_back(yu);
                 affectedRange.push_back(sl);
                 affectedRange.push_back(su);
-                typeOfChanges.push_back(ChangeType::ADDOBSERVATION);
+                typeOfChanges.push_back(ChangeFlags::ADDOBSERVATION);
                 long x = (long) std::floor(xl);
                 while (x < xu) {
                     long y = (long) std::floor(yl);
@@ -674,7 +673,7 @@ void UnderwaterNavModel::update(long tCh,
                 su.push_back(yu);
                 affectedRange.push_back(sl);
                 affectedRange.push_back(su);
-                typeOfChanges.push_back(ChangeType::REWARD);
+                typeOfChanges.push_back(ChangeFlags::REWARD);
                 std::vector<UnderwaterNavState>::iterator itSt;
                 long x = (long) std::floor(xl);
                 while (x < xu) {
@@ -703,7 +702,7 @@ void UnderwaterNavModel::update(long tCh,
                 su.push_back(yu);
                 affectedRange.push_back(sl);
                 affectedRange.push_back(su);
-                typeOfChanges.push_back(ChangeType::REWARD);
+                typeOfChanges.push_back(ChangeFlags::REWARD);
                 double newRew;
                 ss >> tmpStr >> newRew;
                 spcRew_.push_back(newRew);
@@ -725,7 +724,7 @@ void UnderwaterNavModel::update(long tCh,
              State sl; sl.push_back(xl); sl.push_back(yl);
              State su; su.push_back(xl); su.push_back(yl);
              affectedRange.push_back(sl); affectedRange.push_back(su);
-             typesOfChanges.push_back(ChangeType::TRANSITION);
+             typesOfChanges.push_back(ChangeFlags::TRANSITION);
              //...
              }
              */

@@ -12,17 +12,21 @@
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/ModelWithProgramOptions.hpp"
 #include "solver/Action.hpp"            // for Action
-#include "solver/ChangeType.hpp"               // for ChangeType
+#include "solver/ChangeFlags.hpp"               // for ChangeFlags
 #include "solver/Model.hpp"                    // for Model
 #include "solver/Observation.hpp"              // for Observation
 #include "uwnav.hpp"
 
-class StRoadmap;
-class UnderwaterNavState;
-
 namespace po = boost::program_options;
 
+namespace solver {
+class StatePool;
+}
+
 namespace uwnav {
+
+class StRoadmap;
+class UnderwaterNavState;
 class UnderwaterNavModel: public ModelWithProgramOptions {
   public:
     UnderwaterNavModel(RandomGenerator *randGen, po::variables_map vm);
@@ -69,16 +73,7 @@ class UnderwaterNavModel: public ModelWithProgramOptions {
             solver::Action const &action, solver::Observation const &obs);
 
     std::vector<long> loadChanges(char const *changeFilename);
-    void update(long time,
-            std::vector<std::unique_ptr<solver::State>> *affectedRange,
-            std::vector<solver::ChangeType> *typeOfChanges);
-
-    bool modifStSeq(std::vector<solver::State const *> const &states,
-            long startAffectedIdx, long endAffectedIdx,
-            std::vector<std::unique_ptr<solver::State>> *modifStSeq,
-            std::vector<solver::Action> *modifActSeq,
-            std::vector<solver::Observation> *modifObsSeq,
-            std::vector<double> *modifRewSeq);
+    void update(long time, solver::StatePool *pool);
 
     void dispAct(solver::Action const &action, std::ostream &os);
     /** Displays a single cell of the map. */

@@ -9,7 +9,7 @@
 #include "defs.hpp"                     // for make_unique
 
 #include "Action.hpp"                   // for Action
-#include "ChangeType.hpp"               // for ChangeType, ChangeType::UNDEFINED
+#include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "Observation.hpp"              // for Observation
 #include "StateInfo.hpp"                // for StateInfo
@@ -27,82 +27,91 @@ HistorySequence::HistorySequence(long startDepth) :
     histSeq_(),
     startAffectedIdx_(LONG_MAX),
     endAffectedIdx_(-1),
-    changeType_(ChangeType::UNDEFINED) {
+    changeFlags_(ChangeFlags::UNCHANGED) {
     currId++;
-}
-
-HistorySequence::HistorySequence(std::unique_ptr<HistoryEntry> startEntry,
-        long startDepth) :
-    HistorySequence(startDepth) {
-    startEntry->seqId_ = id_;
-    histSeq_.push_back(std::move(startEntry));
 }
 
 // Do nothing!
 HistorySequence::~HistorySequence() {
 }
 
-HistoryEntry *HistorySequence::getFirstEntry() {
-    return histSeq_.begin()->get();
-}
-
-HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
+HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, double discount) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, id_, histSeq_.size());
+                stateInfo, discount, this, histSeq_.size());
     HistoryEntry *newEntryReturn = newEntry.get();
     histSeq_.push_back(std::move(newEntry));
     return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo,
-        Action const &action,
-        Observation const &obs, double rew, double disc) {
+HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, double discount,
+        Action const &action, Observation const &obs, double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, id_, histSeq_.size());
+                stateInfo, discount, this, histSeq_.size());
     newEntry->action_ = action;
     newEntry->observation_ = obs;
-    newEntry->immediateReward_ = rew;
-    newEntry->discount_ = disc;
+    newEntry->immediateReward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
     histSeq_.push_back(std::move(newEntry));
     return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo,
-        Action const &action,
-        Observation const &obs, double rew, double disc, long atIdx) {
+HistoryEntry *HistorySequence::insertEntry(long index,
+        StateInfo *stateInfo, double discount,
+        Action const &action, Observation const &obs, double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, id_, histSeq_.size());
+                stateInfo, discount, this, histSeq_.size());
     newEntry->action_ = action;
     newEntry->observation_ = obs;
-    newEntry->immediateReward_ = rew;
-    newEntry->discount_ = disc;
+    newEntry->immediateReward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
-    histSeq_.insert(histSeq_.begin() + atIdx, std::move(newEntry));
+    histSeq_.insert(histSeq_.begin() + index, std::move(newEntry));
     return newEntryReturn;
 }
 
-void HistorySequence::addEntry(std::unique_ptr<HistoryEntry> histEntry) {
-    histSeq_.push_back(std::move(histEntry));
-}
-
-HistoryEntry *HistorySequence::get(int entryId) {
+HistoryEntry *HistorySequence::getEntry(int entryId) {
     return histSeq_[entryId].get();
 }
 
 std::vector<State const *> HistorySequence::getStates() {
     std::vector<State const *> states;
     for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
-        states.push_back(entry->stateInfo_->getState());
+        states.push_back(entry->getState());
     }
     return states;
 }
 
-void HistorySequence::fixEntryIds() {
-    long i = 0;
-    for (auto &entry : histSeq_) {
-        entry->entryId_ = i;
-        i++;
+void HistorySequence::resetChangeFlags() {
+    changeFlags_ = ChangeFlags::UNCHANGED;
+    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+        entry->resetChangeFlags();
+    }
+    resetAffectedIndices();
+}
+
+void HistorySequence::setChangeFlags(long index, ChangeFlags flags) {
+    setChangeFlags(flags);
+    getEntry(index)->setChangeFlags(flags);
+    addAffectedIndex(index);
+}
+
+
+// These are private and ought not to be called outside HistorySequence.
+
+void HistorySequence::setChangeFlags(ChangeFlags flags) {
+    changeFlags_ |= flags;
+}
+
+void HistorySequence::resetAffectedIndices() {
+    startAffectedIdx_ = LONG_MAX;
+    endAffectedIdx_ = -1;
+}
+
+void HistorySequence::addAffectedIndex(long index) {
+    if (startAffectedIdx_ > index) {
+        startAffectedIdx_ = index;
+    }
+    if (endAffectedIdx_ < index) {
+        endAffectedIdx_ = index;
     }
 }
 } /* namespace solver */

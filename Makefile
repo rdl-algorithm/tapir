@@ -33,7 +33,7 @@ WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
 WARN               += -Wswitch-default -Wfatal-errors
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3
-CXXFLAGS_debug       := $(CXXFLAGS) -O0 -ggdb
+CXXFLAGS_debug       := $(CXXFLAGS) -O0 -g3
 
 # ----------------------------------------------------------------------
 # Linker flags

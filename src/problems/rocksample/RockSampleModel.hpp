@@ -13,7 +13,7 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
-#include "solver/ChangeType.hpp"        // for ChangeType
+#include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
 
@@ -21,6 +21,7 @@ namespace po = boost::program_options;
 
 namespace solver {
 class State;
+class StatePool;
 } /* namespace solver */
 
 namespace rocksample {
@@ -99,14 +100,19 @@ class RockSampleModel : public ModelWithProgramOptions {
     /** Generates a state uniformly at random. */
     std::unique_ptr<solver::State> sampleStateUniform();
 
-    bool isTerm(solver::State const &state);
+    bool isTerminal(solver::State const &state);
     double solveHeuristic(solver::State const &state);
     double getDefaultVal();
 
-    solver::Model::StepResult generateStep(solver::State const &state,
+    /* --------------- Black box dynamics ----------------- */
+    virtual std::unique_ptr<solver::State> generateNextState(
+            solver::State const &state, solver::Action const &action);
+    virtual solver::Observation generateObservation(
+            solver::Action const &action, solver::State const &nextState);
+    virtual double getReward(solver::State const &state,
+                solver::Action const &action);
+    virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action);
-    double getReward(solver::State const &state);
-    double getReward(solver::State const &state, solver::Action const &action);
 
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action, solver::Observation const &obs,
@@ -115,17 +121,7 @@ class RockSampleModel : public ModelWithProgramOptions {
             solver::Action const &action, solver::Observation const &obs);
 
     std::vector<long> loadChanges(char const *changeFilename);
-    void update(long time,
-            std::vector<std::unique_ptr<solver::State>> *affectedRange,
-            std::vector<solver::ChangeType> *typeOfChanges);
-
-    bool modifStSeq(std::vector<solver::State const *> const &states,
-            long startAffectedIdx,
-            long endAffectedIdx,
-            std::vector<std::unique_ptr<solver::State>> *modifStSeq,
-            std::vector<solver::Action> *modifActSeq,
-            std::vector<solver::Observation> *modifObsSeq,
-            std::vector<double> *modifRewSeq);
+    void update(long time, solver::StatePool *pool);
 
     void dispAct(solver::Action const &action, std::ostream &os);
     /** Displays an individual cell of the map. */
@@ -147,6 +143,7 @@ class RockSampleModel : public ModelWithProgramOptions {
     std::vector<bool> sampleRocks();
     /** Decodes rocks from an integer. */
     std::vector<bool> decodeRocks(unsigned long val);
+
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
@@ -156,9 +153,12 @@ class RockSampleModel : public ModelWithProgramOptions {
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    RSObservation makeObs(solver::Action const &action,
+    RSObservation makeObservation(solver::Action const &action,
             RockSampleState const &nextState);
-
+    /** Retrieves the reward via the next state. */
+    double makeReward(RockSampleState const &state,
+            solver::Action const &action, RockSampleState const &nextState,
+            bool isLegal);
 
     /** The reward for sampling a good rock. */
     double goodRockReward_;

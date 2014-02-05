@@ -1,5 +1,6 @@
 #include "ParticleSet.hpp"
 
+#include <iostream>
 #include <iterator>
 #include <unordered_map>
 #include <vector>
@@ -23,28 +24,35 @@ unsigned long ParticleSet::size() {
     return particles_.size();
 }
 
-void ParticleSet::add(HistoryEntry* entry) {
+void ParticleSet::add(HistoryEntry *entry) {
+    if (contains(entry)) {
+        std::cerr << "ERROR: Duplicate particle." << std::endl;
+        return;
+    }
     particles_.push_back(entry);
     particleMap_.emplace(entry, particles_.size() - 1);
 }
 
-void ParticleSet::remove(HistoryEntry* entry) {
-    unsigned long index = particleMap_.at(entry);
-    particles_[index] = *particles_.rbegin();
+void ParticleSet::remove(HistoryEntry *entry) {
+    unsigned long index = particleMap_[entry];
+    unsigned long lastIndex = particles_.size() - 1;
+
+    if (index != lastIndex) {
+        HistoryEntry *lastEntry = particles_[lastIndex];
+        particles_[index] = lastEntry;
+        particleMap_[lastEntry] = index;
+    }
+
+    // Remove extraneous elements.
     particles_.pop_back();
     particleMap_.erase(entry);
 }
 
-HistoryEntry* ParticleSet::get(unsigned long index) {
+HistoryEntry *ParticleSet::get(unsigned long index) {
     return particles_[index];
 }
 
-bool ParticleSet::contains(HistoryEntry* entry) {
+bool ParticleSet::contains(HistoryEntry *entry) {
     return particleMap_.count(entry) > 0;
-}
-
-HistoryEntry* ParticleSet::getRandom(RandomGenerator* randGen) {
-    return particles_[std::uniform_int_distribution<unsigned long>(
-                             0, particles_.size() - 1)(*randGen)];
 }
 } /* namespace solver */
