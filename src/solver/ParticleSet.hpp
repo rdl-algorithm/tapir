@@ -16,12 +16,12 @@ class ParticleSet {
 
     std::vector<HistoryEntry *>::const_iterator begin() const;
     std::vector<HistoryEntry *>::const_iterator end() const;
-    unsigned long size();
+    unsigned long size() const;
 
     void add(HistoryEntry *entry);
     void remove(HistoryEntry *entry);
-    HistoryEntry *get(unsigned long index);
-    bool contains(HistoryEntry *entry);
+    HistoryEntry *get(unsigned long index) const;
+    bool contains(HistoryEntry *entry) const;
 
   private:
     std::unordered_map<HistoryEntry *, unsigned long> particleMap_;

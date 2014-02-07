@@ -16,11 +16,12 @@
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
+#include "solver/State.hpp"       // for State
+
 
 namespace po = boost::program_options;
 
 namespace solver {
-class State;
 class StatePool;
 } /* namespace solver */
 
@@ -107,7 +108,7 @@ class RockSampleModel : public ModelWithProgramOptions {
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
             solver::State const &state, solver::Action const &action);
-    virtual solver::Observation generateObservation(
+    virtual std::unique_ptr<solver::Observation> generateObservation(
             solver::Action const &action, solver::State const &nextState);
     virtual double getReward(solver::State const &state,
                 solver::Action const &action);

@@ -1,4 +1,4 @@
-#include "VectorState.hpp"
+#include "Vector.hpp"
 
 #include <cmath>
 #include <cstddef>
@@ -12,36 +12,22 @@ void hash_combine(std::size_t &seed, T const &v) {
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-double VectorState::distanceTo(State const &otherState) const {
+bool Vector::equals(Point const &otherPoint) const {
     std::vector<double> v1 = this->asVector();
-    std::vector<double> v2 = static_cast<VectorState const *>(
-            &otherState)->asVector();
-    std::vector<double>::iterator i1 = v1.begin();
-    std::vector<double>::iterator i2 = v2.begin();
-
-    double distance = 0;
-    for (; i1 < v1.end(); i1++, i2++) {
-        distance += std::abs(*i1 - *i2);
-    }
-    return distance;
-}
-
-bool VectorState::equals(State const &otherState) const {
-    std::vector<double> v1 = this->asVector();
-    std::vector<double> v2 = static_cast<VectorState const *>(
-            &otherState)->asVector();
+    std::vector<double> v2 = static_cast<Vector const *>(
+            &otherPoint)->asVector();
     std::vector<double>::iterator i1 = v1.begin();
     std::vector<double>::iterator i2 = v2.begin();
 
     for (; i1 < v1.end(); i1++, i2++) {
-        if (*i1 == *i2) {
+        if (*i1 != *i2) {
             return false;
         }
     }
     return true;
 }
 
-std::size_t VectorState::hash() const {
+std::size_t Vector::hash() const {
     std::vector<double> v1 = this->asVector();
 
     std::size_t hashValue = 0;
@@ -51,4 +37,14 @@ std::size_t VectorState::hash() const {
     return hashValue;
 
 }
+
+void Vector::print(std::ostream &os) const {
+    std::vector<double> values = asVector();
+    os << "< ";
+    for (double v : values) {
+        os << v << " ";
+    }
+    os << ">";
+}
+
 } /* namespace solver */

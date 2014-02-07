@@ -7,6 +7,7 @@
 #include <ostream>                      // for operator<<, ostream
 #include <vector>                       // for vector, operator==, _Bit_const_iterator, _Bit_iterator_base, hash, vector<>::const_iterator
 
+#include "defs.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
 
@@ -19,15 +20,17 @@ void hash_combine(std::size_t &seed, T const &v) {
 
 RockSampleState::RockSampleState(GridPosition position,
         std::vector<bool> rockStates) :
-    solver::VectorState(),
+    solver::Vector(),
     position_(position),
     rockStates_(rockStates) {
 }
 
 RockSampleState::RockSampleState(RockSampleState const &other) :
-    solver::VectorState(),
-    position_(other.position_),
-    rockStates_(other.rockStates_) {
+    RockSampleState(other.position_, other.rockStates_) {
+}
+
+std::unique_ptr<solver::Point> RockSampleState::copy() const {
+    return std::make_unique<RockSampleState>(position_, rockStates_);
 }
 
 double RockSampleState::distanceTo(solver::State const &otherState) const {

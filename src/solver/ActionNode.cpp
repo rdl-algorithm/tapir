@@ -8,7 +8,7 @@
 
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
-#include "ObservationEdge.hpp"          // for ObservationEdge
+#include "SimpleObsMap.hpp"             // for SimpleObsMap
 
 namespace solver {
 ActionNode::ActionNode() :
@@ -20,7 +20,7 @@ ActionNode::ActionNode(Action const &action) :
     nParticles_(0),
     totalQValue_(0),
     meanQValue_(0),
-    obsChildren() {
+    obsMap_(std::make_unique<SimpleObsMap>()) {
 }
 
 // Default destructor
@@ -42,25 +42,17 @@ void ActionNode::updateQValue(double increase,
     updateQValue(increase);
 }
 
-std::pair<BeliefNode *, bool> ActionNode::addChild(Observation const &obs) {
-    BeliefNode *beliefChild = getBeliefChild(obs);
+std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Observation const &obs) {
+    BeliefNode *beliefChild = getChild(obs);
     bool added = false;
     if (beliefChild == nullptr) {
-        std::unique_ptr<ObservationEdge> newEdge =
-            std::make_unique<ObservationEdge>(obs);
-        beliefChild = newEdge->getBeliefChild();
-        obsChildren.push_back(std::move(newEdge));
+        beliefChild = obsMap_->createBelief(obs);
         added = true;
     }
     return std::make_pair(beliefChild, added);
 }
 
-BeliefNode *ActionNode::getBeliefChild(Observation const &obs) {
-    for (std::unique_ptr<ObservationEdge> &child : obsChildren) {
-        if (child->obsEquals(obs)) {
-            return child->getBeliefChild();
-        }
-    }
-    return nullptr;
+BeliefNode *ActionNode::getChild(Observation const &obs) {
+    return obsMap_->getBelief(obs);
 }
 } /* namespace solver */

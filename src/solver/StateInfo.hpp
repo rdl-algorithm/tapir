@@ -2,15 +2,15 @@
 #define SOLVER_STATEINFO_HPP_
 
 #include <memory>                       // for unique_ptr
-#include <unordered_set>                          // for set
+#include <unordered_set>                          // for seteset(state.copy());
 #include <vector>                       // for vector
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
+#include "State.hpp"
 
 namespace solver {
 class BeliefNode;
 class HistoryEntry;
-class State;
 
 class StateInfo {
   public:
@@ -22,6 +22,8 @@ class StateInfo {
     StateInfo();
     /** Constructs a StateInfo to manage the given state. */
     StateInfo(std::unique_ptr<State> state);
+    /** Constructs a StateInfo to manage the given state. */
+    StateInfo(State const &state);
 
     /** Default destructor. */
     ~StateInfo();

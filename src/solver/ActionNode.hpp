@@ -7,10 +7,10 @@
 
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
+#include "ObservationMapping.hpp"
 
 namespace solver {
 class BeliefNode;
-class ObservationEdge;
 
 class ActionNode {
   public:
@@ -39,15 +39,15 @@ class ActionNode {
      */
     void updateQValue(double increase, long deltaNParticles);
 
-    /** Adds a new ObservationEdge with the given observation, creating
-     * a new belief node if necessary.
+    /** Adds a child with the given observation, creating a new belief node if
+     * necessary.
      */
-    std::pair<BeliefNode *, bool> addChild(Observation const &obs);
+    std::pair<BeliefNode *, bool> createOrGetChild(Observation const &obs);
 
     /** Returns the child corresponding to the given observation, based on
      * sufficient proximity.
      */
-    BeliefNode *getBeliefChild(Observation const &obs);
+    BeliefNode *getChild(Observation const &obs);
 
   private:
     /** The action for this node. */
@@ -61,8 +61,7 @@ class ActionNode {
     /** The mean q-value of this node. */
     double meanQValue_;
 
-    /** The vector of this node's children. */
-    std::vector<std::unique_ptr<ObservationEdge>> obsChildren;
+    std::unique_ptr<ObservationMapping> obsMap_;
 };
 } /* namespace solver */
 

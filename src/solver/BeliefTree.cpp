@@ -2,10 +2,12 @@
 
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
+#include <iostream>
 
 #include "defs.hpp"                     // for make_unique
 
 #include "BeliefNode.hpp"               // for BeliefNode
+#include "Observation.hpp"
 
 namespace solver {
 BeliefTree::BeliefTree() :
@@ -19,10 +21,10 @@ BeliefTree::~BeliefTree() {
 }
 
 BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
-        Action const &action, Observation const &observation) {
+        Action const &action, Observation const &obs) {
     bool isNew;
     BeliefNode *childNode;
-    std::tie(childNode, isNew) = node->createOrGetChild(action, observation);
+    std::tie(childNode, isNew) = node->createOrGetChild(action, obs);
     if (isNew) {
         allNodes_.push_back(childNode);
     }

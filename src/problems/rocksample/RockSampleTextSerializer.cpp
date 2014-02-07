@@ -24,13 +24,13 @@ RockSampleTextSerializer::RockSampleTextSerializer(solver::Solver *solver) :
     solver::TextSerializer(solver) {
 }
 
-void RockSampleTextSerializer::saveState(solver::State &state,
+void RockSampleTextSerializer::saveState(solver::State const &state,
         std::ostream &os) {
-    RockSampleState *rockSampleState =
-        static_cast<RockSampleState *>(&state);
-    os << rockSampleState->position_.i << " " << rockSampleState->position_.j
+    RockSampleState const &rockSampleState =
+        static_cast<RockSampleState const &>(state);
+    os << rockSampleState.position_.i << " " << rockSampleState.position_.j
        << " ";
-    for (bool isGood : rockSampleState->getRockStates()) {
+    for (bool isGood : rockSampleState.getRockStates()) {
         if (isGood) {
             os << 'G';
         } else {

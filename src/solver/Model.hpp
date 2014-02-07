@@ -100,7 +100,7 @@ class Model {
     virtual std::unique_ptr<State> generateNextState(State const &state,
             Action const &action) = 0;
     /** Generates an observation, given the action and resulting next state. */
-    virtual Observation generateObservation(Action const &action,
+    virtual std::unique_ptr<Observation> generateObservation(Action const &action,
             State const &nextState) = 0;
     /** Returns the reward for the given state and action. */
     virtual double getReward(State const &state, Action const &action) = 0;
@@ -110,9 +110,9 @@ class Model {
      */
     struct StepResult {
         Action action = 0;
-        Observation observation = Observation();
+        std::unique_ptr<Observation> observation = nullptr;
         double immediateReward = 0;
-        std::unique_ptr<State> nextState = std::unique_ptr<State>();
+        std::unique_ptr<State> nextState = nullptr;
         bool isTerminal = false;
     };
     /** Generates the next state, an observation, and the reward. */

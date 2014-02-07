@@ -10,7 +10,7 @@
 #include "SpatialIndexVisitor.hpp"
 #include "State.hpp"
 #include "StateInfo.hpp"
-#include "VectorState.hpp"
+#include "Vector.hpp"
 
 namespace solver {
 RTree::RTree(unsigned long nSDim, StatePool *statePool) :
@@ -55,14 +55,14 @@ void RTree::reset() {
 
 void RTree::addStateInfo(StateInfo *stateInfo) {
     SpatialIndex::id_type stateId = stateInfo->getId();
-    std::vector<double> vectorData = static_cast<VectorState*>(stateInfo->getState())->asVector();
+    std::vector<double> vectorData = static_cast<Vector*>(stateInfo->getState())->asVector();
     SpatialIndex::Point point(&vectorData[0], nSDim_);
     tree_->insertData(0, nullptr, point, stateId);
 }
 
 void RTree::removeStateInfo(StateInfo *stateInfo) {
     SpatialIndex::id_type stateId = stateInfo->getId();
-    std::vector<double> vectorData = static_cast<VectorState*>(stateInfo->getState())->asVector();
+    std::vector<double> vectorData = static_cast<Vector*>(stateInfo->getState())->asVector();
     SpatialIndex::Point point(&vectorData[0], nSDim_);
     tree_->deleteData(point, stateId);
 }

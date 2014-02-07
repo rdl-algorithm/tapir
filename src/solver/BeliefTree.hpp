@@ -38,7 +38,7 @@ class BeliefTree {
      * added to the flattened node list if and only if it is actually new.
      */
     BeliefNode *createOrGetChild(BeliefNode *node,
-            Action const &action, Observation const &observation);
+            Action const &action, Observation const &obs);
 
   private:
     std::unique_ptr<BeliefNode> root_;

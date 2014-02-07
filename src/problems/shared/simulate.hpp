@@ -96,13 +96,13 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     }
     std::vector<std::unique_ptr<solver::State>> trajSt;
     std::vector<long> trajActId;
-    std::vector<solver::Observation> trajObs;
+    std::vector<std::unique_ptr<solver::Observation>> trajObs;
     std::vector<double> trajRew;
     double val;
     long j;
     std::vector<std::unique_ptr<solver::State>>::iterator itS;
     std::vector<long>::iterator itA;
-    std::vector<solver::Observation>::iterator itO;
+    std::vector<std::unique_ptr<solver::Observation>>::iterator itO;
     std::vector<double>::iterator itR;
     std::vector<double>::iterator itD;
     std::ofstream os;
@@ -127,11 +127,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
                  trajRew.begin(), j = 0; itA != trajActId.end();
              itS++, itA++, itO++, itR++, j++) {
             os << "Step-" << j << " " << *itA;
-            os << " ( " << **itS << ") < ";
-            for (itD = (*itO).begin(); itD != (*itO).end(); itD++) {
-                os << *itD << " ";
-            }
-            os << " > " << *itR << endl;
+            os << " ( " << **itS << ") " << **itO << *itR << endl;
         }
         cout << val << " " << actualNSteps << " " << totChTime << " "
              << totImpTime << " " << totT << endl;

@@ -7,10 +7,10 @@
 #include "Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Observation.hpp"              // for Observation
+#include "State.hpp"
 
 namespace solver {
 class HistoryEntry;
-class State;
 class StateInfo;
 
 class HistorySequence {
@@ -37,14 +37,16 @@ class HistorySequence {
      * well as the given action,observation and immediate reward.
      */
     HistoryEntry *addEntry(StateInfo *stateInfo, double discount,
-            Action const &action, Observation const &obs, double immediateReward);
+            Action const &action, Observation const &obs,
+            double immediateReward);
     /** Adds a new entry at the specified position (index),
      * with the given state info, action, observation, immediate reward, and
      * discount.
      */
     HistoryEntry *insertEntry(long index,
             StateInfo *stateInfo, double discount,
-            Action const &action, Observation const &obs, double immediateReward);
+            Action const &action, Observation const &obs,
+            double immediateReward);
 
     /** Returns the history entry in this sequence with the given ID. */
     HistoryEntry *getEntry(int entryId);

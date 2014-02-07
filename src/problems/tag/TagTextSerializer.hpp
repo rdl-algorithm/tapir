@@ -5,10 +5,10 @@
 #include <memory>                       // for unique_ptr
 
 #include "solver/TextSerializer.hpp"    // for TextSerializer
+#include "solver/State.hpp"
 
 namespace solver {
 class Solver;
-class State;
 }  /* namespace solver */
 
 namespace tag {
@@ -22,7 +22,7 @@ class TagTextSerializer : public solver::TextSerializer {
     TagTextSerializer &operator=(TagTextSerializer const &) = delete;
     TagTextSerializer &operator=(TagTextSerializer &&) = delete;
 
-    void saveState(solver::State &state, std::ostream &os);
+    void saveState(solver::State const &state, std::ostream &os);
     std::unique_ptr<solver::State> loadState(std::istream &is);
 };
 } /* namespace tag */

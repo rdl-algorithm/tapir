@@ -3,23 +3,27 @@
 
 #include <cstddef>                      // for size_t
 
+#include <memory>
 #include <ostream>                      // for ostream
 #include <vector>
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/VectorState.hpp"             // for State
+#include "solver/State.hpp"
+#include "solver/Vector.hpp"             // for State
 
 namespace tag {
-class TagState : public solver::VectorState {
+class TagState : public solver::Vector {
     friend class TagTextSerializer;
   public:
     TagState(GridPosition robotPos, GridPosition opponentPos, bool _isTagged);
 
     virtual ~TagState() = default;
-    TagState(TagState const &other);
+    TagState(TagState const &);
     TagState(TagState &&) = delete;
     virtual TagState &operator=(TagState const &) = delete;
     virtual TagState &operator=(TagState &&) = delete;
+
+    std::unique_ptr<solver::Point> copy() const;
 
     double distanceTo(solver::State const &otherState) const;
     bool equals(solver::State const &otherState) const;

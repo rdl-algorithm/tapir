@@ -22,12 +22,11 @@ TagTextSerializer::TagTextSerializer(solver::Solver *solver) :
     solver::TextSerializer(solver) {
 }
 
-
-void TagTextSerializer::saveState(solver::State &state, std::ostream &os) {
-    TagState *tagState = static_cast<TagState *>(&state);
-    os << tagState->robotPos_.i << " " << tagState->robotPos_.j << " "
-       <<tagState->opponentPos_.i << " " << tagState->opponentPos_.j << " "
-       << tagState->isTagged_;
+void TagTextSerializer::saveState(solver::State const &state, std::ostream &os) {
+    TagState const &tagState = static_cast<TagState const &>(state);
+    os << tagState.robotPos_.i << " " << tagState.robotPos_.j << " "
+       <<tagState.opponentPos_.i << " " << tagState.opponentPos_.j << " "
+       << tagState.isTagged_;
 }
 
 std::unique_ptr<solver::State> TagTextSerializer::loadState(std::istream &is) {

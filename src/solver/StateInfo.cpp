@@ -15,17 +15,20 @@ class HistoryEntry;
 
 long StateInfo::currId = 0;
 
-// Private constructor for serialization
-StateInfo::StateInfo() :
-    state_(nullptr),
+StateInfo::StateInfo(std::unique_ptr<State> state) :
+    state_(std::move(state)),
     id_(0),
     usedInHistoryEntries_(),
     changeFlags_(ChangeFlags::UNCHANGED) {
 }
 
-StateInfo::StateInfo(std::unique_ptr<State> state) :
-    StateInfo() {
-    this->state_ = std::move(state);
+// Private constructor for serialization
+StateInfo::StateInfo() :
+    StateInfo(nullptr) {
+}
+
+StateInfo::StateInfo(State const &state) :
+        StateInfo(state.copy()) {
 }
 
 // Do nothing!

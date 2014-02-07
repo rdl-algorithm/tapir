@@ -11,10 +11,10 @@
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "RTree.hpp"
+#include "State.hpp"
 #include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
 
 namespace solver {
-class State;
 
 StatePool::StatePool(unsigned long nSDim) :
     nSDim_(nSDim),

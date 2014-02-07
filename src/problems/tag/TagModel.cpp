@@ -4,6 +4,7 @@
 #include <cstddef>                      // for size_t
 #include <cstdlib>                      // for exit
 
+#include <memory>
 #include <fstream>                      // for ifstream, basic_istream, basic_istream<>::__istream_type
 #include <iomanip>                      // for operator<<, setw
 #include <iostream>                     // for cout, cerr
@@ -23,6 +24,7 @@
 #include "solver/Observation.hpp"       // for Observation
 #include "solver/RTree.hpp"
 #include "solver/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
+#include "solver/SimpleVectorL1.hpp"             // for State, State::Hash, operator<<, operator==
 #include "solver/State.hpp"             // for State, State::Hash, operator<<, operator==
 #include "solver/StatePool.hpp"
 
@@ -256,9 +258,10 @@ bool TagModel::isValid(GridPosition const &position) {
             && position.j < nCols_ && envMap_[position.i][position.j] != WALL);
 }
 
-solver::Observation TagModel::makeObservation(solver::Action const & /*action*/,
+std::unique_ptr<solver::Observation> TagModel::makeObservation(
+        solver::Action const & /*action*/,
         TagState const &state) {
-    solver::Observation obs(3);
+    std::vector<double> obs(3);
     GridPosition p = state.getRobotPosition();
     obs[0] = p.i;
     obs[1] = p.j;
@@ -267,7 +270,7 @@ solver::Observation TagModel::makeObservation(solver::Action const & /*action*/,
     } else {
         obs[2] = UNSEEN;
     }
-    return obs;
+    return std::make_unique<solver::SimpleVectorL1>(obs);
 }
 
 double TagModel::getReward(solver::State const &state,
@@ -289,7 +292,7 @@ std::unique_ptr<solver::State> TagModel::generateNextState(
     return makeNextState(static_cast<TagState const &>(state), action).first;
 }
 
-solver::Observation TagModel::generateObservation(
+std::unique_ptr<solver::Observation> TagModel::generateObservation(
            solver::Action const &action, solver::State const &nextState) {
     return makeObservation(action, static_cast<TagState const &>(nextState));
 }
@@ -312,11 +315,17 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         std::vector<solver::State *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
 
-    typedef std::unordered_map<TagState, double, solver::State::Hash> WeightMap;
+    struct Hash {
+        std::size_t operator()(TagState const &state) const {
+            return state.hash();
+        }
+    };
+    typedef std::unordered_map<TagState, double, Hash> WeightMap;
     WeightMap weights;
     double weightTotal = 0;
-    GridPosition newRobotPos(obs[0], obs[1]);
-    if (obs[2] == SEEN) {
+    std::vector<double> obsVals(static_cast<solver::SimpleVectorL1 const &>(obs).asVector());
+    GridPosition newRobotPos(obsVals[0], obsVals[1]);
+    if (obsVals[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
         newParticles.push_back(std::make_unique<TagState>(newRobotPos,
                         newRobotPos, action == TAG));
@@ -366,8 +375,9 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
-    GridPosition newRobotPos(obs[0], obs[1]);
-    if (obs[2] == SEEN) {
+    std::vector<double> obsVals(static_cast<solver::SimpleVectorL1 const &>(obs).asVector());
+    GridPosition newRobotPos(obsVals[0], obsVals[1]);
+    if (obsVals[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
         newParticles.push_back(
                 std::make_unique<TagState>(newRobotPos, newRobotPos,
@@ -376,7 +386,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         while (newParticles.size() < getNParticles()) {
             std::unique_ptr<solver::State> state = sampleStateUniform();
             solver::Model::StepResult result = generateStep(*state, action);
-            if (obs == result.observation) {
+            if (obs == *result.observation) {
                 newParticles.push_back(std::move(result.nextState));
             }
         }
@@ -493,8 +503,9 @@ void TagModel::dispAct(solver::Action const &action, std::ostream &os) {
 }
 
 void TagModel::dispObs(solver::Observation const &obs, std::ostream &os) {
-    os << GridPosition(obs[0], obs[1]);
-    if (obs[2] == SEEN) {
+    std::vector<double> obsVals(static_cast<solver::SimpleVectorL1 const &>(obs).asVector());
+    os << GridPosition(obsVals[0], obsVals[1]);
+    if (obsVals[2] == SEEN) {
         os << " SEEN!";
     }
 }

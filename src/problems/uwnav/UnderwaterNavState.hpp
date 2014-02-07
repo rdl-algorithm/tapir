@@ -6,10 +6,10 @@
 #include <ostream>                      // for ostream
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/VectorState.hpp"             // for State
+#include "solver/Vector.hpp"             // for State
 
 namespace uwnav {
-class UnderwaterNavState : public solver::VectorState {
+class UnderwaterNavState : public solver::Vector {
     friend class UnderwaterNavTextSerializer;
   public:
     UnderwaterNavState(GridPosition pos);

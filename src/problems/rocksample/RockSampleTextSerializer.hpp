@@ -4,11 +4,11 @@
 #include <iosfwd>                       // for istream, ostream
 #include <memory>                       // for unique_ptr
 
+#include "solver/State.hpp"
 #include "solver/TextSerializer.hpp"    // for TextSerializer
 
 namespace solver {
 class Solver;
-class State;
 } /* namespace solver */
 
 namespace rocksample {
@@ -23,7 +23,7 @@ class RockSampleTextSerializer : public solver::TextSerializer {
         delete;
     RockSampleTextSerializer &operator=(RockSampleTextSerializer &&) = delete;
 
-    void saveState(solver::State &state, std::ostream &os);
+    void saveState(solver::State const &state, std::ostream &os);
     std::unique_ptr<solver::State> loadState(std::istream &is);
 };
 } /* namespace rocksample */

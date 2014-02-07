@@ -1,10 +1,10 @@
 #ifndef SOLVER_OBSERVATION_HPP_
 #define SOLVER_OBSERVATION_HPP_
 
-#include <vector>                       // for vector
+#include "Point.hpp"
 
 namespace solver {
-typedef std::vector<double> Observation;
+    typedef Point Observation;
 } /* namespace solver */
 
 #endif /* SOLVER_OBSERVATION_HPP_ */

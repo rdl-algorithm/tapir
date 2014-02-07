@@ -1,14 +1,16 @@
 #ifndef SOLVER_HISTORYENTRY_HPP_
 #define SOLVER_HISTORYENTRY_HPP_
 
+#include <memory>
+
 #include "Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"              // for ChangeFlags
 #include "Observation.hpp"              // for Observation
+#include "State.hpp"
 
 namespace solver {
 class BeliefNode;
 class HistorySequence;
-class State;
 class StateInfo;
 
 class HistoryEntry {
@@ -71,7 +73,7 @@ class HistoryEntry {
     /** Action performed in this entry. */
     Action action_;
     /** Observation received in this entry. */
-    Observation observation_;
+    std::unique_ptr<Observation> observation_;
 
     /** True iff this entry has been processed in a Bellman backup,
      * false otherwise.

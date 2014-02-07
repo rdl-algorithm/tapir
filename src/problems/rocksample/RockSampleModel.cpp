@@ -24,6 +24,7 @@
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
+#include "solver/SimpleVectorL1.hpp"             // for State, State::Hash, operator<<, operator==
 #include "solver/State.hpp"             // for State, operator<<, State::Hash, operator==
 #include "solver/StatePool.hpp"
 
@@ -297,12 +298,12 @@ std::unique_ptr<solver::State> RockSampleModel::generateNextState(
             action).first;
 }
 
-solver::Observation RockSampleModel::generateObservation(
+std::unique_ptr<solver::Observation> RockSampleModel::generateObservation(
         solver::Action const &action, solver::State const &nextState) {
-    solver::Observation observation;
-    observation.push_back((double)makeObservation(action,
+    std::vector<double> values;
+    values.push_back((double)makeObservation(action,
             static_cast<RockSampleState const &>(nextState)));
-    return observation;
+    return std::make_unique<solver::SimpleVectorL1>(values);
 }
 
 double RockSampleModel::getReward(solver::State const &state,
@@ -327,7 +328,7 @@ solver::Model::StepResult RockSampleModel::generateStep(
     bool isLegal;
     std::unique_ptr<RockSampleState> nextState;
     std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
-    result.observation.push_back((double)makeObservation(action, *nextState));
+    result.observation = generateObservation(action, *nextState);
     result.immediateReward = makeReward(rockSampleState, action, *nextState, isLegal);
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);
@@ -341,8 +342,12 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     // If it's a CHECK action, we condition on the observation.
     if (action >= CHECK) {
         int rockNo = action - CHECK;
-        typedef std::unordered_map<RockSampleState, double,
-                solver::State::Hash> WeightMap;
+        struct Hash {
+            std::size_t operator()(RockSampleState const &state) const {
+                return state.hash();
+            }
+        };
+        typedef std::unordered_map<RockSampleState, double, Hash> WeightMap;
         WeightMap weights;
         double weightTotal = 0;
         for (solver::State *state : previousParticles) {
@@ -355,8 +360,9 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
                                           / halfEfficiencyDistance_)) * 0.5);
             bool rockIsGood = rockSampleState->getRockStates()[rockNo];
             double probability;
-            if ((rockIsGood && obs[0] == (double)RSObservation::GOOD)
-                || (!rockIsGood && obs[0] == (double)RSObservation::BAD)) {
+            double obsValue = static_cast<solver::SimpleVectorL1 const &>(obs).asVector()[0];
+            if ((rockIsGood && obsValue == (double)RSObservation::GOOD)
+                || (!rockIsGood && obsValue == (double)RSObservation::BAD)) {
                 probability = efficiency;
             } else {
                 probability = 1 - efficiency;
@@ -395,7 +401,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     while (particles.size() < getNParticles()) {
         std::unique_ptr<solver::State> state = sampleStateUniform();
         solver::Model::StepResult result = generateStep(*state, action);
-        if (obs == result.observation) {
+        if (obs == *result.observation) {
             particles.push_back(std::move(result.nextState));
         }
     }
@@ -458,7 +464,8 @@ void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
 
 void RockSampleModel::dispObs(solver::Observation const &obs,
         std::ostream &os) {
-    switch ((int)obs[0]) {
+    double obsValue = static_cast<solver::SimpleVectorL1 const &>(obs).asVector()[0];
+    switch ((int)obsValue) {
     case (int)RSObservation::NONE:
         os << "NONE";
         break;
@@ -469,7 +476,7 @@ void RockSampleModel::dispObs(solver::Observation const &obs,
         os << "BAD";
         break;
     default:
-        os << "ERROR-" << obs[0];
+        os << "ERROR-" << obsValue;
         break;
     }
 }

@@ -6,6 +6,7 @@
 #include <ostream>                      // for operator<<, ostream, basic_ostream>
 #include <vector>
 
+#include "defs.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
 
@@ -18,20 +19,21 @@ void hash_combine(std::size_t &seed, T const &v) {
 
 TagState::TagState(GridPosition robotPos, GridPosition opponentPos,
         bool _isTagged) :
-    solver::VectorState(),
+    solver::Vector(),
     robotPos_(robotPos),
     opponentPos_(opponentPos),
     isTagged_(_isTagged) {
 }
 
 TagState::TagState(TagState const &other) :
-    solver::VectorState(),
-    robotPos_(other.robotPos_),
-    opponentPos_(other.opponentPos_),
-    isTagged_(other.isTagged_) {
+        TagState(other.robotPos_, other.opponentPos_, other.isTagged_) {
 }
 
-double TagState::distanceTo(State const &otherState) const {
+std::unique_ptr<solver::Point> TagState::copy() const {
+    return std::make_unique<TagState>(robotPos_, opponentPos_, isTagged_);
+}
+
+double TagState::distanceTo(solver::State const &otherState) const {
     TagState const *otherTagState =
         static_cast<TagState const *>(&otherState);
     double distance = robotPos_.manhattanDistanceTo(otherTagState->robotPos_);
@@ -40,7 +42,7 @@ double TagState::distanceTo(State const &otherState) const {
     return distance;
 }
 
-bool TagState::equals(State const &otherState) const {
+bool TagState::equals(solver::State const &otherState) const {
     TagState const *otherTagState =
         static_cast<TagState const *>(&otherState);
     return (robotPos_ == otherTagState->robotPos_

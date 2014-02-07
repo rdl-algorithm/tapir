@@ -38,19 +38,19 @@ class BeliefNode {
 
     /** Chooses a next action with the UCB algorithm. */
     Action getUcbAction(double ucbExploreCoefficient);
-    /** Chooses the action with the best expected value */
-    Action getBestAction();
     /** Updates the calculation of which action is optimal. */
     void updateBestValue();
+    /** Chooses the action with the best expected value */
+    Action getBestAction() const;
     /** Returns the best q-value */
-    double getBestMeanQValue();
+    double getBestMeanQValue() const;
 
     /** Adds the given history entry to this belief node. */
     void addParticle(HistoryEntry *newHistEntry);
     /** Removes the given history entry from this belief node. */
     void removeParticle(HistoryEntry *histEntry);
     /** Samples a particle from this node. */
-    HistoryEntry *sampleAParticle(RandomGenerator *randGen);
+    HistoryEntry *sampleAParticle(RandomGenerator *randGen) const;
 
     /** Updates the q-value for the given action, with the given increase in
      * the total q-value (negative values for a decrease).
@@ -73,21 +73,21 @@ class BeliefNode {
     /** Returns the belief node child corresponding to the given action and
      * observation
      */
-    BeliefNode *getChild(Action const &action, Observation const &obs);
+    BeliefNode *getChild(Action const &action, Observation const &obs) const;
 
     /** Returns the next action to attempt. */
     Action getNextActionToTry();
 
     /** Returns the ID of this node. */
-    long getId() {
+    long getId() const {
         return id_;
     }
     /** Returns the number of particles in this node. */
-    long getNParticles() {
+    long getNParticles() const {
         return particles_.size();
     }
     /** Returns the current number of action children of this node. */
-    unsigned long getNActChildren() {
+    unsigned long getNActChildren() const {
         return actChildren_.size();
     }
 

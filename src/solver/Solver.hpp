@@ -12,6 +12,7 @@
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Model.hpp"                    // for Model, Model::StepResult
 #include "Observation.hpp"              // for Observation
+#include "State.hpp"
 
 namespace solver {
 class BeliefNode;
@@ -20,7 +21,6 @@ class Histories;
 class HistoryEntry;
 class HistorySequence;
 class Serializer;
-class State;
 class StateInfo;
 class StatePool;
 
@@ -63,7 +63,8 @@ class Solver {
      */
     double runSim(long nSteps, std::vector<long> &changeTimes,
             std::vector<std::unique_ptr<State>> &trajSt,
-            std::vector<Action> &trajActId, std::vector<Observation> &trajObs,
+            std::vector<Action> &trajActId,
+            std::vector<std::unique_ptr<Observation>> &trajObs,
             std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
             double *totImpTime);
 
@@ -98,7 +99,8 @@ class Solver {
     /** Simulates a single step. */
     Model::StepResult simAStep(BeliefNode *currentBelief, State &currentState);
     /** Handles particle depletion during the simulation. */
-    BeliefNode *addChild(BeliefNode *currNode, Action &action, Observation &obs,
+    BeliefNode *addChild(BeliefNode *currNode, Action &action,
+            Observation const &obs,
             long timeStep);
     /** Improves the solution, with the root at the given node. */
     void improveSol(BeliefNode *startNode, unsigned long maxTrials,

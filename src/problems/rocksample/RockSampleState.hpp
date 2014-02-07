@@ -7,10 +7,11 @@
 #include <vector>                       // for vector
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/VectorState.hpp"             // for State
+#include "solver/State.hpp"             // for State
+#include "solver/Vector.hpp"             // for Vector
 
 namespace rocksample {
-class RockSampleState : public solver::VectorState {
+class RockSampleState : public solver::Vector {
     friend class RockSampleTextSerializer;
   public:
     RockSampleState(GridPosition position, std::vector<bool> rockStates);
@@ -20,6 +21,8 @@ class RockSampleState : public solver::VectorState {
     RockSampleState(RockSampleState &&) = delete;
     virtual RockSampleState &operator=(RockSampleState const &) = delete;
     virtual RockSampleState &operator=(RockSampleState &&) = delete;
+
+    std::unique_ptr<solver::Point> copy() const;
 
     GridPosition getPosition() const {
         return position_;
@@ -32,9 +35,9 @@ class RockSampleState : public solver::VectorState {
     double distanceTo(solver::State const &otherState) const;
     bool equals(solver::State const &otherState) const;
     std::size_t hash() const;
+    void print(std::ostream &os) const;
 
     std::vector<double> asVector() const;
-    void print(std::ostream &os) const;
 
   private:
     GridPosition position_;

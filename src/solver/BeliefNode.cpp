@@ -13,7 +13,7 @@
 
 #include "defs.hpp"                     // for RandomGenerator, make_unique
 
-#warning Action and Observation should be classes!
+#warning Action should be a class!
 #include "Action.hpp"                   // for Action
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry
@@ -73,11 +73,11 @@ Action BeliefNode::getUcbAction(double ucbExploreCoefficient) {
     return bestActId;
 }
 
-Action BeliefNode::getBestAction() {
+Action BeliefNode::getBestAction() const {
     return bestAction_;
 }
 
-double BeliefNode::getBestMeanQValue() {
+double BeliefNode::getBestMeanQValue() const {
     return bestMeanQValue_;
 }
 
@@ -110,7 +110,7 @@ void BeliefNode::removeParticle(HistoryEntry *histEntry) {
     particles_.remove(histEntry);
 }
 
-HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) {
+HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
     unsigned long index = std::uniform_int_distribution<unsigned long>(
                                  0, getNParticles() - 1)(*randGen);
     return particles_.get(index);
@@ -126,7 +126,7 @@ std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Action const &action,
                         action, std::move(newActionNode)));
 
     ActionNode *actChild = actionIter->second.get();
-    return actChild->addChild(obs);
+    return actChild->createOrGetChild(obs);
 }
 
 void BeliefNode::updateQValue(Action const &action, double increase) {
@@ -149,12 +149,12 @@ double BeliefNode::distL1Independent(BeliefNode *b) {
     return dist / (getNParticles() * b->getNParticles());
 }
 
-BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) {
-    ActionMap::iterator iter = actChildren_.find(action);
+BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) const {
+    ActionMap::const_iterator iter = actChildren_.find(action);
     if (iter == actChildren_.end()) {
         return nullptr;
     }
-    return iter->second->getBeliefChild(obs);
+    return iter->second->getChild(obs);
 }
 
 Action BeliefNode::getNextActionToTry() {

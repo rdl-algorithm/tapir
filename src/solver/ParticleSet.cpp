@@ -20,7 +20,7 @@ std::vector<HistoryEntry *>::const_iterator ParticleSet::end() const {
     return particles_.end();
 }
 
-unsigned long ParticleSet::size() {
+unsigned long ParticleSet::size() const {
     return particles_.size();
 }
 
@@ -48,11 +48,11 @@ void ParticleSet::remove(HistoryEntry *entry) {
     particleMap_.erase(entry);
 }
 
-HistoryEntry *ParticleSet::get(unsigned long index) {
+HistoryEntry *ParticleSet::get(unsigned long index) const {
     return particles_[index];
 }
 
-bool ParticleSet::contains(HistoryEntry *entry) {
+bool ParticleSet::contains(HistoryEntry *entry) const {
     return particleMap_.count(entry) > 0;
 }
 } /* namespace solver */
