@@ -5,13 +5,9 @@
 
 #include <vector>
 
-namespace solver {
-template<class T>
-void hash_combine(std::size_t &seed, T const &v) {
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
+#include "defs.hpp"
 
+namespace solver {
 bool Vector::equals(Point const &otherPoint) const {
     std::vector<double> v1 = this->asVector();
     std::vector<double> v2 = static_cast<Vector const *>(
@@ -40,11 +36,15 @@ std::size_t Vector::hash() const {
 
 void Vector::print(std::ostream &os) const {
     std::vector<double> values = asVector();
-    os << "< ";
-    for (double v : values) {
-        os << v << " ";
+    os << "(";
+    for (std::vector<double>::const_iterator it = values.begin();
+            it < values.end(); it++) {
+        os << *it;
+        if (it + 1 != values.end()) {
+            os << ",";
+        }
     }
-    os << ">";
+    os << ")";
 }
 
 } /* namespace solver */

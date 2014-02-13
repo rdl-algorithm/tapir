@@ -27,7 +27,7 @@ HistorySequence *Histories::addNew(long startDepth) {
     return rawPtr;
 }
 
-HistorySequence *Histories::getHistorySequence(long seqId) {
+HistorySequence *Histories::getHistorySequence(long seqId) const {
     return allHistSeq_[seqId].get();
 }
 
@@ -44,7 +44,7 @@ void Histories::deleteHistorySequence(long seqId) {
     allHistSeq_.pop_back();
 }
 
-HistoryEntry *Histories::getHistoryEntry(long seqId, long entryId) {
+HistoryEntry *Histories::getHistoryEntry(long seqId, long entryId) const {
     return allHistSeq_[seqId]->getEntry(entryId);
 }
 } /* namespace solver */

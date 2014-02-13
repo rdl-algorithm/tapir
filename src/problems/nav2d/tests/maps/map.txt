@@ -1,0 +1,11 @@
+discrete
+............@@@@@@gg
+..xxxxxx....@xxxx@gg
+..xxxxxx....@xxxx@..
+..xxxxxx....@xxxx@..
+............@@@@@@..
+sssss...............
+sssss........xxxxx..
+sssss........xxxxx..
+sssss........xxxxx..
+sssss........xxxxx..

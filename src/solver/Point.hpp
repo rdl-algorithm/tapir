@@ -3,6 +3,8 @@
 
 #include <cstddef>                      // for size_t
 
+#include <string>
+#include <sstream>
 #include <memory>                       // for unique_ptr
 #include <ostream>                      // for ostream
 
@@ -25,6 +27,12 @@ class Point {
     virtual bool equals(Point const &otherPoint) const = 0;
     virtual std::size_t hash() const = 0;
     virtual void print(std::ostream &os) const = 0;
+
+    virtual std::string toString() {
+        std::ostringstream sstr;
+        print(sstr);
+        return sstr.str();
+    }
 
     friend std::ostream &operator<<(std::ostream &os, Point const &Point);
     friend bool operator==(Point const &s1, Point const &s2);

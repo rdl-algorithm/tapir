@@ -19,7 +19,7 @@
 #include "Observation.hpp"              // for Observation
 #include "ObservationMapping.hpp"          // for Ofor (double v : vector) {bservationMapping
 #include "Serializer.hpp"               // for Serializer
-#include "SimpleVectorL1.hpp"
+#include "VectorLP.hpp"
 #include "SimpleObsMap.hpp"          // for SimpleObsMap
 #include "Solver.hpp"                   // for Solver
 #include "State.hpp"                    // for State, operator<<
@@ -71,7 +71,7 @@ void TextSerializer::load(std::vector<double> &vector, std::istream &is) {
 }
 
 void TextSerializer::saveState(State const &state, std::ostream &os) {
-    std::vector<double> vector = ((Vector const &)state).asVector();
+    std::vector<double> vector = static_cast<Vector const &>(state).asVector();
     save(vector, os);
 }
 
@@ -81,11 +81,11 @@ std::unique_ptr<State> TextSerializer::loadState(std::istream &is) {
     if (vector.empty()) {
         return nullptr;
     }
-    return std::make_unique<SimpleVectorL1>(vector);
+    return std::make_unique<VectorLP>(vector, 1);
 }
 
 void TextSerializer::saveObservation(Observation const &obs, std::ostream &os) {
-    std::vector<double> vector = ((Vector const &)obs).asVector();
+    std::vector<double> vector = static_cast<Vector const &>(obs).asVector();
     save(vector, os);
 }
 
@@ -95,7 +95,7 @@ std::unique_ptr<State> TextSerializer::loadObservation(std::istream &is) {
     if (vector.empty()) {
         return nullptr;
     }
-    return std::make_unique<SimpleVectorL1>(vector);
+    return std::make_unique<VectorLP>(vector, 1);
 }
 
 void TextSerializer::save(StateInfo const &info, std::ostream &os) {

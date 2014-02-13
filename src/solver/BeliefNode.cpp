@@ -160,4 +160,16 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
 Action BeliefNode::getNextActionToTry() {
     return nextActionToTry_++;
 }
+
+long BeliefNode::getId() const {
+    return id_;
+}
+
+unsigned long BeliefNode::getNParticles() const {
+    return particles_.size();
+}
+
+unsigned long BeliefNode::getNActChildren() const {
+    return actChildren_.size();
+}
 } /* namespace solver */

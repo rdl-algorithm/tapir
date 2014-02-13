@@ -23,12 +23,15 @@ public:
     // copy() remains unimplemented because we have no data!
     // distanceTo() remains unimplemented - it's up to the user to choose a metric.
 
-    // We give default implementations for these methods.
+    // We will give default implementations for these methods.
     virtual bool equals(Point const &otherPoint) const;
     virtual std::size_t hash() const;
     virtual void print(std::ostream &os) const;
 
-    // We require convertibility to an std::vector<double>
+    /* Vector-like functionality. We don't implement this as we are being
+     * storage-agnostic here.
+     */
+    /* Returns this vector in the form of a std::vector<double> */
     virtual std::vector<double> asVector() const = 0;
 };
 

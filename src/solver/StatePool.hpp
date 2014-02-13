@@ -20,17 +20,17 @@ class StatePool {
     friend class Solver;
   public:
     struct Hash {
-        std::size_t operator()(State * const &state) const {
+        std::size_t operator()(State const *state) const {
             return state->hash();
         }
     };
     struct EqualityTest {
-        bool operator()(State * const &s1,
-                State * const &s2) const {
+        bool operator()(State const *s1,
+                State const *s2) const {
             return *s1 == *s2;
         }
     };
-    typedef std::unordered_map<State *, StateInfo *,
+    typedef std::unordered_map<State const *, StateInfo *,
             Hash, EqualityTest> StateInfoMap;
 
     friend class TextSerializer;
@@ -44,19 +44,19 @@ class StatePool {
 
     void reset();
 
-    StateInfo *getInfo(State *state);
-    StateInfo *getInfoById(long stId);
+    StateInfo *getInfo(State const &state) const;
+    StateInfo *getInfoById(long stId) const;
 
     StateInfo *add(std::unique_ptr<StateInfo> stateInfo);
-    StateInfo *createOrGetInfo(std::unique_ptr<State> state);
+    StateInfo *createOrGetInfo(State const &state);
 
-    StateIndex *getStateIndex();
-    void addToStateIndex(StateInfo *stateInfo);
+    StateIndex *getStateIndex() const;
+    void addToStateIndex(StateInfo *stateInfo) const;
 
     void resetChangeFlags(StateInfo *stateInfo);
     void setChangeFlags(StateInfo *stateInfo, ChangeFlags flags);
     void resetAffectedStates();
-    std::unordered_set<StateInfo *> getAffectedStates();
+    std::unordered_set<StateInfo *> getAffectedStates() const;
 
   private:
     unsigned long nSDim_;

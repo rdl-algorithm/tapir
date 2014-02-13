@@ -47,7 +47,7 @@ class ActionNode {
     /** Returns the child corresponding to the given observation, based on
      * sufficient proximity.
      */
-    BeliefNode *getChild(Observation const &obs);
+    BeliefNode *getChild(Observation const &obs) const;
 
   private:
     /** The action for this node. */

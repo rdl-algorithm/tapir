@@ -83,13 +83,13 @@ class Solver {
 
     /** Uses a rollout method to select an action and get results. */
     std::pair<Model::StepResult, double> getRolloutAction(BeliefNode *belNode,
-            State &state, double startDiscount, double discountFactor);
+            State const &state, double startDiscount, double discountFactor);
     /** Attempts to find another belief node near enough to this one to be
      * suitable for the policy-based rollout heuristic.
      */
     BeliefNode *getNNBelNode(BeliefNode *b);
     /** Helper method for policy-based rollout. */
-    double rolloutPolHelper(BeliefNode *currNode, State &state, double disc);
+    double rolloutPolHelper(BeliefNode *currNode, State const &state, double disc);
     /** Updates the overall weighting of the different heuristic heuristics
      * based on their performance.
      */
@@ -97,9 +97,9 @@ class Solver {
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
-    Model::StepResult simAStep(BeliefNode *currentBelief, State &currentState);
+    Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
     /** Handles particle depletion during the simulation. */
-    BeliefNode *addChild(BeliefNode *currNode, Action &action,
+    BeliefNode *addChild(BeliefNode *currNode, Action const &action,
             Observation const &obs,
             long timeStep);
     /** Improves the solution, with the root at the given node. */

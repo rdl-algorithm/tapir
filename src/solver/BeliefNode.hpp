@@ -79,17 +79,13 @@ class BeliefNode {
     Action getNextActionToTry();
 
     /** Returns the ID of this node. */
-    long getId() const {
-        return id_;
-    }
+    long getId() const;
+
     /** Returns the number of particles in this node. */
-    long getNParticles() const {
-        return particles_.size();
-    }
+    unsigned long getNParticles() const;
+
     /** Returns the current number of action children of this node. */
-    unsigned long getNActChildren() const {
-        return actChildren_.size();
-    }
+    unsigned long getNActChildren() const;
 
   private:
     /** Adds a child for the given action and observation;

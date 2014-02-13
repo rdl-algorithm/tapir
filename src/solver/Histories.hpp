@@ -27,11 +27,11 @@ class Histories {
     /** Adds a new history sequence, starting at the given depth. */
     HistorySequence *addNew(long startDepth);
     /** Retrieves the history sequence with the given ID. */
-    HistorySequence *getHistorySequence(long seqId);
+    HistorySequence *getHistorySequence(long seqId) const;
     /** Deletes the history sequence with the given ID. */
     void deleteHistorySequence(long seqId);
     /** Retrieves the history entry with the given sequence ID and entry ID. */
-    HistoryEntry *getHistoryEntry(long seqId, long entryId);
+    HistoryEntry *getHistoryEntry(long seqId, long entryId) const;
 
   private:
     std::vector<std::unique_ptr<HistorySequence>> allHistSeq_;

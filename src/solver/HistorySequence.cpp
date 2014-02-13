@@ -1,6 +1,6 @@
 #include "HistorySequence.hpp"
 
-#include <climits>                      // for LONG_MAX
+#include <limits>
 
 #include <memory>                       // for unique_ptr
 #include <utility>                      // for move
@@ -25,7 +25,7 @@ HistorySequence::HistorySequence(long startDepth) :
     id_(currId),
     startDepth_(startDepth),
     histSeq_(),
-    startAffectedIdx_(LONG_MAX),
+    startAffectedIdx_(std::numeric_limits<long>::max()),
     endAffectedIdx_(-1),
     changeFlags_(ChangeFlags::UNCHANGED) {
     currId++;
@@ -69,13 +69,13 @@ HistoryEntry *HistorySequence::insertEntry(long index,
     return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::getEntry(int entryId) {
+HistoryEntry *HistorySequence::getEntry(int entryId) const {
     return histSeq_[entryId].get();
 }
 
-std::vector<State const *> HistorySequence::getStates() {
+std::vector<State const *> HistorySequence::getStates() const {
     std::vector<State const *> states;
-    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+    for (std::unique_ptr<HistoryEntry> const &entry : histSeq_) {
         states.push_back(entry->getState());
     }
     return states;
@@ -103,7 +103,7 @@ void HistorySequence::setChangeFlags(ChangeFlags flags) {
 }
 
 void HistorySequence::resetAffectedIndices() {
-    startAffectedIdx_ = LONG_MAX;
+    startAffectedIdx_ = std::numeric_limits<long>::max();
     endAffectedIdx_ = -1;
 }
 

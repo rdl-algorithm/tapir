@@ -1,12 +1,11 @@
 #include "Solver.hpp"
 
-#include <cfloat>                       // for DBL_MAX
-#include <climits>                      // for LONG_MAX
 #include <cmath>                        // for pow, exp
 #include <ctime>                        // for clock, clock_t, CLOCKS_PER_SEC
 
 #include <algorithm>                    // for max
 #include <iostream>                     // for operator<<, cerr, ostream, basic_ostream, endl, basic_ostream<>::__ostream_type, cout
+#include <limits>
 #include <memory>                       // for unique_ptr
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
 #include <set>                          // for set, _Rb_tree_const_iterator, set<>::iterator
@@ -69,8 +68,8 @@ void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
     // Initialise the tree by taking each action once.
     for (Action action = 0; action < (long)model_->getNActions(); action++) {
         std::unique_ptr<State> newState = model_->sampleAnInitState();
-        StateInfo *stateInfo = allStates_->createOrGetInfo(std::move(newState));
-        State *state = stateInfo->getState();
+        StateInfo *stateInfo = allStates_->createOrGetInfo(*newState);
+        State const *state = stateInfo->getState();
 
         HistorySequence *currHistSeq = allHistories_->addNew(0);
         HistoryEntry *firstEntry = currHistSeq->addEntry(stateInfo, 1.0);
@@ -83,7 +82,7 @@ void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
         firstEntry->observation_ = result.observation->copy();
 
         // Add the next state to the pool, and retrieve the next state.
-        stateInfo = allStates_->createOrGetInfo(std::move(result.nextState));
+        stateInfo = allStates_->createOrGetInfo(*result.nextState);
 
         // Step forward in the history sequence, and update the belief node.
         HistoryEntry *nextEntry = currHistSeq->addEntry(stateInfo, discountFactor);
@@ -108,7 +107,7 @@ void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
 }
 
 void Solver::singleSearch(double discountFactor, double minimumDiscount) {
-    StateInfo *stateInfo = allStates_->createOrGetInfo(model_->sampleAnInitState());
+    StateInfo *stateInfo = allStates_->createOrGetInfo(*model_->sampleAnInitState());
     singleSearch(
             policy_->getRoot(), stateInfo, 0, discountFactor, minimumDiscount);
 }
@@ -156,7 +155,7 @@ void Solver::continueSearch(HistorySequence *sequence,
         currHistEntry->observation_ = result.observation->copy();
 
         // Add the next state to the pool
-        StateInfo *nextStateInfo = allStates_->createOrGetInfo(std::move(result.nextState));
+        StateInfo *nextStateInfo = allStates_->createOrGetInfo(*result.nextState);
 
         // Step forward in the history, and update the belief node.
         currentDiscount *= discountFactor;
@@ -227,7 +226,7 @@ void Solver::undoBackup(HistorySequence *sequence) {
 }
 
 std::pair<Model::StepResult, double> Solver::getRolloutAction(
-        BeliefNode *belNode, State &state, double startDiscount,
+        BeliefNode *belNode, State const &state, double startDiscount,
         double discountFactor) {
     // We will try the next action that has not yet been tried.
     Action action = belNode->getNextActionToTry();
@@ -260,7 +259,7 @@ std::pair<Model::StepResult, double> Solver::getRolloutAction(
     if (lastRolloutMode_ == ROLLOUT_RANDHEURISTIC) {
         startTime = std::clock();
         if (!result.isTerminal) {
-            qVal = model_->solveHeuristic(*result.nextState);
+            qVal = model_->getHeuristicValue(*result.nextState);
             qVal *= startDiscount * discountFactor;
         }
         lastRolloutMode_ = ROLLOUT_RANDHEURISTIC;
@@ -273,7 +272,7 @@ std::pair<Model::StepResult, double> Solver::getRolloutAction(
     return std::make_pair(std::move(result), qVal);
 }
 
-double Solver::rolloutPolHelper(BeliefNode *currNode, State &state,
+double Solver::rolloutPolHelper(BeliefNode *currNode, State const &state,
         double discountFactor) {
     if (currNode == nullptr) {
         // cerr << "WARNING: nullptr in rolloutPolHelper!" << endl;
@@ -299,7 +298,7 @@ double Solver::rolloutPolHelper(BeliefNode *currNode, State &state,
 
 BeliefNode *Solver::getNNBelNode(BeliefNode *b) {
     double d, minDist;
-    minDist = DBL_MAX;
+    minDist = std::numeric_limits<double>::infinity();
     BeliefNode *nnBel = b->nnBel_;
     long numTried = 0;
     for (BeliefNode *node : policy_->allNodes_) {
@@ -372,7 +371,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     double discountedTotalReward = 0.0;
 
     BeliefNode *currNode = policy_->getRoot();
-    std::unique_ptr<State> state(model_->sampleAnInitState());
+    std::unique_ptr<State> state = model_->sampleAnInitState();
     State *currentState = state.get();
     trajSt.push_back(std::move(state));
 
@@ -388,14 +387,14 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
             chTimeStart = std::clock();
             model_->update(*itCh, allStates_.get());
-            if (changes::hasFlag(allStates_->getInfo(currentState)->changeFlags_,
+            if (changes::hasFlag(allStates_->getInfo(*currentState)->changeFlags_,
                     ChangeFlags::DELETED)) {
                 cerr << "ERROR: Current simulation state deleted. Exiting.." << endl;
                 std::exit(1);
             }
             for (std::unique_ptr<State> &state2 : trajSt) {
                 if (changes::hasFlag(
-                        allStates_->getInfo(state2.get())->changeFlags_,
+                        allStates_->getInfo(*state2)->changeFlags_,
                         ChangeFlags::DELETED)) {
                     cerr << "ERROR: Impossible simulation history! Includes " << *state2 << endl;
                 }
@@ -422,7 +421,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
         trajAction.push_back(result.action);
         trajObs.push_back(result.observation->copy());
-        trajSt.push_back(std::move(result.nextState)); // trajSt is responsible for ownership
+        trajSt.push_back(result.nextState->copy()); // trajSt is responsible for ownership
         trajRew.push_back(result.immediateReward);
         discountedTotalReward += currDiscFactor * result.immediateReward;
         currDiscFactor = currDiscFactor * discFactor;
@@ -445,7 +444,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 }
 
 Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
-        State &currentState) {
+        State const &currentState) {
 //    cout << "Belief node: ";
 //    serializer_->save(*currentBelief, cout);
 
@@ -478,13 +477,13 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 //        cout << visitor.states.size() << " states; 1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
 //    }
 
-    State *state = currentBelief->sampleAParticle(randGen_)->getState();
+    State const *state = currentBelief->sampleAParticle(randGen_)->getState();
     cout << "Sampled particle: " << *state << endl;
 
     double totalDistance = 0;
     for (int i = 0; i < 100; i++) {
-        State *s1 = currentBelief->sampleAParticle(randGen_)->getState();
-        State *s2 = currentBelief->sampleAParticle(randGen_)->getState();
+        State const *s1 = currentBelief->sampleAParticle(randGen_)->getState();
+        State const *s2 = currentBelief->sampleAParticle(randGen_)->getState();
         totalDistance += s1->distanceTo(*s2);
     }
     cout << "Est. mean inter-particle distance: " << totalDistance / 100
@@ -543,11 +542,11 @@ void Solver::improveSol(BeliefNode *startNode, unsigned long maxTrials,
     }
 }
 
-BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action,
+BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         Observation const &obs, long timeStep) {
     cerr << "WARNING: Adding particles due to depletion" << endl;
 
-    std::vector<State *> particles;
+    std::vector<State const *> particles;
     std::vector<HistoryEntry *>::iterator it;
     for (HistoryEntry *entry : currNode->particles_) {
         particles.push_back(entry->getState());
@@ -570,7 +569,7 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action &action,
 
     BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
-        StateInfo *stateInfo = allStates_->createOrGetInfo(std::move(uniqueStatePtr));
+        StateInfo *stateInfo = allStates_->createOrGetInfo(*uniqueStatePtr);
 
         // Create a new history sequence and entry for the new particle.
         HistorySequence *histSeq = allHistories_->addNew(timeStep);
@@ -632,7 +631,7 @@ void Solver::updateSequence(HistorySequence *sequence) {
             sequence->histSeq_.begin() + sequence->endAffectedIdx_ + 1);
     for (; historyIterator != firstUnchanged; historyIterator++) {
         HistoryEntry *entry = historyIterator->get();
-        State *state = entry->getState();
+        State const *state = entry->getState();
 
         isTerminal = model_->isTerminal(*state);
         if (isTerminal || entry->action_ == -1) {
@@ -662,7 +661,7 @@ void Solver::updateSequence(HistorySequence *sequence) {
                     model_->generateNextState(*entry->getState(),
                             entry->action_));
             if (!nextState->equals(*nextEntry->getState())) {
-                StateInfo *nextStateInfo = allStates_->createOrGetInfo(std::move(nextState));
+                StateInfo *nextStateInfo = allStates_->createOrGetInfo(*nextState);
 
                 nextEntry->registerState(nextStateInfo);
 

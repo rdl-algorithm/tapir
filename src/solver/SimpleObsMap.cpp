@@ -10,7 +10,7 @@ SimpleObsMap::SimpleObsMap() :
 SimpleObsMap::~SimpleObsMap() {
 }
 
-BeliefNode* SimpleObsMap::getBelief(const Observation& obs) {
+BeliefNode* SimpleObsMap::getBelief(const Observation& obs) const {
     try {
         return obsNodes_.at(obs.copy()).get();
     } catch (const std::out_of_range &oor) {
@@ -19,7 +19,7 @@ BeliefNode* SimpleObsMap::getBelief(const Observation& obs) {
 }
 
 BeliefNode* SimpleObsMap::createBelief(const Observation& obs) {
-    auto val = std::make_pair(obs.copy(), std::make_unique<BeliefNode>());
+    Entry val = std::make_pair(obs.copy(), std::make_unique<BeliefNode>());
     BeliefNode *node = val.second.get();
     obsNodes_.insert(std::move(val));
     return node;

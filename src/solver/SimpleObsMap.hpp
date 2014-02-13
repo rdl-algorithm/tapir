@@ -23,7 +23,7 @@ public:
     SimpleObsMap &operator=(SimpleObsMap const &) = delete;
     SimpleObsMap &operator=(SimpleObsMap &&) = delete;
 
-    virtual BeliefNode *getBelief(Observation const &obs);
+    virtual BeliefNode *getBelief(Observation const &obs) const;
     virtual BeliefNode *createBelief(Observation const &obs);
 private:
     struct HashContents {

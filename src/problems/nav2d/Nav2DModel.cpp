@@ -1,4 +1,4 @@
-#include "TagModel.hpp"
+#include "Nav2DModel.hpp"
 
 #include <cmath>                        // for floor, pow
 #include <cstddef>                      // for size_t
@@ -29,19 +29,19 @@
 #include "solver/StatePool.hpp"
 
 
-#include "TagState.hpp"                 // for TagState
+#include "Nav2DState.hpp"                 // for Nav2DState
 
 using std::cerr;
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
 
-namespace tag {
-TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
+namespace nav2d {
+Nav2DModel::Nav2DModel(RandomGenerator *randGen, po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
     moveCost_(vm["problem.moveCost"].as<double>()),
-    tagReward_(vm["problem.tagReward"].as<double>()),
-    failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
+    nav2dReward_(vm["problem.nav2dReward"].as<double>()),
+    failedNav2DPenalty_(vm["problem.failedNav2DPenalty"].as<double>()),
     opponentStayProbability_(
             vm["problem.opponentStayProbability"].as<double>()),
     nRows_(0), // to be updated
@@ -50,10 +50,12 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     mapText_(), // will be pushed to
     envMap_(), // will be pushed to
     changes_(),
+
     nActions_(5),
+    nObservations_(0), // to be updated
     nStVars_(5),
-    minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
-    maxVal_(tagReward_)
+    minVal_(-failedNav2DPenalty_ / (1 - getDiscountFactor())),
+    maxVal_(nav2dReward_)
     {
     // Read the map from the file.
     std::ifstream inFile;
@@ -73,11 +75,12 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     inFile.close();
 
     initialise();
-    cout << "Constructed the TagModel" << endl;
+    cout << "Constructed the Nav2DModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "Size: " << nRows_ << " by " << nCols_ << endl;
     cout << "move cost: " << moveCost_ << endl;
     cout << "nActions: " << nActions_ << endl;
+    cout << "nObservations: " << nObservations_ << endl;
     cout << "nStVars: " << nStVars_ << endl;
     cout << "Example States: " << endl;
     for (int i = 0; i < 5; i++) {
@@ -89,7 +92,7 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     drawEnv(cout);
 }
 
-void TagModel::initialise() {
+void Nav2DModel::initialise() {
     GridPosition p;
     nEmptyCells_ = 0;
     envMap_.resize(nRows_);
@@ -97,92 +100,94 @@ void TagModel::initialise() {
         envMap_[p.i].resize(nCols_);
         for (p.j = 0; p.j < nCols_; p.j++) {
             char c = mapText_[p.i][p.j];
-            TagCellType cellType;
+            Nav2DCellType cellType;
             if (c == 'X') {
                 cellType = WALL;
             } else {
-                cellType = TagCellType::EMPTY;
+                cellType = Nav2DCellType::EMPTY;
                 nEmptyCells_++;
             }
             envMap_[p.i][p.j] = cellType;
         }
     }
+
+    nObservations_ = nEmptyCells_ * 2;
 }
 
-GridPosition TagModel::randomEmptyCell() {
+GridPosition Nav2DModel::randomEmptyCell() {
     GridPosition pos;
     while (true) {
         pos.i = std::uniform_int_distribution<unsigned long>(0, nRows_ - 1)(*randGen_);
         pos.j = std::uniform_int_distribution<unsigned long>(0, nCols_ - 1)(*randGen_);
-        if (envMap_[pos.i][pos.j] == TagCellType::EMPTY) {
+        if (envMap_[pos.i][pos.j] == Nav2DCellType::EMPTY) {
             break;
         }
     }
     return pos;
 }
 
-std::unique_ptr<solver::State> TagModel::sampleAnInitState() {
+std::unique_ptr<solver::State> Nav2DModel::sampleAnInitState() {
     return sampleStateUniform();
 }
 
-std::unique_ptr<solver::State> TagModel::sampleStateUniform() {
+std::unique_ptr<solver::State> Nav2DModel::sampleStateUniform() {
     GridPosition robotPos = randomEmptyCell();
     GridPosition opponentPos = randomEmptyCell();
-    return std::make_unique<TagState>(robotPos, opponentPos, false);
+    return std::make_unique<Nav2DState>(robotPos, opponentPos, false);
 }
 
-bool TagModel::isTerminal(solver::State const &state) {
-    return static_cast<TagState const &>(state).isTagged();
+bool Nav2DModel::isTerminal(solver::State const &state) {
+    return static_cast<Nav2DState const &>(state).isNav2Dged();
 }
 
-double TagModel::getHeuristicValue(solver::State const &state) {
-    TagState const &tagState = static_cast<TagState const &>(state);
-    if (tagState.isTagged()) {
+double Nav2DModel::getHeuristicValue(solver::State const &state) {
+    Nav2DState const &nav2dState = static_cast<Nav2DState const &>(state);
+    if (nav2dState.isNav2Dged()) {
         return 0;
     }
-    GridPosition robotPos = tagState.getRobotPosition();
-    GridPosition opponentPos = tagState.getOpponentPosition();
+    GridPosition robotPos = nav2dState.getRobotPosition();
+    GridPosition opponentPos = nav2dState.getOpponentPosition();
     int dist = robotPos.manhattanDistanceTo(opponentPos);
     double nSteps = dist / opponentStayProbability_;
     double finalDiscount = std::pow(getDiscountFactor(), nSteps);
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
-    qVal += finalDiscount * tagReward_;
+    qVal += finalDiscount * nav2dReward_;
     return qVal;
 }
 
-double TagModel::getDefaultVal() {
+double Nav2DModel::getDefaultVal() {
     return minVal_;
 }
 
-std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
+std::pair<std::unique_ptr<Nav2DState>, bool> Nav2DModel::makeNextState(
         solver::State const &state, solver::Action const &action) {
-    TagState const &tagState = static_cast<TagState const &>(state);
-    if (tagState.isTagged()) {
-        return std::make_pair(std::make_unique<TagState>(tagState), false);
+    Nav2DState const &nav2dState = static_cast<Nav2DState const &>(state);
+    if (nav2dState.isNav2Dged()) {
+        return std::make_pair(std::make_unique<Nav2DState>(nav2dState), false);
     }
 
-    GridPosition robotPos = tagState.getRobotPosition();
-    GridPosition opponentPos = tagState.getOpponentPosition();
-    if (action == TagAction::TAG && robotPos == opponentPos) {
+    GridPosition robotPos = nav2dState.getRobotPosition();
+    GridPosition opponentPos = nav2dState.getOpponentPosition();
+    if (action == Nav2DAction::NAV2D && robotPos == opponentPos) {
         return std::make_pair(
-                std::make_unique<TagState>(robotPos, opponentPos, true), true);
+                std::make_unique<Nav2DState>(robotPos, opponentPos, true), true);
     }
 
     GridPosition newOpponentPos = getMovedOpponentPos(robotPos, opponentPos);
     GridPosition newRobotPos = getMovedPos(robotPos, action);
     if (!isValid(newRobotPos)) {
         return std::make_pair(
-                std::make_unique<TagState>(robotPos, newOpponentPos, false),
+                std::make_unique<Nav2DState>(robotPos, newOpponentPos, false),
                 false);
     }
-    return std::make_pair(std::make_unique<TagState>(
+    return std::make_pair(std::make_unique<Nav2DState>(
                     newRobotPos, newOpponentPos, false), true);
 }
 
-std::vector<TagModel::TagAction> TagModel::makeOpponentActions(
+std::vector<Nav2DModel::Nav2DAction> Nav2DModel::makeOpponentActions(
         GridPosition const &robotPos,
         GridPosition const &opponentPos) {
-    std::vector<TagAction> actions;
+    std::vector<Nav2DAction> actions;
     if (robotPos.i > opponentPos.i) {
         actions.push_back(NORTH);
         actions.push_back(NORTH);
@@ -206,13 +211,13 @@ std::vector<TagModel::TagAction> TagModel::makeOpponentActions(
     return actions;
 }
 
-GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
+GridPosition Nav2DModel::getMovedOpponentPos(GridPosition const &robotPos,
         GridPosition const &opponentPos) {
     // Randomize to see if the opponent stays still.
     if (std::bernoulli_distribution(opponentStayProbability_)(*randGen_)) {
         return opponentPos;
     }
-    std::vector<TagAction> actions(makeOpponentActions(robotPos, opponentPos));;
+    std::vector<Nav2DAction> actions(makeOpponentActions(robotPos, opponentPos));;
     solver::Action action =
         actions[std::uniform_int_distribution<unsigned long>(
                     0, actions.size() - 1)(*randGen_)];
@@ -223,7 +228,7 @@ GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
     return newOpponentPos;
 }
 
-GridPosition TagModel::getMovedPos(GridPosition const &position,
+GridPosition Nav2DModel::getMovedPos(GridPosition const &position,
         solver::Action const &action) {
     GridPosition movedPos = position;
     switch (action) {
@@ -239,7 +244,7 @@ GridPosition TagModel::getMovedPos(GridPosition const &position,
     case WEST:
         movedPos.j -= 1;
         break;
-    case TAG:
+    case NAV2D:
         break;
     default:
         cerr << "Invalid action: " << action << endl;
@@ -248,52 +253,55 @@ GridPosition TagModel::getMovedPos(GridPosition const &position,
     return movedPos;
 }
 
-bool TagModel::isValid(GridPosition const &position) {
+bool Nav2DModel::isValid(GridPosition const &position) {
     return (position.i >= 0 && position.i < nRows_ && position.j >= 0
             && position.j < nCols_ && envMap_[position.i][position.j] != WALL);
 }
 
-std::unique_ptr<solver::Observation> TagModel::makeObservation(
+std::unique_ptr<solver::Observation> Nav2DModel::makeObservation(
         solver::Action const & /*action*/,
-        TagState const &state) {
+        Nav2DState const &state) {
+    std::vector<double> obs(3);
     GridPosition p = state.getRobotPosition();
-    return std::make_unique<solver::VectorLP>(std::vector<double> {
-        (double)p.i, (double)p.j, (double)(
-                p == state.getOpponentPosition() ? SEEN : UNSEEN)}, 1.0);
-    //return std::make_unique<solver::VectorLP>(std::initializer_list<double> {
-    //    (double)p.i, (double)p.j, (double)(
-    //            p == state.getOpponentPosition() ? SEEN : UNSEEN)}, 1.0);
+    obs[0] = p.i;
+    obs[1] = p.j;
+    if (p == state.getOpponentPosition()) {
+        obs[2] = SEEN;
+    } else {
+        obs[2] = UNSEEN;
+    }
+    return std::make_unique<solver::VectorLP>(1, obs);
 }
 
-double TagModel::getReward(solver::State const &state,
+double Nav2DModel::getReward(solver::State const &state,
         solver::Action const &action) {
-    if (action == TAG) {
-        TagState const &tagState = static_cast<TagState const &>(state);
-        if (tagState.getRobotPosition() == tagState.getOpponentPosition()) {
-            return tagReward_;
+    if (action == NAV2D) {
+        Nav2DState const &nav2dState = static_cast<Nav2DState const &>(state);
+        if (nav2dState.getRobotPosition() == nav2dState.getOpponentPosition()) {
+            return nav2dReward_;
         } else {
-            return -failedTagPenalty_;
+            return -failedNav2DPenalty_;
         }
     } else {
         return -moveCost_;
     }
 }
 
-std::unique_ptr<solver::State> TagModel::generateNextState(
+std::unique_ptr<solver::State> Nav2DModel::generateNextState(
            solver::State const &state, solver::Action const &action) {
-    return makeNextState(static_cast<TagState const &>(state), action).first;
+    return makeNextState(static_cast<Nav2DState const &>(state), action).first;
 }
 
-std::unique_ptr<solver::Observation> TagModel::generateObservation(
+std::unique_ptr<solver::Observation> Nav2DModel::generateObservation(
            solver::Action const &action, solver::State const &nextState) {
-    return makeObservation(action, static_cast<TagState const &>(nextState));
+    return makeObservation(action, static_cast<Nav2DState const &>(nextState));
 }
 
-solver::Model::StepResult TagModel::generateStep(solver::State const &state,
+solver::Model::StepResult Nav2DModel::generateStep(solver::State const &state,
         solver::Action const &action) {
     solver::Model::StepResult result;
     result.action = action;
-    std::unique_ptr<TagState> nextState = makeNextState(state, action).first;
+    std::unique_ptr<Nav2DState> nextState = makeNextState(state, action).first;
 
     result.observation = makeObservation(action, *nextState);
     result.immediateReward = getReward(state, action);
@@ -302,40 +310,39 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
     return result;
 }
 
-std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
+std::vector<std::unique_ptr<solver::State>> Nav2DModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
 
     struct Hash {
-        std::size_t operator()(TagState const &state) const {
+        std::size_t operator()(Nav2DState const &state) const {
             return state.hash();
         }
     };
-    typedef std::unordered_map<TagState, double, Hash> WeightMap;
+    typedef std::unordered_map<Nav2DState, double, Hash> WeightMap;
     WeightMap weights;
     double weightTotal = 0;
-    std::vector<double> observation = static_cast<solver::VectorLP const &>(obs).asVector();
-    // solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
-    GridPosition newRobotPos(observation[0], observation[1]);
-    if (observation[2] == SEEN) {
+    std::vector<double> obsVals(static_cast<solver::VectorLP const &>(obs).asVector());
+    GridPosition newRobotPos(obsVals[0], obsVals[1]);
+    if (obsVals[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
-        newParticles.push_back(std::make_unique<TagState>(newRobotPos,
-                        newRobotPos, action == TAG));
+        newParticles.push_back(std::make_unique<Nav2DState>(newRobotPos,
+                        newRobotPos, action == NAV2D));
     } else {
         // We didn't see the opponent, so we must be in different places.
         for (solver::State const *state : previousParticles) {
-            TagState const *tagState = static_cast<TagState const *>(state);
-            GridPosition oldRobotPos(tagState->getRobotPosition());
+            Nav2DState const *nav2dState = static_cast<Nav2DState const *>(state);
+            GridPosition oldRobotPos(nav2dState->getRobotPosition());
             // Ignore states that do not match knowledge of the robot's position.
             if (newRobotPos != getMovedPos(oldRobotPos, action)) {
                 continue;
             }
-            GridPosition oldOpponentPos(tagState->getOpponentPosition());
-            std::vector<TagAction> actions(makeOpponentActions(oldRobotPos,
+            GridPosition oldOpponentPos(nav2dState->getOpponentPosition());
+            std::vector<Nav2DAction> actions(makeOpponentActions(oldRobotPos,
                             oldOpponentPos));
-            std::vector<TagAction> newActions;
-            for (TagAction enemyAction : actions) {
+            std::vector<Nav2DAction> newActions;
+            for (Nav2DAction enemyAction : actions) {
                 if (getMovedPos(oldOpponentPos, enemyAction) != newRobotPos) {
                     newActions.push_back(enemyAction);
                 }
@@ -344,7 +351,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
             for (solver::Action enemyAction : newActions) {
                 GridPosition newOpponentPos = getMovedPos(oldOpponentPos,
                             enemyAction);
-                TagState newState(newRobotPos, newOpponentPos, false);
+                Nav2DState newState(newRobotPos, newOpponentPos, false);
                 weights[newState] += probability;
                 weightTotal += probability;
             }
@@ -358,24 +365,23 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
                 numToAdd += 1;
             }
             for (int i = 0; i < numToAdd; i++) {
-                newParticles.push_back(std::make_unique<TagState>(it->first));
+                newParticles.push_back(std::make_unique<Nav2DState>(it->first));
             }
         }
     }
     return newParticles;
 }
 
-std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
+std::vector<std::unique_ptr<solver::State>> Nav2DModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
-    std::vector<double> observation = static_cast<solver::VectorLP const &>(obs).asVector();
-    // solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
-    GridPosition newRobotPos(observation[0], observation[1]);
-    if (observation[2] == SEEN) {
+    std::vector<double> obsVals(static_cast<solver::VectorLP const &>(obs).asVector());
+    GridPosition newRobotPos(obsVals[0], obsVals[1]);
+    if (obsVals[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
         newParticles.push_back(
-                std::make_unique<TagState>(newRobotPos, newRobotPos,
-                        action == TAG));
+                std::make_unique<Nav2DState>(newRobotPos, newRobotPos,
+                        action == NAV2D));
     } else {
         while (newParticles.size() < getNParticles()) {
             std::unique_ptr<solver::State> state = sampleStateUniform();
@@ -400,7 +406,7 @@ std::vector<long> getVector(std::istringstream &iss) {
     return values;
 }
 
-std::vector<long> TagModel::loadChanges(char const *changeFilename) {
+std::vector<long> Nav2DModel::loadChanges(char const *changeFilename) {
     std::vector<long> changeTimes;
     std::ifstream ifs;
     ifs.open(changeFilename);
@@ -412,14 +418,14 @@ std::vector<long> TagModel::loadChanges(char const *changeFilename) {
         long nChanges;
         sstr >> tmpStr >> time >> tmpStr >> nChanges;
 
-        changes_[time] = std::vector<TagChange>();
+        changes_[time] = std::vector<Nav2DChange>();
         changeTimes.push_back(time);
         for (int i = 0; i < nChanges; i++) {
             std::getline(ifs, line);
             sstr.clear();
             sstr.str(line);
 
-            TagChange change;
+            Nav2DChange change;
             std::getline(sstr, change.changeType, ':');
             std::vector<long> v0 = getVector(sstr);
             std::vector<long> v1 = getVector(sstr);
@@ -434,14 +440,14 @@ std::vector<long> TagModel::loadChanges(char const *changeFilename) {
     return changeTimes;
 }
 
-void TagModel::update(long time, solver::StatePool *pool) {
-    for (TagChange &change : changes_[time]) {
+void Nav2DModel::update(long time, solver::StatePool *pool) {
+    for (Nav2DChange &change : changes_[time]) {
         cout << change.changeType << " " << change.i0 << " " << change.j0 << " "
                 << change.i1 << " " << change.j1 << endl;
         if (change.changeType == "Add Obstacles") {
             for (int i = change.i0; i <= change.i1; i++) {
                 for (int j = change.j0; j <= change.j1; j++) {
-                    envMap_[i][j] = TagCellType::WALL;
+                    envMap_[i][j] = Nav2DCellType::WALL;
                 }
             }
             solver::RTree *tree =
@@ -457,7 +463,7 @@ void TagModel::update(long time, solver::StatePool *pool) {
         } else if (change.changeType == "Remove Obstacles") {
             for (int i = change.i0; i <= change.i1; i++) {
                 for (int j = change.j0; j <= change.j1; j++) {
-                    envMap_[i][j] = TagCellType::EMPTY;
+                    envMap_[i][j] = Nav2DCellType::EMPTY;
                 }
             }
             solver::RTree *tree =
@@ -473,7 +479,7 @@ void TagModel::update(long time, solver::StatePool *pool) {
     }
 }
 
-void TagModel::dispAct(solver::Action const &action, std::ostream &os) {
+void Nav2DModel::dispAct(solver::Action const &action, std::ostream &os) {
     switch (action) {
     case NORTH:
         os << "NORTH";
@@ -487,8 +493,8 @@ void TagModel::dispAct(solver::Action const &action, std::ostream &os) {
     case WEST:
         os << "WEST";
         break;
-    case TAG:
-        os << "TAG";
+    case NAV2D:
+        os << "NAV2D";
         break;
     default:
         os << "INVALID" << action;
@@ -496,16 +502,15 @@ void TagModel::dispAct(solver::Action const &action, std::ostream &os) {
     }
 }
 
-void TagModel::dispObs(solver::Observation const &obs, std::ostream &os) {
-    std::vector<double> observation = static_cast<solver::VectorLP const &>(obs).asVector();
-    // solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
-    os << GridPosition(observation[0], observation[1]);
-    if (observation[2] == SEEN) {
+void Nav2DModel::dispObs(solver::Observation const &obs, std::ostream &os) {
+    std::vector<double> obsVals(static_cast<solver::VectorLP const &>(obs).asVector());
+    os << GridPosition(obsVals[0], obsVals[1]);
+    if (obsVals[2] == SEEN) {
         os << " SEEN!";
     }
 }
 
-void TagModel::dispCell(TagCellType cellType, std::ostream &os) {
+void Nav2DModel::dispCell(Nav2DCellType cellType, std::ostream &os) {
     if (cellType >= EMPTY) {
         os << std::setw(2);
         os << cellType;
@@ -521,9 +526,9 @@ void TagModel::dispCell(TagCellType cellType, std::ostream &os) {
     }
 }
 
-void TagModel::drawEnv(std::ostream &os) {
-    for (std::vector<TagCellType> &row : envMap_) {
-        for (TagCellType cellType : row) {
+void Nav2DModel::drawEnv(std::ostream &os) {
+    for (std::vector<Nav2DCellType> &row : envMap_) {
+        for (Nav2DCellType cellType : row) {
             dispCell(cellType, os);
             os << " ";
         }
@@ -531,13 +536,13 @@ void TagModel::drawEnv(std::ostream &os) {
     }
 }
 
-void TagModel::drawState(solver::State const &state, std::ostream &os) {
-    TagState const &tagState = static_cast<TagState const &>(state);
+void Nav2DModel::drawState(solver::State const &state, std::ostream &os) {
+    Nav2DState const &nav2dState = static_cast<Nav2DState const &>(state);
     for (std::size_t i = 0; i < envMap_.size(); i++) {
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
             GridPosition pos(i, j);
-            bool hasRobot = (pos == tagState.getRobotPosition());
-            bool hasOpponent = (pos == tagState.getOpponentPosition());
+            bool hasRobot = (pos == nav2dState.getRobotPosition());
+            bool hasOpponent = (pos == nav2dState.getOpponentPosition());
             if (hasRobot) {
                 if (hasOpponent) {
                     os << "#";
@@ -557,4 +562,4 @@ void TagModel::drawState(solver::State const &state, std::ostream &os) {
         os << endl;
     }
 }
-} /* namespace tag */
+} /* namespace nav2d */

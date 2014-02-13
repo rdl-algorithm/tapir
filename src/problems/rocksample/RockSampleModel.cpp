@@ -5,6 +5,7 @@
 #include <cstdlib>                      // for exit
 
 #include <fstream>                      // for operator<<, basic_ostream, endl, basic_ostream<>::__ostream_type, ifstream, basic_ostream::operator<<, basic_istream, basic_istream<>::__istream_type
+#include <initializer_list>
 #include <iostream>                     // for cout, cerr
 #include <memory>                       // for unique_ptr, default_delete
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
@@ -24,7 +25,7 @@
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
-#include "solver/SimpleVectorL1.hpp"             // for State, State::Hash, operator<<, operator==
+#include "solver/VectorLP.hpp"             // for State, State::Hash, operator<<, operator==
 #include "solver/State.hpp"             // for State, operator<<, State::Hash, operator==
 #include "solver/StatePool.hpp"
 
@@ -53,7 +54,6 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     mapText_(), // push rows
     envMap_(), // push rows
     nActions_(0), // depends on nRocks
-    nObservations_(2),
     nStVars_(), // depends on nRocks
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
     maxVal_(0) // depends on nRocks
@@ -85,7 +85,6 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     cout << "Rock 1: " << rockPositions_[1] << endl;
     cout << "good rock reward: " << goodRockReward_ << endl;
     cout << "nActions: " << nActions_ << endl;
-    cout << "nObservations: " << nObservations_ << endl;
     cout << "nStVars: " << nStVars_ << endl;
     cout << "Random initial states:" << endl;
     cout << *sampleAnInitState() << endl;
@@ -123,7 +122,6 @@ void RockSampleModel::initialise() {
     }
 
     nActions_ = 5 + nRocks_;
-    nObservations_ = 2;
     nStVars_ = 2 + nRocks_;
     minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
@@ -165,7 +163,7 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
     return envMap_[pos.i][pos.j] == GOAL;
 }
 
-double RockSampleModel::solveHeuristic(solver::State const &state) {
+double RockSampleModel::getHeuristicValue(solver::State const &state) {
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
     double qVal = 0;
@@ -300,10 +298,10 @@ std::unique_ptr<solver::State> RockSampleModel::generateNextState(
 
 std::unique_ptr<solver::Observation> RockSampleModel::generateObservation(
         solver::Action const &action, solver::State const &nextState) {
-    std::vector<double> values;
-    values.push_back((double)makeObservation(action,
-            static_cast<RockSampleState const &>(nextState)));
-    return std::make_unique<solver::SimpleVectorL1>(values);
+    double obsValue = (double)makeObservation(action,
+            static_cast<RockSampleState const &>(nextState));
+    return std::make_unique<solver::VectorLP>(
+            std::initializer_list<double>{obsValue}, 1.0);
 }
 
 double RockSampleModel::getReward(solver::State const &state,
@@ -337,7 +335,7 @@ solver::Model::StepResult RockSampleModel::generateStep(
 
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs,
-        std::vector<solver::State *> const &previousParticles) {
+        std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
     // If it's a CHECK action, we condition on the observation.
     if (action >= CHECK) {
@@ -350,7 +348,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         typedef std::unordered_map<RockSampleState, double, Hash> WeightMap;
         WeightMap weights;
         double weightTotal = 0;
-        for (solver::State *state : previousParticles) {
+        for (solver::State const *state : previousParticles) {
             RockSampleState const *rockSampleState =
                 static_cast<RockSampleState const *>(state);
             GridPosition pos(rockSampleState->getPosition());
@@ -360,7 +358,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
                                           / halfEfficiencyDistance_)) * 0.5);
             bool rockIsGood = rockSampleState->getRockStates()[rockNo];
             double probability;
-            double obsValue = static_cast<solver::SimpleVectorL1 const &>(obs).asVector()[0];
+            double obsValue = static_cast<solver::VectorLP const &>(obs)[0];
             if ((rockIsGood && obsValue == (double)RSObservation::GOOD)
                 || (!rockIsGood && obsValue == (double)RSObservation::BAD)) {
                 probability = efficiency;
@@ -385,7 +383,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
 
     } else {
         // It's not a CHECK action, so we just add each resultant state.
-        for (solver::State *state : previousParticles) {
+        for (solver::State const *state : previousParticles) {
             RockSampleState const *rockSampleState =
                 static_cast<RockSampleState const *>(state);
             newParticles.push_back(makeNextState(*rockSampleState,
@@ -464,7 +462,7 @@ void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
 
 void RockSampleModel::dispObs(solver::Observation const &obs,
         std::ostream &os) {
-    double obsValue = static_cast<solver::SimpleVectorL1 const &>(obs).asVector()[0];
+    double obsValue = static_cast<solver::VectorLP const &>(obs)[0];
     switch ((int)obsValue) {
     case (int)RSObservation::NONE:
         os << "NONE";

@@ -29,9 +29,7 @@ class BeliefTree {
     void reset();
 
     /** Returns the root node. */
-    BeliefNode *getRoot() {
-        return root_.get();
-    }
+    BeliefNode *getRoot() const;
 
     /**
      * Adds a child belief node to the given belief node; this node will be

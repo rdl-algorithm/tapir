@@ -176,7 +176,7 @@ void UnderwaterNavModel::sampleAnInitState(UnderwaterNavState &tmpStVals) {
  */
 
 // Nearest distance to goal.
-void UnderwaterNavModel::solveHeuristic(UnderwaterNavState &s, double *qVal) {
+void UnderwaterNavModel::getHeuristicValue(UnderwaterNavState &s, double *qVal) {
     UnderwaterNavState nxtS;
     if (inRock(s)) {
         *qVal = crashPenalty_;

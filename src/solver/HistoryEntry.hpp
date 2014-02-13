@@ -59,7 +59,7 @@ class HistoryEntry {
      */
 
     /** Returns the state associated with this history entry. */
-    State *getState();
+    State const *getState();
 
     /**  Resets the changes that apply to this history entry. */
     void resetChangeFlags();

@@ -68,9 +68,6 @@ class TagModel : public ModelWithProgramOptions {
     unsigned long getNActions() {
         return nActions_;
     }
-    unsigned long getNObservations() {
-        return nObservations_;
-    }
     unsigned long getNStVars() {
         return nStVars_;
     }
@@ -87,7 +84,7 @@ class TagModel : public ModelWithProgramOptions {
     std::unique_ptr<solver::State> sampleStateUniform();
 
     bool isTerminal(solver::State const &state);
-    double solveHeuristic(solver::State const &state);
+    double getHeuristicValue(solver::State const &state);
     double getDefaultVal();
 
     /* --------------- Black box dynamics ----------------- */
@@ -103,7 +100,7 @@ class TagModel : public ModelWithProgramOptions {
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action,
             solver::Observation const &obs,
-            std::vector<solver::State *> const &previousParticles);
+            std::vector<solver::State const *> const &previousParticles);
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action,
             solver::Observation const &obs);
@@ -186,7 +183,7 @@ class TagModel : public ModelWithProgramOptions {
     std::map<long, std::vector<TagChange>> changes_;
 
     // General problem parameters
-    unsigned long nActions_, nObservations_, nStVars_;
+    unsigned long nActions_, nStVars_;
     double minVal_, maxVal_;
 };
 } /* namespace tag */

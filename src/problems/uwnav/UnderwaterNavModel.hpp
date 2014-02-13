@@ -58,7 +58,7 @@ class UnderwaterNavModel: public ModelWithProgramOptions {
     std::unique_ptr<solver::State> sampleAnInitState();
 
     bool isTerm(solver::State const &state);
-    double solveHeuristic(solver::State const &state);
+    double getHeuristicValue(solver::State const &state);
     double getDefaultVal();
 
     solver::Model::StepResult generateStep(solver::State const &state,

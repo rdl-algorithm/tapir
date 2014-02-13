@@ -52,7 +52,7 @@ std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Observation const &ob
     return std::make_pair(beliefChild, added);
 }
 
-BeliefNode *ActionNode::getChild(Observation const &obs) {
+BeliefNode *ActionNode::getChild(Observation const &obs) const {
     return obsMap_->getBelief(obs);
 }
 } /* namespace solver */

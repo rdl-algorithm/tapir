@@ -12,12 +12,6 @@
 #include "solver/State.hpp"             // for State
 
 namespace rocksample {
-template<class T>
-void hash_combine(std::size_t &seed, T const &v) {
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
-
 RockSampleState::RockSampleState(GridPosition position,
         std::vector<bool> rockStates) :
     solver::Vector(),
@@ -34,13 +28,13 @@ std::unique_ptr<solver::Point> RockSampleState::copy() const {
 }
 
 double RockSampleState::distanceTo(solver::State const &otherState) const {
-    RockSampleState const *otherRockSampleState =
-        static_cast<RockSampleState const *>(&otherState);
+    RockSampleState const &otherRockSampleState =
+        static_cast<RockSampleState const &>(otherState);
     double distance = position_.manhattanDistanceTo(
-                otherRockSampleState->position_) / 10.0;
+                otherRockSampleState.position_) / 10.0;
     typedef std::vector<bool>::const_iterator BoolIt;
     BoolIt it1 = rockStates_.cbegin();
-    BoolIt it2 = otherRockSampleState->rockStates_.cbegin();
+    BoolIt it2 = otherRockSampleState.rockStates_.cbegin();
     for (; it1 != rockStates_.cend(); it1++, it2++) {
         if (*it1 != *it2) {
             distance += 1;
@@ -50,10 +44,10 @@ double RockSampleState::distanceTo(solver::State const &otherState) const {
 }
 
 bool RockSampleState::equals(solver::State const &otherState) const {
-    RockSampleState const *otherRockSampleState =
-        static_cast<RockSampleState const *>(&otherState);
-    return (position_ == otherRockSampleState->position_
-            && rockStates_ == otherRockSampleState->rockStates_);
+    RockSampleState const &otherRockSampleState =
+        static_cast<RockSampleState const &>(otherState);
+    return (position_ == otherRockSampleState.position_
+            && rockStates_ == otherRockSampleState.rockStates_);
 }
 
 std::size_t RockSampleState::hash() const {

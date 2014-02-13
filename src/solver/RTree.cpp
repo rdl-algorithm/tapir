@@ -55,14 +55,16 @@ void RTree::reset() {
 
 void RTree::addStateInfo(StateInfo *stateInfo) {
     SpatialIndex::id_type stateId = stateInfo->getId();
-    std::vector<double> vectorData = static_cast<Vector*>(stateInfo->getState())->asVector();
+    std::vector<double> vectorData = static_cast<Vector const *>(
+            stateInfo->getState())->asVector();
     SpatialIndex::Point point(&vectorData[0], nSDim_);
     tree_->insertData(0, nullptr, point, stateId);
 }
 
 void RTree::removeStateInfo(StateInfo *stateInfo) {
     SpatialIndex::id_type stateId = stateInfo->getId();
-    std::vector<double> vectorData = static_cast<Vector*>(stateInfo->getState())->asVector();
+    std::vector<double> vectorData = static_cast<Vector const *>(
+            stateInfo->getState())->asVector();
     SpatialIndex::Point point(&vectorData[0], nSDim_);
     tree_->deleteData(point, stateId);
 }

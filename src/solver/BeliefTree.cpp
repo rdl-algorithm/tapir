@@ -20,6 +20,10 @@ BeliefTree::BeliefTree() :
 BeliefTree::~BeliefTree() {
 }
 
+BeliefNode *BeliefTree::getRoot() const {
+    return root_.get();
+}
+
 BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         Action const &action, Observation const &obs) {
     bool isNew;

@@ -35,10 +35,8 @@ class Model {
     /** Returns the POMDP discount factor. */
     virtual double getDiscountFactor() = 0;
 
-    /** Returns the # of actions for this POMDP. */
+    /** Returns the # of discrete actions for this POMDP. */
     virtual unsigned long getNActions() = 0;
-    /** Returns the # of observations for this POMDP. */
-    virtual unsigned long getNObservations() = 0;
     /** Returns the number of state variables */
     virtual unsigned long getNStVars() = 0;
     /** Returns a lower bound on the q-value. */
@@ -91,7 +89,7 @@ class Model {
     /** Returns true iff the given state is terminal. */
     virtual bool isTerminal(State const &state) = 0;
     /** Approximates the q-value of a state */
-    virtual double solveHeuristic(State const &state) = 0;
+    virtual double getHeuristicValue(State const &state) = 0;
     /** Returns the default q-value */
     virtual double getDefaultVal() = 0;
 
@@ -125,7 +123,7 @@ class Model {
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
             Action const &action, Observation const &obs,
-            std::vector<State *> const &previousParticles) = 0;
+            std::vector<State const *> const &previousParticles) = 0;
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
      *

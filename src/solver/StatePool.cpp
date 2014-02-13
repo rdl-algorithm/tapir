@@ -27,15 +27,15 @@ StatePool::StatePool(unsigned long nSDim) :
 StatePool::~StatePool() {
 }
 
-StateInfo *StatePool::getInfo(State *state) {
-    StateInfoMap::iterator it = stateInfoMap_.find(state);
+StateInfo *StatePool::getInfo(State const &state) const {
+    StateInfoMap::const_iterator it = stateInfoMap_.find(&state);
     if (it == stateInfoMap_.end()) {
         return nullptr;
     }
     return it->second;
 }
 
-StateInfo *StatePool::getInfoById(long id) {
+StateInfo *StatePool::getInfoById(long id) const {
     return statesByIndex_[id].get();
 }
 
@@ -65,19 +65,19 @@ StateInfo *StatePool::add(std::unique_ptr<StateInfo> newInfo) {
     return stateInfo;
 }
 
-StateInfo *StatePool::createOrGetInfo(std::unique_ptr<State> state) {
-    StateInfo *info = getInfo(state.get());
+StateInfo *StatePool::createOrGetInfo(State const &state) {
+    StateInfo *info = getInfo(state);
     if (info != nullptr) {
         return info;
     }
-    return add(std::make_unique<StateInfo>(std::move(state)));
+    return add(std::make_unique<StateInfo>(state.copy()));
 }
 
-StateIndex *StatePool::getStateIndex() {
+StateIndex *StatePool::getStateIndex() const {
     return stateIndex_.get();
 }
 
-void StatePool::addToStateIndex(StateInfo *stateInfo) {
+void StatePool::addToStateIndex(StateInfo *stateInfo) const {
     stateIndex_->addStateInfo(stateInfo);
 }
 
@@ -100,7 +100,7 @@ void StatePool::resetAffectedStates() {
     changedStates_.clear();
 }
 
-std::unordered_set<StateInfo *> StatePool::getAffectedStates() {
+std::unordered_set<StateInfo *> StatePool::getAffectedStates() const {
     return changedStates_;
 }
 } /* namespace solver */
