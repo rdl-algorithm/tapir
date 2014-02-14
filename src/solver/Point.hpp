@@ -28,12 +28,6 @@ class Point {
     virtual std::size_t hash() const = 0;
     virtual void print(std::ostream &os) const = 0;
 
-    virtual std::string toString() {
-        std::ostringstream sstr;
-        print(sstr);
-        return sstr.str();
-    }
-
     friend std::ostream &operator<<(std::ostream &os, Point const &Point);
     friend bool operator==(Point const &s1, Point const &s2);
     friend bool operator!=(Point const &s1, Point const &s2);

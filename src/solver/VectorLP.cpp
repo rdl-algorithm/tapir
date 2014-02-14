@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "defs.hpp"
+#include "global.hpp"
 #include "Vector.hpp"
 
 namespace solver {
@@ -33,7 +33,7 @@ bool VectorLP::equals(Point const &otherPoint) const {
 std::size_t VectorLP::hash() const {
     std::size_t hashValue = 0;
     for (double v : values_) {
-        hash_combine(hashValue, v);
+        abt::hash_combine(hashValue, v);
     }
     return hashValue;
 

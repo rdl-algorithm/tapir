@@ -6,7 +6,7 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
@@ -48,7 +48,7 @@ class Solver {
      * number (maxTrials) of episodes, and terminating episodes when the
      * current discount reaches the lowest allowed value (minimumDiscount).
      */
-    void genPol(unsigned long maxTrials, double minimumDiscount);
+    void genPol(long maxTrials, double minimumDiscount);
     /** Runs a single simulation up to a maximum of nSteps steps, returning
      * the total discounted reward.
      *
@@ -103,7 +103,7 @@ class Solver {
             Observation const &obs,
             long timeStep);
     /** Improves the solution, with the root at the given node. */
-    void improveSol(BeliefNode *startNode, unsigned long maxTrials,
+    void improveSol(BeliefNode *startNode, long maxTrials,
             double minimumDiscount);
 
     /* ------------------ Methods for handling model changes ------------------- */

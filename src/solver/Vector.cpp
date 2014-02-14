@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "defs.hpp"
+#include "global.hpp"
 
 namespace solver {
 bool Vector::equals(Point const &otherPoint) const {
@@ -28,7 +28,7 @@ std::size_t Vector::hash() const {
 
     std::size_t hashValue = 0;
     for (std::vector<double>::iterator i1 = v1.begin(); i1 < v1.end(); i1++) {
-        hash_combine(hashValue, *i1);
+        abt::hash_combine(hashValue, *i1);
     }
     return hashValue;
 

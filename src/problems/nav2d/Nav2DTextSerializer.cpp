@@ -2,7 +2,7 @@
 
 #include <iostream>                     // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, basic_istream<>::__istream_type
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/State.hpp"             // for State
 #include "solver/TextSerializer.hpp"    // for TextSerializer

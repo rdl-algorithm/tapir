@@ -1,8 +1,9 @@
-#ifndef DEFS_HPP_
-#define DEFS_HPP_
+#ifndef GLOBAL_HPP_
+#define GLOBAL_HPP_
 
 #include <memory>                       // for unique_ptr
 #include <random>                       // for default_random_engine
+#include <sstream>
 #include <utility>                      // for forward
 
 typedef std::default_random_engine RandomGenerator;
@@ -38,10 +39,16 @@ namespace std {
         make_unique(Args&&...) = delete;
 }
 
+namespace abt {
 template<class T>
 void hash_combine(std::size_t &seed, T const &v) {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-#endif /* DEFS_HPP_ */
+// Used for printing values in GDB
+std::stringstream *get_sstr();
+void reset_sstr();
+} /* namespace abt */
+
+#endif /* GLOBAL_HPP_ */

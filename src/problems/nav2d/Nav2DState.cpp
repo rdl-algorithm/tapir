@@ -7,7 +7,7 @@
 #include <ostream>                      // for operator<<, ostream, basic_ostream>
 #include <vector>
 
-#include "defs.hpp"
+#include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
 
@@ -49,9 +49,9 @@ bool Nav2DState::equals(solver::State const &otherState) const {
 
 std::size_t Nav2DState::hash() const {
     std::size_t hashValue = 0;
-    hash_combine(hashValue, x_);
-    hash_combine(hashValue, y_);
-    hash_combine(hashValue, numTurns_);
+    abt::hash_combine(hashValue, x_);
+    abt::hash_combine(hashValue, y_);
+    abt::hash_combine(hashValue, numTurns_);
     return hashValue;
 }
 

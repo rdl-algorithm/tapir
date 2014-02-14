@@ -9,7 +9,7 @@
 
 #include <boost/program_options.hpp>    // for variables_map
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
@@ -37,7 +37,7 @@ class TagModel : public ModelWithProgramOptions {
     TagModel &operator=(TagModel &&) = delete;
 
     /** Enumerates the possible actions */
-    enum TagAction : long {
+    enum class TagAction : long {
         NORTH = 0,
         EAST = 1,
         SOUTH = 2,
@@ -65,10 +65,10 @@ class TagModel : public ModelWithProgramOptions {
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    unsigned long getNActions() {
+    long getNActions() {
         return nActions_;
     }
-    unsigned long getNStVars() {
+    long getNStVars() {
         return nStVars_;
     }
     double getMinVal() {
@@ -144,7 +144,7 @@ class TagModel : public ModelWithProgramOptions {
      *  this may result in invalid coordinates.
      */
     GridPosition getMovedPos(GridPosition const &position,
-            solver::Action const &action);
+            TagAction const &action);
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
 
@@ -183,9 +183,18 @@ class TagModel : public ModelWithProgramOptions {
     std::map<long, std::vector<TagChange>> changes_;
 
     // General problem parameters
-    unsigned long nActions_, nStVars_;
+    long nActions_, nStVars_;
     double minVal_, maxVal_;
 };
 } /* namespace tag */
+
+
+bool operator==(tag::TagModel::TagAction const &ta, solver::Action const &a) {
+    return static_cast<long>(ta) == static_cast<long>(a);
+}
+
+bool operator==(solver::Action const &a, tag::TagModel::TagAction const &ta) {
+    return ta == a;
+}
 
 #endif /* TAGMODEL_HPP_ */

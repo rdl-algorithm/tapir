@@ -4,7 +4,7 @@
 #include <vector>                       // for vector
 #include <iostream>
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 
 #include "BeliefNode.hpp"               // for BeliefNode
 #include "Observation.hpp"

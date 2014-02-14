@@ -6,7 +6,7 @@
 #include <ostream>                      // for operator<<, ostream, basic_ostream>
 #include <vector>
 
-#include "defs.hpp"
+#include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
 
@@ -44,11 +44,11 @@ bool TagState::equals(solver::State const &otherState) const {
 
 std::size_t TagState::hash() const {
     std::size_t hashValue = 0;
-    hash_combine(hashValue, robotPos_.i);
-    hash_combine(hashValue, robotPos_.j);
-    hash_combine(hashValue, opponentPos_.i);
-    hash_combine(hashValue, opponentPos_.j);
-    hash_combine(hashValue, isTagged_);
+    abt::hash_combine(hashValue, robotPos_.i);
+    abt::hash_combine(hashValue, robotPos_.j);
+    abt::hash_combine(hashValue, opponentPos_.i);
+    abt::hash_combine(hashValue, opponentPos_.j);
+    abt::hash_combine(hashValue, isTagged_);
     return hashValue;
 }
 

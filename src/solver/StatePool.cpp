@@ -7,7 +7,7 @@
 #include <unordered_set>                // for unordered_set
 #include <utility>                      // for move, pair
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "RTree.hpp"
@@ -16,7 +16,7 @@
 
 namespace solver {
 
-StatePool::StatePool(unsigned long nSDim) :
+StatePool::StatePool(long nSDim) :
     nSDim_(nSDim),
     stateInfoMap_(),
     statesByIndex_(),

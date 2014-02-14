@@ -32,7 +32,8 @@ class HistoryEntry {
      *  cumulative discount, owning sequence, and entry ID.
      */
     HistoryEntry(StateInfo *stateInfo, double discount,
-            HistorySequence *owningSequence, long entryId);
+            HistorySequence *owningSequence,
+            long entryId);
 
     /** Destroys this HistoryEntry. */
     ~HistoryEntry();

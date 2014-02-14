@@ -11,7 +11,7 @@
 
 #include <boost/program_options.hpp>    // for options_description, variables_map, positional_options_description, store, variable_value, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
+#include "global.hpp"                     // for RandomGenerator, make_unique
 #include "solver/Serializer.hpp"        // for Serializer
 #include "solver/Solver.hpp"            // for Solver
 
@@ -53,6 +53,9 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
 
     std::string polPath = vm["policy"].as<std::string>();
     unsigned long seed = vm["seed"].as<unsigned long>();
+    if (seed == 0) {
+        seed = std::time(nullptr);
+    }
     cerr << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);

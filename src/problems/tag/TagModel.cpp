@@ -14,7 +14,7 @@
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
+#include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
@@ -112,8 +112,8 @@ void TagModel::initialise() {
 GridPosition TagModel::randomEmptyCell() {
     GridPosition pos;
     while (true) {
-        pos.i = std::uniform_int_distribution<unsigned long>(0, nRows_ - 1)(*randGen_);
-        pos.j = std::uniform_int_distribution<unsigned long>(0, nCols_ - 1)(*randGen_);
+        pos.i = std::uniform_int_distribution<long>(0, nRows_ - 1)(*randGen_);
+        pos.j = std::uniform_int_distribution<long>(0, nCols_ - 1)(*randGen_);
         if (envMap_[pos.i][pos.j] == TagCellType::EMPTY) {
             break;
         }
@@ -142,7 +142,7 @@ double TagModel::getHeuristicValue(solver::State const &state) {
     }
     GridPosition robotPos = tagState.getRobotPosition();
     GridPosition opponentPos = tagState.getOpponentPosition();
-    int dist = robotPos.manhattanDistanceTo(opponentPos);
+    long dist = robotPos.manhattanDistanceTo(opponentPos);
     double nSteps = dist / opponentStayProbability_;
     double finalDiscount = std::pow(getDiscountFactor(), nSteps);
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
@@ -163,7 +163,7 @@ std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
 
     GridPosition robotPos = tagState.getRobotPosition();
     GridPosition opponentPos = tagState.getOpponentPosition();
-    if (action == TagAction::TAG && robotPos == opponentPos) {
+    if (action == (long)TagAction::TAG && robotPos == opponentPos) {
         return std::make_pair(
                 std::make_unique<TagState>(robotPos, opponentPos, true), true);
     }
@@ -184,24 +184,24 @@ std::vector<TagModel::TagAction> TagModel::makeOpponentActions(
         GridPosition const &opponentPos) {
     std::vector<TagAction> actions;
     if (robotPos.i > opponentPos.i) {
-        actions.push_back(NORTH);
-        actions.push_back(NORTH);
+        actions.push_back(TagAction::NORTH);
+        actions.push_back(TagAction::NORTH);
     } else if (robotPos.i < opponentPos.i) {
-        actions.push_back(SOUTH);
-        actions.push_back(SOUTH);
+        actions.push_back(TagAction::SOUTH);
+        actions.push_back(TagAction::SOUTH);
     } else {
-        actions.push_back(NORTH);
-        actions.push_back(SOUTH);
+        actions.push_back(TagAction::NORTH);
+        actions.push_back(TagAction::SOUTH);
     }
     if (robotPos.j > opponentPos.j) {
-        actions.push_back(WEST);
-        actions.push_back(WEST);
+        actions.push_back(TagAction::WEST);
+        actions.push_back(TagAction::WEST);
     } else if (robotPos.j < opponentPos.j) {
-        actions.push_back(EAST);
-        actions.push_back(EAST);
+        actions.push_back(TagAction::EAST);
+        actions.push_back(TagAction::EAST);
     } else {
-        actions.push_back(EAST);
-        actions.push_back(WEST);
+        actions.push_back(TagAction::EAST);
+        actions.push_back(TagAction::WEST);
     }
     return actions;
 }
@@ -213,8 +213,7 @@ GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
         return opponentPos;
     }
     std::vector<TagAction> actions(makeOpponentActions(robotPos, opponentPos));;
-    solver::Action action =
-        actions[std::uniform_int_distribution<unsigned long>(
+    solver::Action action = (long)actions[std::uniform_int_distribution<long>(
                     0, actions.size() - 1)(*randGen_)];
     GridPosition newOpponentPos = getMovedPos(opponentPos, action);
     if (!isValid(newOpponentPos)) {
@@ -226,20 +225,20 @@ GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
 GridPosition TagModel::getMovedPos(GridPosition const &position,
         solver::Action const &action) {
     GridPosition movedPos = position;
-    switch (action) {
-    case NORTH:
+    switch (static_cast<TagAction>(static_cast<long>(action))) {
+    case TagAction::NORTH:
         movedPos.i -= 1;
         break;
-    case EAST:
+    case TagAction::EAST:
         movedPos.j += 1;
         break;
-    case SOUTH:
+    case TagAction::SOUTH:
         movedPos.i += 1;
         break;
-    case WEST:
+    case TagAction::WEST:
         movedPos.j -= 1;
         break;
-    case TAG:
+    case TagAction::TAG:
         break;
     default:
         cerr << "Invalid action: " << action << endl;
@@ -267,7 +266,7 @@ std::unique_ptr<solver::Observation> TagModel::makeObservation(
 
 double TagModel::getReward(solver::State const &state,
         solver::Action const &action) {
-    if (action == TAG) {
+    if (action == TagAction::TAG) {
         TagState const &tagState = static_cast<TagState const &>(state);
         if (tagState.getRobotPosition() == tagState.getOpponentPosition()) {
             return tagReward_;
@@ -315,13 +314,12 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     typedef std::unordered_map<TagState, double, Hash> WeightMap;
     WeightMap weights;
     double weightTotal = 0;
-    std::vector<double> observation = static_cast<solver::VectorLP const &>(obs).asVector();
-    // solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
+    solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
     GridPosition newRobotPos(observation[0], observation[1]);
     if (observation[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
         newParticles.push_back(std::make_unique<TagState>(newRobotPos,
-                        newRobotPos, action == TAG));
+                        newRobotPos, action == TagAction::TAG));
     } else {
         // We didn't see the opponent, so we must be in different places.
         for (solver::State const *state : previousParticles) {
@@ -336,7 +334,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
                             oldOpponentPos));
             std::vector<TagAction> newActions;
             for (TagAction enemyAction : actions) {
-                if (getMovedPos(oldOpponentPos, enemyAction) != newRobotPos) {
+                if (getMovedPos(oldOpponentPos, enemyAction)) != newRobotPos) {
                     newActions.push_back(enemyAction);
                 }
             }
@@ -353,7 +351,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         for (WeightMap::iterator it = weights.begin(); it != weights.end();
              it++) {
             double proportion = it->second * scale;
-            int numToAdd = std::floor(proportion);
+            long numToAdd = static_cast<long>(proportion);
             if (std::bernoulli_distribution(proportion-numToAdd)(*randGen_)) {
                 numToAdd += 1;
             }
@@ -368,8 +366,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
-    std::vector<double> observation = static_cast<solver::VectorLP const &>(obs).asVector();
-    // solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
+    solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
     GridPosition newRobotPos(observation[0], observation[1]);
     if (observation[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
@@ -377,7 +374,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
                 std::make_unique<TagState>(newRobotPos, newRobotPos,
                         action == TAG));
     } else {
-        while (newParticles.size() < getNParticles()) {
+        while (static_cast<long>(newParticles.size()) < getNParticles()) {
             std::unique_ptr<solver::State> state = sampleStateUniform();
             solver::Model::StepResult result = generateStep(*state, action);
             if (obs == *result.observation) {
@@ -439,8 +436,8 @@ void TagModel::update(long time, solver::StatePool *pool) {
         cout << change.changeType << " " << change.i0 << " " << change.j0 << " "
                 << change.i1 << " " << change.j1 << endl;
         if (change.changeType == "Add Obstacles") {
-            for (int i = change.i0; i <= change.i1; i++) {
-                for (int j = change.j0; j <= change.j1; j++) {
+            for (long i = static_cast<long>(change.i0); i <= change.i1; i++) {
+                for (long j = static_cast<long>(change.j0); j <= change.j1; j++) {
                     envMap_[i][j] = TagCellType::WALL;
                 }
             }
@@ -455,8 +452,8 @@ void TagModel::update(long time, solver::StatePool *pool) {
                     std::vector<double> { 0,           0,           change.i0, change.j0, 0 },
                     std::vector<double> { nRows_-1.0,  nCols_-1.0,  change.i1, change.j1, 1 });
         } else if (change.changeType == "Remove Obstacles") {
-            for (int i = change.i0; i <= change.i1; i++) {
-                for (int j = change.j0; j <= change.j1; j++) {
+            for (long i = static_cast<long>(change.i0); i <= change.i1; i++) {
+                for (long j = static_cast<long>(change.j0); j <= change.j1; j++) {
                     envMap_[i][j] = TagCellType::EMPTY;
                 }
             }
@@ -474,7 +471,7 @@ void TagModel::update(long time, solver::StatePool *pool) {
 }
 
 void TagModel::dispAct(solver::Action const &action, std::ostream &os) {
-    switch (action) {
+    switch ((long)action) {
     case NORTH:
         os << "NORTH";
         break;
@@ -497,8 +494,7 @@ void TagModel::dispAct(solver::Action const &action, std::ostream &os) {
 }
 
 void TagModel::dispObs(solver::Observation const &obs, std::ostream &os) {
-    std::vector<double> observation = static_cast<solver::VectorLP const &>(obs).asVector();
-    // solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
+    solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
     os << GridPosition(observation[0], observation[1]);
     if (observation[2] == SEEN) {
         os << " SEEN!";

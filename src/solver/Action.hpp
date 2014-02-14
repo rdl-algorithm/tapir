@@ -2,7 +2,16 @@
 #define SOLVER_ACTION_HPP_
 
 namespace solver {
-typedef long Action;
+class Action {
+  public:
+    Action(long action);
+    /*
+    operator long &();
+    operator long const &() const;
+  private:
+    long action_;
+    */
+};
 } /* namespace solver */
 
 #endif /* SOLVER_ACTION_HPP_ */

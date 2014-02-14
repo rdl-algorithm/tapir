@@ -7,7 +7,7 @@
 #include <ostream>                      // for operator<<, ostream
 #include <vector>                       // for vector, operator==, _Bit_const_iterator, _Bit_iterator_base, hash, vector<>::const_iterator
 
-#include "defs.hpp"
+#include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/State.hpp"             // for State
 
@@ -52,9 +52,9 @@ bool RockSampleState::equals(solver::State const &otherState) const {
 
 std::size_t RockSampleState::hash() const {
     std::size_t hashValue = 0;
-    hash_combine(hashValue, position_.i);
-    hash_combine(hashValue, position_.j);
-    hash_combine(hashValue, rockStates_);
+    abt::hash_combine(hashValue, position_.i);
+    abt::hash_combine(hashValue, position_.j);
+    abt::hash_combine(hashValue, rockStates_);
     return hashValue;
 }
 
@@ -63,7 +63,7 @@ std::vector<double> RockSampleState::asVector() const {
     std::vector<double> vec(2 + rockStates_.size());
     vec[0] = position_.i;
     vec[1] = position_.j;
-    for (unsigned long i = 0; i < rockStates_.size(); i++) {
+    for (std::size_t i = 0; i < rockStates_.size(); i++) {
         vec[i + 2] = rockStates_[i] ? 1 : 0;
     }
     return vec;

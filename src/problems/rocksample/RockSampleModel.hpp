@@ -9,7 +9,7 @@
 
 #include <boost/program_options.hpp>    // for variables_map
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
@@ -58,7 +58,7 @@ class RockSampleModel : public ModelWithProgramOptions {
      * only meaningful when the action taken was CHECK;
      * they are meaningless otherwise.
      */
-    enum class RSObservation : unsigned int {
+    enum class RSObservation : int {
         NONE = 0,
         BAD = 1,
         GOOD = 2
@@ -80,10 +80,10 @@ class RockSampleModel : public ModelWithProgramOptions {
 
     /***** Start implementation of Model's methods *****/
     // Simple getters
-    unsigned long getNActions() {
+    long getNActions() {
         return nActions_;
     }
-    unsigned long getNStVars() {
+    long getNStVars() {
         return nStVars_;
     }
     double getMinVal() {
@@ -140,7 +140,7 @@ class RockSampleModel : public ModelWithProgramOptions {
     /** Generates the state of the rocks uniformly at random. */
     std::vector<bool> sampleRocks();
     /** Decodes rocks from an integer. */
-    std::vector<bool> decodeRocks(unsigned long val);
+    std::vector<bool> decodeRocks(long val);
 
     /**
      * Generates a next state for the given state and action;
@@ -186,7 +186,7 @@ class RockSampleModel : public ModelWithProgramOptions {
     std::vector<std::vector<RSCellType>> envMap_;
 
     // Generic problem parameters
-    unsigned long nActions_, nStVars_;
+    long nActions_, nStVars_;
     double minVal_, maxVal_;
 };
 } /* namespace rocksample */

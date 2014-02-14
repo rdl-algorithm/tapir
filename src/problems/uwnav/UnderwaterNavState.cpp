@@ -13,7 +13,7 @@
 
 namespace uwnav {
 template<class T>
-void hash_combine(std::size_t &seed, T const &v) {
+void abt::hash_combine(std::size_t &seed, T const &v) {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
@@ -48,8 +48,8 @@ bool UnderwaterNavState::equals(State const &otherState) const {
 
 std::size_t UnderwaterNavState::hash() const {
     std::size_t hashValue = 0;
-    hash_combine(hashValue, position_.i);
-    hash_combine(hashValue, position_.j);
+    abt::hash_combine(hashValue, position_.i);
+    abt::hash_combine(hashValue, position_.j);
     return hashValue;
 }
 

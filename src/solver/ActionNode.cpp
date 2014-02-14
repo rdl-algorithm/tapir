@@ -4,7 +4,7 @@
 #include <utility>                      // for make_pair, move, pair
 #include <vector>                       // for vector
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation

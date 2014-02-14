@@ -2,7 +2,7 @@
 
 #include <utility>                      // for move
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "HistorySequence.hpp"          // for HistorySequence
 
@@ -37,7 +37,7 @@ void Histories::deleteHistorySequence(long seqId) {
         entry->registerState(nullptr);
         entry->registerNode(nullptr);
     }
-    if (seqId < (long)allHistSeq_.size() - 1) {
+    if (seqId < static_cast<long>(allHistSeq_.size()) - 1) {
         (allHistSeq_.begin() + seqId)->reset(allHistSeq_.rbegin()->release());
         (allHistSeq_.begin() + seqId)->get()->id_ = seqId;
     }

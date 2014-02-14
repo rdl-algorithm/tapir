@@ -9,7 +9,7 @@
 
 #include <boost/program_options.hpp>    // for variables_map
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
@@ -51,10 +51,10 @@ class Nav2DModel : public ModelWithProgramOptions {
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    unsigned long getNActions() {
+    long getNActions() {
         return nActions_;
     }
-    unsigned long getNStVars() {
+    long getNStVars() {
         return nStVars_;
     }
     double getMinVal() {
@@ -104,7 +104,7 @@ class Nav2DModel : public ModelWithProgramOptions {
     void initialise();
 
     // General problem parameters
-    unsigned long nActions_, nStVars_;
+    long nActions_, nStVars_;
     double minVal_, maxVal_;
 };
 } /* namespace nav2d */

@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "defs.hpp"
+#include "global.hpp"
 
 namespace solver {
 class HistoryEntry;
@@ -16,15 +16,15 @@ class ParticleSet {
 
     std::vector<HistoryEntry *>::const_iterator begin() const;
     std::vector<HistoryEntry *>::const_iterator end() const;
-    unsigned long size() const;
+    long size() const;
 
     void add(HistoryEntry *entry);
     void remove(HistoryEntry *entry);
-    HistoryEntry *get(unsigned long index) const;
+    HistoryEntry *get(long index) const;
     bool contains(HistoryEntry *entry) const;
 
   private:
-    std::unordered_map<HistoryEntry *, unsigned long> particleMap_;
+    std::unordered_map<HistoryEntry *, long> particleMap_;
     std::vector<HistoryEntry *> particles_;
 };
 } /* namespace solver */

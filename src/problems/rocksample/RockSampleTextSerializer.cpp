@@ -4,7 +4,7 @@
 #include <string>                       // for operator>>, string
 #include <vector>                       // for vector
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/State.hpp"             // for State
 #include "solver/TextSerializer.hpp"    // for TextSerializer

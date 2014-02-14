@@ -49,7 +49,7 @@ class HistorySequence {
             double immediateReward);
 
     /** Returns the history entry in this sequence with the given ID. */
-    HistoryEntry *getEntry(int entryId) const;
+    HistoryEntry *getEntry( long entryId) const;
 
     /** Returns the states in this sequence as a vector. */
     std::vector<State const *> getStates() const;

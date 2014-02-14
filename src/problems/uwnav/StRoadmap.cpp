@@ -7,7 +7,7 @@
 #include <utility>                      // for pair, make_pair
 #include <vector>                       // for vector, vector<>::iterator, vector<>::reference
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "solver/State.hpp"                    // for State
 #include "uwnav.hpp"
 #include "UnderwaterNavState.hpp"

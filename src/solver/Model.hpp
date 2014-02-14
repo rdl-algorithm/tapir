@@ -5,7 +5,7 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
@@ -36,9 +36,9 @@ class Model {
     virtual double getDiscountFactor() = 0;
 
     /** Returns the # of discrete actions for this POMDP. */
-    virtual unsigned long getNActions() = 0;
+    virtual long getNActions() = 0;
     /** Returns the number of state variables */
-    virtual unsigned long getNStVars() = 0;
+    virtual long getNStVars() = 0;
     /** Returns a lower bound on the q-value. */
     virtual double getMinVal() = 0;
     /** Returns an upper bound on the q-value. */
@@ -49,11 +49,11 @@ class Model {
     /** Returns the default number of particles per belief - this number will
      * be generated if particle depletion occurs.
      */
-    virtual unsigned long getNParticles() = 0;
+    virtual long getNParticles() = 0;
     /** Returns the maximum number of trials (i.e. simulated episodes) to run
      * in a single time step.
      */
-    virtual unsigned long getMaxTrials() = 0;
+    virtual long getMaxTrials() = 0;
     /** Returns the lowest net discount allowed; tree searching will not go
      * deeper than this threshold.
      */

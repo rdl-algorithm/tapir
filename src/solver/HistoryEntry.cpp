@@ -30,7 +30,8 @@ HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
 
 HistoryEntry::HistoryEntry(StateInfo *stateInfo,
         double discount, HistorySequence* owningSequence,
-        long entryId) : HistoryEntry(discount, owningSequence, entryId) {
+        long entryId) :
+                HistoryEntry(discount, owningSequence, entryId) {
     registerState(stateInfo);
 }
 

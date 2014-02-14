@@ -3,7 +3,7 @@
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value, program_options
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "solver/Model.hpp"             // for Model
 
 namespace po = boost::program_options;
@@ -13,8 +13,8 @@ class ModelWithProgramOptions : public solver::Model {
     ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
         solver::Model(randGen),
         discountFactor_(vm["problem.discountFactor"].as<double>()),
-        nParticles_(vm["SBT.nParticles"].as<unsigned long>()),
-        maxTrials_(vm["SBT.maxTrials"].as<unsigned long>()),
+        nParticles_(vm["SBT.nParticles"].as<long>()),
+        maxTrials_(vm["SBT.maxTrials"].as<long>()),
         minimumDiscount_(vm["SBT.minimumDiscount"].as<double>()),
         heuristicExploreCoefficient_(
                 vm["SBT.heuristicExploreCoefficient"].as<double>()),
@@ -29,10 +29,10 @@ class ModelWithProgramOptions : public solver::Model {
     virtual double getDiscountFactor() final {
         return discountFactor_;
     }
-    virtual unsigned long getNParticles() final {
+    virtual long getNParticles() final {
         return nParticles_;
     }
-    virtual unsigned long getMaxTrials() final {
+    virtual long getMaxTrials() final {
         return maxTrials_;
     }
     virtual double getMinimumDiscount() final {
@@ -56,8 +56,8 @@ class ModelWithProgramOptions : public solver::Model {
     double discountFactor_;
 
     // SBT parameters
-    unsigned long nParticles_;
-    unsigned long maxTrials_;
+    long nParticles_;
+    long maxTrials_;
     double minimumDiscount_;
 
     double heuristicExploreCoefficient_;

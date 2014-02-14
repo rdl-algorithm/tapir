@@ -55,7 +55,7 @@ class ActionNode {
     /** The number of particles being counted towards the q-value for this
      * node.
      */
-    unsigned long nParticles_;
+    long nParticles_;
     /** The total q-value of this node. */
     double totalQValue_;
     /** The mean q-value of this node. */

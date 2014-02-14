@@ -14,7 +14,7 @@
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
+#include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
@@ -117,8 +117,8 @@ void Nav2DModel::initialise() {
 GridPosition Nav2DModel::randomEmptyCell() {
     GridPosition pos;
     while (true) {
-        pos.i = std::uniform_int_distribution<unsigned long>(0, nRows_ - 1)(*randGen_);
-        pos.j = std::uniform_int_distribution<unsigned long>(0, nCols_ - 1)(*randGen_);
+        pos.i = std::uniform_int_distribution<long>(0, nRows_ - 1)(*randGen_);
+        pos.j = std::uniform_int_distribution<long>(0, nCols_ - 1)(*randGen_);
         if (envMap_[pos.i][pos.j] == Nav2DCellType::EMPTY) {
             break;
         }
@@ -219,7 +219,7 @@ GridPosition Nav2DModel::getMovedOpponentPos(GridPosition const &robotPos,
     }
     std::vector<Nav2DAction> actions(makeOpponentActions(robotPos, opponentPos));;
     solver::Action action =
-        actions[std::uniform_int_distribution<unsigned long>(
+        actions[std::uniform_int_distribution<long>(
                     0, actions.size() - 1)(*randGen_)];
     GridPosition newOpponentPos = getMovedPos(opponentPos, action);
     if (!isValid(newOpponentPos)) {
@@ -323,7 +323,6 @@ std::vector<std::unique_ptr<solver::State>> Nav2DModel::generateParticles(
     typedef std::unordered_map<Nav2DState, double, Hash> WeightMap;
     WeightMap weights;
     double weightTotal = 0;
-    std::vector<double> obsVals(static_cast<solver::VectorLP const &>(obs).asVector());
     GridPosition newRobotPos(obsVals[0], obsVals[1]);
     if (obsVals[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
@@ -375,7 +374,6 @@ std::vector<std::unique_ptr<solver::State>> Nav2DModel::generateParticles(
 std::vector<std::unique_ptr<solver::State>> Nav2DModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
-    std::vector<double> obsVals(static_cast<solver::VectorLP const &>(obs).asVector());
     GridPosition newRobotPos(obsVals[0], obsVals[1]);
     if (obsVals[2] == SEEN) {
         // If we saw the opponent, we must be in the same place.
@@ -503,7 +501,6 @@ void Nav2DModel::dispAct(solver::Action const &action, std::ostream &os) {
 }
 
 void Nav2DModel::dispObs(solver::Observation const &obs, std::ostream &os) {
-    std::vector<double> obsVals(static_cast<solver::VectorLP const &>(obs).asVector());
     os << GridPosition(obsVals[0], obsVals[1]);
     if (obsVals[2] == SEEN) {
         os << " SEEN!";

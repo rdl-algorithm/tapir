@@ -8,7 +8,7 @@
 #include <set>
 #include <utility>                      // for pair
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
@@ -82,10 +82,10 @@ class BeliefNode {
     long getId() const;
 
     /** Returns the number of particles in this node. */
-    unsigned long getNParticles() const;
+    long getNParticles() const;
 
     /** Returns the current number of action children of this node. */
-    unsigned long getNActChildren() const;
+    long getNActChildren() const;
 
   private:
     /** Adds a child for the given action and observation;

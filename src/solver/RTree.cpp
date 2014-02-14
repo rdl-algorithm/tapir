@@ -6,14 +6,14 @@
 #include <spatialindex/RTree.h>
 #include <spatialindex/tools/Tools.h>
 
-#include "defs.hpp"
+#include "global.hpp"
 #include "SpatialIndexVisitor.hpp"
 #include "State.hpp"
 #include "StateInfo.hpp"
 #include "Vector.hpp"
 
 namespace solver {
-RTree::RTree(unsigned long nSDim, StatePool *statePool) :
+RTree::RTree(unsigned int nSDim, StatePool *statePool) :
         StateIndex(),
         nSDim_(nSDim),
         statePool_(statePool),

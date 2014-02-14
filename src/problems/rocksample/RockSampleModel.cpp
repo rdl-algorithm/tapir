@@ -18,7 +18,7 @@
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
+#include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
@@ -136,19 +136,19 @@ std::unique_ptr<solver::State> RockSampleModel::sampleStateUniform() {
 }
 
 GridPosition RockSampleModel::samplePosition() {
-    unsigned long i = std::uniform_int_distribution<unsigned long>(
+    long i = std::uniform_int_distribution<long>(
                 0, nRows_ - 1)(*randGen_);
-    unsigned long j = std::uniform_int_distribution<unsigned long>(
+    long j = std::uniform_int_distribution<long>(
                 0, nCols_ - 1)(*randGen_);
     return GridPosition(i, j);
 }
 
 std::vector<bool> RockSampleModel::sampleRocks() {
-    return decodeRocks(std::uniform_int_distribution<unsigned long>
+    return decodeRocks(std::uniform_int_distribution<long>
                 (0, (1 << nRocks_) - 1)(*randGen_));
 }
 
-std::vector<bool> RockSampleModel::decodeRocks(unsigned long val) {
+std::vector<bool> RockSampleModel::decodeRocks(long val) {
     std::vector<bool> isRockGood;
     for (int j = 0; j < nRocks_; j++) {
         isRockGood.push_back(val &  (1 << j));
@@ -252,7 +252,7 @@ RockSampleModel::RSObservation RockSampleModel::makeObservation(
     if (action < CHECK) {
         return RSObservation::NONE;
     }
-    int rockNo = action - CHECK;
+    long rockNo = action - CHECK;
     GridPosition pos(nextState.getPosition());
     std::vector<bool> rockStates(nextState.getRockStates());
     double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
@@ -339,7 +339,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     std::vector<std::unique_ptr<solver::State>> newParticles;
     // If it's a CHECK action, we condition on the observation.
     if (action >= CHECK) {
-        int rockNo = action - CHECK;
+        long rockNo = action - CHECK;
         struct Hash {
             std::size_t operator()(RockSampleState const &state) const {
                 return state.hash();
@@ -371,7 +371,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         double scale = getNParticles() / weightTotal;
         for (WeightMap::value_type &it : weights) {
             double proportion = it.second * scale;
-            int numToAdd = std::floor(proportion);
+            long numToAdd = static_cast<long>(proportion);
             if (std::bernoulli_distribution(proportion - numToAdd)(*randGen_)) {
                 numToAdd += 1;
             }
@@ -396,7 +396,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> particles;
-    while (particles.size() < getNParticles()) {
+    while (static_cast<long>(particles.size()) < getNParticles()) {
         std::unique_ptr<solver::State> state = sampleStateUniform();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {
@@ -419,7 +419,7 @@ void RockSampleModel::dispAct(solver::Action const &action, std::ostream &os) {
         os << "CHECK-" << action - CHECK;
         return;
     }
-    switch (action) {
+    switch ((long)action) {
     case NORTH:
         os << "NORTH";
         break;
@@ -463,14 +463,14 @@ void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
 void RockSampleModel::dispObs(solver::Observation const &obs,
         std::ostream &os) {
     double obsValue = static_cast<solver::VectorLP const &>(obs)[0];
-    switch ((int)obsValue) {
-    case (int)RSObservation::NONE:
+    switch (static_cast<RSObservation>(obsValue)) {
+    case RSObservation::NONE:
         os << "NONE";
         break;
-    case (int)RSObservation::GOOD:
+    case RSObservation::GOOD:
         os << "GOOD";
         break;
-    case (int)RSObservation::BAD:
+    case RSObservation::BAD:
         os << "BAD";
         break;
     default:

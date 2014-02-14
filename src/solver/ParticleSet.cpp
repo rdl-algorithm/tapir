@@ -20,7 +20,7 @@ std::vector<HistoryEntry *>::const_iterator ParticleSet::end() const {
     return particles_.end();
 }
 
-unsigned long ParticleSet::size() const {
+long ParticleSet::size() const {
     return particles_.size();
 }
 
@@ -34,8 +34,8 @@ void ParticleSet::add(HistoryEntry *entry) {
 }
 
 void ParticleSet::remove(HistoryEntry *entry) {
-    unsigned long index = particleMap_[entry];
-    unsigned long lastIndex = particles_.size() - 1;
+    long index = particleMap_[entry];
+    long lastIndex = particles_.size() - 1;
 
     if (index != lastIndex) {
         HistoryEntry *lastEntry = particles_[lastIndex];
@@ -48,7 +48,7 @@ void ParticleSet::remove(HistoryEntry *entry) {
     particleMap_.erase(entry);
 }
 
-HistoryEntry *ParticleSet::get(unsigned long index) const {
+HistoryEntry *ParticleSet::get(long index) const {
     return particles_[index];
 }
 

@@ -6,7 +6,7 @@
 #include <utility>                      // for move
 #include <vector>                       // for vector, __alloc_traits<>::value_type
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 
 #include "Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
@@ -69,7 +69,7 @@ HistoryEntry *HistorySequence::insertEntry(long index,
     return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::getEntry(int entryId) const {
+HistoryEntry *HistorySequence::getEntry(long entryId) const {
     return histSeq_[entryId].get();
 }
 

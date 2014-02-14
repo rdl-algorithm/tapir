@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "defs.hpp"
+#include "global.hpp"
 #include "Vector.hpp"
 
 namespace solver {

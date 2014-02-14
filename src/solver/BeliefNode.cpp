@@ -11,7 +11,7 @@
 #include <tuple>                        // for tie, tuple
 #include <utility>                      // for pair, make_pair, move
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
+#include "global.hpp"                     // for RandomGenerator, make_unique
 
 #warning Action should be a class!
 #include "Action.hpp"                   // for Action
@@ -111,7 +111,7 @@ void BeliefNode::removeParticle(HistoryEntry *histEntry) {
 }
 
 HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
-    unsigned long index = std::uniform_int_distribution<unsigned long>(
+    long index = std::uniform_int_distribution<long>(
                                  0, getNParticles() - 1)(*randGen);
     return particles_.get(index);
 }
@@ -165,11 +165,11 @@ long BeliefNode::getId() const {
     return id_;
 }
 
-unsigned long BeliefNode::getNParticles() const {
+long BeliefNode::getNParticles() const {
     return particles_.size();
 }
 
-unsigned long BeliefNode::getNActChildren() const {
+long BeliefNode::getNActChildren() const {
     return actChildren_.size();
 }
 } /* namespace solver */

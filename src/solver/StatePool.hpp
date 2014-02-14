@@ -35,7 +35,7 @@ class StatePool {
 
     friend class TextSerializer;
 
-    StatePool(unsigned long nSDim);
+    StatePool(long nSDim);
     ~StatePool();
     StatePool(StatePool const &) = delete;
     StatePool(StatePool &&) = delete;
@@ -59,7 +59,7 @@ class StatePool {
     std::unordered_set<StateInfo *> getAffectedStates() const;
 
   private:
-    unsigned long nSDim_;
+    long nSDim_;
     StateInfoMap stateInfoMap_;
     std::vector<std::unique_ptr<StateInfo>> statesByIndex_;
     std::unique_ptr<StateIndex> stateIndex_;

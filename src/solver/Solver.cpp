@@ -14,7 +14,7 @@
 #include <utility>                      // for move, make_pair, pair
 #include <vector>                       // for vector, vector<>::iterator, vector<>::reverse_iterator
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
 #include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
@@ -61,7 +61,7 @@ void Solver::setSerializer(Serializer *serializer) {
     serializer_ = serializer;
 }
 
-void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
+void Solver::genPol(long maxTrials, double minimumDiscount) {
     double discountFactor = model_->getDiscountFactor();
     BeliefNode *root = policy_->getRoot();
 
@@ -101,7 +101,7 @@ void Solver::genPol(unsigned long maxTrials, double minimumDiscount) {
     }
 
     // Start expanding the tree.
-    for (unsigned long i = 0; i < maxTrials; i++) {
+    for (long i = 0; i < maxTrials; i++) {
         singleSearch(discountFactor, minimumDiscount);
     }
 }
@@ -364,7 +364,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     *totImpTime = 0.0;
     std::clock_t chTimeStart, chTimeEnd, impSolTimeStart, impSolTimeEnd;
     *actualNSteps = nSteps;
-    unsigned long maxTrials = model_->getMaxTrials();
+    long maxTrials = model_->getMaxTrials();
     double minimumDiscount = model_->getMinimumDiscount();
     double discFactor = model_->getDiscountFactor();
     double currDiscFactor = 1.0;
@@ -372,11 +372,11 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
     BeliefNode *currNode = policy_->getRoot();
     std::unique_ptr<State> state = model_->sampleAnInitState();
-    State *currentState = state.get();
-    trajSt.push_back(std::move(state));
+    // State *currentState = state.get();
+    trajSt.push_back(state->copy());
 
     cout << "Initial State:" << endl;
-    model_->drawState(*currentState, cout);
+    model_->drawState(*state, cout);
 
     std::vector<long>::iterator itCh = changeTimes.begin();
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
@@ -387,7 +387,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
             chTimeStart = std::clock();
             model_->update(*itCh, allStates_.get());
-            if (changes::hasFlag(allStates_->getInfo(*currentState)->changeFlags_,
+            if (changes::hasFlag(allStates_->getInfo(*state)->changeFlags_,
                     ChangeFlags::DELETED)) {
                 cerr << "ERROR: Current simulation state deleted. Exiting.." << endl;
                 std::exit(1);
@@ -416,12 +416,13 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
         *totImpTime += ((impSolTimeEnd - impSolTimeStart) * 1000
                 / CLOCKS_PER_SEC);
 
-        Model::StepResult result = simAStep(currNode, *currentState);
-        currentState = result.nextState.get();
+        Model::StepResult result = simAStep(currNode, *state);
+        state = result.nextState->copy();
 
         trajAction.push_back(result.action);
         trajObs.push_back(result.observation->copy());
-        trajSt.push_back(result.nextState->copy()); // trajSt is responsible for ownership
+        // trajSt is responsible for ownership
+        trajSt.push_back(result.nextState->copy());
         trajRew.push_back(result.immediateReward);
         discountedTotalReward += currDiscFactor * result.immediateReward;
         currDiscFactor = currDiscFactor * discFactor;
@@ -491,7 +492,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 
     Action action = currentBelief->getBestAction();
     if (action == -1) {
-        action = std::uniform_int_distribution<unsigned long>(
+        action = std::uniform_int_distribution<long>(
                     0, model_->getNActions() - 1)(*randGen_);
     }
     Model::StepResult result = model_->generateStep(currentState, action);
@@ -507,7 +508,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     return result;
 }
 
-void Solver::improveSol(BeliefNode *startNode, unsigned long maxTrials,
+void Solver::improveSol(BeliefNode *startNode, long maxTrials,
         double minimumDiscount) {
     if (startNode->getNParticles() == 0) {
         std::cerr << "ERROR: No particles in the BeliefNode!" << std::endl;
@@ -519,8 +520,8 @@ void Solver::improveSol(BeliefNode *startNode, unsigned long maxTrials,
     HistoryEntry *entry = startNode->particles_.get(0);
     long depth = entry->entryId_ + entry->owningSequence_->startDepth_;
 
-    for (unsigned long i = 0; i < maxTrials; i++) {
-        unsigned long index = std::uniform_int_distribution<unsigned long>(
+    for (long i = 0; i < maxTrials; i++) {
+        long index = std::uniform_int_distribution<long>(
                                          0, startNode->getNParticles() - 1)(*randGen_);
         // entry = startNode->sampleAParticle(randGen_);
         entry = startNode->particles_.get(index);

@@ -12,7 +12,8 @@
 
 #include <boost/program_options.hpp>    // for variables_map, options_description, positional_options_description, variable_value, store, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
+#include "global.hpp"                     // for RandomGenerator, make_unique
+#include "solver/Action.hpp"
 #include "solver/Observation.hpp"       // for Observation
 #include "solver/Serializer.hpp"        // for Serializer
 #include "solver/Solver.hpp"            // for Solver
@@ -69,6 +70,9 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     long nSteps = vm["simulation.nSteps"].as<long>();
     long nRuns = vm["simulation.nRuns"].as<long>();
     unsigned long seed = vm["seed"].as<unsigned long>();
+    if (seed == 0) {
+        seed = std::time(nullptr);
+    }
     cerr << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
@@ -95,13 +99,13 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         changeTimes = model->loadChanges(changesPath.c_str());
     }
     std::vector<std::unique_ptr<solver::State>> trajSt;
-    std::vector<long> trajActId;
+    std::vector<solver::Action> trajActId;
     std::vector<std::unique_ptr<solver::Observation>> trajObs;
     std::vector<double> trajRew;
     double val;
     long j;
     std::vector<std::unique_ptr<solver::State>>::iterator itS;
-    std::vector<long>::iterator itA;
+    std::vector<solver::Action>::iterator itA;
     std::vector<std::unique_ptr<solver::Observation>>::iterator itO;
     std::vector<double>::iterator itR;
     std::vector<double>::iterator itD;
