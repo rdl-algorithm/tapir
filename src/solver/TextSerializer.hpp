@@ -10,6 +10,7 @@
 #include "State.hpp"
 
 namespace solver {
+class ActionMapping;
 class ActionNode;
 class BeliefNode;
 class BeliefTree;
@@ -34,14 +35,25 @@ class TextSerializer : public Serializer {
     virtual void save(std::vector<double> const &vector, std::ostream &os);
     virtual void load(std::vector<double> &vector, std::istream &is);
 
-    virtual void saveState(State const &state, std::ostream &os);
+    virtual void saveState(State const *state, std::ostream &os);
     virtual std::unique_ptr<State> loadState(std::istream &is);
 
-    virtual void saveObservation(Observation const &obs, std::ostream &os);
+    virtual void saveObservation(Observation const *obs, std::ostream &os);
     virtual std::unique_ptr<Observation> loadObservation(std::istream &is);
 
-    virtual void saveMapping(ObservationMapping const &map, std::ostream &os);
-    virtual std::unique_ptr<ObservationMapping> loadMapping(std::istream &is);
+    virtual void saveAction(Action const *action, std::ostream &os);
+    virtual std::unique_ptr<Action> loadAction(std::istream &is);
+
+
+    virtual void saveObservationMapping(ObservationMapping const &map,
+            std::ostream &os);
+    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
+            std::istream &is);
+
+    virtual void saveActionMapping(ActionMapping const &map,
+            std::ostream &os);
+    virtual std::unique_ptr<ActionMapping> loadActionMapping(
+            std::istream &is);
 
     virtual void save(StateInfo const &wrapper, std::ostream &os);
     virtual void load(StateInfo &wrapper, std::istream &is);

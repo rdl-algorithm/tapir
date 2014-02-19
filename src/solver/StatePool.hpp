@@ -14,6 +14,7 @@
 #include "StateInfo.hpp"                // for StateInfo
 
 namespace solver {
+class Model;
 class StateIndex;
 
 class StatePool {
@@ -35,7 +36,7 @@ class StatePool {
 
     friend class TextSerializer;
 
-    StatePool(long nSDim);
+    StatePool(std::unique_ptr<StateIndex> stateIndex);
     ~StatePool();
     StatePool(StatePool const &) = delete;
     StatePool(StatePool &&) = delete;
@@ -59,7 +60,6 @@ class StatePool {
     std::unordered_set<StateInfo *> getAffectedStates() const;
 
   private:
-    long nSDim_;
     StateInfoMap stateInfoMap_;
     std::vector<std::unique_ptr<StateInfo>> statesByIndex_;
     std::unique_ptr<StateIndex> stateIndex_;

@@ -99,13 +99,13 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         changeTimes = model->loadChanges(changesPath.c_str());
     }
     std::vector<std::unique_ptr<solver::State>> trajSt;
-    std::vector<solver::Action> trajActId;
+    std::vector<std::unique_ptr<solver::Action>> trajAction;
     std::vector<std::unique_ptr<solver::Observation>> trajObs;
     std::vector<double> trajRew;
     double val;
     long j;
     std::vector<std::unique_ptr<solver::State>>::iterator itS;
-    std::vector<solver::Action>::iterator itA;
+    std::vector<std::unique_ptr<solver::Action>>::iterator itA;
     std::vector<std::unique_ptr<solver::Observation>>::iterator itO;
     std::vector<double>::iterator itR;
     std::vector<double>::iterator itD;
@@ -118,7 +118,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         double totT;
         double totChTime, totImpTime;
         tStart = std::clock();
-        val = solver.runSim(nSteps, changeTimes, trajSt, trajActId, trajObs,
+        val = solver.runSim(nSteps, changeTimes, trajSt, trajAction, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
         totT = (double)(std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
@@ -127,10 +127,10 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         os << "Init: ( " << **itS << endl;
         os << " )\n";
         itS++;
-        for (itA = trajActId.begin(), itO = trajObs.begin(), itR =
-                 trajRew.begin(), j = 0; itA != trajActId.end();
+        for (itA = trajAction.begin(), itO = trajObs.begin(), itR =
+                 trajRew.begin(), j = 0; itA != trajAction.end();
              itS++, itA++, itO++, itR++, j++) {
-            os << "Step-" << j << " " << *itA;
+            os << "Step-" << j << " " << **itA;
             os << " ( " << **itS << ") " << **itO << *itR << endl;
         }
         cout << val << " " << actualNSteps << " " << totChTime << " "

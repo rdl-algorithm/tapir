@@ -12,10 +12,12 @@
 
 namespace solver {
 class BeliefNode;
+class Model;
+
 class ApproxObsMap : public ObservationMapping {
 public:
     friend class TextSerializer;
-    ApproxObsMap(double maxDistance);
+    ApproxObsMap(Model *model, double maxDistance);
 
     // Default destructor; copying and moving disallowed!
     ~ApproxObsMap();
@@ -27,6 +29,7 @@ public:
     virtual BeliefNode *getBelief(Observation const &obs) const;
     virtual BeliefNode *createBelief(Observation const &obs);
 private:
+    Model *model_;
     double maxDistance_;
     typedef std::pair<std::unique_ptr<Observation>,
             std::unique_ptr<BeliefNode>> Entry;

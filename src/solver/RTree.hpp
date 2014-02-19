@@ -15,7 +15,7 @@ class StatePool;
 
 class RTree : public StateIndex {
   public:
-    RTree(unsigned int nSDim, StatePool *statePool);
+    RTree(unsigned int nSDim);
     virtual ~RTree() = default;
     RTree(RTree const &) = delete;
     RTree(RTree &&) = delete;
@@ -31,7 +31,6 @@ class RTree : public StateIndex {
 
   private:
     unsigned int nSDim_;
-    StatePool *statePool_;
     std::unique_ptr<Tools::PropertySet> properties_;
     std::unique_ptr<SpatialIndex::IStorageManager> storageManager_;
     std::unique_ptr<SpatialIndex::ISpatialIndex> tree_;

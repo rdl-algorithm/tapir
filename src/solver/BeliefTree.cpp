@@ -6,12 +6,13 @@
 
 #include "global.hpp"                     // for make_unique
 
+#include "ActionMapping.hpp"
 #include "BeliefNode.hpp"               // for BeliefNode
 #include "Observation.hpp"
 
 namespace solver {
-BeliefTree::BeliefTree() :
-    root_(std::make_unique<BeliefNode>()),
+BeliefTree::BeliefTree(std::unique_ptr<ActionMapping> actionMap) :
+    root_(std::make_unique<BeliefNode>(std::move(actionMap))),
     allNodes_() {
     allNodes_.push_back(root_.get());
 }

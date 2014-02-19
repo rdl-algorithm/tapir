@@ -19,7 +19,6 @@ class HistoryEntry {
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
-    friend class HistoryEntryComparator;
 
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();
@@ -72,7 +71,7 @@ class HistoryEntry {
     StateInfo *stateInfo_;
 
     /** Action performed in this entry. */
-    Action action_;
+    std::unique_ptr<Action> action_;
     /** Observation received in this entry. */
     std::unique_ptr<Observation> observation_;
 

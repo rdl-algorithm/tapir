@@ -7,10 +7,13 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"                   // for Action
+#include "Action.hpp"        // for Action
+#include "ActionMapping.hpp"
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Observation.hpp"              // for Observation
+#include "ObservationMapping.hpp"
 #include "State.hpp"                    // for State
+#include "StateIndex.hpp"
 
 namespace solver {
 class StatePool;
@@ -18,8 +21,7 @@ class StatePool;
 class Model {
   public:
     /** Constructor - stores the RandomGenerator for this model. */
-    Model(RandomGenerator *randGen) : randGen_(randGen) {
-    }
+    Model(RandomGenerator *randGen);
 
     // Default destructor; copying and moving disallowed!
     virtual ~Model() = default;
@@ -35,8 +37,6 @@ class Model {
     /** Returns the POMDP discount factor. */
     virtual double getDiscountFactor() = 0;
 
-    /** Returns the # of discrete actions for this POMDP. */
-    virtual long getNActions() = 0;
     /** Returns the number of state variables */
     virtual long getNStVars() = 0;
     /** Returns a lower bound on the q-value. */
@@ -107,7 +107,7 @@ class Model {
      * including the next state, observation, and reward.
      */
     struct StepResult {
-        Action action = 0;
+        std::unique_ptr<Action> action = 0;
         std::unique_ptr<Observation> observation = nullptr;
         double immediateReward = 0;
         std::unique_ptr<State> nextState = nullptr;
@@ -142,16 +142,31 @@ class Model {
     virtual void update(long time, StatePool *pool) = 0;
 
     /* --------------- Pretty printing methods ----------------- */
-    /** Displays the given action on the given output stream. */
-    virtual void dispAct(Action const &action, std::ostream &os) = 0;
-    /** Displays the given observation to the given output stream. */
-    virtual void dispObs(Observation const &obs, std::ostream &os) = 0;
     /** Draws the environment map onto the given output stream. */
-    virtual void drawEnv(std::ostream &os) = 0;
+    virtual void drawEnv(std::ostream &/*os*/) {}
     /** Draws the current state in the context of the overall map onto
      * the given output stream.
      */
-    virtual void drawState(State const &state, std::ostream &os) = 0;
+    virtual void drawState(State const &/*state*/, std::ostream &/*os*/) {}
+
+    /* --------------- Data structure customization ----------------- */
+    // These are factory methods to allow the data structures used to
+    // be managed in a customizable way.
+
+    /** Creates a StateIndex, which manages searching for states that
+     * have been used in a StatePool.
+     */
+    virtual std::unique_ptr<StateIndex> createStateIndex();
+    /** Creates an ObservationMapping, which manages how observations are
+     * mapped to subsequent belief nodes. */
+    virtual std::unique_ptr<ObservationMapping> createObservationMapping();
+    /** Creates an ActionMapping, which manages how actions are mapped to
+     * subsequent action nodes. */
+    virtual std::unique_ptr<ActionMapping> createActionMapping() = 0;
+    // The following should be a good implementation for most cases:
+    // return std::make_unique<DiscreteActionMap>(this,
+    //     { <action 1>, <action 2>, ... });
+
   protected:
     /** The random number generator for this model. */
     RandomGenerator *randGen_;

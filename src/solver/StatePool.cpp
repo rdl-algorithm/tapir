@@ -10,17 +10,17 @@
 #include "global.hpp"                     // for make_unique
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
+#include "Model.hpp"
 #include "RTree.hpp"
 #include "State.hpp"
 #include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
 
 namespace solver {
 
-StatePool::StatePool(long nSDim) :
-    nSDim_(nSDim),
+StatePool::StatePool(std::unique_ptr<StateIndex> stateIndex) :
     stateInfoMap_(),
     statesByIndex_(),
-    stateIndex_(std::make_unique<RTree>(nSDim_, this)),
+    stateIndex_(std::move(stateIndex)),
     changedStates_() {
 }
 

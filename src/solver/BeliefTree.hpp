@@ -8,6 +8,7 @@
 #include "Observation.hpp"
 
 namespace solver {
+class ActionMapping;
 class BeliefNode;
 
 class BeliefTree {
@@ -16,7 +17,7 @@ class BeliefTree {
     friend class TextSerializer;
 
     /* Constructs a belief tree with only a root. */
-    BeliefTree();
+    BeliefTree(std::unique_ptr<ActionMapping> actionMap);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefTree();

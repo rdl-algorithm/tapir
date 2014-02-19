@@ -23,10 +23,13 @@ namespace po = boost::program_options;
 
 namespace solver {
 class StatePool;
+class ActionMapping;
 } /* namespace solver */
 
 namespace rocksample {
+class RockSampleAction;
 class RockSampleState;
+class RockSampleObservation;
 
 class RockSampleModel : public ModelWithProgramOptions {
   public:
@@ -36,33 +39,6 @@ class RockSampleModel : public ModelWithProgramOptions {
     RockSampleModel(RockSampleModel &&) = delete;
     RockSampleModel &operator=(RockSampleModel const &) = delete;
     RockSampleModel &operator=(RockSampleModel &&) = delete;
-
-    /**
-     * Enumerates the possible actions. Note that there are actually
-     * multiple check actions; Check-i is represented by CHECK+i,
-     * where i is the rock number from 0..k-1 and k is the number
-     * of rocks.
-     */
-    enum RSAction : long {
-        NORTH = 0,
-        EAST = 1,
-        SOUTH = 2,
-        WEST = 3,
-        SAMPLE = 4,
-        CHECK = 5
-    };
-
-    /**
-     * There are only two possible observations - the rock
-     * is either good or bad. Note that observations are
-     * only meaningful when the action taken was CHECK;
-     * they are meaningless otherwise.
-     */
-    enum class RSObservation : int {
-        NONE = 0,
-        BAD = 1,
-        GOOD = 2
-    };
 
     /**
      * Rocks are enumerated 0, 1, 2, ... ;
@@ -80,9 +56,6 @@ class RockSampleModel : public ModelWithProgramOptions {
 
     /***** Start implementation of Model's methods *****/
     // Simple getters
-    long getNActions() {
-        return nActions_;
-    }
     long getNStVars() {
         return nStVars_;
     }
@@ -121,12 +94,13 @@ class RockSampleModel : public ModelWithProgramOptions {
     std::vector<long> loadChanges(char const *changeFilename);
     void update(long time, solver::StatePool *pool);
 
-    void dispAct(solver::Action const &action, std::ostream &os);
     /** Displays an individual cell of the map. */
     void dispCell(RSCellType cellType, std::ostream &os);
-    void dispObs(solver::Observation const &obs, std::ostream &os);
+
     void drawEnv(std::ostream &os);
     void drawState(solver::State const &state, std::ostream &os);
+
+    std::unique_ptr<solver::ActionMapping> createActionMapping();
 
   private:
     /**
@@ -151,7 +125,8 @@ class RockSampleModel : public ModelWithProgramOptions {
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    RSObservation makeObservation(solver::Action const &action,
+    std::unique_ptr<RockSampleObservation> makeObservation(
+            solver::Action const &action,
             RockSampleState const &nextState);
     /** Retrieves the reward via the next state. */
     double makeReward(RockSampleState const &state,
@@ -162,7 +137,7 @@ class RockSampleModel : public ModelWithProgramOptions {
     double goodRockReward_;
     /** The penalty for sampling a bad rock. */
     double badRockPenalty_;
-    /** The reward for exiting the map. */
+    /** The reward for exiting the mapD. */
     double exitReward_;
     /** The penalty for an illegal move. */
     double illegalMovePenalty_;
@@ -186,7 +161,7 @@ class RockSampleModel : public ModelWithProgramOptions {
     std::vector<std::vector<RSCellType>> envMap_;
 
     // Generic problem parameters
-    long nActions_, nStVars_;
+    long nStVars_;
     double minVal_, maxVal_;
 };
 } /* namespace rocksample */

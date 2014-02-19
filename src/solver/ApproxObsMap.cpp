@@ -3,9 +3,11 @@
 #include <limits>
 
 #include "BeliefNode.hpp"
+#include "Model.hpp"
 
 namespace solver {
-ApproxObsMap::ApproxObsMap(double maxDistance) :
+ApproxObsMap::ApproxObsMap(Model *model, double maxDistance) :
+    model_(model),
     maxDistance_(maxDistance),
     obsNodes_() {
 }
@@ -27,7 +29,8 @@ BeliefNode *ApproxObsMap::getBelief(const Observation& obs) const {
 }
 
 BeliefNode *ApproxObsMap::createBelief(const Observation& obs) {
-    Entry val = std::make_pair(obs.copy(), std::make_unique<BeliefNode>());
+    Entry val = std::make_pair(obs.copy(), std::make_unique<BeliefNode>(
+            model_->createActionMapping()));
     BeliefNode *node = val.second.get();
     obsNodes_.push_back(std::move(val));
     return node;

@@ -13,10 +13,9 @@
 #include "Vector.hpp"
 
 namespace solver {
-RTree::RTree(unsigned int nSDim, StatePool *statePool) :
+RTree::RTree(unsigned int nSDim) :
         StateIndex(),
         nSDim_(nSDim),
-        statePool_(statePool),
         properties_(nullptr),
         storageManager_(nullptr),
         tree_(nullptr) {

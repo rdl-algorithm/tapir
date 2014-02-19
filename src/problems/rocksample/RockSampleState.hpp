@@ -22,7 +22,7 @@ class RockSampleState : public solver::Vector {
     virtual RockSampleState &operator=(RockSampleState const &) = delete;
     virtual RockSampleState &operator=(RockSampleState &&) = delete;
 
-    std::unique_ptr<solver::Point> copy() const;
+    std::unique_ptr<solver::State> copy() const;
 
     GridPosition getPosition() const {
         return position_;

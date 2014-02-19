@@ -30,7 +30,7 @@ WARN               += -Weverything -Wno-c++98-compat
 else
 override CXXFLAGS  += -frounding-math
 WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
-WARN               += -Wswitch-default
+WARN               += -Wswitch-default -Wfatal-errors
 # WARN               += -Wconversion -Wsign-conversion
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3

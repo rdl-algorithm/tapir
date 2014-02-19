@@ -9,6 +9,7 @@
 #include "Solver.hpp"                   // for Solver
 
 namespace solver {
+class ActionMapping;
 class ActionNode;
 class BeliefNode;
 class BeliefTree;
@@ -34,7 +35,7 @@ class Serializer {
     Serializer &operator=(Serializer const &) = delete;
     Serializer &operator=(Serializer &&) = delete;
 
-    /* --------------- Saving the entire solver. ----------------- */
+    /* --------------- Saving the entirnode.e solver. ----------------- */
 
     /** Saves the sate of the solver. */
     virtual void save(std::ostream &os) {
@@ -51,20 +52,38 @@ class Serializer {
 
     /* --------------- Saving states & observations ----------------- */
 
+    // NOTE: null values need to be handled for saving of observations
+    // and of actions
+
     /** Saves a State. */
-    virtual void saveState(State const &state, std::ostream &os) = 0;
+    virtual void saveState(State const *state, std::ostream &os) = 0;
     /** Loads a State. */
     virtual std::unique_ptr<State> loadState(std::istream &is) = 0;
 
-    /** Saves an observation. */
-    virtual void saveObservation(Observation const &obs, std::ostream &os) = 0;
+    /** Saves an Observation. */
+    virtual void saveObservation(Observation const *obs, std::ostream &os) = 0;
     /** Loads an Observation. */
     virtual std::unique_ptr<Observation> loadObservation(std::istream &is) = 0;
 
+    /** Saves an Action. */
+    virtual void saveAction(Action const *action, std::ostream &os) = 0;
+    /** Loads an Action. */
+    virtual std::unique_ptr<Action> loadAction(std::istream &is) = 0;
+
+
     /** Saves a mapping of observations to belief nodes. */
-    virtual void saveMapping(ObservationMapping const &map, std::ostream &os) = 0;
+    virtual void saveActionMapping(ActionMapping const &map,
+            std::ostream &os) = 0;
     /** Loads a mapping of observations to belief nodes. */
-    virtual std::unique_ptr<ObservationMapping> loadMapping(std::istream &is) = 0;
+    virtual std::unique_ptr<ActionMapping> loadActionMapping(
+            std::istream &is) = 0;
+
+    /** Saves a mapping of observations to belief nodes. */
+    virtual void saveObservationMapping(ObservationMapping const &map,
+            std::ostream &os) = 0;
+    /** Loads a mapping of observations to belief nodes. */
+    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
+            std::istream &is) = 0;
 
     /* --------------- Saving the state pool ----------------- */
 

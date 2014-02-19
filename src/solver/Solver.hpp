@@ -63,7 +63,7 @@ class Solver {
      */
     double runSim(long nSteps, std::vector<long> &changeTimes,
             std::vector<std::unique_ptr<State>> &trajSt,
-            std::vector<Action> &trajActId,
+            std::vector<std::unique_ptr<Action>> &trajAction,
             std::vector<std::unique_ptr<Observation>> &trajObs,
             std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
             double *totImpTime);

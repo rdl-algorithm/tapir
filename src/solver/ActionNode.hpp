@@ -14,13 +14,13 @@ class BeliefNode;
 
 class ActionNode {
   public:
-    friend class BeliefNode;
     friend class TextSerializer;
 
     /** Constructs an action node without an action!! */
     ActionNode();
     /** Creates an empty action node with the given action */
-    ActionNode(Action const &action);
+    ActionNode(std::unique_ptr<ObservationMapping> mapping,
+            Action const *action);
 
     // Default destructor; copying and moving disallowed!
     ~ActionNode();
@@ -39,19 +39,26 @@ class ActionNode {
      */
     void updateQValue(double increase, long deltaNParticles);
 
-    /** Adds a child with the given observation, creating a new belief node if
-     * necessary.
-     */
-    std::pair<BeliefNode *, bool> createOrGetChild(Observation const &obs);
+    /** Returns the number of particles counted towards the q-value. */
+    long getNParticles() const;
+    /** Returns the total q-value for this node. */
+    double getTotalQValue () const;
+    /** Returns the mean q-value for this node. */
+    double getMeanQValue () const;
 
     /** Returns the child corresponding to the given observation, based on
      * sufficient proximity.
      */
     BeliefNode *getChild(Observation const &obs) const;
 
+    /** Adds a child with the given observation, creating a new belief node if
+     * necessary.
+     */
+    std::pair<BeliefNode *, bool> createOrGetChild(Observation const &obs);
+
   private:
     /** The action for this node. */
-    Action action_;
+    std::unique_ptr<Action> action_;
     /** The number of particles being counted towards the q-value for this
      * node.
      */
