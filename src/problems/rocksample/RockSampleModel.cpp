@@ -23,7 +23,6 @@
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/DiscreteActionMap.hpp"        // for DiscreteObservationMap
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 #include "solver/Observation.hpp"       // for Observation
 #include "solver/VectorLP.hpp"             // for State, State::Hash, operator<<, operator==
@@ -213,10 +212,10 @@ std::pair<std::unique_ptr<RockSampleState>,
     std::vector<bool> rockStates(state.getRockStates());
     bool isValid = true;
     RockSampleAction const &a = static_cast<RockSampleAction const &>(action);
-    RockSampleAction::Code code = a.getCode();
-    if (code == RockSampleAction::Code::CHECK) {
+    ActionType actionType = a.getActionType();
+    if (actionType == ActionType::CHECK) {
         // Do nothing - the state remains the same.
-    } else if (code == RockSampleAction::Code::SAMPLE) {
+    } else if (actionType == ActionType::SAMPLE) {
         int rockNo = envMap_[pos.i][pos.j] - ROCK;
         if (0 <= rockNo && rockNo < nRocks_) {
             rockStates[rockNo] = false;
@@ -225,13 +224,13 @@ std::pair<std::unique_ptr<RockSampleState>,
             isValid = false;
         }
     } else {
-        if (code == RockSampleAction::Code::NORTH) {
+        if (actionType == ActionType::NORTH) {
             pos.i -= 1;
-        } else if (code == RockSampleAction::Code::EAST) {
+        } else if (actionType == ActionType::EAST) {
             pos.j += 1;
-        } else if (code == RockSampleAction::Code::SOUTH) {
+        } else if (actionType == ActionType::SOUTH) {
             pos.i += 1;
-        } else if (code == RockSampleAction::Code::WEST) {
+        } else if (actionType == ActionType::WEST) {
             pos.j -= 1;
         } else {
             cerr << "Invalid action: " << action << endl;
@@ -250,8 +249,8 @@ std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
         solver::Action const &action,
         RockSampleState const &nextState) {
     RockSampleAction const &a = static_cast<RockSampleAction const &>(action);
-    RockSampleAction::Code code = a.getCode();
-    if (code < RockSampleAction::Code::CHECK) {
+    ActionType actionType = a.getActionType();
+    if (actionType < ActionType::CHECK) {
         return std::make_unique<RockSampleObservation>();
     }
     long rockNo = a.getRockNo();
@@ -275,8 +274,8 @@ double RockSampleModel::makeReward(RockSampleState const &state,
         return exitReward_;
     }
 
-    RockSampleAction::Code code = static_cast<RockSampleAction const &>(action).getCode();
-    if (code == RockSampleAction::Code::SAMPLE) {
+    ActionType actionType = static_cast<RockSampleAction const &>(action).getActionType();
+    if (actionType == ActionType::SAMPLE) {
         GridPosition pos = state.getPosition();
         int rockNo = envMap_[pos.i][pos.j] - ROCK;
         if (0 <= rockNo && rockNo < nRocks_) {
@@ -336,7 +335,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     std::vector<std::unique_ptr<solver::State>> newParticles;
 
     RockSampleAction const &a = static_cast<RockSampleAction const &>(action);
-    if (a.getCode() == RockSampleAction::Code::CHECK) {
+    if (a.getActionType() == ActionType::CHECK) {
         long rockNo = a.getRockNo();
         struct Hash {
             std::size_t operator()(RockSampleState const &state) const {
@@ -459,13 +458,13 @@ void RockSampleModel::drawState(solver::State const &state, std::ostream &os) {
 
 std::unique_ptr<solver::ActionMapping> RockSampleModel::createActionMapping() {
     std::vector<std::unique_ptr<solver::Action>> actions;
-    actions.push_back(std::make_unique<RockSampleAction>(RockSampleAction::Code::NORTH));
-    actions.push_back(std::make_unique<RockSampleAction>(RockSampleAction::Code::EAST));
-    actions.push_back(std::make_unique<RockSampleAction>(RockSampleAction::Code::SOUTH));
-    actions.push_back(std::make_unique<RockSampleAction>(RockSampleAction::Code::WEST));
-    actions.push_back(std::make_unique<RockSampleAction>(RockSampleAction::Code::SAMPLE));
+    actions.push_back(std::make_unique<RockSampleAction>(ActionType::NORTH));
+    actions.push_back(std::make_unique<RockSampleAction>(ActionType::EAST));
+    actions.push_back(std::make_unique<RockSampleAction>(ActionType::SOUTH));
+    actions.push_back(std::make_unique<RockSampleAction>(ActionType::WEST));
+    actions.push_back(std::make_unique<RockSampleAction>(ActionType::SAMPLE));
     for (long i = 0; i < nRocks_; i++) {
-        actions.push_back(std::make_unique<RockSampleAction>(RockSampleAction::Code::CHECK, i));
+        actions.push_back(std::make_unique<RockSampleAction>(ActionType::CHECK, i));
     }
     return std::make_unique<solver::DiscreteActionMap>(this, std::move(actions));
 }

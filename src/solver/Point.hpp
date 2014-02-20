@@ -8,15 +8,14 @@
 #include <memory>                       // for unique_ptr
 #include <ostream>                      // for ostream
 
+#include "global.hpp"
+
 namespace solver {
 class Point {
   public:
     Point() = default;
     virtual ~Point() = default;
-    Point(Point const &) = delete;
-    Point(Point &&) = delete;
-    virtual Point &operator=(Point const &) = delete;
-    virtual Point &operator=(Point &&) = delete;
+    _NO_COPY_OR_MOVE(Point);
 
     /* We're not using copy constructors - instead we want to use this copy
      * method to avoid issues with "slicing".

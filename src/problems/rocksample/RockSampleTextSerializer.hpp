@@ -5,25 +5,26 @@
 #include <memory>                       // for unique_ptr
 
 #include "solver/Action.hpp"
+#include "solver/enumerated_actions.hpp"
+#include "solver/enumerated_observations.hpp"
 #include "solver/State.hpp"
 #include "solver/TextSerializer.hpp"    // for TextSerializer
 #include "solver/Observation.hpp"
+
+#include "global.hpp"
 
 namespace solver {
 class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-class RockSampleTextSerializer : public solver::TextSerializer {
+class RockSampleTextSerializer : virtual public solver::TextSerializer,
+    virtual public solver::EnumeratedActionTextSerializer,
+    virtual public solver::EnumeratedObservationTextSerializer {
   public:
     RockSampleTextSerializer();
     RockSampleTextSerializer(solver::Solver *solver);
-    virtual ~RockSampleTextSerializer() = default;
-    RockSampleTextSerializer(RockSampleTextSerializer const &) = delete;
-    RockSampleTextSerializer(RockSampleTextSerializer &&) = delete;
-    RockSampleTextSerializer &operator=(RockSampleTextSerializer const &) =
-        delete;
-    RockSampleTextSerializer &operator=(RockSampleTextSerializer &&) = delete;
+    _NO_COPY_OR_MOVE(RockSampleTextSerializer);
 
     void saveState(solver::State const *state, std::ostream &os);
     std::unique_ptr<solver::State> loadState(std::istream &is);

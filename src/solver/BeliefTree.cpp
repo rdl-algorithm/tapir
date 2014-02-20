@@ -11,14 +11,21 @@
 #include "Observation.hpp"
 
 namespace solver {
-BeliefTree::BeliefTree(std::unique_ptr<ActionMapping> actionMap) :
-    root_(std::make_unique<BeliefNode>(std::move(actionMap))),
+BeliefTree::BeliefTree() :
+    root_(nullptr),
     allNodes_() {
-    allNodes_.push_back(root_.get());
 }
 
 // Do nothing!
 BeliefTree::~BeliefTree() {
+}
+
+BeliefNode *BeliefTree::setRoot(std::unique_ptr<BeliefNode> root) {
+    allNodes_.clear();
+    root_ = std::move(root);
+    BeliefNode *rootPtr = root_.get();
+    allNodes_.push_back(rootPtr);
+    return rootPtr;
 }
 
 BeliefNode *BeliefTree::getRoot() const {
@@ -34,11 +41,5 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         allNodes_.push_back(childNode);
     }
     return childNode;
-}
-
-void BeliefTree::reset() {
-    allNodes_.clear();
-    root_ = std::make_unique<BeliefNode>();
-    allNodes_.push_back(root_.get());
 }
 } /* namespace solver */

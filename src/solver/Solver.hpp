@@ -15,11 +15,13 @@
 #include "State.hpp"
 
 namespace solver {
+class ActionPool;
 class BeliefNode;
 class BeliefTree;
 class Histories;
 class HistoryEntry;
 class HistorySequence;
+class ObservationPool;
 class Serializer;
 class StateInfo;
 class StatePool;
@@ -28,18 +30,21 @@ class Solver {
   public:
     friend class Serializer;
     friend class TextSerializer;
+    friend class EnumeratedActionTextSerializer;
+    friend class EnumeratedObservationTextSerializer;
+    friend class ApproximateObservationTextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
-    Solver(Solver const &) = delete;
-    Solver(Solver &&) = delete;
-    Solver &operator=(Solver const &) = delete;
-    Solver &operator=(Solver &&) = delete;
+    _NO_COPY_OR_MOVE(Solver);
 
     enum RolloutMode {
         ROLLOUT_RANDHEURISTIC = 0,
         ROLLOUT_POL = 1
     };
+
+    /** Resets and initializes the solver. */
+    void initialize();
 
     /** Sets the serializer to be used by this solver. */
     void setSerializer(Serializer *serializer);
@@ -119,12 +124,16 @@ class Solver {
     RandomGenerator *randGen_;
     /** The POMDP model */
     std::unique_ptr<Model> model_;
-    /** The tree that stores the policy */
-    std::unique_ptr<BeliefTree> policy_;
     /** The full collection of simulated histories. */
     std::unique_ptr<Histories> allHistories_;
     /** The pool of states. */
     std::unique_ptr<StatePool> allStates_;
+    /** The pool of actions. */
+    std::unique_ptr<ActionPool> actionPool_;
+    /** The pool of observations. */
+    std::unique_ptr<ObservationPool> observationPool_;
+    /** The tree that stores the policy */
+    std::unique_ptr<BeliefTree> policy_;
 
     /** The rollout mode that was used in the last rollout. */
     RolloutMode lastRolloutMode_;

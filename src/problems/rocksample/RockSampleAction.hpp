@@ -6,25 +6,24 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/Action.hpp"             // for State
+#include "solver/Action.hpp"
+#include "solver/EnumeratedPoint.hpp"             // for EnumeratedPoint
 
 namespace rocksample {
-class RockSampleAction : public solver::Action {
+enum class ActionType : long {
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3,
+    SAMPLE = 4,
+    CHECK = 5
+};
+
+class RockSampleAction : public solver::EnumeratedPoint {
     friend class RockSampleTextSerializer;
   public:
-    enum class Code : long {
-        NORTH = 0,
-        EAST = 1,
-        SOUTH = 2,
-        WEST = 3,
-        SAMPLE = 4,
-        CHECK = 5
-    };
-
-    RockSampleAction(Code code);
-    RockSampleAction(long rockNo);
-    RockSampleAction(Code code, long rockNo);
+    RockSampleAction(ActionType actionType, long rockNo = 0);
+    RockSampleAction(long code);
 
     virtual ~RockSampleAction() = default;
     RockSampleAction(RockSampleAction const &other) = default;
@@ -34,15 +33,17 @@ class RockSampleAction : public solver::Action {
 
     std::unique_ptr<solver::Action> copy() const;
 
+    // Default implementations for
+
     double distanceTo(solver::Action const &otherAction) const;
-    bool equals(solver::Action const &otherAction) const;
-    std::size_t hash() const;
     void print(std::ostream &os) const;
 
-    Code getCode() const;
+    long getCode() const;
+
+    ActionType getActionType() const;
     long getRockNo() const;
   private:
-    Code code_;
+    ActionType actionType_;
     long rockNo_;
 };
 } /* namespace rocksample */

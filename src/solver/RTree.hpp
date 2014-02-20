@@ -8,6 +8,8 @@
 
 #include "StateIndex.hpp"
 
+#include "global.hpp"
+
 namespace solver {
 class SpatialIndexVisitor;
 class StateInfo;
@@ -17,10 +19,7 @@ class RTree : public StateIndex {
   public:
     RTree(unsigned int nSDim);
     virtual ~RTree() = default;
-    RTree(RTree const &) = delete;
-    RTree(RTree &&) = delete;
-    virtual RTree &operator=(RTree const &) = delete;
-    virtual RTree &operator=(RTree &&) = delete;
+    _NO_COPY_OR_MOVE(RTree);
 
     virtual void reset();
     virtual void addStateInfo(StateInfo *stateInfo);

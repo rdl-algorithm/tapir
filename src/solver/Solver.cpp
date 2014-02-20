@@ -42,9 +42,11 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     serializer_(nullptr),
     randGen_(randGen),
     model_(std::move(model)),
-    policy_(std::make_unique<BeliefTree>(model_->createActionMapping())),
+    policy_(),
     allHistories_(std::make_unique<Histories>()),
     allStates_(std::make_unique<StatePool>(model_->createStateIndex())),
+    actionPool_(model_->createActionPool()),
+    observationPool_(model_->createObservationPool()),
     lastRolloutMode_(ROLLOUT_RANDHEURISTIC),
     heuristicExploreCoefficient_(this->model_->getHeuristicExploreCoefficient()),
     timeUsedPerHeuristic_{ 1.0, 1.0 },
@@ -55,6 +57,13 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
 
 // Default destructor, not in .hpp
 Solver::~Solver() {
+}
+
+void Solver::initialize() {
+    actionPool_->observationPool_ = observationPool_.get();
+    observationPool_->actionPool_ = actionPool_.get();
+    policy_->setRoot(std::make_unique<BeliefNode>(
+            actionPool_->createActionMapping()));
 }
 
 void Solver::setSerializer(Serializer *serializer) {

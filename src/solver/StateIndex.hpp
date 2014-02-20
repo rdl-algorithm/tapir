@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include "global.hpp"
+
 namespace solver {
 class StateInfo;
 
@@ -10,10 +12,7 @@ class StateIndex {
   public:
     StateIndex() = default;
     virtual ~StateIndex() = default;
-    StateIndex(StateIndex const &) = delete;
-    StateIndex(StateIndex &&) = delete;
-    virtual StateIndex &operator=(StateIndex const &) = delete;
-    virtual StateIndex &operator=(StateIndex &&) = delete;
+    _NO_COPY_OR_MOVE(StateIndex);
 
     /** Resets the state index, making it empty. */
     virtual void reset() = 0;

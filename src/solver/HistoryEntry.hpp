@@ -8,6 +8,8 @@
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"
 
+#include "global.hpp"
+
 namespace solver {
 class BeliefNode;
 class HistorySequence;
@@ -37,11 +39,7 @@ class HistoryEntry {
     /** Destroys this HistoryEntry. */
     ~HistoryEntry();
 
-    // Copying and moving disallowed!
-    HistoryEntry(HistoryEntry const &) = delete;
-    HistoryEntry(HistoryEntry &&) = delete;
-    HistoryEntry &operator=(HistoryEntry const &) = delete;
-    HistoryEntry &operator=(HistoryEntry &&) = delete;
+    _NO_COPY_OR_MOVE(HistoryEntry);
 
 
     /** Registers this history entry as a particle of the given belief node.

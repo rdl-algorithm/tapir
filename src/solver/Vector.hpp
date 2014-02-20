@@ -9,16 +9,14 @@
 #include <ostream>                      // for ostream
 #include <vector>
 
-namespace solver {
+#include "global.hpp"
 
+namespace solver {
 class Vector: public solver::Point {
 public:
     Vector() = default;
     virtual ~Vector() = default;
-    Vector(Vector const &) = delete;
-    Vector(Vector &&) = delete;
-    virtual Vector &operator=(Vector const &) = delete;
-    virtual Vector &operator=(Vector &&) = delete;
+    _NO_COPY_OR_MOVE(Vector);
 
     // copy() remains unimplemented because we have no data!
     // distanceTo() remains unimplemented - it's up to the user to choose a metric.

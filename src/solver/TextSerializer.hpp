@@ -3,11 +3,12 @@
 
 #include <iosfwd>                       // for ostream, istream
 #include <memory>                       // for unique_ptr
-#include <queue>                        // for queue
 
 #include "Observation.hpp"              // for Observation
 #include "Serializer.hpp"               // for Serializer
 #include "State.hpp"
+
+#include "global.hpp"
 
 namespace solver {
 class ActionMapping;
@@ -22,38 +23,16 @@ class Solver;
 class StateInfo;
 class StatePool;
 
-class TextSerializer : public Serializer {
+/** Implements a text-based serialization of the core solver classes, i.e.
+ * StatePool/StateInfo;
+ * Histories/HistorySequence/HistoryEntry;
+ * BeliefTree/BeliefNode/ActionNode;
+ */
+class TextSerializer : virtual public Serializer {
   public:
-    TextSerializer();
-    TextSerializer(Solver *solver);
+    TextSerializer() = default;
     virtual ~TextSerializer() = default;
-    TextSerializer(TextSerializer const &) = delete;
-    TextSerializer(TextSerializer &&) = delete;
-    TextSerializer &operator=(TextSerializer const &) = delete;
-    TextSerializer &operator=(TextSerializer &&) = delete;
-
-    virtual void save(std::vector<double> const &vector, std::ostream &os);
-    virtual void load(std::vector<double> &vector, std::istream &is);
-
-    virtual void saveState(State const *state, std::ostream &os);
-    virtual std::unique_ptr<State> loadState(std::istream &is);
-
-    virtual void saveObservation(Observation const *obs, std::ostream &os);
-    virtual std::unique_ptr<Observation> loadObservation(std::istream &is);
-
-    virtual void saveAction(Action const *action, std::ostream &os);
-    virtual std::unique_ptr<Action> loadAction(std::istream &is);
-
-
-    virtual void saveObservationMapping(ObservationMapping const &map,
-            std::ostream &os);
-    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
-            std::istream &is);
-
-    virtual void saveActionMapping(ActionMapping const &map,
-            std::ostream &os);
-    virtual std::unique_ptr<ActionMapping> loadActionMapping(
-            std::istream &is);
+    _NO_COPY_OR_MOVE(TextSerializer);
 
     virtual void save(StateInfo const &wrapper, std::ostream &os);
     virtual void load(StateInfo &wrapper, std::istream &is);

@@ -34,16 +34,12 @@ class BeliefNode {
 
     // Default destructor; copying and moving disallowed!
     ~BeliefNode();
-    BeliefNode(BeliefNode const &) = delete;
-    BeliefNode(BeliefNode &&) = delete;
-    BeliefNode &operator=(BeliefNode const &) = delete;
-    BeliefNode &operator=(BeliefNode &&) = delete;
-
+    _NO_COPY_OR_MOVE(BeliefNode);
 
     /** Returns true iff there is another action that needs to be explored. */
     bool hasActionToTry() const;
     /** Returns the next action to attempt, if any. */
-    std::unique_ptr<Action> getNextActionToTry(RandomGenerator *randGen) const;
+    std::unique_ptr<Action> getNextActionToTry() const;
 
     /** Chooses the next action to search, from a multi-armed bandit problem
      * (probably using a UCB algorithm). */

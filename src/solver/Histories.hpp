@@ -4,6 +4,8 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
+#include "global.hpp"
+
 namespace solver {
 class HistoryEntry;
 class HistorySequence;
@@ -17,10 +19,7 @@ class Histories {
 
     // Default destructor; copying and moving disallowed!
     ~Histories() = default;
-    Histories(Histories const &) = delete;
-    Histories(Histories &&) = delete;
-    Histories &operator=(Histories const &) = delete;
-    Histories &operator=(Histories &&) = delete;
+    _NO_COPY_OR_MOVE(Histories);
 
     /** Resets the histories to be empty. */
     void reset();

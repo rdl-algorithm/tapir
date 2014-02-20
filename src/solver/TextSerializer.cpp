@@ -10,6 +10,7 @@
 #include <utility>                      // for move, pair
 #include <vector>                       // for vector
 
+#include "ActionMapping.hpp"
 #include "ActionNode.hpp"               // for ActionNode
 #include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::ActionMap, BeliefNode::currId
 #include "BeliefTree.hpp"               // for BeliefTree
@@ -20,8 +21,6 @@
 #include "ObservationMapping.hpp"          // for ObservationMapping
 #include "Serializer.hpp"               // for Serializer
 #include "VectorLP.hpp"
-#include "DiscreteActionMap.hpp"          // for DiscreteObservationMap
-#include "DiscreteObservationMap.hpp"          // for DiscreteObservationMap
 #include "Solver.hpp"                   // for Solver
 #include "State.hpp"                    // for State, operator<<
 #include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
@@ -32,95 +31,6 @@ using std::cerr;
 using std::endl;
 
 namespace solver {
-TextSerializer::TextSerializer() :
-    TextSerializer(nullptr) {
-}
-
-TextSerializer::TextSerializer(Solver *solver) :
-    Serializer(solver) {
-}
-
-void TextSerializer::save(std::vector<double> const &vector, std::ostream &os) {
-    os << "<";
-    for (std::vector<double>::const_iterator it = vector.begin();
-            it != vector.end(); it++) {
-        os << *it;
-        if (it + 1 != vector.end()) {
-            os << " ";
-        }
-    }
-    os << ">";
-}
-
-void TextSerializer::load(std::vector<double> &vector, std::istream &is) {
-    std::string tmpStr;
-    std::getline(is, tmpStr, '<');
-    std::getline(is, tmpStr, '>');
-
-    vector.clear();
-
-    if (!is.good() || tmpStr.empty()) {
-        return;
-    }
-
-    std::stringstream sstr(tmpStr);
-    while (sstr.good()) {
-        double tmpDouble;
-        sstr >> tmpDouble;
-        vector.push_back(tmpDouble);
-    }
-}
-
-void TextSerializer::saveState(State const *state, std::ostream &os) {
-    std::vector<double> vector = static_cast<Vector const *>(state)->asVector();
-    save(vector, os);
-}
-
-std::unique_ptr<State> TextSerializer::loadState(std::istream &is) {
-    std::vector<double> vector;
-    load(vector, is);
-    if (vector.empty()) {
-        return nullptr;
-    }
-    return std::make_unique<VectorLP>(vector, 1);
-}
-
-void TextSerializer::saveObservation(Observation const *obs, std::ostream &os) {
-    if (obs == nullptr) {
-        os << "<>";
-    } else {
-        std::vector<double> vector = static_cast<Vector const *>(obs)->asVector();
-        save(vector, os);
-    }
-}
-
-std::unique_ptr<Observation> TextSerializer::loadObservation(std::istream &is) {
-    std::vector<double> vector;
-    load(vector, is);
-    if (vector.empty()) {
-        return nullptr;
-    }
-    return std::make_unique<VectorLP>(vector, 1);
-}
-
-void TextSerializer::saveAction(Action const *action, std::ostream &os) {
-    if (action == nullptr) {
-        os << "<>";
-    } else {
-        std::vector<double> vector = static_cast<Vector const *>(action)->asVector();
-        save(vector, os);
-    }
-}
-
-std::unique_ptr<Action> TextSerializer::loadAction(std::istream &is) {
-    std::vector<double> vector;
-    load(vector, is);
-    if (vector.empty()) {
-        return nullptr;
-    }
-    return std::make_unique<VectorLP>(vector, 1);
-}
-
 void TextSerializer::save(StateInfo const &info, std::ostream &os) {
     os << "s " << info.id_ << " : ";
     saveState(info.state_.get(), os);
@@ -266,84 +176,6 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
     }
 }
 
-void TextSerializer::saveObservationMapping(ObservationMapping const &map, std::ostream &os) {
-    os << "{";
-    DiscreteObservationMap const &so = static_cast<DiscreteObservationMap const &>(map);
-    if (so.obsNodes_.size() != 0) {
-        for(DiscreteObservationMap::ObsMap::const_iterator it
-                = so.obsNodes_.cbegin(); it != so.obsNodes_.cend(); ++it) {
-            saveObservation(it->first, os);
-            os << ":" << it->second->id_;
-            if (std::next(it) != so.obsNodes_.cend()) {
-                os << ", ";
-            }
-        }
-    }
-    os << "}";
-}
-
-std::unique_ptr<ObservationMapping> TextSerializer::loadObservationMapping(std::istream &is) {
-    std::unique_ptr<DiscreteObservationMap> map(
-            std::make_unique<DiscreteObservationMap>(solver_->model_.get()));
-    std::string tmpStr;
-    std::getline(is, tmpStr, '{');
-    std::getline(is, tmpStr, '}');
-    std::stringstream sstr(tmpStr);
-
-    std::string entry;
-    while (!is.eof()) {
-        std::getline(sstr, entry, ',');
-        std::stringstream sstr2(entry);
-        std::string tmpStr2;
-        std::getline(sstr2, tmpStr2, ':');
-        std::stringstream sstr3(tmpStr2);
-        std::unique_ptr<Observation> obs = loadObservation(sstr3);
-        if (obs == nullptr) {
-            break;
-        }
-        long childId;
-        sstr2 >> childId;
-        if (solver_->policy_->allNodes_[childId] != nullptr) {
-            cerr << "ERROR: Node already present !?" << endl;
-        }
-        BeliefNode *node = map->createBelief(*obs);
-        node->id_ = childId;
-        solver_->policy_->allNodes_[childId] = node;
-    }
-    return std::move(map);
-}
-
-void TextSerializer::saveActionMapping(ActionMapping const &map, std::ostream &os) {
-    DiscreteActionMap const &so = static_cast<DiscreteActionMap const &>(map);
-    os << so.size() << endl;
-    for (auto &entry : so.actionMap_) {
-        save(*entry.second, os);
-        os << endl;
-    }
-}
-
-std::unique_ptr<ActionMapping> TextSerializer::loadActionMapping(std::istream &is) {
-    std::unique_ptr<DiscreteActionMap> map(
-            std::make_unique<DiscreteActionMap>(solver_->model_.get()));
-
-    std::string line;
-    std::getline(is, line);
-    std::stringstream sstr(line);
-    long nActChildren;
-    sstr >> nActChildren;
-
-    for (long i = 0; i < nActChildren; i++) {
-        std::getline(is, line);
-        std::stringstream sstr2(line);
-        std::unique_ptr<ActionNode> actionNode(std::make_unique<ActionNode>());
-        load(*actionNode, sstr2);
-        std::unique_ptr<Action> action(actionNode->action_->copy());
-        map->actionMap_.emplace(action.get(), std::move(actionNode));
-        map->actions_.push_back(std::move(action));
-    }
-    return std::move(map);
-}
-
 void TextSerializer::save(ActionNode const &node, std::ostream &os) {
     os << "A ";
     saveAction(node.action_.get(), os);
@@ -398,8 +230,6 @@ void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
 }
 
 void TextSerializer::load(BeliefTree &tree, std::istream &is) {
-    tree.reset();
-
     std::string line;
     std::getline(is, line);
     while (line.find("BELIEFTREE-BEGIN") == std::string::npos) {

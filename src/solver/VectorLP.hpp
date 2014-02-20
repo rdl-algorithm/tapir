@@ -14,11 +14,7 @@ public:
     VectorLP(std::initializer_list<double> values, double p = 1.0);
     VectorLP(std::vector<double> values, double p = 1.0);
     virtual ~VectorLP() = default;
-
-    VectorLP(VectorLP const &) = delete;
-    VectorLP(VectorLP &&) = delete;
-    virtual VectorLP &operator=(VectorLP const &) = delete;
-    virtual VectorLP &operator=(VectorLP &&) = delete;
+    _NO_COPY_OR_MOVE(VectorLP);
 
     virtual bool equals(Point const &otherPoint) const;
     virtual std::size_t hash() const;

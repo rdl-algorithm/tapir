@@ -9,6 +9,8 @@
 #include "Observation.hpp"              // for Observation
 #include "State.hpp"
 
+#include "global.hpp"
+
 namespace solver {
 class HistoryEntry;
 class StateInfo;
@@ -26,10 +28,7 @@ class HistorySequence {
 
     // Default destructor; copying and moving disallowed!
     ~HistorySequence();
-    HistorySequence(HistorySequence const &) = delete;
-    HistorySequence(HistorySequence &&) = delete;
-    HistorySequence &operator=(HistorySequence const &) = delete;
-    HistorySequence &operator=(HistorySequence &&) = delete;
+    _NO_COPY_OR_MOVE(HistorySequence);
 
     /** Adds a new entry with the given state info and current discount. */
     HistoryEntry *addEntry(StateInfo *stateInfo, double discount);

@@ -6,6 +6,12 @@
 #include <sstream>
 #include <utility>                      // for forward
 
+#define _NO_COPY_OR_MOVE(ClassName) \
+    ClassName(ClassName const &) = delete; \
+    ClassName(ClassName &&) = delete; \
+    ClassName &operator=(ClassName const &) = delete; \
+    ClassName &operator=(ClassName &&) = delete
+
 typedef std::default_random_engine RandomGenerator;
 
 namespace std {

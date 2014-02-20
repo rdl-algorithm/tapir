@@ -20,12 +20,8 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-RockSampleTextSerializer::RockSampleTextSerializer() :
-    solver::TextSerializer() {
-}
-
 RockSampleTextSerializer::RockSampleTextSerializer(solver::Solver *solver) :
-    solver::TextSerializer(solver) {
+    solver::Serializer(solver) {
 }
 
 void RockSampleTextSerializer::saveState(solver::State const *state,
@@ -116,25 +112,25 @@ void RockSampleTextSerializer::saveAction(solver::Action const *action,
     }
     RockSampleAction const &a =
             static_cast<RockSampleAction const &>(*action);
-    RockSampleAction::Code code = a.getCode();
-    if (code == RockSampleAction::Code::CHECK) {
+    ActionType code = a.getActionType();
+    if (code == ActionType::CHECK) {
         os << "CHECK-" << a.getRockNo();
         return;
     }
     switch (code) {
-    case RockSampleAction::Code::NORTH:
+    case ActionType::NORTH:
         os << "NORTH";
         break;
-    case RockSampleAction::Code::EAST:
+    case ActionType::EAST:
         os << "EAST";
         break;
-    case RockSampleAction::Code::SOUTH:
+    case ActionType::SOUTH:
         os << "SOUTH";
         break;
-    case RockSampleAction::Code::WEST:
+    case ActionType::WEST:
         os << "WEST";
         break;
-    case RockSampleAction::Code::SAMPLE:
+    case ActionType::SAMPLE:
         os << "SAMPLE";
         break;
     default:
@@ -150,22 +146,22 @@ std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(
     if (text == "NULL") {
         return nullptr;
     } else if (text == "NORTH") {
-        return std::make_unique<RockSampleAction>(RockSampleAction::Code::NORTH);
+        return std::make_unique<RockSampleAction>(ActionType::NORTH);
     } else if (text == "EAST") {
-        return std::make_unique<RockSampleAction>(RockSampleAction::Code::EAST);
+        return std::make_unique<RockSampleAction>(ActionType::EAST);
     } else if (text == "SOUTH") {
-        return std::make_unique<RockSampleAction>(RockSampleAction::Code::SOUTH);
+        return std::make_unique<RockSampleAction>(ActionType::SOUTH);
     } else if (text == "WEST") {
-        return std::make_unique<RockSampleAction>(RockSampleAction::Code::WEST);
+        return std::make_unique<RockSampleAction>(ActionType::WEST);
     } else if (text == "SAMPLE") {
-        return std::make_unique<RockSampleAction>(RockSampleAction::Code::SAMPLE);
+        return std::make_unique<RockSampleAction>(ActionType::SAMPLE);
     } else if (text.find("CHECK") != std::string::npos) {
         std::string tmpStr;
         std::stringstream sstr(text);
         std::getline(sstr, tmpStr, '-');
         long rockNo;
         sstr >> rockNo;
-        return std::make_unique<RockSampleAction>(RockSampleAction::Code::CHECK, rockNo);
+        return std::make_unique<RockSampleAction>(ActionType::CHECK, rockNo);
     } else {
         std::string tmpStr;
         std::stringstream sstr(text);
@@ -174,7 +170,7 @@ std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(
         sstr >> code;
         std::cerr << "ERROR: Invalid action!" << std::endl;
         return std::make_unique<RockSampleAction>(
-                static_cast<RockSampleAction::Code>(code));
+                static_cast<ActionType>(code));
     }
 }
 

@@ -8,10 +8,10 @@
 #include "global.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"        // for Action
-#include "ActionMapping.hpp"
+#include "ActionPool.hpp"
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Observation.hpp"              // for Observation
-#include "ObservationMapping.hpp"
+#include "ObservationPool.hpp"
 #include "State.hpp"                    // for State
 #include "StateIndex.hpp"
 
@@ -21,16 +21,14 @@ class StatePool;
 class Model {
   public:
     /** Constructor - stores the RandomGenerator for this model. */
-    Model(RandomGenerator *randGen);
+    Model() = default;
 
     // Default destructor; copying and moving disallowed!
     virtual ~Model() = default;
-    Model(Model const &) = delete;
-    Model(Model &&) = delete;
-    Model &operator=(Model const &) = delete;
-    Model &operator=(Model &&) = delete;
 
     virtual std::string getName() = 0;
+
+    virtual RandomGenerator *getRandomGenerator() = 0;
 
     /* ---------- Virtual getters for important model parameters  ---------- */
     // POMDP parameters
@@ -157,19 +155,14 @@ class Model {
      * have been used in a StatePool.
      */
     virtual std::unique_ptr<StateIndex> createStateIndex();
-    /** Creates an ObservationMapping, which manages how observations are
-     * mapped to subsequent belief nodes. */
-    virtual std::unique_ptr<ObservationMapping> createObservationMapping();
-    /** Creates an ActionMapping, which manages how actions are mapped to
-     * subsequent action nodes. */
-    virtual std::unique_ptr<ActionMapping> createActionMapping() = 0;
-    // The following should be a good implementation for most cases:
-    // return std::make_unique<DiscreteActionMap>(this,
-    //     { <action 1>, <action 2>, ... });
-
-  protected:
-    /** The random number generator for this model. */
-    RandomGenerator *randGen_;
+    /** Creates an ActionPool, which manages actions & creates
+     * ActionMappings
+     */
+    virtual std::unique_ptr<ActionPool> createActionPool() = 0;
+    /** Creates an ObservationPool, which manages observations & creates
+     * ObservationMappings.
+     */
+    virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
 };
 } /* namespace solver */
 

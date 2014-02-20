@@ -18,7 +18,6 @@
 #include "solver/Observation.hpp"       // for Observation
 #include "solver/State.hpp"       // for State
 
-
 namespace po = boost::program_options;
 
 namespace solver {

@@ -13,6 +13,8 @@
 #include "State.hpp"                    // for State, operator==
 #include "StateInfo.hpp"                // for StateInfo
 
+#include "global.hpp"
+
 namespace solver {
 class Model;
 class StateIndex;
@@ -38,10 +40,7 @@ class StatePool {
 
     StatePool(std::unique_ptr<StateIndex> stateIndex);
     ~StatePool();
-    StatePool(StatePool const &) = delete;
-    StatePool(StatePool &&) = delete;
-    StatePool &operator=(StatePool const &) = delete;
-    StatePool &operator=(StatePool &&) = delete;
+    _NO_COPY_OR_MOVE(StatePool);
 
     void reset();
 

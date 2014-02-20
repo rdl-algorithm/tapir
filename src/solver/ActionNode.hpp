@@ -8,6 +8,7 @@
 #include "Action.hpp"                   // for Action
 #include "Observation.hpp"              // for Observation
 #include "ObservationMapping.hpp"
+#include "global.hpp"
 
 namespace solver {
 class BeliefNode;
@@ -24,10 +25,7 @@ class ActionNode {
 
     // Default destructor; copying and moving disallowed!
     ~ActionNode();
-    ActionNode(ActionNode const &) = delete;
-    ActionNode(ActionNode &&) = delete;
-    ActionNode &operator=(ActionNode const &) = delete;
-    ActionNode &operator=(ActionNode &&) = delete;
+    _NO_COPY_OR_MOVE(ActionNode);
 
     /** Updates the q-value, as would occur on adding the given amount to the
      * total (negative for a decrease).

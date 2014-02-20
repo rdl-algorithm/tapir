@@ -8,6 +8,8 @@
 #include "State.hpp"
 #include "Solver.hpp"                   // for Solver
 
+#include "global.hpp"
+
 namespace solver {
 class ActionMapping;
 class ActionNode;
@@ -21,19 +23,29 @@ class StateInfo;
 class StatePool;
 
 class Serializer {
-  public:
+public:
     /** Constructs a serializer for the given solver. */
-    Serializer(Solver *solver) :
-        solver_(solver) {
+    Serializer() :
+            solver_(nullptr) {
     }
+
+    Serializer(Solver *solver) :
+            solver_(solver) {
+    }
+
+    void setSolver(Solver *solver) {
+        solver_ = solver;
+    }
+
+    Solver *getSolver() {
+        return solver_;
+    }
+
     /** Default destructor. */
     virtual ~Serializer() = default;
 
     /* Copying and moving is disallowed. */
-    Serializer(Serializer const &) = delete;
-    Serializer(Serializer &&) = delete;
-    Serializer &operator=(Serializer const &) = delete;
-    Serializer &operator=(Serializer &&) = delete;
+    _NO_COPY_OR_MOVE(Serializer);
 
     /* --------------- Saving the entirnode.e solver. ----------------- */
 
@@ -41,12 +53,17 @@ class Serializer {
     virtual void save(std::ostream &os) {
         save(*(solver_->allStates_), os);
         save(*(solver_->allHistories_), os);
+        saveActionPool(*(solver_->actionPool_), os);
+        saveObservationPool(*(solver_->observationPool_), os);
         save(*(solver_->policy_), os);
     }
     /** Loads the state of the solver. */
     virtual void load(std::istream &is) {
         load(*(solver_->allStates_), is);
         load(*(solver_->allHistories_), is);
+        solver_->actionPool_ = loadActionPool(is);
+        solver_->observationPool_ = loadObservationPool(is);
+        solver_->initialize();
         load(*(solver_->policy_), is);
     }
 
@@ -71,6 +88,11 @@ class Serializer {
     virtual std::unique_ptr<Action> loadAction(std::istream &is) = 0;
 
 
+    /** Saves the pool handling all the actions. */
+    virtual void saveActionPool(ActionPool const &actionPool,
+            std::ostream &os) = 0;
+    /** Loads the pool handling all the actions. */
+    virtual  std::unique_ptr<ActionPool> loadActionPool(std::istream &is) = 0;
     /** Saves a mapping of observations to belief nodes. */
     virtual void saveActionMapping(ActionMapping const &map,
             std::ostream &os) = 0;
@@ -78,6 +100,12 @@ class Serializer {
     virtual std::unique_ptr<ActionMapping> loadActionMapping(
             std::istream &is) = 0;
 
+    /** Saves the pool handling all the actions. */
+    virtual void saveObservationPool(
+            ObservationPool const &observationPool, std::ostream &os) = 0;
+    /** Loads the pool handling all the actions. */
+    virtual std::unique_ptr<ObservationPool> loadObservationPool(
+            std::istream &is) = 0;
     /** Saves a mapping of observations to belief nodes. */
     virtual void saveObservationMapping(ObservationMapping const &map,
             std::ostream &os) = 0;

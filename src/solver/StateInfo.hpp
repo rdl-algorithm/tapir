@@ -8,6 +8,8 @@
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "State.hpp"
 
+#include "global.hpp"
+
 namespace solver {
 class BeliefNode;
 class HistoryEntry;
@@ -27,11 +29,7 @@ class StateInfo {
 
     /** Default destructor. */
     ~StateInfo();
-    // Copying and moving is disallowed.
-    StateInfo(StateInfo const &) = delete;
-    StateInfo(StateInfo &&) = delete;
-    StateInfo &operator=(StateInfo const &) = delete;
-    StateInfo &operator=(StateInfo &&) = delete;
+    _NO_COPY_OR_MOVE(StateInfo);
 
     /** Returns the ID of this state. */
     long getId() const;

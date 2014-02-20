@@ -55,9 +55,8 @@ bool BeliefNode::hasActionToTry() const {
     return actionMap_->hasActionToTry();
 }
 
-std::unique_ptr<Action> BeliefNode::getNextActionToTry(
-        RandomGenerator *randGen) const {
-    return actionMap_->getNextActionToTry(randGen);
+std::unique_ptr<Action> BeliefNode::getNextActionToTry() const {
+    return actionMap_->getNextActionToTry();
 }
 
 std::unique_ptr<Action> BeliefNode::getSearchAction(double exploreCoefficient) {
@@ -122,7 +121,7 @@ long BeliefNode::getNParticles() const {
 }
 
 long BeliefNode::getNActChildren() const {
-    return actionMap_->size();
+    return actionMap_->getNChildren();
 }
 
 BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) const {
