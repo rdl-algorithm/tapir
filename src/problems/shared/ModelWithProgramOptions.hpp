@@ -24,6 +24,7 @@ class ModelWithProgramOptions : public virtual solver::Model {
     }
 
     virtual ~ModelWithProgramOptions() = default;
+    _NO_COPY_OR_MOVE(ModelWithProgramOptions);
 
     // Simple getters
     virtual RandomGenerator *getRandomGenerator() {

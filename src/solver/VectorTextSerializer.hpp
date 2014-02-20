@@ -1,10 +1,11 @@
 #ifndef SOLVER_VECTORTEXTSERIALIZER_HPP_
 #define SOLVER_VECTORTEXTSERIALIZER_HPP_
 
+#include "Serializer.hpp"
+
 #include "global.hpp"
 
 namespace solver {
-
 /** Simple vector-based serialization of States, Observations, and Actions;
  * using an L1 metric where needed.
  * If you use a custom subclass of State/Observation/Action you will need

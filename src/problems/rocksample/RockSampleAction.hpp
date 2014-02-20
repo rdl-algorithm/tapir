@@ -26,10 +26,7 @@ class RockSampleAction : public solver::EnumeratedPoint {
     RockSampleAction(long code);
 
     virtual ~RockSampleAction() = default;
-    RockSampleAction(RockSampleAction const &other) = default;
-    RockSampleAction(RockSampleAction &&) = default;
-    virtual RockSampleAction &operator=(RockSampleAction const &) = default;
-    virtual RockSampleAction &operator=(RockSampleAction &&) = default;
+    _NO_COPY_OR_MOVE(RockSampleAction);
 
     std::unique_ptr<solver::Action> copy() const;
 

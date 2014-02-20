@@ -28,6 +28,11 @@ RockSampleObservation::RockSampleObservation(bool _isEmpty, bool _isGood) :
         isGood_(_isGood) {
 }
 
+RockSampleObservation::RockSampleObservation(long code) :
+        isEmpty_(code == 0),
+        isGood_(code == 1) {
+}
+
 std::unique_ptr<solver::Observation> RockSampleObservation::copy() const {
     return std::make_unique<RockSampleObservation>(isEmpty_,isGood_);
 }
@@ -56,6 +61,10 @@ void RockSampleObservation::print(std::ostream &os) const {
     } else {
         os << "BAD";
     }
+}
+
+long RockSampleObservation::getCode() const {
+    return isEmpty_ ? 0 : (isGood_ ? 1 : 2);
 }
 
 bool RockSampleObservation::isEmpty() const {

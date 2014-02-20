@@ -17,6 +17,9 @@ class BeliefTree {
   public:
     friend class Solver;
     friend class TextSerializer;
+    friend class ApproximateObservationTextSerializer;
+    friend class EnumeratedActionTextSerializer;
+    friend class EnumeratedObservationTextSerializer;
 
     /* Constructs an empty belief tree. */
     BeliefTree();

@@ -9,19 +9,19 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/Observation.hpp"             // for State
 
+#include "global.hpp"                     // for RandomGenerator
+
 namespace rocksample {
-class RockSampleObservation : public solver::Observation {
+class RockSampleObservation : public solver::EnumeratedPoint {
     friend class RockSampleTextSerializer;
   public:
     RockSampleObservation();
     RockSampleObservation(bool _isGood);
     RockSampleObservation(bool _isEmpty, bool _isGood);
+    RockSampleObservation(long code);
 
     virtual ~RockSampleObservation() = default;
-    RockSampleObservation(RockSampleObservation const &other) = delete;
-    RockSampleObservation(RockSampleObservation &&) = delete;
-    virtual RockSampleObservation &operator=(RockSampleObservation const &) = delete;
-    virtual RockSampleObservation &operator=(RockSampleObservation &&) = delete;
+    _NO_COPY_OR_MOVE(RockSampleObservation);
 
     std::unique_ptr<solver::Observation> copy() const;
 
@@ -29,6 +29,8 @@ class RockSampleObservation : public solver::Observation {
     bool equals(solver::Observation const &otherObs) const;
     std::size_t hash() const;
     void print(std::ostream &os) const;
+
+    long getCode() const;
 
     bool isEmpty() const;
     bool isGood() const;

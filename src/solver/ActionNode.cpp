@@ -68,4 +68,8 @@ std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Observation const &ob
     }
     return std::make_pair(beliefChild, added);
 }
+
+Action const *ActionNode::getAction() const {
+    return action_.get();
+}
 } /* namespace solver */

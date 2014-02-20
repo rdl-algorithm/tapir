@@ -23,6 +23,9 @@ class BeliefNode {
   public:
     friend class Solver;
     friend class TextSerializer;
+    friend class ApproximateObservationTextSerializer;
+    friend class EnumeratedActionTextSerializer;
+    friend class EnumeratedObservationTextSerializer;
 
     /** Constructs a new belief node with an auto-generated ID and no
      * action mapping. */

@@ -1,8 +1,11 @@
 #include "approximate_observations.hpp"
 
+#include "ActionMapping.hpp"
 #include "ActionPool.hpp"
 #include "BeliefNode.hpp"
+#include "BeliefTree.hpp"
 #include "Model.hpp"
+#include "Observation.hpp"
 #include "ObservationPool.hpp"
 #include "ObservationMapping.hpp"
 
@@ -13,8 +16,10 @@
 #include "global.hpp"
 
 namespace solver {
-
 /* ------------------- ModelWithApproximateObservations ------------------- */
+ModelWithApproximateObservations::~ModelWithApproximateObservations() {
+}
+
 std::unique_ptr<ObservationPool>
     ModelWithApproximateObservations::createObservationPool() {
     return std::make_unique<ApproximateObservationPool>(
@@ -22,6 +27,9 @@ std::unique_ptr<ObservationPool>
 }
 
 /* --------------------- ApproximateObservationPool --------------------- */
+ApproximateObservationPool::~ApproximateObservationPool() {
+}
+
 ApproximateObservationPool::ApproximateObservationPool(double maxDistance) :
         maxDistance_(maxDistance) {
 }
@@ -33,6 +41,9 @@ std::unique_ptr<ObservationMapping>
 }
 
 /* ---------------------- ApproximateObservationMap ---------------------- */
+ApproximateObservationMap::~ApproximateObservationMap() {
+}
+
 ApproximateObservationMap::ApproximateObservationMap(ActionPool *actionPool,
         double maxDistance) :
                 actionPool_(actionPool),
@@ -63,7 +74,10 @@ BeliefNode* ApproximateObservationMap::createBelief(
     return node;
 }
 
-/* ------------------- ApproximateObservationTextSerializer ------------------- */
+/* ----------------- ApproximateObservationTextSerializer ----------------- */
+ApproximateObservationTextSerializer::~ApproximateObservationTextSerializer() {
+}
+
 void ApproximateObservationTextSerializer::saveObservationPool(
         ObservationPool const &/*observationPool*/, std::ostream &/*os*/) {
     // We won't bother writing the pool to file as the model can make a new one.
@@ -80,14 +94,23 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
     os << "{";
     ApproximateObservationMap const &approxMap = (
             static_cast<ApproximateObservationMap const &>(map));
-    // TODO Do this properly!
-    os << "}";
+    for (ApproximateObservationMap::ChildMappingVector::const_iterator
+            it = approxMap.children_.cbegin();
+            it != approxMap.children_.cend(); it++) {
+        saveObservation(it->first.get(), os);
+        os << ":" << it->second->id_;
+        if (std::next(it) != approxMap.children_.cend()) {
+            os << ", ";
+        }
+    }
+     os << "}";
 }
 
 std::unique_ptr<ObservationMapping>
 ApproximateObservationTextSerializer::loadObservationMapping(std::istream &is) {
     std::unique_ptr<ApproximateObservationMap> map(
-            solver_->observationPool_->createObservationMapping());
+            static_cast<ApproximateObservationMap *>(
+            solver_->observationPool_->createObservationMapping().release()));
     std::string tmpStr;
     std::getline(is, tmpStr, '{');
     std::getline(is, tmpStr, '}');

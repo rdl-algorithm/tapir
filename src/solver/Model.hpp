@@ -15,6 +15,8 @@
 #include "State.hpp"                    // for State
 #include "StateIndex.hpp"
 
+#include "global.hpp"
+
 namespace solver {
 class StatePool;
 
@@ -25,9 +27,9 @@ class Model {
 
     // Default destructor; copying and moving disallowed!
     virtual ~Model() = default;
+    _NO_COPY_OR_MOVE(Model);
 
     virtual std::string getName() = 0;
-
     virtual RandomGenerator *getRandomGenerator() = 0;
 
     /* ---------- Virtual getters for important model parameters  ---------- */

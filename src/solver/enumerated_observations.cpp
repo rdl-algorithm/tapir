@@ -5,9 +5,13 @@
 #include <sstream>
 #include <vector>
 
+#include "ActionMapping.hpp"
 #include "ActionPool.hpp"
 #include "BeliefNode.hpp"
+#include "BeliefTree.hpp"
+#include "EnumeratedPoint.hpp"
 #include "Model.hpp"
+#include "Observation.hpp"
 #include "ObservationPool.hpp"
 #include "ObservationMapping.hpp"
 
@@ -40,14 +44,14 @@ std::unique_ptr<ObservationMapping>
 
 /* ---------------------- EnumeratedObservationMap ---------------------- */
 EnumeratedObservationMap::EnumeratedObservationMap(ActionPool *actionPool,
-        std::vector<std::unique_ptr<EnumeratedPoint>> const &observations) :
+        std::vector<std::unique_ptr<EnumeratedPoint>> const &allObservations) :
+                allObservations_(allObservations),
                 actionPool_(actionPool),
-                observations_(observations),
-                children_(observations_.size()) {
+                children_(allObservations_.size()) {
 }
 
 long EnumeratedObservationMap::size() const {
-    return observations_.size();
+    return allObservations_.size();
 }
 
 BeliefNode* EnumeratedObservationMap::getBelief(
@@ -67,12 +71,12 @@ BeliefNode* EnumeratedObservationMap::createBelief(
 
 /* ------------------- EnumeratedObservationTextSerializer ------------------- */
 void EnumeratedObservationTextSerializer::saveObservationPool(
-        ObservationPool const &observationPool, std::ostream &os) {
+        ObservationPool const &/*observationPool*/, std::ostream &/*os*/) {
     // We won't bother writing the pool to file as the model can make a new one.
 }
 std::unique_ptr<ObservationPool>
 EnumeratedObservationTextSerializer::loadObservationPool(
-        std::istream &is) {
+        std::istream &/*is*/) {
     // Here we just create a new one.
     return solver_->model_->createObservationPool();
 }
@@ -85,7 +89,7 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
     for (int i = 0; i < enumMap.size(); i++) {
         BeliefNode *child = enumMap.children_[i].get();
         if (child != nullptr) {
-            saveObservation(observations_[i]);
+            saveObservation(enumMap.allObservations_[i].get(), os);
             os << ":" << child->id_;
             if (i != enumMap.size() - 1) {
                 os << ", ";
@@ -98,7 +102,8 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
 std::unique_ptr<ObservationMapping>
 EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
     std::unique_ptr<EnumeratedObservationMap> map(
-            solver_->observationPool_->createObservationMapping());
+                static_cast<EnumeratedObservationMap *>(
+                solver_->observationPool_->createObservationMapping().release()));
     std::string tmpStr;
     std::getline(is, tmpStr, '{');
     std::getline(is, tmpStr, '}');

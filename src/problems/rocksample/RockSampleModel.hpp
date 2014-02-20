@@ -9,7 +9,6 @@
 
 #include <boost/program_options.hpp>    // for variables_map
 
-#include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 #include "solver/Action.hpp"            // for Action
@@ -18,11 +17,17 @@
 #include "solver/Observation.hpp"       // for Observation
 #include "solver/State.hpp"       // for State
 
+#include "solver/enumerated_actions.hpp"
+#include "solver/enumerated_observations.hpp"
+
+#include "global.hpp"                     // for RandomGenerator
+
 namespace po = boost::program_options;
 
 namespace solver {
-class StatePool;
 class ActionMapping;
+class StatePool;
+class EnumeratedPoint;
 } /* namespace solver */
 
 namespace rocksample {
@@ -30,14 +35,13 @@ class RockSampleAction;
 class RockSampleState;
 class RockSampleObservation;
 
-class RockSampleModel : public ModelWithProgramOptions {
+class RockSampleModel : virtual public ModelWithProgramOptions,
+    virtual public solver::ModelWithEnumeratedActions,
+    virtual public solver::ModelWithEnumeratedObservations {
   public:
     RockSampleModel(RandomGenerator *randGen, po::variables_map vm);
     ~RockSampleModel() = default;
-    RockSampleModel(RockSampleModel const &) = delete;
-    RockSampleModel(RockSampleModel &&) = delete;
-    RockSampleModel &operator=(RockSampleModel const &) = delete;
-    RockSampleModel &operator=(RockSampleModel &&) = delete;
+    _NO_COPY_OR_MOVE(RockSampleModel);
 
     /**
      * Rocks are enumerated 0, 1, 2, ... ;
@@ -99,7 +103,11 @@ class RockSampleModel : public ModelWithProgramOptions {
     void drawEnv(std::ostream &os);
     void drawState(solver::State const &state, std::ostream &os);
 
-    std::unique_ptr<solver::ActionMapping> createActionMapping();
+    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+    getAllActionsInOrder();
+
+    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+    getAllObservationsInOrder();
 
   private:
     /**

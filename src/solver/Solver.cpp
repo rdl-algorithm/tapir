@@ -17,6 +17,7 @@
 #include "global.hpp"                     // for RandomGenerator
 
 #include "Action.hpp"                   // for Action
+#include "ActionMapping.hpp"
 #include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
 #include "BeliefTree.hpp"               // for BeliefTree
 #include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
@@ -25,6 +26,7 @@
 #include "HistorySequence.hpp"          // for HistorySequence
 #include "Model.hpp"                    // for Model::StepResult, Model
 #include "Observation.hpp"              // for Observation
+#include "ObservationMapping.hpp"
 #include "Serializer.hpp"               // for Serializer
 #include "State.hpp"                    // for State, operator<<
 #include "StateInfo.hpp"                // for StateInfo
@@ -42,11 +44,11 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     serializer_(nullptr),
     randGen_(randGen),
     model_(std::move(model)),
-    policy_(),
-    allHistories_(std::make_unique<Histories>()),
-    allStates_(std::make_unique<StatePool>(model_->createStateIndex())),
     actionPool_(model_->createActionPool()),
     observationPool_(model_->createObservationPool()),
+    allStates_(std::make_unique<StatePool>(model_->createStateIndex())),
+    allHistories_(std::make_unique<Histories>()),
+    policy_(),
     lastRolloutMode_(ROLLOUT_RANDHEURISTIC),
     heuristicExploreCoefficient_(this->model_->getHeuristicExploreCoefficient()),
     timeUsedPerHeuristic_{ 1.0, 1.0 },
@@ -200,7 +202,7 @@ std::pair<Model::StepResult, double> Solver::getRolloutAction(
         BeliefNode *belNode, State const &state, double startDiscount,
         double discountFactor) {
     // We will try the next action that has not yet been tried.
-    std::unique_ptr<Action> action = belNode->getNextActionToTry(randGen_);
+    std::unique_ptr<Action> action = belNode->getNextActionToTry();
     Model::StepResult result = model_->generateStep(state, *action);
     double qVal = 0;
 
@@ -464,7 +466,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
-        action = currentBelief->getNextActionToTry(randGen_);
+        action = currentBelief->getNextActionToTry();
     }
     Model::StepResult result = model_->generateStep(currentState, *action);
     if (result.isTerminal) {

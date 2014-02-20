@@ -16,7 +16,7 @@ class ActionPool;
 class BeliefNode;
 class EnumeratedPoint;
 
-class ModelWithEnumeratedObservations : public solver::Model {
+class ModelWithEnumeratedObservations : virtual public solver::Model {
 public:
     ModelWithEnumeratedObservations() = default;
     virtual ~ModelWithEnumeratedObservations() = default;
@@ -43,9 +43,10 @@ private:
 class EnumeratedObservationMap: public solver::ObservationMapping {
   public:
     friend class TextSerializer;
+    friend class EnumeratedObservationTextSerializer;
     EnumeratedObservationMap(ActionPool *actionPool,
             std::vector<std::unique_ptr<EnumeratedPoint>>
-            const &observations);
+            const &allObservations);
 
     // Default destructor; copying and moving disallowed!
     virtual ~EnumeratedObservationMap() = default;
@@ -56,8 +57,8 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     virtual BeliefNode *getBelief(Observation const &obs) const;
     virtual BeliefNode *createBelief(Observation const &obs);
   private:
+    std::vector<std::unique_ptr<EnumeratedPoint>> const &allObservations_;
     ActionPool *actionPool_;
-    std::vector<std::unique_ptr<EnumeratedPoint>> const &observations_;
     std::vector<std::unique_ptr<BeliefNode>> children_;
 };
 

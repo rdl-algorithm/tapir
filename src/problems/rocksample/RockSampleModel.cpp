@@ -40,7 +40,8 @@ namespace po = boost::program_options;
 
 namespace rocksample {
 RockSampleModel::RockSampleModel(RandomGenerator *randGen,
-        po::variables_map vm) : ModelWithProgramOptions(randGen, vm),
+        po::variables_map vm) :
+    ModelWithProgramOptions(randGen, vm),
     goodRockReward_(vm["problem.goodRockReward"].as<double>()),
     badRockPenalty_(vm["problem.badRockPenalty"].as<double>()),
     exitReward_(vm["problem.exitReward"].as<double>()),
@@ -456,16 +457,22 @@ void RockSampleModel::drawState(solver::State const &state, std::ostream &os) {
     }
 }
 
-std::unique_ptr<solver::ActionMapping> RockSampleModel::createActionMapping() {
-    std::vector<std::unique_ptr<solver::Action>> actions;
-    actions.push_back(std::make_unique<RockSampleAction>(ActionType::NORTH));
-    actions.push_back(std::make_unique<RockSampleAction>(ActionType::EAST));
-    actions.push_back(std::make_unique<RockSampleAction>(ActionType::SOUTH));
-    actions.push_back(std::make_unique<RockSampleAction>(ActionType::WEST));
-    actions.push_back(std::make_unique<RockSampleAction>(ActionType::SAMPLE));
-    for (long i = 0; i < nRocks_; i++) {
-        actions.push_back(std::make_unique<RockSampleAction>(ActionType::CHECK, i));
+std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+RockSampleModel::getAllActionsInOrder() {
+    std::vector<std::unique_ptr<solver::EnumeratedPoint>> allActions_;
+    for (long code = 0; code < 5 + nRocks_; code++) {
+        allActions_.push_back(std::make_unique<RockSampleAction>(code));
     }
-    return std::make_unique<solver::DiscreteActionMap>(this, std::move(actions));
+    return allActions_;
+}
+
+std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+RockSampleModel::getAllObservationsInOrder() {
+    std::vector<std::unique_ptr<solver::EnumeratedPoint>> allObservations_;
+    for (long code = 0; code < 3; code++) {
+        allObservations_.push_back(
+                std::make_unique<RockSampleObservation>(code));
+    }
+    return allObservations_;
 }
 } /* namespace rocksample */

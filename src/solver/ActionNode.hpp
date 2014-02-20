@@ -54,6 +54,9 @@ class ActionNode {
      */
     std::pair<BeliefNode *, bool> createOrGetChild(Observation const &obs);
 
+    /** Returns the action used within this ActionNode. */
+    Action const *getAction() const;
+
   private:
     /** The action for this node. */
     std::unique_ptr<Action> action_;

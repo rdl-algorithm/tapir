@@ -30,9 +30,9 @@ class Solver {
   public:
     friend class Serializer;
     friend class TextSerializer;
+    friend class ApproximateObservationTextSerializer;
     friend class EnumeratedActionTextSerializer;
     friend class EnumeratedObservationTextSerializer;
-    friend class ApproximateObservationTextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
@@ -124,14 +124,16 @@ class Solver {
     RandomGenerator *randGen_;
     /** The POMDP model */
     std::unique_ptr<Model> model_;
-    /** The full collection of simulated histories. */
-    std::unique_ptr<Histories> allHistories_;
-    /** The pool of states. */
-    std::unique_ptr<StatePool> allStates_;
+
     /** The pool of actions. */
     std::unique_ptr<ActionPool> actionPool_;
     /** The pool of observations. */
     std::unique_ptr<ObservationPool> observationPool_;
+
+    /** The pool of states. */
+    std::unique_ptr<StatePool> allStates_;
+    /** The full collection of simulated histories. */
+    std::unique_ptr<Histories> allHistories_;
     /** The tree that stores the policy */
     std::unique_ptr<BeliefTree> policy_;
 

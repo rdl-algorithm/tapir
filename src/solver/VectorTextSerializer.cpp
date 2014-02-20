@@ -1,5 +1,10 @@
 #include "VectorTextSerializer.hpp"
 
+#include <vector>
+
+#include "Vector.hpp"
+#include "VectorLP.hpp"
+
 namespace solver {
 void VectorTextSerializer::save(std::vector<double> const &vector, std::ostream &os) {
     os << "<";
@@ -11,7 +16,7 @@ void VectorTextSerializer::save(std::vector<double> const &vector, std::ostream 
         }
     }
     os << ">";
-}virtual
+}
 
 void VectorTextSerializer::load(std::vector<double> &vector, std::istream &is) {
     std::string tmpStr;
