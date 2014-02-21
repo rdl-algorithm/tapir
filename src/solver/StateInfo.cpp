@@ -6,8 +6,8 @@
 #include <utility>                      // for move
 #include <vector>                       // for vector, vector<>::iterator
 
-#include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
-#include "State.hpp"                    // for State
+#include "ChangeFlags.hpp"              // for ChangeFlags, ChangeFlags::UNCHANGED
+#include "topology/State.hpp"                    // for State
 
 namespace solver {
 class BeliefNode;
@@ -35,13 +35,17 @@ StateInfo::StateInfo(State const &state) :
 StateInfo::~StateInfo() {
 }
 
-long StateInfo::getId() {
+long StateInfo::getId() const {
     return id_;
 }
 
 void StateInfo::setId() {
     id_ = currId;
     currId++;
+}
+
+State const *StateInfo::getState() const {
+    return state_.get();
 }
 
 void StateInfo::addHistoryEntry(HistoryEntry *entry) {

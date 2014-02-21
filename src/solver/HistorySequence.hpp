@@ -4,10 +4,12 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "Observation.hpp"              // for Observation
-#include "State.hpp"
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"
+
+#include "global.hpp"
 
 namespace solver {
 class HistoryEntry;
@@ -26,10 +28,7 @@ class HistorySequence {
 
     // Default destructor; copying and moving disallowed!
     ~HistorySequence();
-    HistorySequence(HistorySequence const &) = delete;
-    HistorySequence(HistorySequence &&) = delete;
-    HistorySequence &operator=(HistorySequence const &) = delete;
-    HistorySequence &operator=(HistorySequence &&) = delete;
+    _NO_COPY_OR_MOVE(HistorySequence);
 
     /** Adds a new entry with the given state info and current discount. */
     HistoryEntry *addEntry(StateInfo *stateInfo, double discount);
@@ -49,10 +48,10 @@ class HistorySequence {
             double immediateReward);
 
     /** Returns the history entry in this sequence with the given ID. */
-    HistoryEntry *getEntry(int entryId);
+    HistoryEntry *getEntry(long entryId) const;
 
     /** Returns the states in this sequence as a vector. */
-    std::vector<State const *> getStates();
+    std::vector<State const *> getStates() const;
 
     /** Resets the changes for this sequence and all its entries. */
     void resetChangeFlags();

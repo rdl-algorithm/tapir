@@ -6,20 +6,26 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Model.hpp"                    // for Model, Model::StepResult
-#include "Observation.hpp"              // for Observation
-#include "State.hpp"
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"
+
+namespace tag {
+class TagTextSerializer;
+}
 
 namespace solver {
+class ActionPool;
 class BeliefNode;
 class BeliefTree;
 class Histories;
 class HistoryEntry;
 class HistorySequence;
+class ObservationPool;
 class Serializer;
 class StateInfo;
 class StatePool;
@@ -28,18 +34,23 @@ class Solver {
   public:
     friend class Serializer;
     friend class TextSerializer;
+    friend class ApproximateObservationTextSerializer;
+    friend class EnumeratedActionTextSerializer;
+    friend class EnumeratedObservationTextSerializer;
+    friend class DiscreteObservationTextSerializer;
+    friend class tag::TagTextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
-    Solver(Solver const &) = delete;
-    Solver(Solver &&) = delete;
-    Solver &operator=(Solver const &) = delete;
-    Solver &operator=(Solver &&) = delete;
+    _NO_COPY_OR_MOVE(Solver);
 
     enum RolloutMode {
         ROLLOUT_RANDHEURISTIC = 0,
         ROLLOUT_POL = 1
     };
+
+    /** Resets and initializes the solver. */
+    void initialize();
 
     /** Sets the serializer to be used by this solver. */
     void setSerializer(Serializer *serializer);
@@ -48,7 +59,7 @@ class Solver {
      * number (maxTrials) of episodes, and terminating episodes when the
      * current discount reaches the lowest allowed value (minimumDiscount).
      */
-    void genPol(unsigned long maxTrials, double minimumDiscount);
+    void genPol(long maxTrials, double minimumDiscount);
     /** Runs a single simulation up to a maximum of nSteps steps, returning
      * the total discounted reward.
      *
@@ -63,7 +74,7 @@ class Solver {
      */
     double runSim(long nSteps, std::vector<long> &changeTimes,
             std::vector<std::unique_ptr<State>> &trajSt,
-            std::vector<Action> &trajActId,
+            std::vector<std::unique_ptr<Action>> &trajAction,
             std::vector<std::unique_ptr<Observation>> &trajObs,
             std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
             double *totImpTime);
@@ -83,13 +94,13 @@ class Solver {
 
     /** Uses a rollout method to select an action and get results. */
     std::pair<Model::StepResult, double> getRolloutAction(BeliefNode *belNode,
-            State &state, double startDiscount, double discountFactor);
+            State const &state, double startDiscount, double discountFactor);
     /** Attempts to find another belief node near enough to this one to be
      * suitable for the policy-based rollout heuristic.
      */
     BeliefNode *getNNBelNode(BeliefNode *b);
     /** Helper method for policy-based rollout. */
-    double rolloutPolHelper(BeliefNode *currNode, State &state, double disc);
+    double rolloutPolHelper(BeliefNode *currNode, State const &state, double disc);
     /** Updates the overall weighting of the different heuristic heuristics
      * based on their performance.
      */
@@ -97,13 +108,13 @@ class Solver {
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
-    Model::StepResult simAStep(BeliefNode *currentBelief, State &currentState);
+    Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
     /** Handles particle depletion during the simulation. */
-    BeliefNode *addChild(BeliefNode *currNode, Action &action,
+    BeliefNode *addChild(BeliefNode *currNode, Action const &action,
             Observation const &obs,
             long timeStep);
     /** Improves the solution, with the root at the given node. */
-    void improveSol(BeliefNode *startNode, unsigned long maxTrials,
+    void improveSol(BeliefNode *startNode, long maxTrials,
             double minimumDiscount);
 
     /* ------------------ Methods for handling model changes ------------------- */
@@ -119,12 +130,18 @@ class Solver {
     RandomGenerator *randGen_;
     /** The POMDP model */
     std::unique_ptr<Model> model_;
-    /** The tree that stores the policy */
-    std::unique_ptr<BeliefTree> policy_;
-    /** The full collection of simulated histories. */
-    std::unique_ptr<Histories> allHistories_;
+
+    /** The pool of actions. */
+    std::unique_ptr<ActionPool> actionPool_;
+    /** The pool of observations. */
+    std::unique_ptr<ObservationPool> observationPool_;
+
     /** The pool of states. */
     std::unique_ptr<StatePool> allStates_;
+    /** The full collection of simulated histories. */
+    std::unique_ptr<Histories> allHistories_;
+    /** The tree that stores the policy */
+    std::unique_ptr<BeliefTree> policy_;
 
     /** The rollout mode that was used in the last rollout. */
     RolloutMode lastRolloutMode_;

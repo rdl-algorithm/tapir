@@ -31,6 +31,7 @@ else
 override CXXFLAGS  += -frounding-math
 WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
 WARN               += -Wswitch-default -Wfatal-errors
+# WARN               += -Wconversion -Wsign-conversion
 endif
 CXXFLAGS_release     := $(CXXFLAGS) -O3
 CXXFLAGS_debug       := $(CXXFLAGS) -O0 -g3

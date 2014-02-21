@@ -8,7 +8,7 @@
 
 #include <boost/program_options.hpp>    // for program_options, variables_map
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/ModelWithProgramOptions.hpp"
 #include "solver/Action.hpp"            // for Action
@@ -38,13 +38,13 @@ class UnderwaterNavModel: public ModelWithProgramOptions {
 
     /***** Start implementation of Model's virtual methods *****/
        // Simple getters
-       unsigned long getNActions() {
+       long getNActions() {
            return nActions_;
        }
-       unsigned long getNObservations() {
+       long getNObservations() {
            return nObservations_;
        }
-       unsigned long getNStVars() {
+       long getNStVars() {
            return nStVars_;
        }
        double getMinVal() {
@@ -58,7 +58,7 @@ class UnderwaterNavModel: public ModelWithProgramOptions {
     std::unique_ptr<solver::State> sampleAnInitState();
 
     bool isTerm(solver::State const &state);
-    double solveHeuristic(solver::State const &state);
+    double getHeuristicValue(solver::State const &state);
     double getDefaultVal();
 
     solver::Model::StepResult generateStep(solver::State const &state,
@@ -84,20 +84,20 @@ class UnderwaterNavModel: public ModelWithProgramOptions {
 
   private:
     // uwnav-specific parameters
-    unsigned long nX_, nY_;
+    long nX_, nY_;
     double goalReward_, crashPenalty_, moveCost_, moveDiagCost_;
     double ctrlCorrectProb_, ctrlErrProb1_;
     double rolloutExploreTh_;
     long nTryCon_, maxDistCon_, nVerts_;
 
     // General parameters.
-    unsigned long nActions_, nObservations_, nStVars_;
+    long nActions_, nObservations_, nStVars_;
     double minVal_, maxVal_;
 
-    unsigned long nGoals_;
-    unsigned long nRocks_;
+    long nGoals_;
+    long nRocks_;
     /** The number of state particles in the initial belief. */
-    unsigned long nInitBel_;
+    long nInitBel_;
     /** A vector of all the states in the initial belief. */
     std::vector<UnderwaterNavState> initBel_;
 
@@ -124,7 +124,7 @@ class UnderwaterNavModel: public ModelWithProgramOptions {
     double getDistToNearestObs(UnderwaterNavState &st, UnderwaterNavState &nxtSt);
     bool inGoal(UnderwaterNavState &st);
     bool inRock(UnderwaterNavState &st);
-    void getReachableSt(UnderwaterNavState &s, unsigned long actId,
+    void getReachableSt(UnderwaterNavState &s, long actId,
                         std::vector<UnderwaterNavState> &nxtS);
     std::vector<UnderwaterNavState>::iterator getIterator(std::vector<UnderwaterNavState> &vecStVals,
             long x, long y);

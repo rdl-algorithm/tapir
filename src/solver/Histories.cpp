@@ -2,13 +2,9 @@
 
 #include <utility>                      // for move
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "HistorySequence.hpp"          // for HistorySequence
-
-// For testing
-#include <iostream>
-#include "State.hpp"
 
 namespace solver {
 Histories::Histories() :
@@ -27,7 +23,7 @@ HistorySequence *Histories::addNew(long startDepth) {
     return rawPtr;
 }
 
-HistorySequence *Histories::getHistorySequence(long seqId) {
+HistorySequence *Histories::getHistorySequence(long seqId) const {
     return allHistSeq_[seqId].get();
 }
 
@@ -37,14 +33,14 @@ void Histories::deleteHistorySequence(long seqId) {
         entry->registerState(nullptr);
         entry->registerNode(nullptr);
     }
-    if (seqId < (long)allHistSeq_.size() - 1) {
+    if (seqId < static_cast<long>(allHistSeq_.size()) - 1) {
         (allHistSeq_.begin() + seqId)->reset(allHistSeq_.rbegin()->release());
         (allHistSeq_.begin() + seqId)->get()->id_ = seqId;
     }
     allHistSeq_.pop_back();
 }
 
-HistoryEntry *Histories::getHistoryEntry(long seqId, long entryId) {
+HistoryEntry *Histories::getHistoryEntry(long seqId, long entryId) const {
     return allHistSeq_[seqId]->getEntry(entryId);
 }
 } /* namespace solver */

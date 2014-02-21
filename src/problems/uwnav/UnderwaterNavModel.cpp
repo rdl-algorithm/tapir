@@ -13,7 +13,7 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector, vector<>::iterator
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "solver/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::REWARD, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE
 #include "solver/Observation.hpp"              // for Observation
 #include "solver/State.hpp"                    // for State
@@ -63,7 +63,7 @@ UnderwaterNavModel::UnderwaterNavModel(RandomGenerator *randGen, po::variables_m
     inFile >> nX_ >> nY_;
     std::getline(inFile, tmp);
 
-    for (unsigned long i = 0; i < nY_; i++) {
+    for (long i = 0; i < nY_; i++) {
         std::getline(inFile, tmp);
         mapText_.push_back(tmp);
     }
@@ -83,7 +83,7 @@ UnderwaterNavModel::UnderwaterNavModel(RandomGenerator *randGen, po::variables_m
 void UnderwaterNavModel::setInitObsGoal() {
     long i = 0;
     for (string &line : mapText_) {
-        for (unsigned long j = 0; j < nX_; j++) {
+        for (long j = 0; j < nX_; j++) {
             if (line[j] == 'S') {
                 UnderwaterNavState s(i, j);
                 initBel_.push_back(s);
@@ -176,7 +176,7 @@ void UnderwaterNavModel::sampleAnInitState(UnderwaterNavState &tmpStVals) {
  */
 
 // Nearest distance to goal.
-void UnderwaterNavModel::solveHeuristic(UnderwaterNavState &s, double *qVal) {
+void UnderwaterNavModel::getHeuristicValue(UnderwaterNavState &s, double *qVal) {
     UnderwaterNavState nxtS;
     if (inRock(s)) {
         *qVal = crashPenalty_;
@@ -248,7 +248,7 @@ double UnderwaterNavModel::getDistToNearestObs(UnderwaterNavState &st, Underwate
  return totDist / (double) nParticles;
  }
  */
-void UnderwaterNavModel::getNextState(UnderwaterNavState &s, unsigned long actId,
+void UnderwaterNavModel::getNextState(UnderwaterNavState &s, long actId,
         UnderwaterNavState &sp) {
     sp.resize(2);
 
@@ -449,7 +449,7 @@ double UnderwaterNavModel::getReward(UnderwaterNavState &sVals) {
     return totRew;
 }
 
-double UnderwaterNavModel::getReward(UnderwaterNavState &sVals, unsigned long actId) {
+double UnderwaterNavModel::getReward(UnderwaterNavState &sVals, long actId) {
     double totRew = 0.0;
     short ct = 0;
 
@@ -493,7 +493,7 @@ double UnderwaterNavModel::getReward(UnderwaterNavState &sVals, unsigned long ac
     return totRew;
 }
 
-bool UnderwaterNavModel::getNextState(UnderwaterNavState &sVals, unsigned long actId,
+bool UnderwaterNavModel::getNextState(UnderwaterNavState &sVals, long actId,
         double *immediateRew, UnderwaterNavState &nxtSVals, Observation &obs) {
     getNextState(sVals, actId, nxtSVals);
     inObsRegion(nxtSVals, obs);
@@ -764,7 +764,7 @@ std::vector<UnderwaterNavState>::iterator UnderwaterNavModel::getIterator(
     return vecStVals.end();
 }
 
-void UnderwaterNavModel::getReachableSt(UnderwaterNavState &s, unsigned long actId,
+void UnderwaterNavModel::getReachableSt(UnderwaterNavState &s, long actId,
         std::vector<UnderwaterNavState> &nxtS) {
     nxtS.clear();
     switch (actId) {
@@ -836,7 +836,7 @@ void UnderwaterNavModel::getReachableSt(UnderwaterNavState &s, unsigned long act
     }
 }
 
-void UnderwaterNavModel::getStatesSeeObs(unsigned long actId,
+void UnderwaterNavModel::getStatesSeeObs(long actId,
         Observation &obs, std::vector<UnderwaterNavState> &partSt,
         std::vector<UnderwaterNavState> &partNxtSt) {
     for (UnderwaterNavState &sVals : partSt) {
@@ -851,7 +851,7 @@ void UnderwaterNavModel::getStatesSeeObs(unsigned long actId,
     }
 }
 
-void UnderwaterNavModel::getStatesSeeObs(unsigned long /*actId*/,
+void UnderwaterNavModel::getStatesSeeObs(long /*actId*/,
         Observation &obs, std::vector<UnderwaterNavState> &partNxtSt) {
     UnderwaterNavState s(2);
     s[0] = obs[0];
@@ -1172,8 +1172,8 @@ void UnderwaterNavModel::dispAct(Action const &action, std::ostream &os) {
 void UnderwaterNavModel::drawEnv(std::ostream &os) {
     std::map<long, std::map<long, short> >::iterator itCellType;
     os << endl;
-    for (unsigned long y = 0; y < nY_; y++) {
-        for (unsigned long x = 0; x < nX_; x++) {
+    for (long y = 0; y < nY_; y++) {
+        for (long x = 0; x < nX_; x++) {
             itCellType = envMap_.find(x);
             if (itCellType != envMap_.end()) {
                 if (itCellType->second.find(y) != itCellType->second.end()) {
@@ -1214,8 +1214,8 @@ void UnderwaterNavModel::drawEnv(std::ostream &os) {
 void UnderwaterNavModel::drawState(UnderwaterNavState &s, std::ostream &os) {
     std::map<long, std::map<long, short> >::iterator itCellType;
     os << endl;
-    for (unsigned long y = 0; y < nY_; y++) {
-        for (unsigned long x = 0; x < nX_; x++) {
+    for (long y = 0; y < nY_; y++) {
+        for (long x = 0; x < nX_; x++) {
             if (x == s[0] && y == s[1]) {
                 os << "X";
                 continue;

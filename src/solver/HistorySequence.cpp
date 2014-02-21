@@ -1,17 +1,17 @@
 #include "HistorySequence.hpp"
 
-#include <climits>                      // for LONG_MAX
+#include <limits>
 
 #include <memory>                       // for unique_ptr
 #include <utility>                      // for move
 #include <vector>                       // for vector, __alloc_traits<>::value_type
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
 #include "HistoryEntry.hpp"             // for HistoryEntry
-#include "Observation.hpp"              // for Observation
+#include "topology/Observation.hpp"              // for Observation
 #include "StateInfo.hpp"                // for StateInfo
 
 namespace solver {
@@ -25,7 +25,7 @@ HistorySequence::HistorySequence(long startDepth) :
     id_(currId),
     startDepth_(startDepth),
     histSeq_(),
-    startAffectedIdx_(LONG_MAX),
+    startAffectedIdx_(std::numeric_limits<long>::max()),
     endAffectedIdx_(-1),
     changeFlags_(ChangeFlags::UNCHANGED) {
     currId++;
@@ -47,7 +47,7 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, double discount,
         Action const &action, Observation const &obs, double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
                 stateInfo, discount, this, histSeq_.size());
-    newEntry->action_ = action;
+    newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
     newEntry->immediateReward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
@@ -61,7 +61,7 @@ HistoryEntry *HistorySequence::insertEntry(long index,
         double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
                 stateInfo, discount, this, histSeq_.size());
-    newEntry->action_ = action;
+    newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
     newEntry->immediateReward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
@@ -69,13 +69,13 @@ HistoryEntry *HistorySequence::insertEntry(long index,
     return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::getEntry(int entryId) {
+HistoryEntry *HistorySequence::getEntry(long entryId) const {
     return histSeq_[entryId].get();
 }
 
-std::vector<State const *> HistorySequence::getStates() {
+std::vector<State const *> HistorySequence::getStates() const {
     std::vector<State const *> states;
-    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+    for (std::unique_ptr<HistoryEntry> const &entry : histSeq_) {
         states.push_back(entry->getState());
     }
     return states;
@@ -103,7 +103,7 @@ void HistorySequence::setChangeFlags(ChangeFlags flags) {
 }
 
 void HistorySequence::resetAffectedIndices() {
-    startAffectedIdx_ = LONG_MAX;
+    startAffectedIdx_ = std::numeric_limits<long>::max();
     endAffectedIdx_ = -1;
 }
 

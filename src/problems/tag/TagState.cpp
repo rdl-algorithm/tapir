@@ -6,17 +6,11 @@
 #include <ostream>                      // for operator<<, ostream, basic_ostream>
 #include <vector>
 
-#include "defs.hpp"
+#include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/State.hpp"             // for State
+#include "solver/topology/State.hpp"             // for State
 
 namespace tag {
-template<class T>
-void hash_combine(std::size_t &seed, T const &v) {
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
-
 TagState::TagState(GridPosition robotPos, GridPosition opponentPos,
         bool _isTagged) :
     solver::Vector(),
@@ -34,29 +28,27 @@ std::unique_ptr<solver::Point> TagState::copy() const {
 }
 
 double TagState::distanceTo(solver::State const &otherState) const {
-    TagState const *otherTagState =
-        static_cast<TagState const *>(&otherState);
-    double distance = robotPos_.manhattanDistanceTo(otherTagState->robotPos_);
-    distance += opponentPos_.manhattanDistanceTo(otherTagState->opponentPos_);
-    distance += (isTagged_ == otherTagState->isTagged_) ? 0 : 1;
+    TagState const &otherTagState = static_cast<TagState const &>(otherState);
+    double distance = robotPos_.manhattanDistanceTo(otherTagState.robotPos_);
+    distance += opponentPos_.manhattanDistanceTo(otherTagState.opponentPos_);
+    distance += (isTagged_ == otherTagState.isTagged_) ? 0 : 1;
     return distance;
 }
 
 bool TagState::equals(solver::State const &otherState) const {
-    TagState const *otherTagState =
-        static_cast<TagState const *>(&otherState);
-    return (robotPos_ == otherTagState->robotPos_
-            && opponentPos_ == otherTagState->opponentPos_
-            && isTagged_ == otherTagState->isTagged_);
+    TagState const &otherTagState = static_cast<TagState const &>(otherState);
+    return (robotPos_ == otherTagState.robotPos_
+            && opponentPos_ == otherTagState.opponentPos_
+            && isTagged_ == otherTagState.isTagged_);
 }
 
 std::size_t TagState::hash() const {
     std::size_t hashValue = 0;
-    hash_combine(hashValue, robotPos_.i);
-    hash_combine(hashValue, robotPos_.j);
-    hash_combine(hashValue, opponentPos_.i);
-    hash_combine(hashValue, opponentPos_.j);
-    hash_combine(hashValue, isTagged_);
+    abt::hash_combine(hashValue, robotPos_.i);
+    abt::hash_combine(hashValue, robotPos_.j);
+    abt::hash_combine(hashValue, opponentPos_.i);
+    abt::hash_combine(hashValue, opponentPos_.j);
+    abt::hash_combine(hashValue, isTagged_);
     return hashValue;
 }
 
@@ -75,5 +67,18 @@ void TagState::print(std::ostream &os) const {
     if (isTagged_) {
         os << " TAGGED!";
     }
+}
+
+
+GridPosition TagState::getRobotPosition() const {
+    return robotPos_;
+}
+
+GridPosition TagState::getOpponentPosition() const {
+    return opponentPos_;
+}
+
+bool TagState::isTagged() const {
+    return isTagged_;
 }
 } /* namespace tag */

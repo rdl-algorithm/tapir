@@ -5,29 +5,27 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include "Action.hpp"                   // for Action
-#include "Observation.hpp"              // for Observation
-#include "ObservationMapping.hpp"
+#include "topology/Action.hpp"                   // for Action
+#include "topology/Observation.hpp"              // for Observation
+#include "mappings/ObservationMapping.hpp"
+#include "global.hpp"
 
 namespace solver {
 class BeliefNode;
 
 class ActionNode {
   public:
-    friend class BeliefNode;
     friend class TextSerializer;
 
     /** Constructs an action node without an action!! */
     ActionNode();
     /** Creates an empty action node with the given action */
-    ActionNode(Action const &action);
+    ActionNode(std::unique_ptr<ObservationMapping> mapping,
+            Action const *action);
 
     // Default destructor; copying and moving disallowed!
     ~ActionNode();
-    ActionNode(ActionNode const &) = delete;
-    ActionNode(ActionNode &&) = delete;
-    ActionNode &operator=(ActionNode const &) = delete;
-    ActionNode &operator=(ActionNode &&) = delete;
+    _NO_COPY_OR_MOVE(ActionNode);
 
     /** Updates the q-value, as would occur on adding the given amount to the
      * total (negative for a decrease).
@@ -39,23 +37,33 @@ class ActionNode {
      */
     void updateQValue(double increase, long deltaNParticles);
 
+    /** Returns the number of particles counted towards the q-value. */
+    long getNParticles() const;
+    /** Returns the total q-value for this node. */
+    double getTotalQValue () const;
+    /** Returns the mean q-value for this node. */
+    double getMeanQValue () const;
+
+    /** Returns the child corresponding to the given observation, based on
+     * sufficient proximity.
+     */
+    BeliefNode *getChild(Observation const &obs) const;
+
     /** Adds a child with the given observation, creating a new belief node if
      * necessary.
      */
     std::pair<BeliefNode *, bool> createOrGetChild(Observation const &obs);
 
-    /** Returns the child corresponding to the given observation, based on
-     * sufficient proximity.
-     */
-    BeliefNode *getChild(Observation const &obs);
+    /** Returns the action used within this ActionNode. */
+    Action const *getAction() const;
 
   private:
     /** The action for this node. */
-    Action action_;
+    std::unique_ptr<Action> action_;
     /** The number of particles being counted towards the q-value for this
      * node.
      */
-    unsigned long nParticles_;
+    long nParticles_;
     /** The total q-value of this node. */
     double totalQValue_;
     /** The mean q-value of this node. */

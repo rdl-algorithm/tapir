@@ -22,7 +22,7 @@ $(foreach cfg,$(CFGS),$(eval $(call problem_defaults,$(cfg))))
 
 # Linking rule for the executable targets.
 define problem_build_template
-$(TGTS_$(n)_$(1)): $(_BIN_$(n)_$(1)): $(_O_$(n)_$(1)) $(OBJS_NTGT_$(n)_$(1)) $(OBJS_solver_$(1))
+$(TGTS_$(n)_$(1)): $(_BIN_$(n)_$(1)): $(_O_$(n)_$(1)) $(OBJS_NTGT_$(n)_$(1)) $(OBJS_solver_$(1)) $(OBJS_global_$(1)) $(OBJS_indexing_$(1)) $(OBJS_mappings_$(1)) $(OBJS_serialization_$(1)) $(OBJS_topology_$(1))
 	$$(LINK_RECIPE_$(1))
 # Executables will be copied to the main folder for convenience
 build-$(1)-$(n): $(TGTS_$(n)_$(1))

@@ -1,8 +1,6 @@
 #ifndef PROGRAMOPTIONS_HPP_
 #define PROGRAMOPTIONS_HPP_
 
-#include <ctime>                        // for time
-
 #include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
 #include <string>                       // for basic_string, string
 
@@ -23,8 +21,8 @@ class ProgramOptions {
                         "config file path")
                 ("policy,p", po::value<std::string>()->default_value("pol.pol"),
                         "policy file path (output)")
-                ("seed,s", po::value<unsigned long>()->default_value(
-                        (unsigned long)std::time(nullptr)), "RNG seed");
+                ("seed,s", po::value<unsigned long>()->default_value(0),
+                        "RNG seed; use a value of 0 to seed using the current time");
         return generic;
     }
 
@@ -49,10 +47,10 @@ class ProgramOptions {
     virtual po::options_description getSBTOptions() {
         po::options_description sbt("SBT settings");
         sbt.add_options()
-                ("SBT.nParticles", po::value<unsigned long>(),
+                ("SBT.nParticles", po::value<long>(),
                         "default number of particles per belief - this number"
                         " will be generated if particle depletion occurs.")
-                ("SBT.maxTrials", po::value<unsigned long>(),
+                ("SBT.maxTrials", po::value<long>(),
                         "the number of episodes to sample for each step.")
                 ("SBT.minimumDiscount", po::value<double>(),
                         "Lowest net discount allowed before halting searches.")

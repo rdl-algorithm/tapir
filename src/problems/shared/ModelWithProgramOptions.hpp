@@ -3,18 +3,18 @@
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value, program_options
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "solver/Model.hpp"             // for Model
 
 namespace po = boost::program_options;
 
-class ModelWithProgramOptions : public solver::Model {
+class ModelWithProgramOptions : public virtual solver::Model {
   public:
     ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
-        solver::Model(randGen),
+        randGen_(randGen),
         discountFactor_(vm["problem.discountFactor"].as<double>()),
-        nParticles_(vm["SBT.nParticles"].as<unsigned long>()),
-        maxTrials_(vm["SBT.maxTrials"].as<unsigned long>()),
+        nParticles_(vm["SBT.nParticles"].as<long>()),
+        maxTrials_(vm["SBT.maxTrials"].as<long>()),
         minimumDiscount_(vm["SBT.minimumDiscount"].as<double>()),
         heuristicExploreCoefficient_(
                 vm["SBT.heuristicExploreCoefficient"].as<double>()),
@@ -24,40 +24,47 @@ class ModelWithProgramOptions : public solver::Model {
     }
 
     virtual ~ModelWithProgramOptions() = default;
+    _NO_COPY_OR_MOVE(ModelWithProgramOptions);
 
     // Simple getters
-    virtual double getDiscountFactor() final {
+    virtual RandomGenerator *getRandomGenerator() override {
+        return randGen_;
+    }
+
+    virtual double getDiscountFactor() override {
         return discountFactor_;
     }
-    virtual unsigned long getNParticles() final {
+    virtual long getNParticles() override {
         return nParticles_;
     }
-    virtual unsigned long getMaxTrials() final {
+    virtual long getMaxTrials() override {
         return maxTrials_;
     }
-    virtual double getMinimumDiscount() final {
+    virtual double getMinimumDiscount() override {
         return minimumDiscount_;
     }
-    virtual double getUcbExploreCoefficient() final {
+    virtual double getUcbExploreCoefficient() override {
         return ucbExploreCoefficient_;
     }
-    virtual double getHeuristicExploreCoefficient() final {
+    virtual double getHeuristicExploreCoefficient() override {
         return heuristicExploreCoefficient_;
     }
-    virtual long getMaxNnComparisons() final {
+    virtual long getMaxNnComparisons() override {
         return maxNnComparisons_;
     }
-    virtual double getMaxNnDistance() final {
+    virtual double getMaxNnDistance() override {
         return maxNnDistance_;
     }
 
   private:
+    RandomGenerator *randGen_;
+
     // Problem parameters.
     double discountFactor_;
 
     // SBT parameters
-    unsigned long nParticles_;
-    unsigned long maxTrials_;
+    long nParticles_;
+    long maxTrials_;
     double minimumDiscount_;
 
     double heuristicExploreCoefficient_;

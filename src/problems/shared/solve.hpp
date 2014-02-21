@@ -11,8 +11,8 @@
 
 #include <boost/program_options.hpp>    // for options_description, variables_map, positional_options_description, store, variable_value, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
-#include "solver/Serializer.hpp"        // for Serializer
+#include "global.hpp"                     // for RandomGenerator, make_unique
+#include "solver/serialization/Serializer.hpp"        // for Serializer
 #include "solver/Solver.hpp"            // for Solver
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
@@ -53,6 +53,9 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
 
     std::string polPath = vm["policy"].as<std::string>();
     unsigned long seed = vm["seed"].as<unsigned long>();
+    if (seed == 0) {
+        seed = std::time(nullptr);
+    }
     cerr << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
@@ -64,6 +67,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     solver::Solver solver(&randGen, std::move(newModel));
     std::unique_ptr<solver::Serializer> serializer(std::make_unique<SerializerType>(&solver));
     solver.setSerializer(serializer.get());
+    solver.initialize();
 
     double totT;
     std::clock_t tStart;

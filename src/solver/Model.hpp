@@ -5,12 +5,17 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"        // for Action
+#include "mappings/ActionPool.hpp"
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "Observation.hpp"              // for Observation
-#include "State.hpp"                    // for State
+#include "topology/Observation.hpp"              // for Observation
+#include "mappings/ObservationPool.hpp"
+#include "topology/State.hpp"                    // for State
+#include "indexing/StateIndex.hpp"
+
+#include "global.hpp"
 
 namespace solver {
 class StatePool;
@@ -18,29 +23,22 @@ class StatePool;
 class Model {
   public:
     /** Constructor - stores the RandomGenerator for this model. */
-    Model(RandomGenerator *randGen) : randGen_(randGen) {
-    }
+    Model() = default;
 
     // Default destructor; copying and moving disallowed!
     virtual ~Model() = default;
-    Model(Model const &) = delete;
-    Model(Model &&) = delete;
-    Model &operator=(Model const &) = delete;
-    Model &operator=(Model &&) = delete;
+    _NO_COPY_OR_MOVE(Model);
 
     virtual std::string getName() = 0;
+    virtual RandomGenerator *getRandomGenerator() = 0;
 
     /* ---------- Virtual getters for important model parameters  ---------- */
     // POMDP parameters
     /** Returns the POMDP discount factor. */
     virtual double getDiscountFactor() = 0;
 
-    /** Returns the # of actions for this POMDP. */
-    virtual unsigned long getNActions() = 0;
-    /** Returns the # of observations for this POMDP. */
-    virtual unsigned long getNObservations() = 0;
     /** Returns the number of state variables */
-    virtual unsigned long getNStVars() = 0;
+    virtual long getNStVars() = 0;
     /** Returns a lower bound on the q-value. */
     virtual double getMinVal() = 0;
     /** Returns an upper bound on the q-value. */
@@ -51,11 +49,11 @@ class Model {
     /** Returns the default number of particles per belief - this number will
      * be generated if particle depletion occurs.
      */
-    virtual unsigned long getNParticles() = 0;
+    virtual long getNParticles() = 0;
     /** Returns the maximum number of trials (i.e. simulated episodes) to run
-     * in a single time step.
+     * in a single time step.State
      */
-    virtual unsigned long getMaxTrials() = 0;
+    virtual long getMaxTrials() = 0;
     /** Returns the lowest net discount allowed; tree searching will not go
      * deeper than this threshold.
      */
@@ -88,10 +86,12 @@ class Model {
     /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the belief vector. */
     virtual std::unique_ptr<State> sampleAnInitState() = 0;
+    /** Samples a state uniformly at random from all states. */
+    virtual std::unique_ptr<State> sampleStateUniform() = 0;
     /** Returns true iff the given state is terminal. */
     virtual bool isTerminal(State const &state) = 0;
     /** Approximates the q-value of a state */
-    virtual double solveHeuristic(State const &state) = 0;
+    virtual double getHeuristicValue(State const &state) = 0;
     /** Returns the default q-value */
     virtual double getDefaultVal() = 0;
 
@@ -109,7 +109,7 @@ class Model {
      * including the next state, observation, and reward.
      */
     struct StepResult {
-        Action action = 0;
+        std::unique_ptr<Action> action = 0;
         std::unique_ptr<Observation> observation = nullptr;
         double immediateReward = 0;
         std::unique_ptr<State> nextState = nullptr;
@@ -125,7 +125,7 @@ class Model {
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
             Action const &action, Observation const &obs,
-            std::vector<State *> const &previousParticles) = 0;
+            std::vector<State const *> const &previousParticles) = 0;
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
      *
@@ -144,19 +144,29 @@ class Model {
     virtual void update(long time, StatePool *pool) = 0;
 
     /* --------------- Pretty printing methods ----------------- */
-    /** Displays the given action on the given output stream. */
-    virtual void dispAct(Action const &action, std::ostream &os) = 0;
-    /** Displays the given observation to the given output stream. */
-    virtual void dispObs(Observation const &obs, std::ostream &os) = 0;
     /** Draws the environment map onto the given output stream. */
-    virtual void drawEnv(std::ostream &os) = 0;
+    virtual void drawEnv(std::ostream &/*os*/) {}
     /** Draws the current state in the context of the overall map onto
      * the given output stream.
      */
-    virtual void drawState(State const &state, std::ostream &os) = 0;
-  protected:
-    /** The random number generator for this model. */
-    RandomGenerator *randGen_;
+    virtual void drawState(State const &/*state*/, std::ostream &/*os*/) {}
+
+    /* --------------- Data structure customization ----------------- */
+    // These are factory methods to allow the data structures used to
+    // be managed in a customizable way.
+
+    /** Creates a StateIndex, which manages searching for states that
+     * have been used in a StatePool.
+     */
+    virtual std::unique_ptr<StateIndex> createStateIndex();
+    /** Creates an ActionPool, which manages actions & creates
+     * ActionMappings
+     */
+    virtual std::unique_ptr<ActionPool> createActionPool() = 0;
+    /** Creates an ObservationPool, which manages observations & creates
+     * ObservationMappings.
+     */
+    virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
 };
 } /* namespace solver */
 

@@ -16,7 +16,7 @@ HistoryEntry::HistoryEntry() :
 HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
         long entryId) :
     stateInfo_(nullptr),
-    action_(-1),
+    action_(nullptr),
     observation_(),
     hasBeenBackedUp_(false),
     entryId_(entryId),
@@ -30,14 +30,15 @@ HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
 
 HistoryEntry::HistoryEntry(StateInfo *stateInfo,
         double discount, HistorySequence* owningSequence,
-        long entryId) : HistoryEntry(discount, owningSequence, entryId) {
+        long entryId) :
+                HistoryEntry(discount, owningSequence, entryId) {
     registerState(stateInfo);
 }
 
 HistoryEntry::~HistoryEntry() {
 }
 
-State *HistoryEntry::getState() {
+State const *HistoryEntry::getState() const {
     return stateInfo_->getState();
 }
 

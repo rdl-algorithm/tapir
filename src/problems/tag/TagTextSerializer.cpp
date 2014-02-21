@@ -2,11 +2,19 @@
 
 #include <iostream>                     // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, basic_istream<>::__istream_type
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/State.hpp"             // for State
-#include "solver/TextSerializer.hpp"    // for TextSerializer
+#include "solver/topology/Action.hpp"
+#include "solver/topology/Observation.hpp"
+#include "solver/topology/State.hpp"             // for State
+#include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/discrete_observations_map.hpp"
+
+#include "TagAction.hpp"
+#include "TagModel.hpp"
+#include "TagObservation.hpp"
 #include "TagState.hpp"                 // for TagState
 
 namespace solver {
@@ -14,16 +22,12 @@ class Solver;
 } /* namespace solver */
 
 namespace tag {
-TagTextSerializer::TagTextSerializer() :
-    solver::TextSerializer() {
-}
-
 TagTextSerializer::TagTextSerializer(solver::Solver *solver) :
-    solver::TextSerializer(solver) {
+    solver::Serializer(solver) {
 }
 
-void TagTextSerializer::saveState(solver::State const &state, std::ostream &os) {
-    TagState const &tagState = static_cast<TagState const &>(state);
+void TagTextSerializer::saveState(solver::State const *state, std::ostream &os) {
+    TagState const &tagState = static_cast<TagState const &>(*state);
     os << tagState.robotPos_.i << " " << tagState.robotPos_.j << " "
        <<tagState.opponentPos_.i << " " << tagState.opponentPos_.j << " "
        << tagState.isTagged_;
@@ -38,5 +42,95 @@ std::unique_ptr<solver::State> TagTextSerializer::loadState(std::istream &is) {
     bool isTagged;
     is >> isTagged;
     return std::make_unique<TagState>(robotPos, opponentPos, isTagged);
+}
+
+
+void TagTextSerializer::saveObservation(solver::Observation const *obs,
+        std::ostream &os) {
+    if (obs == nullptr) {
+        os << "()";
+        return;
+    }
+    TagObservation const &observation = static_cast<TagObservation const &>(
+            *obs);
+    os << "(" << observation.position_.i << " " << observation.position_.j;
+    os << " " << (observation.seesOpponent_ ? "SEEN" : "UNSEEN") << ")";
+}
+
+std::unique_ptr<solver::Observation> TagTextSerializer::loadObservation(
+        std::istream &is) {
+    std::string obsString;
+    std::getline(is, obsString, '(');
+    std::getline(is, obsString, ')');
+    if (obsString == "") {
+        return nullptr;
+    }
+    long i, j;
+    std::string tmpStr;
+    std::stringstream sstr(obsString);
+    sstr >> i >> j >> tmpStr;
+    bool seesOpponent = tmpStr == "SEEN";
+    return std::make_unique<TagObservation>(dynamic_cast<TagModel *>(
+            solver_->model_.get()), GridPosition(i, j), seesOpponent);
+}
+
+
+void TagTextSerializer::saveAction(solver::Action const *action,
+        std::ostream &os) {
+    if (action == nullptr) {
+        os << "NULL";
+        return;
+    }
+    TagAction const &a =
+            static_cast<TagAction const &>(*action);
+    ActionType code = a.getActionType();
+    switch (code) {
+    case ActionType::NORTH:
+        os << "NORTH";
+        break;
+    case ActionType::EAST:
+        os << "EAST";
+        break;
+    case ActionType::SOUTH:
+        os << "SOUTH";
+        break;
+    case ActionType::WEST:
+        os << "WEST";
+        break;
+    case ActionType::TAG:
+        os << "TAG";
+        break;
+    default:
+        os << "ERROR-" << static_cast<long>(code);
+        break;
+    }
+}
+
+std::unique_ptr<solver::Action> TagTextSerializer::loadAction(
+        std::istream &is) {
+    std::string text;
+    is >> text;
+    if (text == "NULL") {
+        return nullptr;
+    } else if (text == "NORTH") {
+        return std::make_unique<TagAction>(ActionType::NORTH);
+    } else if (text == "EAST") {
+        return std::make_unique<TagAction>(ActionType::EAST);
+    } else if (text == "SOUTH") {
+        return std::make_unique<TagAction>(ActionType::SOUTH);
+    } else if (text == "WEST") {
+        return std::make_unique<TagAction>(ActionType::WEST);
+    } else if (text == "TAG") {
+        return std::make_unique<TagAction>(ActionType::TAG);
+    } else {
+        std::string tmpStr;
+        std::stringstream sstr(text);
+        std::getline(sstr, tmpStr, '-');
+        long code;
+        sstr >> code;
+        std::cerr << "ERROR: Invalid action!" << std::endl;
+        return std::make_unique<TagAction>(
+                static_cast<ActionType>(code));
+    }
 }
 } /* namespace tag */

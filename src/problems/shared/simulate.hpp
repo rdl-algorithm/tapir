@@ -12,11 +12,12 @@
 
 #include <boost/program_options.hpp>    // for variables_map, options_description, positional_options_description, variable_value, store, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
-#include "defs.hpp"                     // for RandomGenerator, make_unique
-#include "solver/Observation.hpp"       // for Observation
-#include "solver/Serializer.hpp"        // for Serializer
+#include "global.hpp"                     // for RandomGenerator, make_unique
+#include "solver/topology/Action.hpp"
+#include "solver/topology/Observation.hpp"       // for Observation
+#include "solver/serialization/Serializer.hpp"        // for Serializer
 #include "solver/Solver.hpp"            // for Solver
-#include "solver/State.hpp"             // for operator<<, State
+#include "solver/topology/State.hpp"             // for operator<<, State
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
@@ -69,6 +70,9 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     long nSteps = vm["simulation.nSteps"].as<long>();
     long nRuns = vm["simulation.nRuns"].as<long>();
     unsigned long seed = vm["seed"].as<unsigned long>();
+    if (seed == 0) {
+        seed = std::time(nullptr);
+    }
     cerr << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
@@ -95,13 +99,13 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         changeTimes = model->loadChanges(changesPath.c_str());
     }
     std::vector<std::unique_ptr<solver::State>> trajSt;
-    std::vector<long> trajActId;
+    std::vector<std::unique_ptr<solver::Action>> trajAction;
     std::vector<std::unique_ptr<solver::Observation>> trajObs;
     std::vector<double> trajRew;
     double val;
     long j;
     std::vector<std::unique_ptr<solver::State>>::iterator itS;
-    std::vector<long>::iterator itA;
+    std::vector<std::unique_ptr<solver::Action>>::iterator itA;
     std::vector<std::unique_ptr<solver::Observation>>::iterator itO;
     std::vector<double>::iterator itR;
     std::vector<double>::iterator itD;
@@ -114,7 +118,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         double totT;
         double totChTime, totImpTime;
         tStart = std::clock();
-        val = solver.runSim(nSteps, changeTimes, trajSt, trajActId, trajObs,
+        val = solver.runSim(nSteps, changeTimes, trajSt, trajAction, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
         totT = (double)(std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
@@ -123,10 +127,10 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         os << "Init: ( " << **itS << endl;
         os << " )\n";
         itS++;
-        for (itA = trajActId.begin(), itO = trajObs.begin(), itR =
-                 trajRew.begin(), j = 0; itA != trajActId.end();
+        for (itA = trajAction.begin(), itO = trajObs.begin(), itR =
+                 trajRew.begin(), j = 0; itA != trajAction.end();
              itS++, itA++, itO++, itR++, j++) {
-            os << "Step-" << j << " " << *itA;
+            os << "Step-" << j << " " << **itA;
             os << " ( " << **itS << ") " << **itO << *itR << endl;
         }
         cout << val << " " << actualNSteps << " " << totChTime << " "

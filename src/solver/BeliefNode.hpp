@@ -8,42 +8,54 @@
 #include <set>
 #include <utility>                      // for pair
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"                   // for Action
-#include "Observation.hpp"              // for Observation
-#include "ParticleSet.hpp"
+#include "topology/Action.hpp"                   // for Action
+#include "topology/Observation.hpp"              // for Observation
+#include "RandomAccessSet.hpp"
 
 namespace solver {
+class ActionMapping;
 class ActionNode;
 class HistoryEntry;
 
 class BeliefNode {
   public:
-    friend class BeliefTree;
     friend class Solver;
     friend class TextSerializer;
+    friend class ApproximateObservationTextSerializer;
+    friend class EnumeratedActionTextSerializer;
+    friend class EnumeratedObservationTextSerializer;
+    friend class DiscreteObservationTextSerializer;
 
-    /** Constructs a new belief node with an auto-generated ID. */
+    /** Constructs a new belief node with an auto-generated ID and no
+     * action mapping. */
     BeliefNode();
+    /** Constructs a new belief node with an auto-generated ID. */
+    BeliefNode(std::unique_ptr<ActionMapping> actionMap);
     /** Constructs a new belief node with the given ID. */
-    BeliefNode(long id);
+    BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefNode();
-    BeliefNode(BeliefNode const &) = delete;
-    BeliefNode(BeliefNode &&) = delete;
-    BeliefNode &operator=(BeliefNode const &) = delete;
-    BeliefNode &operator=(BeliefNode &&) = delete;
+    _NO_COPY_OR_MOVE(BeliefNode);
 
-    /** Chooses a next action with the UCB algorithm. */
-    Action getUcbAction(double ucbExploreCoefficient);
+    /** Returns true iff there is another action that needs to be explored. */
+    bool hasActionToTry() const;
+    /** Returns the next action to attempt, if any. */
+    std::unique_ptr<Action> getNextActionToTry() const;
+
+    /** Chooses the next action to search, from a multi-armed bandit problem
+     * (probably using a UCB algorithm). */
+    std::unique_ptr<Action> getSearchAction(double ucbExploreCoefficient);
+
     /** Updates the calculation of which action is optimal. */
     void updateBestValue();
     /** Chooses the action with the best expected value */
-    Action getBestAction() const;
+    std::unique_ptr<Action> getBestAction() const;
     /** Returns the best q-value */
     double getBestMeanQValue() const;
+
 
     /** Adds the given history entry to this belief node. */
     void addParticle(HistoryEntry *newHistEntry);
@@ -52,9 +64,10 @@ class BeliefNode {
     /** Samples a particle from this node. */
     HistoryEntry *sampleAParticle(RandomGenerator *randGen) const;
 
+
     /** Updates the q-value for the given action, with the given increase in
      * the total q-value (negative values for a decrease).
-     */
+     */friend class BeliefTree;
     void updateQValue(Action const &action, double increase);
     /** Updates the q-value for the given action, with the given increase in
      * the total q-value (negative values for a decrease), and the given
@@ -64,39 +77,34 @@ class BeliefNode {
     void updateQValue(Action const &action, double increase,
             long deltaNParticles);
 
+
     /** Calculates the distance between this belief node and another by
      * calculating the average pairwise distance between the individual
      * particles.
      */
-    double distL1Independent(BeliefNode *b);
+    double distL1Independent(BeliefNode *b) const;
+
+
+    /** Returns the ID of this node. */
+    long getId() const;
+    /** Returns the number of particles in this node. */
+    long getNParticles() const;
+    /** Returns the current number of action children of this node. */
+    long getNActChildren() const;
+
 
     /** Returns the belief node child corresponding to the given action and
      * observation
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
-
-    /** Returns the next action to attempt. */
-    Action getNextActionToTry();
-
-    /** Returns the ID of this node. */
-    long getId() const {
-        return id_;
-    }
-    /** Returns the number of particles in this node. */
-    long getNParticles() const {
-        return particles_.size();
-    }
-    /** Returns the current number of action children of this node. */
-    unsigned long getNActChildren() const {
-        return actChildren_.size();
-    }
-
-  private:
     /** Adds a child for the given action and observation;
-     * returns the child node, and a boolean representing
+     * returns the child node, and a boolean which is true iff a new node was
+     * actually created.
      */
     std::pair<BeliefNode *, bool> createOrGetChild(Action const &action,
             Observation const &obs);
+
+private:
 
     /** The ID for the next belief node. */
     static long currId;
@@ -105,12 +113,6 @@ class BeliefNode {
 
     /** The ID of this node. */
     long id_;
-    /** The next untried action to explore. */
-    Action nextActionToTry_;
-    /** The best mean q-value of any action child. */
-    double bestMeanQValue_;
-    /** The action corresponding to the highest expected value. */
-    Action bestAction_;
 
     /** The time at which the last particle was added. */
     double tLastAddedParticle_;
@@ -120,11 +122,10 @@ class BeliefNode {
     BeliefNode *nnBel_;
 
     /** The set of particles belonging to this node. */
-    ParticleSet particles_;
+    abt::RandomAccessSet<HistoryEntry *> particles_;
 
-    typedef std::map<Action, std::unique_ptr<ActionNode>> ActionMap;
     /** A mapping of actions to action children for this node. */
-    ActionMap actChildren_;
+    std::unique_ptr<ActionMapping> actionMap_;
 };
 } /* namespace solver */
 

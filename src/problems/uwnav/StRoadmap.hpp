@@ -6,7 +6,7 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include "defs.hpp"                     // for RandomGenerator
+#include "global.hpp"                     // for RandomGenerator
 #include "solver/State.hpp"                    // for State
 #include "UnderwaterNavState.hpp"
 #include "uwnav.hpp"

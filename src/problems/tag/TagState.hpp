@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/State.hpp"
-#include "solver/Vector.hpp"             // for State
+#include "solver/topology/State.hpp"
+#include "solver/topology/Vector.hpp"             // for State
 
 namespace tag {
 class TagState : public solver::Vector {
@@ -23,27 +23,18 @@ class TagState : public solver::Vector {
     virtual TagState &operator=(TagState const &) = delete;
     virtual TagState &operator=(TagState &&) = delete;
 
-    std::unique_ptr<solver::Point> copy() const;
+    std::unique_ptr<solver::Point> copy() const override;
 
-    double distanceTo(solver::State const &otherState) const;
-    bool equals(solver::State const &otherState) const;
+    double distanceTo(solver::State const &otherState) const override;
+    bool equals(solver::State const &otherState) const override;
     std::size_t hash() const;
 
-    std::vector<double> asVector() const;
-    void print(std::ostream &os) const;
+    std::vector<double> asVector() const override;
+    void print(std::ostream &os) const override;
 
-    GridPosition getRobotPosition() const {
-        return robotPos_;
-    }
-
-    GridPosition getOpponentPosition() const {
-        return opponentPos_;
-    }
-
-    bool isTagged() const {
-        return isTagged_;
-    }
-
+    GridPosition getRobotPosition() const;
+    GridPosition getOpponentPosition() const;
+    bool isTagged() const;
   private:
     GridPosition robotPos_, opponentPos_;
     bool isTagged_;

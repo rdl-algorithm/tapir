@@ -4,34 +4,36 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "Action.hpp"
-#include "Observation.hpp"
+#include "topology/Action.hpp"
+#include "topology/Observation.hpp"
+
+#include "global.hpp"
 
 namespace solver {
+class ActionMapping;
 class BeliefNode;
 
 class BeliefTree {
   public:
     friend class Solver;
     friend class TextSerializer;
+    friend class ApproximateObservationTextSerializer;
+    friend class EnumeratedActionTextSerializer;
+    friend class EnumeratedObservationTextSerializer;
+    friend class DiscreteObservationTextSerializer;
 
-    /* Constructs a belief tree with only a root. */
+    /* Constructs an empty belief tree. */
     BeliefTree();
 
     // Default destructor; copying and moving disallowed!
     ~BeliefTree();
-    BeliefTree(BeliefTree const &) = delete;
-    BeliefTree(BeliefTree &&) = delete;
-    BeliefTree &operator=(BeliefTree const &) = delete;
-    BeliefTree &operator=(BeliefTree &&) = delete;
+    _NO_COPY_OR_MOVE(BeliefTree);
 
-    /** Resets the tree to be empty. */
-    void reset();
+    /** Resets the tree and sets it root to be the given new node. */
+    BeliefNode *setRoot(std::unique_ptr<BeliefNode> root);
 
     /** Returns the root node. */
-    BeliefNode *getRoot() {
-        return root_.get();
-    }
+    BeliefNode *getRoot() const;
 
     /**
      * Adds a child belief node to the given belief node; this node will be

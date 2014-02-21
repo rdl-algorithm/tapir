@@ -3,10 +3,12 @@
 
 #include <memory>
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"              // for ChangeFlags
-#include "Observation.hpp"              // for Observation
-#include "State.hpp"
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"
+
+#include "global.hpp"
 
 namespace solver {
 class BeliefNode;
@@ -19,7 +21,6 @@ class HistoryEntry {
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
-    friend class HistoryEntryComparator;
 
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();
@@ -32,16 +33,13 @@ class HistoryEntry {
      *  cumulative discount, owning sequence, and entry ID.
      */
     HistoryEntry(StateInfo *stateInfo, double discount,
-            HistorySequence *owningSequence, long entryId);
+            HistorySequence *owningSequence,
+            long entryId);
 
     /** Destroys this HistoryEntry. */
     ~HistoryEntry();
 
-    // Copying and moving disallowed!
-    HistoryEntry(HistoryEntry const &) = delete;
-    HistoryEntry(HistoryEntry &&) = delete;
-    HistoryEntry &operator=(HistoryEntry const &) = delete;
-    HistoryEntry &operator=(HistoryEntry &&) = delete;
+    _NO_COPY_OR_MOVE(HistoryEntry);
 
 
     /** Registers this history entry as a particle of the given belief node.
@@ -59,7 +57,7 @@ class HistoryEntry {
      */
 
     /** Returns the state associated with this history entry. */
-    State *getState();
+    State const *getState() const;
 
     /**  Resets the changes that apply to this history entry. */
     void resetChangeFlags();
@@ -71,7 +69,7 @@ class HistoryEntry {
     StateInfo *stateInfo_;
 
     /** Action performed in this entry. */
-    Action action_;
+    std::unique_ptr<Action> action_;
     /** Observation received in this entry. */
     std::unique_ptr<Observation> observation_;
 

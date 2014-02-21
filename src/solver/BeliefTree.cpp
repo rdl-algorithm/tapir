@@ -4,20 +4,33 @@
 #include <vector>                       // for vector
 #include <iostream>
 
-#include "defs.hpp"                     // for make_unique
+#include "global.hpp"                     // for make_unique
+
+#include "topology/Observation.hpp"
+#include "mappings/ActionMapping.hpp"
 
 #include "BeliefNode.hpp"               // for BeliefNode
-#include "Observation.hpp"
 
 namespace solver {
 BeliefTree::BeliefTree() :
-    root_(std::make_unique<BeliefNode>()),
+    root_(nullptr),
     allNodes_() {
-    allNodes_.push_back(root_.get());
 }
 
 // Do nothing!
 BeliefTree::~BeliefTree() {
+}
+
+BeliefNode *BeliefTree::setRoot(std::unique_ptr<BeliefNode> root) {
+    allNodes_.clear();
+    root_ = std::move(root);
+    BeliefNode *rootPtr = root_.get();
+    allNodes_.push_back(rootPtr);
+    return rootPtr;
+}
+
+BeliefNode *BeliefTree::getRoot() const {
+    return root_.get();
 }
 
 BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
@@ -29,11 +42,5 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         allNodes_.push_back(childNode);
     }
     return childNode;
-}
-
-void BeliefTree::reset() {
-    allNodes_.clear();
-    root_ = std::make_unique<BeliefNode>();
-    allNodes_.push_back(root_.get());
 }
 } /* namespace solver */

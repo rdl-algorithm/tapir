@@ -6,7 +6,9 @@
 #include <vector>                       // for vector
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "State.hpp"
+#include "topology/State.hpp"
+
+#include "global.hpp"
 
 namespace solver {
 class BeliefNode;
@@ -27,14 +29,10 @@ class StateInfo {
 
     /** Default destructor. */
     ~StateInfo();
-    // Copying and moving is disallowed.
-    StateInfo(StateInfo const &) = delete;
-    StateInfo(StateInfo &&) = delete;
-    StateInfo &operator=(StateInfo const &) = delete;
-    StateInfo &operator=(StateInfo &&) = delete;
+    _NO_COPY_OR_MOVE(StateInfo);
 
     /** Returns the ID of this state. */
-    long getId();
+    long getId() const;
     /** Sets the ID of this state using the static counter. */
     void setId();
 
@@ -44,18 +42,15 @@ class StateInfo {
     void removeHistoryEntry(HistoryEntry *entry);
 
     /** Returns the state held by this StateInfo. */
-    State *getState() const {
-        return state_.get();
-    }
+    State const *getState() const;
 
   private:
-
     void resetChangeFlags();
     void setChangeFlags(ChangeFlags flags);
 
     static long currId;
 
-    std::unique_ptr<State> state_;
+    std::unique_ptr<State const> state_;
     long id_;
 
     std::unordered_set<HistoryEntry *> usedInHistoryEntries_;
