@@ -6,9 +6,10 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "ActionMapping.hpp"
+#include "topology/Observation.hpp"
+#include "mappings/ActionMapping.hpp"
+
 #include "BeliefNode.hpp"               // for BeliefNode
-#include "Observation.hpp"
 
 namespace solver {
 BeliefTree::BeliefTree() :

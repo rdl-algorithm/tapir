@@ -5,9 +5,9 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include "Action.hpp"                   // for Action
-#include "Observation.hpp"              // for Observation
-#include "ObservationMapping.hpp"
+#include "topology/Action.hpp"                   // for Action
+#include "topology/Observation.hpp"              // for Observation
+#include "mappings/ObservationMapping.hpp"
 #include "global.hpp"
 
 namespace solver {

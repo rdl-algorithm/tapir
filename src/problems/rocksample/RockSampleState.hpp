@@ -7,8 +7,8 @@
 #include <vector>                       // for vector
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/State.hpp"             // for State
-#include "solver/Vector.hpp"             // for Vector
+#include "solver/topology/State.hpp"             // for State
+#include "solver/topology/Vector.hpp"             // for Vector
 
 namespace rocksample {
 class RockSampleState : public solver::Vector {
@@ -22,22 +22,16 @@ class RockSampleState : public solver::Vector {
     virtual RockSampleState &operator=(RockSampleState const &) = delete;
     virtual RockSampleState &operator=(RockSampleState &&) = delete;
 
-    std::unique_ptr<solver::State> copy() const;
+    std::unique_ptr<solver::State> copy() const override;
+    double distanceTo(solver::State const &otherState) const override;
+    bool equals(solver::State const &otherState) const override;
+    std::size_t hash() const override;
+    void print(std::ostream &os) const override;
 
-    GridPosition getPosition() const {
-        return position_;
-    }
+    std::vector<double> asVector() const override;
 
-    std::vector<bool> getRockStates() const {
-        return rockStates_;
-    }
-
-    double distanceTo(solver::State const &otherState) const;
-    bool equals(solver::State const &otherState) const;
-    std::size_t hash() const;
-    void print(std::ostream &os) const;
-
-    std::vector<double> asVector() const;
+    GridPosition getPosition() const;
+    std::vector<bool> getRockStates() const;
 
   private:
     GridPosition position_;

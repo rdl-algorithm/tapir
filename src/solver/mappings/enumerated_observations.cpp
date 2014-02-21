@@ -5,13 +5,15 @@
 #include <sstream>
 #include <vector>
 
+#include "solver/BeliefNode.hpp"
+#include "solver/BeliefTree.hpp"
+#include "solver/Model.hpp"
+
+#include "solver/topology/EnumeratedPoint.hpp"
+#include "solver/topology/Observation.hpp"
+
 #include "ActionMapping.hpp"
 #include "ActionPool.hpp"
-#include "BeliefNode.hpp"
-#include "BeliefTree.hpp"
-#include "EnumeratedPoint.hpp"
-#include "Model.hpp"
-#include "Observation.hpp"
 #include "ObservationPool.hpp"
 #include "ObservationMapping.hpp"
 
@@ -27,7 +29,6 @@ std::unique_ptr<ObservationPool>
     ModelWithEnumeratedObservations::createObservationPool() {
     return std::make_unique<EnumeratedObservationPool>(getAllObservationsInOrder());
 }
-
 
 /* --------------------- EnumeratedObservationPool --------------------- */
 EnumeratedObservationPool::EnumeratedObservationPool(
@@ -69,11 +70,12 @@ BeliefNode* EnumeratedObservationMap::createBelief(
 }
 
 
-/* ------------------- EnumeratedObservationTextSerializer ------------------- */
+/* ------------------ EnumeratedObservationTextSerializer ------------------ */
 void EnumeratedObservationTextSerializer::saveObservationPool(
         ObservationPool const &/*observationPool*/, std::ostream &/*os*/) {
     // We won't bother writing the pool to file as the model can make a new one.
 }
+
 std::unique_ptr<ObservationPool>
 EnumeratedObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
@@ -86,14 +88,17 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
     os << "{";
     EnumeratedObservationMap const &enumMap = (
             static_cast<EnumeratedObservationMap const &>(map));
+    bool isFirst = true;
     for (int i = 0; i < enumMap.size(); i++) {
         BeliefNode *child = enumMap.children_[i].get();
         if (child != nullptr) {
-            saveObservation(enumMap.allObservations_[i].get(), os);
-            os << ":" << child->id_;
-            if (i != enumMap.size() - 1) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
                 os << ", ";
             }
+            saveObservation(enumMap.allObservations_[i].get(), os);
+            os << ":" << child->id_;
         }
     }
     os << "}";

@@ -22,9 +22,9 @@ public:
     // distanceTo() remains unimplemented - it's up to the user to choose a metric.
 
     // We will give default implementations for these methods.
-    virtual bool equals(Point const &otherPoint) const;
-    virtual std::size_t hash() const;
-    virtual void print(std::ostream &os) const;
+    virtual bool equals(Point const &otherPoint) const override;
+    virtual std::size_t hash() const override;
+    virtual void print(std::ostream &os) const override;
 
     /* Vector-like functionality. We don't implement this as we are being
      * storage-agnostic here.

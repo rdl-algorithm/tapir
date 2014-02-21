@@ -1,8 +1,7 @@
-MODULE_NAME = solver
+MODULE_NAME = mappings
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS = indexing mappings serialization topology
 include .make/template.mk
 
 # ----------------------------------------------------------------------

@@ -6,10 +6,6 @@
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "HistorySequence.hpp"          // for HistorySequence
 
-// For testing
-#include <iostream>
-#include "State.hpp"
-
 namespace solver {
 Histories::Histories() :
     allHistSeq_() {

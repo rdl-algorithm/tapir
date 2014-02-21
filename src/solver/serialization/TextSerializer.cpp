@@ -10,22 +10,28 @@
 #include <utility>                      // for move, pair
 #include <vector>                       // for vector
 
-#include "ActionMapping.hpp"
-#include "ActionNode.hpp"               // for ActionNode
-#include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::ActionMap, BeliefNode::currId
-#include "BeliefTree.hpp"               // for BeliefTree
-#include "Histories.hpp"                // for Histories
-#include "HistoryEntry.hpp"             // for HistoryEntry
-#include "HistorySequence.hpp"          // for HistorySequence
-#include "Observation.hpp"              // for Observation
-#include "ObservationMapping.hpp"          // for ObservationMapping
+#include "solver/ActionNode.hpp"               // for ActionNode
+#include "solver/BeliefNode.hpp"               // for BeliefNode, BeliefNode::ActionMap, BeliefNode::currId
+#include "solver/BeliefTree.hpp"               // for BeliefTree
+#include "solver/Histories.hpp"                // for Histories
+#include "solver/HistoryEntry.hpp"             // for HistoryEntry
+#include "solver/HistorySequence.hpp"          // for HistorySequence
+#include "solver/Solver.hpp"                   // for Solver
+#include "solver/StateInfo.hpp"                // for StateInfo, StateInfo::currId
+#include "solver/StatePool.hpp"                // for StatePool, StatePool::StateInfoSet
+
+
+#include "solver/mappings/ActionMapping.hpp"
+#include "solver/mappings/ObservationMapping.hpp"          // for ObservationMapping
+
+#include "solver/topology/Action.hpp"              // for Observation
+#include "solver/topology/Observation.hpp"              // for Observation
+#include "solver/topology/State.hpp"                    // for State, operator<<
+#include "solver/topology/Vector.hpp"
+#include "solver/topology/VectorLP.hpp"
+
 #include "Serializer.hpp"               // for Serializer
-#include "VectorLP.hpp"
-#include "Solver.hpp"                   // for Solver
-#include "State.hpp"                    // for State, operator<<
-#include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
-#include "StatePool.hpp"                // for StatePool, StatePool::StateInfoSet
-#include "Vector.hpp"
+
 
 using std::cerr;
 using std::endl;

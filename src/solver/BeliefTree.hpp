@@ -4,8 +4,8 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "Action.hpp"
-#include "Observation.hpp"
+#include "topology/Action.hpp"
+#include "topology/Observation.hpp"
 
 #include "global.hpp"
 
@@ -20,6 +20,7 @@ class BeliefTree {
     friend class ApproximateObservationTextSerializer;
     friend class EnumeratedActionTextSerializer;
     friend class EnumeratedObservationTextSerializer;
+    friend class DiscreteObservationTextSerializer;
 
     /* Constructs an empty belief tree. */
     BeliefTree();

@@ -1,11 +1,12 @@
 #include "approximate_observations.hpp"
 
+#include "solver/BeliefNode.hpp"
+#include "solver/BeliefTree.hpp"
+#include "solver/Model.hpp"
+#include "solver/topology/Observation.hpp"
+
 #include "ActionMapping.hpp"
 #include "ActionPool.hpp"
-#include "BeliefNode.hpp"
-#include "BeliefTree.hpp"
-#include "Model.hpp"
-#include "Observation.hpp"
 #include "ObservationPool.hpp"
 #include "ObservationMapping.hpp"
 
@@ -17,9 +18,6 @@
 
 namespace solver {
 /* ------------------- ModelWithApproximateObservations ------------------- */
-ModelWithApproximateObservations::~ModelWithApproximateObservations() {
-}
-
 std::unique_ptr<ObservationPool>
     ModelWithApproximateObservations::createObservationPool() {
     return std::make_unique<ApproximateObservationPool>(
@@ -27,9 +25,6 @@ std::unique_ptr<ObservationPool>
 }
 
 /* --------------------- ApproximateObservationPool --------------------- */
-ApproximateObservationPool::~ApproximateObservationPool() {
-}
-
 ApproximateObservationPool::ApproximateObservationPool(double maxDistance) :
         maxDistance_(maxDistance) {
 }
@@ -41,9 +36,6 @@ std::unique_ptr<ObservationMapping>
 }
 
 /* ---------------------- ApproximateObservationMap ---------------------- */
-ApproximateObservationMap::~ApproximateObservationMap() {
-}
-
 ApproximateObservationMap::ApproximateObservationMap(ActionPool *actionPool,
         double maxDistance) :
                 actionPool_(actionPool),
@@ -75,9 +67,6 @@ BeliefNode* ApproximateObservationMap::createBelief(
 }
 
 /* ----------------- ApproximateObservationTextSerializer ----------------- */
-ApproximateObservationTextSerializer::~ApproximateObservationTextSerializer() {
-}
-
 void ApproximateObservationTextSerializer::saveObservationPool(
         ObservationPool const &/*observationPool*/, std::ostream &/*os*/) {
     // We won't bother writing the pool to file as the model can make a new one.

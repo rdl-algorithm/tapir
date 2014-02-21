@@ -21,9 +21,9 @@ class RTree : public StateIndex {
     virtual ~RTree() = default;
     _NO_COPY_OR_MOVE(RTree);
 
-    virtual void reset();
-    virtual void addStateInfo(StateInfo *stateInfo);
-    virtual void removeStateInfo(StateInfo *stateInfo);
+    virtual void reset() override;
+    virtual void addStateInfo(StateInfo *stateInfo) override;
+    virtual void removeStateInfo(StateInfo *stateInfo) override;
     virtual void boxQuery(SpatialIndexVisitor &visitor,
             std::vector<double> lowCorner,
             std::vector<double> highCorner);

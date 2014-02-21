@@ -1,7 +1,7 @@
 #include "FlaggingVisitor.hpp"
 
-#include "ChangeFlags.hpp"
-#include "StatePool.hpp"
+#include "solver/ChangeFlags.hpp"
+#include "solver/StatePool.hpp"
 
 namespace solver {
 

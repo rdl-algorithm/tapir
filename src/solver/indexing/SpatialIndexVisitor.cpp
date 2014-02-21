@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <spatialindex/SpatialIndex.h>
-#include "StatePool.hpp"
+#include "solver/StatePool.hpp"
 
 namespace solver {
 

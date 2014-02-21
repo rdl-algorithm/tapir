@@ -22,9 +22,9 @@ class EnumeratedPoint : public Point {
     virtual long getCode() const = 0;
 
     // We leave distanceTo() and copy() unimplemented, but the others are OK.
-    virtual bool equals(Point const &otherPoint) const;
-    virtual std::size_t hash() const;
-    virtual void print(std::ostream &os) const;
+    virtual bool equals(Point const &otherPoint) const override;
+    virtual std::size_t hash() const override;
+    virtual void print(std::ostream &os) const override;
 };
 } /* namespace solver */
 

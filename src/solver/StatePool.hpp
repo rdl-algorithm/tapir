@@ -10,7 +10,7 @@
 #include <vector>                       // for vector
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "State.hpp"                    // for State, operator==
+#include "topology/State.hpp"                    // for State, operator==
 #include "StateInfo.hpp"                // for StateInfo
 
 #include "global.hpp"

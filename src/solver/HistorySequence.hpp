@@ -4,10 +4,10 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "Observation.hpp"              // for Observation
-#include "State.hpp"
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"
 
 #include "global.hpp"
 
@@ -48,7 +48,7 @@ class HistorySequence {
             double immediateReward);
 
     /** Returns the history entry in this sequence with the given ID. */
-    HistoryEntry *getEntry( long entryId) const;
+    HistoryEntry *getEntry(long entryId) const;
 
     /** Returns the states in this sequence as a vector. */
     std::vector<State const *> getStates() const;

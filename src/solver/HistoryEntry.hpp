@@ -3,10 +3,10 @@
 
 #include <memory>
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"              // for ChangeFlags
-#include "Observation.hpp"              // for Observation
-#include "State.hpp"
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"
 
 #include "global.hpp"
 
@@ -57,7 +57,7 @@ class HistoryEntry {
      */
 
     /** Returns the state associated with this history entry. */
-    State const *getState();
+    State const *getState() const;
 
     /**  Resets the changes that apply to this history entry. */
     void resetChangeFlags();

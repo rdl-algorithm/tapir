@@ -12,7 +12,7 @@
 #include <boost/program_options.hpp>    // for options_description, variables_map, positional_options_description, store, variable_value, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
-#include "solver/Serializer.hpp"        // for Serializer
+#include "solver/serialization/Serializer.hpp"        // for Serializer
 #include "solver/Solver.hpp"            // for Solver
 
 #include "ProgramOptions.hpp"           // for ProgramOptions

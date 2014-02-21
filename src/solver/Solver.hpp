@@ -8,11 +8,15 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"                   // for Action
+#include "topology/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Model.hpp"                    // for Model, Model::StepResult
-#include "Observation.hpp"              // for Observation
-#include "State.hpp"
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"
+
+namespace tag {
+class TagTextSerializer;
+}
 
 namespace solver {
 class ActionPool;
@@ -33,6 +37,8 @@ class Solver {
     friend class ApproximateObservationTextSerializer;
     friend class EnumeratedActionTextSerializer;
     friend class EnumeratedObservationTextSerializer;
+    friend class DiscreteObservationTextSerializer;
+    friend class tag::TagTextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();

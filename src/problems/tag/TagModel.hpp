@@ -12,11 +12,16 @@
 #include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/Action.hpp"            // for Action
+#include "solver/topology/Action.hpp"            // for Action
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/Observation.hpp"       // for Observation
-#include "solver/State.hpp"
+#include "solver/topology/Observation.hpp"       // for Observation
+#include "solver/topology/State.hpp"
+
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/discrete_observations_map.hpp"
+
+#include "TagAction.hpp"
 
 namespace po = boost::program_options;
 
@@ -25,9 +30,14 @@ class StatePool;
 } /* namespace solver */
 
 namespace tag {
+class TagObervation;
 class TagState;
 
-class TagModel : public ModelWithProgramOptions {
+class TagModel: virtual public ModelWithProgramOptions,
+        virtual public solver::ModelWithEnumeratedActions,
+        virtual public solver::ModelWithDiscreteObservations {
+    friend class TagObservation;
+
   public:
     TagModel(RandomGenerator *randGen, po::variables_map vm);
     ~TagModel() = default;
@@ -35,15 +45,6 @@ class TagModel : public ModelWithProgramOptions {
     TagModel(TagModel &&) = delete;
     TagModel &operator=(TagModel const &) = delete;
     TagModel &operator=(TagModel &&) = delete;
-
-    /** Enumerates the possible actions */
-    enum class TagAction : long {
-        NORTH = 0,
-        EAST = 1,
-        SOUTH = 2,
-        WEST = 3,
-        TAG = 4
-    };
 
     /** The cells are either empty or walls; empty cells are numbered
      * starting at 0
@@ -53,71 +54,65 @@ class TagModel : public ModelWithProgramOptions {
         WALL = -1
     };
 
-    /** Either you've seen the opponent, or you haven't. 0*/
-    enum TagObservation : int {
-        UNSEEN = 0,
-        SEEN = 1
-    };
-
-    std::string getName() {
+    std::string getName() override {
         return "Tag";
     }
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    long getNActions() {
-        return nActions_;
-    }
-    long getNStVars() {
+    long getNStVars() override {
         return nStVars_;
     }
-    double getMinVal() {
+    double getMinVal() override {
         return minVal_;
     }
-    double getMaxVal() {
+    double getMaxVal() override {
         return maxVal_;
     }
 
     // Other virtual methods
-    std::unique_ptr<solver::State> sampleAnInitState();
+    std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates an untagged state uniformly at random. */
-    std::unique_ptr<solver::State> sampleStateUniform();
+    std::unique_ptr<solver::State> sampleStateUniform() override;
 
-    bool isTerminal(solver::State const &state);
-    double getHeuristicValue(solver::State const &state);
-    double getDefaultVal();
+    bool isTerminal(solver::State const &state) override;
+    double getHeuristicValue(solver::State const &state) override;
+    double getDefaultVal() override;
 
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
-            solver::State const &state, solver::Action const &action);
+            solver::State const &state, solver::Action const &action) override;
     virtual std::unique_ptr<solver::Observation> generateObservation(
-            solver::Action const &action, solver::State const &nextState);
+            solver::Action const &action,
+            solver::State const &nextState) override;
     virtual double getReward(solver::State const &state,
-                solver::Action const &action);
+                solver::Action const &action) override;
     virtual Model::StepResult generateStep(solver::State const &state,
-            solver::Action const &action);
+            solver::Action const &action) override;
 
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action,
             solver::Observation const &obs,
-            std::vector<solver::State const *> const &previousParticles);
+            std::vector<solver::State const *>
+                const &previousParticles) override;
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action,
-            solver::Observation const &obs);
+            solver::Observation const &obs) override;
 
-    std::vector<long> loadChanges(char const *changeFilename);
-    void update(long time, solver::StatePool *pool);
+    std::vector<long> loadChanges(char const *changeFilename) override;
+    void update(long time, solver::StatePool *pool) override;
 
-    void dispAct(solver::Action const &action, std::ostream &os);
     /** Displays a single cell of the map. */
     void dispCell(TagCellType cellType, std::ostream &os);
-    void dispObs(solver::Observation const &obs, std::ostream &os);
-    void drawEnv(std::ostream &os);
-    void drawState(solver::State const &state, std::ostream &os);
+    void drawEnv(std::ostream &os) override;
+    void drawState(solver::State const &state, std::ostream &os) override;
+
+    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+    getAllActionsInOrder() override;
 
   private:
     /** Initialises the required data structures and variables */
-    void initialise();
+    void initialize();
 
     /** Generates a random empty grid cell. */
     GridPosition randomEmptyCell();
@@ -131,20 +126,19 @@ class TagModel : public ModelWithProgramOptions {
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    std::unique_ptr<solver::Observation> makeObservation(solver::Action const &action,
-            TagState const &state);
+    std::unique_ptr<solver::Observation> makeObservation(
+            solver::Action const &action, TagState const &nextState);
     /** Moves the opponent. */
     GridPosition getMovedOpponentPos(GridPosition const &robotPos,
             GridPosition const &opponentPos);
     /** Generates the distribution for the opponent's actions. */
-    std::vector<TagAction> makeOpponentActions(GridPosition const &robotPos,
+    std::vector<ActionType> makeOpponentActions(GridPosition const &robotPos,
             GridPosition const &opponentPos);
 
     /** Gets the expected coordinates after taking the given action;
      *  this may result in invalid coordinates.
      */
-    GridPosition getMovedPos(GridPosition const &position,
-            TagAction const &action);
+    GridPosition getMovedPos(GridPosition const &position, ActionType action);
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
 
@@ -161,9 +155,6 @@ class TagModel : public ModelWithProgramOptions {
     long nRows_;
     /** The number of columns in the map. */
     long nCols_;
-
-    /** The number of empty cells in the map. */
-    long nEmptyCells_;
 
     /** The environment map in text form. */
     std::vector<std::string> mapText_;
@@ -187,14 +178,5 @@ class TagModel : public ModelWithProgramOptions {
     double minVal_, maxVal_;
 };
 } /* namespace tag */
-
-
-bool operator==(tag::TagModel::TagAction const &ta, solver::Action const &a) {
-    return static_cast<long>(ta) == static_cast<long>(a);
-}
-
-bool operator==(solver::Action const &a, tag::TagModel::TagAction const &ta) {
-    return ta == a;
-}
 
 #endif /* TAGMODEL_HPP_ */

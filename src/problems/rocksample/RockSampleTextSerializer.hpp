@@ -4,12 +4,14 @@
 #include <iosfwd>                       // for istream, ostream
 #include <memory>                       // for unique_ptr
 
-#include "solver/Action.hpp"
-#include "solver/enumerated_actions.hpp"
-#include "solver/enumerated_observations.hpp"
-#include "solver/State.hpp"
-#include "solver/TextSerializer.hpp"    // for TextSerializer
-#include "solver/Observation.hpp"
+#include "solver/topology/Action.hpp"
+#include "solver/topology/State.hpp"
+#include "solver/topology/Observation.hpp"
+
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/enumerated_observations.hpp"
+
+#include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
 #include "global.hpp"
 
@@ -22,18 +24,20 @@ class RockSampleTextSerializer : virtual public solver::TextSerializer,
     virtual public solver::EnumeratedActionTextSerializer,
     virtual public solver::EnumeratedObservationTextSerializer {
   public:
-    RockSampleTextSerializer();
     RockSampleTextSerializer(solver::Solver *solver);
+    virtual ~RockSampleTextSerializer() = default;
     _NO_COPY_OR_MOVE(RockSampleTextSerializer);
 
-    void saveState(solver::State const *state, std::ostream &os);
-    std::unique_ptr<solver::State> loadState(std::istream &is);
+    void saveState(solver::State const *state, std::ostream &os) override;
+    std::unique_ptr<solver::State> loadState(std::istream &is) override;
 
-    void saveObservation(solver::Observation const *obs, std::ostream &os);
-    std::unique_ptr<solver::Observation> loadObservation(std::istream &is);
+    void saveObservation(solver::Observation const *obs,
+            std::ostream &os) override;
+    std::unique_ptr<solver::Observation> loadObservation(
+            std::istream &is) override;
 
-    void saveAction(solver::Action const *action, std::ostream &os);
-    std::unique_ptr<solver::Action> loadAction(std::istream &is);
+    void saveAction(solver::Action const *action, std::ostream &os) override;
+    std::unique_ptr<solver::Action> loadAction(std::istream &is) override;
 };
 } /* namespace rocksample */
 

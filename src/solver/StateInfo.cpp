@@ -7,7 +7,7 @@
 #include <vector>                       // for vector, vector<>::iterator
 
 #include "ChangeFlags.hpp"              // for ChangeFlags, ChangeFlags::UNCHANGED
-#include "State.hpp"                    // for State
+#include "topology/State.hpp"                    // for State
 
 namespace solver {
 class BeliefNode;

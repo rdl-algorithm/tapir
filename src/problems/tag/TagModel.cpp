@@ -17,18 +17,21 @@
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/Action.hpp"            // for Action
+#include "solver/topology/Action.hpp"            // for Action
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/FlaggingVisitor.hpp"
+#include "solver/indexing/FlaggingVisitor.hpp"
 #include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/Observation.hpp"       // for Observation
-#include "solver/RTree.hpp"
-#include "solver/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
-#include "solver/VectorLP.hpp"             // for State, State::Hash, operator<<, operator==
-#include "solver/State.hpp"             // for State, State::Hash, operator<<, operator==
+#include "solver/topology/Observation.hpp"       // for Observation
+#include "solver/indexing/RTree.hpp"
+#include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
+#include "solver/topology/State.hpp"             // for State, State::Hash, operator<<, operator==
 #include "solver/StatePool.hpp"
 
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/discrete_observations_map.hpp"
 
+#include "TagAction.hpp"
+#include "TagObservation.hpp"
 #include "TagState.hpp"                 // for TagState
 
 using std::cerr;
@@ -46,7 +49,6 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
             vm["problem.opponentStayProbability"].as<double>()),
     nRows_(0), // to be updated
     nCols_(0), // to be updated
-    nEmptyCells_(0), // will count
     mapText_(), // will be pushed to
     envMap_(), // will be pushed to
     changes_(),
@@ -72,7 +74,7 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     }
     inFile.close();
 
-    initialise();
+    initialize();
     cout << "Constructed the TagModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "Size: " << nRows_ << " by " << nCols_ << endl;
@@ -89,9 +91,8 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     drawEnv(cout);
 }
 
-void TagModel::initialise() {
+void TagModel::initialize() {
     GridPosition p;
-    nEmptyCells_ = 0;
     envMap_.resize(nRows_);
     for (p.i = nRows_ - 1; p.i >= 0; p.i--) {
         envMap_[p.i].resize(nCols_);
@@ -102,7 +103,6 @@ void TagModel::initialise() {
                 cellType = WALL;
             } else {
                 cellType = TagCellType::EMPTY;
-                nEmptyCells_++;
             }
             envMap_[p.i][p.j] = cellType;
         }
@@ -112,8 +112,10 @@ void TagModel::initialise() {
 GridPosition TagModel::randomEmptyCell() {
     GridPosition pos;
     while (true) {
-        pos.i = std::uniform_int_distribution<long>(0, nRows_ - 1)(*randGen_);
-        pos.j = std::uniform_int_distribution<long>(0, nCols_ - 1)(*randGen_);
+        pos.i = std::uniform_int_distribution<long>(0, nRows_ - 1)(
+                *getRandomGenerator());
+        pos.j = std::uniform_int_distribution<long>(0, nCols_ - 1)(
+                *getRandomGenerator());
         if (envMap_[pos.i][pos.j] == TagCellType::EMPTY) {
             break;
         }
@@ -161,15 +163,18 @@ std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
         return std::make_pair(std::make_unique<TagState>(tagState), false);
     }
 
+    TagAction const &tagAction = static_cast<TagAction const &>(action);
+
     GridPosition robotPos = tagState.getRobotPosition();
     GridPosition opponentPos = tagState.getOpponentPosition();
-    if (action == (long)TagAction::TAG && robotPos == opponentPos) {
+    if (tagAction.getActionType() == ActionType::TAG
+            && robotPos == opponentPos) {
         return std::make_pair(
                 std::make_unique<TagState>(robotPos, opponentPos, true), true);
     }
 
     GridPosition newOpponentPos = getMovedOpponentPos(robotPos, opponentPos);
-    GridPosition newRobotPos = getMovedPos(robotPos, action);
+    GridPosition newRobotPos = getMovedPos(robotPos, tagAction.getActionType());
     if (!isValid(newRobotPos)) {
         return std::make_pair(
                 std::make_unique<TagState>(robotPos, newOpponentPos, false),
@@ -179,29 +184,29 @@ std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
                     newRobotPos, newOpponentPos, false), true);
 }
 
-std::vector<TagModel::TagAction> TagModel::makeOpponentActions(
+std::vector<ActionType> TagModel::makeOpponentActions(
         GridPosition const &robotPos,
         GridPosition const &opponentPos) {
-    std::vector<TagAction> actions;
+    std::vector<ActionType> actions;
     if (robotPos.i > opponentPos.i) {
-        actions.push_back(TagAction::NORTH);
-        actions.push_back(TagAction::NORTH);
+        actions.push_back(ActionType::NORTH);
+        actions.push_back(ActionType::NORTH);
     } else if (robotPos.i < opponentPos.i) {
-        actions.push_back(TagAction::SOUTH);
-        actions.push_back(TagAction::SOUTH);
+        actions.push_back(ActionType::SOUTH);
+        actions.push_back(ActionType::SOUTH);
     } else {
-        actions.push_back(TagAction::NORTH);
-        actions.push_back(TagAction::SOUTH);
+        actions.push_back(ActionType::NORTH);
+        actions.push_back(ActionType::SOUTH);
     }
     if (robotPos.j > opponentPos.j) {
-        actions.push_back(TagAction::WEST);
-        actions.push_back(TagAction::WEST);
+        actions.push_back(ActionType::WEST);
+        actions.push_back(ActionType::WEST);
     } else if (robotPos.j < opponentPos.j) {
-        actions.push_back(TagAction::EAST);
-        actions.push_back(TagAction::EAST);
+        actions.push_back(ActionType::EAST);
+        actions.push_back(ActionType::EAST);
     } else {
-        actions.push_back(TagAction::EAST);
-        actions.push_back(TagAction::WEST);
+        actions.push_back(ActionType::EAST);
+        actions.push_back(ActionType::WEST);
     }
     return actions;
 }
@@ -209,12 +214,13 @@ std::vector<TagModel::TagAction> TagModel::makeOpponentActions(
 GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
         GridPosition const &opponentPos) {
     // Randomize to see if the opponent stays still.
-    if (std::bernoulli_distribution(opponentStayProbability_)(*randGen_)) {
+    if (std::bernoulli_distribution(opponentStayProbability_)(
+            *getRandomGenerator())) {
         return opponentPos;
     }
-    std::vector<TagAction> actions(makeOpponentActions(robotPos, opponentPos));;
-    solver::Action action = (long)actions[std::uniform_int_distribution<long>(
-                    0, actions.size() - 1)(*randGen_)];
+    std::vector<ActionType> actions(makeOpponentActions(robotPos, opponentPos));
+    ActionType action = actions[std::uniform_int_distribution<long>(
+                    0, actions.size() - 1)(*getRandomGenerator())];
     GridPosition newOpponentPos = getMovedPos(opponentPos, action);
     if (!isValid(newOpponentPos)) {
         newOpponentPos = opponentPos;
@@ -223,25 +229,25 @@ GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
 }
 
 GridPosition TagModel::getMovedPos(GridPosition const &position,
-        solver::Action const &action) {
+        ActionType action) {
     GridPosition movedPos = position;
-    switch (static_cast<TagAction>(static_cast<long>(action))) {
-    case TagAction::NORTH:
+    switch (action) {
+    case ActionType::NORTH:
         movedPos.i -= 1;
         break;
-    case TagAction::EAST:
+    case ActionType::EAST:
         movedPos.j += 1;
         break;
-    case TagAction::SOUTH:
+    case ActionType::SOUTH:
         movedPos.i += 1;
         break;
-    case TagAction::WEST:
+    case ActionType::WEST:
         movedPos.j -= 1;
         break;
-    case TagAction::TAG:
+    case ActionType::TAG:
         break;
     default:
-        cerr << "Invalid action: " << action << endl;
+        cerr << "Invalid action: " << (long)action << endl;
         break;
     }
     return movedPos;
@@ -254,19 +260,15 @@ bool TagModel::isValid(GridPosition const &position) {
 
 std::unique_ptr<solver::Observation> TagModel::makeObservation(
         solver::Action const & /*action*/,
-        TagState const &state) {
-    GridPosition p = state.getRobotPosition();
-    return std::make_unique<solver::VectorLP>(std::vector<double> {
-        (double)p.i, (double)p.j, (double)(
-                p == state.getOpponentPosition() ? SEEN : UNSEEN)}, 1.0);
-    //return std::make_unique<solver::VectorLP>(std::initializer_list<double> {
-    //    (double)p.i, (double)p.j, (double)(
-    //            p == state.getOpponentPosition() ? SEEN : UNSEEN)}, 1.0);
+        TagState const &nextState) {
+    return std::make_unique<TagObservation>(this, nextState.getRobotPosition(),
+            nextState.getRobotPosition() == nextState.getOpponentPosition());
 }
 
 double TagModel::getReward(solver::State const &state,
         solver::Action const &action) {
-    if (action == TagAction::TAG) {
+    if (static_cast<TagAction const &>(action).getActionType()
+            == ActionType::TAG) {
         TagState const &tagState = static_cast<TagState const &>(state);
         if (tagState.getRobotPosition() == tagState.getOpponentPosition()) {
             return tagReward_;
@@ -291,7 +293,7 @@ std::unique_ptr<solver::Observation> TagModel::generateObservation(
 solver::Model::StepResult TagModel::generateStep(solver::State const &state,
         solver::Action const &action) {
     solver::Model::StepResult result;
-    result.action = action;
+    result.action = action.copy();
     std::unique_ptr<TagState> nextState = makeNextState(state, action).first;
 
     result.observation = makeObservation(action, *nextState);
@@ -305,6 +307,10 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
+    TagObservation const &observation = (
+            static_cast<TagObservation const &>(obs));
+    ActionType actionType = (
+            static_cast<TagAction const &>(action).getActionType());
 
     struct Hash {
         std::size_t operator()(TagState const &state) const {
@@ -314,34 +320,35 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     typedef std::unordered_map<TagState, double, Hash> WeightMap;
     WeightMap weights;
     double weightTotal = 0;
-    solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
-    GridPosition newRobotPos(observation[0], observation[1]);
-    if (observation[2] == SEEN) {
+
+    GridPosition newRobotPos(observation.getPosition());
+    if (observation.seesOpponent()) {
         // If we saw the opponent, we must be in the same place.
         newParticles.push_back(std::make_unique<TagState>(newRobotPos,
-                        newRobotPos, action == TagAction::TAG));
+                        newRobotPos, actionType == ActionType::TAG));
     } else {
         // We didn't see the opponent, so we must be in different places.
         for (solver::State const *state : previousParticles) {
             TagState const *tagState = static_cast<TagState const *>(state);
             GridPosition oldRobotPos(tagState->getRobotPosition());
             // Ignore states that do not match knowledge of the robot's position.
-            if (newRobotPos != getMovedPos(oldRobotPos, action)) {
+            if (newRobotPos != getMovedPos(oldRobotPos, actionType)) {
                 continue;
             }
             GridPosition oldOpponentPos(tagState->getOpponentPosition());
-            std::vector<TagAction> actions(makeOpponentActions(oldRobotPos,
+            std::vector<ActionType> actions(makeOpponentActions(oldRobotPos,
                             oldOpponentPos));
-            std::vector<TagAction> newActions;
-            for (TagAction enemyAction : actions) {
-                if (getMovedPos(oldOpponentPos, enemyAction)) != newRobotPos) {
-                    newActions.push_back(enemyAction);
+            std::vector<ActionType> newActions;
+            for (ActionType opponentAction : actions) {
+                if (getMovedPos(oldOpponentPos,
+                        opponentAction) != newRobotPos) {
+                    newActions.push_back(opponentAction);
                 }
             }
             double probability = 1.0 / newActions.size();
-            for (solver::Action enemyAction : newActions) {
+            for (ActionType opponentAction : newActions) {
                 GridPosition newOpponentPos = getMovedPos(oldOpponentPos,
-                            enemyAction);
+                        opponentAction);
                 TagState newState(newRobotPos, newOpponentPos, false);
                 weights[newState] += probability;
                 weightTotal += probability;
@@ -352,7 +359,8 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
              it++) {
             double proportion = it->second * scale;
             long numToAdd = static_cast<long>(proportion);
-            if (std::bernoulli_distribution(proportion-numToAdd)(*randGen_)) {
+            if (std::bernoulli_distribution(proportion-numToAdd)(
+                    *getRandomGenerator())) {
                 numToAdd += 1;
             }
             for (int i = 0; i < numToAdd; i++) {
@@ -366,13 +374,16 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
-    solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
-    GridPosition newRobotPos(observation[0], observation[1]);
-    if (observation[2] == SEEN) {
+    TagObservation const &observation = (
+            static_cast<TagObservation const &>(obs));
+    ActionType actionType = (
+            static_cast<TagAction const &>(action).getActionType());
+    GridPosition newRobotPos(observation.getPosition());
+    if (observation.seesOpponent()) {
         // If we saw the opponent, we must be in the same place.
         newParticles.push_back(
                 std::make_unique<TagState>(newRobotPos, newRobotPos,
-                        action == TAG));
+                        actionType == ActionType::TAG));
     } else {
         while (static_cast<long>(newParticles.size()) < getNParticles()) {
             std::unique_ptr<solver::State> state = sampleStateUniform();
@@ -470,37 +481,6 @@ void TagModel::update(long time, solver::StatePool *pool) {
     }
 }
 
-void TagModel::dispAct(solver::Action const &action, std::ostream &os) {
-    switch ((long)action) {
-    case NORTH:
-        os << "NORTH";
-        break;
-    case EAST:
-        os << "EAST";
-        break;
-    case SOUTH:
-        os << "SOUTH";
-        break;
-    case WEST:
-        os << "WEST";
-        break;
-    case TAG:
-        os << "TAG";
-        break;
-    default:
-        os << "INVALID" << action;
-        break;
-    }
-}
-
-void TagModel::dispObs(solver::Observation const &obs, std::ostream &os) {
-    solver::VectorLP const &observation = static_cast<solver::VectorLP const &>(obs);
-    os << GridPosition(observation[0], observation[1]);
-    if (observation[2] == SEEN) {
-        os << " SEEN!";
-    }
-}
-
 void TagModel::dispCell(TagCellType cellType, std::ostream &os) {
     if (cellType >= EMPTY) {
         os << std::setw(2);
@@ -552,5 +532,15 @@ void TagModel::drawState(solver::State const &state, std::ostream &os) {
         }
         os << endl;
     }
+}
+
+
+std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+TagModel::getAllActionsInOrder() {
+    std::vector<std::unique_ptr<solver::EnumeratedPoint>> allActions_;
+    for (long code = 0; code < 5; code++) {
+        allActions_.push_back(std::make_unique<TagAction>(code));
+    }
+    return allActions_;
 }
 } /* namespace tag */

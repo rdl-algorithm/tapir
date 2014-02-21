@@ -1,7 +1,7 @@
 #include "Model.hpp"
 
-#include "RTree.hpp"
-#include "StateIndex.hpp"
+#include "indexing/RTree.hpp"
+#include "indexing/StateIndex.hpp"
 
 namespace solver {
 std::unique_ptr<StateIndex> Model::createStateIndex() {

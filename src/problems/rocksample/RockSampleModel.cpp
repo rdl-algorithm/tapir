@@ -21,12 +21,16 @@
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/Action.hpp"            // for Action
+
+#include "solver/topology/Action.hpp"            // for Action
+#include "solver/topology/Observation.hpp"       // for Observation
+#include "solver/topology/State.hpp"       // for State
+
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/enumerated_observations.hpp"
+
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/Observation.hpp"       // for Observation
-#include "solver/VectorLP.hpp"             // for State, State::Hash, operator<<, operator==
-#include "solver/State.hpp"             // for State, operator<<, State::Hash, operator==
 #include "solver/StatePool.hpp"
 
 #include "RockSampleAction.hpp"         // for RockSampleAction
@@ -77,7 +81,7 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     }
     inFile.close();
 
-    initialise();
+    initialize();
     cout << "Constructed the RockSampleModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "Size: " << nRows_ << " by " << nCols_ << endl;
@@ -98,7 +102,7 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     drawEnv(cout);
 }
 
-void RockSampleModel::initialise() {
+void RockSampleModel::initialize() {
     nRocks_ = 0;
     GridPosition p;
     for (p.i = 0; p.i < nRows_; p.i++) {
@@ -137,15 +141,15 @@ std::unique_ptr<solver::State> RockSampleModel::sampleStateUniform() {
 
 GridPosition RockSampleModel::samplePosition() {
     long i = std::uniform_int_distribution<long>(
-                0, nRows_ - 1)(*randGen_);
+                0, nRows_ - 1)(*getRandomGenerator());
     long j = std::uniform_int_distribution<long>(
-                0, nCols_ - 1)(*randGen_);
+                0, nCols_ - 1)(*getRandomGenerator());
     return GridPosition(i, j);
 }
 
 std::vector<bool> RockSampleModel::sampleRocks() {
     return decodeRocks(std::uniform_int_distribution<long>
-                (0, (1 << nRocks_) - 1)(*randGen_));
+                (0, (1 << nRocks_) - 1)(*getRandomGenerator()));
 }
 
 std::vector<bool> RockSampleModel::decodeRocks(long val) {
@@ -261,7 +265,7 @@ std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
     double efficiency =
         (1 + std::pow(2, -dist / halfEfficiencyDistance_)) * 0.5;
     // cerr << "D: " << dist << " E:" << efficiency << endl;
-    bool obsMatches = std::bernoulli_distribution(efficiency)(*randGen_);
+    bool obsMatches = std::bernoulli_distribution(efficiency)(*getRandomGenerator());
     return std::make_unique<RockSampleObservation>(rockStates[rockNo] == obsMatches);
 }
 
@@ -370,7 +374,8 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         for (WeightMap::value_type &it : weights) {
             double proportion = it.second * scale;
             long numToAdd = static_cast<long>(proportion);
-            if (std::bernoulli_distribution(proportion - numToAdd)(*randGen_)) {
+            if (std::bernoulli_distribution(proportion - numToAdd)(
+                    *getRandomGenerator())) {
                 numToAdd += 1;
             }
             for (int i = 0; i < numToAdd; i++) {

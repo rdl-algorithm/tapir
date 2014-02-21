@@ -6,10 +6,15 @@
 
 #include "global.hpp"                     // for make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/Action.hpp"
-#include "solver/State.hpp"
-#include "solver/TextSerializer.hpp"    // for TextSerializer
-#include "solver/Observation.hpp"
+
+#include "solver/topology/Action.hpp"
+#include "solver/topology/State.hpp"
+#include "solver/topology/Observation.hpp"
+
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/enumerated_observations.hpp"
+
+#include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
 #include "RockSampleAction.hpp"         // for RockSampleAction
 #include "RockSampleObservation.hpp"    // for RockSampleObservation

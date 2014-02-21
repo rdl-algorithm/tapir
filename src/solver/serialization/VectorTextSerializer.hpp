@@ -22,14 +22,16 @@ class VectorTextSerializer : virtual public Serializer {
     /** Loads a vector from an input stream. */
     virtual void load(std::vector<double> &vector, std::istream &is);
 
-    virtual void saveState(State const *state, std::ostream &os);
-    virtual std::unique_ptr<State> loadState(std::istream &is);
+    virtual void saveState(State const *state, std::ostream &os) override;
+    virtual std::unique_ptr<State> loadState(std::istream &is) override;
 
-    virtual void saveObservation(Observation const *obs, std::ostream &os);
-    virtual std::unique_ptr<Observation> loadObservation(std::istream &is);
+    virtual void saveObservation(Observation const *obs,
+            std::ostream &os) override;
+    virtual std::unique_ptr<Observation> loadObservation(
+            std::istream &is) override;
 
-    virtual void saveAction(Action const *action, std::ostream &os);
-    virtual std::unique_ptr<Action> loadAction(std::istream &is);
+    virtual void saveAction(Action const *action, std::ostream &os) override;
+    virtual std::unique_ptr<Action> loadAction(std::istream &is) override;
 };
 } /* namespace solver */
 

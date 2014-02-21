@@ -1,10 +1,11 @@
 #ifndef SOLVER_APPROXIMATE_OBSERVATIONS_HPP_
 #define SOLVER_APPROXIMATE_OBSERVATIONS_HPP_
 
-#include "Model.hpp"
+#include "solver/Model.hpp"
+#include "solver/serialization/Serializer.hpp"
+
 #include "ObservationPool.hpp"
 #include "ObservationMapping.hpp"
-#include "Serializer.hpp"
 
 #include <memory>
 #include <vector>
@@ -16,7 +17,7 @@ class BeliefNode;
 class ModelWithApproximateObservations : virtual public solver::Model {
 public:
     ModelWithApproximateObservations();
-    virtual ~ModelWithApproximateObservations();
+    virtual ~ModelWithApproximateObservations() = default;
     _NO_COPY_OR_MOVE(ModelWithApproximateObservations);
 
     virtual std::unique_ptr<ObservationPool> createObservationPool() override;
@@ -27,7 +28,7 @@ class ApproximateObservationPool: public solver::ObservationPool {
     friend class TextSerializer;
   public:
     ApproximateObservationPool(double maxDistance);
-    virtual ~ApproximateObservationPool();
+    virtual ~ApproximateObservationPool() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationPool);
 
     virtual std::unique_ptr<ObservationMapping>
@@ -43,7 +44,7 @@ class ApproximateObservationMap: public solver::ObservationMapping {
     ApproximateObservationMap(ActionPool *actionPool, double maxDistance);
 
     // Default destructor; copying and moving disallowed!
-    virtual ~ApproximateObservationMap();
+    virtual ~ApproximateObservationMap() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationMap);
 
     virtual BeliefNode *getBelief(Observation const &obs) const override;
@@ -61,7 +62,7 @@ class ApproximateObservationMap: public solver::ObservationMapping {
 class ApproximateObservationTextSerializer: virtual public solver::Serializer {
   public:
     ApproximateObservationTextSerializer() = default;
-    virtual ~ApproximateObservationTextSerializer();
+    virtual ~ApproximateObservationTextSerializer() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationTextSerializer);
 
     virtual void saveObservationPool(

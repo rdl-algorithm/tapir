@@ -74,7 +74,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen, po::variables_map vm) :
     }
     inFile.close();
 
-    initialise();
+    initialize();
     cout << "Constructed the Nav2DModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "Size: " << nRows_ << " by " << nCols_ << endl;
@@ -92,7 +92,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen, po::variables_map vm) :
     drawEnv(cout);
 }
 
-void Nav2DModel::initialise() {
+void Nav2DModel::initialize() {
     GridPosition p;
     nEmptyCells_ = 0;
     envMap_.resize(nRows_);

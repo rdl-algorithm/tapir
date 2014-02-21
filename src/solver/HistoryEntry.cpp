@@ -38,7 +38,7 @@ HistoryEntry::HistoryEntry(StateInfo *stateInfo,
 HistoryEntry::~HistoryEntry() {
 }
 
-State const *HistoryEntry::getState() {
+State const *HistoryEntry::getState() const {
     return stateInfo_->getState();
 }
 

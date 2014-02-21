@@ -7,13 +7,13 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"        // for Action
-#include "ActionPool.hpp"
+#include "topology/Action.hpp"        // for Action
+#include "mappings/ActionPool.hpp"
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "Observation.hpp"              // for Observation
-#include "ObservationPool.hpp"
-#include "State.hpp"                    // for State
-#include "StateIndex.hpp"
+#include "topology/Observation.hpp"              // for Observation
+#include "mappings/ObservationPool.hpp"
+#include "topology/State.hpp"                    // for State
+#include "indexing/StateIndex.hpp"
 
 #include "global.hpp"
 
@@ -51,7 +51,7 @@ class Model {
      */
     virtual long getNParticles() = 0;
     /** Returns the maximum number of trials (i.e. simulated episodes) to run
-     * in a single time step.
+     * in a single time step.State
      */
     virtual long getMaxTrials() = 0;
     /** Returns the lowest net discount allowed; tree searching will not go
@@ -86,6 +86,8 @@ class Model {
     /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the belief vector. */
     virtual std::unique_ptr<State> sampleAnInitState() = 0;
+    /** Samples a state uniformly at random from all states. */
+    virtual std::unique_ptr<State> sampleStateUniform() = 0;
     /** Returns true iff the given state is terminal. */
     virtual bool isTerminal(State const &state) = 0;
     /** Approximates the q-value of a state */

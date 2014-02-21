@@ -15,7 +15,7 @@ public:
     virtual ~ActionPool() = default;
     _NO_COPY_OR_MOVE(ActionPool);
 
-    virtual std::unique_ptr<ActionMapping> createActionMapping();
+    virtual std::unique_ptr<ActionMapping> createActionMapping() = 0;
 protected:
     ObservationPool *observationPool_ = nullptr;
 };

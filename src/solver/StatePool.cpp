@@ -11,8 +11,7 @@
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Model.hpp"
-#include "RTree.hpp"
-#include "State.hpp"
+#include "topology/State.hpp"
 #include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
 
 namespace solver {

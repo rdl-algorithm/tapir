@@ -11,14 +11,17 @@
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/Action.hpp"            // for Action
+
+#include "solver/topology/Action.hpp"            // for Action
+#include "solver/topology/Observation.hpp"       // for Observation
+#include "solver/topology/State.hpp"       // for State
+
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/enumerated_observations.hpp"
+
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/Observation.hpp"       // for Observation
-#include "solver/State.hpp"       // for State
 
-#include "solver/enumerated_actions.hpp"
-#include "solver/enumerated_observations.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
 
@@ -53,68 +56,70 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
         GOAL = -2,
     };
 
-    std::string getName() {
+    virtual std::string getName() override {
         return "RockSample";
     }
 
     /***** Start implementation of Model's methods *****/
     // Simple getters
-    long getNStVars() {
+    virtual long getNStVars() override {
         return nStVars_;
     }
-    double getMinVal() {
+    virtual double getMinVal() override {
         return minVal_;
     }
-    double getMaxVal() {
+    virtual double getMaxVal() override {
         return maxVal_;
     }
 
     // Other methods
-    std::unique_ptr<solver::State> sampleAnInitState();
+    virtual std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates a state uniformly at random. */
-    std::unique_ptr<solver::State> sampleStateUniform();
+    virtual std::unique_ptr<solver::State> sampleStateUniform() override;
 
-    bool isTerminal(solver::State const &state);
-    double getHeuristicValue(solver::State const &state);
-    double getDefaultVal();
+    virtual bool isTerminal(solver::State const &state) override;
+    virtual double getHeuristicValue(solver::State const &state) override;
+    virtual double getDefaultVal() override;
 
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
-            solver::State const &state, solver::Action const &action);
+            solver::State const &state, solver::Action const &action) override;
     virtual std::unique_ptr<solver::Observation> generateObservation(
-            solver::Action const &action, solver::State const &nextState);
+            solver::Action const &action,
+            solver::State const &nextState) override;
     virtual double getReward(solver::State const &state,
-                solver::Action const &action);
+                solver::Action const &action)  override;
     virtual Model::StepResult generateStep(solver::State const &state,
-            solver::Action const &action);
+            solver::Action const &action) override;
 
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action, solver::Observation const &obs,
-            std::vector<solver::State const *> const &previousParticles);
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
-            solver::Action const &action, solver::Observation const &obs);
+            std::vector<solver::State const *> const &previousParticles) override;
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
+            solver::Action const &action,
+            solver::Observation const &obs) override;
 
-    std::vector<long> loadChanges(char const *changeFilename);
-    void update(long time, solver::StatePool *pool);
+    virtual std::vector<long> loadChanges(char const *changeFilename) override;
+    virtual void update(long time, solver::StatePool *pool) override;
 
     /** Displays an individual cell of the map. */
-    void dispCell(RSCellType cellType, std::ostream &os);
+    virtual void dispCell(RSCellType cellType, std::ostream &os);
 
-    void drawEnv(std::ostream &os);
-    void drawState(solver::State const &state, std::ostream &os);
-
-    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
-    getAllActionsInOrder();
+    virtual void drawEnv(std::ostream &os) override;
+    virtual void drawState(solver::State const &state,
+            std::ostream &os) override;
 
     virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
-    getAllObservationsInOrder();
+    getAllActionsInOrder() override;
+    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+    getAllObservationsInOrder() override;
 
   private:
     /**
-     * Finds and counts the rocks on the map, and initialises the required
+     * Finds and counts the rocks on the map, and initializes the required
      * data structures and variables.
      */
-    void initialise();
+    void initialize();
 
     /** Generates a random position within the problem space. */
     GridPosition samplePosition();

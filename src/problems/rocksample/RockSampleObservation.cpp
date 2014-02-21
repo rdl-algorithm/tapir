@@ -9,7 +9,7 @@
 
 #include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/Observation.hpp"             // for Observation
+#include "solver/topology/Observation.hpp"             // for Observation
 
 namespace rocksample {
 

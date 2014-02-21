@@ -6,11 +6,13 @@
 #include <spatialindex/RTree.h>
 #include <spatialindex/tools/Tools.h>
 
-#include "global.hpp"
+#include "solver/topology/State.hpp"
+#include "solver/topology/Vector.hpp"
+#include "solver/StateInfo.hpp"
+
 #include "SpatialIndexVisitor.hpp"
-#include "State.hpp"
-#include "StateInfo.hpp"
-#include "Vector.hpp"
+
+#include "global.hpp"
 
 namespace solver {
 RTree::RTree(unsigned int nSDim) :

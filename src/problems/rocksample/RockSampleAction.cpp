@@ -9,7 +9,7 @@
 
 #include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/State.hpp"             // for State
+#include "solver/topology/State.hpp"             // for State
 
 namespace rocksample {
 RockSampleAction::RockSampleAction(ActionType actionType, long rockNo) :

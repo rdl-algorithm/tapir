@@ -16,8 +16,13 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"                   // for Action
-#include "ActionMapping.hpp"
+#include "topology/Action.hpp"                   // for Action
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"                    // for State, operator<<
+
+#include "mappings/ActionMapping.hpp"
+#include "mappings/ObservationMapping.hpp"
+
 #include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
 #include "BeliefTree.hpp"               // for BeliefTree
 #include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
@@ -25,15 +30,13 @@
 #include "HistoryEntry.hpp"             // for HistoryEntry
 #include "HistorySequence.hpp"          // for HistorySequence
 #include "Model.hpp"                    // for Model::StepResult, Model
-#include "Observation.hpp"              // for Observation
-#include "ObservationMapping.hpp"
-#include "Serializer.hpp"               // for Serializer
-#include "State.hpp"                    // for State, operator<<
 #include "StateInfo.hpp"                // for StateInfo
 #include "StatePool.hpp"                // for StatePool
 
-#include "RTree.hpp"
-#include "SpatialIndexVisitor.hpp"
+#include "serialization/Serializer.hpp"               // for Serializer
+
+#include "indexing/RTree.hpp"
+#include "indexing/SpatialIndexVisitor.hpp"
 
 using std::cerr;
 using std::cout;
@@ -48,7 +51,7 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     observationPool_(model_->createObservationPool()),
     allStates_(std::make_unique<StatePool>(model_->createStateIndex())),
     allHistories_(std::make_unique<Histories>()),
-    policy_(),
+    policy_(std::make_unique<BeliefTree>()),
     lastRolloutMode_(ROLLOUT_RANDHEURISTIC),
     heuristicExploreCoefficient_(this->model_->getHeuristicExploreCoefficient()),
     timeUsedPerHeuristic_{ 1.0, 1.0 },

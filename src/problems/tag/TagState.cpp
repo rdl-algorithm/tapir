@@ -8,7 +8,7 @@
 
 #include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/State.hpp"             // for State
+#include "solver/topology/State.hpp"             // for State
 
 namespace tag {
 TagState::TagState(GridPosition robotPos, GridPosition opponentPos,
@@ -67,5 +67,18 @@ void TagState::print(std::ostream &os) const {
     if (isTagged_) {
         os << " TAGGED!";
     }
+}
+
+
+GridPosition TagState::getRobotPosition() const {
+    return robotPos_;
+}
+
+GridPosition TagState::getOpponentPosition() const {
+    return opponentPos_;
+}
+
+bool TagState::isTagged() const {
+    return isTagged_;
 }
 } /* namespace tag */

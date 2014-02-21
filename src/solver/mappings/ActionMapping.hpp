@@ -3,7 +3,7 @@
 
 #include <memory>                       // for unique_ptr
 
-#include "Action.hpp"              // for Action
+#include "solver/topology/Action.hpp"              // for Action
 #include "global.hpp"
 
 namespace solver {

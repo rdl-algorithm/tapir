@@ -12,13 +12,17 @@
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
 
-#include "Action.hpp"                   // for Action
-#include "ActionMapping.hpp"
+#include "topology/Action.hpp"                   // for Action
+#include "topology/Observation.hpp"              // for Observation
+#include "topology/State.hpp"                    // for State
+
+#include "mappings/ActionMapping.hpp"
+
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry
-#include "Observation.hpp"              // for Observation
+
 #include "RandomAccessSet.hpp"
-#include "State.hpp"                    // for State
+
 
 using std::cerr;
 using std::endl;

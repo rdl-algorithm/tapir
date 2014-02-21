@@ -3,7 +3,7 @@
 
 #include <memory>                       // for unique_ptr
 
-#include "Observation.hpp"              // for Observation
+#include "solver/topology/Observation.hpp"              // for Observation
 
 namespace solver {
 class BeliefNode;

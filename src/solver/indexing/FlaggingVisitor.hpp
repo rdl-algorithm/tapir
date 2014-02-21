@@ -1,8 +1,9 @@
 #ifndef solver_FLAGGINGVISITOR_HPP_
 #define solver_FLAGGINGVISITOR_HPP_
 
+#include "solver/ChangeFlags.hpp"
+
 #include "SpatialIndexVisitor.hpp"
-#include "ChangeFlags.hpp"
 
 #include "global.hpp"
 
@@ -16,7 +17,7 @@ class FlaggingVisitor: public solver::SpatialIndexVisitor {
     virtual ~FlaggingVisitor() = default;
     _NO_COPY_OR_MOVE(FlaggingVisitor);
 
-    virtual void visit(StateInfo *info);
+    virtual void visit(StateInfo *info) override;
   private:
     ChangeFlags flagsToSet_;
 };

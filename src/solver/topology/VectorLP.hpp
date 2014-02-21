@@ -16,13 +16,13 @@ public:
     virtual ~VectorLP() = default;
     _NO_COPY_OR_MOVE(VectorLP);
 
-    virtual bool equals(Point const &otherPoint) const;
-    virtual std::size_t hash() const;
-    virtual void print(std::ostream &os) const;
+    virtual bool equals(Point const &otherPoint) const override;
+    virtual std::size_t hash() const override;
+    virtual void print(std::ostream &os) const override;
 
-    virtual std::unique_ptr<Point> copy() const;
-    double distanceTo(Point const &otherPoint) const;
-    std::vector<double> asVector() const;
+    virtual std::unique_ptr<Point> copy() const override;
+    double distanceTo(Point const &otherPoint) const override;
+    std::vector<double> asVector() const override;
 
     // Extra vector-like accessors for convenience.
     double &operator[](std::size_t index);

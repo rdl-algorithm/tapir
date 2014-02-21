@@ -10,8 +10,8 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"                   // for Action
-#include "Observation.hpp"              // for Observation
+#include "topology/Action.hpp"                   // for Action
+#include "topology/Observation.hpp"              // for Observation
 #include "RandomAccessSet.hpp"
 
 namespace solver {
@@ -26,6 +26,7 @@ class BeliefNode {
     friend class ApproximateObservationTextSerializer;
     friend class EnumeratedActionTextSerializer;
     friend class EnumeratedObservationTextSerializer;
+    friend class DiscreteObservationTextSerializer;
 
     /** Constructs a new belief node with an auto-generated ID and no
      * action mapping. */

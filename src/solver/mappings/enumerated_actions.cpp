@@ -4,16 +4,19 @@
 #include <cmath>
 
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <vector>
 
-#include "Action.hpp"
-#include "ActionNode.hpp"
+#include "solver/ActionNode.hpp"
+#include "solver/BeliefNode.hpp"
+#include "solver/Model.hpp"
+
+#include "solver/topology/Action.hpp"
+#include "solver/topology/EnumeratedPoint.hpp"
+
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"
-#include "BeliefNode.hpp"
-#include "EnumeratedPoint.hpp"
-#include "Model.hpp"
 #include "ObservationPool.hpp"
 
 namespace solver {
@@ -29,9 +32,6 @@ EnumeratedActionPool::EnumeratedActionPool(RandomGenerator *randGen,
         std::vector<std::unique_ptr<EnumeratedPoint>> actions) :
     randGen_(randGen),
     allActions_(std::move(actions)) {
-}
-
-EnumeratedActionPool::~EnumeratedActionPool() {
 }
 
 std::unique_ptr<ActionMapping>
@@ -60,7 +60,7 @@ EnumeratedActionMap::EnumeratedActionMap(ObservationPool *observationPool,
                 actionOrder_(actionOrder),
                 nextActionIterator_(actionOrder_.cbegin()),
                 bestAction_(nullptr),
-                bestMeanQValue_(0) {
+                bestMeanQValue_(-std::numeric_limits<double>::infinity()) {
 }
 
 ActionNode* EnumeratedActionMap::getActionNode(Action const &action) const {
@@ -94,44 +94,37 @@ std::unique_ptr<Action> EnumeratedActionMap::getNextActionToTry() {
 
 std::unique_ptr<Action> EnumeratedActionMap::getSearchAction(
         double exploreCoefficient) {
-    std::vector<std::unique_ptr<ActionNode>>::const_iterator iter = (
-            children_.cbegin());
-    double maxVal = ((*iter)->getMeanQValue() + exploreCoefficient
-                      * std::sqrt(std::log(getNChildren())
-                             / (*iter)->getNParticles()));
-    Action const *bestAction = (*iter)->getAction();
-    iter++;
-    for (; iter != children_.cend(); iter++) {
-        double tmpVal = ((*iter)->getMeanQValue() + exploreCoefficient
-             * std::sqrt(
-                     std::log(getNChildren())
-                     / (*iter)->getNParticles()));
+    double maxVal = -std::numeric_limits<double>::infinity();
+    Action const *bestAction = nullptr;
+    for (std::unique_ptr<ActionNode> const &node : children_) {
+        if (node == nullptr) {
+            continue;
+        }
+        double tmpVal = node->getMeanQValue() + exploreCoefficient * std::sqrt(
+                std::log(getNChildren()) / node->getNParticles());
         if (maxVal < tmpVal) {
             maxVal = tmpVal;
-            bestAction = (*iter)->getAction();
+            bestAction = node->getAction();
         }
     }
     return bestAction->copy();
 }
 
 void EnumeratedActionMap::updateBestValue() {
+    bestAction_ = nullptr;
+    bestMeanQValue_ = -std::numeric_limits<double>::infinity();
     if (getNChildren() == 0) {
-        bestAction_ = nullptr;
-        bestMeanQValue_ = 0;
         std::cerr << "No children - could not update Q-value!" << std::endl;
         return;
     }
-
-    std::vector<std::unique_ptr<ActionNode>>::const_iterator iter = (
-                children_.cbegin());
-    bestMeanQValue_ = (*iter)->getMeanQValue();
-    bestAction_ = (*iter)->getAction();
-    iter++;
-    for (; iter != children_.cend(); iter++) {
-        double meanQValue = (*iter)->getMeanQValue();
+    for (std::unique_ptr<ActionNode> const &node : children_) {
+        if (node == nullptr) {
+            continue;
+        }
+        double meanQValue = node->getMeanQValue();
         if (bestMeanQValue_ < meanQValue) {
             bestMeanQValue_ = meanQValue;
-            bestAction_ = (*iter)->getAction();
+            bestAction_ = node->getAction();
         }
     }
 }
@@ -161,21 +154,21 @@ void EnumeratedActionTextSerializer::saveActionMapping(
     EnumeratedActionMap const &enumMap = (
             static_cast<EnumeratedActionMap const &>(map));
     std::vector<long>::const_iterator it = enumMap.actionOrder_.cbegin();
-    os << "TRIED (";
+    os << "TRIED   (";
     for (; it != enumMap.nextActionIterator_; it++) {
         os << *enumMap.allActions_[*it];
         if (std::next(it) != enumMap.nextActionIterator_) {
             os << ", ";
         }
-        os << ") // UNTRIED (";
     }
+    os << ")" << std::endl << "UNTRIED (";
     for (; it != enumMap.actionOrder_.cend(); it++) {
         os << *enumMap.allActions_[*it];
         if (std::next(it) != enumMap.actionOrder_.cend()) {
             os << ", ";
         }
     }
-    os << ");" << std::endl;
+    os << ")" << std::endl;
     os << enumMap.getNChildren() << std::endl;
     for (std::unique_ptr<ActionNode> const &child : enumMap.children_) {
         if (child != nullptr) {
@@ -192,16 +185,19 @@ EnumeratedActionTextSerializer::loadActionMapping(std::istream &is) {
             solver_->actionPool_->createActionMapping().release()));
 
     std::string line;
-    std::getline(is, line);
-    std::stringstream sstr(line);
-    std::string tmpStr;
     std::vector<long>::iterator codeIterator = map->actionOrder_.begin();
     for (int i = 0; i < 2; i++) {
+        std::getline(is, line);
+        std::stringstream sstr(line);
+        std::string tmpStr;
         if (i == 1) {
             map->nextActionIterator_ = codeIterator;
         }
         std::getline(sstr, tmpStr, '(');
         std::getline(sstr, tmpStr, ')');
+        if (tmpStr == "") {
+            continue;
+        }
         std::stringstream sstr2(tmpStr);
         std::string actionString;
         while (!sstr2.eof()) {
@@ -214,8 +210,7 @@ EnumeratedActionTextSerializer::loadActionMapping(std::istream &is) {
     }
 
     std::getline(is, line);
-    sstr.clear();
-    sstr.str(line);
+    std::stringstream sstr(line);
     sstr >> map->nChildren_;
 
     for (long i = 0; i < map->nChildren_; i++) {

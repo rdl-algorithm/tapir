@@ -4,11 +4,12 @@
 #include <memory>
 #include <vector>
 
-#include "Action.hpp"
+#include "solver/serialization/Serializer.hpp"
+#include "solver/topology/Action.hpp"
+#include "solver/Model.hpp"
+
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"
-#include "Model.hpp"
-#include "Serializer.hpp"
 
 #include "global.hpp"
 
@@ -20,7 +21,7 @@ class EnumeratedPoint;
 class ModelWithEnumeratedActions : virtual public solver::Model {
 public:
     ModelWithEnumeratedActions() = default;
-    virtual ~ModelWithEnumeratedActions();
+    virtual ~ModelWithEnumeratedActions() = default;
     _NO_COPY_OR_MOVE(ModelWithEnumeratedActions);
 
     virtual std::unique_ptr<ActionPool> createActionPool() override;
@@ -33,7 +34,7 @@ class EnumeratedActionPool: public solver::ActionPool {
   public:
     EnumeratedActionPool(RandomGenerator *randGen,
             std::vector<std::unique_ptr<EnumeratedPoint>> actions);
-    virtual ~EnumeratedActionPool();
+    virtual ~EnumeratedActionPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedActionPool);
 
     virtual std::unique_ptr<ActionMapping> createActionMapping() override;
@@ -52,24 +53,24 @@ class EnumeratedActionMap: public solver::ActionMapping {
             std::vector<long> actionOrder);
 
     // Default destructor; copying and moving disallowed!
-    virtual ~EnumeratedActionMap();
+    virtual ~EnumeratedActionMap() = default;
     _NO_COPY_OR_MOVE(EnumeratedActionMap);
 
-    virtual ActionNode *getActionNode(Action const &action) const;
-    virtual ActionNode *createActionNode(Action const &action);
+    virtual ActionNode *getActionNode(Action const &action) const override;
+    virtual ActionNode *createActionNode(Action const &action) override;
 
-    virtual long getNChildren() const;
+    virtual long getNChildren() const override;
     virtual long size() const;
 
-    virtual bool hasActionToTry() const;
-    virtual std::unique_ptr<Action> getNextActionToTry();
+    virtual bool hasActionToTry() const override;
+    virtual std::unique_ptr<Action> getNextActionToTry() override;
 
     virtual std::unique_ptr<Action> getSearchAction(
-            double exploreCofficient);
+            double exploreCofficient) override;
 
-    virtual void updateBestValue();
-    virtual std::unique_ptr<Action> getBestAction() const;
-    virtual double getBestMeanQValue() const;
+    virtual void updateBestValue() override;
+    virtual std::unique_ptr<Action> getBestAction() const override;
+    virtual double getBestMeanQValue() const override;
   private:
     std::vector<std::unique_ptr<EnumeratedPoint>> const &allActions_;
     ObservationPool *observationPool_;
@@ -91,13 +92,13 @@ class EnumeratedActionTextSerializer: virtual public solver::Serializer {
     _NO_COPY_OR_MOVE(EnumeratedActionTextSerializer);
 
     virtual void saveActionPool(
-            ActionPool const &actionPool, std::ostream &os);
+            ActionPool const &actionPool, std::ostream &os) override;
     virtual std::unique_ptr<ActionPool> loadActionPool(
-            std::istream &is);
+            std::istream &is) override;
     virtual void saveActionMapping(ActionMapping const &map,
-            std::ostream &os);
+            std::ostream &os) override;
     virtual std::unique_ptr<ActionMapping> loadActionMapping(
-            std::istream &is);
+            std::istream &is) override;
 };
 } /* namespace solver */
 

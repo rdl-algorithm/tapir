@@ -101,7 +101,7 @@ class Nav2DModel : public ModelWithProgramOptions {
 
   private:
     /** Initialises the required data structures and variables */
-    void initialise();
+    void initialize();
 
     // General problem parameters
     long nActions_, nStVars_;

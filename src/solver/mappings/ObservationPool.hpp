@@ -14,7 +14,7 @@ public:
     virtual ~ObservationPool() = default;
     _NO_COPY_OR_MOVE(ObservationPool);
 
-    virtual std::unique_ptr<ObservationMapping> createObservationMapping();
+    virtual std::unique_ptr<ObservationMapping> createObservationMapping() = 0;
 protected:
     ActionPool *actionPool_ = nullptr;
 };

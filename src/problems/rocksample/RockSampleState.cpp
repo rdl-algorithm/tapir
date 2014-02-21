@@ -9,7 +9,7 @@
 
 #include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/State.hpp"             // for State
+#include "solver/topology/State.hpp"             // for State
 
 namespace rocksample {
 RockSampleState::RockSampleState(GridPosition position,
@@ -58,17 +58,6 @@ std::size_t RockSampleState::hash() const {
     return hashValue;
 }
 
-
-std::vector<double> RockSampleState::asVector() const {
-    std::vector<double> vec(2 + rockStates_.size());
-    vec[0] = position_.i;
-    vec[1] = position_.j;
-    for (std::size_t i = 0; i < rockStates_.size(); i++) {
-        vec[i + 2] = rockStates_[i] ? 1 : 0;
-    }
-    return vec;
-}
-
 void RockSampleState::print(std::ostream &os) const {
     os << position_ << " GOOD: {";
     std::vector<int> goodRocks;
@@ -87,4 +76,23 @@ void RockSampleState::print(std::ostream &os) const {
             std::ostream_iterator<double>(os, " "));
     os << "}";
 }
+
+
+std::vector<double> RockSampleState::asVector() const {
+    std::vector<double> vec(2 + rockStates_.size());
+    vec[0] = position_.i;
+    vec[1] = position_.j;
+    for (std::size_t i = 0; i < rockStates_.size(); i++) {
+        vec[i + 2] = rockStates_[i] ? 1 : 0;
+    }
+    return vec;
+}
+
+GridPosition RockSampleState::getPosition() const {
+     return position_;
+}
+
+ std::vector<bool> RockSampleState::getRockStates() const {
+     return rockStates_;
+ }
 } /* namespace rocksample */

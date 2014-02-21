@@ -27,32 +27,32 @@ class ModelWithProgramOptions : public virtual solver::Model {
     _NO_COPY_OR_MOVE(ModelWithProgramOptions);
 
     // Simple getters
-    virtual RandomGenerator *getRandomGenerator() {
+    virtual RandomGenerator *getRandomGenerator() override {
         return randGen_;
     }
 
-    virtual double getDiscountFactor() const {
+    virtual double getDiscountFactor() override {
         return discountFactor_;
     }
-    virtual long getNParticles() const {
+    virtual long getNParticles() override {
         return nParticles_;
     }
-    virtual long getMaxTrials() const {
+    virtual long getMaxTrials() override {
         return maxTrials_;
     }
-    virtual double getMinimumDiscount() const {
+    virtual double getMinimumDiscount() override {
         return minimumDiscount_;
     }
-    virtual double getUcbExploreCoefficient() const {
+    virtual double getUcbExploreCoefficient() override {
         return ucbExploreCoefficient_;
     }
-    virtual double getHeuristicExploreCoefficient() const {
+    virtual double getHeuristicExploreCoefficient() override {
         return heuristicExploreCoefficient_;
     }
-    virtual long getMaxNnComparisons() const {
+    virtual long getMaxNnComparisons() override {
         return maxNnComparisons_;
     }
-    virtual double getMaxNnDistance() const {
+    virtual double getMaxNnDistance() override {
         return maxNnDistance_;
     }
 
