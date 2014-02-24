@@ -4,10 +4,10 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "topology/Action.hpp"                   // for Action
+#include "geometry/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "topology/Observation.hpp"              // for Observation
-#include "topology/State.hpp"
+#include "geometry/Observation.hpp"              // for Observation
+#include "geometry/State.hpp"
 
 #include "global.hpp"
 

@@ -12,8 +12,8 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/Model.hpp"
 
-#include "solver/topology/Action.hpp"
-#include "solver/topology/EnumeratedPoint.hpp"
+#include "solver/geometry/Action.hpp"
+#include "solver/geometry/EnumeratedPoint.hpp"
 
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"

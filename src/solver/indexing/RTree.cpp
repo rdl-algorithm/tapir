@@ -6,8 +6,8 @@
 #include <spatialindex/RTree.h>
 #include <spatialindex/tools/Tools.h>
 
-#include "solver/topology/State.hpp"
-#include "solver/topology/Vector.hpp"
+#include "solver/geometry/State.hpp"
+#include "solver/geometry/Vector.hpp"
 #include "solver/StateInfo.hpp"
 
 #include "SpatialIndexVisitor.hpp"

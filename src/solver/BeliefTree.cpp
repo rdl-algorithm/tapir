@@ -6,7 +6,7 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "topology/Observation.hpp"
+#include "geometry/Observation.hpp"
 #include "mappings/ActionMapping.hpp"
 
 #include "BeliefNode.hpp"               // for BeliefNode

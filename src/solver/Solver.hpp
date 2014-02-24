@@ -8,11 +8,11 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "topology/Action.hpp"                   // for Action
+#include "geometry/Action.hpp"                   // for Action
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "Model.hpp"                    // for Model, Model::StepResult
-#include "topology/Observation.hpp"              // for Observation
-#include "topology/State.hpp"
+#include "geometry/Observation.hpp"              // for Observation
+#include "geometry/State.hpp"
 
 namespace tag {
 class TagTextSerializer;

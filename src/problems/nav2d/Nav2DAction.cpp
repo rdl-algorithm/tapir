@@ -1,4 +1,4 @@
-#include "RockSampleAction.hpp"
+#include "Nav2DAction.hpp"
 
 #include <cstddef>                      // for size_t
 
@@ -11,26 +11,30 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/geometry/State.hpp"             // for State
 
-namespace rocksample {
-RockSampleAction::RockSampleAction(ActionType actionType, long rockNo) :
+namespace nav2d {
+Nav2DAction::ACTIONS = {
+
+};
+
+Nav2DAction::Nav2DAction(ActionType actionType, long rockNo) :
         actionType_(actionType),
         rockNo_(rockNo) {
 }
 
-RockSampleAction::RockSampleAction(long code) :
+Nav2DAction::Nav2DAction(long code) :
         actionType_(code <= 5 ? static_cast<ActionType>(code) : ActionType::CHECK),
         rockNo_(actionType_ == ActionType::CHECK ? code-5 : 0) {
 }
 
-std::unique_ptr<solver::Action> RockSampleAction::copy() const {
-    return std::make_unique<RockSampleAction>(actionType_,rockNo_);
+std::unique_ptr<solver::Action> Nav2DAction::copy() const {
+    return std::make_unique<Nav2DAction>(actionType_,rockNo_);
 }
 
-double RockSampleAction::distanceTo(solver::Action const &/*otherAction*/) const {
+double Nav2DAction::distanceTo(solver::Action const &/*otherAction*/) const {
     return 0;
 }
 
-void RockSampleAction::print(std::ostream &os) const {
+void Nav2DAction::print(std::ostream &os) const {
     if (actionType_ == ActionType::CHECK) {
         os << "CHECK-" << rockNo_;
         return;
@@ -57,7 +61,7 @@ void RockSampleAction::print(std::ostream &os) const {
     }
 }
 
-long RockSampleAction::getCode() const {
+long Nav2DAction::getCode() const {
     long code = static_cast<long>(actionType_);
     if (actionType_ == ActionType::CHECK) {
         code += rockNo_;
@@ -65,11 +69,11 @@ long RockSampleAction::getCode() const {
     return code;
 }
 
-ActionType RockSampleAction::getActionType() const {
+ActionType Nav2DAction::getActionType() const {
     return actionType_;
 }
 
-long RockSampleAction::getRockNo() const {
+long Nav2DAction::getRockNo() const {
     return rockNo_;
 }
-} /* namespace rocksample */
+} /* namespace nav2d */

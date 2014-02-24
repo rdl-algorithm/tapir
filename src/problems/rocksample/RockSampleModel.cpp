@@ -22,9 +22,9 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
-#include "solver/topology/Action.hpp"            // for Action
-#include "solver/topology/Observation.hpp"       // for Observation
-#include "solver/topology/State.hpp"       // for State
+#include "solver/geometry/Action.hpp"            // for Action
+#include "solver/geometry/Observation.hpp"       // for Observation
+#include "solver/geometry/State.hpp"       // for State
 
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/enumerated_observations.hpp"

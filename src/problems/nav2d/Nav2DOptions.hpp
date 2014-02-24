@@ -17,14 +17,23 @@ class Nav2DOptions : public ProgramOptions {
         po::options_description problem("Settings specific to the Nav2D POMDP");
         problem.add(ProgramOptions::getProblemOptions());
         problem.add_options()
-                ("problem.mapPath,m", po::value<std::string>(), "path to map file")
-                ("problem.moveCost", po::value<double>(), "movement cost")
-                ("problem.nav2dReward", po::value<double>(),
-                        "reward for nav2dging the opponent")
-                ("problem.failedNav2DPenalty", po::value<double>(),
-                        "penalty for attempting to nav2d the opponent but failing")
-                ("problem.opponentStayProbability", po::value<double>(),
-                        "probability that the opponent will stay in place");
+                ("problem.mapPath,m", po::value<std::string>(),
+                        "path to map file")
+                ("problem.timeStepLength,m", po::value<double>(),
+                        "path to map file")
+                ("problem.costPerUnitDistance", po::value<double>(),
+                        "cost per unit distance travelled"),
+                ("problem.costPerRevolution", po::value<double>(),
+                        "cost per 360 degrees of turning"),
+                ("problem.speedErrorType", po::value<std::string>(),
+                        "type of error in the speed signal")
+                ("problem.speedErrorSD", po::value<double>(),
+                        "standard deviation for errors in the speed")
+                ("problem.rotationErrorType", po::value<std::string>(),
+                        "standard deviation for errors in the speed")
+                ("problem.rotationErrorSD", po::value<double>(),
+                        "standard deviation for errors in angular velocity;"
+                        "measured in turns (360deg) per unit time.");
         return problem;
     }
 

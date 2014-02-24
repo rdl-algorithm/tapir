@@ -2,7 +2,7 @@ MODULE_NAME = problems
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS := shared rocksample tag
+CHILD_FOLDERS := shared rocksample tag nav2d
 include .make/template.mk
 
 else

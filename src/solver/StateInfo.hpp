@@ -6,7 +6,7 @@
 #include <vector>                       // for vector
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "topology/State.hpp"
+#include "geometry/State.hpp"
 
 #include "global.hpp"
 

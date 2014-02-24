@@ -13,11 +13,11 @@
 #include <boost/program_options.hpp>    // for variables_map, options_description, positional_options_description, variable_value, store, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
-#include "solver/topology/Action.hpp"
-#include "solver/topology/Observation.hpp"       // for Observation
+#include "solver/geometry/Action.hpp"
+#include "solver/geometry/Observation.hpp"       // for Observation
 #include "solver/serialization/Serializer.hpp"        // for Serializer
 #include "solver/Solver.hpp"            // for Solver
-#include "solver/topology/State.hpp"             // for operator<<, State
+#include "solver/geometry/State.hpp"             // for operator<<, State
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 

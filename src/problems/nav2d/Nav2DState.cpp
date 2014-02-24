@@ -1,65 +1,98 @@
 #include "Nav2DState.hpp"
 
 #include <cstddef>                      // for size_t
-#include <cmath>                        // for pow
 
-#include <functional>   // for hash
-#include <ostream>                      // for operator<<, ostream, basic_ostream>
-#include <vector>
+#include <algorithm>                    // for copy
+#include <iterator>                     // for ostream_iterator
+#include <ostream>                      // for operator<<, ostream
+#include <vector>                       // for vector, operator==, _Bit_const_iterator, _Bit_iterator_base, hash, vector<>::const_iterator
 
 #include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/State.hpp"             // for State
+#include "solver/geometry/State.hpp"             // for State
 
 namespace nav2d {
-constexpr double normalizeTurns(double numTurns) {
-    double value = std::fmod(numTurns, 1);
-    return value <= -0.5 ? value + 1 : (value > 0.5 ? value-1 : value);
-}
-
-constexpr double DISTANCE_PER_TURN = 1;
-
-Nav2DState::Nav2DState(double x, double y, double numTurns) :
+Nav2DState::Nav2DState(GridPosition position,
+        std::vector<bool> rockStates) :
     solver::Vector(),
-    x_(x),
-    y_(y),
-    numTurns_(normalizeTurns(numTurns)) {
+    position_(position),
+    rockStates_(rockStates) {
 }
 
 Nav2DState::Nav2DState(Nav2DState const &other) :
-        Nav2DState(other.x_, other.y_, other.numTurns_) {
+    Nav2DState(other.position_, other.rockStates_) {
 }
 
 std::unique_ptr<solver::Point> Nav2DState::copy() const {
-    return std::make_unique<Nav2DState>(this);
+    return std::make_unique<Nav2DState>(position_, rockStates_);
 }
 
 double Nav2DState::distanceTo(solver::State const &otherState) const {
-    Nav2DState const &other = static_cast<Nav2DState const &>(other);
-    double squaredDistance = std::pow(x_ - other.x_, 2);
-    squaredDistance += std::pow(y_ - other.y_, 2);
-    double numTurns = std::abs(normalizeTurns(numTurns_ - other.numTurns_));
-    return std::sqrt(squaredDistance) + DISTANCE_PER_TURN * numTurns;
+    Nav2DState const &otherNav2DState =
+        static_cast<Nav2DState const &>(otherState);
+    double distance = position_.manhattanDistanceTo(
+                otherNav2DState.position_) / 10.0;
+    typedef std::vector<bool>::const_iterator BoolIt;
+    BoolIt it1 = rockStates_.cbegin();
+    BoolIt it2 = otherNav2DState.rockStates_.cbegin();
+    for (; it1 != rockStates_.cend(); it1++, it2++) {
+        if (*it1 != *it2) {
+            distance += 1;
+        }
+    }
+    return distance;
 }
 
 bool Nav2DState::equals(solver::State const &otherState) const {
-    Nav2DState const &other = static_cast<Nav2DState const &>(other);
-    return (x_ == other.x_ && y_ == other.y_ && numTurns_ == other.numTurns_);
+    Nav2DState const &otherNav2DState =
+        static_cast<Nav2DState const &>(otherState);
+    return (position_ == otherNav2DState.position_
+            && rockStates_ == otherNav2DState.rockStates_);
 }
 
 std::size_t Nav2DState::hash() const {
     std::size_t hashValue = 0;
-    abt::hash_combine(hashValue, x_);
-    abt::hash_combine(hashValue, y_);
-    abt::hash_combine(hashValue, numTurns_);
+    abt::hash_combine(hashValue, position_.i);
+    abt::hash_combine(hashValue, position_.j);
+    abt::hash_combine(hashValue, rockStates_);
     return hashValue;
 }
 
-std::vector<double> Nav2DState::asVector() const {
-    return std::vector<double> {x_, y_, numTurns_};
+void Nav2DState::print(std::ostream &os) const {
+    os << position_ << " GOOD: {";
+    std::vector<int> goodRocks;
+    std::vector<int> badRocks;
+    for (std::size_t i = 0; i < rockStates_.size(); i++) {
+        if (rockStates_[i]) {
+            goodRocks.push_back(i);
+        } else {
+            badRocks.push_back(i);
+        }
+    }
+    std::copy(goodRocks.begin(), goodRocks.end(),
+            std::ostream_iterator<double>(os, " "));
+    os << "}; BAD: {";
+    std::copy(badRocks.begin(), badRocks.end(),
+            std::ostream_iterator<double>(os, " "));
+    os << "}";
 }
 
-void Nav2DState::print(std::ostream &os) const {
-    os << "(" << x_ << ", " << y_ << ") < " << numTurns_ * 360 << " deg";
+
+std::vector<double> Nav2DState::asVector() const {
+    std::vector<double> vec(2 + rockStates_.size());
+    vec[0] = position_.i;
+    vec[1] = position_.j;
+    for (std::size_t i = 0; i < rockStates_.size(); i++) {
+        vec[i + 2] = rockStates_[i] ? 1 : 0;
+    }
+    return vec;
 }
+
+GridPosition Nav2DState::getPosition() const {
+     return position_;
+}
+
+ std::vector<bool> Nav2DState::getRockStates() const {
+     return rockStates_;
+ }
 } /* namespace nav2d */

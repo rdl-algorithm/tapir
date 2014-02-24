@@ -16,9 +16,9 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "topology/Action.hpp"                   // for Action
-#include "topology/Observation.hpp"              // for Observation
-#include "topology/State.hpp"                    // for State, operator<<
+#include "geometry/Action.hpp"                   // for Action
+#include "geometry/Observation.hpp"              // for Observation
+#include "geometry/State.hpp"                    // for State, operator<<
 
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"

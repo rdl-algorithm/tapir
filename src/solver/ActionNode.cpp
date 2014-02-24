@@ -6,8 +6,8 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "topology/Action.hpp"                   // for Action
-#include "topology/Observation.hpp"              // for Observation
+#include "geometry/Action.hpp"                   // for Action
+#include "geometry/Observation.hpp"              // for Observation
 #include "mappings/ObservationMapping.hpp"       // for ObservationMapping
 
 namespace solver {

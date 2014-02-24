@@ -1,4 +1,4 @@
-#include "RockSampleObservation.hpp"
+#include "Nav2DObservation.hpp"
 
 #include <cstddef>                      // for size_t
 
@@ -11,49 +11,49 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/geometry/Observation.hpp"             // for Observation
 
-namespace rocksample {
+namespace nav2d {
 
-RockSampleObservation::RockSampleObservation() :
+Nav2DObservation::Nav2DObservation() :
         isEmpty_(true),
         isGood_(false) {
 }
 
-RockSampleObservation::RockSampleObservation(bool _isGood) :
+Nav2DObservation::Nav2DObservation(bool _isGood) :
         isEmpty_(false),
         isGood_(_isGood) {
 }
 
-RockSampleObservation::RockSampleObservation(bool _isEmpty, bool _isGood) :
+Nav2DObservation::Nav2DObservation(bool _isEmpty, bool _isGood) :
         isEmpty_(_isEmpty),
         isGood_(_isGood) {
 }
 
-RockSampleObservation::RockSampleObservation(long code) :
+Nav2DObservation::Nav2DObservation(long code) :
         isEmpty_(code == 0),
         isGood_(code == 1) {
 }
 
-std::unique_ptr<solver::Observation> RockSampleObservation::copy() const {
-    return std::make_unique<RockSampleObservation>(isEmpty_,isGood_);
+std::unique_ptr<solver::Observation> Nav2DObservation::copy() const {
+    return std::make_unique<Nav2DObservation>(isEmpty_,isGood_);
 }
 
-double RockSampleObservation::distanceTo(solver::Observation const &otherObs) const {
-    RockSampleObservation const &other =
-            static_cast<RockSampleObservation const &>(otherObs);
+double Nav2DObservation::distanceTo(solver::Observation const &otherObs) const {
+    Nav2DObservation const &other =
+            static_cast<Nav2DObservation const &>(otherObs);
     return isGood_ == other.isGood_ ? 0 : 1;
 }
 
-bool RockSampleObservation::equals(solver::Observation const &otherObs) const {
-    RockSampleObservation const &other =
-        static_cast<RockSampleObservation const &>(otherObs);
+bool Nav2DObservation::equals(solver::Observation const &otherObs) const {
+    Nav2DObservation const &other =
+        static_cast<Nav2DObservation const &>(otherObs);
     return isGood_ == other.isGood_;
 }
 
-std::size_t RockSampleObservation::hash() const {
+std::size_t Nav2DObservation::hash() const {
     return isGood_ ? 1 : 0;
 }
 
-void RockSampleObservation::print(std::ostream &os) const {
+void Nav2DObservation::print(std::ostream &os) const {
     if (isEmpty_) {
         os << "NONE";
     } else if (isGood_) {
@@ -63,16 +63,16 @@ void RockSampleObservation::print(std::ostream &os) const {
     }
 }
 
-long RockSampleObservation::getCode() const {
+long Nav2DObservation::getCode() const {
     return isEmpty_ ? 0 : (isGood_ ? 1 : 2);
 }
 
-bool RockSampleObservation::isEmpty() const {
+bool Nav2DObservation::isEmpty() const {
     return isEmpty_;
 }
 
-bool RockSampleObservation::isGood() const {
+bool Nav2DObservation::isGood() const {
     return isGood_;
 }
 }
-/* namespace rocksample */
+/* namespace nav2d */

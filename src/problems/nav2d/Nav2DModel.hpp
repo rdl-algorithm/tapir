@@ -1,112 +1,181 @@
-#ifndef NAV2DMODEL_HPP_
-#define NAV2DMODEL_HPP_
+#ifndef NAV2D_MODEL_HPP_
+#define NAV2D_MODEL_HPP_
 
+#include <ios>                          // for ostream
 #include <memory>                       // for unique_ptr
-#include <ostream>                      // for ostream
 #include <string>                       // for string
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
 #include <boost/program_options.hpp>    // for variables_map
 
-#include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/Action.hpp"            // for Action
+
+#include "solver/geometry/Action.hpp"            // for Action
+#include "solver/geometry/Observation.hpp"       // for Observation
+#include "solver/geometry/State.hpp"       // for State
+
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/approximate_observations.hpp"
+
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/Observation.hpp"       // for Observation
-#include "solver/State.hpp"
+
+
+#include "global.hpp"                     // for RandomGenerator
 
 namespace po = boost::program_options;
 
 namespace solver {
+class ActionMapping;
 class StatePool;
+class EnumeratedPoint;
 } /* namespace solver */
 
 namespace nav2d {
+class Nav2DAction;
 class Nav2DState;
+class Nav2DObservation;
 
-class Nav2DModel : public ModelWithProgramOptions {
+class Nav2DModel : virtual public ModelWithProgramOptions,
+    virtual public solver::ModelWithEnumeratedActions,
+    virtual public solver::ModelWithApproximateObservations {
   public:
     Nav2DModel(RandomGenerator *randGen, po::variables_map vm);
     ~Nav2DModel() = default;
-    Nav2DModel(Nav2DModel const &) = delete;
-    Nav2DModel(Nav2DModel &&) = delete;
-    Nav2DModel &operator=(Nav2DModel const &) = delete;
-    Nav2DModel &operator=(Nav2DModel &&) = delete;
+    _NO_COPY_OR_MOVE(Nav2DModel);
 
-    /** Enumerates the possible actions */
-    enum Nav2DAction : long {
-        NORTH = 0,
-        EAST = 1,
-        SOUTH = 2,
-        WEST = 3,
-        NAV2D = 4
+    /**
+     * Rocks are enumerated 0, 1, 2, ... ;
+     * other cell types should be negative.
+     */
+    enum RSCellType : int {
+        ROCK = 0,
+        EMPTY = -1,
+        GOAL = -2,
     };
 
-    std::string getName() {
+    virtual std::string getName() override {
         return "Nav2D";
     }
 
-    /***** Start implementation of Model's virtual methods *****/
+    /***** Start implementation of Model's methods *****/
     // Simple getters
-    long getNActions() {
-        return nActions_;
-    }
-    long getNStVars() {
+    virtual long getNStVars() override {
         return nStVars_;
     }
-    double getMinVal() {
+    virtual double getMinVal() override {
         return minVal_;
     }
-    double getMaxVal() {
+    virtual double getMaxVal() override {
         return maxVal_;
     }
 
-    // Other virtual methods
-    std::unique_ptr<solver::State> sampleAnInitState();
-    /** Generates a new nav2d state uniformly at random. */
-    std::unique_ptr<solver::State> sampleStateUniform();
+    // Other methods
+    virtual std::unique_ptr<solver::State> sampleAnInitState() override;
+    /** Generates a state uniformly at random. */
+    virtual std::unique_ptr<solver::State> sampleStateUniform() override;
 
-    bool isTerminal(solver::State const &state);
-    double getHeuristicValue(solver::State const &state);
-    double getDefaultVal();
+    virtual bool isTerminal(solver::State const &state) override;
+    virtual double getHeuristicValue(solver::State const &state) override;
+    virtual double getDefaultVal() override;
 
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
-            solver::State const &state, solver::Action const &action);
+            solver::State const &state, solver::Action const &action) override;
     virtual std::unique_ptr<solver::Observation> generateObservation(
-            solver::Action const &action, solver::State const &nextState);
+            solver::Action const &action,
+            solver::State const &nextState) override;
     virtual double getReward(solver::State const &state,
-                solver::Action const &action);
+                solver::Action const &action)  override;
     virtual Model::StepResult generateStep(solver::State const &state,
-            solver::Action const &action);
+            solver::Action const &action) override;
 
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
+            solver::Action const &action, solver::Observation const &obs,
+            std::vector<solver::State const *> const &previousParticles) override;
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::Action const &action,
-            solver::Observation const &obs,
-            std::vector<solver::State const *> const &previousParticles);
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
-            solver::Action const &action,
-            solver::Observation const &obs);
+            solver::Observation const &obs) override;
 
-    std::vector<long> loadChanges(char const *changeFilename);
-    void update(long time, solver::StatePool *pool);
+    virtual std::vector<long> loadChanges(char const *changeFilename) override;
+    virtual void update(long time, solver::StatePool *pool) override;
 
-    void dispAct(solver::Action const &action, std::ostream &os);
-    void dispObs(solver::Observation const &obs, std::ostream &os);
-    void drawEnv(std::ostream &os);
-    void drawState(solver::State const &state, std::ostream &os);
+    /** Displays an individual cell of the map. */
+    virtual void dispCell(RSCellType cellType, std::ostream &os);
+
+    virtual void drawEnv(std::ostream &os) override;
+    virtual void drawState(solver::State const &state,
+            std::ostream &os) override;
+
+    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+    getAllActionsInOrder() override;
+    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+    getAllObservationsInOrder() override;
 
   private:
-    /** Initialises the required data structures and variables */
+    /**
+     * Finds and counts the rocks on the map, and initializes the required
+     * data structures and variables.
+     */
     void initialize();
 
-    // General problem parameters
-    long nActions_, nStVars_;
+    /** Generates a random position within the problem space. */
+    GridPosition samplePosition();
+    /** Generates the state of the rocks uniformly at random. */
+    std::vector<bool> sampleRocks();
+    /** Decodes rocks from an integer. */
+    std::vector<bool> decodeRocks(long val);
+
+    /**
+     * Generates a next state for the given state and action;
+     * returns true if the action was legal, and false if it was illegal.
+     */
+    std::pair<std::unique_ptr<Nav2DState>, bool> makeNextState(
+            Nav2DState const &state, solver::Action const &action);
+    /** Generates an observation given a next state (i.e. after the action)
+     * and an action.
+     */
+    std::unique_ptr<Nav2DObservation> makeObservation(
+            solver::Action const &action,
+            Nav2DState const &nextState);
+    /** Retrieves the reward via the next state. */
+    double makeReward(Nav2DState const &state,
+            solver::Action const &action, Nav2DState const &nextState,
+            bool isLegal);
+
+    /** The reward for sampling a good rock. */
+    double goodRockReward_;
+    /** The penalty for sampling a bad rock. */
+    double badRockPenalty_;
+    /** The reward for exiting the mapD. */
+    double exitReward_;
+    /** The penalty for an illegal move. */
+    double illegalMovePenalty_;
+    /** The half efficiency distance d0 */
+    double halfEfficiencyDistance_;
+
+    /** The number of rows in the map. */
+    long nRows_;
+    /** The number of columns in the map. */
+    long nCols_;
+    /** The number of rocks on the map. */
+    long nRocks_;
+    /** The starting position. */
+    GridPosition startPos_;
+    /** The coordinates of the rocks. */
+    std::vector<GridPosition> rockPositions_;
+
+    /** The environment map in text form. */
+    std::vector<std::string> mapText_;
+    /** The environment map in vector form. */
+    std::vector<std::vector<RSCellType>> envMap_;
+
+    // Generic problem parameters
+    long nStVars_;
     double minVal_, maxVal_;
 };
 } /* namespace nav2d */
 
-#endif /* NAV2DMODEL_HPP_ */
+#endif /* NAV2D_MODEL_HPP_ */

@@ -1,5 +1,5 @@
-#ifndef ROCKSAMPLE_OBSERVATION_HPP_
-#define ROCKSAMPLE_OBSERVATION_HPP_
+#ifndef NAV2D_OBSERVATION_HPP_
+#define NAV2D_OBSERVATION_HPP_
 
 #include <cstddef>                      // for size_t
 
@@ -11,17 +11,17 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-namespace rocksample {
-class RockSampleObservation : public solver::EnumeratedPoint {
-    friend class RockSampleTextSerializer;
+namespace nav2d {
+class Nav2DObservation : public solver::EnumeratedPoint {
+    friend class Nav2DTextSerializer;
   public:
-    RockSampleObservation();
-    RockSampleObservation(bool _isGood);
-    RockSampleObservation(bool _isEmpty, bool _isGood);
-    RockSampleObservation(long code);
+    Nav2DObservation();
+    Nav2DObservation(bool _isGood);
+    Nav2DObservation(bool _isEmpty, bool _isGood);
+    Nav2DObservation(long code);
 
-    virtual ~RockSampleObservation() = default;
-    _NO_COPY_OR_MOVE(RockSampleObservation);
+    virtual ~Nav2DObservation() = default;
+    _NO_COPY_OR_MOVE(Nav2DObservation);
 
     std::unique_ptr<solver::Observation> copy() const override;
     double distanceTo(solver::Observation const &otherObs) const override;
@@ -38,6 +38,6 @@ class RockSampleObservation : public solver::EnumeratedPoint {
     bool isEmpty_;
     bool isGood_;
 };
-} /* namespace rocksample */
+} /* namespace nav2d */
 
-#endif /* ROCKSAMPLE_OBSERVATION_HPP_ */
+#endif /* NAV2D_OBSERVATION_HPP_ */

@@ -4,8 +4,8 @@
 #include <istream>                      // for istream, ostream
 #include <memory>                       // for unique_ptr
 
-#include "solver/topology/Observation.hpp"              // for Observation
-#include "solver/topology/State.hpp"
+#include "solver/geometry/Observation.hpp"              // for Observation
+#include "solver/geometry/State.hpp"
 #include "solver/Solver.hpp"                   // for Solver
 
 #include "global.hpp"
