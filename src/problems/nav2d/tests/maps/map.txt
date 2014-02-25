@@ -1,11 +1,6 @@
-discrete
-............@@@@@@gg
-..xxxxxx....@xxxx@gg
-..xxxxxx....@xxxx@..
-..xxxxxx....@xxxx@..
-............@@@@@@..
-sssss...............
-sssss........xxxxx..
-sssss........xxxxx..
-sssss........xxxxx..
-sssss........xxxxx..
+World       (( 0.0,  0.0), (52.0, 51.0))
+Start       (( 0.0, 13.0), ( 1.0, 18.0))
+Start       (( 0.0, 34.0), ( 1.0, 39.0))
+Observation (( 0.0,  0.0), (52.0,  1.0))
+Observation (( 0.0, 50.0), (52.0, 51.0))
+Goal        ((51.0, 24.0), (52.0, 27.0))

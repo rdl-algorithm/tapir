@@ -12,22 +12,18 @@
 #include "solver/geometry/State.hpp"             // for State
 
 namespace nav2d {
-Nav2DAction::ACTIONS = {
-
-};
-
-Nav2DAction::Nav2DAction(ActionType actionType, long rockNo) :
-        actionType_(actionType),
-        rockNo_(rockNo) {
+Nav2DAction::Nav2DAction(double speed, double rotationalSpeed) :
+        speed_(speed),
+        rotationalSpeed_(rotationalSpeed) {
 }
 
-Nav2DAction::Nav2DAction(long code) :
-        actionType_(code <= 5 ? static_cast<ActionType>(code) : ActionType::CHECK),
-        rockNo_(actionType_ == ActionType::CHECK ? code-5 : 0) {
+Nav2DAction::Nav2DAction(Nav2DAction const &other) :
+        speed_(other.speed_),
+        rotationalSpeed_(other.rotationalSpeed_) {
 }
 
 std::unique_ptr<solver::Action> Nav2DAction::copy() const {
-    return std::make_unique<Nav2DAction>(actionType_,rockNo_);
+    return std::make_unique<Nav2DAction>(this);
 }
 
 double Nav2DAction::distanceTo(solver::Action const &/*otherAction*/) const {
@@ -35,45 +31,14 @@ double Nav2DAction::distanceTo(solver::Action const &/*otherAction*/) const {
 }
 
 void Nav2DAction::print(std::ostream &os) const {
-    if (actionType_ == ActionType::CHECK) {
-        os << "CHECK-" << rockNo_;
-        return;
-    }
-    switch (actionType_) {
-    case ActionType::NORTH:
-        os << "NORTH";
-        break;
-    case ActionType::EAST:
-        os << "EAST";
-        break;
-    case ActionType::SOUTH:
-        os << "SOUTH";
-        break;
-    case ActionType::WEST:
-        os << "WEST";
-        break;
-    case ActionType::SAMPLE:
-        os << "SAMPLE";
-        break;
-    default:
-        os << "ERROR-" << static_cast<long>(actionType_);
-        break;
-    }
+    os << speed_ << "/" << rotationalSpeed_;
 }
 
-long Nav2DAction::getCode() const {
-    long code = static_cast<long>(actionType_);
-    if (actionType_ == ActionType::CHECK) {
-        code += rockNo_;
-    }
-    return code;
+double Nav2DAction::getSpeed() const {
+    return speed_;
 }
 
-ActionType Nav2DAction::getActionType() const {
-    return actionType_;
-}
-
-long Nav2DAction::getRockNo() const {
-    return rockNo_;
+double Nav2DAction::getRotationalSpeed() const{
+    return rotationalSpeed_;
 }
 } /* namespace nav2d */

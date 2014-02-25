@@ -32,80 +32,64 @@ Nav2DTextSerializer::Nav2DTextSerializer(solver::Solver *solver) :
 void Nav2DTextSerializer::saveState(solver::State const *state,
         std::ostream &os) {
     if (state == nullptr) {
-        os << "NULL";
+        os << "()";
         return;
     }
-    Nav2DState const &rockSampleState =
+    Nav2DState const &navState =
         static_cast<Nav2DState const &>(*state);
-    os << rockSampleState.position_.i << " " << rockSampleState.position_.j
-       << " ";
-    for (bool isGood : rockSampleState.getRockStates()) {
-        if (isGood) {
-            os << 'G';
-        } else {
-            os << 'B';
-        }
-    }
+    os << "(" << navState.x_ << " " << navState.y_;
+    os << "):" << navState.direction_;
 }
 
 std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
         std::istream &is) {
-    std::string text;
-    is >> text;
-    if (text == "NULL") {
+    std::string tmpStr;
+    std::getline(is, tmpStr, '(');
+    std::getline(is, tmpStr, ')');
+    if (tmpStr == "") {
         return nullptr;
     }
-    long i, j;
-    std::string rockString;
-    std::vector<bool> rockStates;
-    std::stringstream sstr(text);
-    sstr >> i;
-    is >> j >> rockString;
-    for (char c : rockString) {
-        if (c == 'G') {
-            rockStates.push_back(true);
-        } else if (c == 'B') {
-            rockStates.push_back(false);
-        } else {
-            std::cerr << "Error; invalid rock state: " << c << std::endl;
-        }
-    }
-    return std::make_unique<Nav2DState>(GridPosition(i, j), rockStates);
+    double x, y, direction;
+    std::istringstream iss(tmpStr);
+    iss >> x;
+    iss >> y;
+    std::getline(is, tmpStr, ':');
+    is >> direction;
+    return std::make_unique<Nav2DState>(x, y, direction);
 }
 
 void Nav2DTextSerializer::saveObservation(solver::Observation const *obs,
         std::ostream &os) {
     if (obs == nullptr) {
-        os << "NULL";
+        os << "()";
         return;
     }
     Nav2DObservation const &observation =
             static_cast<Nav2DObservation const &>(*obs);
     if (observation.isEmpty()) {
-        os << "NONE";
-    } else if (observation.isGood_) {
-        os << "GOOD";
+        os << "(NONE)";
     } else {
-        os << "BAD";
+        saveState(observation.state_.get(), os);
     }
 }
 
 std::unique_ptr<solver::Observation> Nav2DTextSerializer::loadObservation(
         std::istream &is) {
-    std::string text;
-    is >> text;
-    if (text == "NULL") {
+    std::string tmpStr;
+    std::getline(is, tmpStr, '(');
+    std::getline(is, tmpStr, ')');
+    if (tmpStr == "") {
         return nullptr;
-    } else if (text == "NONE") {
-        return std::make_unique<Nav2DObservation>(true, true);
-    } else if (text == "GOOD") {
-        return std::make_unique<Nav2DObservation>(false, true);
-    } else if (text == "BAD") {
-        return std::make_unique<Nav2DObservation>(false, false);
-    } else {
-        std::cerr << "ERROR: Invalid observation!" << std::endl;
-        return nullptr;
+    } else if (tmpStr == "NONE") {
+        return std::make_unique<Nav2DObservation>();
     }
+    double x, y, direction;
+    std::istringstream iss(tmpStr);
+    iss >> x;
+    iss >> y;
+    std::getline(is, tmpStr, ':');
+    is >> direction;
+    return std::make_unique<Nav2DObservation>(x, y, direction);
 }
 
 
@@ -116,32 +100,8 @@ void Nav2DTextSerializer::saveAction(solver::Action const *action,
         return;
     }
     Nav2DAction const &a =
-            static_cast<Nav2DAction const &>(*action);
-    ActionType code = a.getActionType();
-    if (code == ActionType::CHECK) {
-        os << "CHECK-" << a.getRockNo();
-        return;
-    }
-    switch (code) {
-    case ActionType::NORTH:
-        os << "NORTH";
-        break;
-    case ActionType::EAST:
-        os << "EAST";
-        break;
-    case ActionType::SOUTH:
-        os << "SOUTH";
-        break;
-    case ActionType::WEST:
-        os << "WEST";
-        break;
-    case ActionType::SAMPLE:
-        os << "SAMPLE";
-        break;
-    default:
-        os << "ERROR-" << static_cast<long>(code);
-        break;
-    }
+            static_cast<Nav2DObservation const &>(*action);
+    os << a.speed_ << "/" << a.rotationalSpeed_;
 }
 
 std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
@@ -150,33 +110,13 @@ std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
     is >> text;
     if (text == "NULL") {
         return nullptr;
-    } else if (text == "NORTH") {
-        return std::make_unique<Nav2DAction>(ActionType::NORTH);
-    } else if (text == "EAST") {
-        return std::make_unique<Nav2DAction>(ActionType::EAST);
-    } else if (text == "SOUTH") {
-        return std::make_unique<Nav2DAction>(ActionType::SOUTH);
-    } else if (text == "WEST") {
-        return std::make_unique<Nav2DAction>(ActionType::WEST);
-    } else if (text == "SAMPLE") {
-        return std::make_unique<Nav2DAction>(ActionType::SAMPLE);
-    } else if (text.find("CHECK") != std::string::npos) {
-        std::string tmpStr;
-        std::stringstream sstr(text);
-        std::getline(sstr, tmpStr, '-');
-        long rockNo;
-        sstr >> rockNo;
-        return std::make_unique<Nav2DAction>(ActionType::CHECK, rockNo);
-    } else {
-        std::string tmpStr;
-        std::stringstream sstr(text);
-        std::getline(sstr, tmpStr, '-');
-        long code;
-        sstr >> code;
-        std::cerr << "ERROR: Invalid action!" << std::endl;
-        return std::make_unique<Nav2DAction>(
-                static_cast<ActionType>(code));
     }
+    std::istringstream iss(text);
+    double speed, rotationalSpeed;
+    std::getline()
+    Nav2DAction const &a =
+            static_cast<Nav2DObservation const &>(*action);
+    os << a.speed_ << "/" << a.rotationalSpeed_;
 }
 
 } /* namespace nav2d */

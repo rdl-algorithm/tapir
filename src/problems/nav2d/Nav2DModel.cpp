@@ -471,13 +471,7 @@ Nav2DModel::getAllActionsInOrder() {
     return allActions_;
 }
 
-std::vector<std::unique_ptr<solver::EnumeratedPoint>>
-Nav2DModel::getAllObservationsInOrder() {
-    std::vector<std::unique_ptr<solver::EnumeratedPoint>> allObservations_;
-    for (long code = 0; code < 3; code++) {
-        allObservations_.push_back(
-                std::make_unique<Nav2DObservation>(code));
-    }
-    return allObservations_;
+double Nav2DModel::getMaxObservationDistance() {
+    return
 }
 } /* namespace nav2d */

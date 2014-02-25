@@ -12,13 +12,12 @@
 #include "global.hpp"                     // for RandomGenerator
 
 namespace nav2d {
-class Nav2DObservation : public solver::EnumeratedPoint {
+class Nav2DObservation : public solver::Point {
     friend class Nav2DTextSerializer;
   public:
     Nav2DObservation();
-    Nav2DObservation(bool _isGood);
-    Nav2DObservation(bool _isEmpty, bool _isGood);
-    Nav2DObservation(long code);
+    Nav2DObservation(Nav2DState const &state);
+    Nav2DObservation(double x, double y, double direction);
 
     virtual ~Nav2DObservation() = default;
     _NO_COPY_OR_MOVE(Nav2DObservation);
@@ -29,14 +28,14 @@ class Nav2DObservation : public solver::EnumeratedPoint {
     std::size_t hash() const override;
     void print(std::ostream &os) const override;
 
-    long getCode() const override;
-
     bool isEmpty() const;
-    bool isGood() const;
+    Nav2DState const *getState() const;
+    double getX() const;
+    double getY() const;
+    double getDirection() const;
 
   private:
-    bool isEmpty_;
-    bool isGood_;
+    std::unique_ptr<Nav2DState> state_;
 };
 } /* namespace nav2d */
 

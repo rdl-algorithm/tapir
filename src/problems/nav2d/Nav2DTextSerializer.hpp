@@ -22,7 +22,7 @@ class Solver;
 namespace nav2d {
 class Nav2DTextSerializer : virtual public solver::TextSerializer,
     virtual public solver::EnumeratedActionTextSerializer,
-    virtual public solver::EnumeratedObservationTextSerializer {
+    virtual public solver::ApproximateObservationTextSerializer {
   public:
     Nav2DTextSerializer(solver::Solver *solver);
     virtual ~Nav2DTextSerializer() = default;

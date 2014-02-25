@@ -8,6 +8,20 @@
 #include "global.hpp"
 
 namespace solver {
+
+double Vector::distanceTo(Point const &otherPoint) const {
+    std::vector<double> v1 = this->asVector();
+    std::vector<double> v2 = static_cast<Vector const *>(
+            &otherPoint)->asVector();
+    std::vector<double>::iterator i1 = v1.begin();
+    std::vector<double>::iterator i2 = v2.begin();
+    double distanceSquared = 0;
+    for (; i1 < v1.end(); i1++, i2++) {
+        distanceSquared += std::pow(*i1 - *i2, 2);
+    }
+    return std::sqrt(distanceSquared);
+}
+
 bool Vector::equals(Point const &otherPoint) const {
     std::vector<double> v1 = this->asVector();
     std::vector<double> v2 = static_cast<Vector const *>(

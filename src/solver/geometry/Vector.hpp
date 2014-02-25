@@ -19,7 +19,9 @@ public:
     _NO_COPY_OR_MOVE(Vector);
 
     // copy() remains unimplemented because we have no data!
-    // distanceTo() remains unimplemented - it's up to the user to choose a metric.
+
+    // The default implementation for distance uses a Euclidean metric.
+    virtual double distanceTo(Point const &otherPoint) const override;
 
     // We will give default implementations for these methods.
     virtual bool equals(Point const &otherPoint) const override;

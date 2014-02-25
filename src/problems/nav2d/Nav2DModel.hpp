@@ -46,16 +46,6 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     ~Nav2DModel() = default;
     _NO_COPY_OR_MOVE(Nav2DModel);
 
-    /**
-     * Rocks are enumerated 0, 1, 2, ... ;
-     * other cell types should be negative.
-     */
-    enum RSCellType : int {
-        ROCK = 0,
-        EMPTY = -1,
-        GOAL = -2,
-    };
-
     virtual std::string getName() override {
         return "Nav2D";
     }
@@ -111,8 +101,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
 
     virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
     getAllActionsInOrder() override;
-    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
-    getAllObservationsInOrder() override;
+    virtual double getMaxObservationDistance();
 
   private:
     /**
@@ -121,32 +110,25 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
      */
     void initialize();
 
-    /** Generates a random position within the problem space. */
-    GridPosition samplePosition();
-    /** Generates the state of the rocks uniformly at random. */
-    std::vector<bool> sampleRocks();
-    /** Decodes rocks from an integer. */
-    std::vector<bool> decodeRocks(long val);
-
     /**
      * Generates a next state for the given state and action;
-     * returns true if the action was legal, and false if it was illegal.
      */
-    std::pair<std::unique_ptr<Nav2DState>, bool> makeNextState(
-            Nav2DState const &state, solver::Action const &action);
+    std::unique_ptr<Nav2DState> makeNextState(
+            Nav2DState const &state, Nav2DAction const &action);
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
     std::unique_ptr<Nav2DObservation> makeObservation(
-            solver::Action const &action,
+            Nav2DAction const &action,
             Nav2DState const &nextState);
     /** Retrieves the reward via the next state. */
     double makeReward(Nav2DState const &state,
-            solver::Action const &action, Nav2DState const &nextState,
+            Nav2DAction const &action, Nav2DState const &nextState,
             bool isLegal);
 
+
     /** The reward for sampling a good rock. */
-    double goodRockReward_;
+    double timeStepLength_;
     /** The penalty for sampling a bad rock. */
     double badRockPenalty_;
     /** The reward for exiting the mapD. */
