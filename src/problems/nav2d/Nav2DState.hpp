@@ -6,29 +6,20 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "problems/shared/GridPosition.hpp"  // for GridPosition
+#include "problems/shared/geometry/Point2D.hpp"  // for Point2D
 #include "solver/geometry/State.hpp"             // for State
 #include "solver/geometry/Vector.hpp"             // for Vector
 
 #include "global.hpp"
-
-double normalizeAngle(double angle) {
-    double numRotations;
-    angle = std::modf(angle, &numRotations);
-    if (angle < -0.5) {
-        angle += 1;
-    } else if (angle > 0.5) {
-        angle -= 1;
-    }
-    return angle;
-}
 
 namespace nav2d {
 class Nav2DState : public solver::Vector {
     friend class Nav2DTextSerializer;
   public:
     Nav2DState(double x, double y, double direction,
-            double costPerUnitDistance = 1.0, double costPerRevolution = 1.0);
+            double costPerUnitDistance, double costPerRevolution);
+    Nav2DState(geometry::Point2D position, double direction,
+                double costPerUnitDistance, double costPerRevolution);
 
     virtual ~Nav2DState() = default;
     // Copy constructor is allowed, but not others.
@@ -44,16 +35,16 @@ class Nav2DState : public solver::Vector {
     void print(std::ostream &os) const override;
     std::vector<double> asVector() const override;
 
+    geometry::Point2D getPosition() const;
     double getX() const;
     double getY() const;
     double getDirection() const;
 
   private:
+    geometry::Point2D position_;
+    double direction_;
     double costPerUnitDistance_;
     double costPerRevolution_;
-    double x_;
-    double y_;
-    double direction_;
 };
 } /* namespace nav2d */
 

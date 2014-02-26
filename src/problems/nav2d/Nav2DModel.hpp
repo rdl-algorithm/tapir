@@ -5,11 +5,13 @@
 #include <memory>                       // for unique_ptr
 #include <string>                       // for string
 #include <utility>                      // for pair
+#include <unordered_map>                // for unordered_map
 #include <vector>                       // for vector
 
 #include <boost/program_options.hpp>    // for variables_map
 
-#include "problems/shared/GridPosition.hpp"  // for GridPosition
+#include "problems/shared/geometry/Point2D.hpp"  // for Point2D
+#include "problems/shared/geometry/Rectangle2D.hpp"  // for Rectangle2D
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
 #include "solver/geometry/Action.hpp"            // for Action
@@ -22,10 +24,12 @@
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 
-
 #include "global.hpp"                     // for RandomGenerator
 
 namespace po = boost::program_options;
+
+using geometry::Point2D;
+using geometry::Rectangle2D;
 
 namespace solver {
 class ActionMapping;
@@ -41,10 +45,18 @@ class Nav2DObservation;
 class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual public solver::ModelWithEnumeratedActions,
     virtual public solver::ModelWithApproximateObservations {
+
+    friend class Nav2DTextSerializer;
+
   public:
     Nav2DModel(RandomGenerator *randGen, po::variables_map vm);
     ~Nav2DModel() = default;
     _NO_COPY_OR_MOVE(Nav2DModel);
+
+    enum class ErrorType {
+        PROPORTIONAL_GAUSSIAN_NOISE = 1,
+        ABSOLUTE_GAUSSIAN_NOISE = 2
+    };
 
     virtual std::string getName() override {
         return "Nav2D";
@@ -82,33 +94,39 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
 
-    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
-            solver::Action const &action, solver::Observation const &obs,
-            std::vector<solver::State const *> const &previousParticles) override;
-    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
-            solver::Action const &action,
-            solver::Observation const &obs) override;
-
     virtual std::vector<long> loadChanges(char const *changeFilename) override;
     virtual void update(long time, solver::StatePool *pool) override;
 
-    /** Displays an individual cell of the map. */
-    virtual void dispCell(RSCellType cellType, std::ostream &os);
-
+    enum class PointType {
+        EMPTY = 0,
+        START = 1,
+        GOAL = 2,
+        OBSERVATION = 3,
+        OBSTACLE = 4,
+        OUT_OF_BOUNDS = 5
+    };
+    /** Returns the contents of a given point on the map. */
+    PointType getPointType(geometry::Point2D point);
+    /** Displays an individual point on the map. */
+    virtual void dispPoint(PointType type, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
     virtual void drawState(solver::State const &state,
             std::ostream &os) override;
 
     virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
     getAllActionsInOrder() override;
-    virtual double getMaxObservationDistance();
+    virtual double getMaxObservationDistance() override;
 
   private:
+    /** Parses an error type. */
+    ErrorType parseErrorType(std::string text);
     /**
      * Finds and counts the rocks on the map, and initializes the required
      * data structures and variables.
      */
     void initialize();
+
+    std::unique_ptr<Nav2DState> sampleStateAt(Point2D position);
 
     /**
      * Generates a next state for the given state and action;
@@ -126,37 +144,45 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
             Nav2DAction const &action, Nav2DState const &nextState,
             bool isLegal);
 
-
-    /** The reward for sampling a good rock. */
+    /** Amount of time per single time step. */
     double timeStepLength_;
-    /** The penalty for sampling a bad rock. */
-    double badRockPenalty_;
-    /** The reward for exiting the mapD. */
-    double exitReward_;
-    /** The penalty for an illegal move. */
-    double illegalMovePenalty_;
-    /** The half efficiency distance d0 */
-    double halfEfficiencyDistance_;
+    /** Penalty for crashing. */
+    double crashPenalty_;
+    /** Reward for reaching a goal area. */
+    double goalReward_;
 
-    /** The number of rows in the map. */
-    long nRows_;
-    /** The number of columns in the map. */
-    long nCols_;
-    /** The number of rocks on the map. */
-    long nRocks_;
-    /** The starting position. */
-    GridPosition startPos_;
-    /** The coordinates of the rocks. */
-    std::vector<GridPosition> rockPositions_;
+    /** Maximum speed allowed as an action. */
+    double maxSpeed_;
+    /** Cost per unit distance traveled. */
+    double costPerUnitDistance_;
+    /** Type of error used for the speed. */
+    ErrorType speedErrorType_;
+    /** Standard deviation for speed error. */
+    double speedErrorSD_;
 
-    /** The environment map in text form. */
-    std::vector<std::string> mapText_;
-    /** The environment map in vector form. */
-    std::vector<std::vector<RSCellType>> envMap_;
+    /** Maximum rotational speed allowed in an action. */
+    double maxRotationalSpeed_;
+    /** Cost per revolution. */
+    double costPerRevolution_;
+    /** Type of error used for rotations. */
+    ErrorType rotationErrorType_;
+    /** Standard deviation for rotational error. */
+    double rotationErrorSD_;
+
+    typedef std::unordered_map<std::string, Rectangle2D> AreasByName;
+    Rectangle2D mapArea_;
+    AreasByName startAreas_;
+    double totalStartArea_;
+    AreasByName observationAreas_;
+    AreasByName goalAreas_;
+    AreasByName obstacles_;
 
     // Generic problem parameters
     long nStVars_;
     double minVal_, maxVal_;
+
+    /** Maximum distance between observations to group them together. */
+    double maxObservationDistance_;
 };
 } /* namespace nav2d */
 

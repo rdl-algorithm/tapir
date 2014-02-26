@@ -266,7 +266,8 @@ std::unique_ptr<solver::Observation> TagModel::makeObservation(
 }
 
 double TagModel::getReward(solver::State const &state,
-        solver::Action const &action) {
+        solver::Action const &action,
+        solver::State const &/*nextState*/) {
     if (static_cast<TagAction const &>(action).getActionType()
             == ActionType::TAG) {
         TagState const &tagState = static_cast<TagState const &>(state);
@@ -304,6 +305,7 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
 }
 
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
+        solver::BeliefNode *previousBelief,
         solver::Action const &action, solver::Observation const &obs,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
@@ -372,6 +374,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 }
 
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
+        solver::BeliefNode *previousBelief,
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
     TagObservation const &observation = (

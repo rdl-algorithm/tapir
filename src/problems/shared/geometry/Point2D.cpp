@@ -11,17 +11,40 @@
 #include "global.hpp"
 
 namespace geometry {
+Point2D::Point2D() :
+        Point2D(0.0, 0.0) {
+}
+
 Point2D::Point2D(double x, double y) :
     x_(x),
     y_(y) {
 }
 
-Point2D::Point2D(const Point2D& other) :
-        Point2D(x_, y_) {
+Point2D::Point2D(Point2D const &other) :
+        Point2D(other.x_, other.y_) {
+}
+
+Point2D::Point2D(Point2D &&other) :
+        Point2D(other.x_, other.y_) {
+}
+
+Point2D &Point2D::operator=(Point2D const &other) {
+    x_ = other.x_;
+    y_ = other.y_;
+    return *this;
+}
+
+Point2D &Point2D::operator=(Point2D &&other) {
+    x_ = other.x_;
+    y_ = other.y_;
+    return *this;
+}
+
+Point2D::~Point2D() {
 }
 
 std::unique_ptr<solver::Point> Point2D::copy() const {
-    return std::make_unique<Point2D>(this);
+    return std::make_unique<Point2D>(*this);
 }
 
 double Point2D::distanceTo(const Point& otherPoint) const {
@@ -52,10 +75,12 @@ void Point2D::loadFrom(std::istream &is) {
     std::istringstream iss(tmpStr);
     iss >> x_;
     std::getline(is, tmpStr, ')');
+    iss.clear();
+    iss.str(tmpStr);
     iss >> y_;
 }
 
-inline std::istream &operator>>(std::istream &is, Point2D &point) {
+std::istream &operator>>(std::istream &is, Point2D &point) {
     point.loadFrom(is);
     return is;
 }

@@ -9,6 +9,7 @@
 #include "solver/geometry/EnumeratedPoint.hpp"
 #include "solver/geometry/Observation.hpp"
 
+#include "Nav2DState.hpp"
 #include "global.hpp"                     // for RandomGenerator
 
 namespace nav2d {
@@ -17,7 +18,10 @@ class Nav2DObservation : public solver::Point {
   public:
     Nav2DObservation();
     Nav2DObservation(Nav2DState const &state);
-    Nav2DObservation(double x, double y, double direction);
+    Nav2DObservation(double x, double y, double direction,
+               double costPerUnitDistance, double costPerRevolution);
+    Nav2DObservation(geometry::Point2D position, double direction,
+                   double costPerUnitDistance, double costPerRevolution);
 
     virtual ~Nav2DObservation() = default;
     _NO_COPY_OR_MOVE(Nav2DObservation);
@@ -29,10 +33,12 @@ class Nav2DObservation : public solver::Point {
     void print(std::ostream &os) const override;
 
     bool isEmpty() const;
-    Nav2DState const *getState() const;
+    geometry::Point2D getPosition() const;
     double getX() const;
     double getY() const;
     double getDirection() const;
+
+    std::unique_ptr<Nav2DState> makeState() const;
 
   private:
     std::unique_ptr<Nav2DState> state_;

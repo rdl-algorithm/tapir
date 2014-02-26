@@ -26,11 +26,13 @@ class Serializer {
 public:
     /** Constructs a serializer for the given solver. */
     Serializer() :
-            solver_(nullptr) {
+            solver_(nullptr),
+            model_(nullptr) {
     }
 
     Serializer(Solver *solver) :
-            solver_(solver) {
+            solver_(solver),
+            model_(solver_->model_.get()) {
     }
 
     void setSolver(Solver *solver) {
@@ -156,6 +158,7 @@ public:
     virtual void load(BeliefTree &tree, std::istream &is) = 0;
   protected:
     Solver *solver_;
+    Model *model_;
 };
 } /* namespace solver */
 

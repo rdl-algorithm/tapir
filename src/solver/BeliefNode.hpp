@@ -93,6 +93,8 @@ class BeliefNode {
     long getNActChildren() const;
 
 
+    /** Returns the action mapping for this node. */
+    ActionMapping *getMapping();
     /** Returns the belief node child corresponding to the given action and
      * observation
      */

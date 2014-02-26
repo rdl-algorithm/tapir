@@ -67,7 +67,11 @@ class ProgramOptions {
                         " make before stopping.")
                 ("SBT.maxNnDistance", po::value<double>(),
                         "Maximum distance for a node to be considered a valid"
-                        "nearest-neighbor");
+                        "nearest-neighbor")
+                ("SBT.maxObservationDistance", po::value<double>(),
+                        "Maximum distance between observations to group them"
+                        "together - only applicable if approximate"
+                        "observations are being used");
         return sbt;
     }
 

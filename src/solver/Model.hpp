@@ -18,6 +18,7 @@
 #include "global.hpp"
 
 namespace solver {
+class BeliefNode;
 class StatePool;
 
 class Model {
@@ -103,7 +104,8 @@ class Model {
     virtual std::unique_ptr<Observation> generateObservation(Action const &action,
             State const &nextState) = 0;
     /** Returns the reward for the given state and action. */
-    virtual double getReward(State const &state, Action const &action) = 0;
+    virtual double getReward(State const &state, Action const &action,
+            State const &nextState) = 0;
 
     /** Represents the results of a complete step in the model,
      * including the next state, observation, and reward.
@@ -124,8 +126,9 @@ class Model {
      * previous node, as well as on the action and observation.
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
+            BeliefNode *previousBelief,
             Action const &action, Observation const &obs,
-            std::vector<State const *> const &previousParticles) = 0;
+            std::vector<State const *> const &previousParticles);
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
      *
@@ -133,7 +136,8 @@ class Model {
      * incompatible with the current observation.
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
-            Action const &, Observation const &obs) = 0;
+            BeliefNode *previousBelief,
+            Action const &action, Observation const &obs);
 
     /* -------------- Methods for handling model changes ---------------- */
     /** Loads future model changes from the given file. */

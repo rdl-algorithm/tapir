@@ -19,7 +19,9 @@
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
-#include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
+#include "problems/shared/geometry/Point2D.hpp"
+#include "problems/shared/geometry/Rectangle2D.hpp"
+
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
 #include "solver/geometry/Action.hpp"            // for Action
@@ -27,7 +29,7 @@
 #include "solver/geometry/State.hpp"       // for State
 
 #include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/enumerated_observations.hpp"
+#include "solver/mappings/approximate_observations.hpp"
 
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
@@ -40,29 +42,41 @@
 using std::cerr;
 using std::cout;
 using std::endl;
+
+using geometry::Point2D;
+using geometry::Rectangle2D;
+
 namespace po = boost::program_options;
 
 namespace nav2d {
 Nav2DModel::Nav2DModel(RandomGenerator *randGen,
         po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
-    goodRockReward_(vm["problem.goodRockReward"].as<double>()),
-    badRockPenalty_(vm["problem.badRockPenalty"].as<double>()),
-    exitReward_(vm["problem.exitReward"].as<double>()),
-    illegalMovePenalty_(
-            vm["problem.illegalMovePenalty"].as<double>()),
-    halfEfficiencyDistance_(
-            vm["problem.halfEfficiencyDistance"].as<double>()),
-    nRows_(0), // update
-    nCols_(0), // update
-    nRocks_(0), // update
-    startPos_(), // update
-    rockPositions_(), // push rocks
-    mapText_(), // push rows
-    envMap_(), // push rows
-    nStVars_(), // depends on nRocks
-    minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
-    maxVal_(0) // depends on nRocks
+    timeStepLength_(vm["problem.timeStepLength"].as<double>()),
+    crashPenalty_(vm["problem.crashPenalty"].as<double>()),
+    goalReward_(vm["problem.goalReward"].as<double>()),
+    maxSpeed_(vm["problem.maxSpeed"].as<double>()),
+    costPerUnitDistance_(vm["problem.costPerUnitDistance"].as<double>()),
+    speedErrorType_(parseErrorType(
+                vm["problem.speedErrorType"].as<std::string>())),
+    speedErrorSD_(vm["problem.speedErrorSD"].as<double>()),
+    maxRotationalSpeed_(vm["problem.maxRotationalSpeed"].as<double>()),
+    costPerRevolution_(vm["problem.costPerRevolution"].as<double>()),
+    rotationErrorType_(parseErrorType(
+                vm["problem.rotationErrorType"].as<std::string>())),
+    rotationErrorSD_(vm["problem.rotationErrorSD"].as<double>()),
+    mapArea_(),
+    startAreas_(),
+    totalStartArea_(0),
+    observationAreas_(),
+    goalAreas_(),
+    obstacles_(),
+    nStVars_(2),
+    minVal_(-(crashPenalty_ + maxSpeed_ * costPerUnitDistance_
+            + maxRotationalSpeed_ * costPerRevolution_)
+            / (1 - getDiscountFactor())),
+    maxVal_(0),
+    maxObservationDistance_(vm["SBT.maxObservationDistance"].as<double>())
          {
     // Read the map from the file.
     std::ifstream inFile;
@@ -72,24 +86,30 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
         std::cerr << "Failed to open " << mapPath << "\n";
         exit(1);
     }
-    inFile >> nRows_ >> nCols_;
-    std::string tmp;
-    getline(inFile, tmp);
-    for (long i = 0; i < nRows_; i++) {
-        getline(inFile, tmp);
-        mapText_.push_back(tmp);
+    std::string line;
+    while (std::getline(inFile, line)) {
+        cerr << line << endl;
+        std::istringstream iss(line);
+        std::string type;
+        std::string name;
+        Rectangle2D rect;
+        iss >> type >> name >> rect;
+        if (type == "World") {
+            mapArea_ = rect;
+        } else if (type == "Start") {
+            startAreas_.emplace(name, rect);
+            totalStartArea_ += rect.getArea();
+        } else if (type == "Observation") {
+            observationAreas_.emplace(name, rect);
+        } else if (type == "Goal") {
+            observationAreas_.emplace(name, rect);
+        }
     }
     inFile.close();
 
     initialize();
     cout << "Constructed the Nav2DModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
-    cout << "Size: " << nRows_ << " by " << nCols_ << endl;
-    cout << "Start: " << startPos_.i << " " << startPos_.j << endl;
-    cout << "nRocks: " << nRocks_ << endl;
-    cout << "Rock 0: " << rockPositions_[0] << endl;
-    cout << "Rock 1: " << rockPositions_[1] << endl;
-    cout << "good rock reward: " << goodRockReward_ << endl;
     cout << "nStVars: " << nStVars_ << endl;
     cout << "Random initial states:" << endl;
     cout << *sampleAnInitState() << endl;
@@ -98,222 +118,88 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     cout << *sampleAnInitState() << endl;
 
     cout << "nParticles: " << getNParticles() << endl;
-    cout << "Environment:" << endl;
-    drawEnv(cout);
+    cout << "Random state drawn:" << endl;
+    drawState(*sampleAnInitState(), cout);
+}
+
+Nav2DModel::ErrorType Nav2DModel::parseErrorType(std::string text) {
+    if (text == "proportional gaussian noise") {
+        return ErrorType::PROPORTIONAL_GAUSSIAN_NOISE;
+    } else if (text == "absolute gaussian noise") {
+        return ErrorType::ABSOLUTE_GAUSSIAN_NOISE;
+    } else {
+        cerr << "ERROR: Invalid error type - " << text;
+        return ErrorType::PROPORTIONAL_GAUSSIAN_NOISE;
+    }
 }
 
 void Nav2DModel::initialize() {
-    nRocks_ = 0;
-    GridPosition p;
-    for (p.i = 0; p.i < nRows_; p.i++) {
-        envMap_.emplace_back();
-        for (p.j = 0; p.j < nCols_; p.j++) {
-            char c = mapText_[p.i][p.j];
-            RSCellType cellType;
-            if (c == 'o') {
-                rockPositions_.push_back(p);
-                cellType = (RSCellType)(ROCK + nRocks_);
-                nRocks_++;
-            } else if (c == 'G') {
-                cellType = GOAL;
-            } else if (c == 'S') {
-                startPos_ = p;
-                cellType = EMPTY;
-            } else {
-                cellType = EMPTY;
-            }
-            envMap_.back().push_back(cellType);
-        }
-    }
+}
 
-    nStVars_ = 2 + nRocks_;
-    minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
-    maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
+std::unique_ptr<Nav2DState> Nav2DModel::sampleStateAt(Point2D position) {
+    return std::make_unique<Nav2DState>(position,
+            -std::uniform_real_distribution<double>(-0.5, 0.5)(
+                    *getRandomGenerator()),
+                    costPerUnitDistance_, costPerRevolution_);
 }
 
 std::unique_ptr<solver::State> Nav2DModel::sampleAnInitState() {
-    return std::make_unique<Nav2DState>(startPos_, sampleRocks());
+    RandomGenerator &randGen = *getRandomGenerator();
+    double areaValue = std::uniform_real_distribution<double>(0,
+            totalStartArea_)(randGen);
+    double areaTotal = 0;
+    for (AreasByName::value_type const &entry : startAreas_) {
+        areaTotal += entry.second.getArea();
+        if (areaValue < areaTotal) {
+            return sampleStateAt(entry.second.sampleUniform(randGen));
+        }
+    }
+    cerr << "ERROR: Invalid area at " << areaValue << endl;
+    return nullptr;
 }
 
 std::unique_ptr<solver::State> Nav2DModel::sampleStateUniform() {
-    return std::make_unique<Nav2DState>(samplePosition(), sampleRocks());
-}
-
-GridPosition Nav2DModel::samplePosition() {
-    long i = std::uniform_int_distribution<long>(
-                0, nRows_ - 1)(*getRandomGenerator());
-    long j = std::uniform_int_distribution<long>(
-                0, nCols_ - 1)(*getRandomGenerator());
-    return GridPosition(i, j);
-}
-
-std::vector<bool> Nav2DModel::sampleRocks() {
-    return decodeRocks(std::uniform_int_distribution<long>
-                (0, (1 << nRocks_) - 1)(*getRandomGenerator()));
-}
-
-std::vector<bool> Nav2DModel::decodeRocks(long val) {
-    std::vector<bool> isRockGood;
-    for (int j = 0; j < nRocks_; j++) {
-        isRockGood.push_back(val &  (1 << j));
-    }
-    return isRockGood;
+    return sampleStateAt(mapArea_.sampleUniform(*getRandomGenerator()));
 }
 
 bool Nav2DModel::isTerminal(solver::State const &state) {
-    Nav2DState const &rockSampleState =
-        static_cast<Nav2DState const &>(state);
-    GridPosition pos = rockSampleState.getPosition();
-    return envMap_[pos.i][pos.j] == GOAL;
+    return getPointType(static_cast<Nav2DState const &>(
+            state).getPosition()) == PointType::GOAL;
 }
 
 double Nav2DModel::getHeuristicValue(solver::State const &state) {
     Nav2DState const &rockSampleState =
         static_cast<Nav2DState const &>(state);
-    double qVal = 0;
-    double currentDiscount = 1;
-    GridPosition currentPos(rockSampleState.getPosition());
-    std::vector<bool> rockStates(rockSampleState.getRockStates());
-
-    std::set<int> goodRocks;
-    for (int i = 0; i < nRocks_; i++) {
-        if (rockStates[i]) {
-            goodRocks.insert(i);
-        }
-    }
-    while (!goodRocks.empty()) {
-        std::set<int>::iterator it = goodRocks.begin();
-        int bestRock = *it;
-        long lowestDist =
-            rockPositions_[bestRock].manhattanDistanceTo(currentPos);
-        ++it;
-        for (; it != goodRocks.end(); ++it) {
-            long dist = rockPositions_[*it].manhattanDistanceTo(currentPos);
-            if (dist < lowestDist) {
-                bestRock = *it;
-                lowestDist = dist;
-            }
-        }
-        currentDiscount *= std::pow(getDiscountFactor(), lowestDist);
-        qVal += currentDiscount * goodRockReward_;
-        goodRocks.erase(bestRock);
-        currentPos = rockPositions_[bestRock];
-    }
-    currentDiscount *= std::pow(getDiscountFactor(), nCols_ - currentPos.j);
-    qVal += currentDiscount * exitReward_;
-    // dispState(s, cerr);
-    // cerr << endl << "Heuristic: " << *qVal << endl;
-    return qVal;
+    // TODO Calculate distance to a goal square!
+    return 0;
 }
 
 double Nav2DModel::getDefaultVal() {
     return minVal_;
 }
 
-std::pair<std::unique_ptr<Nav2DState>,
-        bool> Nav2DModel::makeNextState(
-        Nav2DState const &state, solver::Action const &action) {
-    GridPosition pos(state.getPosition());
-    std::vector<bool> rockStates(state.getRockStates());
-    bool isValid = true;
-    Nav2DAction const &a = static_cast<Nav2DAction const &>(action);
-    ActionType actionType = a.getActionType();
-    if (actionType == ActionType::CHECK) {
-        // Do nothing - the state remains the same.
-    } else if (actionType == ActionType::SAMPLE) {
-        int rockNo = envMap_[pos.i][pos.j] - ROCK;
-        if (0 <= rockNo && rockNo < nRocks_) {
-            rockStates[rockNo] = false;
-        } else {
-            // cerr << "Cannot sample at " << pos << " - no rock!" << endl;
-            isValid = false;
-        }
-    } else {
-        if (actionType == ActionType::NORTH) {
-            pos.i -= 1;
-        } else if (actionType == ActionType::EAST) {
-            pos.j += 1;
-        } else if (actionType == ActionType::SOUTH) {
-            pos.i += 1;
-        } else if (actionType == ActionType::WEST) {
-            pos.j -= 1;
-        } else {
-            cerr << "Invalid action: " << action << endl;
-        }
-        // If the position is now invalid, reset it.
-        if (pos.i < 0 || pos.i >= nRows_ || pos.j < 0 || pos.j >= nCols_) {
-            pos = state.getPosition();
-            isValid = false;
-        }
-    }
-    return std::make_pair(std::make_unique<Nav2DState>(pos, rockStates),
-            isValid);
-}
-
-std::unique_ptr<Nav2DObservation> Nav2DModel::makeObservation(
-        solver::Action const &action,
-        Nav2DState const &nextState) {
-    Nav2DAction const &a = static_cast<Nav2DAction const &>(action);
-    ActionType actionType = a.getActionType();
-    if (actionType < ActionType::CHECK) {
-        return std::make_unique<Nav2DObservation>();
-    }
-    long rockNo = a.getRockNo();
-    GridPosition pos(nextState.getPosition());
-    std::vector<bool> rockStates(nextState.getRockStates());
-    double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
-    double efficiency =
-        (1 + std::pow(2, -dist / halfEfficiencyDistance_)) * 0.5;
-    // cerr << "D: " << dist << " E:" << efficiency << endl;
-    bool obsMatches = std::bernoulli_distribution(efficiency)(*getRandomGenerator());
-    return std::make_unique<Nav2DObservation>(rockStates[rockNo] == obsMatches);
-}
-
-double Nav2DModel::makeReward(Nav2DState const &state,
-        solver::Action const &action, Nav2DState const &nextState,
-        bool isLegal) {
-    if (!isLegal) {
-        return -illegalMovePenalty_;
-    }
-    if (isTerminal(nextState)) {
-        return exitReward_;
-    }
-
-    ActionType actionType = static_cast<Nav2DAction const &>(action).getActionType();
-    if (actionType == ActionType::SAMPLE) {
-        GridPosition pos = state.getPosition();
-        int rockNo = envMap_[pos.i][pos.j] - ROCK;
-        if (0 <= rockNo && rockNo < nRocks_) {
-            return state.getRockStates()[rockNo] ? goodRockReward_
-                   : -badRockPenalty_;
-        } else {
-            cerr << "Invalid sample action!?!" << endl;
-            return -illegalMovePenalty_;
-        }
-    }
-    return 0;
-}
-
 std::unique_ptr<solver::State> Nav2DModel::generateNextState(
            solver::State const &state, solver::Action const &action) {
-    return makeNextState(static_cast<Nav2DState const &>(state),
-            action).first;
+    // TODO Handle generation of next states;
+    return nullptr;
 }
 
 std::unique_ptr<solver::Observation> Nav2DModel::generateObservation(
         solver::Action const &action, solver::State const &nextState) {
-    return makeObservation(action, static_cast<Nav2DState const &>(nextState));
+    Nav2DState const &navState = static_cast<Nav2DState const &>(nextState);
+    if (getPointType(navState.getPosition()) == PointType::OBSERVATION) {
+        return std::make_unique<Nav2DObservation>(navState);
+    } else {
+        return std::make_unique<Nav2DObservation>();
+    }
 }
 
 double Nav2DModel::getReward(solver::State const &state,
         solver::Action const &action) {
+    // TODO Handle rewards.
     Nav2DState const &rockSampleState =
         static_cast<Nav2DState const &>(state);
-
-    std::unique_ptr<Nav2DState> nextState;
-    bool isLegal;
-    std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
-    return makeReward(rockSampleState, action, *nextState, isLegal);
+    return 0;
 }
 
 solver::Model::StepResult Nav2DModel::generateStep(
@@ -324,89 +210,11 @@ solver::Model::StepResult Nav2DModel::generateStep(
     solver::Model::StepResult result;
     result.action = action.copy();
 
-    bool isLegal;
-    std::unique_ptr<Nav2DState> nextState;
-    std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
-    result.observation = generateObservation(action, *nextState);
-    result.immediateReward = makeReward(rockSampleState, action, *nextState, isLegal);
-    result.isTerminal = isTerminal(*nextState);
-    result.nextState = std::move(nextState);
+    result.nextState = generateNextState(rockSampleState, action);
+    result.observation = generateObservation(action, *result.nextState);
+    result.immediateReward = getReward(rockSampleState, action);
+    result.isTerminal = isTerminal(*result.nextState);
     return result;
-}
-
-std::vector<std::unique_ptr<solver::State>> Nav2DModel::generateParticles(
-        solver::Action const &action, solver::Observation const &obs,
-        std::vector<solver::State const *> const &previousParticles) {
-    std::vector<std::unique_ptr<solver::State>> newParticles;
-
-    Nav2DAction const &a = static_cast<Nav2DAction const &>(action);
-    if (a.getActionType() == ActionType::CHECK) {
-        long rockNo = a.getRockNo();
-        struct Hash {
-            std::size_t operator()(Nav2DState const &state) const {
-                return state.hash();
-            }
-        };
-        typedef std::unordered_map<Nav2DState, double, Hash> WeightMap;
-        WeightMap weights;
-        double weightTotal = 0;
-        for (solver::State const *state : previousParticles) {
-            Nav2DState const *rockSampleState =
-                static_cast<Nav2DState const *>(state);
-            GridPosition pos(rockSampleState->getPosition());
-            double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
-            double efficiency = ((1
-                                  + std::pow(2, -dist
-                                          / halfEfficiencyDistance_)) * 0.5);
-            bool rockIsGood = rockSampleState->getRockStates()[rockNo];
-            double probability;
-            Nav2DObservation const &observation = (
-                    static_cast<Nav2DObservation const &>(obs));
-            if (rockIsGood == observation.isGood()) {
-                probability = efficiency;
-            } else {
-                probability = 1 - efficiency;
-            }
-            weights[*rockSampleState] += probability;
-            weightTotal += probability;
-        }
-        double scale = getNParticles() / weightTotal;
-        for (WeightMap::value_type &it : weights) {
-            double proportion = it.second * scale;
-            long numToAdd = static_cast<long>(proportion);
-            if (std::bernoulli_distribution(proportion - numToAdd)(
-                    *getRandomGenerator())) {
-                numToAdd += 1;
-            }
-            for (int i = 0; i < numToAdd; i++) {
-                newParticles.push_back(std::make_unique<Nav2DState>(it.
-                                first));
-            }
-        }
-
-    } else {
-        // It's not a CHECK action, so we just add each resultant state.
-        for (solver::State const *state : previousParticles) {
-            Nav2DState const *rockSampleState =
-                static_cast<Nav2DState const *>(state);
-            newParticles.push_back(makeNextState(*rockSampleState,
-                            action).first);
-        }
-    }
-    return newParticles;
-}
-
-std::vector<std::unique_ptr<solver::State>> Nav2DModel::generateParticles(
-        solver::Action const &action, solver::Observation const &obs) {
-    std::vector<std::unique_ptr<solver::State>> particles;
-    while (static_cast<long>(particles.size()) < getNParticles()) {
-        std::unique_ptr<solver::State> state = sampleStateUniform();
-        solver::Model::StepResult result = generateStep(*state, action);
-        if (obs == *result.observation) {
-            particles.push_back(std::move(result.nextState));
-        }
-    }
-    return particles;
 }
 
 std::vector<long> Nav2DModel::loadChanges(char const */*changeFilename*/) {
@@ -417,61 +225,92 @@ std::vector<long> Nav2DModel::loadChanges(char const */*changeFilename*/) {
 void Nav2DModel::update(long /*time*/, solver::StatePool */*pool*/) {
 }
 
-void Nav2DModel::dispCell(RSCellType cellType, std::ostream &os) {
-    if (cellType >= ROCK) {
-        os << std::hex << cellType - ROCK;
-        os << std::dec;
-        return;
+
+Nav2DModel::PointType Nav2DModel::getPointType(geometry::Point2D point) {
+    if (!mapArea_.contains(point)) {
+        return PointType::OUT_OF_BOUNDS;
+    } else {
+        return PointType::EMPTY;
     }
-    switch (cellType) {
-    case EMPTY:
-        os << '.';
-        break;
-    case GOAL:
-        os << 'G';
-        break;
+}
+
+void Nav2DModel::dispPoint(Nav2DModel::PointType type, std::ostream &os) {
+    switch(type) {
+    case PointType::EMPTY:
+        os << " ";
+        return;
+    case PointType::START:
+        os << "+";
+        return;
+    case PointType::GOAL:
+        os << "*";
+        return;
+    case PointType::OBSTACLE:
+        os << "x";
+        return;
+    case PointType::OUT_OF_BOUNDS:
+        os << "%";
+        return;
     default:
-        os << "ERROR-" << cellType;
-        break;
+        cerr << "ERROR: Invalid point type!?" << endl;
+        return;
     }
 }
 
 void Nav2DModel::drawEnv(std::ostream &os) {
-    for (std::vector<RSCellType> &row : envMap_) {
-        for (RSCellType cellValue : row) {
-            dispCell(cellValue, os);
+    double minX = mapArea_.getLowerLeft().getX();
+    double maxX = mapArea_.getUpperRight().getX();
+    double minY = mapArea_.getLowerLeft().getY();
+    double maxY = mapArea_.getUpperRight().getY();
+    double height = maxY - minY;
+    long nRows = 30; //(int)height;
+    double width = maxX - minX;
+    long nCols = (int)width;
+    for (long i = 0; i <= nRows + 1; i++) {
+        double y = (nRows + 0.5 - i) * height / nRows;
+        for (long j = 0; j <= nCols + 1; j++) {
+            double x = (j - 0.5) * width / nCols;
+            dispPoint(getPointType({x, y}), os);
         }
         os << endl;
     }
 }
 
 void Nav2DModel::drawState(solver::State const &state, std::ostream &os) {
-    Nav2DState const &rockSampleState =
-        static_cast<Nav2DState const &>(state);
-    os << state << endl;
-    GridPosition pos(rockSampleState.getPosition());
-    for (std::size_t i = 0; i < envMap_.size(); i++) {
-        for (std::size_t j = 0; j < envMap_[0].size(); j++) {
-            if ((long)i == pos.i && (long)j == pos.j) {
-                os << "x";
-                continue;
+    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
+    double minX = mapArea_.getLowerLeft().getX();
+    double maxX = mapArea_.getUpperRight().getX();
+    double minY = mapArea_.getLowerLeft().getY();
+    double maxY = mapArea_.getUpperRight().getY();
+    double height = maxY - minY;
+    long nRows = 30; //(int)height;
+    double width = maxX - minX;
+    long nCols = (int)width;
+
+    long stateI = nRows - (int)std::round(navState.getY() * nRows / height - 0.5);
+    long stateJ = (int)std::round(navState.getX() * nCols / width + 0.5);
+    for (long i = 0; i <= nRows + 1; i++) {
+        double y = (nRows + 0.5 - i) * height / nRows;
+        for (long j = 0; j <= nCols + 1; j++) {
+            double x = (j - 0.5) * width / nCols;
+            if (i == stateI && j == stateJ) {
+                os << "o";
+            } else {
+                dispPoint(getPointType({x, y}), os);
             }
-            dispCell(envMap_[i][j], os);
         }
         os << endl;
     }
+    os << state << endl;
 }
 
 std::vector<std::unique_ptr<solver::EnumeratedPoint>>
 Nav2DModel::getAllActionsInOrder() {
     std::vector<std::unique_ptr<solver::EnumeratedPoint>> allActions_;
-    for (long code = 0; code < 5 + nRocks_; code++) {
-        allActions_.push_back(std::make_unique<Nav2DAction>(code));
-    }
     return allActions_;
 }
 
 double Nav2DModel::getMaxObservationDistance() {
-    return
+    return maxObservationDistance_;
 }
 } /* namespace nav2d */

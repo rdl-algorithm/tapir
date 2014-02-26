@@ -18,6 +18,7 @@
 
 #include "Nav2DAction.hpp"         // for Nav2DAction
 #include "Nav2DObservation.hpp"    // for Nav2DObservation
+#include "Nav2DModel.hpp"
 #include "Nav2DState.hpp"          // for Nav2DState
 
 namespace solver {
@@ -37,8 +38,8 @@ void Nav2DTextSerializer::saveState(solver::State const *state,
     }
     Nav2DState const &navState =
         static_cast<Nav2DState const &>(*state);
-    os << "(" << navState.x_ << " " << navState.y_;
-    os << "):" << navState.direction_;
+    os << "(" << navState.getX() << " " << navState.getY();
+    os << "):" << navState.getDirection();
 }
 
 std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
@@ -55,7 +56,9 @@ std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
     iss >> y;
     std::getline(is, tmpStr, ':');
     is >> direction;
-    return std::make_unique<Nav2DState>(x, y, direction);
+    Nav2DModel const &model = dynamic_cast<Nav2DModel const &>(*model_);
+    return std::make_unique<Nav2DState>(x, y, direction,
+            model.costPerUnitDistance_, model.costPerRevolution_);
 }
 
 void Nav2DTextSerializer::saveObservation(solver::Observation const *obs,
@@ -89,7 +92,9 @@ std::unique_ptr<solver::Observation> Nav2DTextSerializer::loadObservation(
     iss >> y;
     std::getline(is, tmpStr, ':');
     is >> direction;
-    return std::make_unique<Nav2DObservation>(x, y, direction);
+    Nav2DModel const &model = dynamic_cast<Nav2DModel const &>(*model_);
+    return std::make_unique<Nav2DObservation>(x, y, direction,
+            model.costPerUnitDistance_, model.costPerRevolution_);
 }
 
 
@@ -99,24 +104,22 @@ void Nav2DTextSerializer::saveAction(solver::Action const *action,
         os << "NULL";
         return;
     }
-    Nav2DAction const &a =
-            static_cast<Nav2DObservation const &>(*action);
-    os << a.speed_ << "/" << a.rotationalSpeed_;
+    Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
+    os << a.speed_ << " / " << a.rotationalSpeed_;
 }
 
 std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
         std::istream &is) {
-    std::string text;
-    is >> text;
-    if (text == "NULL") {
+    std::string tmpStr;
+    is >> tmpStr;
+    if (tmpStr == "NULL") {
         return nullptr;
     }
-    std::istringstream iss(text);
     double speed, rotationalSpeed;
-    std::getline()
-    Nav2DAction const &a =
-            static_cast<Nav2DObservation const &>(*action);
-    os << a.speed_ << "/" << a.rotationalSpeed_;
+    std::istringstream iss(tmpStr);
+    iss >> speed;
+    is >> tmpStr >> rotationalSpeed;
+    return std::make_unique<Nav2DAction>(speed, rotationalSpeed);
 }
 
 } /* namespace nav2d */

@@ -20,7 +20,8 @@ class ModelWithProgramOptions : public virtual solver::Model {
                 vm["SBT.heuristicExploreCoefficient"].as<double>()),
         ucbExploreCoefficient_(vm["SBT.ucbExploreCoefficient"].as<double>()),
         maxNnComparisons_(vm["SBT.maxNnComparisons"].as<long>()),
-        maxNnDistance_(vm["SBT.maxNnDistance"].as<double>()) {
+        maxNnDistance_(vm["SBT.maxNnDistance"].as<double>())
+    {
     }
 
     virtual ~ModelWithProgramOptions() = default;

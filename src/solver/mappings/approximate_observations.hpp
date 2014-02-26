@@ -16,7 +16,7 @@ class BeliefNode;
 
 class ModelWithApproximateObservations : virtual public solver::Model {
 public:
-    ModelWithApproximateObservations();
+    ModelWithApproximateObservations() = default;
     virtual ~ModelWithApproximateObservations() = default;
     _NO_COPY_OR_MOVE(ModelWithApproximateObservations);
 

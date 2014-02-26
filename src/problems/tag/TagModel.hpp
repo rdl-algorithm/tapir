@@ -86,16 +86,19 @@ class TagModel: virtual public ModelWithProgramOptions,
             solver::Action const &action,
             solver::State const &nextState) override;
     virtual double getReward(solver::State const &state,
-                solver::Action const &action) override;
+                solver::Action const &action,
+                solver::State const &nextState) override;
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
 
     std::vector<std::unique_ptr<solver::State>> generateParticles(
+            solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
             std::vector<solver::State const *>
                 const &previousParticles) override;
     std::vector<std::unique_ptr<solver::State>> generateParticles(
+            solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs) override;
 

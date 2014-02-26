@@ -11,13 +11,14 @@
 namespace geometry {
 class Point2D: public solver::Vector {
 public:
+    Point2D();
     Point2D(double x, double y);
 
-    virtual ~Point2D() = default;
+    virtual ~Point2D();
     Point2D(Point2D const &other);
-    Point2D(Point2D &&) = delete;
-    virtual Point2D &operator=(Point2D const &) = delete;
-    virtual Point2D &operator=(Point2D &&) = delete;
+    Point2D(Point2D &&other);
+    virtual Point2D &operator=(Point2D const &other);
+    virtual Point2D &operator=(Point2D &&other);
 
     virtual std::unique_ptr<solver::Point> copy() const;
     virtual double distanceTo(Point const &otherPoint) const;
@@ -32,13 +33,12 @@ public:
     double getX() const;
     double getY() const;
 
-    friend std::istream &operator>>(std::istream &is, Point2D const &point);
-private:
+    friend std::istream &operator>>(std::istream &is, Point2D &point);
     double x_;
     double y_;
 };
 
-std::ostream &operator>>(std::istream &os, Point2D const &point);
+std::istream &operator>>(std::istream &is, Point2D &point);
 } /* namespace geometry */
 
 #endif /* GEOMETRY_POINT2D_HPP_ */

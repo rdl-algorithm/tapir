@@ -19,19 +19,26 @@ Nav2DObservation::Nav2DObservation() :
 }
 
 Nav2DObservation::Nav2DObservation(Nav2DState const &state) :
-        state_(state.copy()) {
+        state_(std::make_unique<Nav2DState>(state)) {
 }
 
-Nav2DObservation::Nav2DObservation(double x, double y, double direction) :
-        state_(std::make_unique<Nav2DState>(x, y, direction)) {
+Nav2DObservation::Nav2DObservation(double x, double y, double direction,
+        double costPerUnitDistance, double costPerRevolution) :
+        state_(std::make_unique<Nav2DState>(x, y, direction,
+                costPerUnitDistance, costPerRevolution)) {
 }
 
+Nav2DObservation::Nav2DObservation(geometry::Point2D position, double direction,
+        double costPerUnitDistance, double costPerRevolution) :
+        state_(std::make_unique<Nav2DState>(position, direction,
+                costPerUnitDistance, costPerRevolution)) {
+}
 
 std::unique_ptr<solver::Observation> Nav2DObservation::copy() const {
     if (state_ == nullptr) {
         return std::make_unique<Nav2DObservation>();
     } else {
-        return std::make_unique<Nav2DObservation>(state_);
+        return std::make_unique<Nav2DObservation>(*state_);
     }
 }
 
@@ -77,20 +84,24 @@ bool Nav2DObservation::isEmpty() const {
     return state_ == nullptr;
 }
 
-Nav2DState const *Nav2DObservation::getState() const {
-    return state_->copy();
+geometry::Point2D Nav2DObservation::getPosition() const {
+    return state_->getPosition();
 }
 
 double Nav2DObservation::getX() const {
-    return state_->x_;
+    return state_->getX();
 }
 
 double Nav2DObservation::getY() const {
-    return state_->y_;
+    return state_->getY();
 }
 
 double Nav2DObservation::getDirection() const {
-    return state_->direction_;
+    return state_->getDirection();
+}
+
+std::unique_ptr<Nav2DState> Nav2DObservation::makeState() const {
+    return std::make_unique<Nav2DState>(*state_);
 }
 }
 /* namespace nav2d */

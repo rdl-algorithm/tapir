@@ -520,6 +520,7 @@ void Solver::improveSol(BeliefNode *startNode, long maxTrials,
 BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         Observation const &obs, long timeStep) {
     cerr << "WARNING: Adding particles due to depletion" << endl;
+    BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
 
     std::vector<State const *> particles;
     std::vector<HistoryEntry *>::iterator it;
@@ -532,17 +533,15 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
     // Attempt to generate particles for next state based on the current belief,
     // the observation, and the action.
     std::vector<std::unique_ptr<State>> nextParticles(
-            model_->generateParticles(action, obs, particles));
+            model_->generateParticles(currNode, action, obs, particles));
     if (nextParticles.empty()) {
         cerr << "WARNING: Could not generate based on belief!" << endl;
         // If that fails, ignore the current belief.
-        nextParticles = model_->generateParticles(action, obs);
+        nextParticles = model_->generateParticles(currNode, action, obs);
     }
     if (nextParticles.empty()) {
         cerr << "ERROR: Failed to generate new particles!" << endl;
     }
-
-    BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
         StateInfo *stateInfo = allStates_->createOrGetInfo(*uniqueStatePtr);
 

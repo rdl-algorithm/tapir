@@ -9,7 +9,7 @@
 #include "solver/geometry/Observation.hpp"
 
 #include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/enumerated_observations.hpp"
+#include "solver/mappings/approximate_observations.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 

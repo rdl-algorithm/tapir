@@ -44,6 +44,9 @@ class ActionNode {
     /** Returns the mean q-value for this node. */
     double getMeanQValue () const;
 
+    /** Returns the observation mapping for this node. */
+    ObservationMapping *getMapping();
+
     /** Returns the child corresponding to the given observation, based on
      * sufficient proximity.
      */

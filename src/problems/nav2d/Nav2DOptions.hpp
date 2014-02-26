@@ -20,15 +20,23 @@ class Nav2DOptions : public ProgramOptions {
                 ("problem.mapPath,m", po::value<std::string>(),
                         "path to map file")
                 ("problem.timeStepLength,m", po::value<double>(),
-                        "path to map file")
-                ("problem.costPerUnitDistance", po::value<double>(),
-                        "cost per unit distance travelled"),
-                ("problem.costPerRevolution", po::value<double>(),
-                        "cost per 360 degrees of turning"),
+                        "number of time units per time step")
+                ("problem.crashPenalty", po::value<double>(),
+                        "penalty for crashing")
+                ("problem.goalReward", po::value<double>(),
+                        "reward for reaching the goal")
+                ("problem.maxSpeed", po::value<double>(),
+                        "maximum speed")
                 ("problem.speedErrorType", po::value<std::string>(),
                         "type of error in the speed signal")
                 ("problem.speedErrorSD", po::value<double>(),
                         "standard deviation for errors in the speed")
+                ("problem.costPerUnitDistance", po::value<double>(),
+                        "cost per unit distance travelled")
+                ("problem.maxRotationalSpeed", po::value<double>(),
+                        "maximum rotational speed (turns per unit time)")
+                ("problem.costPerRevolution", po::value<double>(),
+                        "cost per 360 degrees of turning")
                 ("problem.rotationErrorType", po::value<std::string>(),
                         "standard deviation for errors in the speed")
                 ("problem.rotationErrorSD", po::value<double>(),

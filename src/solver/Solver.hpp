@@ -14,10 +14,6 @@
 #include "geometry/Observation.hpp"              // for Observation
 #include "geometry/State.hpp"
 
-namespace tag {
-class TagTextSerializer;
-}
-
 namespace solver {
 class ActionPool;
 class BeliefNode;
@@ -38,7 +34,6 @@ class Solver {
     friend class EnumeratedActionTextSerializer;
     friend class EnumeratedObservationTextSerializer;
     friend class DiscreteObservationTextSerializer;
-    friend class tag::TagTextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();

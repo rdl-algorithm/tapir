@@ -18,20 +18,32 @@ Nav2DAction::Nav2DAction(double speed, double rotationalSpeed) :
 }
 
 Nav2DAction::Nav2DAction(Nav2DAction const &other) :
-        speed_(other.speed_),
-        rotationalSpeed_(other.rotationalSpeed_) {
+        Nav2DAction(other.speed_, other.rotationalSpeed_) {
 }
 
 std::unique_ptr<solver::Action> Nav2DAction::copy() const {
-    return std::make_unique<Nav2DAction>(this);
+    return std::make_unique<Nav2DAction>(*this);
 }
 
 double Nav2DAction::distanceTo(solver::Action const &/*otherAction*/) const {
     return 0;
 }
 
+bool Nav2DAction::equals(solver::Action const &otherAction) const {
+    Nav2DAction const &other = static_cast<Nav2DAction const &>(otherAction);
+    return (speed_ == other.speed_
+            && rotationalSpeed_ == other.rotationalSpeed_);
+}
+
+std::size_t Nav2DAction::hash() const {
+    std::size_t hashValue = 0;
+    abt::hash_combine(hashValue, speed_);
+    abt::hash_combine(hashValue, rotationalSpeed_);
+    return hashValue;
+}
+
 void Nav2DAction::print(std::ostream &os) const {
-    os << speed_ << "/" << rotationalSpeed_;
+    os << speed_ << " / " << rotationalSpeed_;
 }
 
 double Nav2DAction::getSpeed() const {

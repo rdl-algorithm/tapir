@@ -306,14 +306,14 @@ std::unique_ptr<solver::Observation> RockSampleModel::generateObservation(
 }
 
 double RockSampleModel::getReward(solver::State const &state,
-        solver::Action const &action) {
+        solver::Action const &action,
+        solver::State const &/*nextState*/) {
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
-
-    std::unique_ptr<RockSampleState> nextState;
+    std::unique_ptr<RockSampleState> nextState2;
     bool isLegal;
-    std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
-    return makeReward(rockSampleState, action, *nextState, isLegal);
+    std::tie(nextState2, isLegal) = makeNextState(rockSampleState, action);
+    return makeReward(rockSampleState, action, *nextState2, isLegal);
 }
 
 solver::Model::StepResult RockSampleModel::generateStep(
@@ -335,6 +335,7 @@ solver::Model::StepResult RockSampleModel::generateStep(
 }
 
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
+        solver::BeliefNode *previousBelief,
         solver::Action const &action, solver::Observation const &obs,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
@@ -397,6 +398,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
 }
 
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
+        solver::BeliefNode *previousBelief,
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> particles;
     while (static_cast<long>(particles.size()) < getNParticles()) {

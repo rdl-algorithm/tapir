@@ -128,6 +128,10 @@ long BeliefNode::getNActChildren() const {
     return actionMap_->getNChildren();
 }
 
+ActionMapping *BeliefNode::getMapping() {
+    return actionMap_.get();
+}
+
 BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) const {
     ActionNode *node = actionMap_->getActionNode(action);
     if (node == nullptr) {

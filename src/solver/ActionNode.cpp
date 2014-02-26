@@ -55,6 +55,10 @@ double ActionNode::getMeanQValue () const {
     return meanQValue_;
 }
 
+ObservationMapping *ActionNode::getMapping() {
+    return obsMap_.get();
+}
+
 BeliefNode *ActionNode::getChild(Observation const &obs) const {
     return obsMap_->getBelief(obs);
 }
