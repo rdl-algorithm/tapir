@@ -21,6 +21,10 @@ class Nav2DOptions : public ProgramOptions {
                         "path to map file")
                 ("problem.timeStepLength,m", po::value<double>(),
                         "number of time units per time step")
+                ("problem.costPerUnitTime,m", po::value<double>(),
+                        "cost per unit time")
+                ("problem.interpolationStepCount,m", po::value<double>(),
+                        "number of steps for interpolation")
                 ("problem.crashPenalty", po::value<double>(),
                         "penalty for crashing")
                 ("problem.goalReward", po::value<double>(),

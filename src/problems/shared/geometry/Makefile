@@ -15,6 +15,6 @@ endef
 $(foreach cfg,$(CFGS),$(eval $(call build_template,$(cfg))))
 
 else
-ROOT = ..
+ROOT = ../../..
 include $(ROOT)/.make/redirect.mk
 endif

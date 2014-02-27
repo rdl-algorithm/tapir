@@ -89,7 +89,7 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
             solver::State const &nextState) override;
     virtual double getReward(solver::State const &state,
                 solver::Action const &action,
-                solver::State const &nextState) override;
+                solver::State const *nextState) override;
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
 

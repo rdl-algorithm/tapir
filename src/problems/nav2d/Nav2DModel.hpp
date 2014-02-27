@@ -12,13 +12,14 @@
 
 #include "problems/shared/geometry/Point2D.hpp"  // for Point2D
 #include "problems/shared/geometry/Rectangle2D.hpp"  // for Rectangle2D
+#include "problems/shared/geometry/RTree.hpp"  // for RTree
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
 #include "solver/geometry/Action.hpp"            // for Action
 #include "solver/geometry/Observation.hpp"       // for Observation
 #include "solver/geometry/State.hpp"       // for State
 
-#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/approximate_observations.hpp"
 
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
@@ -27,9 +28,6 @@
 #include "global.hpp"                     // for RandomGenerator
 
 namespace po = boost::program_options;
-
-using geometry::Point2D;
-using geometry::Rectangle2D;
 
 namespace solver {
 class ActionMapping;
@@ -43,7 +41,7 @@ class Nav2DState;
 class Nav2DObservation;
 
 class Nav2DModel : virtual public ModelWithProgramOptions,
-    virtual public solver::ModelWithEnumeratedActions,
+    virtual public solver::ModelWithDiscretizedActions,
     virtual public solver::ModelWithApproximateObservations {
 
     friend class Nav2DTextSerializer;
@@ -53,9 +51,22 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     ~Nav2DModel() = default;
     _NO_COPY_OR_MOVE(Nav2DModel);
 
+    typedef std::unordered_map<int64_t, geometry::Rectangle2D> AreasById;
+
     enum class ErrorType {
         PROPORTIONAL_GAUSSIAN_NOISE = 1,
-        ABSOLUTE_GAUSSIAN_NOISE = 2
+        ABSOLUTE_GAUSSIAN_NOISE = 2,
+        NONE = 3
+    };
+
+    enum class AreaType {
+        EMPTY = 0,
+        START = 1,
+        GOAL = 2,
+        OBSERVATION = 3,
+        OBSTACLE = 4,
+        OUT_OF_BOUNDS = 5,
+        WORLD = 6
     };
 
     virtual std::string getName() override {
@@ -89,63 +100,70 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual std::unique_ptr<solver::Observation> generateObservation(
             solver::Action const &action,
             solver::State const &nextState) override;
+    bool hasDynamicReward() override {
+        return true;
+    }
     virtual double getReward(solver::State const &state,
-                solver::Action const &action)  override;
+                solver::Action const &action,
+                solver::State const *nextState) override;
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
 
     virtual std::vector<long> loadChanges(char const *changeFilename) override;
     virtual void update(long time, solver::StatePool *pool) override;
 
-    enum class PointType {
-        EMPTY = 0,
-        START = 1,
-        GOAL = 2,
-        OBSERVATION = 3,
-        OBSTACLE = 4,
-        OUT_OF_BOUNDS = 5
-    };
+    /** Returns the tree with the given object type. */
+    geometry::RTree *getTree(AreaType type);
+    /** Returns the areas of the given type. */
+    AreasById *getAreas(AreaType type);
+    /** Returns the distance to the nearest object of the given type. */
+    double getDistance(geometry::Point2D point, AreaType type);
+    /** Returns true iff the point is inside an object of the given type. */
+    bool isInside(geometry::Point2D point, AreaType type);
     /** Returns the contents of a given point on the map. */
-    PointType getPointType(geometry::Point2D point);
+    AreaType getAreaType(geometry::Point2D point);
     /** Displays an individual point on the map. */
-    virtual void dispPoint(PointType type, std::ostream &os);
+    virtual void dispPoint(AreaType type, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
     virtual void drawState(solver::State const &state,
             std::ostream &os) override;
 
-    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
-    getAllActionsInOrder() override;
+    virtual long getNumberOfBins() override;
+    virtual std::unique_ptr<solver::EnumeratedPoint> sampleAnAction(
+            long code) override;
+
     virtual double getMaxObservationDistance() override;
 
   private:
+    /** Converts an area type to a string. */
+    std::string areaTypeToString(AreaType type);
+    /** Parses an area type. */
+    AreaType parseAreaType(std::string text);
     /** Parses an error type. */
     ErrorType parseErrorType(std::string text);
-    /**
-     * Finds and counts the rocks on the map, and initializes the required
-     * data structures and variables.
-     */
-    void initialize();
+    /** Applies error to the speed. */
+    double applySpeedError(double speed);
+    /** Applies error to the rotational speed. */
+    double applyRotationalError(double rotationalSpeed);
 
-    std::unique_ptr<Nav2DState> sampleStateAt(Point2D position);
+    /** Adds the given Rectangle2D as an area of the given type. */
+    void addArea(int64_t id, geometry::Rectangle2D const &area,
+            AreaType type);
+    /** Samples a state at the given point. */
+    std::unique_ptr<Nav2DState> sampleStateAt(geometry::Point2D position);
 
-    /**
-     * Generates a next state for the given state and action;
+    /** Checks the path, and returns the resulting state & true iff no
+     * collisions occurred.
      */
-    std::unique_ptr<Nav2DState> makeNextState(
-            Nav2DState const &state, Nav2DAction const &action);
-    /** Generates an observation given a next state (i.e. after the action)
-     * and an action.
-     */
-    std::unique_ptr<Nav2DObservation> makeObservation(
-            Nav2DAction const &action,
-            Nav2DState const &nextState);
-    /** Retrieves the reward via the next state. */
-    double makeReward(Nav2DState const &state,
-            Nav2DAction const &action, Nav2DState const &nextState,
-            bool isLegal);
+    std::pair<std::unique_ptr<Nav2DState>, double> tryPath(
+               Nav2DState const &state, double speed, double rotationalSpeed);
 
     /** Amount of time per single time step. */
     double timeStepLength_;
+    /** Cost per unit time. */
+    double costPerUnitTime_;
+    /** Number of steps for interpolation. */
+    long interpolationStepCount_;
     /** Penalty for crashing. */
     double crashPenalty_;
     /** Reward for reaching a goal area. */
@@ -169,20 +187,35 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     /** Standard deviation for rotational error. */
     double rotationErrorSD_;
 
-    typedef std::unordered_map<std::string, Rectangle2D> AreasByName;
-    Rectangle2D mapArea_;
-    AreasByName startAreas_;
-    double totalStartArea_;
-    AreasByName observationAreas_;
-    AreasByName goalAreas_;
-    AreasByName obstacles_;
+    /** Maximum distance between observations to group them together. */
+    double maxObservationDistance_;
 
     // Generic problem parameters
     long nStVars_;
     double minVal_, maxVal_;
 
-    /** Maximum distance between observations to group them together. */
-    double maxObservationDistance_;
+    geometry::Rectangle2D mapArea_;
+    AreasById startAreas_;
+    double totalStartArea_;
+    AreasById observationAreas_;
+    AreasById goalAreas_;
+    AreasById obstacles_;
+
+    geometry::RTree obstacleTree_;
+    geometry::RTree goalAreaTree_;
+    geometry::RTree startAreaTree_;
+    geometry::RTree observationAreaTree_;
+
+    /** Represents a change in the Tag model. */
+    struct Nav2DChange {
+        std::string operation = "";
+        AreaType type = AreaType::EMPTY;
+        int64_t id = 0;
+        geometry::Rectangle2D area{};
+    };
+
+    /** The changes (scheduled for simulation). */
+    std::map<long, std::vector<Nav2DChange>> changes_;
 };
 } /* namespace nav2d */
 

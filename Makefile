@@ -42,6 +42,7 @@ CXXFLAGS_debug       := $(CXXFLAGS) -O0 -g3
 
 # Library directories
 override LIBDIRS  += -L/usr/lib/x86_64-linux-gnu/
+#override LIBDIRS  += -L/usr/local/lib -Wl,-rpath=/usr/local/lib/
 
 override LDLIBS  += -lboost_program_options -lspatialindex
 override LDFLAGS += $(LIBDIRS)

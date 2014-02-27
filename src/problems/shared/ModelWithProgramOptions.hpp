@@ -15,7 +15,7 @@ class ModelWithProgramOptions : public virtual solver::Model {
         discountFactor_(vm["problem.discountFactor"].as<double>()),
         nParticles_(vm["SBT.nParticles"].as<long>()),
         maxTrials_(vm["SBT.maxTrials"].as<long>()),
-        minimumDiscount_(vm["SBT.minimumDiscount"].as<double>()),
+        maximumDepth_(vm["SBT.maximumDepth"].as<double>()),
         heuristicExploreCoefficient_(
                 vm["SBT.heuristicExploreCoefficient"].as<double>()),
         ucbExploreCoefficient_(vm["SBT.ucbExploreCoefficient"].as<double>()),
@@ -41,8 +41,8 @@ class ModelWithProgramOptions : public virtual solver::Model {
     virtual long getMaxTrials() override {
         return maxTrials_;
     }
-    virtual double getMinimumDiscount() override {
-        return minimumDiscount_;
+    virtual long getMaximumDepth() override {
+        return maximumDepth_;
     }
     virtual double getUcbExploreCoefficient() override {
         return ucbExploreCoefficient_;
@@ -66,7 +66,7 @@ class ModelWithProgramOptions : public virtual solver::Model {
     // SBT parameters
     long nParticles_;
     long maxTrials_;
-    double minimumDiscount_;
+    long maximumDepth_;
 
     double heuristicExploreCoefficient_;
     double ucbExploreCoefficient_;

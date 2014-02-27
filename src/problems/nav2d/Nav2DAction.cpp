@@ -12,13 +12,14 @@
 #include "solver/geometry/State.hpp"             // for State
 
 namespace nav2d {
-Nav2DAction::Nav2DAction(double speed, double rotationalSpeed) :
+Nav2DAction::Nav2DAction(long code, double speed, double rotationalSpeed) :
+        code_(code),
         speed_(speed),
         rotationalSpeed_(rotationalSpeed) {
 }
 
 Nav2DAction::Nav2DAction(Nav2DAction const &other) :
-        Nav2DAction(other.speed_, other.rotationalSpeed_) {
+        Nav2DAction(other.code_, other.speed_, other.rotationalSpeed_) {
 }
 
 std::unique_ptr<solver::Action> Nav2DAction::copy() const {
@@ -43,7 +44,7 @@ std::size_t Nav2DAction::hash() const {
 }
 
 void Nav2DAction::print(std::ostream &os) const {
-    os << speed_ << " / " << rotationalSpeed_;
+    os << "#" << code_ << ":" << speed_ << "/" << rotationalSpeed_;
 }
 
 double Nav2DAction::getSpeed() const {
@@ -52,5 +53,9 @@ double Nav2DAction::getSpeed() const {
 
 double Nav2DAction::getRotationalSpeed() const{
     return rotationalSpeed_;
+}
+
+long Nav2DAction::getCode() const {
+    return code_;
 }
 } /* namespace nav2d */

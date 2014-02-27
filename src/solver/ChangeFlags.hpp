@@ -11,7 +11,8 @@ enum class ChangeFlags : int {
     REWARD = 0x02,
     TRANSITION = 0x04,
     OBSERVATION = 0x08,
-    HEURISTIC = 0x10,
+    OBSERVATION_BEFORE = 0x10,
+    HEURISTIC = 0x20
 };
 
 inline ChangeFlags &operator|=(ChangeFlags &lhs, const ChangeFlags &rhs) {
@@ -24,7 +25,6 @@ inline ChangeFlags operator|(ChangeFlags lhs, const ChangeFlags &rhs) {
     return lhs;
 }
 
-
 inline ChangeFlags &operator&=(ChangeFlags &lhs, const ChangeFlags &rhs) {
     lhs = static_cast<ChangeFlags>(static_cast<int>(lhs) & static_cast<int>(rhs));
     return lhs;
@@ -33,6 +33,10 @@ inline ChangeFlags &operator&=(ChangeFlags &lhs, const ChangeFlags &rhs) {
 inline ChangeFlags operator&(ChangeFlags lhs, const ChangeFlags &rhs) {
     lhs &= rhs;
     return lhs;
+}
+
+inline ChangeFlags operator~(ChangeFlags const &cf) {
+    return static_cast<ChangeFlags>(~static_cast<int>(cf));
 }
 
 namespace changes {

@@ -52,8 +52,8 @@ class ProgramOptions {
                         " will be generated if particle depletion occurs.")
                 ("SBT.maxTrials", po::value<long>(),
                         "the number of episodes to sample for each step.")
-                ("SBT.minimumDiscount", po::value<double>(),
-                        "Lowest net discount allowed before halting searches.")
+                ("SBT.maximumDepth", po::value<double>(),
+                        "maximum Depth allowed before search stops.")
                 ("SBT.heuristicExploreCoefficient", po::value<double>(),
                         "determines the ratio between exploration and"
                         " exploitation for the UCB action selection - higher"

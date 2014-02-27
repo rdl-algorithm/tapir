@@ -72,7 +72,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     double totT;
     std::clock_t tStart;
     tStart = std::clock();
-    // solver.genPol(model->getMaxTrials(), model->getMinimumDiscount());
+    solver.genPol(model->getMaxTrials(), model->getMaximumDepth());
     totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
     std::ofstream os;

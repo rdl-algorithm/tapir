@@ -64,13 +64,13 @@ std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
 void Nav2DTextSerializer::saveObservation(solver::Observation const *obs,
         std::ostream &os) {
     if (obs == nullptr) {
-        os << "()";
+        os << "[]";
         return;
     }
     Nav2DObservation const &observation =
             static_cast<Nav2DObservation const &>(*obs);
     if (observation.isEmpty()) {
-        os << "(NONE)";
+        os << "[()]";
     } else {
         saveState(observation.state_.get(), os);
     }
@@ -79,22 +79,16 @@ void Nav2DTextSerializer::saveObservation(solver::Observation const *obs,
 std::unique_ptr<solver::Observation> Nav2DTextSerializer::loadObservation(
         std::istream &is) {
     std::string tmpStr;
-    std::getline(is, tmpStr, '(');
-    std::getline(is, tmpStr, ')');
+    std::getline(is, tmpStr, '[');
+    std::getline(is, tmpStr, ']');
     if (tmpStr == "") {
         return nullptr;
-    } else if (tmpStr == "NONE") {
+    } else if (tmpStr == "()") {
         return std::make_unique<Nav2DObservation>();
     }
-    double x, y, direction;
     std::istringstream iss(tmpStr);
-    iss >> x;
-    iss >> y;
-    std::getline(is, tmpStr, ':');
-    is >> direction;
-    Nav2DModel const &model = dynamic_cast<Nav2DModel const &>(*model_);
-    return std::make_unique<Nav2DObservation>(x, y, direction,
-            model.costPerUnitDistance_, model.costPerRevolution_);
+    return std::make_unique<Nav2DObservation>(static_cast<Nav2DState const &>(
+            *loadState(iss)));
 }
 
 
@@ -105,7 +99,7 @@ void Nav2DTextSerializer::saveAction(solver::Action const *action,
         return;
     }
     Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
-    os << a.speed_ << " / " << a.rotationalSpeed_;
+    os << "#" << a.code_ << ":" << a.speed_ << "/" << a.rotationalSpeed_;
 }
 
 std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
@@ -115,11 +109,20 @@ std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
     if (tmpStr == "NULL") {
         return nullptr;
     }
+    long code;
     double speed, rotationalSpeed;
     std::istringstream iss(tmpStr);
-    iss >> speed;
-    is >> tmpStr >> rotationalSpeed;
-    return std::make_unique<Nav2DAction>(speed, rotationalSpeed);
+    std::string tmpStr2;
+    std::getline(iss, tmpStr2, '#');
+    std::getline(iss, tmpStr2, ':');
+    std::istringstream iss2(tmpStr2);
+    iss2 >> code;
+    std::getline(iss, tmpStr2, '/');
+    iss2.clear();
+    iss2.str(tmpStr2);
+    iss2 >> speed;
+    iss >> rotationalSpeed;
+    return std::make_unique<Nav2DAction>(code, speed, rotationalSpeed);
 }
 
 } /* namespace nav2d */

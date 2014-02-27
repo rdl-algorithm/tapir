@@ -81,8 +81,8 @@ class HistoryEntry {
     long entryId_;
     /** Net discount factor, as applies to the immediate reward. */
     double discount_;
-    /** Non-discounted immediate reward. */
-    double immediateReward_;
+    /** Non-discounted reward. */
+    double reward_;
     /** Total discounted reward. */
     double totalDiscountedReward_;
 

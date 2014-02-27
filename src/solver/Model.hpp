@@ -55,11 +55,9 @@ class Model {
      * in a single time step.State
      */
     virtual long getMaxTrials() = 0;
-    /** Returns the lowest net discount allowed; tree searching will not go
-     * deeper than this threshold.
-     */
-    virtual double getMinimumDiscount() = 0;
 
+    /** Returns the maximum depth allowed in the tree. */
+    virtual long getMaximumDepth() = 0;
 
     /** Returns the exploration coefficient used for selecting a rollout
      * heuristic - this should be a value between 0 and 1, where a 1 results in
@@ -97,29 +95,36 @@ class Model {
     virtual double getDefaultVal() = 0;
 
     /* --------------- Black box dynamics ----------------- */
-    /** Generates a next state from the previous state and the action taken. */
-    virtual std::unique_ptr<State> generateNextState(State const &state,
-            Action const &action) = 0;
-    /** Generates an observation, given the action and resulting next state. */
-    virtual std::unique_ptr<Observation> generateObservation(Action const &action,
-            State const &nextState) = 0;
-    /** Returns the reward for the given state and action. */
-    virtual double getReward(State const &state, Action const &action,
-            State const &nextState) = 0;
-
     /** Represents the results of a complete step in the model,
      * including the next state, observation, and reward.
      */
     struct StepResult {
         std::unique_ptr<Action> action = 0;
         std::unique_ptr<Observation> observation = nullptr;
-        double immediateReward = 0;
+        double reward = 0;
         std::unique_ptr<State> nextState = nullptr;
         bool isTerminal = false;
     };
     /** Generates the next state, an observation, and the reward. */
-     virtual StepResult generateStep(State const &state,
+    virtual StepResult generateStep(State const &state,
             Action const &action) = 0;
+
+    /** Generates a next state from the previous state and the action taken. */
+    virtual std::unique_ptr<State> generateNextState(State const &state,
+            Action const &action) = 0;
+
+    /** Generates an observation, given the action and resulting next state. */
+    virtual std::unique_ptr<Observation> generateObservation(Action const &action,
+            State const &nextState) = 0;
+
+    virtual bool hasDynamicReward() {
+        return false;
+    }
+    /** Returns the reward for the given state, action, and (optionally)
+     * next state - use nullptr for nextState if it isn't required.
+     */
+    virtual double getReward(State const &state, Action const &action,
+            State const *nextState) = 0;
 
     /* ------------ Methods for handling particle depletion -------------- */
     /** Generates new state particles based on the state particles of the

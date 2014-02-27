@@ -21,6 +21,8 @@ public:
     virtual void print(std::ostream &os) const;
     virtual void loadFrom(std::istream &is);
 
+    double distanceTo(Point2D const &point) const;
+
     Point2D sampleUniform(RandomGenerator &randGen) const;
     Point2D getLowerLeft() const;
     Point2D getUpperRight() const;

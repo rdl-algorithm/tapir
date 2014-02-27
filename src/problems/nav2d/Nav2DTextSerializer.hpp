@@ -8,7 +8,7 @@
 #include "solver/geometry/State.hpp"
 #include "solver/geometry/Observation.hpp"
 
-#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/approximate_observations.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
@@ -21,7 +21,7 @@ class Solver;
 
 namespace nav2d {
 class Nav2DTextSerializer : virtual public solver::TextSerializer,
-    virtual public solver::EnumeratedActionTextSerializer,
+    virtual public solver::DiscretizedActionTextSerializer,
     virtual public solver::ApproximateObservationTextSerializer {
   public:
     Nav2DTextSerializer(solver::Solver *solver);

@@ -75,32 +75,33 @@ void Solver::setSerializer(Serializer *serializer) {
     serializer_ = serializer;
 }
 
-void Solver::genPol(long maxTrials, double minimumDiscount) {
+void Solver::genPol(long maxTrials, long maximumDepth) {
     // Start expanding the tree.
     for (long i = 0; i < maxTrials; i++) {
-        singleSearch(model_->getDiscountFactor(), minimumDiscount);
+        singleSearch(model_->getDiscountFactor(), maximumDepth);
     }
 }
 
-void Solver::singleSearch(double discountFactor, double minimumDiscount) {
+void Solver::singleSearch(double discountFactor, long maximumDepth) {
     StateInfo *stateInfo = allStates_->createOrGetInfo(*model_->sampleAnInitState());
     singleSearch(
-            policy_->getRoot(), stateInfo, 0, discountFactor, minimumDiscount);
+            policy_->getRoot(), stateInfo, 0, discountFactor, maximumDepth);
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-        long startDepth, double discountFactor, double minimumDiscount) {
+        long startDepth, double discountFactor, long maximumDepth) {
     HistorySequence *sequence = allHistories_->addNew(startDepth);
     HistoryEntry *entry = sequence->addEntry(startStateInfo,
             std::pow(discountFactor, startDepth));
     entry->registerNode(startNode);
-    continueSearch(sequence, discountFactor, minimumDiscount);
+    continueSearch(sequence, discountFactor, maximumDepth);
 }
 
 void Solver::continueSearch(HistorySequence *sequence,
-        double discountFactor, double minimumDiscount) {
+        double discountFactor, long maximumDepth) {
     HistorySequence *currHistSeq = sequence;
-    HistoryEntry *currHistEntry = sequence->getEntry(sequence->histSeq_.size() - 1);
+    HistoryEntry *currHistEntry = sequence->getEntry(
+            sequence->histSeq_.size() - 1);
     double currentDiscount = currHistEntry->discount_;
     BeliefNode *currNode = currHistEntry->owningBeliefNode_;
 
@@ -109,7 +110,10 @@ void Solver::continueSearch(HistorySequence *sequence,
 
     bool rolloutUsed = false;
     bool done = false;
-    while (!done && currentDiscount >= minimumDiscount) {
+
+    long currentDepth = currHistSeq->startDepth_ + currHistEntry->entryId_ + 1;
+    while (!done && currentDepth <= maximumDepth) {
+        currentDepth++;
         Model::StepResult result;
         double qVal = 0;
         if (!currNode->hasActionToTry()) {
@@ -126,7 +130,7 @@ void Solver::continueSearch(HistorySequence *sequence,
             rolloutUsed = true;
             done = true;
         }
-        currHistEntry->immediateReward_ = result.immediateReward;
+        currHistEntry->reward_ = result.reward;
         currHistEntry->action_ = result.action->copy();
         currHistEntry->observation_ = result.observation->copy();
 
@@ -166,19 +170,19 @@ void Solver::backup(HistorySequence *sequence) {
         totalReward = (*itHist)->totalDiscountedReward_;
     } else {
         totalReward = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
-                * (*itHist)->immediateReward_;
+                * (*itHist)->reward_;
     }
     itHist++;
     for (; itHist != sequence->histSeq_.rend(); itHist++) {
         if ((*itHist)->hasBeenBackedUp_) {
             double previousTotalReward = (*itHist)->totalDiscountedReward_;
             totalReward = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
-                    * (*itHist)->immediateReward_ + totalReward;
+                    * (*itHist)->reward_ + totalReward;
             (*itHist)->owningBeliefNode_->updateQValue(
                     *(*itHist)->action_, totalReward - previousTotalReward);
         } else {
             totalReward = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
-                    * (*itHist)->immediateReward_ + totalReward;
+                    * (*itHist)->reward_ + totalReward;
             (*itHist)->owningBeliefNode_->updateQValue(
                     *(*itHist)->action_, totalReward, +1);
             (*itHist)->hasBeenBackedUp_ = true;
@@ -264,7 +268,7 @@ double Solver::rolloutPolHelper(BeliefNode *currNode, State const &state,
     std::unique_ptr<Action> action = currNode->getBestAction();
     Model::StepResult result = model_->generateStep(state, *action);
     currNode = currNode->getChild(*action, *result.observation);
-    double qVal = result.immediateReward;
+    double qVal = result.reward;
     if (!result.isTerminal) {
         qVal += (discountFactor * rolloutPolHelper(
                          currNode, *result.nextState, discountFactor));
@@ -342,7 +346,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     std::clock_t chTimeStart, chTimeEnd, impSolTimeStart, impSolTimeEnd;
     *actualNSteps = nSteps;
     long maxTrials = model_->getMaxTrials();
-    double minimumDiscount = model_->getMinimumDiscount();
+    long maximumDepth = model_->getMaximumDepth();
     double discFactor = model_->getDiscountFactor();
     double currDiscFactor = 1.0;
     double discountedTotalReward = 0.0;
@@ -358,6 +362,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     std::vector<long>::iterator itCh = changeTimes.begin();
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
         cout << "t-" << timeStep << endl;
+        allStates_->createOrGetInfo(*state);
         if (itCh != changeTimes.end() && timeStep == *itCh) {
             // Apply the changes to the model.
             cout << "Model changing." << endl;
@@ -388,7 +393,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
             itCh++;
         }
         impSolTimeStart = std::clock();
-        improveSol(currNode, maxTrials, minimumDiscount);
+        improveSol(currNode, maxTrials, maximumDepth);
         impSolTimeEnd = std::clock();
         *totImpTime += ((impSolTimeEnd - impSolTimeStart) * 1000
                 / CLOCKS_PER_SEC);
@@ -400,8 +405,8 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
         trajObs.push_back(result.observation->copy());
         // trajSt is responsible for ownership
         trajSt.push_back(result.nextState->copy());
-        trajRew.push_back(result.immediateReward);
-        discountedTotalReward += currDiscFactor * result.immediateReward;
+        trajRew.push_back(result.reward);
+        discountedTotalReward += currDiscFactor * result.reward;
         currDiscFactor = currDiscFactor * discFactor;
         cout << "Discount: " << currDiscFactor << "; Total Reward: "
              << discountedTotalReward << endl;
@@ -476,14 +481,14 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         cout << " Reached a terminal state." << endl;
     }
     cout << "Action: " << *result.action;
-    cout << "; Reward: " << result.immediateReward;
+    cout << "; Reward: " << result.reward;
     cout << "; Obs: " << *result.observation << endl;
     model_->drawState(*result.nextState, cout);
     return result;
 }
 
 void Solver::improveSol(BeliefNode *startNode, long maxTrials,
-        double minimumDiscount) {
+        long maximumDepth) {
     if (startNode->getNParticles() == 0) {
         std::cerr << "ERROR: No particles in the BeliefNode!" << std::endl;
         std::exit(10);
@@ -513,7 +518,7 @@ void Solver::improveSol(BeliefNode *startNode, long maxTrials,
         samples.push_back(entry->stateInfo_);
     }
     for (StateInfo *sample : samples) {
-        singleSearch(startNode, sample, depth, disc, minimumDiscount);
+        singleSearch(startNode, sample, depth, disc, maximumDepth);
     }
 }
 
@@ -570,7 +575,15 @@ void Solver::applyChanges() {
             sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
             if (changes::hasFlag(entry->changeFlags_, ChangeFlags::DELETED)) {
                 if (entryId > 0) {
-                    sequence->setChangeFlags(entryId - 1, ChangeFlags::TRANSITION);
+                    sequence->setChangeFlags(entryId - 1,
+                            ChangeFlags::TRANSITION);
+                }
+            }
+            if (changes::hasFlag(entry->changeFlags_,
+                    ChangeFlags::OBSERVATION_BEFORE)) {
+                if (entryId > 0) {
+                    sequence->setChangeFlags(entryId - 1,
+                            ChangeFlags::OBSERVATION);
                 }
             }
             affectedSequences.insert(sequence);
@@ -611,7 +624,7 @@ void Solver::updateSequence(HistorySequence *sequence) {
         if (isTerminal || entry->action_ == nullptr) {
             entry->action_ = nullptr;
             entry->observation_ = nullptr;
-            entry->immediateReward_ = 0;
+            entry->reward_ = 0;
             entry->totalDiscountedReward_ = 0;
             historyIterator++;
             break;
@@ -622,41 +635,52 @@ void Solver::updateSequence(HistorySequence *sequence) {
             cerr << "ERROR: deleted state in updateSequence." << endl;
         }
 
-        if (changes::hasFlag(entry->changeFlags_,
-                ChangeFlags::REWARD)) {
-            entry->immediateReward_ = model_->getReward(*entry->getState(),
-                    *entry->action_);
-        }
-
+        Model::StepResult result;
         HistoryEntry *nextEntry = (historyIterator + 1)->get();
-        if (changes::hasFlag(entry->changeFlags_,
-                ChangeFlags::TRANSITION)) {
-            std::unique_ptr<State> nextState = (
-                    model_->generateNextState(*entry->getState(),
-                            *entry->action_));
-            if (!nextState->equals(*nextEntry->getState())) {
-                StateInfo *nextStateInfo = allStates_->createOrGetInfo(*nextState);
-
-                nextEntry->registerState(nextStateInfo);
-
-                if (historyIterator + 1 == firstUnchanged) {
-                    firstUnchanged++;
-                }
-                entry->setChangeFlags(ChangeFlags::OBSERVATION);
-                nextEntry->changeFlags_ = ChangeFlags::REWARD | ChangeFlags::TRANSITION;
-            } else {
+        if (model_->hasDynamicReward()) {
+            if (changes::hasFlag(entry->changeFlags_, ChangeFlags::TRANSITION)
+                    || changes::hasFlag(entry->changeFlags_,
+                            ChangeFlags::REWARD)) {
+                result = model_->generateStep(*entry->getState(),
+                        *entry->action_);
+            }
+        } else {
+            if (changes::hasFlag(entry->changeFlags_,
+                    ChangeFlags::TRANSITION)) {
+                result.nextState = model_->generateNextState(
+                        *entry->getState(), *entry->action_);
             }
         }
-
-        if (changes::hasFlag(entry->changeFlags_,
-                ChangeFlags::OBSERVATION )) {
-
-            std::unique_ptr<Observation> observation = model_->generateObservation(
-                    *entry->action_, *nextEntry->getState());
-            if (*observation != *entry->observation_) {
+        if (result.nextState != nullptr && !result.nextState->equals(
+                *nextEntry->getState())) {
+            StateInfo *nextStateInfo = allStates_->createOrGetInfo(
+                    *result.nextState);
+            nextEntry->registerState(nextStateInfo);
+            if (historyIterator + 1 == firstUnchanged) {
+                firstUnchanged++;
+            }
+            entry->setChangeFlags(
+                    ChangeFlags::OBSERVATION | ChangeFlags::REWARD);
+            nextEntry->changeFlags_ = (ChangeFlags::REWARD
+                    | ChangeFlags::TRANSITION);
+        }
+        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::REWARD)) {
+            if (model_->hasDynamicReward()) {
+                entry->reward_ = result.reward;
+            } else {
+                entry->reward_ = model_->getReward(*entry->getState(),
+                        *entry->action_, nextEntry->getState());
+            }
+        }
+        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::OBSERVATION )) {
+            if (result.observation == nullptr) {
+                result.observation = model_->generateObservation(
+                        *entry->action_, *nextEntry->getState());
+            }
+            if (*result.observation != *entry->observation_) {
                 linksBroken = true;
                 linkBreakStart = historyIterator;
-                entry->observation_ = std::move(observation);
+                entry->observation_ = std::move(result.observation);
             }
         }
     }
@@ -694,7 +718,7 @@ void Solver::updateSequence(HistorySequence *sequence) {
         // Note: this also adjusts the relative weights of ROLLOUT_POL
         // and ROLLOUT_RANDHEURISTIC, as though this was an entirely new history.
         continueSearch(sequence, model_->getDiscountFactor(),
-                model_->getMinimumDiscount());
+                model_->getMaximumDepth());
     }
 }
 } /* namespace solver */

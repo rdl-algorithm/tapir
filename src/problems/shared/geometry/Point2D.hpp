@@ -9,6 +9,8 @@
 #include "solver/geometry/Vector.hpp"
 
 namespace geometry {
+class Vector2D;
+
 class Point2D: public solver::Vector {
 public:
     Point2D();
@@ -36,6 +38,10 @@ public:
     friend std::istream &operator>>(std::istream &is, Point2D &point);
     double x_;
     double y_;
+
+    friend Vector2D operator-(Point2D const &to, Point2D const &from);
+    friend Point2D operator+(Point2D const &p, Vector2D const &v);
+    friend Point2D operator+(Vector2D const &v, Point2D const &p);
 };
 
 std::istream &operator>>(std::istream &is, Point2D &point);

@@ -1,5 +1,5 @@
-#ifndef solver_FLAGGINGVISITOR_HPP_
-#define solver_FLAGGINGVISITOR_HPP_
+#ifndef SOLVER_FLAGGINGVISITOR_HPP_
+#define SOLVER_FLAGGINGVISITOR_HPP_
 
 #include "solver/ChangeFlags.hpp"
 
@@ -18,10 +18,9 @@ class FlaggingVisitor: public solver::SpatialIndexVisitor {
     _NO_COPY_OR_MOVE(FlaggingVisitor);
 
     virtual void visit(StateInfo *info) override;
-  private:
     ChangeFlags flagsToSet_;
 };
 
 } /* namespace solver */
 
-#endif /* solver_FLAGGINGVISITOR_HPP_ */
+#endif /* SOLVER_FLAGGINGVISITOR_HPP_ */

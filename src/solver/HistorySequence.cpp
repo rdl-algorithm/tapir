@@ -49,7 +49,7 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, double discount,
                 stateInfo, discount, this, histSeq_.size());
     newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
-    newEntry->immediateReward_ = immediateReward;
+    newEntry->reward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
     histSeq_.push_back(std::move(newEntry));
     return newEntryReturn;
@@ -63,7 +63,7 @@ HistoryEntry *HistorySequence::insertEntry(long index,
                 stateInfo, discount, this, histSeq_.size());
     newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
-    newEntry->immediateReward_ = immediateReward;
+    newEntry->reward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
     histSeq_.insert(histSeq_.begin() + index, std::move(newEntry));
     return newEntryReturn;
@@ -94,7 +94,6 @@ void HistorySequence::setChangeFlags(long index, ChangeFlags flags) {
     getEntry(index)->setChangeFlags(flags);
     addAffectedIndex(index);
 }
-
 
 // These are private and ought not to be called outside HistorySequence.
 

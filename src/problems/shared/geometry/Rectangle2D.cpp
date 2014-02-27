@@ -48,6 +48,40 @@ void Rectangle2D::loadFrom(std::istream &is) {
     std::getline(is, tmpStr, ')');
 }
 
+double Rectangle2D::distanceTo(Point2D const &point) const {
+    double px = point.getX();
+    double py = point.getY();
+    double x0 = lowerLeft_.getX();
+    double x1 = upperRight_.getX();
+    double y0 = lowerLeft_.getY();
+    double y1 = upperRight_.getY();
+    if (px <= x0) {
+        if (py <= y0) {
+            return point.distanceTo(lowerLeft_);
+        } else if (py >= y1) {
+            return point.distanceTo(Point2D(x0, y1));
+        } else {
+            return x0 - px;
+        }
+    } else if (px >= x1) {
+        if (py <= y0) {
+            return point.distanceTo(Point2D(x1, y0));
+        } else if (py >= y1) {
+            return point.distanceTo(upperRight_);
+        } else {
+            return px - x1;
+        }
+    } else {
+        if (py <= y0) {
+            return y0 - py;
+        } else if (py >= y1) {
+            return py - y1;
+        } else {
+            return 0;
+        }
+    }
+}
+
 std::istream &operator>>(std::istream &is, Rectangle2D &rect) {
     rect.loadFrom(is);
     return is;

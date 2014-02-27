@@ -7,12 +7,13 @@
 #include <vector>                       // for vector
 
 #include "solver/geometry/Action.hpp"
+#include "solver/geometry/EnumeratedPoint.hpp"
 
 namespace nav2d {
-class Nav2DAction : public solver::Action {
+class Nav2DAction : public solver::EnumeratedPoint {
     friend class Nav2DTextSerializer;
   public:
-    Nav2DAction(double speed, double rotationalSpeed);
+    Nav2DAction(long code, double speed, double rotationalSpeed);
 
     virtual ~Nav2DAction() = default;
     // Copy constructor is allowed, but not others.
@@ -30,7 +31,11 @@ class Nav2DAction : public solver::Action {
     double getSpeed() const;
     double getRotationalSpeed() const;
 
+    long getCode() const;
+    void calculateCode();
+
   private:
+    long code_;
     double speed_;
     double rotationalSpeed_;
 };

@@ -8,6 +8,8 @@
 #include "solver/geometry/Point.hpp"
 #include "solver/geometry/Vector.hpp"
 
+#include "Vector2D.hpp"
+
 #include "global.hpp"
 
 namespace geometry {

@@ -46,7 +46,9 @@ double Nav2DObservation::distanceTo(
         solver::Observation const &otherObs) const {
     Nav2DObservation const &other =
             static_cast<Nav2DObservation const &>(otherObs);
-    if (state_ == nullptr || other.state_ == nullptr) {
+    if (state_ == nullptr && other.state_ == nullptr) {
+        return 0;
+    } else if (state_ == nullptr || other.state_ == nullptr) {
         return std::numeric_limits<double>::infinity();
     }
     return state_->distanceTo(*other.state_);
@@ -55,7 +57,6 @@ double Nav2DObservation::distanceTo(
 bool Nav2DObservation::equals(solver::Observation const &otherObs) const {
     Nav2DObservation const &other =
         static_cast<Nav2DObservation const &>(otherObs);
-
     if (state_ == nullptr && other.state_ == nullptr) {
         return true;
     } else if (state_ == nullptr || other.state_ == nullptr) {

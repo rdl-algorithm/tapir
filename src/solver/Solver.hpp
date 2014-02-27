@@ -30,10 +30,11 @@ class Solver {
   public:
     friend class Serializer;
     friend class TextSerializer;
-    friend class ApproximateObservationTextSerializer;
     friend class EnumeratedActionTextSerializer;
-    friend class EnumeratedObservationTextSerializer;
+    friend class DiscretizedActionTextSerializer;
+    friend class ApproximateObservationTextSerializer;
     friend class DiscreteObservationTextSerializer;
+    friend class EnumeratedObservationTextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
@@ -52,9 +53,9 @@ class Solver {
 
     /** Generates a starting policy for the solver, by generating the given
      * number (maxTrials) of episodes, and terminating episodes when the
-     * current discount reaches the lowest allowed value (minimumDiscount).
+     * depth reaches maximumDepth.
      */
-    void genPol(long maxTrials, double minimumDiscount);
+    void genPol(long maxTrials, long maximumDepth);
     /** Runs a single simulation up to a maximum of nSteps steps, returning
      * the total discounted reward.
      *
@@ -77,13 +78,13 @@ class Solver {
   private:
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
-    void singleSearch(double discountFactor, double minimumDiscount);
+    void singleSearch(double discountFactor, long maximumDepth);
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-            long startDepth, double discountFactor, double minimumDiscount);
+            long startDepth, double discountFactor, long maximumDepth);
     /** Continues a pre-existing history sequence from its endpoint. */
     void continueSearch(HistorySequence *sequence,
-            double discountFactor, double minimumDiscount);
+            double discountFactor, long maximumDepth);
     /** Performs a backup on the given history sequence. */
     void backup(HistorySequence *sequence);
 
@@ -110,7 +111,7 @@ class Solver {
             long timeStep);
     /** Improves the solution, with the root at the given node. */
     void improveSol(BeliefNode *startNode, long maxTrials,
-            double minimumDiscount);
+            long maximumDepth);
 
     /* ------------------ Methods for handling model changes ------------------- */
     void applyChanges();

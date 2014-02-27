@@ -41,7 +41,7 @@ double Nav2DState::distanceTo(solver::State const &otherState) const {
     Nav2DState const &other = static_cast<Nav2DState const &>(otherState);
     return costPerUnitDistance_ * std::sqrt(position_.distanceTo(
             other.position_)) + costPerRevolution_ * std::abs(
-                    geometry::normalizeAngle(direction_ - other.direction_));
+                    geometry::normalizeTurn(direction_ - other.direction_));
 }
 
 bool Nav2DState::equals(solver::State const &otherState) const {
