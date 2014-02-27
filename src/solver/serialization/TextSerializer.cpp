@@ -24,11 +24,11 @@
 #include "solver/mappings/ActionMapping.hpp"
 #include "solver/mappings/ObservationMapping.hpp"          // for ObservationMapping
 
-#include "solver/topology/Action.hpp"              // for Observation
-#include "solver/topology/Observation.hpp"              // for Observation
-#include "solver/topology/State.hpp"                    // for State, operator<<
-#include "solver/topology/Vector.hpp"
-#include "solver/topology/VectorLP.hpp"
+#include "solver/geometry/Action.hpp"              // for Observation
+#include "solver/geometry/Observation.hpp"              // for Observation
+#include "solver/geometry/State.hpp"                    // for State, operator<<
+#include "solver/geometry/Vector.hpp"
+#include "solver/geometry/VectorLP.hpp"
 
 #include "Serializer.hpp"               // for Serializer
 

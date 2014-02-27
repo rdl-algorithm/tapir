@@ -7,9 +7,9 @@
 #include "global.hpp"                     // for make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 
-#include "solver/topology/Action.hpp"
-#include "solver/topology/State.hpp"
-#include "solver/topology/Observation.hpp"
+#include "solver/geometry/Action.hpp"
+#include "solver/geometry/State.hpp"
+#include "solver/geometry/Observation.hpp"
 
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/enumerated_observations.hpp"

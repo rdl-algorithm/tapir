@@ -12,11 +12,11 @@
 #include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/topology/Action.hpp"            // for Action
+#include "solver/geometry/Action.hpp"            // for Action
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/topology/Observation.hpp"       // for Observation
-#include "solver/topology/State.hpp"
+#include "solver/geometry/Observation.hpp"       // for Observation
+#include "solver/geometry/State.hpp"
 
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/discrete_observations_map.hpp"

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "solver/serialization/Serializer.hpp"
-#include "solver/topology/Action.hpp"
+#include "solver/geometry/Action.hpp"
 #include "solver/Model.hpp"
 
 #include "ActionPool.hpp"

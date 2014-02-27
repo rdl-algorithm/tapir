@@ -3,7 +3,7 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/BeliefTree.hpp"
 #include "solver/Model.hpp"
-#include "solver/topology/Observation.hpp"
+#include "solver/geometry/Observation.hpp"
 
 #include "ActionMapping.hpp"
 #include "ActionPool.hpp"

@@ -7,8 +7,8 @@
 #include <vector>                       // for vector
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/topology/State.hpp"             // for State
-#include "solver/topology/Vector.hpp"             // for Vector
+#include "solver/geometry/State.hpp"             // for State
+#include "solver/geometry/Vector.hpp"             // for Vector
 
 namespace rocksample {
 class RockSampleState : public solver::Vector {

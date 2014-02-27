@@ -7,8 +7,8 @@
 #include <vector>                       // for vector
 
 #include "problems/shared/GridPosition.hpp"
-#include "solver/topology/EnumeratedPoint.hpp"
-#include "solver/topology/Observation.hpp"
+#include "solver/geometry/EnumeratedPoint.hpp"
+#include "solver/geometry/Observation.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
 

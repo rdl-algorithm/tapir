@@ -10,8 +10,8 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "topology/Action.hpp"                   // for Action
-#include "topology/Observation.hpp"              // for Observation
+#include "geometry/Action.hpp"                   // for Action
+#include "geometry/Observation.hpp"              // for Observation
 #include "RandomAccessSet.hpp"
 
 namespace solver {

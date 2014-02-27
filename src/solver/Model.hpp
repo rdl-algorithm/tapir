@@ -7,12 +7,12 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "topology/Action.hpp"        // for Action
+#include "geometry/Action.hpp"        // for Action
 #include "mappings/ActionPool.hpp"
 #include "ChangeFlags.hpp"               // for ChangeFlags
-#include "topology/Observation.hpp"              // for Observation
+#include "geometry/Observation.hpp"              // for Observation
 #include "mappings/ObservationPool.hpp"
-#include "topology/State.hpp"                    // for State
+#include "geometry/State.hpp"                    // for State
 #include "indexing/StateIndex.hpp"
 
 #include "global.hpp"

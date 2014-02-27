@@ -2,7 +2,7 @@ MODULE_NAME = solver
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS = indexing mappings serialization topology
+CHILD_FOLDERS = indexing mappings serialization geometry
 include .make/template.mk
 
 # ----------------------------------------------------------------------

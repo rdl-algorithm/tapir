@@ -12,9 +12,9 @@
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
 
-#include "topology/Action.hpp"                   // for Action
-#include "topology/Observation.hpp"              // for Observation
-#include "topology/State.hpp"                    // for State
+#include "geometry/Action.hpp"                   // for Action
+#include "geometry/Observation.hpp"              // for Observation
+#include "geometry/State.hpp"                    // for State
 
 #include "mappings/ActionMapping.hpp"
 

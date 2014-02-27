@@ -8,7 +8,7 @@
 
 #include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/topology/State.hpp"             // for State
+#include "solver/geometry/State.hpp"             // for State
 
 namespace tag {
 TagState::TagState(GridPosition robotPos, GridPosition opponentPos,
