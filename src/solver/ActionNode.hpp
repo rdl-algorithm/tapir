@@ -15,6 +15,7 @@ class BeliefNode;
 
 class ActionNode {
   public:
+    friend class Solver;
     friend class TextSerializer;
 
     /** Constructs an action node without an action!! */

@@ -44,6 +44,8 @@ class ActionMapping {
     /** Returns the best q-value */
     virtual double getBestMeanQValue() const = 0;
 
+
+    virtual std::vector<ActionNode *> getChildren() const = 0;
 };
 } /* namespace solver */
 
