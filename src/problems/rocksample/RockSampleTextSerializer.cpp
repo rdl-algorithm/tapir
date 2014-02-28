@@ -67,7 +67,7 @@ std::unique_ptr<solver::State> RockSampleTextSerializer::loadState(
         } else if (c == 'B') {
             rockStates.push_back(false);
         } else {
-            std::cerr << "Error; invalid rock state: " << c << std::endl;
+            std::cerr << "ERROR: Invalid rock state: " << c << std::endl;
         }
     }
     return std::make_unique<RockSampleState>(GridPosition(i, j), rockStates);

@@ -54,7 +54,7 @@ StateInfo *StatePool::add(std::unique_ptr<StateInfo> newInfo) {
         // New state - add to the index.
         stateInfo->setId();
         if (stateInfo->id_ != (long)statesByIndex_.size()) {
-            std::cerr << "Error: wrong size in StatePool?" << std::endl;
+            std::cerr << "ERROR: Wrong size in StatePool?" << std::endl;
         }
         statesByIndex_.push_back(std::move(newInfo));
         addToStateIndex(stateInfo);

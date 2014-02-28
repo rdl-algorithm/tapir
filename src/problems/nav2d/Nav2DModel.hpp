@@ -44,8 +44,8 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual public solver::ModelWithDiscretizedActions,
     virtual public solver::ModelWithApproximateObservations {
 
+    friend class Nav2DAction;
     friend class Nav2DTextSerializer;
-
   public:
     Nav2DModel(RandomGenerator *randGen, po::variables_map vm);
     ~Nav2DModel() = default;

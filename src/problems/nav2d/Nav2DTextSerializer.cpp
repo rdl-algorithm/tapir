@@ -99,7 +99,7 @@ void Nav2DTextSerializer::saveAction(solver::Action const *action,
         return;
     }
     Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
-    os << "#" << a.code_ << ":" << a.speed_ << "/" << a.rotationalSpeed_;
+    os << "#" << a.getCode() << ":" << a.speed_ << "/" << a.rotationalSpeed_;
 }
 
 std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
@@ -122,7 +122,8 @@ std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
     iss2.str(tmpStr2);
     iss2 >> speed;
     iss >> rotationalSpeed;
-    return std::make_unique<Nav2DAction>(code, speed, rotationalSpeed);
+    return std::make_unique<Nav2DAction>(static_cast<ActionType>(code),
+            speed, rotationalSpeed);
 }
 
 } /* namespace nav2d */

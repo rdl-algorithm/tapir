@@ -646,54 +646,13 @@ void Nav2DModel::drawState(solver::State const &state, std::ostream &os) {
     os << state << endl;
 }
 
-enum class ActionType {
-    FORWARD_0 = 0,
-    FORWARD_1 = 1,
-    FORWARD_2 = 2,
-    TURN_LEFT_0 = 3,
-    TURN_LEFT_1 = 4,
-    TURN_LEFT_2 = 5,
-    TURN_RIGHT_0 = 6,
-    TURN_RIGHT_1 = 7,
-    TURN_RIGHT_2 = 8,
-    DO_NOTHING = 9,
-};
-
 long Nav2DModel::getNumberOfBins() {
-    return 10;
+    return static_cast<long>(ActionType::END);
 }
 
 std::unique_ptr<solver::EnumeratedPoint> Nav2DModel::sampleAnAction(
         long code) {
-    switch(static_cast<ActionType>(code)) {
-    case ActionType::FORWARD_0:
-        return std::make_unique<Nav2DAction>(code, 0.2 * maxSpeed_, 0.0);
-    case ActionType::FORWARD_1:
-        return std::make_unique<Nav2DAction>(code, 0.6 * maxSpeed_, 0.0);
-    case ActionType::FORWARD_2:
-        return std::make_unique<Nav2DAction>(code, maxSpeed_, 0.0);
-    case ActionType::TURN_LEFT_0:
-        return std::make_unique<Nav2DAction>(
-                code, 0.0,0.2 * maxRotationalSpeed_);
-    case ActionType::TURN_LEFT_1:
-        return std::make_unique<Nav2DAction>(
-                code, 0.0, 0.6 * maxRotationalSpeed_);
-    case ActionType::TURN_LEFT_2:
-        return std::make_unique<Nav2DAction>(code, 0.0, maxRotationalSpeed_);
-    case ActionType::TURN_RIGHT_0:
-        return std::make_unique<Nav2DAction>(
-                code, 0.0, -0.2 * maxRotationalSpeed_);
-    case ActionType::TURN_RIGHT_1:
-        return std::make_unique<Nav2DAction>(
-                code, 0.0, -0.6 * maxRotationalSpeed_);
-    case ActionType::TURN_RIGHT_2:
-        return std::make_unique<Nav2DAction>(code, 0.0, -maxRotationalSpeed_);
-    case ActionType::DO_NOTHING:
-        return std::make_unique<Nav2DAction>(code, 0.0, 0.0);
-    default:
-        cerr << "ERROR: Invalid Action Code " << code;
-        return nullptr;
-    }
+    return std::make_unique<Nav2DAction>(static_cast<ActionType>(code), this);
 }
 
 double Nav2DModel::getMaxObservationDistance() {
