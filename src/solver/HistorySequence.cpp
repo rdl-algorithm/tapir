@@ -24,6 +24,8 @@ HistorySequence::HistorySequence() :
 HistorySequence::HistorySequence(long startDepth) :
     id_(currId),
     startDepth_(startDepth),
+    isTerminal_(false),
+    invalidLinksStartId_(-1),
     histSeq_(),
     startAffectedIdx_(std::numeric_limits<long>::max()),
     endAffectedIdx_(-1),
@@ -67,6 +69,14 @@ HistoryEntry *HistorySequence::insertEntry(long index,
     HistoryEntry *newEntryReturn = newEntry.get();
     histSeq_.insert(histSeq_.begin() + index, std::move(newEntry));
     return newEntryReturn;
+}
+
+bool HistorySequence::isTerminal() const {
+    return isTerminal_;
+}
+
+long HistorySequence::getLength() const {
+    return histSeq_.size();
 }
 
 HistoryEntry *HistorySequence::getEntry(long entryId) const {

@@ -3,6 +3,7 @@
 
 #include <memory>                       // for unique_ptr
 #include <set>                          // for set
+#include <unordered_set>
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
@@ -115,7 +116,10 @@ class Solver {
 
     /* ------------------ Methods for handling model changes ------------------- */
     void applyChanges();
-    void updateSequence(HistorySequence *sequence);
+    void reviseHistories(
+            std::unordered_set<HistorySequence *> &affectedSequences);
+    void reviseSequence(HistorySequence *sequence);
+    void fixLinks(HistorySequence *sequence);
     /** Negates a backup on the given history sequence. */
     void undoBackup(HistorySequence *sequence);
 

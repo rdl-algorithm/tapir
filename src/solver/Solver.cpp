@@ -130,6 +130,7 @@ void Solver::continueSearch(HistorySequence *sequence,
             rolloutUsed = true;
             done = true;
         }
+        sequence->isTerminal_ = result.isTerminal;
         currHistEntry->reward_ = result.reward;
         currHistEntry->action_ = result.action->copy();
         currHistEntry->transitionParameters_ = std::move(
@@ -593,28 +594,50 @@ void Solver::applyChanges() {
         }
     }
     cout << "Updating " << affectedSequences.size() << " histories!" << endl;
-    for (HistorySequence *sequence : affectedSequences) {
+
+    // Delete and remove any sequences where the first entry is now invalid.
+    std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
+    while (it != affectedSequences.end()) {
+        HistorySequence *sequence = *it;
+        undoBackup(sequence);
         if (changes::hasFlag(sequence->getEntry(0)->changeFlags_,
                 ChangeFlags::DELETED)) {
+            it = affectedSequences.erase(it);
             allHistories_->deleteHistorySequence(sequence->id_);
         } else {
-            updateSequence(sequence);
-            sequence->resetChangeFlags();
+            it++;
+        }
+    }
+
+    // Revise all of the histories.
+    reviseHistories(affectedSequences);
+
+    // Clear flags and fix up all the sequences.
+    for (HistorySequence *sequence : affectedSequences) {
+        fixLinks(sequence);
+        sequence->resetChangeFlags();
+        if (sequence->isTerminal()) {
+            backup(sequence);
+        } else {
+            continueSearch(sequence, model_->getDiscountFactor(),
+                    model_->getMaximumDepth());
         }
     }
 }
 
-void Solver::updateSequence(HistorySequence *sequence) {
+void Solver::reviseHistories(
+        std::unordered_set<HistorySequence *> &affectedSequences) {
+    for (HistorySequence *sequence : affectedSequences) {
+        reviseSequence(sequence);
+    }
+}
+
+void Solver::reviseSequence(HistorySequence *sequence) {
     if (sequence->endAffectedIdx_ < sequence->startAffectedIdx_) {
         cerr << "WARNING: Sequence to update has no affected entries!?" << endl;
         return;
     }
-
-    undoBackup(sequence);
-
-    bool linksBroken = false;
-    std::vector<std::unique_ptr<HistoryEntry>>::iterator linkBreakStart;
-    bool isTerminal = false;
+    bool hitTerminalState = false;
     std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = (
         sequence->histSeq_.begin() + sequence->startAffectedIdx_);
     std::vector<std::unique_ptr<HistoryEntry>>::iterator firstUnchanged = (
@@ -623,8 +646,11 @@ void Solver::updateSequence(HistorySequence *sequence) {
         HistoryEntry *entry = historyIterator->get();
         State const *state = entry->getState();
 
-        isTerminal = model_->isTerminal(*state);
-        if (isTerminal || entry->action_ == nullptr) {
+        hitTerminalState = model_->isTerminal(*state);
+        if (hitTerminalState) {
+            sequence->isTerminal_ = true;
+        }
+        if (hitTerminalState || entry->action_ == nullptr) {
             entry->action_ = nullptr;
             entry->observation_ = nullptr;
             entry->reward_ = 0;
@@ -671,47 +697,39 @@ void Solver::updateSequence(HistorySequence *sequence) {
                             entry->transitionParameters_.get(),
                             *nextEntry->getState()));
             if (!newObservation->equals(*entry->observation_)) {
-                linksBroken = true;
-                linkBreakStart = historyIterator;
+                sequence->invalidLinksStartId_ = entry->entryId_;
                 entry->observation_ = std::move(newObservation);
             }
         }
     }
-    if (historyIterator != sequence->histSeq_.end()) {
-        if (isTerminal) {
-            std::vector<std::unique_ptr<
-                HistoryEntry>>::iterator firstDeletedEntry =
-                    historyIterator;
-            for (; historyIterator != sequence->histSeq_.end();
-                    historyIterator++) {
-                (*historyIterator)->registerState(nullptr);
-                (*historyIterator)->registerNode(nullptr);
-            }
-            sequence->histSeq_.erase(firstDeletedEntry,
-                    sequence->histSeq_.end());
+    // If we hit a terminal state before the end of the sequence,
+    // we must remove the remaining entries in the sequence.
+    if (hitTerminalState && historyIterator != sequence->histSeq_.end()) {
+        std::vector<std::unique_ptr<HistoryEntry>>::iterator firstDeletedEntry =
+                historyIterator;
+        for (; historyIterator != sequence->histSeq_.end(); historyIterator++) {
+            (*historyIterator)->registerState(nullptr);
+            (*historyIterator)->registerNode(nullptr);
         }
-
-        if (linksBroken) {
-            for (historyIterator = linkBreakStart;
-                    (historyIterator + 1) != sequence->histSeq_.end();
-                    historyIterator++) {
-                HistoryEntry *entry = historyIterator->get();
-                HistoryEntry *nextEntry = (historyIterator + 1)->get();
-                BeliefNode *nextNode = policy_->createOrGetChild(
-                        entry->owningBeliefNode_, *entry->action_,
-                        *entry->observation_);
-                nextEntry->registerNode(nextNode);
-            }
-        }
+        sequence->histSeq_.erase(firstDeletedEntry, sequence->histSeq_.end());
     }
+}
 
-    if (isTerminal) {
-        backup(sequence);
-    } else {
-        // Note: this also adjusts the relative weights of ROLLOUT_POL
-        // and ROLLOUT_RANDHEURISTIC, as though this was an entirely new history.
-        continueSearch(sequence, model_->getDiscountFactor(),
-                model_->getMaximumDepth());
+void Solver::fixLinks(HistorySequence *sequence) {
+    if (sequence->invalidLinksStartId_ != -1) {
+        std::vector<std::unique_ptr<HistoryEntry>>::iterator
+        historyIterator = (sequence->histSeq_.begin()
+                + sequence->invalidLinksStartId_);
+        for ( ; (historyIterator + 1) != sequence->histSeq_.end();
+                historyIterator++) {
+            HistoryEntry *entry = historyIterator->get();
+            HistoryEntry *nextEntry = (historyIterator + 1)->get();
+            BeliefNode *nextNode = policy_->createOrGetChild(
+                    entry->owningBeliefNode_, *entry->action_,
+                    *entry->observation_);
+            nextEntry->registerNode(nextNode);
+        }
+        sequence->invalidLinksStartId_ = -1;
     }
 }
 } /* namespace solver */
