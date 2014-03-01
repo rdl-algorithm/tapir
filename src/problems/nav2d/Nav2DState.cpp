@@ -22,16 +22,18 @@ Nav2DState::Nav2DState(double x, double y, double direction,
 Nav2DState::Nav2DState(geometry::Point2D position, double direction,
             double costPerUnitDistance, double costPerRevolution) :
     position_(position),
-    direction_(direction),
+    direction_(geometry::normalizeTurn(direction)),
     costPerUnitDistance_(costPerUnitDistance),
     costPerRevolution_(costPerRevolution) {
+}
+
+Nav2DState::~Nav2DState() {
 }
 
 Nav2DState::Nav2DState(Nav2DState const &other) :
         Nav2DState(other.position_, other.direction_,
                 other.costPerUnitDistance_, other.costPerRevolution_) {
 }
-
 
 std::unique_ptr<solver::Point> Nav2DState::copy() const {
     return std::make_unique<Nav2DState>(*this);

@@ -61,37 +61,6 @@ std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
             model.costPerUnitDistance_, model.costPerRevolution_);
 }
 
-void Nav2DTextSerializer::saveObservation(solver::Observation const *obs,
-        std::ostream &os) {
-    if (obs == nullptr) {
-        os << "[]";
-        return;
-    }
-    Nav2DObservation const &observation =
-            static_cast<Nav2DObservation const &>(*obs);
-    if (observation.isEmpty()) {
-        os << "[()]";
-    } else {
-        saveState(observation.state_.get(), os);
-    }
-}
-
-std::unique_ptr<solver::Observation> Nav2DTextSerializer::loadObservation(
-        std::istream &is) {
-    std::string tmpStr;
-    std::getline(is, tmpStr, '[');
-    std::getline(is, tmpStr, ']');
-    if (tmpStr == "") {
-        return nullptr;
-    } else if (tmpStr == "()") {
-        return std::make_unique<Nav2DObservation>();
-    }
-    std::istringstream iss(tmpStr);
-    return std::make_unique<Nav2DObservation>(static_cast<Nav2DState const &>(
-            *loadState(iss)));
-}
-
-
 void Nav2DTextSerializer::saveAction(solver::Action const *action,
         std::ostream &os) {
     if (action == nullptr) {
@@ -124,6 +93,82 @@ std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
     iss >> rotationalSpeed;
     return std::make_unique<Nav2DAction>(static_cast<ActionType>(code),
             speed, rotationalSpeed);
+}
+
+void Nav2DTextSerializer::saveTransitionParameters(
+        solver::TransitionParameters const *tp, std::ostream &os) {
+    os << "T:(";
+    if (tp != nullptr) {
+        Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
+        os << tp2.speed << "/" << tp2.rotationalSpeed << " ";
+        os << tp2.moveRatio << " ";
+        if (tp2.reachedGoal) {
+            os << "G";
+        }
+        if (tp2.hadCollision) {
+            os << "C";
+        }
+    }
+    os << ")";
+}
+
+std::unique_ptr<solver::TransitionParameters>
+Nav2DTextSerializer::loadTransitionParameters(
+        std::istream &is) {
+    std::string tmpStr;
+    std::getline(is, tmpStr, '(');
+    std::getline(is, tmpStr, ')');
+    if (tmpStr == "") {
+        return nullptr;
+    }
+    std::unique_ptr<Nav2DTransition> tp(
+            std::make_unique<Nav2DTransition>());
+    std::istringstream sstr(tmpStr);
+    std::string tmpStr2;
+    std::getline(sstr, tmpStr2, '/');
+    std::istringstream sstr2(tmpStr2);
+    sstr2 >> tp->speed;
+    sstr >> tp->rotationalSpeed;
+    sstr >> tp->moveRatio;
+    sstr >> tmpStr2;
+    for (char c : tmpStr2) {
+        if (c == 'G') {
+            tp->reachedGoal = true;
+        } else if (c == 'C') {
+            tp->hadCollision = true;
+        }
+    }
+    return std::move(tp);
+}
+
+void Nav2DTextSerializer::saveObservation(solver::Observation const *obs,
+        std::ostream &os) {
+    if (obs == nullptr) {
+        os << "[]";
+        return;
+    }
+    Nav2DObservation const &observation =
+            static_cast<Nav2DObservation const &>(*obs);
+    if (observation.isEmpty()) {
+        os << "[()]";
+    } else {
+        saveState(observation.state_.get(), os);
+    }
+}
+
+std::unique_ptr<solver::Observation> Nav2DTextSerializer::loadObservation(
+        std::istream &is) {
+    std::string tmpStr;
+    std::getline(is, tmpStr, '[');
+    std::getline(is, tmpStr, ']');
+    if (tmpStr == "") {
+        return nullptr;
+    } else if (tmpStr == "()") {
+        return std::make_unique<Nav2DObservation>();
+    }
+    std::istringstream iss(tmpStr);
+    return std::make_unique<Nav2DObservation>(static_cast<Nav2DState const &>(
+            *loadState(iss)));
 }
 
 } /* namespace nav2d */

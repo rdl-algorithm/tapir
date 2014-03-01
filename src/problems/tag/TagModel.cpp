@@ -265,8 +265,10 @@ std::unique_ptr<solver::Observation> TagModel::makeObservation(
             nextState.getRobotPosition() == nextState.getOpponentPosition());
 }
 
-double TagModel::getReward(solver::State const &state,
+double TagModel::generateReward(
+        solver::State const &state,
         solver::Action const &action,
+        solver::TransitionParameters const */*tp*/,
         solver::State const */*nextState*/) {
     if (static_cast<TagAction const &>(action).getActionType()
             == ActionType::TAG) {
@@ -282,12 +284,17 @@ double TagModel::getReward(solver::State const &state,
 }
 
 std::unique_ptr<solver::State> TagModel::generateNextState(
-           solver::State const &state, solver::Action const &action) {
+        solver::State const &state,
+        solver::Action const &action,
+        solver::TransitionParameters const */*tp*/) {
     return makeNextState(static_cast<TagState const &>(state), action).first;
 }
 
 std::unique_ptr<solver::Observation> TagModel::generateObservation(
-           solver::Action const &action, solver::State const &nextState) {
+        solver::State const */*state*/,
+        solver::Action const &action,
+        solver::TransitionParameters const */*tp*/,
+        solver::State const &nextState) {
     return makeObservation(action, static_cast<TagState const &>(nextState));
 }
 
@@ -298,7 +305,7 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
     std::unique_ptr<TagState> nextState = makeNextState(state, action).first;
 
     result.observation = makeObservation(action, *nextState);
-    result.reward = getReward(state, action, nextState.get());
+    result.reward = generateReward(state, action, nullptr, nullptr);
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);
     return result;

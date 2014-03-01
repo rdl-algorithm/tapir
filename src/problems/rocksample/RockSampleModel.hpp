@@ -83,15 +83,22 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
 
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
-            solver::State const &state, solver::Action const &action) override;
-    virtual std::unique_ptr<solver::Observation> generateObservation(
+            solver::State const &state,
             solver::Action const &action,
+            solver::TransitionParameters const */*tp*/) override;
+    virtual std::unique_ptr<solver::Observation> generateObservation(
+            solver::State const */*state*/,
+            solver::Action const &action,
+            solver::TransitionParameters const */*tp*/,
             solver::State const &nextState) override;
-    virtual double getReward(solver::State const &state,
-                solver::Action const &action,
-                solver::State const *nextState) override;
+    virtual double generateReward(
+            solver::State const &state,
+            solver::Action const &action,
+            solver::TransitionParameters const */*tp*/,
+            solver::State const */*nextState*/) override;
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
+
 
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,

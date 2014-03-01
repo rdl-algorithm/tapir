@@ -12,9 +12,12 @@
 #include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/geometry/Action.hpp"            // for Action
+
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
+#include "solver/TransitionParameters.hpp"
+
+#include "solver/geometry/Action.hpp"            // for Action
 #include "solver/geometry/Observation.hpp"       // for Observation
 #include "solver/geometry/State.hpp"
 
@@ -81,15 +84,25 @@ class TagModel: virtual public ModelWithProgramOptions,
 
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
-            solver::State const &state, solver::Action const &action) override;
-    virtual std::unique_ptr<solver::Observation> generateObservation(
+            solver::State const &state,
             solver::Action const &action,
+            solver::TransitionParameters const */*tp*/) override;
+
+    virtual std::unique_ptr<solver::Observation> generateObservation(
+            solver::State const */*state*/,
+            solver::Action const &action,
+            solver::TransitionParameters const */*tp*/,
             solver::State const &nextState) override;
-    virtual double getReward(solver::State const &state,
+
+    virtual double generateReward(
+                solver::State const &state,
                 solver::Action const &action,
-                solver::State const *nextState) override;
+                solver::TransitionParameters const */*tp*/,
+                solver::State const */*nextState*/) override;
+
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
+
 
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,

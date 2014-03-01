@@ -45,12 +45,9 @@ public:
     void calculatePolar();
 
     friend std::istream &operator>>(std::istream &is, Vector2D &point);
-    double x_;
-    double y_;
-    double magnitude_;
-    double direction_;
 
-    friend Point2D operator+(Point2D const &p, Vector2D const &v);
+    friend Point2D operator+(Point2D p, Vector2D const &v);
+    friend Point2D &operator+=(Point2D &p, Vector2D const &v);
     friend Point2D operator+(Vector2D const &v, Point2D const &p);
 
     friend Vector2D operator+(Vector2D const &v1, Vector2D const &v2);
@@ -58,6 +55,12 @@ public:
     friend Vector2D operator-(Vector2D const &v);
     friend Vector2D operator*(double scalar, Vector2D const &v);
     friend Vector2D operator*(Vector2D const &v, double scalar);
+
+private:
+    double x_;
+    double y_;
+    double magnitude_;
+    double direction_;
 };
 
 std::istream &operator>>(std::istream &is, Vector2D &point);
@@ -87,8 +90,15 @@ inline Vector2D operator*(Vector2D const &v, double scalar) {
     return Vector2D(Point2D(scalar * v.x_, scalar * v.y_));
 }
 
-inline Point2D operator+(Point2D const &p, Vector2D const &v) {
-    return Point2D(p.x_ + v.x_, p.y_ + v.y_);
+inline Point2D operator+(Point2D p, Vector2D const &v) {
+    p += v;
+    return p;
+}
+
+inline Point2D &operator+=(Point2D &p, Vector2D const &v) {
+    p.x_ += v.x_;
+    p.y_ += v.y_;
+    return p;
 }
 
 inline Point2D operator+(Vector2D const &v, Point2D const &p) {

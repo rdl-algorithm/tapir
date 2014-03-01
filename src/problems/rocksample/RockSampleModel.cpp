@@ -295,25 +295,33 @@ double RockSampleModel::makeReward(RockSampleState const &state,
 }
 
 std::unique_ptr<solver::State> RockSampleModel::generateNextState(
-           solver::State const &state, solver::Action const &action) {
+           solver::State const &state,
+           solver::Action const &action,
+           solver::TransitionParameters const */*tp*/) {
     return makeNextState(static_cast<RockSampleState const &>(state),
             action).first;
 }
 
 std::unique_ptr<solver::Observation> RockSampleModel::generateObservation(
-        solver::Action const &action, solver::State const &nextState) {
-    return makeObservation(action, static_cast<RockSampleState const &>(nextState));
+        solver::State const */*state*/,
+        solver::Action const &action,
+        solver::TransitionParameters const */*tp*/,
+        solver::State const &nextState) {
+    return makeObservation(action,
+            static_cast<RockSampleState const &>(nextState));
 }
 
-double RockSampleModel::getReward(solver::State const &state,
+double RockSampleModel::generateReward(
+        solver::State const &state,
         solver::Action const &action,
+        solver::TransitionParameters const */*tp*/,
         solver::State const */*nextState*/) {
-    RockSampleState const &rockSampleState =
-        static_cast<RockSampleState const &>(state);
-    std::unique_ptr<RockSampleState> nextState2;
+    RockSampleState const &rockSampleState = (
+            static_cast<RockSampleState const &>(state));
+    std::unique_ptr<RockSampleState> nextState;
     bool isLegal;
-    std::tie(nextState2, isLegal) = makeNextState(rockSampleState, action);
-    return makeReward(rockSampleState, action, *nextState2, isLegal);
+    std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
+    return makeReward(rockSampleState, action, *nextState, isLegal);
 }
 
 solver::Model::StepResult RockSampleModel::generateStep(
@@ -327,7 +335,7 @@ solver::Model::StepResult RockSampleModel::generateStep(
     bool isLegal;
     std::unique_ptr<RockSampleState> nextState;
     std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
-    result.observation = generateObservation(action, *nextState);
+    result.observation = makeObservation(action, *nextState);
     result.reward = makeReward(rockSampleState, action, *nextState, isLegal);
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);

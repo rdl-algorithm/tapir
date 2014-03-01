@@ -79,15 +79,22 @@ public:
     /** Loads a State. */
     virtual std::unique_ptr<State> loadState(std::istream &is) = 0;
 
-    /** Saves an Observation. */
-    virtual void saveObservation(Observation const *obs, std::ostream &os) = 0;
-    /** Loads an Observation. */
-    virtual std::unique_ptr<Observation> loadObservation(std::istream &is) = 0;
-
     /** Saves an Action. */
     virtual void saveAction(Action const *action, std::ostream &os) = 0;
     /** Loads an Action. */
     virtual std::unique_ptr<Action> loadAction(std::istream &is) = 0;
+
+    /** Saves TransitionParameters. */
+    virtual void saveTransitionParameters(TransitionParameters const *tp,
+            std::ostream &os) = 0;
+    /** Loads TransitionParameters. */
+    virtual std::unique_ptr<TransitionParameters> loadTransitionParameters(
+            std::istream &is) = 0;
+
+    /** Saves an Observation. */
+    virtual void saveObservation(Observation const *obs, std::ostream &os) = 0;
+    /** Loads an Observation. */
+    virtual std::unique_ptr<Observation> loadObservation(std::istream &is) = 0;
 
 
     /** Saves the pool handling all the actions. */

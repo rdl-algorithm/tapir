@@ -25,6 +25,8 @@
 #include "solver/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/Model.hpp"             // for Model::StepResult, Model
 
+#include "Nav2DState.hpp"
+
 #include "global.hpp"                     // for RandomGenerator
 
 namespace po = boost::program_options;
@@ -37,8 +39,15 @@ class EnumeratedPoint;
 
 namespace nav2d {
 class Nav2DAction;
-class Nav2DState;
 class Nav2DObservation;
+
+struct Nav2DTransition : public solver::TransitionParameters {
+    double speed = 0.0;
+    double rotationalSpeed = 0.0;
+    double moveRatio = 0.0; // 0.0 = same position; 1.0 = full move
+    bool reachedGoal = false;
+    bool hadCollision = false;
+};
 
 class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual public solver::ModelWithDiscretizedActions,
@@ -95,18 +104,29 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual double getDefaultVal() override;
 
     /* --------------- Black box dynamics ----------------- */
+    virtual std::unique_ptr<solver::TransitionParameters> generateTransition(
+                solver::State const &state,
+                solver::Action const &action);
+
     virtual std::unique_ptr<solver::State> generateNextState(
-            solver::State const &state, solver::Action const &action) override;
-    virtual std::unique_ptr<solver::Observation> generateObservation(
+            solver::State const &state,
             solver::Action const &action,
+            solver::TransitionParameters const *tp) override;
+
+    virtual std::unique_ptr<solver::Observation> generateObservation(
+            solver::State const */*state*/,
+            solver::Action const &action,
+            solver::TransitionParameters const */*tp*/,
             solver::State const &nextState) override;
-    bool hasDynamicReward() override {
-        return true;
-    }
-    virtual double getReward(solver::State const &state,
-                solver::Action const &action,
-                solver::State const *nextState) override;
-    virtual Model::StepResult generateStep(solver::State const &state,
+
+    virtual double generateReward(
+            solver::State const &state,
+            solver::Action const &action,
+            solver::TransitionParameters const */*tp*/,
+            solver::State const */*nextState*/) override;
+
+    virtual Model::StepResult generateStep(
+            solver::State const &state,
             solver::Action const &action) override;
 
     virtual std::vector<long> loadChanges(char const *changeFilename) override;
@@ -151,12 +171,6 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
             AreaType type);
     /** Samples a state at the given point. */
     std::unique_ptr<Nav2DState> sampleStateAt(geometry::Point2D position);
-
-    /** Checks the path, and returns the resulting state & true iff no
-     * collisions occurred.
-     */
-    std::pair<std::unique_ptr<Nav2DState>, double> tryPath(
-               Nav2DState const &state, double speed, double rotationalSpeed);
 
     /** Amount of time per single time step. */
     double timeStepLength_;

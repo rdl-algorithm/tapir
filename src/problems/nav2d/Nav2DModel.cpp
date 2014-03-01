@@ -289,90 +289,86 @@ double Nav2DModel::getDefaultVal() {
     return minVal_;
 }
 
-std::pair<std::unique_ptr<Nav2DState>, double> Nav2DModel::tryPath(
-           Nav2DState const &state, double speed, double rotationalSpeed) {
-    Point2D position = state.getPosition();
-    double direction = state.getDirection();
-    double radius = speed / (2 * M_PI * rotationalSpeed);
-    double turnAmount = rotationalSpeed * timeStepLength_;
-    Vector2D velocity(speed, direction);
+std::unique_ptr<solver::TransitionParameters> Nav2DModel::generateTransition(
+               solver::State const &state,
+               solver::Action const &action) {
+    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
+    Nav2DAction const &navAction = static_cast<Nav2DAction const &>(action);
+    std::unique_ptr<Nav2DTransition> transition(
+            std::make_unique<Nav2DTransition>());
 
-    std::unique_ptr<Nav2DState> resultingState(nullptr);
-    bool inGoal = false;
-    bool hasCollision = false;
+    transition->speed = applySpeedError(navAction.getSpeed());
+    transition->rotationalSpeed = applyRotationalError(
+            navAction.getRotationalSpeed());
+    Point2D position = navState.getPosition();
+    double direction = navState.getDirection();
+    double radius = transition->speed / (
+            2 * M_PI * transition->rotationalSpeed);
+    double turnAmount = transition->rotationalSpeed * timeStepLength_;
+    Vector2D displacement(transition->speed * timeStepLength_, direction);
 
-    double currentScalar = 0;
-    Point2D currentPosition = position;
-    double currentDirection = direction;
+    transition->moveRatio = 0;
     Point2D center = position + Vector2D(radius, direction +
             turnAmount > 0 ? 0.25 : -0.25);
 
     for (long step = 1; step <= interpolationStepCount_; step++) {
-        Point2D previousPosition = currentPosition;
-        double previousDirection = currentDirection;
-        double previousScalar = currentScalar;
+        double previousRatio = transition->moveRatio;
 
-        currentScalar = (double)step / interpolationStepCount_;
+        transition->moveRatio = (double)step / interpolationStepCount_;
+        Point2D currentPosition;
         if (turnAmount == 0) {
-            currentPosition = position + currentScalar * velocity;
+            currentPosition = position + (transition->moveRatio
+                    * displacement);
         } else {
-            currentDirection = direction + currentScalar * turnAmount;
-            currentPosition = center + Vector2D(radius, currentDirection +
-                               turnAmount > 0 ? 0.25 : -0.25);
+            currentPosition = center + Vector2D(radius,
+                    direction + transition->moveRatio * turnAmount +
+                               turnAmount > 0 ? -0.25 : 0.25);
         }
         if (!mapArea_.contains(currentPosition) ||
                 isInside(currentPosition, AreaType::OBSTACLE)) {
-            currentScalar = previousScalar;
-            currentPosition = previousPosition;
-            currentDirection = previousDirection;
-            hasCollision = true;
+            transition->moveRatio = previousRatio;
+            transition->hadCollision = true;
             break;
         }
         if (isInside(currentPosition, AreaType::GOAL)){
-            inGoal = true;
+            transition->reachedGoal = true;
             break;
         }
     }
-    resultingState = std::make_unique<Nav2DState>(
-            currentPosition.getX(),
-            currentPosition.getY(),
-            currentDirection,
-            costPerUnitDistance_,
-            costPerRevolution_);
-    double actualDistance;
-    double actualTurnAmount;
-    if (turnAmount == 0) {
-        actualDistance = (currentPosition - position).getMagnitude();
-        actualTurnAmount = 0;
-    } else {
-        actualTurnAmount = std::abs(currentScalar * turnAmount);
-        actualDistance = 2 * M_PI * actualTurnAmount * radius;
-    }
-    double reward = 0;
-    reward -= costPerUnitTime_ * timeStepLength_;
-    reward -= costPerUnitDistance_ * actualDistance;
-    reward -= costPerRevolution_ * actualTurnAmount;
-    if (inGoal) {
-        reward += goalReward_;
-    }
-    if (hasCollision) {
-        reward -= crashPenalty_;
-    }
-    return std::make_pair(std::move(resultingState), reward);
+    return std::move(transition);
+
 }
 
 std::unique_ptr<solver::State> Nav2DModel::generateNextState(
-           solver::State const &state, solver::Action const &action) {
-    Nav2DAction const &navAction = static_cast<Nav2DAction const &>(action);
-    double speed = applySpeedError(navAction.getSpeed());
-    double rotationalSpeed = applyRotationalError(
-            navAction.getRotationalSpeed());
-    return tryPath(static_cast<Nav2DState const &>(state), speed,
-            rotationalSpeed).first;
+        solver::State const &state,
+        solver::Action const &/*action*/,
+        solver::TransitionParameters const *tp) {
+    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
+    Point2D position = navState.getPosition();
+    double direction = navState.getDirection();
+    Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
+    if (tp2.rotationalSpeed == 0.0) {
+        position += Vector2D(tp2.moveRatio * tp2.speed * timeStepLength_,
+                direction);
+    } else {
+        double radius = tp2.speed / (2 * M_PI * tp2.rotationalSpeed);
+        Point2D center = position + Vector2D(radius,
+                direction + tp2.rotationalSpeed > 0 ? 0.25 : -0.25);
+        direction += tp2.moveRatio * tp2.rotationalSpeed * timeStepLength_;
+        position = center + Vector2D(radius,
+                direction + tp2.rotationalSpeed > 0 ? -0.25 : 0.25);
+    }
+    return std::make_unique<Nav2DState>(position, direction,
+            costPerUnitDistance_,
+            costPerRevolution_);
 }
 
+
 std::unique_ptr<solver::Observation> Nav2DModel::generateObservation(
-        solver::Action const &/*action*/, solver::State const &nextState) {
+        solver::State const */*state*/,
+        solver::Action const &/*action*/,
+        solver::TransitionParameters const */*tp*/,
+        solver::State const &nextState) {
     Nav2DState const &navState = static_cast<Nav2DState const &>(nextState);
     if (isInside(navState.getPosition(), AreaType::OBSERVATION)) {
         return std::make_unique<Nav2DObservation>(navState);
@@ -381,31 +377,39 @@ std::unique_ptr<solver::Observation> Nav2DModel::generateObservation(
     }
 }
 
-double Nav2DModel::getReward(solver::State const &/*state*/,
+double Nav2DModel::generateReward(
+        solver::State const &/*state*/,
         solver::Action const &/*action*/,
+        solver::TransitionParameters const *tp,
         solver::State const */*nextState*/) {
-    cerr << "ERROR: Cannot calculate reward!" << endl;
-    return 0;
+    Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
+    double reward = 0;
+    reward -= costPerUnitTime_ * timeStepLength_;
+    double distance = tp2.moveRatio * tp2.speed * timeStepLength_;
+    double turnAmount = tp2.moveRatio * tp2.rotationalSpeed * timeStepLength_;
+    reward -= costPerUnitDistance_ * distance;
+    reward -= costPerRevolution_ * turnAmount;
+    if (tp2.reachedGoal) {
+        reward += goalReward_;
+    }
+    if (tp2.hadCollision) {
+        reward -= crashPenalty_;
+    }
+    return reward;
 }
 
 solver::Model::StepResult Nav2DModel::generateStep(
         solver::State const &state,
         solver::Action const &action) {
-    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
-    Nav2DAction const &navAction = static_cast<Nav2DAction const &>(action);
-    double speed = applySpeedError(navAction.getSpeed());
-    double rotationalSpeed = applyRotationalError(
-            navAction.getRotationalSpeed());
-
-    std::unique_ptr<Nav2DState> nextState;
-    double reward;
-    std::tie(nextState, reward) = tryPath(navState, speed, rotationalSpeed);
     solver::Model::StepResult result;
     result.action = action.copy();
-    result.nextState = std::move(nextState);
-    result.isTerminal = isTerminal(*result.nextState);
-    result.observation = generateObservation(action, *result.nextState);
-    result.reward = reward;
+    result.transitionParameters = generateTransition(state, action);
+    result.nextState = generateNextState(state, action,
+            result.transitionParameters.get());
+    result.observation = generateObservation(nullptr, action,
+            nullptr, *result.nextState);
+    result.reward = generateReward(state, action,
+            result.transitionParameters.get(), result.nextState.get());
     return result;
 }
 

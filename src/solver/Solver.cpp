@@ -132,6 +132,8 @@ void Solver::continueSearch(HistorySequence *sequence,
         }
         currHistEntry->reward_ = result.reward;
         currHistEntry->action_ = result.action->copy();
+        currHistEntry->transitionParameters_ = std::move(
+                result.transitionParameters);
         currHistEntry->observation_ = result.observation->copy();
 
         // Add the next state to the pool
@@ -140,7 +142,8 @@ void Solver::continueSearch(HistorySequence *sequence,
         // Step forward in the history, and update the belief node.
         currentDiscount *= discountFactor;
         currHistEntry = currHistSeq->addEntry(nextStateInfo, currentDiscount);
-        currNode = policy_->createOrGetChild(currNode, *result.action, *result.observation);
+        currNode = policy_->createOrGetChild(currNode, *result.action,
+                *result.observation);
         currHistEntry->registerNode(currNode);
 
         if (rolloutUsed) {
@@ -635,52 +638,42 @@ void Solver::updateSequence(HistorySequence *sequence) {
             cerr << "ERROR: deleted state in updateSequence." << endl;
         }
 
-        Model::StepResult result;
+        // Model::StepResult result;
         HistoryEntry *nextEntry = (historyIterator + 1)->get();
-        if (model_->hasDynamicReward()) {
-            if (changes::hasFlag(entry->changeFlags_, ChangeFlags::TRANSITION)
-                    || changes::hasFlag(entry->changeFlags_,
-                            ChangeFlags::REWARD)) {
-                result = model_->generateStep(*entry->getState(),
-                        *entry->action_);
+        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::TRANSITION)) {
+            entry->transitionParameters_ = model_->generateTransition(
+                    *entry->getState(), *entry->action_);
+            std::unique_ptr<State> nextState = model_->generateNextState(
+                    *entry->getState(), *entry->action_,
+                    entry->transitionParameters_.get());
+            if (!nextState->equals(*nextEntry->getState())) {
+                StateInfo *nextStateInfo = allStates_->createOrGetInfo(
+                        *nextState);
+                nextEntry->registerState(nextStateInfo);
+                if (historyIterator + 1 == firstUnchanged) {
+                    firstUnchanged++;
+                }
+                entry->setChangeFlags(
+                        ChangeFlags::OBSERVATION | ChangeFlags::REWARD);
+                nextEntry->changeFlags_ = (ChangeFlags::REWARD
+                        | ChangeFlags::TRANSITION);
             }
-        } else {
-            if (changes::hasFlag(entry->changeFlags_,
-                    ChangeFlags::TRANSITION)) {
-                result.nextState = model_->generateNextState(
-                        *entry->getState(), *entry->action_);
-            }
-        }
-        if (result.nextState != nullptr && !result.nextState->equals(
-                *nextEntry->getState())) {
-            StateInfo *nextStateInfo = allStates_->createOrGetInfo(
-                    *result.nextState);
-            nextEntry->registerState(nextStateInfo);
-            if (historyIterator + 1 == firstUnchanged) {
-                firstUnchanged++;
-            }
-            entry->setChangeFlags(
-                    ChangeFlags::OBSERVATION | ChangeFlags::REWARD);
-            nextEntry->changeFlags_ = (ChangeFlags::REWARD
-                    | ChangeFlags::TRANSITION);
         }
         if (changes::hasFlag(entry->changeFlags_, ChangeFlags::REWARD)) {
-            if (model_->hasDynamicReward()) {
-                entry->reward_ = result.reward;
-            } else {
-                entry->reward_ = model_->getReward(*entry->getState(),
-                        *entry->action_, nextEntry->getState());
-            }
+            entry->reward_ = model_->generateReward(*entry->getState(),
+                    *entry->action_, entry->transitionParameters_.get(),
+                    nextEntry->getState());
         }
         if (changes::hasFlag(entry->changeFlags_, ChangeFlags::OBSERVATION )) {
-            if (result.observation == nullptr) {
-                result.observation = model_->generateObservation(
-                        *entry->action_, *nextEntry->getState());
-            }
-            if (*result.observation != *entry->observation_) {
+            std::unique_ptr<Observation> newObservation = (
+                    model_->generateObservation(entry->getState(),
+                            *entry->action_,
+                            entry->transitionParameters_.get(),
+                            *nextEntry->getState()));
+            if (!newObservation->equals(*entry->observation_)) {
                 linksBroken = true;
                 linkBreakStart = historyIterator;
-                entry->observation_ = std::move(result.observation);
+                entry->observation_ = std::move(newObservation);
             }
         }
     }

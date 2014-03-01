@@ -4,9 +4,12 @@
 #include <memory>
 
 #include "geometry/Action.hpp"                   // for Action
-#include "ChangeFlags.hpp"              // for ChangeFlags
 #include "geometry/Observation.hpp"              // for Observation
 #include "geometry/State.hpp"
+
+#include "TransitionParameters.hpp"
+#include "ChangeFlags.hpp"              // for ChangeFlags
+
 
 #include "global.hpp"
 
@@ -67,9 +70,11 @@ class HistoryEntry {
   private:
     /** The state information for this history entry. */
     StateInfo *stateInfo_;
-
     /** Action performed in this entry. */
     std::unique_ptr<Action> action_;
+    /** Extra information about the transition, if any is needed. */
+    std::unique_ptr<TransitionParameters> transitionParameters_;
+
     /** Observation received in this entry. */
     std::unique_ptr<Observation> observation_;
 

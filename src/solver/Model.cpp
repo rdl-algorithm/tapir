@@ -8,7 +8,15 @@
 #include "indexing/RTree.hpp"
 #include "indexing/StateIndex.hpp"
 
+#include "TransitionParameters.hpp"
+
 namespace solver {
+std::unique_ptr<TransitionParameters> Model::generateTransition(
+        State const &/*state*/,
+        Action const &/*action*/) {
+    return nullptr;
+}
+
 std::vector<std::unique_ptr<State>> Model::generateParticles(
         BeliefNode *previousBelief,
         Action const &action, Observation const &obs,

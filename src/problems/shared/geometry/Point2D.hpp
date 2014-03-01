@@ -40,7 +40,8 @@ public:
     double y_;
 
     friend Vector2D operator-(Point2D const &to, Point2D const &from);
-    friend Point2D operator+(Point2D const &p, Vector2D const &v);
+    friend Point2D operator+(Point2D p, Vector2D const &v);
+    friend Point2D &operator+=(Point2D &p, Vector2D const &v);
     friend Point2D operator+(Vector2D const &v, Point2D const &p);
 };
 

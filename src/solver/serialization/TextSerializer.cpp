@@ -37,6 +37,15 @@ using std::cerr;
 using std::endl;
 
 namespace solver {
+void TextSerializer::saveTransitionParameters(
+        TransitionParameters const */*tp*/, std::ostream &/*os*/) {
+}
+
+std::unique_ptr<TransitionParameters> TextSerializer::loadTransitionParameters(
+        std::istream &/*is*/) {
+    return nullptr;
+}
+
 void TextSerializer::save(StateInfo const &info, std::ostream &os) {
     os << "s " << info.id_ << " : ";
     saveState(info.state_.get(), os);
@@ -96,6 +105,8 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     os << entry.entryId_ << " >: ( " << entry.stateInfo_->id_ << " ";
     saveAction(entry.action_.get(), os);
     os << " ";
+    saveTransitionParameters(entry.transitionParameters_.get(), os);
+    os << " ";
     saveObservation(entry.observation_.get(), os);
     os << " " << entry.discount_ << " " << entry.reward_ << " "
        << entry.totalDiscountedReward_ << " ) ";
@@ -109,6 +120,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     is >> tmpStr >> tmpStr >> seqId >> entry.entryId_;
     is >> tmpStr >> tmpStr >> stateId;
     entry.action_ = std::move(loadAction(is));
+    entry.transitionParameters_ = std::move(loadTransitionParameters(is));
     entry.observation_ = std::move(loadObservation(is));
     (is >> entry.discount_ >> entry.reward_
         >> entry.totalDiscountedReward_ >> tmpStr);

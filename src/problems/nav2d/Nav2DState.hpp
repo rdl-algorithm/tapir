@@ -21,7 +21,7 @@ class Nav2DState : public solver::Vector {
     Nav2DState(geometry::Point2D position, double direction,
                 double costPerUnitDistance, double costPerRevolution);
 
-    virtual ~Nav2DState() = default;
+    virtual ~Nav2DState();
     // Copy constructor is allowed, but not others.
     Nav2DState(Nav2DState const &other);
     Nav2DState(Nav2DState &&) = delete;

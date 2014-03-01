@@ -17,6 +17,7 @@ HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
         long entryId) :
     stateInfo_(nullptr),
     action_(nullptr),
+    transitionParameters_(nullptr),
     observation_(),
     hasBeenBackedUp_(false),
     entryId_(entryId),

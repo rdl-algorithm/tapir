@@ -25,7 +25,7 @@ Vector2D::Vector2D(double magnitude, double direction) :
         x_(0),
         y_(0),
         magnitude_(magnitude),
-        direction_(direction) {
+        direction_(normalizeTurn(direction)) {
     calculateCartesian();
 }
 

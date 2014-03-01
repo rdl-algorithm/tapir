@@ -7,15 +7,15 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "geometry/Action.hpp"        // for Action
-#include "mappings/ActionPool.hpp"
-#include "ChangeFlags.hpp"               // for ChangeFlags
-#include "geometry/Observation.hpp"              // for Observation
-#include "mappings/ObservationPool.hpp"
-#include "geometry/State.hpp"                    // for State
 #include "indexing/StateIndex.hpp"
+#include "geometry/Action.hpp"        // for Action
+#include "geometry/State.hpp"                    // for State
+#include "geometry/Observation.hpp"              // for Observation
+#include "mappings/ActionPool.hpp"
+#include "mappings/ObservationPool.hpp"
 
-#include "global.hpp"
+#include "ChangeFlags.hpp"               // for ChangeFlags
+#include "TransitionParameters.hpp"
 
 namespace solver {
 class BeliefNode;
@@ -100,6 +100,7 @@ class Model {
      */
     struct StepResult {
         std::unique_ptr<Action> action = 0;
+        std::unique_ptr<TransitionParameters> transitionParameters = nullptr;
         std::unique_ptr<Observation> observation = nullptr;
         double reward = 0;
         std::unique_ptr<State> nextState = nullptr;
@@ -109,22 +110,41 @@ class Model {
     virtual StepResult generateStep(State const &state,
             Action const &action) = 0;
 
-    /** Generates a next state from the previous state and the action taken. */
-    virtual std::unique_ptr<State> generateNextState(State const &state,
-            Action const &action) = 0;
+    /** Generates the parameters for a next-state transition, if any are being
+     * used - the default implementation simply returns nullptr.
+     */
+    virtual std::unique_ptr<TransitionParameters> generateTransition(
+            State const &state,
+            Action const &action);
 
-    /** Generates an observation, given the action and resulting next state. */
-    virtual std::unique_ptr<Observation> generateObservation(Action const &action,
+    /** Generates the next state, based on the state and action, and,
+     * if used, the transition parameters.
+     */
+    virtual std::unique_ptr<State> generateNextState(
+            State const &state,
+            Action const &action,
+            TransitionParameters const *transitionParameters // optional
+            ) = 0;
+
+    /** Generates an observation, given the action and resulting next state;
+     * optionally, the previous state and the transition parameters can also be
+     * used.
+     */
+    virtual std::unique_ptr<Observation> generateObservation(
+            State const *state, // optional
+            Action const &action,
+            TransitionParameters const *transitionParameters, // optional
             State const &nextState) = 0;
 
-    virtual bool hasDynamicReward() {
-        return false;
-    }
-    /** Returns the reward for the given state, action, and (optionally)
-     * next state - use nullptr for nextState if it isn't required.
+    /** Returns the reward for the given state, action; optionally this also
+     * includes transition parameters and the next state - if they aren't
+     * being used it is OK to use nullptr for those inputs.
      */
-    virtual double getReward(State const &state, Action const &action,
-            State const *nextState) = 0;
+    virtual double generateReward(
+            State const &state,
+            Action const &action,
+            TransitionParameters const *transitionParameters, // optional
+            State const *nextState) = 0; // optional
 
     /* ------------ Methods for handling particle depletion -------------- */
     /** Generates new state particles based on the state particles of the
