@@ -25,7 +25,6 @@ public:
 };
 
 class ApproximateObservationPool: public solver::ObservationPool {
-    friend class TextSerializer;
   public:
     ApproximateObservationPool(double maxDistance);
     virtual ~ApproximateObservationPool() = default;
@@ -39,7 +38,6 @@ class ApproximateObservationPool: public solver::ObservationPool {
 
 class ApproximateObservationMap: public solver::ObservationMapping {
   public:
-    friend class TextSerializer;
     friend class ApproximateObservationTextSerializer;
     ApproximateObservationMap(ActionPool *actionPool, double maxDistance);
 

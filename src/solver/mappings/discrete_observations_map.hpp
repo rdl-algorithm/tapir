@@ -28,7 +28,6 @@ public:
 };
 
 class DiscreteObservationPool: public solver::ObservationPool {
-    friend class TextSerializer;
   public:
     DiscreteObservationPool() = default;
     virtual ~DiscreteObservationPool() = default;
@@ -40,7 +39,6 @@ class DiscreteObservationPool: public solver::ObservationPool {
 
 class DiscreteObservationMap: public solver::ObservationMapping {
   public:
-    friend class TextSerializer;
     friend class DiscreteObservationTextSerializer;
     DiscreteObservationMap(ActionPool *actionPool);
 

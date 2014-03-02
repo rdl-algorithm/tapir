@@ -29,7 +29,6 @@ public:
 };
 
 class EnumeratedObservationPool: public solver::ObservationPool {
-    friend class TextSerializer;
   public:
     EnumeratedObservationPool(
             std::vector<std::unique_ptr<EnumeratedPoint>> observations);
@@ -44,7 +43,6 @@ private:
 
 class EnumeratedObservationMap: public solver::ObservationMapping {
   public:
-    friend class TextSerializer;
     friend class EnumeratedObservationTextSerializer;
     EnumeratedObservationMap(ActionPool *actionPool,
             std::vector<std::unique_ptr<EnumeratedPoint>>

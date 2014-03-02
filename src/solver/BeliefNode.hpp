@@ -67,7 +67,7 @@ class BeliefNode {
 
     /** Updates the q-value for the given action, with the given increase in
      * the total q-value (negative values for a decrease).
-     */friend class BeliefTree;
+     */
     void updateQValue(Action const &action, double increase);
     /** Updates the q-value for the given action, with the given increase in
      * the total q-value (negative values for a decrease), and the given

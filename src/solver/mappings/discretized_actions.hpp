@@ -30,7 +30,6 @@ public:
 };
 
 class DiscretizedActionPool: public solver::ActionPool {
-    friend class TextSerializer;
   public:
     DiscretizedActionPool(ModelWithDiscretizedActions *model,
             long numberOfBins);
@@ -46,7 +45,6 @@ private:
 
 class DiscretizedActionMap: public solver::ActionMapping {
   public:
-    friend class TextSerializer;
     friend class DiscretizedActionTextSerializer;
     DiscretizedActionMap(ObservationPool *observationPool,
             ModelWithDiscretizedActions *model,

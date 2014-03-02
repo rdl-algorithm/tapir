@@ -11,8 +11,6 @@ class ActionNode;
 
 class ActionMapping {
   public:
-    friend class TextSerializer;
-
     /** Creates an empty observation map */
     ActionMapping() = default;
 

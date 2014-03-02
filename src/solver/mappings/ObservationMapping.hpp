@@ -10,8 +10,6 @@ class BeliefNode;
 
 class ObservationMapping {
   public:
-    friend class TextSerializer;
-
     /** Creates an empty observation map */
     ObservationMapping() = default;
 

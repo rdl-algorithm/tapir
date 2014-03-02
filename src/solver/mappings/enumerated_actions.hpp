@@ -30,7 +30,6 @@ public:
 };
 
 class EnumeratedActionPool: public solver::ActionPool {
-    friend class TextSerializer;
   public:
     EnumeratedActionPool(RandomGenerator *randGen,
             std::vector<std::unique_ptr<EnumeratedPoint>> actions);
@@ -46,7 +45,6 @@ private:
 
 class EnumeratedActionMap: public solver::ActionMapping {
   public:
-    friend class TextSerializer;
     friend class EnumeratedActionTextSerializer;
     EnumeratedActionMap(ObservationPool *observationPool,
             std::vector<std::unique_ptr<EnumeratedPoint>> const &actions,
