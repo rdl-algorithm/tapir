@@ -37,6 +37,8 @@ class Solver {
     friend class DiscreteObservationTextSerializer;
     friend class EnumeratedObservationTextSerializer;
 
+    friend class DefaultHistoryCorrector;
+
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
     _NO_COPY_OR_MOVE(Solver);
@@ -116,9 +118,6 @@ class Solver {
 
     /* ------------------ Methods for handling model changes ------------------- */
     void applyChanges();
-    void reviseHistories(
-            std::unordered_set<HistorySequence *> &affectedSequences);
-    void reviseSequence(HistorySequence *sequence);
     void fixLinks(HistorySequence *sequence);
     /** Negates a backup on the given history sequence. */
     void undoBackup(HistorySequence *sequence);
@@ -142,6 +141,9 @@ class Solver {
     std::unique_ptr<Histories> allHistories_;
     /** The tree that stores the policy */
     std::unique_ptr<BeliefTree> policy_;
+
+    /** The history corrector. */
+    std::unique_ptr<HistoryCorrector> historyCorrector_;
 
     /** The rollout mode that was used in the last rollout. */
     RolloutMode lastRolloutMode_;

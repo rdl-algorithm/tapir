@@ -20,6 +20,7 @@ class StateInfo;
 
 class HistoryEntry {
   public:
+    friend class DefaultHistoryCorrector;
     friend class Histories;
     friend class HistorySequence;
     friend class Solver;

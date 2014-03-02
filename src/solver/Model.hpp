@@ -16,6 +16,7 @@
 
 #include "ChangeFlags.hpp"               // for ChangeFlags
 #include "TransitionParameters.hpp"
+#include "HistoryCorrector.hpp"
 
 namespace solver {
 class BeliefNode;
@@ -196,6 +197,10 @@ class Model {
      * ObservationMappings.
      */
     virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
+    /** Creates a HistoryCorrector; defaults to general one, but can
+     * be made problem-specific.
+     */
+    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector();
 };
 } /* namespace solver */
 

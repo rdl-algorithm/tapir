@@ -52,6 +52,7 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     allStates_(std::make_unique<StatePool>(model_->createStateIndex())),
     allHistories_(std::make_unique<Histories>()),
     policy_(std::make_unique<BeliefTree>()),
+    historyCorrector_(model_->createHistoryCorrector()),
     lastRolloutMode_(ROLLOUT_RANDHEURISTIC),
     heuristicExploreCoefficient_(this->model_->getHeuristicExploreCoefficient()),
     timeUsedPerHeuristic_{ 1.0, 1.0 },
@@ -69,6 +70,7 @@ void Solver::initialize() {
     observationPool_->actionPool_ = actionPool_.get();
     policy_->setRoot(std::make_unique<BeliefNode>(
             actionPool_->createActionMapping()));
+    historyCorrector_->setSolver(this);
 }
 
 void Solver::setSerializer(Serializer *serializer) {
@@ -610,7 +612,7 @@ void Solver::applyChanges() {
     }
 
     // Revise all of the histories.
-    reviseHistories(affectedSequences);
+    historyCorrector_->reviseHistories(affectedSequences);
 
     // Clear flags and fix up all the sequences.
     for (HistorySequence *sequence : affectedSequences) {
@@ -622,96 +624,6 @@ void Solver::applyChanges() {
             continueSearch(sequence, model_->getDiscountFactor(),
                     model_->getMaximumDepth());
         }
-    }
-}
-
-void Solver::reviseHistories(
-        std::unordered_set<HistorySequence *> &affectedSequences) {
-    for (HistorySequence *sequence : affectedSequences) {
-        reviseSequence(sequence);
-    }
-}
-
-void Solver::reviseSequence(HistorySequence *sequence) {
-    if (sequence->endAffectedIdx_ < sequence->startAffectedIdx_) {
-        cerr << "WARNING: Sequence to update has no affected entries!?" << endl;
-        return;
-    }
-    bool hitTerminalState = false;
-    std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = (
-        sequence->histSeq_.begin() + sequence->startAffectedIdx_);
-    std::vector<std::unique_ptr<HistoryEntry>>::iterator firstUnchanged = (
-            sequence->histSeq_.begin() + sequence->endAffectedIdx_ + 1);
-    for (; historyIterator != firstUnchanged; historyIterator++) {
-        HistoryEntry *entry = historyIterator->get();
-        State const *state = entry->getState();
-
-        hitTerminalState = model_->isTerminal(*state);
-        if (hitTerminalState) {
-            sequence->isTerminal_ = true;
-        }
-        if (hitTerminalState || entry->action_ == nullptr) {
-            entry->action_ = nullptr;
-            entry->observation_ = nullptr;
-            entry->reward_ = 0;
-            entry->totalDiscountedReward_ = 0;
-            historyIterator++;
-            break;
-        }
-
-        if (changes::hasFlag(entry->changeFlags_,
-                        ChangeFlags::DELETED)) {
-            cerr << "ERROR: deleted state in updateSequence." << endl;
-        }
-
-        // Model::StepResult result;
-        HistoryEntry *nextEntry = (historyIterator + 1)->get();
-        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::TRANSITION)) {
-            entry->transitionParameters_ = model_->generateTransition(
-                    *entry->getState(), *entry->action_);
-            std::unique_ptr<State> nextState = model_->generateNextState(
-                    *entry->getState(), *entry->action_,
-                    entry->transitionParameters_.get());
-            if (!nextState->equals(*nextEntry->getState())) {
-                StateInfo *nextStateInfo = allStates_->createOrGetInfo(
-                        *nextState);
-                nextEntry->registerState(nextStateInfo);
-                if (historyIterator + 1 == firstUnchanged) {
-                    firstUnchanged++;
-                }
-                entry->setChangeFlags(
-                        ChangeFlags::OBSERVATION | ChangeFlags::REWARD);
-                nextEntry->changeFlags_ = (ChangeFlags::REWARD
-                        | ChangeFlags::TRANSITION);
-            }
-        }
-        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::REWARD)) {
-            entry->reward_ = model_->generateReward(*entry->getState(),
-                    *entry->action_, entry->transitionParameters_.get(),
-                    nextEntry->getState());
-        }
-        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::OBSERVATION )) {
-            std::unique_ptr<Observation> newObservation = (
-                    model_->generateObservation(entry->getState(),
-                            *entry->action_,
-                            entry->transitionParameters_.get(),
-                            *nextEntry->getState()));
-            if (!newObservation->equals(*entry->observation_)) {
-                sequence->invalidLinksStartId_ = entry->entryId_;
-                entry->observation_ = std::move(newObservation);
-            }
-        }
-    }
-    // If we hit a terminal state before the end of the sequence,
-    // we must remove the remaining entries in the sequence.
-    if (hitTerminalState && historyIterator != sequence->histSeq_.end()) {
-        std::vector<std::unique_ptr<HistoryEntry>>::iterator firstDeletedEntry =
-                historyIterator;
-        for (; historyIterator != sequence->histSeq_.end(); historyIterator++) {
-            (*historyIterator)->registerState(nullptr);
-            (*historyIterator)->registerNode(nullptr);
-        }
-        sequence->histSeq_.erase(firstDeletedEntry, sequence->histSeq_.end());
     }
 }
 

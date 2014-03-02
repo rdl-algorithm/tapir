@@ -9,6 +9,8 @@
 #include "indexing/StateIndex.hpp"
 
 #include "TransitionParameters.hpp"
+#include "HistoryCorrector.hpp"
+#include "DefaultHistoryCorrector.hpp"
 
 namespace solver {
 std::unique_ptr<TransitionParameters> Model::generateTransition(
@@ -56,5 +58,9 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
 
 std::unique_ptr<StateIndex> Model::createStateIndex() {
     return std::make_unique<RTree>(getNStVars());
+}
+
+std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
+    return std::make_unique<DefaultHistoryCorrector>(this);
 }
 } /* namespace solver */

@@ -20,6 +20,7 @@ class HistorySequence {
     friend class Histories;
     friend class Solver;
     friend class TextSerializer;
+    friend class DefaultHistoryCorrector;
 
     /** Constructs an empty history sequence starting at depth 0. */
     HistorySequence();
