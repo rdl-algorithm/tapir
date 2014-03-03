@@ -23,6 +23,7 @@
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"
 
+#include "ActionNode.hpp"               // for BeliefNode, BeliefNode::startTime
 #include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
 #include "BeliefTree.hpp"               // for BeliefTree
 #include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
@@ -476,6 +477,16 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 //        totalDistance += s1->distanceTo(*s2);
 //    }
 //    cout << "Est. mean inter-particle distance: " << totalDistance / 100 << endl;
+
+
+    cout << "Action children: " << endl;
+    for (ActionNode *node : currentBelief->getMapping()->getChildren()) {
+        if (node == nullptr) {
+            continue;
+        }
+        cout << *node->action_ << " " << node->meanQValue_ << endl;
+    }
+
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {

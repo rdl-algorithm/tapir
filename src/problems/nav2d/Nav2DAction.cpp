@@ -26,39 +26,47 @@ Nav2DAction::Nav2DAction(ActionType type, Nav2DModel *model) :
         rotationalSpeed_(0.0) {
     switch (type) {
     case ActionType::FORWARD_0:
-        speed_ = 0.2 * model->maxSpeed_;
+        speed_ = model->maxSpeed_;
         return;
+ /*       
     case ActionType::FORWARD_1:
         speed_ = 0.6 * model->maxSpeed_;
         return;
     case ActionType::FORWARD_2:
         speed_ = model->maxSpeed_;
         return;
+*/
     case ActionType::TURN_LEFT_0:
-        rotationalSpeed_ = 0.2 * model->maxRotationalSpeed_;
+        rotationalSpeed_ = model->maxRotationalSpeed_;
         return;
+/*
     case ActionType::TURN_LEFT_1:
         rotationalSpeed_ = 0.6 * model->maxRotationalSpeed_;
         return;
     case ActionType::TURN_LEFT_2:
         rotationalSpeed_ = model->maxRotationalSpeed_;
         return;
+*/
     case ActionType::TURN_RIGHT_0:
-        rotationalSpeed_ = -0.2 * model->maxRotationalSpeed_;
+        rotationalSpeed_ =  model->maxRotationalSpeed_;
         return;
+ /*
     case ActionType::TURN_RIGHT_1:
         rotationalSpeed_ = -0.6 * model->maxRotationalSpeed_;
         return;
     case ActionType::TURN_RIGHT_2:
         rotationalSpeed_ = -model->maxRotationalSpeed_;
         return;
+
     case ActionType::DO_NOTHING:
         return;
+*/
     default:
         std::cerr << "ERROR: Invalid Action Code " << getCode();
         return;
     }
 }
+
 
 Nav2DAction::Nav2DAction(Nav2DAction const &other) :
         Nav2DAction(other.type_, other.speed_, other.rotationalSpeed_) {

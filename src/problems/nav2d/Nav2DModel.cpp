@@ -333,8 +333,11 @@ std::unique_ptr<solver::TransitionParameters> Nav2DModel::generateTransition(
                     direction + transition->moveRatio * turnAmount +
                                turnAmount > 0 ? -0.25 : 0.25);
         }
-        if (!mapArea_.contains(currentPosition) ||
-                isInside(currentPosition, AreaType::OBSTACLE)) {
+        if (!mapArea_.contains(currentPosition)) {
+            transition->moveRatio = previousRatio;
+			break;
+ 		}
+        if (isInside(currentPosition, AreaType::OBSTACLE)) {
             transition->moveRatio = previousRatio;
             transition->hadCollision = true;
             break;
@@ -419,6 +422,8 @@ solver::Model::StepResult Nav2DModel::generateStep(
             nullptr, *result.nextState);
     result.reward = generateReward(state, action,
             result.transitionParameters.get(), result.nextState.get());
+	result.isTerminal = static_cast<Nav2DTransition const &>(
+			*result.transitionParameters).reachedGoal;
     return result;
 }
 

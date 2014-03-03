@@ -14,15 +14,15 @@ class Nav2DModel;
 
 enum class ActionType {
     FORWARD_0,
-    FORWARD_1,
-    FORWARD_2,
+//    FORWARD_1,
+//    FORWARD_2,
     TURN_LEFT_0,
-    TURN_LEFT_1,
-    TURN_LEFT_2,
+//    TURN_LEFT_1,
+//    TURN_LEFT_2,
     TURN_RIGHT_0,
-    TURN_RIGHT_1,
-    TURN_RIGHT_2,
-    DO_NOTHING,
+//    TURN_RIGHT_1,
+//    TURN_RIGHT_2,
+//    DO_NOTHING,
     END // Not an action, but must be last to count the number of actions.
 };
 

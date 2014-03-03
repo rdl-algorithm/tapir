@@ -69,6 +69,7 @@ class EnumeratedActionMap: public solver::ActionMapping {
     virtual void updateBestValue() override;
     virtual std::unique_ptr<Action> getBestAction() const override;
     virtual double getBestMeanQValue() const override;
+    virtual std::vector<ActionNode *> getChildren() const override;
   private:
     std::vector<std::unique_ptr<EnumeratedPoint>> const &allActions_;
     ObservationPool *observationPool_;

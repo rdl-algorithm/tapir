@@ -143,6 +143,14 @@ double DiscretizedActionMap::getBestMeanQValue() const {
     return bestMeanQValue_;
 }
 
+std::vector<ActionNode *> DiscretizedActionMap::getChildren() const {
+    std::vector<ActionNode *> children;
+    for (std::unique_ptr<ActionNode> const &node : children_) {
+        children.push_back(node.get());
+    }
+    return children;
+}
+
 
 /* ------------------- DiscretizedActionTextSerializer ------------------- */
 void DiscretizedActionTextSerializer::saveActionPool(

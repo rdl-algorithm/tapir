@@ -137,6 +137,13 @@ double EnumeratedActionMap::getBestMeanQValue() const {
     return bestMeanQValue_;
 }
 
+std::vector<ActionNode *> EnumeratedActionMap::getChildren() const {
+    std::vector<ActionNode *> children;
+    for (std::unique_ptr<ActionNode> const &node : children_) {
+        children.push_back(node.get());
+    }
+    return children;
+}
 
 /* ------------------- EnumeratedActionTextSerializer ------------------- */
 void EnumeratedActionTextSerializer::saveActionPool(
