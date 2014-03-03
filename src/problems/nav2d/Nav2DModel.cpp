@@ -287,11 +287,22 @@ double Nav2DModel::getHeuristicValue(solver::State const &state) {
     double distance = displacement.getMagnitude();
     double turnAmount = std::abs(geometry::normalizeTurn(
             displacement.getDirection() - navState.getDirection()));
-    double value = goalReward_;
-    value -= costPerUnitDistance_ * distance;
-    value -= costPerRevolution_ * turnAmount;
-    value -= costPerUnitTime_ * distance / maxSpeed_;
-    return value;
+    long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
+    numSteps += std::floor(turnAmount / (maxRotationalSpeed_
+			* timeStepLength_));
+	double costPerStep = costPerUnitDistance_ * distance / numSteps;
+	costPerStep += costPerRevolution_ * turnAmount / numSteps;
+	costPerStep += costPerUnitTime_ * timeStepLength_;
+	
+	double discountFactor = getDiscountFactor();
+	if (discountFactor < 1.0) {
+		double finalDiscount = std::pow(discountFactor, numSteps);
+		double reward = finalDiscount * goalReward_;
+		reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
+		return reward;
+	} else {
+		return goalReward_ - costPerStep * numSteps;
+	}
 }
 
 double Nav2DModel::getDefaultVal() {

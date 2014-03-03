@@ -48,7 +48,7 @@ Nav2DAction::Nav2DAction(ActionType type, Nav2DModel *model) :
         return;
 */
     case ActionType::TURN_RIGHT_0:
-        rotationalSpeed_ =  model->maxRotationalSpeed_;
+        rotationalSpeed_ =  -model->maxRotationalSpeed_;
         return;
  /*
     case ActionType::TURN_RIGHT_1:
