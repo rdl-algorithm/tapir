@@ -1,6 +1,7 @@
 #include "Nav2DState.hpp"
 
 #include <cstddef>                      // for size_t
+#include <cmath>                        // for round
 
 #include <algorithm>                    // for copy
 #include <iterator>                     // for ostream_iterator
@@ -46,16 +47,23 @@ double Nav2DState::distanceTo(solver::State const &otherState) const {
                     geometry::normalizeTurn(direction_ - other.direction_));
 }
 
+double Nav2DState::round(double value) const {
+    return std::round(value * 1e6) / 1e6;
+}
+
 bool Nav2DState::equals(solver::State const &otherState) const {
     Nav2DState const &other =
         static_cast<Nav2DState const &>(otherState);
-    return position_ == other.position_ && direction_ == other.direction_;
+    return (round(position_.getX()) == round(other.position_.getX())
+            && round(position_.getY()) == round(other.position_.getY())
+            && round(direction_) == round(other.direction_));
 }
 
 std::size_t Nav2DState::hash() const {
     std::size_t hashValue = 0;
-    abt::hash_combine(hashValue, position_.hash());
-    abt::hash_combine(hashValue, direction_);
+    abt::hash_combine(hashValue, round(position_.getX()));
+    abt::hash_combine(hashValue, round(position_.getY()));
+    abt::hash_combine(hashValue, round(direction_));
     return hashValue;
 }
 

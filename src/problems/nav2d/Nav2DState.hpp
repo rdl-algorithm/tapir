@@ -35,6 +35,8 @@ class Nav2DState : public solver::Vector {
     void print(std::ostream &os) const override;
     std::vector<double> asVector() const override;
 
+    double round(double value) const;
+
     geometry::Point2D getPosition() const;
     double getX() const;
     double getY() const;

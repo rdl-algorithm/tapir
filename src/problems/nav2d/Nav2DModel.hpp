@@ -136,6 +136,9 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     geometry::RTree *getTree(AreaType type);
     /** Returns the areas of the given type. */
     AreasById *getAreas(AreaType type);
+    /** Returns the nearest point of the given type. */
+    geometry::Point2D getClosestPointOfType(geometry::Point2D point,
+            AreaType type);
     /** Returns the distance to the nearest object of the given type. */
     double getDistance(geometry::Point2D point, AreaType type);
     /** Returns true iff the point is inside an object of the given type. */

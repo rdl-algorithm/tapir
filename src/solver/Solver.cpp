@@ -466,17 +466,16 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 //        cout << visitor.states.size() << " states; 1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
 //    }
 
-    State const *state = currentBelief->sampleAParticle(randGen_)->getState();
-    cout << "Sampled particle: " << *state << endl;
-
-    double totalDistance = 0;
-    for (int i = 0; i < 100; i++) {
-        State const *s1 = currentBelief->sampleAParticle(randGen_)->getState();
-        State const *s2 = currentBelief->sampleAParticle(randGen_)->getState();
-        totalDistance += s1->distanceTo(*s2);
-    }
-    cout << "Est. mean inter-particle distance: " << totalDistance / 100
-         << endl;
+//    State const *state = currentBelief->sampleAParticle(randGen_)->getState();
+//    cout << "Sampled particle: " << *state << endl;
+//
+//    double totalDistance = 0;
+//    for (int i = 0; i < 100; i++) {
+//        State const *s1 = currentBelief->sampleAParticle(randGen_)->getState();
+//        State const *s2 = currentBelief->sampleAParticle(randGen_)->getState();
+//        totalDistance += s1->distanceTo(*s2);
+//    }
+//    cout << "Est. mean inter-particle distance: " << totalDistance / 100 << endl;
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
@@ -490,6 +489,8 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     cout << "; Reward: " << result.reward;
     cout << "; Obs: " << *result.observation << endl;
     model_->drawState(*result.nextState, cout);
+    cout << "Heuristic value: ";
+    cout << model_->getHeuristicValue(*result.nextState) << endl;
     return result;
 }
 

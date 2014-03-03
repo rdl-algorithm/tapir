@@ -23,6 +23,7 @@
 #include "problems/shared/geometry/Point2D.hpp"
 #include "problems/shared/geometry/Vector2D.hpp"
 #include "problems/shared/geometry/Rectangle2D.hpp"
+#include "problems/shared/geometry/utilities.hpp"
 
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
@@ -102,7 +103,6 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     }
     std::string line;
     while (std::getline(inFile, line)) {
-        cerr << line << endl;
         std::istringstream iss(line);
         std::string typeString;
         int64_t id;
@@ -120,19 +120,22 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     cout << "Constructed the Nav2DModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "nStVars: " << nStVars_ << endl;
-    cout << "Testing random initial states:" << endl;
-    for (int i = 0; i < 2; i++) {
-        std::unique_ptr<solver::State> state = sampleAnInitState();
-        cout << *state << " ==> " << getHeuristicValue(*state) << endl;
-    }
-    cout << "Testing random states:" << endl;
-    for (int i = 0; i < 2; i++) {
-        std::unique_ptr<solver::State> state = sampleStateUniform();
-        cout << *state << " ==> " << getHeuristicValue(*state) << endl;
-    }
     cout << "nParticles: " << getNParticles() << endl;
-    cout << "Random state drawn:" << endl;
-    drawState(*sampleAnInitState(), cout);
+//    cout << "Testing random initial states:" << endl;
+//    for (int i = 0; i < 2; i++) {
+//        std::unique_ptr<solver::State> state = sampleAnInitState();
+//        cout << *state << " ==> " << getHeuristicValue(*state) << endl;
+//    }
+//    cout << "Testing random states:" << endl;
+//    for (int i = 0; i < 2; i++) {
+//        std::unique_ptr<Nav2DState> state(
+//                static_cast<Nav2DState *>(sampleStateUniform().release()));
+//        cout << *state << " ==> " << getHeuristicValue(*state) << endl;
+//        cout << getClosestPointOfType(state->getPosition(),
+//                AreaType::GOAL) << endl;
+//    }
+//    cout << "Random state drawn:" << endl;
+//    drawState(*sampleAnInitState(), cout);
 }
 
 std::string Nav2DModel::areaTypeToString(Nav2DModel::AreaType type) {
@@ -278,9 +281,15 @@ bool Nav2DModel::isTerminal(solver::State const &state) {
 
 double Nav2DModel::getHeuristicValue(solver::State const &state) {
     Nav2DState const &navState = static_cast<Nav2DState const &>(state);
-    double distance = getDistance(navState.getPosition(), AreaType::GOAL);
+    Point2D closestPoint = getClosestPointOfType(navState.getPosition(),
+            AreaType::GOAL);
+    Vector2D displacement = closestPoint - navState.getPosition();
+    double distance = displacement.getMagnitude();
+    double turnAmount = std::abs(geometry::normalizeTurn(
+            displacement.getDirection() - navState.getDirection()));
     double value = goalReward_;
     value -= costPerUnitDistance_ * distance;
+    value -= costPerRevolution_ * turnAmount;
     value -= costPerUnitTime_ * distance / maxSpeed_;
     return value;
 }
@@ -528,7 +537,22 @@ bool Nav2DModel::isInside(geometry::Point2D point, AreaType type) {
     */
 }
 
-double Nav2DModel::getDistance(geometry::Point2D point, AreaType type) {
+Point2D Nav2DModel::getClosestPointOfType(Point2D point, AreaType type) {
+    double infinity = std::numeric_limits<double>::infinity();
+    double distance = infinity;
+    Point2D closestPoint(infinity, infinity);
+    for (AreasById::value_type &entry : *getAreas(type)) {
+        Point2D newClosestPoint = entry.second.closestPointTo(point);
+        double newDistance = (point - newClosestPoint).getMagnitude();
+        if (newDistance < distance) {
+            distance = newDistance;
+            closestPoint = newClosestPoint;
+        }
+    }
+    return closestPoint;
+}
+
+double Nav2DModel::getDistance(Point2D point, AreaType type) {
     double distance = std::numeric_limits<double>::infinity();
     for (AreasById::value_type &entry : *getAreas(type)) {
         double newDistance = entry.second.distanceTo(point);

@@ -38,8 +38,13 @@ void Nav2DTextSerializer::saveState(solver::State const *state,
     }
     Nav2DState const &navState =
         static_cast<Nav2DState const &>(*state);
+    std::streamsize precision = os.precision(7);
+    std::ios_base::fmtflags flags = os.flags(std::ios_base::fixed);
     os << "(" << navState.getX() << " " << navState.getY();
+    os.unsetf(std::ios_base::floatfield);
     os << "):" << navState.getDirection();
+    os.precision(precision);
+    os.flags(flags);
 }
 
 std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(

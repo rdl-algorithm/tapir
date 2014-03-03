@@ -1,6 +1,7 @@
 #include "Rectangle2D.hpp"
 
 #include "Point2D.hpp"
+#include "Vector2D.hpp"
 
 #include <sstream>
 #include <string>
@@ -49,6 +50,10 @@ void Rectangle2D::loadFrom(std::istream &is) {
 }
 
 double Rectangle2D::distanceTo(Point2D const &point) const {
+    return (closestPointTo(point) - point).getMagnitude();
+}
+
+Point2D Rectangle2D::closestPointTo(Point2D const &point) const {
     double px = point.getX();
     double py = point.getY();
     double x0 = lowerLeft_.getX();
@@ -57,27 +62,27 @@ double Rectangle2D::distanceTo(Point2D const &point) const {
     double y1 = upperRight_.getY();
     if (px <= x0) {
         if (py <= y0) {
-            return point.distanceTo(lowerLeft_);
+            return lowerLeft_;
         } else if (py >= y1) {
-            return point.distanceTo(Point2D(x0, y1));
+            return Point2D(x0, y1);
         } else {
-            return x0 - px;
+            return Point2D(x0, py);
         }
     } else if (px >= x1) {
         if (py <= y0) {
-            return point.distanceTo(Point2D(x1, y0));
+            return Point2D(x1, y0);
         } else if (py >= y1) {
-            return point.distanceTo(upperRight_);
+            return upperRight_;
         } else {
-            return px - x1;
+            return Point2D(x1, py);
         }
     } else {
         if (py <= y0) {
-            return y0 - py;
+            return Point2D(px, y0);
         } else if (py >= y1) {
-            return py - y1;
+            return Point2D(px, y1);
         } else {
-            return 0;
+            return point;
         }
     }
 }

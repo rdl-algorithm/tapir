@@ -22,6 +22,7 @@ public:
     virtual void loadFrom(std::istream &is);
 
     double distanceTo(Point2D const &point) const;
+    Point2D closestPointTo(Point2D const &point) const;
 
     Point2D sampleUniform(RandomGenerator &randGen) const;
     Point2D getLowerLeft() const;
