@@ -51,10 +51,18 @@ void hash_combine(std::size_t &seed, T const &v) {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
+}
 
-// Used for printing values in GDB
-std::stringstream *get_sstr();
-void reset_sstr();
-} /* namespace abt */
+namespace debug {
+//    void show_message(char const *message, bool print = true);
+    void show_message(std::string message, bool print = true);
+
+    template <typename T>
+    std::string to_string(T t) {
+        std::ostringstream sstr;
+        sstr << t;
+        return sstr.str();
+    }
+} /* namespace debug */
 
 #endif /* GLOBAL_HPP_ */

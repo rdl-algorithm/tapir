@@ -116,7 +116,9 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
     virtual void dispCell(RSCellType cellType, std::ostream &os);
 
     virtual void drawEnv(std::ostream &os) override;
-    virtual void drawState(solver::State const &state,
+    virtual void drawSimulationState(
+            std::vector<solver::State const *> /*particles*/,
+            solver::State const &state,
             std::ostream &os) override;
 
     virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>

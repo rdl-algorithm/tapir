@@ -47,6 +47,8 @@ struct Nav2DTransition : public solver::TransitionParameters {
     double moveRatio = 0.0; // 0.0 = same position; 1.0 = full move
     bool reachedGoal = false;
     bool hadCollision = false;
+
+    void print(std::ostream &os) const override;
 };
 
 class Nav2DModel : virtual public ModelWithProgramOptions,
@@ -148,7 +150,9 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     /** Displays an individual point on the map. */
     virtual void dispPoint(AreaType type, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
-    virtual void drawState(solver::State const &state,
+    virtual void drawSimulationState(
+            std::vector<solver::State const *> particles,
+            solver::State const &state,
             std::ostream &os) override;
 
     virtual long getNumberOfBins() override;

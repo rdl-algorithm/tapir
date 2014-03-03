@@ -11,6 +11,7 @@
 #include "global.hpp"                     // for RandomGenerator
 
 #include "geometry/Action.hpp"                   // for Action
+#include "geometry/State.hpp"
 #include "geometry/Observation.hpp"              // for Observation
 #include "RandomAccessSet.hpp"
 
@@ -89,9 +90,10 @@ class BeliefNode {
     long getId() const;
     /** Returns the number of particles in this node. */
     long getNParticles() const;
+    /** Returns an array containing all of the states within this node. */
+    std::vector<State const *> getStates() const;
     /** Returns the current number of action children of this node. */
     long getNActChildren() const;
-
 
     /** Returns the action mapping for this node. */
     ActionMapping *getMapping();

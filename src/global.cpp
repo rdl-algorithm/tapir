@@ -1,14 +1,20 @@
 #include "global.hpp"
 
-namespace abt {
-// Used for printing values in GDB
-std::stringstream *get_sstr() {
-    static std::stringstream sstr;
-    return &sstr;
+#include <iostream>
+
+#include "solver/geometry/Point.hpp"
+
+namespace debug {
+//void show_message(char const *message, bool print) {
+//    if (print) {
+//        std::cerr << message << std::endl;
+//    }
+//}
+void show_message(std::string message, bool print) {
+    if (print) {
+        std::cerr << message << std::endl;
+    }
 }
 
-void reset_sstr() {
-    get_sstr()->str("");
-    get_sstr()->clear();
-}
-} /* namespace global */
+template std::string to_string<solver::Point &>(solver::Point &);
+} /* namespace debug */

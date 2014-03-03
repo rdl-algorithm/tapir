@@ -7,7 +7,7 @@
 #include <memory>
 #include <fstream>                      // for ifstream, basic_istream, basic_istream<>::__istream_type
 #include <iomanip>                      // for operator<<, setw
-#include <iostream>                     // for cout, cerr
+#include <iostream>                     // for cout
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
 #include <unordered_map>                // for _Node_iterator, operator!=, unordered_map<>::iterator, _Node_iterator_base, unordered_map
 #include <utility>                      // for make_pair, move, pair
@@ -34,7 +34,6 @@
 #include "TagObservation.hpp"
 #include "TagState.hpp"                 // for TagState
 
-using std::cerr;
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
@@ -62,8 +61,10 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
-        std::cerr << "Failed to open " << mapPath << "\n";
-        exit(1);
+        std::ostringstream message;
+        message << "ERROR: Failed to open " << mapPath;
+        debug::show_message(message.str());
+        std::exit(1);
     }
     inFile >> nRows_ >> nCols_;
     std::string tmp;
@@ -247,7 +248,9 @@ GridPosition TagModel::getMovedPos(GridPosition const &position,
     case ActionType::TAG:
         break;
     default:
-        cerr << "Invalid action: " << (long)action << endl;
+        std::ostringstream message;
+        message << "Invalid action: " << (long)action;
+        debug::show_message(message.str());
         break;
     }
     return movedPos;
@@ -517,7 +520,10 @@ void TagModel::drawEnv(std::ostream &os) {
     }
 }
 
-void TagModel::drawState(solver::State const &state, std::ostream &os) {
+void TagModel::drawSimulationState(
+        std::vector<solver::State const *> /*particles*/,
+        solver::State const &state,
+        std::ostream &os) {
     TagState const &tagState = static_cast<TagState const &>(state);
     for (std::size_t i = 0; i < envMap_.size(); i++) {
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {

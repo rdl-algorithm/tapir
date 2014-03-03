@@ -129,7 +129,7 @@ EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
         long childId;
         sstr2 >> childId;
         if (solver_->policy_->allNodes_[childId] != nullptr) {
-            std::cerr << "ERROR: Node already present !?" << std::endl;
+            debug::show_message("ERROR: Node already present !?");
         }
         BeliefNode *node = map->createBelief(*obs);
         node->id_ = childId;

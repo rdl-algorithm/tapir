@@ -118,7 +118,7 @@ void DiscretizedActionMap::updateBestValue() {
     bestActionCode_ = -1;
     bestMeanQValue_ = -std::numeric_limits<double>::infinity();
     if (getNChildren() == 0) {
-        std::cerr << "No children - could not update Q-value!" << std::endl;
+        debug::show_message("WARNING: No children - could not update Q-value!");
         return;
     }
     long code = -1;

@@ -2,7 +2,6 @@
 
 #include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
 
-#include <iostream>                     // for cerr, endl, operator<<, basic_ostream, ostream
 #include <map>                          // for _Rb_tree_iterator, map<>::iterator, map
 #include <memory>                       // for unique_ptr
 #include <random>                       // for uniform_int_distribution
@@ -22,10 +21,6 @@
 #include "HistoryEntry.hpp"             // for HistoryEntry
 
 #include "RandomAccessSet.hpp"
-
-
-using std::cerr;
-using std::endl;
 
 namespace solver {
 long BeliefNode::currId = 0;
@@ -109,11 +104,17 @@ void BeliefNode::updateQValue(Action const &action, double increase,
 double BeliefNode::distL1Independent(BeliefNode *b) const {
     double dist = 0.0;
     for (HistoryEntry *entry1 : particles_) {
-        for (HistoryEntry *entry2 : particles_) {
+        for (HistoryEntry *entry2 : b->particles_) {
             dist += entry1->getState()->distanceTo(*entry2->getState());
         }
     }
-    return dist / (getNParticles() * b->getNParticles());
+    double averageDist = dist / (getNParticles() * b->getNParticles());
+    if (averageDist < 0) {
+        debug::show_message("ERROR: Distance < 0 between beliefs.");
+    } else if (averageDist == 0) {
+        debug::show_message("NOTE: Identical belief nodes found!");
+    }
+    return averageDist;
 }
 
 long BeliefNode::getId() const {
@@ -122,6 +123,14 @@ long BeliefNode::getId() const {
 
 long BeliefNode::getNParticles() const {
     return particles_.size();
+}
+
+std::vector<State const *> BeliefNode::getStates() const {
+    std::vector<State const *> states;
+    for (HistoryEntry *entry : particles_) {
+        states.push_back(entry->getState());
+    }
+    return states;
 }
 
 long BeliefNode::getNActChildren() const {

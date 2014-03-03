@@ -38,7 +38,7 @@ class RandomAccessSet {
 
     void add(Element entry) {
         if (contains(entry)) {
-            std::cerr << "ERROR: should not be adding duplicate entry!" << std::endl;
+            debug::show_message("ERROR: should not be adding duplicate entry!");
             return;
         }
         elements_.push_back(entry);

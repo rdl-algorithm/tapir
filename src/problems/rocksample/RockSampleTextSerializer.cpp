@@ -1,6 +1,6 @@
 #include "RockSampleTextSerializer.hpp"
 
-#include <iostream>                     // for operator<<, basic_ostream, basic_istream<>::__istream_type, basic_ostream<>::__ostream_type, cerr, endl
+#include <iostream>                     // for operator<<, basic_ostream, basic_istream<>::__istream_type, basic_ostream<>::__ostream_type, endl
 #include <string>                       // for operator>>, string
 #include <vector>                       // for vector
 
@@ -67,7 +67,9 @@ std::unique_ptr<solver::State> RockSampleTextSerializer::loadState(
         } else if (c == 'B') {
             rockStates.push_back(false);
         } else {
-            std::cerr << "ERROR: Invalid rock state: " << c << std::endl;
+            std::ostringstream message;
+            message << "ERROR: Invalid rock state: " << c;
+            debug::show_message(message.str());
         }
     }
     return std::make_unique<RockSampleState>(GridPosition(i, j), rockStates);
@@ -103,7 +105,7 @@ std::unique_ptr<solver::Observation> RockSampleTextSerializer::loadObservation(
     } else if (text == "BAD") {
         return std::make_unique<RockSampleObservation>(false, false);
     } else {
-        std::cerr << "ERROR: Invalid observation!" << std::endl;
+        debug::show_message("ERROR: Invalid observation!");
         return nullptr;
     }
 }
@@ -173,7 +175,9 @@ std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(
         std::getline(sstr, tmpStr, '-');
         long code;
         sstr >> code;
-        std::cerr << "ERROR: Invalid action!" << std::endl;
+        std::ostringstream message;
+        message << "ERROR: Invalid action; code " << code;
+        debug::show_message(message.str());
         return std::make_unique<RockSampleAction>(
                 static_cast<ActionType>(code));
     }

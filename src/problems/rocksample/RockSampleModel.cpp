@@ -6,7 +6,7 @@
 
 #include <fstream>                      // for operator<<, basic_ostream, endl, basic_ostream<>::__ostream_type, ifstream, basic_ostream::operator<<, basic_istream, basic_istream<>::__istream_type
 #include <initializer_list>
-#include <iostream>                     // for cout, cerr
+#include <iostream>                     // for cout
 #include <memory>                       // for unique_ptr, default_delete
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
 #include <set>                          // for set, _Rb_tree_const_iterator, set<>::iterator
@@ -37,7 +37,6 @@
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
 #include "RockSampleState.hpp"          // for RockSampleState
 
-using std::cerr;
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
@@ -69,7 +68,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
-        std::cerr << "Failed to open " << mapPath << "\n";
+        std::ostringstream message;
+        message << "Failed to open " << mapPath;
+        debug::show_message(message.str());
         exit(1);
     }
     inFile >> nRows_ >> nCols_;
@@ -201,8 +202,6 @@ double RockSampleModel::getHeuristicValue(solver::State const &state) {
     }
     currentDiscount *= std::pow(getDiscountFactor(), nCols_ - currentPos.j);
     qVal += currentDiscount * exitReward_;
-    // dispState(s, cerr);
-    // cerr << endl << "Heuristic: " << *qVal << endl;
     return qVal;
 }
 
@@ -225,7 +224,9 @@ std::pair<std::unique_ptr<RockSampleState>,
         if (0 <= rockNo && rockNo < nRocks_) {
             rockStates[rockNo] = false;
         } else {
-            // cerr << "Cannot sample at " << pos << " - no rock!" << endl;
+            // std::ostringstream message;
+            // message << "Cannot sample at " << pos << " - no rock!";
+            // debug::show_message(message.str());
             isValid = false;
         }
     } else {
@@ -238,7 +239,8 @@ std::pair<std::unique_ptr<RockSampleState>,
         } else if (actionType == ActionType::WEST) {
             pos.j -= 1;
         } else {
-            cerr << "Invalid action: " << action << endl;
+            std::ostringstream message;
+            message << "Invalid action: " << action;
         }
         // If the position is now invalid, reset it.
         if (pos.i < 0 || pos.i >= nRows_ || pos.j < 0 || pos.j >= nCols_) {
@@ -264,7 +266,6 @@ std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
     double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
     double efficiency =
         (1 + std::pow(2, -dist / halfEfficiencyDistance_)) * 0.5;
-    // cerr << "D: " << dist << " E:" << efficiency << endl;
     bool obsMatches = std::bernoulli_distribution(efficiency)(*getRandomGenerator());
     return std::make_unique<RockSampleObservation>(rockStates[rockNo] == obsMatches);
 }
@@ -287,7 +288,7 @@ double RockSampleModel::makeReward(RockSampleState const &state,
             return state.getRockStates()[rockNo] ? goodRockReward_
                    : -badRockPenalty_;
         } else {
-            cerr << "Invalid sample action!?!" << endl;
+            debug::show_message("Invalid sample action!?!");
             return -illegalMovePenalty_;
         }
     }
@@ -455,7 +456,10 @@ void RockSampleModel::drawEnv(std::ostream &os) {
     }
 }
 
-void RockSampleModel::drawState(solver::State const &state, std::ostream &os) {
+void RockSampleModel::drawSimulationState(
+        std::vector<solver::State const *> /*particles*/,
+        solver::State const &state,
+        std::ostream &os) {
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
     os << state << endl;

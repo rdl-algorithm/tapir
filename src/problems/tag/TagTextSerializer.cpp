@@ -128,7 +128,7 @@ std::unique_ptr<solver::Action> TagTextSerializer::loadAction(
         std::getline(sstr, tmpStr, '-');
         long code;
         sstr >> code;
-        std::cerr << "ERROR: Invalid action!" << std::endl;
+        debug::show_message("ERROR: Invalid action!");
         return std::make_unique<TagAction>(
                 static_cast<ActionType>(code));
     }

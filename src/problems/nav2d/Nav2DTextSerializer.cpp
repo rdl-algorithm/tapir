@@ -1,6 +1,6 @@
 #include "Nav2DTextSerializer.hpp"
 
-#include <iostream>                     // for operator<<, basic_ostream, basic_istream<>::__istream_type, basic_ostream<>::__ostream_type, cerr, endl
+#include <iostream>                     // for operator<<, basic_ostream, basic_istream<>::__istream_type, basic_ostream<>::__ostream_type, endl
 #include <string>                       // for operator>>, string
 #include <vector>                       // for vector
 

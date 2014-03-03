@@ -7,7 +7,7 @@
 
 #include <fstream>                      // for operator<<, basic_ostream, endl, basic_ostream<>::__ostream_type, ifstream, basic_ostream::operator<<, basic_istream, basic_istream<>::__istream_type
 #include <initializer_list>
-#include <iostream>                     // for cout, cerr
+#include <iostream>                     // for cout
 #include <memory>                       // for unique_ptr, default_delete
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
 #include <set>                          // for set, _Rb_tree_const_iterator, set<>::iterator
@@ -45,7 +45,6 @@
 #include "Nav2DObservation.hpp"    // for Nav2DObservation
 #include "Nav2DState.hpp"          // for Nav2DState
 
-using std::cerr;
 using std::cout;
 using std::endl;
 
@@ -57,6 +56,17 @@ using geometry::RTree;
 namespace po = boost::program_options;
 
 namespace nav2d {
+void Nav2DTransition::print(std::ostream &os) const {
+    os << speed << "/" << rotationalSpeed << " ";
+    os << moveRatio << " ";
+    if (reachedGoal) {
+        os << "G";
+    }
+    if (hadCollision) {
+        os << "C";
+    }
+}
+
 Nav2DModel::Nav2DModel(RandomGenerator *randGen,
         po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
@@ -98,7 +108,9 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
     inFile.open(mapPath);
     if (!inFile.is_open()) {
-        std::cerr << "Failed to open " << mapPath << endl;
+        std::ostringstream message;
+        message << "Failed to open " << mapPath;
+        debug::show_message(message.str());
         exit(1);
     }
     std::string line;
@@ -155,7 +167,9 @@ std::string Nav2DModel::areaTypeToString(Nav2DModel::AreaType type) {
     case AreaType::OUT_OF_BOUNDS:
         return "OOB";
     default:
-        cerr << "ERROR: Invalid area code: " << static_cast<long>(type);
+        std::ostringstream message;
+        message << "ERROR: Invalid area code: " << static_cast<long>(type);
+        debug::show_message(message.str());
         return "ERROR";
      }
 }
@@ -176,7 +190,9 @@ Nav2DModel::AreaType Nav2DModel::parseAreaType(std::string text) {
     } else if (text == "OOB") {
         return AreaType::OUT_OF_BOUNDS;
     } else {
-        cerr << "ERROR: Invalid area type: " << text;
+        std::ostringstream message;
+        message << "ERROR: Invalid area type: " << text;
+        debug::show_message(message.str());
         return AreaType::EMPTY;
     }
 }
@@ -189,7 +205,9 @@ Nav2DModel::ErrorType Nav2DModel::parseErrorType(std::string text) {
     } else if (text == "none") {
         return ErrorType::NONE;
     } else {
-        cerr << "ERROR: Invalid error type - " << text;
+        std::ostringstream message;
+        message << "ERROR: Invalid error type - " << text;
+        debug::show_message(message.str());
         return ErrorType::PROPORTIONAL_GAUSSIAN_NOISE;
     }
 }
@@ -213,7 +231,7 @@ double Nav2DModel::applySpeedError(double speed) {
     case ErrorType::NONE:
         return speed;
     default:
-        cerr << "Cannot calculate speed error";
+        debug::show_message("Cannot calculate speed error");
         return speed;
     }
 }
@@ -229,7 +247,7 @@ double Nav2DModel::applyRotationalError(double rotationalSpeed) {
     case ErrorType::NONE:
         return rotationalSpeed;
     default:
-        cerr << "Cannot calculate rotational error";
+        debug::show_message("Cannot calculate rotational error");
         return rotationalSpeed;
     }
 }
@@ -266,7 +284,9 @@ std::unique_ptr<solver::State> Nav2DModel::sampleAnInitState() {
                     costPerUnitDistance_, costPerRevolution_);
         }
     }
-    cerr << "ERROR: Invalid area at " << areaValue << endl;
+    std::ostringstream message;
+    message << "ERROR: Invalid area at " << areaValue;
+    debug::show_message(message.str());
     return nullptr;
 }
 
@@ -290,19 +310,26 @@ double Nav2DModel::getHeuristicValue(solver::State const &state) {
     long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
     numSteps += std::floor(turnAmount / (maxRotationalSpeed_
 			* timeStepLength_));
+    if (numSteps <= 0) {
+        numSteps = 1;
+    }
 	double costPerStep = costPerUnitDistance_ * distance / numSteps;
 	costPerStep += costPerRevolution_ * turnAmount / numSteps;
 	costPerStep += costPerUnitTime_ * timeStepLength_;
-	
+
 	double discountFactor = getDiscountFactor();
+	double reward = 0;
 	if (discountFactor < 1.0) {
-		double finalDiscount = std::pow(discountFactor, numSteps);
-		double reward = finalDiscount * goalReward_;
+	    double finalDiscount = std::pow(discountFactor, numSteps);
+		reward = finalDiscount * goalReward_;
 		reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
-		return reward;
 	} else {
-		return goalReward_ - costPerStep * numSteps;
+	    reward = goalReward_ - costPerStep * numSteps;
 	}
+    if (std::isnan(reward) || std::isinf(reward)) {
+        debug::show_message("Bad reward!");
+    }
+	return reward;
 }
 
 double Nav2DModel::getDefaultVal() {
@@ -460,7 +487,9 @@ std::vector<long> Nav2DModel::loadChanges(char const *changeFilename) {
                Nav2DChange change;
                sstr >> change.operation;
                if (change.operation != "ADD") {
-                   cerr << "ERROR: Cannot " << change.operation;
+                   std::ostringstream message;
+                   message << "ERROR: Cannot " << change.operation;
+                   debug::show_message(message.str());
                    continue;
                }
                std::string typeString;
@@ -505,8 +534,9 @@ geometry::RTree *Nav2DModel::getTree(AreaType type) {
     case AreaType::OBSERVATION:
         return &observationAreaTree_;
     default:
-        cerr << "ERROR: Cannot get tree; type " << static_cast<long>(type);
-        cerr << endl;
+        std::ostringstream message;
+        message << "ERROR: Cannot get tree; type " << static_cast<long>(type);
+        debug::show_message(message.str());
         return nullptr;
     }
 }
@@ -522,8 +552,9 @@ Nav2DModel::AreasById *Nav2DModel::getAreas(AreaType type) {
     case AreaType::OBSERVATION:
         return &observationAreas_;
     default:
-        cerr << "ERROR: Cannot get area; type " << static_cast<long>(type);
-        cerr << endl;
+        std::ostringstream message;
+        message << "ERROR: Cannot get area; type " << static_cast<long>(type);
+        debug::show_message(message.str());
         return nullptr;
     }
 }
@@ -638,7 +669,9 @@ void Nav2DModel::dispPoint(Nav2DModel::AreaType type, std::ostream &os) {
         os << "#";
         return;
     default:
-        cerr << "ERROR: Invalid point type!?" << endl;
+        std::ostringstream message;
+        message << "ERROR: Invalid point type!?";
+        debug::show_message(message.str());
         return;
     }
 }
@@ -662,7 +695,10 @@ void Nav2DModel::drawEnv(std::ostream &os) {
     }
 }
 
-void Nav2DModel::drawState(solver::State const &state, std::ostream &os) {
+void Nav2DModel::drawSimulationState(
+        std::vector<solver::State const *> particles,
+        solver::State const &state,
+        std::ostream &os) {
     Nav2DState const &navState = static_cast<Nav2DState const &>(state);
     double minX = mapArea_.getLowerLeft().getX();
     double maxX = mapArea_.getUpperRight().getX();
@@ -671,7 +707,19 @@ void Nav2DModel::drawState(solver::State const &state, std::ostream &os) {
     double height = maxY - minY;
     long nRows = 30; //(int)height;
     double width = maxX - minX;
-    long nCols = (int)width;
+    long nCols = (long)width;
+
+    std::vector<std::vector<long>> particleCounts (nRows + 2,
+            std::vector<long>(nCols + 2));
+
+    for (solver::State const *particle : particles) {
+        Nav2DState const &navParticle = static_cast<Nav2DState const &>(
+                *particle);
+        long pI = nRows - (int)std::round(
+                navParticle.getY() * nRows / height - 0.5);
+        long pJ = (int)std::round(navParticle.getX() * nCols / width + 0.5);
+        particleCounts[pI][pJ] += 1;
+    }
 
     long stateI = nRows - (int)std::round(navState.getY() * nRows / height - 0.5);
     long stateJ = (int)std::round(navState.getX() * nCols / width + 0.5);
@@ -679,10 +727,17 @@ void Nav2DModel::drawState(solver::State const &state, std::ostream &os) {
         double y = (nRows + 0.5 - i) * height / nRows;
         for (long j = 0; j <= nCols + 1; j++) {
             double x = (j - 0.5) * width / nCols;
-            if (i == stateI && j == stateJ) {
-                os << "o";
+            char particleStrength = (particleCounts[i][j] * 26
+                    / particles.size());
+            bool isState = (i == stateI && j == stateJ);
+            if (!isState) {
+                if (particleStrength == 0) {
+                    dispPoint(getAreaType({x, y}), os);
+                } else {
+                    os << (char)('a' + particleStrength);
+                }
             } else {
-                dispPoint(getAreaType({x, y}), os);
+                os << (char)('A' + particleStrength);
             }
         }
         os << endl;

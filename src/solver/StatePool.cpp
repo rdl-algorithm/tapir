@@ -1,6 +1,5 @@
 #include "StatePool.hpp"
 
-#include <iostream>                     // for operator<<, basic_ostream, cerr, endl, ostream
 #include <map>                          // for multimap, __alloc_traits<>::value_type
 #include <set>                          // for set
 #include <unordered_map>                // for unordered_map
@@ -54,12 +53,12 @@ StateInfo *StatePool::add(std::unique_ptr<StateInfo> newInfo) {
         // New state - add to the index.
         stateInfo->setId();
         if (stateInfo->id_ != (long)statesByIndex_.size()) {
-            std::cerr << "ERROR: Wrong size in StatePool?" << std::endl;
+            debug::show_message("ERROR: Wrong size in StatePool?");
         }
         statesByIndex_.push_back(std::move(newInfo));
         addToStateIndex(stateInfo);
     } else {
-        std::cerr << "StateInfo already added!!" << std::endl;
+        debug::show_message("StateInfo already added!!");
     }
     return stateInfo;
 }

@@ -176,10 +176,11 @@ class Model {
     /* --------------- Pretty printing methods ----------------- */
     /** Draws the environment map onto the given output stream. */
     virtual void drawEnv(std::ostream &/*os*/) {}
-    /** Draws the current state in the context of the overall map onto
-     * the given output stream.
+    /** Draws the current belief and/or the current state in the context of the
+     * overall map onto the given output stream.
      */
-    virtual void drawState(State const &/*state*/, std::ostream &/*os*/) {}
+    virtual void drawSimulationState(std::vector<State const *> /*particles*/,
+            State const &/*state*/, std::ostream &/*os*/) {}
 
     /* --------------- Data structure customization ----------------- */
     // These are factory methods to allow the data structures used to

@@ -4,7 +4,7 @@
 #include <ctime>                        // for clock, clock_t, CLOCKS_PER_SEC
 
 #include <algorithm>                    // for max
-#include <iostream>                     // for operator<<, cerr, ostream, basic_ostream, endl, basic_ostream<>::__ostream_type, cout
+#include <iostream>                     // for operator<<, ostream, basic_ostream, endl, basic_ostream<>::__ostream_type, cout
 #include <limits>
 #include <memory>                       // for unique_ptr
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
@@ -39,7 +39,6 @@
 #include "indexing/RTree.hpp"
 #include "indexing/SpatialIndexVisitor.hpp"
 
-using std::cerr;
 using std::cout;
 using std::endl;
 
@@ -83,6 +82,12 @@ void Solver::genPol(long maxTrials, long maximumDepth) {
     for (long i = 0; i < maxTrials; i++) {
         singleSearch(model_->getDiscountFactor(), maximumDepth);
     }
+    cout << "MDP heuristic used ";
+    cout << heuristicUseCount_[ROLLOUT_RANDHEURISTIC] - 1 << " times; Took ";
+    cout << timeUsedPerHeuristic_[ROLLOUT_RANDHEURISTIC] << "ms" << endl;
+    cout << "NN heuristic used ";
+    cout << heuristicUseCount_[ROLLOUT_POL] - 1 << " times; Took ";
+    cout << timeUsedPerHeuristic_[ROLLOUT_POL] << "ms" << endl;
 }
 
 void Solver::singleSearch(double discountFactor, long maximumDepth) {
@@ -207,7 +212,7 @@ void Solver::undoBackup(HistorySequence *sequence) {
                     *(*itHist)->action_, -(*itHist)->totalDiscountedReward_, -1);
             (*itHist)->hasBeenBackedUp_ = false;
         } else {
-            cerr << "ERROR: Backup not yet done; cannot undo!" << endl;
+            debug::show_message("ERROR: Backup not yet done; cannot undo!");
         }
     }
 }
@@ -232,6 +237,8 @@ std::pair<Model::StepResult, double> Solver::getRolloutAction(
         // Find a nearest neighbor as an approximation.
         BeliefNode *currNode = getNNBelNode(belNode);
         if (currNode == nullptr) {
+            timeUsedPerHeuristic_[ROLLOUT_POL] +=
+                (std::clock() - startTime) * 1000.0 / CLOCKS_PER_SEC;
             lastRolloutMode_ = ROLLOUT_RANDHEURISTIC;
             // Use RANDHEURISTIC instead.
         } else {
@@ -262,14 +269,14 @@ std::pair<Model::StepResult, double> Solver::getRolloutAction(
 double Solver::rolloutPolHelper(BeliefNode *currNode, State const &state,
         double discountFactor) {
     if (currNode == nullptr) {
-        // cerr << "WARNING: nullptr in rolloutPolHelper!" << endl;
-        return 0.0;
+        // debug::show_message("WARNING: nullptr in rolloutPolHelper!");
+        return model_->getHeuristicValue(state);
     } else if (currNode->getNParticles() == 0) {
-        // cerr << "WARNING: nParticles == 0 in rolloutPolHelper" << endl;
-        return 0.0;
+        // debug::show_message("WARNING: nParticles == 0 in rolloutPolHelper");
+        return model_->getHeuristicValue(state);
     } else if (currNode->getNActChildren() == 0) {
-        // cerr << "WARNING: No children in rolloutPolHelper" << endl;
-        return 0.0;
+        // debug::show_message("WARNING: No children in rolloutPolHelper");
+        return model_->getHeuristicValue(state);
     }
 
     std::unique_ptr<Action> action = currNode->getBestAction();
@@ -283,31 +290,36 @@ double Solver::rolloutPolHelper(BeliefNode *currNode, State const &state,
     return qVal;
 }
 
-BeliefNode *Solver::getNNBelNode(BeliefNode *b) {
-    double d, minDist;
-    minDist = std::numeric_limits<double>::infinity();
-    BeliefNode *nnBel = b->nnBel_;
+BeliefNode *Solver::getNNBelNode(BeliefNode *currentBelief) {
+    if (model_->getMaxNnDistance() < 0) {
+        return nullptr;
+    }
+    double minDist = std::numeric_limits<double>::infinity();
+    BeliefNode *nnBel = currentBelief->nnBel_;
     long numTried = 0;
-    for (BeliefNode *node : policy_->allNodes_) {
+    for (BeliefNode *otherBelief : policy_->allNodes_) {
+        if (currentBelief == otherBelief) {
+            continue;
+        }
         if (numTried >= model_->getMaxNnComparisons()) {
             break;
         } else {
-            if (b->tNNComp_ < node->tLastAddedParticle_) {
-                d = b->distL1Independent(node);
-                if (d < minDist) {
-                    minDist = d;
-                    nnBel = node;
+            if (currentBelief->tNNComp_ < otherBelief->tLastAddedParticle_) {
+                double distance = currentBelief->distL1Independent(otherBelief);
+                if (distance < minDist) {
+                    minDist = distance;
+                    nnBel = otherBelief;
                 }
             }
             numTried++;
         }
     }
-    b->tNNComp_ = (double) (std::clock() - BeliefNode::startTime)
+    currentBelief->tNNComp_ = (double) (std::clock() - BeliefNode::startTime)
         * 1000 / CLOCKS_PER_SEC;
-    b->nnBel_ = nnBel;
     if (minDist > model_->getMaxNnDistance()) {
         return nullptr;
     }
+    currentBelief->nnBel_ = nnBel;
     return nnBel;
 }
 
@@ -364,7 +376,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     trajSt.push_back(state->copy());
 
     cout << "Initial State:" << endl;
-    model_->drawState(*state, cout);
+    model_->drawSimulationState(currNode->getStates(), *state, cout);
 
     std::vector<long>::iterator itCh = changeTimes.begin();
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
@@ -378,14 +390,17 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
             model_->update(*itCh, allStates_.get());
             if (changes::hasFlag(allStates_->getInfo(*state)->changeFlags_,
                     ChangeFlags::DELETED)) {
-                cerr << "ERROR: Current simulation state deleted. Exiting.." << endl;
+                debug::show_message("ERROR: Current simulation state deleted. Exiting..");
                 std::exit(1);
             }
             for (std::unique_ptr<State> &state2 : trajSt) {
                 if (changes::hasFlag(
                         allStates_->getInfo(*state2)->changeFlags_,
                         ChangeFlags::DELETED)) {
-                    cerr << "ERROR: Impossible simulation history! Includes " << *state2 << endl;
+                    std::ostringstream message;
+                    message << "ERROR: Impossible simulation history! Includes ";
+                    message << *state2;
+                    debug::show_message(message.str());
                 }
             }
             applyChanges();
@@ -430,6 +445,12 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
         }
         currNode = nextNode;
     }
+    cout << "MDP heuristic used ";
+    cout << heuristicUseCount_[ROLLOUT_RANDHEURISTIC] - 1 << " times; Took ";
+    cout << timeUsedPerHeuristic_[ROLLOUT_RANDHEURISTIC] << "ms" << endl;
+    cout << "NN heuristic used ";
+    cout << heuristicUseCount_[ROLLOUT_POL] - 1 << " times; Took ";
+    cout << timeUsedPerHeuristic_[ROLLOUT_POL] << "ms" << endl;
     return discountedTotalReward;
 }
 
@@ -478,15 +499,20 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 //    }
 //    cout << "Est. mean inter-particle distance: " << totalDistance / 100 << endl;
 
+    cout << "Belief has " << currentBelief->getNParticles();
+    cout << " particles." << endl;
 
     cout << "Action children: " << endl;
     for (ActionNode *node : currentBelief->getMapping()->getChildren()) {
         if (node == nullptr) {
             continue;
         }
+        if (std::isnan(node->meanQValue_)) {
+            // std::string s = debug::to_string(*node->action_);
+            debug::show_message("ERROR: NaN value!");
+        }
         cout << *node->action_ << " " << node->meanQValue_ << endl;
     }
-
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
@@ -496,10 +522,17 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     if (result.isTerminal) {
         cout << " Reached a terminal state." << endl;
     }
-    cout << "Action: " << *result.action;
-    cout << "; Reward: " << result.reward;
-    cout << "; Obs: " << *result.observation << endl;
-    model_->drawState(*result.nextState, cout);
+    cout << "Action: " << *result.action << endl;
+    cout << "Transition: ";
+    if (result.transitionParameters == nullptr) {
+        cout << "NULL" << endl;
+    } else {
+        cout << *result.transitionParameters << endl;
+    }
+    cout << "Reward: " << result.reward << endl;
+    cout << "Observation: " << *result.observation << endl;
+    model_->drawSimulationState(currentBelief->getStates(),
+            *result.nextState, cout);
     cout << "Heuristic value: ";
     cout << model_->getHeuristicValue(*result.nextState) << endl;
     return result;
@@ -508,7 +541,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 void Solver::improveSol(BeliefNode *startNode, long maxTrials,
         long maximumDepth) {
     if (startNode->getNParticles() == 0) {
-        std::cerr << "ERROR: No particles in the BeliefNode!" << std::endl;
+        debug::show_message("ERROR: No particles in the BeliefNode!");
         std::exit(10);
     }
     double disc = model_->getDiscountFactor();
@@ -530,8 +563,10 @@ void Solver::improveSol(BeliefNode *startNode, long maxTrials,
             }
         }
         if (!found) {
-            cerr << "ERROR: INVALID STATE IN PARTICLE!" << endl;
-            cerr << index << endl;
+            std::ostringstream message;
+            message << "ERROR: INVALID STATE IN PARTICLE #" << index;
+            debug::show_message(message.str());
+
         }
         samples.push_back(entry->stateInfo_);
     }
@@ -542,7 +577,7 @@ void Solver::improveSol(BeliefNode *startNode, long maxTrials,
 
 BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         Observation const &obs, long timeStep) {
-    cerr << "WARNING: Adding particles due to depletion" << endl;
+    debug::show_message("WARNING: Adding particles due to depletion");
     BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
 
     std::vector<State const *> particles;
@@ -558,12 +593,12 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
     std::vector<std::unique_ptr<State>> nextParticles(
             model_->generateParticles(currNode, action, obs, particles));
     if (nextParticles.empty()) {
-        cerr << "WARNING: Could not generate based on belief!" << endl;
+        debug::show_message("WARNING: Could not generate based on belief!");
         // If that fails, ignore the current belief.
         nextParticles = model_->generateParticles(currNode, action, obs);
     }
     if (nextParticles.empty()) {
-        cerr << "ERROR: Failed to generate new particles!" << endl;
+        debug::show_message("ERROR: Failed to generate new particles!");
     }
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
         StateInfo *stateInfo = allStates_->createOrGetInfo(*uniqueStatePtr);

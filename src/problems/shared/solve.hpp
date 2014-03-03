@@ -4,7 +4,7 @@
 #include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
 
 #include <fstream>                      // for operator<<, endl, ostream, ofstream, basic_ostream, basic_ostream<>::__ostream_type
-#include <iostream>                     // for cout, cerr
+#include <iostream>                     // for cout
 #include <memory>                       // for unique_ptr
 #include <string>                       // for string
 #include <utility>                      // for move                // IWYU pragma: keep
@@ -17,7 +17,6 @@
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
-using std::cerr;
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
@@ -56,7 +55,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     if (seed == 0) {
         seed = std::time(nullptr);
     }
-    cerr << "Seed: " << seed << endl;
+    cout << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
     randGen.discard(10);
@@ -81,7 +80,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     serializer->save(os);
     os.close();
 
-    cout << "SolvingTime: " << totT << endl;
+    cout << "Total solving time: " << totT << "ms" << endl;
     return 0;
 }
 

@@ -2,7 +2,7 @@
 
 #include <cstddef>                      // for size_t
 
-#include <iostream>                     // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, basic_istream, endl, basic_istream<>::__istream_type, cerr, basic_ios::clear
+#include <iostream>
 #include <map>                          // for _Rb_tree_iterator, map<>::mapped_type
 #include <sstream>                      // for stringstream
 #include <string>                       // for operator>>, getline, string, operator<<
@@ -32,8 +32,6 @@
 
 #include "Serializer.hpp"               // for Serializer
 
-
-using std::cerr;
 using std::endl;
 
 namespace solver {
@@ -76,7 +74,10 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
     std::string line;
     std::getline(is, line);
     while (line.find("STATESPOOL-BEGIN") == std::string::npos) {
-        std::cerr << "Junk line: " << line;
+        std::ostringstream message;
+        message << "WARNING: Junk line: ";
+        message << line;
+        debug::show_message(message.str());
         std::getline(is, line);
     }
     std::getline(is, line);
@@ -173,7 +174,10 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
     std::string line;
     std::getline(is, line);
     while (line.find("HISTORIES-BEGIN") == std::string::npos) {
-        std::cerr << "Junk line: " << line;
+        std::ostringstream message;
+        message << "WARNING: Junk line: ";
+        message << line;
+        debug::show_message(message.str());
         std::getline(is, line);
     }
 
@@ -189,7 +193,10 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
     }
     std::getline(is, line);
     while (line.find("HISTORIES-END") == std::string::npos) {
-        std::cerr << "Junk line: " << line;
+        std::ostringstream message;
+        message << "WARNING: Junk line: ";
+        message << line;
+        debug::show_message(message.str());
         std::getline(is, line);
     }
 }
@@ -251,7 +258,10 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
     std::string line;
     std::getline(is, line);
     while (line.find("BELIEFTREE-BEGIN") == std::string::npos) {
-        std::cerr << "Junk line: " << line;
+        std::ostringstream message;
+        message << "WARNING: Junk line: ";
+        message << line;
+        debug::show_message(message.str());
         std::getline(is, line);
     }
     std::getline(is, line);

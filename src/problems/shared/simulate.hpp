@@ -4,7 +4,7 @@
 #include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
 
 #include <fstream>                      // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, ofstream, endl, ostream, ifstream
-#include <iostream>                     // for cout, cerr
+#include <iostream>                     // for cout
 #include <memory>                       // for unique_ptr
 #include <string>                       // for string, char_traits, operator<<
 #include <utility>                      // for move                // IWYU pragma: keep
@@ -21,7 +21,6 @@
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
-using std::cerr;
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
@@ -73,7 +72,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     if (seed == 0) {
         seed = std::time(nullptr);
     }
-    cerr << "Seed: " << seed << endl;
+    cout << "Seed: " << seed << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
     randGen.discard(10);
@@ -81,7 +80,9 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     std::ifstream inFile;
     inFile.open(polPath);
     if (!inFile.is_open()) {
-        cerr << "Failed to open " << polPath << endl;
+        std::ostringstream message;
+        message << "Failed to open " << polPath;
+        debug::show_message(message.str());
         return 1;
     }
 
@@ -134,13 +135,16 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             os << "Step-" << j << " " << **itA;
             os << " ( " << **itS << ") " << **itO << *itR << endl;
         }
-        cout << val << " " << actualNSteps << " " << totChTime << " "
-             << totImpTime << " " << totT << endl;
+        cout << "Total discounted reward: " << val << endl;
+        cout << "# of steps: " << actualNSteps << endl;
+        cout << "Time spent on changes: " << totChTime << "ms" << endl;
+        cout << "Time spent on policy updates: " << totImpTime << "ms" << endl;
+        cout << "Total time taken: " << totT << "ms" << endl;
     }
     os.close();
 
     // Write the final policy to a file.
-//    cerr << "Saving final policy" << endl;
+//    cout << "Saving final policy" << endl;
 //    std::ofstream outFile;
 //    outFile.open("final.pol");
 //    serializer->save(outFile);

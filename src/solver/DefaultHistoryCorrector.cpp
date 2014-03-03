@@ -1,6 +1,5 @@
 #include "DefaultHistoryCorrector.hpp"
 
-#include <iostream>
 #include <memory>
 
 #include "HistoryEntry.hpp"
@@ -19,8 +18,7 @@ DefaultHistoryCorrector::DefaultHistoryCorrector(Model *model) :
 
 void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
     if (sequence->endAffectedIdx_ < sequence->startAffectedIdx_) {
-        std::cerr << "WARNING: Sequence to update has no affected entries!?";
-        std::cerr << std::endl;
+        debug::show_message("WARNING: Sequence to update has no affected entries!?");
         return;
     }
     bool hitTerminalState = false;
@@ -47,7 +45,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
 
         if (changes::hasFlag(entry->changeFlags_,
                         ChangeFlags::DELETED)) {
-            std::cerr << "ERROR: deleted state in updateSequence." << std::endl;
+            debug::show_message("ERROR: deleted state in updateSequence.");
         }
 
         // Model::StepResult result;
