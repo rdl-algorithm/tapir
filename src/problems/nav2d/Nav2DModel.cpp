@@ -77,14 +77,14 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     goalReward_(vm["problem.goalReward"].as<double>()),
     maxSpeed_(vm["problem.maxSpeed"].as<double>()),
     costPerUnitDistance_(vm["problem.costPerUnitDistance"].as<double>()),
-    speedErrorType_(parseErrorType(
-                vm["problem.speedErrorType"].as<std::string>())),
     speedErrorSD_(vm["problem.speedErrorSD"].as<double>()),
+    speedErrorType_(speedErrorSD_ <= 0 ? ErrorType::NONE : parseErrorType(
+                vm["problem.speedErrorType"].as<std::string>())),
     maxRotationalSpeed_(vm["problem.maxRotationalSpeed"].as<double>()),
     costPerRevolution_(vm["problem.costPerRevolution"].as<double>()),
-    rotationErrorType_(parseErrorType(
-                vm["problem.rotationErrorType"].as<std::string>())),
     rotationErrorSD_(vm["problem.rotationErrorSD"].as<double>()),
+    rotationErrorType_(rotationErrorSD_ <= 0 ? ErrorType::NONE : parseErrorType(
+                vm["problem.rotationErrorType"].as<std::string>())),
     maxObservationDistance_(vm["SBT.maxObservationDistance"].as<double>()),
     nStVars_(2),
     minVal_(-(crashPenalty_ + maxSpeed_ * costPerUnitDistance_
@@ -115,11 +115,10 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     }
     std::string line;
     while (std::getline(inFile, line)) {
-        std::istringstream iss(line);
         std::string typeString;
         int64_t id;
         Rectangle2D rect;
-        iss >> typeString >> id >> rect;
+        std::istringstream(line) >> typeString >> id >> rect;
         AreaType areaType = parseAreaType(typeString);
         if (areaType == AreaType::WORLD) {
             mapArea_ = rect;
@@ -132,7 +131,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     cout << "Constructed the Nav2DModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "nStVars: " << nStVars_ << endl;
-    cout << "nParticles: " << getNParticles() << endl;
+    cout << "maxTrials: " << getMaxTrials() << endl;
 //    cout << "Testing random initial states:" << endl;
 //    for (int i = 0; i < 2; i++) {
 //        std::unique_ptr<solver::State> state = sampleAnInitState();
@@ -243,7 +242,7 @@ double Nav2DModel::applyRotationalError(double rotationalSpeed) {
                 1.0, rotationErrorSD_)(*getRandomGenerator());
     case ErrorType::ABSOLUTE_GAUSSIAN_NOISE:
         return std::normal_distribution<double>(
-                rotationalSpeed, speedErrorSD_)(*getRandomGenerator());
+                rotationalSpeed, rotationErrorSD_)(*getRandomGenerator());
     case ErrorType::NONE:
         return rotationalSpeed;
     default:
@@ -336,6 +335,33 @@ double Nav2DModel::getDefaultVal() {
     return minVal_;
 }
 
+std::unique_ptr<Nav2DState> Nav2DModel::extrapolateState(
+        Nav2DState const &state, double speed,
+        double rotationalSpeed, double moveRatio) {
+    Point2D position = state.getPosition();
+    double direction = state.getDirection();
+    Point2D newPosition(position);
+    double newDirection(direction);
+    if (rotationalSpeed == 0.0) {
+        newPosition += Vector2D(moveRatio * speed * timeStepLength_,
+                direction);
+    } else if (speed == 0.0) {
+        newDirection += moveRatio * rotationalSpeed * timeStepLength_;
+    } else {
+        double absSpeed = std::abs(rotationalSpeed);
+        double radius = speed / (2 * M_PI * absSpeed);
+        double absDeltaInRadians = 2 * M_PI * moveRatio * absSpeed * timeStepLength_;
+        double forwardDistance = radius * std::sin(absDeltaInRadians);
+        double sideDistance = radius - (radius * std::cos(absDeltaInRadians));
+        newPosition += Vector2D(forwardDistance, direction);
+        double sideDirection = direction + (rotationalSpeed > 0 ? 0.25 : -0.25);
+        newPosition += Vector2D(sideDistance, sideDirection);
+    }
+    return std::make_unique<Nav2DState>(newPosition, newDirection,
+            costPerUnitDistance_,
+            costPerRevolution_);
+}
+
 std::unique_ptr<solver::TransitionParameters> Nav2DModel::generateTransition(
                solver::State const &state,
                solver::Action const &action) {
@@ -347,30 +373,14 @@ std::unique_ptr<solver::TransitionParameters> Nav2DModel::generateTransition(
     transition->speed = applySpeedError(navAction.getSpeed());
     transition->rotationalSpeed = applyRotationalError(
             navAction.getRotationalSpeed());
-    Point2D position = navState.getPosition();
-    double direction = navState.getDirection();
-    double radius = transition->speed / (
-            2 * M_PI * transition->rotationalSpeed);
-    double turnAmount = transition->rotationalSpeed * timeStepLength_;
-    Vector2D displacement(transition->speed * timeStepLength_, direction);
-
-    transition->moveRatio = 0;
-    Point2D center = position + Vector2D(radius, direction +
-            turnAmount > 0 ? 0.25 : -0.25);
-
     for (long step = 1; step <= interpolationStepCount_; step++) {
         double previousRatio = transition->moveRatio;
-
         transition->moveRatio = (double)step / interpolationStepCount_;
-        Point2D currentPosition;
-        if (turnAmount == 0) {
-            currentPosition = position + (transition->moveRatio
-                    * displacement);
-        } else {
-            currentPosition = center + Vector2D(radius,
-                    direction + transition->moveRatio * turnAmount +
-                               turnAmount > 0 ? -0.25 : 0.25);
-        }
+
+        std::unique_ptr<Nav2DState> currentState = extrapolateState(
+                navState, transition->speed, transition->rotationalSpeed,
+                transition->moveRatio);
+        Point2D currentPosition = currentState->getPosition();
         if (!mapArea_.contains(currentPosition)) {
             transition->moveRatio = previousRatio;
 			break;
@@ -393,24 +403,10 @@ std::unique_ptr<solver::State> Nav2DModel::generateNextState(
         solver::State const &state,
         solver::Action const &/*action*/,
         solver::TransitionParameters const *tp) {
-    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
-    Point2D position = navState.getPosition();
-    double direction = navState.getDirection();
     Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
-    if (tp2.rotationalSpeed == 0.0) {
-        position += Vector2D(tp2.moveRatio * tp2.speed * timeStepLength_,
-                direction);
-    } else {
-        double radius = tp2.speed / (2 * M_PI * tp2.rotationalSpeed);
-        Point2D center = position + Vector2D(radius,
-                direction + tp2.rotationalSpeed > 0 ? 0.25 : -0.25);
-        direction += tp2.moveRatio * tp2.rotationalSpeed * timeStepLength_;
-        position = center + Vector2D(radius,
-                direction + tp2.rotationalSpeed > 0 ? -0.25 : 0.25);
-    }
-    return std::make_unique<Nav2DState>(position, direction,
-            costPerUnitDistance_,
-            costPerRevolution_);
+    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
+    return extrapolateState(navState, tp2.speed, tp2.rotationalSpeed,
+            tp2.moveRatio);
 }
 
 
@@ -421,6 +417,7 @@ std::unique_ptr<solver::Observation> Nav2DModel::generateObservation(
         solver::State const &nextState) {
     Nav2DState const &navState = static_cast<Nav2DState const &>(nextState);
     if (isInside(navState.getPosition(), AreaType::OBSERVATION)) {
+        // debug::show_message("NOTE: Generated an observation!", true, false);
         return std::make_unique<Nav2DObservation>(navState);
     } else {
         return std::make_unique<Nav2DObservation>();
@@ -471,20 +468,19 @@ std::vector<long> Nav2DModel::loadChanges(char const *changeFilename) {
        ifs.open(changeFilename);
        std::string line;
        while (std::getline(ifs, line)) {
-           std::istringstream sstr(line);
+
            std::string tmpStr;
            long time;
            long nChanges;
-           sstr >> tmpStr >> time >> tmpStr >> nChanges;
+           std::istringstream(line) >> tmpStr >> time >> tmpStr >> nChanges;
 
            changes_[time] = std::vector<Nav2DChange>();
            changeTimes.push_back(time);
            for (int i = 0; i < nChanges; i++) {
                std::getline(ifs, line);
-               sstr.clear();
-               sstr.str(line);
 
                Nav2DChange change;
+               std::istringstream sstr(line);
                sstr >> change.operation;
                if (change.operation != "ADD") {
                    std::ostringstream message;

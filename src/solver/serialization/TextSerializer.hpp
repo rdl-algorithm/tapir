@@ -34,6 +34,8 @@ class TextSerializer : virtual public Serializer {
     virtual ~TextSerializer() = default;
     _NO_COPY_OR_MOVE(TextSerializer);
 
+    static const int NUM_PARTICLES_PER_LINE = 5;
+
     virtual void saveTransitionParameters(TransitionParameters const *tp,
             std::ostream &os) override;
     virtual std::unique_ptr<TransitionParameters> loadTransitionParameters(

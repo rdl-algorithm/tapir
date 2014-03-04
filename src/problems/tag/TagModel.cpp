@@ -414,8 +414,8 @@ std::vector<long> getVector(std::istringstream &iss) {
     std::string tmpStr;
     std::getline(iss, tmpStr, '(');
     std::getline(iss, tmpStr, ')');
-    std::stringstream iss2(tmpStr);
-    while (std::getline(iss2, tmpStr, ',')) {
+    std::istringstream sstr(tmpStr);
+    while (std::getline(sstr, tmpStr, ',')) {
         values.push_back(std::atoi(tmpStr.c_str()));
     }
     return values;
@@ -427,20 +427,17 @@ std::vector<long> TagModel::loadChanges(char const *changeFilename) {
     ifs.open(changeFilename);
     std::string line;
     while (std::getline(ifs, line)) {
-        std::istringstream sstr(line);
         std::string tmpStr;
         long time;
         long nChanges;
-        sstr >> tmpStr >> time >> tmpStr >> nChanges;
+        std::istringstream(line) >> tmpStr >> time >> tmpStr >> nChanges;
 
         changes_[time] = std::vector<TagChange>();
         changeTimes.push_back(time);
         for (int i = 0; i < nChanges; i++) {
             std::getline(ifs, line);
-            sstr.clear();
-            sstr.str(line);
-
             TagChange change;
+            std::istringstream sstr(line);
             std::getline(sstr, change.changeType, ':');
             std::vector<long> v0 = getVector(sstr);
             std::vector<long> v1 = getVector(sstr);

@@ -54,8 +54,8 @@ void hash_combine(std::size_t &seed, T const &v) {
 }
 
 namespace debug {
-//    void show_message(char const *message, bool print = true);
-    void show_message(std::string message, bool print = true);
+    void show_message(std::string message, bool print = true,
+            bool bp_branch = true);
 
     template <typename T>
     std::string to_string(T t) {

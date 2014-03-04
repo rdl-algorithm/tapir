@@ -160,15 +160,16 @@ void EnumeratedActionTextSerializer::saveActionMapping(
         ActionMapping const &map, std::ostream &os) {
     EnumeratedActionMap const &enumMap = (
             static_cast<EnumeratedActionMap const &>(map));
+    os << enumMap.getNChildren() << " action children" << std::endl;
     std::vector<long>::const_iterator it = enumMap.actionOrder_.cbegin();
-    os << "TRIED   (";
+    os << "Tried   (";
     for (; it != enumMap.nextActionIterator_; it++) {
         os << *enumMap.allActions_[*it];
         if (std::next(it) != enumMap.nextActionIterator_) {
             os << ", ";
         }
     }
-    os << ")" << std::endl << "UNTRIED (";
+    os << ")" << std::endl << "Untried (";
     for (; it != enumMap.actionOrder_.cend(); it++) {
         os << *enumMap.allActions_[*it];
         if (std::next(it) != enumMap.actionOrder_.cend()) {
@@ -176,7 +177,6 @@ void EnumeratedActionTextSerializer::saveActionMapping(
         }
     }
     os << ")" << std::endl;
-    os << enumMap.getNChildren() << std::endl;
     for (std::unique_ptr<ActionNode> const &child : enumMap.children_) {
         if (child != nullptr) {
             save(*child, os);
@@ -192,10 +192,14 @@ EnumeratedActionTextSerializer::loadActionMapping(std::istream &is) {
             solver_->actionPool_->createActionMapping().release()));
 
     std::string line;
+
+    std::getline(is, line);
+    std::istringstream(line) >> map->nChildren_;
+
     std::vector<long>::iterator codeIterator = map->actionOrder_.begin();
     for (int i = 0; i < 2; i++) {
         std::getline(is, line);
-        std::stringstream sstr(line);
+        std::istringstream sstr(line);
         std::string tmpStr;
         if (i == 1) {
             map->nextActionIterator_ = codeIterator;
@@ -205,24 +209,20 @@ EnumeratedActionTextSerializer::loadActionMapping(std::istream &is) {
         if (tmpStr == "") {
             continue;
         }
-        std::stringstream sstr2(tmpStr);
+        std::istringstream sstr2(tmpStr);
         std::string actionString;
         while (!sstr2.eof()) {
             std::getline(sstr2, actionString, ',');
-            std::stringstream sstr3(actionString);
+            std::istringstream sstr3(actionString);
             std::unique_ptr<Action> action = loadAction(sstr3);
             long code = static_cast<EnumeratedPoint const &>(*action).getCode();
             *(codeIterator++) = code;
         }
     }
 
-    std::getline(is, line);
-    std::stringstream sstr(line);
-    sstr >> map->nChildren_;
-
     for (long i = 0; i < map->nChildren_; i++) {
         std::getline(is, line);
-        std::stringstream sstr2(line);
+        std::istringstream sstr2(line);
         std::unique_ptr<ActionNode> actionNode(std::make_unique<ActionNode>());
         load(*actionNode, sstr2);
         long code = static_cast<const EnumeratedPoint *>(

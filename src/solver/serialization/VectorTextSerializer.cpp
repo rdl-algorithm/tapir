@@ -29,7 +29,7 @@ void VectorTextSerializer::load(std::vector<double> &vector, std::istream &is) {
         return;
     }
 
-    std::stringstream sstr(tmpStr);
+    std::istringstream sstr(tmpStr);
     while (sstr.good()) {
         double tmpDouble;
         sstr >> tmpDouble;

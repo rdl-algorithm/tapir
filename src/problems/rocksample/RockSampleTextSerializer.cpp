@@ -56,10 +56,10 @@ std::unique_ptr<solver::State> RockSampleTextSerializer::loadState(
         return nullptr;
     }
     long i, j;
+    std::istringstream(text) >> i;
     std::string rockString;
     std::vector<bool> rockStates;
-    std::stringstream sstr(text);
-    sstr >> i;
+
     is >> j >> rockString;
     for (char c : rockString) {
         if (c == 'G') {
@@ -164,14 +164,14 @@ std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(
         return std::make_unique<RockSampleAction>(ActionType::SAMPLE);
     } else if (text.find("CHECK") != std::string::npos) {
         std::string tmpStr;
-        std::stringstream sstr(text);
+        std::istringstream sstr(text);
         std::getline(sstr, tmpStr, '-');
         long rockNo;
         sstr >> rockNo;
         return std::make_unique<RockSampleAction>(ActionType::CHECK, rockNo);
     } else {
         std::string tmpStr;
-        std::stringstream sstr(text);
+        std::istringstream sstr(text);
         std::getline(sstr, tmpStr, '-');
         long code;
         sstr >> code;

@@ -67,8 +67,7 @@ std::unique_ptr<solver::Observation> TagTextSerializer::loadObservation(
     }
     long i, j;
     std::string tmpStr;
-    std::stringstream sstr(obsString);
-    sstr >> i >> j >> tmpStr;
+    std::istringstream(obsString) >> i >> j >> tmpStr;
     bool seesOpponent = tmpStr == "SEEN";
     return std::make_unique<TagObservation>(dynamic_cast<TagModel *>(
             model_), GridPosition(i, j), seesOpponent);
@@ -124,7 +123,7 @@ std::unique_ptr<solver::Action> TagTextSerializer::loadAction(
         return std::make_unique<TagAction>(ActionType::TAG);
     } else {
         std::string tmpStr;
-        std::stringstream sstr(text);
+        std::istringstream sstr(text);
         std::getline(sstr, tmpStr, '-');
         long code;
         sstr >> code;

@@ -87,7 +87,7 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
             it = approxMap.children_.cbegin();
             it != approxMap.children_.cend(); it++) {
         saveObservation(it->first.get(), os);
-        os << ":" << it->second->id_;
+        os << " -> " << it->second->id_;
         if (std::next(it) != approxMap.children_.cend()) {
             os << ", ";
         }
@@ -103,17 +103,16 @@ ApproximateObservationTextSerializer::loadObservationMapping(std::istream &is) {
     std::string tmpStr;
     std::getline(is, tmpStr, '{');
     std::getline(is, tmpStr, '}');
-    std::stringstream sstr(tmpStr);
+    std::istringstream sstr(tmpStr);
 
     std::string entry;
     while (!sstr.eof()) {
         std::getline(sstr, entry, ',');
-
-        std::stringstream sstr2(entry);
+        std::istringstream sstr2(entry);
+        std::unique_ptr<Observation> obs = loadObservation(sstr2);
         std::string tmpStr2;
-        std::getline(sstr2, tmpStr2, ':');
-        std::stringstream sstr3(tmpStr2);
-        std::unique_ptr<Observation> obs = loadObservation(sstr3);
+        sstr2 >> tmpStr2;
+
         if (obs == nullptr) {
             break;
         }

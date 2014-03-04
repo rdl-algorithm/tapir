@@ -162,6 +162,11 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual double getMaxObservationDistance() override;
 
   private:
+    /** Extrapolates the position, based on a current position, speed,
+     * rotational speed, and the proportion of the time step spent moving.
+     */
+    std::unique_ptr<Nav2DState> extrapolateState(Nav2DState const &state,
+            double speed, double rotationalSpeed, double moveRatio = 1.0);
     /** Converts an area type to a string. */
     std::string areaTypeToString(AreaType type);
     /** Parses an area type. */
@@ -194,19 +199,19 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     double maxSpeed_;
     /** Cost per unit distance traveled. */
     double costPerUnitDistance_;
-    /** Type of error used for the speed. */
-    ErrorType speedErrorType_;
     /** Standard deviation for speed error. */
     double speedErrorSD_;
+    /** Type of error used for the speed. */
+    ErrorType speedErrorType_;
 
     /** Maximum rotational speed allowed in an action. */
     double maxRotationalSpeed_;
     /** Cost per revolution. */
     double costPerRevolution_;
-    /** Type of error used for rotations. */
-    ErrorType rotationErrorType_;
     /** Standard deviation for rotational error. */
     double rotationErrorSD_;
+    /** Type of error used for rotations. */
+    ErrorType rotationErrorType_;
 
     /** Maximum distance between observations to group them together. */
     double maxObservationDistance_;

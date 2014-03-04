@@ -74,12 +74,9 @@ void Point2D::loadFrom(std::istream &is) {
     std::string tmpStr;
     std::getline(is, tmpStr, '(');
     std::getline(is, tmpStr, ',');
-    std::istringstream iss(tmpStr);
-    iss >> x_;
+    std::istringstream(tmpStr) >> x_;
     std::getline(is, tmpStr, ')');
-    iss.clear();
-    iss.str(tmpStr);
-    iss >> y_;
+    std::istringstream(tmpStr) >> y_;
 }
 
 std::istream &operator>>(std::istream &is, Point2D &point) {

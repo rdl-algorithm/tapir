@@ -30,6 +30,9 @@ class Nav2DTextSerializer : virtual public solver::TextSerializer,
     virtual ~Nav2DTextSerializer() = default;
     _NO_COPY_OR_MOVE(Nav2DTextSerializer);
 
+    void saveDouble(double value, std::ostream &os, bool showpos = false,
+            int precision = 7);
+
     void saveState(solver::State const *state, std::ostream &os) override;
     std::unique_ptr<solver::State> loadState(std::istream &is) override;
 
