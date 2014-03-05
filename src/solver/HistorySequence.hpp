@@ -11,6 +11,10 @@
 
 #include "global.hpp"
 
+namespace nav2d{
+class Nav2DSpcHistoryCorrector;
+}
+
 namespace solver {
 class HistoryEntry;
 class StateInfo;
@@ -21,6 +25,7 @@ class HistorySequence {
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;
+    friend class nav2d::Nav2DSpcHistoryCorrector;
 
     /** Constructs an empty history sequence starting at depth 0. */
     HistorySequence();

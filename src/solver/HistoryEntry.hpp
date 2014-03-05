@@ -13,6 +13,10 @@
 
 #include "global.hpp"
 
+namespace nav2d{
+class Nav2DSpcHistoryCorrector;
+}
+
 namespace solver {
 class BeliefNode;
 class HistorySequence;
@@ -25,6 +29,7 @@ class HistoryEntry {
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
+    friend class nav2d::Nav2DSpcHistoryCorrector;
 
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();

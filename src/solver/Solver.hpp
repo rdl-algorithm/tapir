@@ -15,6 +15,10 @@
 #include "geometry/Observation.hpp"              // for Observation
 #include "geometry/State.hpp"
 
+namespace nav2d{
+class Nav2DSpcHistoryCorrector;
+}
+
 namespace solver {
 class ActionPool;
 class BeliefNode;
@@ -38,6 +42,7 @@ class Solver {
     friend class EnumeratedObservationTextSerializer;
 
     friend class DefaultHistoryCorrector;
+    friend class nav2d::Nav2DSpcHistoryCorrector;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
