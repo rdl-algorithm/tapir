@@ -44,6 +44,9 @@ problem's source folder, or by specifying that problem as a target, e.g.
 "make tag". For debugging output, prefix the make target with "debug-", e.g.
 "make debug-all" or "make debug-tag".
 
+For more documentation of the build system being used for this project, see
+[this README](.make/README.md).
+
 Usage
 -----
 Each problem should generate two executables - "solve" for initial offline

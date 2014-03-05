@@ -4,7 +4,31 @@ ifdef HAS_ROOT_MAKEFILE
 
 CHILD_FOLDERS = indexing mappings serialization geometry
 include .make/template.mk
-include .make/build.mk
+
+# Elements that make up the library
+define library_template
+LIB_solver_$(1) := $(BUILDDIR_solver_$(1))/libabt.a
+OUTPUTS_TO_CLEAN_solver_$(1) += $$(LIB_solver_$(1))
+MEMBERS_solver_$(1) := $$$$(OBJS_solver_$(1))
+MEMBERS_solver_$(1) += $$$$(OBJS_indexing_$(1)) $$$$(OBJS_mappings_$(1))
+MEMBERS_solver_$(1) += $$$$(OBJS_serialization_$(1)) $$$$(OBJS_geometry_$(1))
+MEMBERS_solver_$(1) += $$$$(OBJS_global_$(1))
+OUTPUTS_TO_CLEAN_solver_$(1) += $$(OBJS_indexing_$(1)) $$(OBJS_mappings_$(1))
+OUTPUTS_TO_CLEAN_solver_$(1) += $$(OBJS_serialization_$(1)) $$(OBJS_geometry_$(1))
+OUTPUTS_TO_CLEAN_solver_$(1) += $$(OBJS_global_$(1))
+endef
+$(foreach cfg,$(CFGS),$(eval $(call library_template,$(cfg))))
+
+# Include a configuration for building just the object files
+define make_archive_template
+build-$(1)-solver: $(LIB_solver_$(1))
+$(LIB_solver_$(1)): $$(MEMBERS_solver_$(1))
+	$(AR) rcs $$@ $(MEMBERS_solver_$(1))
+
+# Rebuild the archive if this Makefile changes.
+$(BUILDDIR_solver_$(1))/libabt.a: $(d)/Makefile
+endef
+$(foreach cfg,$(CFGS),$(eval $(call make_archive_template,$(cfg))))
 
 else
 ROOT = ../..

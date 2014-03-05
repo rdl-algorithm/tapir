@@ -11,6 +11,7 @@ DEFAULT_CFG := release
 # Compiler & linker
 # ----------------------------------------------------------------------
 
+AR   := ar
 CXX  := g++
 
 # ----------------------------------------------------------------------
@@ -44,7 +45,6 @@ CXXFLAGS_debug       := $(CXXFLAGS) -O0 -g3
 override LIBDIRS  += -L/usr/lib/x86_64-linux-gnu/
 #override LIBDIRS  += -L/usr/local/lib -Wl,-rpath=/usr/local/lib/
 
-override LDLIBS  += -lboost_program_options -lspatialindex
 override LDFLAGS += $(LIBDIRS)
 LDFLAGS_debug     = $(LDFLAGS) -g
 LDFLAGS_release   = $(LDFLAGS)
@@ -76,8 +76,8 @@ IWYU_FIX_FLAGS += -o $(dir $@)
 # ----------------------------------------------------------------------
 #
 define recipe_template
-COMPILE_RECIPE_$(1) = $$(CXX) $$(CPPFLAGS_$(1)) $$(CXXFLAGS_$(1)) -MMD -c $$< -o $$@
-LINK_RECIPE_$(1)    = $$(CXX) $$(LDFLAGS_$(1)) $$^ $$(LDLIBS) -o $$@
+COMPILE_CMD_$(1) = $$(CXX) $$(CPPFLAGS_$(1)) $$(CXXFLAGS_$(1)) -MMD -c -o $$@
+LINK_CMD_$(1)    = $$(CXX) $$(LDFLAGS_$(1)) -o $$@
 endef
 $(foreach cfg,$(CFGS),$(eval $(call recipe_template,$(cfg))))
 
@@ -125,6 +125,8 @@ clean-$(1)-all:
 endef
 $(foreach cfg,$(CFGS),$(eval $(call phonies_template,$(cfg))))
 
+# Turn on secondary expansion for cross-referencing!
+.SECONDEXPANSION:
 # Start including other makefiles.
 dir := $(ROOT)/src
 include .make/stack.mk

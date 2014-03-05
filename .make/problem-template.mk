@@ -7,7 +7,7 @@ TARGET_NAMES_$(n) := $(TARGET_NAMES)
 # ----------------------------------------------------------------------
 define problem_defaults
 TGTS_$(n)_$(1)        := $(patsubst %,$(_BIN_$(n)_$(1)),$(TARGET_NAMES_$(n)))
-ALL_OUTPUTS_$(n)_$(1) += $$(TGTS_$(n)_$(1))
+OUTPUTS_TO_CLEAN_$(n)_$(1) += $$(TGTS_$(n)_$(1))
 OBJS_TGT_$(n)_$(1)    := $$(patsubst $(_BIN_$(n)_$(1)),$(_O_$(n)_$(1)),$$(TGTS_$(n)_$(1)))
 OBJS_NTGT_$(n)_$(1)   := $$(filter-out $$(OBJS_TGT_$(n)_$(1)),$(OBJS_$(n)_$(1)))
 
@@ -20,13 +20,25 @@ $(foreach cfg,$(CFGS),$(eval $(call problem_defaults,$(cfg))))
 # Targets
 # ----------------------------------------------------------------------
 
+# Dependencies for the linker
+define dependencies_template
+LINKER_DEPS_$(n)_$(1) := $(EXTRA_LINKER_DEPS_$(n)_$(1)) $$$$(OBJS_NTGT_$(n)_$(1))
+LINKER_DEPS_$(n)_$(1) += $$$$(LIB_solver_$(1))
+LINKER_DEPS_$(n)_$(1) += -lboost_program_options -lspatialindex
+endef 
+$(foreach cfg,$(CFGS),$(eval $(call dependencies_template,$(cfg))))
+
 # Linking rule for the executable targets.
 define problem_build_template
-$(TGTS_$(n)_$(1)): $(_BIN_$(n)_$(1)): $(_O_$(n)_$(1)) $(OBJS_NTGT_$(n)_$(1)) $(OBJS_solver_$(1)) $(OBJS_global_$(1)) $(OBJS_indexing_$(1)) $(OBJS_mappings_$(1)) $(OBJS_serialization_$(1)) $(OBJS_geometry_$(1)) $(OBJS_geometry_utils_$(1))
-	$$(LINK_RECIPE_$(1))
+$(TGTS_$(n)_$(1)): $(_BIN_$(n)_$(1)): $(_O_$(n)_$(1)) $$(LINKER_DEPS_$(n)_$(1))
+	$$(LINK_CMD_$(1)) $$< $(LINKER_DEPS_$(n)_$(1))
+
 # Executables will be copied to the main folder for convenience
 build-$(1)-$(n): $(TGTS_$(n)_$(1))
 	cp $$^ $(d)
+
+# Rebuild if this makefile changes.
+$(TGTS_$(n)_$(1)): .make/problem-template.mk
 endef
 $(foreach cfg,$(CFGS),$(eval $(call problem_build_template,$(cfg))))
 
