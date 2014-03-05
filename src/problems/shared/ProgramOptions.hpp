@@ -43,32 +43,32 @@ class ProgramOptions {
         return simulation;
     }
 
-    /** Returns configuration options for the SBT */
-    virtual po::options_description getSBTOptions() {
-        po::options_description sbt("SBT settings");
+    /** Returns configuration options for the ABT */
+    virtual po::options_description getABTOptions() {
+        po::options_description sbt("ABT settings");
         sbt.add_options()
-                ("SBT.nParticles", po::value<long>(),
+                ("ABT.nParticles", po::value<long>(),
                         "default number of particles per belief - this number"
                         " will be generated if particle depletion occurs.")
-                ("SBT.maxTrials", po::value<long>(),
+                ("ABT.maxTrials", po::value<long>(),
                         "the number of episodes to sample for each step.")
-                ("SBT.maximumDepth", po::value<double>(),
+                ("ABT.maximumDepth", po::value<double>(),
                         "maximum Depth allowed before search stops.")
-                ("SBT.heuristicExploreCoefficient", po::value<double>(),
+                ("ABT.heuristicExploreCoefficient", po::value<double>(),
                         "determines the ratio between exploration and"
                         " exploitation for the UCB action selection - higher"
                         " values mean more exploration.")
-                ("SBT.ucbExploreCoefficient", po::value<double>(),
+                ("ABT.ucbExploreCoefficient", po::value<double>(),
                         "determines the ratio between exploration and"
                         " exploitation for the UCB action selection - higher"
                         " values mean more exploration.")
-                ("SBT.maxNnComparisons", po::value<long>(),
+                ("ABT.maxNnComparisons", po::value<long>(),
                         "maximum number of nearest-neighbor comparisons to"
                         " make before stopping.")
-                ("SBT.maxNnDistance", po::value<double>(),
+                ("ABT.maxNnDistance", po::value<double>(),
                         "Maximum distance for a node to be considered a valid"
                         "nearest-neighbor")
-                ("SBT.maxObservationDistance", po::value<double>(),
+                ("ABT.maxObservationDistance", po::value<double>(),
                         "Maximum distance between observations to group them"
                         "together - only applicable if approximate"
                         "observations are being used");

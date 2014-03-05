@@ -13,13 +13,13 @@ namespace nav2d {
 class Nav2DModel;
 
 enum class ActionType {
-    FORWARD_0,
+    FORWARD,
 //    FORWARD_1,
 //    FORWARD_2,
-    TURN_LEFT_0,
+    FORWARD_LEFT,
 //    TURN_LEFT_1,
 //    TURN_LEFT_2,
-    TURN_RIGHT_0,
+    FORWARD_RIGHT,
 //    TURN_RIGHT_1,
 //    TURN_RIGHT_2,
 //    DO_NOTHING,

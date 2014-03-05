@@ -85,7 +85,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     rotationErrorSD_(vm["problem.rotationErrorSD"].as<double>()),
     rotationErrorType_(rotationErrorSD_ <= 0 ? ErrorType::NONE : parseErrorType(
                 vm["problem.rotationErrorType"].as<std::string>())),
-    maxObservationDistance_(vm["SBT.maxObservationDistance"].as<double>()),
+    maxObservationDistance_(vm["ABT.maxObservationDistance"].as<double>()),
     nStVars_(2),
     minVal_(-(crashPenalty_ + maxSpeed_ * costPerUnitDistance_
             + maxRotationalSpeed_ * costPerRevolution_)

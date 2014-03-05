@@ -26,7 +26,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
     visibleOptions.add(options->getGenericOptions()).add(
-            options->getSBTOptions()).add(options->getProblemOptions()).add(
+            options->getABTOptions()).add(options->getProblemOptions()).add(
             options->getHeuristicOptions());
     allOptions.add(visibleOptions).add(options->getSimulationOptions());
 

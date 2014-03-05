@@ -30,7 +30,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
     visibleOptions.add(options->getGenericOptions()).add(
-            options->getSBTOptions()).add(options->getProblemOptions()).add(
+            options->getABTOptions()).add(options->getProblemOptions()).add(
             options->getHeuristicOptions().add(
                     options->getSimulationOptions()));
     allOptions.add(visibleOptions);
@@ -144,11 +144,11 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     os.close();
 
     // Write the final policy to a file.
-//    cout << "Saving final policy" << endl;
-//    std::ofstream outFile;
-//    outFile.open("final.pol");
-//    serializer->save(outFile);
-//    outFile.close();
+    cout << "Saving final policy" << endl;
+    std::ofstream outFile;
+    outFile.open("final.pol");
+    serializer->save(outFile);
+    outFile.close();
 
     return 0;
 }

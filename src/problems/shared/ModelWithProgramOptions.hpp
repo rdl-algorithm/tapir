@@ -13,14 +13,14 @@ class ModelWithProgramOptions : public virtual solver::Model {
     ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
         randGen_(randGen),
         discountFactor_(vm["problem.discountFactor"].as<double>()),
-        nParticles_(vm["SBT.nParticles"].as<long>()),
-        maxTrials_(vm["SBT.maxTrials"].as<long>()),
-        maximumDepth_(vm["SBT.maximumDepth"].as<double>()),
+        nParticles_(vm["ABT.nParticles"].as<long>()),
+        maxTrials_(vm["ABT.maxTrials"].as<long>()),
+        maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
         heuristicExploreCoefficient_(
-                vm["SBT.heuristicExploreCoefficient"].as<double>()),
-        ucbExploreCoefficient_(vm["SBT.ucbExploreCoefficient"].as<double>()),
-        maxNnComparisons_(vm["SBT.maxNnComparisons"].as<long>()),
-        maxNnDistance_(vm["SBT.maxNnDistance"].as<double>())
+                vm["ABT.heuristicExploreCoefficient"].as<double>()),
+        ucbExploreCoefficient_(vm["ABT.ucbExploreCoefficient"].as<double>()),
+        maxNnComparisons_(vm["ABT.maxNnComparisons"].as<long>()),
+        maxNnDistance_(vm["ABT.maxNnDistance"].as<double>())
     {
     }
 
@@ -63,7 +63,7 @@ class ModelWithProgramOptions : public virtual solver::Model {
     // Problem parameters.
     double discountFactor_;
 
-    // SBT parameters
+    // ABT parameters
     long nParticles_;
     long maxTrials_;
     long maximumDepth_;

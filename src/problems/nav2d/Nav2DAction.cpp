@@ -25,7 +25,7 @@ Nav2DAction::Nav2DAction(ActionType type, Nav2DModel *model) :
         speed_(0.0),
         rotationalSpeed_(0.0) {
     switch (type) {
-    case ActionType::FORWARD_0:
+    case ActionType::FORWARD:
         speed_ = model->maxSpeed_;
         return;
 //    case ActionType::FORWARD_1:
@@ -34,7 +34,8 @@ Nav2DAction::Nav2DAction(ActionType type, Nav2DModel *model) :
 //    case ActionType::FORWARD_2:
 //        speed_ = 0.2 * model->maxSpeed_;
 //        return;
-    case ActionType::TURN_LEFT_0:
+    case ActionType::FORWARD_LEFT:
+        speed_= model->maxSpeed_ / 2;
         rotationalSpeed_ = model->maxRotationalSpeed_;
         return;
 //    case ActionType::TURN_LEFT_1:
@@ -43,7 +44,8 @@ Nav2DAction::Nav2DAction(ActionType type, Nav2DModel *model) :
 //    case ActionType::TURN_LEFT_2:
 //        rotationalSpeed_ = model->maxRotationalSpeed_;
 //        return;
-    case ActionType::TURN_RIGHT_0:
+    case ActionType::FORWARD_RIGHT:
+        speed_ = model->maxSpeed_ / 2;
         rotationalSpeed_ =  -model->maxRotationalSpeed_;
         return;
 //    case ActionType::TURN_RIGHT_1:

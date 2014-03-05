@@ -47,7 +47,7 @@ class Model {
     virtual double getMaxVal() = 0;
 
 
-    // SBT algorithm parameters
+    // ABT algorithm parameters
     /** Returns the default number of particles per belief - this number will
      * be generated if particle depletion occurs.
      */
