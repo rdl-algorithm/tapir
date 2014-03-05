@@ -12,8 +12,8 @@ quite easily be compiled in parallel.
 
 The system used here adds two key conveniences to the aforementioned system:
 - Improved readability by moving standard code, especially the recursion,
-	into template files wihin the .make directory. The recursion is located in
-	[stack.mk](.make/stack.mk)
+	into template files wihin the .make directory.
+	The recursion is located in [stack.mk](stack.mk)
 - The ability to call make from any child folder and have it behave the way
 	you would expect it to if that child folder were the root.
 
@@ -30,9 +30,9 @@ the relative path of the current module w.r.t. the root.
 
 Each module is also required to define two variables that are used for the
 recursive processing:
-MODULE_NAME: The module name; should be a unique identifier. This is used
+- MODULE_NAME: The module name; should be a unique identifier. This is used
     for generating intermediate targets for each specific module.
-CHILD_FOLDERS: The subdirectories that are required to be processed.
+- CHILD_FOLDERS: The subdirectories that are required to be processed.
 
 However, in order to mainain consistency with the rest of the build system,
 particularly with regards to build modes (release vs. debug) and with regards
