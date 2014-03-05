@@ -13,3 +13,6 @@ solve
 core
 *.log
 *.pol
+
+# backup files
+*~
