@@ -1,6 +1,7 @@
 #include "global.hpp"
 
 #include <iostream>
+#include <unistd.h>
 
 #include "solver/geometry/Point.hpp"
 

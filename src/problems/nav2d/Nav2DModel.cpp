@@ -132,6 +132,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "nStVars: " << nStVars_ << endl;
     cout << "maxTrials: " << getMaxTrials() << endl;
+    cout << endl << endl;
 //    cout << "Testing random initial states:" << endl;
 //    for (int i = 0; i < 2; i++) {
 //        std::unique_ptr<solver::State> state = sampleAnInitState();
@@ -383,6 +384,7 @@ std::unique_ptr<solver::TransitionParameters> Nav2DModel::generateTransition(
         Point2D currentPosition = currentState->getPosition();
         if (!mapArea_.contains(currentPosition)) {
             transition->moveRatio = previousRatio;
+            transition->hadCollision = true;
 			break;
  		}
         if (isInside(currentPosition, AreaType::OBSTACLE)) {
@@ -432,8 +434,9 @@ double Nav2DModel::generateReward(
     Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
     double reward = 0;
     reward -= costPerUnitTime_ * timeStepLength_;
-    double distance = tp2.moveRatio * tp2.speed * timeStepLength_;
-    double turnAmount = tp2.moveRatio * tp2.rotationalSpeed * timeStepLength_;
+    double distance = std::abs(tp2.moveRatio * tp2.speed * timeStepLength_);
+    double turnAmount = std::abs(tp2.moveRatio * tp2.rotationalSpeed
+            * timeStepLength_);
     reward -= costPerUnitDistance_ * distance;
     reward -= costPerRevolution_ * turnAmount;
     if (tp2.reachedGoal) {
@@ -678,9 +681,9 @@ void Nav2DModel::drawEnv(std::ostream &os) {
     double minY = mapArea_.getLowerLeft().getY();
     double maxY = mapArea_.getUpperRight().getY();
     double height = maxY - minY;
-    long nRows = 30; //(int)height;
+    long nRows = (long)height / 2;
     double width = maxX - minX;
-    long nCols = (int)width;
+    long nCols = (long)width;
     for (long i = 0; i <= nRows + 1; i++) {
         double y = (nRows + 0.5 - i) * height / nRows;
         for (long j = 0; j <= nCols + 1; j++) {
@@ -701,10 +704,11 @@ void Nav2DModel::drawSimulationState(
     double minY = mapArea_.getLowerLeft().getY();
     double maxY = mapArea_.getUpperRight().getY();
     double height = maxY - minY;
-    long nRows = 30; //(int)height;
+    long nRows = (long)height / 2;
     double width = maxX - minX;
     long nCols = (long)width;
 
+    os << "Belief has " << particles.size() << " particles." << endl;
     std::vector<std::vector<long>> particleCounts (nRows + 2,
             std::vector<long>(nCols + 2));
 
@@ -719,26 +723,42 @@ void Nav2DModel::drawSimulationState(
 
     long stateI = nRows - (int)std::round(navState.getY() * nRows / height - 0.5);
     long stateJ = (int)std::round(navState.getX() * nCols / width + 0.5);
+    double proportion = (double)particleCounts[stateI][stateJ] / particles.size();
+    os << "Ratio in same square: "  << proportion << endl;
     for (long i = 0; i <= nRows + 1; i++) {
         double y = (nRows + 0.5 - i) * height / nRows;
         for (long j = 0; j <= nCols + 1; j++) {
             double x = (j - 0.5) * width / nCols;
-            char particleStrength = (particleCounts[i][j] * 26
-                    / particles.size());
+            proportion = (double)particleCounts[i][j] / particles.size();
             bool isState = (i == stateI && j == stateJ);
-            if (!isState) {
-                if (particleStrength == 0) {
-                    dispPoint(getAreaType({x, y}), os);
+            if (proportion <= 0 && !isState) {
+                dispPoint(getAreaType( { x, y }), os);
+                continue;
+            }
+            if (hasColorOutput()) {
+                std::vector<int> colors {22, 28, 34, 40, 46,
+                        82, 118, 154, 190, 226,
+                        227, 228, 229, 230, 231 };
+                int color = colors[proportion * (colors.size() - 1)];
+                os << "\033[38;5;" << color << "m";
+            }
+            if (isState) {
+                if (proportion == 0) {
+                    os << "!";
                 } else {
-                    os << (char)('a' + particleStrength);
+                    os << (char) ('A' + proportion * 25);
                 }
             } else {
-                os << (char)('A' + particleStrength);
+                os << (char) ('a' + proportion * 25);
+            }
+            if (hasColorOutput()) {
+                os << "\033[0m";
             }
         }
         os << endl;
     }
-    os << state << endl;
+    os << "Actual state: " << state << " with value ";
+    os << getHeuristicValue(state) << endl;
 }
 
 long Nav2DModel::getNumberOfBins() {

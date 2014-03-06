@@ -121,7 +121,7 @@ class TagModel: virtual public ModelWithProgramOptions,
     /** Displays a single cell of the map. */
     void dispCell(TagCellType cellType, std::ostream &os);
     void drawEnv(std::ostream &os) override;
-    void drawSimulationState(std::vector<solver::State const *> /*particles*/,
+    void drawSimulationState(std::vector<solver::State const *> particles,
             solver::State const &state,
             std::ostream &os) override;
 

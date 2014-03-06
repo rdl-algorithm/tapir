@@ -518,12 +518,33 @@ void TagModel::drawEnv(std::ostream &os) {
 }
 
 void TagModel::drawSimulationState(
-        std::vector<solver::State const *> /*particles*/,
+        std::vector<solver::State const *> particles,
         solver::State const &state,
         std::ostream &os) {
     TagState const &tagState = static_cast<TagState const &>(state);
+    os << "Belief has " << particles.size() << " particles." << endl;
+    os << state << endl;
+    std::vector<std::vector<long>> particleCounts(nRows_,
+            std::vector<long>(nCols_));
+    for (solver::State const *particle : particles) {
+        GridPosition opponentPos = static_cast<TagState const &>(
+                *particle).getOpponentPosition();
+        particleCounts[opponentPos.i][opponentPos.j] += 1;
+    }
+
     for (std::size_t i = 0; i < envMap_.size(); i++) {
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
+            double proportion = (double) particleCounts[i][j]
+                    / particles.size();
+            if (hasColorOutput()) {
+                std::vector<int> colors {196,
+                    161, 126, 91, 56, 21,
+                    26, 31, 36, 41, 46};
+                if (proportion > 0) {
+                    int color = colors[proportion * (colors.size() - 1)];
+                    os << "\033[38;5;" << color << "m";
+                }
+            }
             GridPosition pos(i, j);
             bool hasRobot = (pos == tagState.getRobotPosition());
             bool hasOpponent = (pos == tagState.getOpponentPosition());
@@ -541,6 +562,9 @@ void TagModel::drawSimulationState(
                 } else {
                     os << ".";
                 }
+            }
+            if (hasColorOutput()) {
+                os << "\033[0m";
             }
         }
         os << endl;

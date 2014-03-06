@@ -117,7 +117,7 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
 
     virtual void drawEnv(std::ostream &os) override;
     virtual void drawSimulationState(
-            std::vector<solver::State const *> /*particles*/,
+            std::vector<solver::State const *> particles,
             solver::State const &state,
             std::ostream &os) override;
 

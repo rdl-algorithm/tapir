@@ -20,8 +20,8 @@ class ModelWithProgramOptions : public virtual solver::Model {
                 vm["ABT.heuristicExploreCoefficient"].as<double>()),
         ucbExploreCoefficient_(vm["ABT.ucbExploreCoefficient"].as<double>()),
         maxNnComparisons_(vm["ABT.maxNnComparisons"].as<long>()),
-        maxNnDistance_(vm["ABT.maxNnDistance"].as<double>())
-    {
+        maxNnDistance_(vm["ABT.maxNnDistance"].as<double>()),
+        hasColorOutput_(vm["simulation.color"].as<bool>()) {
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -56,6 +56,9 @@ class ModelWithProgramOptions : public virtual solver::Model {
     virtual double getMaxNnDistance() override {
         return maxNnDistance_;
     }
+    virtual bool hasColorOutput() {
+        return hasColorOutput_;
+    }
 
   private:
     RandomGenerator *randGen_;
@@ -73,6 +76,8 @@ class ModelWithProgramOptions : public virtual solver::Model {
 
     long maxNnComparisons_;
     double maxNnDistance_;
+
+    bool hasColorOutput_;
 };
 
 #endif /* MODELWITHPROGRAMOPTIONS_HPP_ */

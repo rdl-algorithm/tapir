@@ -173,11 +173,9 @@ void Solver::continueSearch(HistorySequence *sequence,
 void Solver::backup(HistorySequence *sequence) {
     std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
             sequence->histSeq_.rbegin());
-    double totalReward;
-    if ((*itHist)->action_ == nullptr) {
-        totalReward = (*itHist)->totalDiscountedReward_;
-        (*itHist)->hasBeenBackedUp_ = true;
-    } else {
+    double totalReward = (*itHist)->totalDiscountedReward_;
+    (*itHist)->hasBeenBackedUp_ = true;
+    if ((*itHist)->action_ != nullptr) {
         debug::show_message("ERROR: End of sequence has an action!?");
     }
     itHist++;
@@ -402,24 +400,24 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     double discountedTotalReward = 0.0;
 
     BeliefNode *currNode = policy_->getRoot();
-    std::unique_ptr<State> state = model_->sampleAnInitState();
-    // State *currentState = state.get();
-    trajSt.push_back(state->copy());
+    std::unique_ptr<State> currentState = model_->sampleAnInitState();
+    trajSt.push_back(currentState->copy());
 
-    cout << "Initial State:" << endl;
-    model_->drawSimulationState(currNode->getStates(), *state, cout);
+    cout << "Initial simulation state:" << endl;
+    model_->drawSimulationState(currNode->getStates(), *currentState, cout);
+    cout << endl;
 
     std::vector<long>::iterator itCh = changeTimes.begin();
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
         cout << "t-" << timeStep << endl;
-        allStates_->createOrGetInfo(*state);
+        allStates_->createOrGetInfo(*currentState);
         if (itCh != changeTimes.end() && timeStep == *itCh) {
             // Apply the changes to the model.
             cout << "Model changing." << endl;
 
             chTimeStart = std::clock();
             model_->update(*itCh, allStates_.get());
-            if (changes::hasFlag(allStates_->getInfo(*state)->changeFlags_,
+            if (changes::hasFlag(allStates_->getInfo(*currentState)->changeFlags_,
                     ChangeFlags::DELETED)) {
                 debug::show_message("ERROR: Current simulation state deleted. Exiting..");
                 std::exit(1);
@@ -451,12 +449,11 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
         *totImpTime += ((impSolTimeEnd - impSolTimeStart) * 1000
                 / CLOCKS_PER_SEC);
 
-        Model::StepResult result = simAStep(currNode, *state);
-        state = result.nextState->copy();
+        Model::StepResult result = simAStep(currNode, *currentState);
+        currentState = result.nextState->copy();
 
         trajAction.push_back(result.action->copy());
         trajObs.push_back(result.observation->copy());
-        // trajSt is responsible for ownership
         trajSt.push_back(result.nextState->copy());
         trajRew.push_back(result.reward);
         discountedTotalReward += currDiscFactor * result.reward;
@@ -465,6 +462,9 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
              << discountedTotalReward << endl;
         if (result.isTerminal) {
             *actualNSteps = timeStep;
+            cout << "Final state: " << endl;
+            model_->drawSimulationState(std::vector<const State *>{},
+                    *currentState, cout);
             break;
         }
 
@@ -474,6 +474,10 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
             nextNode = addChild(currNode, *result.action, *result.observation,
                     timeStep);
         }
+        cout << "Simulation state: " << endl;
+        model_->drawSimulationState(nextNode->getStates(),
+                *currentState, cout);
+        cout << endl;
         currNode = nextNode;
     }
     cout << "MDP heuristic used ";
@@ -499,23 +503,20 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 //    }
 //    cout << "Est. mean inter-particle distance: " << totalDistance / 100 << endl;
 
-    cout << "Belief has " << currentBelief->getNParticles();
-    cout << " particles." << endl;
-
-    cout << "Action children: " << endl;
-    std::multimap<double, Action const *> actionValues;
-    for (ActionNode *node : currentBelief->getMapping()->getChildren()) {
-        if (node == nullptr) {
-            continue;
-        }
-        if (std::isnan(node->meanQValue_)) {
-            debug::show_message("ERROR: NaN value!");
-        }
-        actionValues.emplace(node->meanQValue_, node->action_.get());
-    }
-    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-        cout << *it->second << " " << it->first << endl;
-    }
+//    cout << "Action children: " << endl;
+//    std::multimap<double, Action const *> actionValues;
+//    for (ActionNode *node : currentBelief->getMapping()->getChildren()) {
+//        if (node == nullptr) {
+//            continue;
+//        }
+//        if (std::isnan(node->meanQValue_)) {
+//            debug::show_message("ERROR: NaN value!");
+//        }
+//        actionValues.emplace(node->meanQValue_, node->action_.get());
+//    }
+//    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
+//        cout << *it->second << " " << it->first << endl;
+//    }
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
@@ -534,10 +535,6 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     }
     cout << "Reward: " << result.reward << endl;
     cout << "Observation: " << *result.observation << endl;
-    model_->drawSimulationState(currentBelief->getStates(),
-            *result.nextState, cout);
-    cout << "Heuristic value: ";
-    cout << model_->getHeuristicValue(*result.nextState) << endl;
     return result;
 }
 

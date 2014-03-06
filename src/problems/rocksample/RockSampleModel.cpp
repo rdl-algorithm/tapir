@@ -457,20 +457,45 @@ void RockSampleModel::drawEnv(std::ostream &os) {
 }
 
 void RockSampleModel::drawSimulationState(
-        std::vector<solver::State const *> /*particles*/,
-        solver::State const &state,
-        std::ostream &os) {
+        std::vector<solver::State const *> particles,
+        solver::State const &state, std::ostream &os) {
     RockSampleState const &rockSampleState =
-        static_cast<RockSampleState const &>(state);
+            static_cast<RockSampleState const &>(state);
+    os << "Belief has " << particles.size() << " particles." << endl;
     os << state << endl;
     GridPosition pos(rockSampleState.getPosition());
+    std::vector<double> goodProportions(nRocks_);
+    for (solver::State const *particle : particles) {
+        RockSampleState const &rss =
+                static_cast<RockSampleState const &>(*particle);
+        for (long i = 0; i < nRocks_; i++) {
+            if (rss.getRockStates()[i]) {
+                goodProportions[i] += 1;
+            }
+        }
+    }
+    for (long i = 0; i < nRocks_; i++) {
+        goodProportions[i] /= particles.size();
+    }
     for (std::size_t i = 0; i < envMap_.size(); i++) {
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
-            if ((long)i == pos.i && (long)j == pos.j) {
-                os << "x";
-                continue;
+            long rockNo = envMap_[i][j] - ROCK;
+            if (rockNo >= 0 && hasColorOutput()) {
+                std::vector<int> colors {196,
+                    161, 126, 91, 56, 21,
+                    26, 31, 36, 41, 46};
+                int color =
+                        colors[goodProportions[rockNo] * (colors.size() - 1)];
+                os << "\033[38;5;" << color << "m";
             }
-            dispCell(envMap_[i][j], os);
+            if ((long) i == pos.i && (long) j == pos.j) {
+                os << "x";
+            } else {
+                dispCell(envMap_[i][j], os);
+            }
+            if (rockNo >= 0 && hasColorOutput()) {
+                os << "\033[0m";
+            }
         }
         os << endl;
     }
