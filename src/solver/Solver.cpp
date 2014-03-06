@@ -92,8 +92,7 @@ void Solver::genPol(long maxTrials, long maximumDepth) {
 
 void Solver::singleSearch(double discountFactor, long maximumDepth) {
     StateInfo *stateInfo = allStates_->createOrGetInfo(*model_->sampleAnInitState());
-    singleSearch(
-            policy_->getRoot(), stateInfo, 0, discountFactor, maximumDepth);
+    singleSearch(policy_->getRoot(), stateInfo, 0, discountFactor, maximumDepth);
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
@@ -117,7 +116,10 @@ void Solver::continueSearch(HistorySequence *sequence,
     double initialRootQValue = sequenceRoot->getBestMeanQValue();
 
     bool rolloutUsed = false;
-    bool done = false;
+    bool done = model_->isTerminal(*currHistEntry->getState());
+    if (done) {
+        debug::show_message("NOTE: sampled a terminal particle.");
+    }
 
     long currentDepth = currHistSeq->startDepth_ + currHistEntry->entryId_ + 1;
     while (!done && currentDepth <= maximumDepth) {
@@ -156,14 +158,8 @@ void Solver::continueSearch(HistorySequence *sequence,
         currHistEntry->registerNode(currNode);
 
         if (rolloutUsed) {
+            // Assign a heuristic value to the final history entry.
             currHistEntry->totalDiscountedReward_ = qVal;
-        } else {
-            if (done) {
-                //currHistEntry->immediateReward_ = model_->getReward(
-                //            *nextStateInfo->getState());
-                //currHistEntry->totalDiscountedReward_ = currHistEntry->discount_
-                //    * currHistEntry->immediateReward_;
-            }
         }
     }
     backup(currHistSeq);
@@ -180,40 +176,75 @@ void Solver::backup(HistorySequence *sequence) {
     double totalReward;
     if ((*itHist)->action_ == nullptr) {
         totalReward = (*itHist)->totalDiscountedReward_;
+        (*itHist)->hasBeenBackedUp_ = true;
     } else {
-        totalReward = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
-                * (*itHist)->reward_;
+        debug::show_message("ERROR: End of sequence has an action!?");
     }
     itHist++;
+    bool isFirst = true;
+    bool propagating = true;
+    double deltaQValue = 0;
     for (; itHist != sequence->histSeq_.rend(); itHist++) {
-        if ((*itHist)->hasBeenBackedUp_) {
-            double previousTotalReward = (*itHist)->totalDiscountedReward_;
-            totalReward = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
-                    * (*itHist)->reward_ + totalReward;
-            (*itHist)->owningBeliefNode_->updateQValue(
-                    *(*itHist)->action_, totalReward - previousTotalReward);
+        HistoryEntry *entry = itHist->get();
+        BeliefNode *node = entry->owningBeliefNode_;
+        double previousTotalReward;
+        if (entry->hasBeenBackedUp_) {
+            previousTotalReward = entry->totalDiscountedReward_;
         } else {
-            totalReward = (*itHist)->totalDiscountedReward_ = (*itHist)->discount_
-                    * (*itHist)->reward_ + totalReward;
-            (*itHist)->owningBeliefNode_->updateQValue(
-                    *(*itHist)->action_, totalReward, +1);
-            (*itHist)->hasBeenBackedUp_ = true;
+            previousTotalReward = 0;
         }
+        totalReward = entry->totalDiscountedReward_ = entry->discount_
+                * entry->reward_ + totalReward;
+        if (propagating) {
+            if (isFirst) {
+                deltaQValue = totalReward - previousTotalReward;
+            } else {
+                deltaQValue *= model_->getDiscountFactor();
+            }
+            double previousQValue = node->getBestMeanQValue();
+            node->updateQValue(*entry->action_, deltaQValue,
+                    entry->hasBeenBackedUp_ ? 0 : +1);
+            deltaQValue = node->getBestMeanQValue() - previousQValue;
+            if (deltaQValue == 0) {
+                propagating = false;
+            }
+        }
+        entry->hasBeenBackedUp_ = true;
     }
 }
 
 void Solver::undoBackup(HistorySequence *sequence) {
     std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist =
             (sequence->histSeq_.rbegin());
+    if (!(*itHist)->hasBeenBackedUp_) {
+        debug::show_message("ERROR: Trying to undo but not backed up!?");
+    }
+    (*itHist)->hasBeenBackedUp_ = false;
     itHist++;
+    bool isFirst = true;
+    bool propagating = true;
+    double deltaQValue = 0;
     for (; itHist != sequence->histSeq_.rend(); itHist++) {
-        if ((*itHist)->hasBeenBackedUp_) {
-            (*itHist)->owningBeliefNode_->updateQValue(
-                    *(*itHist)->action_, -(*itHist)->totalDiscountedReward_, -1);
-            (*itHist)->hasBeenBackedUp_ = false;
-        } else {
-            debug::show_message("ERROR: Backup not yet done; cannot undo!");
+        HistoryEntry *entry = itHist->get();
+        BeliefNode *node = entry->owningBeliefNode_;
+        if (!entry->hasBeenBackedUp_) {
+            debug::show_message("ERROR: Trying to undo but not backed up!?");
         }
+        if (propagating) {
+            if (isFirst) {
+                deltaQValue = -entry->totalDiscountedReward_;
+            } else {
+                deltaQValue *= model_->getDiscountFactor();
+            }
+            double previousQValue = node->getBestMeanQValue();
+            node->updateQValue(*entry->action_, deltaQValue,
+                    entry->hasBeenBackedUp_ ? 0 : -1);
+            deltaQValue = node->getBestMeanQValue() - previousQValue;
+            if (deltaQValue == 0) {
+                propagating = false;
+            }
+        }
+        entry->hasBeenBackedUp_ = false;
     }
 }
 
@@ -456,38 +487,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
 Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         State const &currentState) {
-//    cout << "Belief node: ";
-//    serializer_->save(*currentBelief, cout);
-
-//    struct MyVisitor : public SpatialIndexVisitor {
-//        MyVisitor(StatePool *statePool) :
-//                    SpatialIndexVisitor(statePool),
-//                    states() {
-//        }
-//        std::vector<StateInfo *> states;
-//        void visit(StateInfo *info) {
-//            states.push_back(info);
-//        }
-//    };
-//    MyVisitor visitor(allStates_.get());
-//    RTree *tree = static_cast<RTree *>(allStates_->getStateIndex());
-//    if (model_->getName() == "Tag") {
-//        clock_t startTime = std::clock();
-//        for (int i = 0; i < 1000; i++) {
-//            visitor.states.clear();
-//            tree->boxQuery(visitor,
-//                    std::vector<double> { 4,  0,  0,  0,  0,},
-//                    std::vector<double> { 4,  0,  4,  9,  1,});
-//        }
-//        clock_t ticks = std::clock() - startTime;
-//
-//        cout << "Query results: " << endl;
-//        for (StateInfo *info : visitor.states) {
-//            cout << *info->getState() << endl;
-//        }
-//        cout << visitor.states.size() << " states; 1000 reps in " << (double)ticks / CLOCKS_PER_SEC << " seconds." << endl;
-//    }
-
+    // Particle sampling and variance estimation.
 //    State const *state = currentBelief->sampleAParticle(randGen_)->getState();
 //    cout << "Sampled particle: " << *state << endl;
 //
@@ -503,15 +503,18 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     cout << " particles." << endl;
 
     cout << "Action children: " << endl;
+    std::multimap<double, Action const *> actionValues;
     for (ActionNode *node : currentBelief->getMapping()->getChildren()) {
         if (node == nullptr) {
             continue;
         }
         if (std::isnan(node->meanQValue_)) {
-            // std::string s = debug::to_string(*node->action_);
             debug::show_message("ERROR: NaN value!");
         }
-        cout << *node->action_ << " " << node->meanQValue_ << endl;
+        actionValues.emplace(node->meanQValue_, node->action_.get());
+    }
+    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
+        cout << *it->second << " " << it->first << endl;
     }
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
@@ -544,32 +547,29 @@ void Solver::improveSol(BeliefNode *startNode, long maxTrials,
         debug::show_message("ERROR: No particles in the BeliefNode!");
         std::exit(10);
     }
-    double disc = model_->getDiscountFactor();
+
+    std::vector<StateInfo *> nonTerminalStates;
+    for (long index = 0; index < startNode->getNParticles(); index++) {
+        HistoryEntry *entry = startNode->particles_.get(index);
+        if (!model_->isTerminal(*entry->getState())) {
+            nonTerminalStates.push_back(entry->stateInfo_);
+        }
+    }
+    if (nonTerminalStates.empty()) {
+        debug::show_message("ERROR: No non-terminal particles!");
+        return;
+    }
+
     std::vector<StateInfo *> samples;
-
-    HistoryEntry *entry = startNode->particles_.get(0);
-    long depth = entry->entryId_ + entry->owningSequence_->startDepth_;
-
     for (long i = 0; i < maxTrials; i++) {
         long index = std::uniform_int_distribution<long>(
-                                         0, startNode->getNParticles() - 1)(*randGen_);
-        // entry = startNode->sampleAParticle(randGen_);
-        entry = startNode->particles_.get(index);
-        bool found = false;
-        for (std::unique_ptr<StateInfo> &s : allStates_->statesByIndex_) {
-            if (s.get() == entry->stateInfo_) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            std::ostringstream message;
-            message << "ERROR: INVALID STATE IN PARTICLE #" << index;
-            debug::show_message(message.str());
-
-        }
-        samples.push_back(entry->stateInfo_);
+                0, nonTerminalStates.size() - 1)(*randGen_);
+        samples.push_back(nonTerminalStates[index]);
     }
+
+    double disc = model_->getDiscountFactor();
+    HistoryEntry *entry = startNode->particles_.get(0);
+    long depth = entry->entryId_ + entry->owningSequence_->startDepth_;
     for (StateInfo *sample : samples) {
         singleSearch(startNode, sample, depth, disc, maximumDepth);
     }

@@ -165,6 +165,7 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
         entry->owningSequence_ = &seq;
         seq.histSeq_.push_back(std::move(entry));
     }
+    seq.isTerminal_ = model_->isTerminal(*(*seq.histSeq_.rbegin())->getState());
 }
 
 void TextSerializer::save(Histories const &histories, std::ostream &os) {

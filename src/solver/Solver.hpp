@@ -15,7 +15,7 @@
 #include "geometry/Observation.hpp"              // for Observation
 #include "geometry/State.hpp"
 
-namespace nav2d{
+namespace nav2d {
 class Nav2DSpcHistoryCorrector;
 }
 

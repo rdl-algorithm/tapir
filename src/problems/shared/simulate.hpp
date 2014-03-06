@@ -69,6 +69,8 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     long nSteps = vm["simulation.nSteps"].as<long>();
     long nRuns = vm["simulation.nRuns"].as<long>();
     unsigned long seed = vm["seed"].as<unsigned long>();
+
+    bool savePolicy = vm["simulation.savePolicy"].as<bool>();
     if (seed == 0) {
         seed = std::time(nullptr);
     }
@@ -143,12 +145,14 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     }
     os.close();
 
-    // Write the final policy to a file.
-    cout << "Saving final policy" << endl;
-    std::ofstream outFile;
-    outFile.open("final.pol");
-    serializer->save(outFile);
-    outFile.close();
+    if (savePolicy) {
+        // Write the final policy to a file.
+        cout << "Saving final policy" << endl;
+        std::ofstream outFile;
+        outFile.open("final.pol");
+        serializer->save(outFile);
+        outFile.close();
+    }
 
     return 0;
 }
