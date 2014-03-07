@@ -59,9 +59,6 @@ void TextSerializer::load(StateInfo &info, std::istream &is) {
     std::string tmpStr;
     is >> tmpStr >> info.id_ >> tmpStr;
     info.state_ = loadState(is);
-    if (info.id_ > StateInfo::currId) {
-        StateInfo::currId = info.id_ + 1;
-    }
 }
 
 void TextSerializer::save(StatePool const &pool, std::ostream &os) {
@@ -91,8 +88,6 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
     long nStates;
     std::istringstream(line) >> tmpStr >> nStates;
 
-    StateInfo::currId = 0;
-
     std::getline(is, line);
     while (line.find("STATESPOOL-END") == std::string::npos) {
         std::unique_ptr<StateInfo> newStateInfo(std::make_unique<StateInfo>());
@@ -101,7 +96,6 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
         pool.add(std::move(newStateInfo));
         std::getline(is, line);
     }
-    StateInfo::currId = nStates;
 }
 
 void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
@@ -170,8 +164,8 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
 
 void TextSerializer::save(Histories const &histories, std::ostream &os) {
     os << "HISTORIES-BEGIN" << endl;
-    os << "#histories: " << histories.allHistSeq_.size() << endl;
-    for (std::unique_ptr<HistorySequence> const &seq : histories.allHistSeq_) {
+    os << "#histories: " << histories.getNumberOfSequences() << endl;
+    for (std::unique_ptr<HistorySequence> const &seq : histories.sequencesById_) {
         save(*seq, os);
     }
     os << "HISTORIES-END" << endl;
@@ -198,7 +192,7 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
     for (int i = 0; i < numHistories; i++) {
         std::unique_ptr<HistorySequence> sequence(std::make_unique<HistorySequence>());
         load(*sequence, is);
-        histories.allHistSeq_.push_back(std::move(sequence));
+        histories.sequencesById_.push_back(std::move(sequence));
     }
     std::getline(is, line);
     while (line.find("HISTORIES-END") == std::string::npos) {
@@ -284,7 +278,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
     os << "BELIEFTREE-BEGIN" << endl;
-    os << "#nodes: " << BeliefNode::currId << endl;
+    os << "#nodes: " << tree.getNumberOfNodes();
     for (BeliefNode *node : tree.allNodes_) {
         os << "NODE # " << node->id_ << endl;
         save(*node, os);

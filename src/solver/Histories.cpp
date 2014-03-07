@@ -8,23 +8,29 @@
 
 namespace solver {
 Histories::Histories() :
-    allHistSeq_() {
+        sequencesById_() {
 }
 
 void Histories::reset() {
-    allHistSeq_.clear();
+    sequencesById_.clear();
 }
 
 HistorySequence *Histories::addNew(long startDepth) {
     std::unique_ptr<HistorySequence> histSeq(
-            std::make_unique<HistorySequence>(startDepth));
+            std::make_unique<HistorySequence>(startDepth,
+                    sequencesById_.size()));
     HistorySequence *rawPtr = histSeq.get();
-    allHistSeq_.push_back(std::move(histSeq));
+    sequencesById_.push_back(std::move(histSeq));
     return rawPtr;
 }
 
+/** Returns the number of history sequences. */
+long Histories::getNumberOfSequences() const {
+    return sequencesById_.size();
+}
+
 HistorySequence *Histories::getHistorySequence(long seqId) const {
-    return allHistSeq_[seqId].get();
+    return sequencesById_[seqId].get();
 }
 
 void Histories::deleteHistorySequence(long seqId) {
@@ -33,14 +39,14 @@ void Histories::deleteHistorySequence(long seqId) {
         entry->registerState(nullptr);
         entry->registerNode(nullptr);
     }
-    if (seqId < static_cast<long>(allHistSeq_.size()) - 1) {
-        (allHistSeq_.begin() + seqId)->reset(allHistSeq_.rbegin()->release());
-        (allHistSeq_.begin() + seqId)->get()->id_ = seqId;
+    if (seqId < static_cast<long>(sequencesById_.size()) - 1) {
+        sequencesById_[seqId] = std::move(sequencesById_[sequencesById_.size()-1]);
+        sequencesById_[seqId]->id_ = seqId;
     }
-    allHistSeq_.pop_back();
+    sequencesById_.pop_back();
 }
 
 HistoryEntry *Histories::getHistoryEntry(long seqId, long entryId) const {
-    return allHistSeq_[seqId]->getEntry(entryId);
+    return sequencesById_[seqId]->getEntry(entryId);
 }
 } /* namespace solver */

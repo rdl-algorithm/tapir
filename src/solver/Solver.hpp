@@ -15,10 +15,6 @@
 #include "geometry/Observation.hpp"              // for Observation
 #include "geometry/State.hpp"
 
-namespace nav2d {
-class Nav2DSpcHistoryCorrector;
-}
-
 namespace solver {
 class ActionPool;
 class BeliefNode;
@@ -35,14 +31,6 @@ class Solver {
   public:
     friend class Serializer;
     friend class TextSerializer;
-    friend class EnumeratedActionTextSerializer;
-    friend class DiscretizedActionTextSerializer;
-    friend class ApproximateObservationTextSerializer;
-    friend class DiscreteObservationTextSerializer;
-    friend class EnumeratedObservationTextSerializer;
-
-    friend class DefaultHistoryCorrector;
-    friend class nav2d::Nav2DSpcHistoryCorrector;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
@@ -82,6 +70,18 @@ class Solver {
             std::vector<std::unique_ptr<Observation>> &trajObs,
             std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
             double *totImpTime);
+
+    /* ------------------ Simple getters. ------------------- */
+    /** Returns the policy. */
+    BeliefTree *getPolicy();
+    /** Returns the state pool. */
+    StatePool *getStatePool();
+    /** Returns the model. */
+    Model *getModel();
+    /** Returns the action pool. */
+    ActionPool *getActionPool();
+    /** Returns the observation pool. */
+    ObservationPool *getObservationPool();
 
   private:
     /* ------------------ Episode sampling methods ------------------- */

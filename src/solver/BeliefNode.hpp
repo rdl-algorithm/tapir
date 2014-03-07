@@ -24,15 +24,10 @@ class BeliefNode {
   public:
     friend class Solver;
     friend class TextSerializer;
-    friend class ApproximateObservationTextSerializer;
-    friend class EnumeratedActionTextSerializer;
-    friend class EnumeratedObservationTextSerializer;
-    friend class DiscreteObservationTextSerializer;
 
-    /** Constructs a new belief node with an auto-generated ID and no
-     * action mapping. */
-    BeliefNode();
-    /** Constructs a new belief node with an auto-generated ID. */
+    /** Constructs a new belief node with the given ID and no action mapping. */
+    BeliefNode(long id);
+    /** Constructs a new belief node with no ID (-1). */
     BeliefNode(std::unique_ptr<ActionMapping> actionMap);
     /** Constructs a new belief node with the given ID. */
     BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id);
@@ -86,8 +81,10 @@ class BeliefNode {
     double distL1Independent(BeliefNode *b) const;
 
 
-    /** Returns the ID of this node. */
+    /** Returns the id of this node. */
     long getId() const;
+    /** Sets the id of this node. */
+    void setId(long id);
     /** Returns the number of particles in this node. */
     long getNParticles() const;
     /** Returns an array containing all of the states within this node. */
@@ -109,12 +106,6 @@ class BeliefNode {
             Observation const &obs);
 
 private:
-
-    /** The ID for the next belief node. */
-    static long currId;
-    /** The startup time */
-    static std::clock_t startTime;
-
     /** The ID of this node. */
     long id_;
 

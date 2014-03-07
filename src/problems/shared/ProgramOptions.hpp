@@ -43,7 +43,7 @@ class ProgramOptions {
                 ("simulation.savePolicy,z", po::bool_switch(),
                         "whether to save the policy to a fiel after simulation"
                         "completes (this policy can be very large).")
-                ("simulation.color", po::bool_switch(),
+                ("simulation.color", po::value<bool>(),
                         "whether to use color output");
         return simulation;
     }

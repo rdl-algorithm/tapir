@@ -41,7 +41,6 @@ void StatePool::reset() {
     stateInfoMap_.clear();
     statesByIndex_.clear();
     stateIndex_->reset();
-    StateInfo::currId = 0;
     changedStates_.clear();
 }
 
@@ -50,15 +49,20 @@ StateInfo *StatePool::add(std::unique_ptr<StateInfo> newInfo) {
             stateInfoMap_.emplace(newInfo->getState(), newInfo.get()));
     StateInfo *stateInfo = ret.first->second;
     if (ret.second) {
+        long newId = long(statesByIndex_.size());
         // New state - add to the index.
-        stateInfo->setId();
-        if (stateInfo->id_ != (long)statesByIndex_.size()) {
-            debug::show_message("ERROR: Wrong size in StatePool?");
+        long oldId = stateInfo->getId();
+        if (oldId != -1 && oldId != newId) {
+            std::ostringstream message;
+            message << "ERROR: ID mismatch - file says " << oldId;
+            message << " but and ID of " << newId << " was assigned.";
+            debug::show_message(message.str());
         }
+        stateInfo->setId(newId);
         statesByIndex_.push_back(std::move(newInfo));
         addToStateIndex(stateInfo);
     } else {
-        debug::show_message("StateInfo already added!!");
+        debug::show_message("ERROR: StateInfo already added!!");
     }
     return stateInfo;
 }

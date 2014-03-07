@@ -80,7 +80,7 @@ std::unique_ptr<ObservationPool>
 EnumeratedObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->model_->createObservationPool();
+    return solver_->getModel()->createObservationPool();
 }
 
 void EnumeratedObservationTextSerializer::saveObservationMapping(
@@ -98,7 +98,7 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
                 os << ", ";
             }
             saveObservation(enumMap.allObservations_[i].get(), os);
-            os << ":" << child->id_;
+            os << ":" << child->getId();
         }
     }
     os << "}";
@@ -106,9 +106,7 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
 
 std::unique_ptr<ObservationMapping>
 EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
-    std::unique_ptr<EnumeratedObservationMap> map(
-                static_cast<EnumeratedObservationMap *>(
-                solver_->observationPool_->createObservationMapping().release()));
+    std::unique_ptr<ObservationMapping> map(solver_->getObservationPool()->createObservationMapping());
     std::string tmpStr;
     std::getline(is, tmpStr, '{');
     std::getline(is, tmpStr, '}');
@@ -128,12 +126,8 @@ EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
         }
         long childId;
         sstr2 >> childId;
-        if (solver_->policy_->allNodes_[childId] != nullptr) {
-            debug::show_message("ERROR: Node already present !?");
-        }
         BeliefNode *node = map->createBelief(*obs);
-        node->id_ = childId;
-        solver_->policy_->allNodes_[childId] = node;
+        solver_->getPolicy()->setNode(childId, node);
     }
     return std::move(map);
 }

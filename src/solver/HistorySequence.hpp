@@ -11,10 +11,6 @@
 
 #include "global.hpp"
 
-namespace nav2d{
-class Nav2DSpcHistoryCorrector;
-}
-
 namespace solver {
 class HistoryEntry;
 class StateInfo;
@@ -25,12 +21,15 @@ class HistorySequence {
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;
-    friend class nav2d::Nav2DSpcHistoryCorrector;
 
-    /** Constructs an empty history sequence starting at depth 0. */
+    /** Constructs an empty history sequence starting at depth 0, without
+     * assigning an ID.
+     */
     HistorySequence();
-    /** Constructs an empty history sequence starting at the given depth. */
-    HistorySequence(long startDepth);
+    /** Constructs an empty history sequence starting at the given depth,
+     * and assigning the given ID.
+     */
+    HistorySequence(long startDepth, long id);
 
     // Default destructor; copying and moving disallowed!
     ~HistorySequence();
@@ -77,9 +76,6 @@ class HistorySequence {
     void resetAffectedIndices();
     /** Adds the given index as one of those affected by changes. */
     void addAffectedIndex(long index);
-
-    /** The current ID; will be assigned to the next sequence to be made. */
-    static long currId;
 
     /** The ID of this sequence. */
     long id_;

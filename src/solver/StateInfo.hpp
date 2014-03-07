@@ -16,9 +16,9 @@ class HistoryEntry;
 
 class StateInfo {
   public:
-    friend class TextSerializer;
-    friend class StatePool;
     friend class Solver;
+    friend class StatePool;
+    friend class TextSerializer;
 
     /** Constructs a StateInfo with no associated state!! */
     StateInfo();
@@ -33,8 +33,8 @@ class StateInfo {
 
     /** Returns the ID of this state. */
     long getId() const;
-    /** Sets the ID of this state using the static counter. */
-    void setId();
+    /** Sets the ID of this state to the given ID. */
+    void setId(long id);
 
     /** Registers a history entry as containing this state. */
     void addHistoryEntry(HistoryEntry *entry);
@@ -47,8 +47,6 @@ class StateInfo {
   private:
     void resetChangeFlags();
     void setChangeFlags(ChangeFlags flags);
-
-    static long currId;
 
     std::unique_ptr<State const> state_;
     long id_;

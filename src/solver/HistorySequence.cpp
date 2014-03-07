@@ -15,14 +15,12 @@
 #include "StateInfo.hpp"                // for StateInfo
 
 namespace solver {
-long HistorySequence::currId = 0;
-
 HistorySequence::HistorySequence() :
-    HistorySequence(0) {
+    HistorySequence(0, -1) {
 }
 
-HistorySequence::HistorySequence(long startDepth) :
-    id_(currId),
+HistorySequence::HistorySequence(long startDepth, long id) :
+    id_(id),
     startDepth_(startDepth),
     isTerminal_(false),
     invalidLinksStartId_(-1),
@@ -30,7 +28,6 @@ HistorySequence::HistorySequence(long startDepth) :
     startAffectedIdx_(std::numeric_limits<long>::max()),
     endAffectedIdx_(-1),
     changeFlags_(ChangeFlags::UNCHANGED) {
-    currId++;
 }
 
 // Do nothing!

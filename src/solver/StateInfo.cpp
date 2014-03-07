@@ -13,16 +13,14 @@ namespace solver {
 class BeliefNode;
 class HistoryEntry;
 
-long StateInfo::currId = 0;
-
 StateInfo::StateInfo(std::unique_ptr<State> state) :
     state_(std::move(state)),
-    id_(0),
+    id_(-1),
     usedInHistoryEntries_(),
     changeFlags_(ChangeFlags::UNCHANGED) {
 }
 
-// Private constructor for serialization
+// Constructor for serialization.
 StateInfo::StateInfo() :
     StateInfo(nullptr) {
 }
@@ -39,9 +37,8 @@ long StateInfo::getId() const {
     return id_;
 }
 
-void StateInfo::setId() {
-    id_ = currId;
-    currId++;
+void StateInfo::setId(long id) {
+    id_ = id;
 }
 
 State const *StateInfo::getState() const {

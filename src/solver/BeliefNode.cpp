@@ -23,15 +23,12 @@
 #include "RandomAccessSet.hpp"
 
 namespace solver {
-long BeliefNode::currId = 0;
-std::clock_t BeliefNode::startTime = std::clock();
-
-BeliefNode::BeliefNode() :
-    BeliefNode(nullptr, currId) {
+BeliefNode::BeliefNode(long id) :
+    BeliefNode(nullptr, id) {
 }
 
 BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap) :
-    BeliefNode(std::move(actionMap), currId) {
+        BeliefNode(std::move(actionMap), -1) {
 }
 
 BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
@@ -41,9 +38,6 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
     nnBel_(nullptr),
     particles_(),
     actionMap_(std::move(actionMap)) {
-    if (currId <= id) {
-        currId = id + 1;
-    }
 }
 
 // Do-nothing destructor
@@ -75,8 +69,7 @@ void BeliefNode::updateBestValue() {
 }
 
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
-    tLastAddedParticle_ = (double) (std::clock() - startTime)
-        * 1000 / CLOCKS_PER_SEC;
+    tLastAddedParticle_ = (double)std::clock() * 1000 / CLOCKS_PER_SEC;
     particles_.add(newHistEntry);
 }
 
@@ -119,6 +112,10 @@ double BeliefNode::distL1Independent(BeliefNode *b) const {
 
 long BeliefNode::getId() const {
     return id_;
+}
+
+void BeliefNode::setId(long id) {
+    id_ = id;
 }
 
 long BeliefNode::getNParticles() const {

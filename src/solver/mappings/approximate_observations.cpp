@@ -75,7 +75,7 @@ std::unique_ptr<ObservationPool>
 ApproximateObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->model_->createObservationPool();
+    return solver_->getModel()->createObservationPool();
 }
 
 void ApproximateObservationTextSerializer::saveObservationMapping(
@@ -87,7 +87,7 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
             it = approxMap.children_.cbegin();
             it != approxMap.children_.cend(); it++) {
         saveObservation(it->first.get(), os);
-        os << " -> " << it->second->id_;
+        os << " -> " << it->second->getId();
         if (std::next(it) != approxMap.children_.cend()) {
             os << ", ";
         }
@@ -97,9 +97,8 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
 
 std::unique_ptr<ObservationMapping>
 ApproximateObservationTextSerializer::loadObservationMapping(std::istream &is) {
-    std::unique_ptr<ApproximateObservationMap> map(
-            static_cast<ApproximateObservationMap *>(
-            solver_->observationPool_->createObservationMapping().release()));
+    std::unique_ptr<ObservationMapping> map(
+            solver_->getObservationPool()->createObservationMapping());
     std::string tmpStr;
     std::getline(is, tmpStr, '{');
     std::getline(is, tmpStr, '}');
@@ -118,12 +117,8 @@ ApproximateObservationTextSerializer::loadObservationMapping(std::istream &is) {
         }
         long childId;
         sstr2 >> childId;
-        if (solver_->policy_->allNodes_[childId] != nullptr) {
-            debug::show_message("ERROR: Node already present !?");
-        }
         BeliefNode *node = map->createBelief(*obs);
-        node->id_ = childId;
-        solver_->policy_->allNodes_[childId] = node;
+        solver_->getPolicy()->setNode(childId, node);
     }
     return std::move(map);
 }

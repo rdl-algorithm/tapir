@@ -153,7 +153,7 @@ void EnumeratedActionTextSerializer::saveActionPool(
 std::unique_ptr<ActionPool> EnumeratedActionTextSerializer::loadActionPool(
         std::istream &/*is*/) {
     // Use the model to create a new one.
-    return solver_->model_->createActionPool();
+    return solver_->getModel()->createActionPool();
 }
 
 void EnumeratedActionTextSerializer::saveActionMapping(
@@ -187,22 +187,23 @@ void EnumeratedActionTextSerializer::saveActionMapping(
 
 std::unique_ptr<ActionMapping>
 EnumeratedActionTextSerializer::loadActionMapping(std::istream &is) {
-    std::unique_ptr<EnumeratedActionMap> map(
-            static_cast<EnumeratedActionMap *>(
-            solver_->actionPool_->createActionMapping().release()));
+    std::unique_ptr<ActionMapping> map(
+            solver_->getActionPool()->createActionMapping());
+
+    EnumeratedActionMap &enumMap = static_cast<EnumeratedActionMap &>(*map);
 
     std::string line;
 
     std::getline(is, line);
-    std::istringstream(line) >> map->nChildren_;
+    std::istringstream(line) >> enumMap.nChildren_;
 
-    std::vector<long>::iterator codeIterator = map->actionOrder_.begin();
+    std::vector<long>::iterator codeIterator = enumMap.actionOrder_.begin();
     for (int i = 0; i < 2; i++) {
         std::getline(is, line);
         std::istringstream sstr(line);
         std::string tmpStr;
         if (i == 1) {
-            map->nextActionIterator_ = codeIterator;
+            enumMap.nextActionIterator_ = codeIterator;
         }
         std::getline(sstr, tmpStr, '(');
         std::getline(sstr, tmpStr, ')');
@@ -220,14 +221,14 @@ EnumeratedActionTextSerializer::loadActionMapping(std::istream &is) {
         }
     }
 
-    for (long i = 0; i < map->nChildren_; i++) {
+    for (long i = 0; i < enumMap.nChildren_; i++) {
         std::getline(is, line);
         std::istringstream sstr2(line);
         std::unique_ptr<ActionNode> actionNode(std::make_unique<ActionNode>());
         load(*actionNode, sstr2);
         long code = static_cast<const EnumeratedPoint *>(
                 actionNode->getAction())->getCode();
-        map->children_[code] = std::move(actionNode);
+        enumMap.children_[code] = std::move(actionNode);
     }
     return std::move(map);
 }

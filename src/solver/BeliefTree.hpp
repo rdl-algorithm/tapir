@@ -17,10 +17,6 @@ class BeliefTree {
   public:
     friend class Solver;
     friend class TextSerializer;
-    friend class ApproximateObservationTextSerializer;
-    friend class EnumeratedActionTextSerializer;
-    friend class EnumeratedObservationTextSerializer;
-    friend class DiscreteObservationTextSerializer;
 
     /* Constructs an empty belief tree. */
     BeliefTree();
@@ -28,6 +24,9 @@ class BeliefTree {
     // Default destructor; copying and moving disallowed!
     ~BeliefTree();
     _NO_COPY_OR_MOVE(BeliefTree);
+
+    /** Returns the number of belief nodes. */
+    long getNumberOfNodes() const;
 
     /** Resets the tree and sets it root to be the given new node. */
     BeliefNode *setRoot(std::unique_ptr<BeliefNode> root);
@@ -39,10 +38,16 @@ class BeliefTree {
      * Adds a child belief node to the given belief node; this node will be
      * added to the flattened node list if and only if it is actually new.
      */
-    BeliefNode *createOrGetChild(BeliefNode *node,
-            Action const &action, Observation const &obs);
+    BeliefNode *createOrGetChild(BeliefNode *node, Action const &action,
+            Observation const &obs);
 
-  private:
+    /** Retrieves the node with the given ID. */
+    BeliefNode *getNode(long id);
+
+    /** Sets the child with the given ID. */
+    void setNode(long id, BeliefNode *node);
+
+private:
     std::unique_ptr<BeliefNode> root_;
     std::vector<BeliefNode *> allNodes_;
 };

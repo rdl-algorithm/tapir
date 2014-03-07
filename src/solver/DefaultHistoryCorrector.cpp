@@ -57,8 +57,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
                     *entry->getState(), *entry->action_,
                     entry->transitionParameters_.get());
             if (!nextState->equals(*nextEntry->getState())) {
-                StateInfo *nextStateInfo = solver_->allStates_->createOrGetInfo(
-                        *nextState);
+                StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(*nextState);
                 nextEntry->registerState(nextStateInfo);
                 if (historyIterator + 1 == firstUnchanged) {
                     firstUnchanged++;

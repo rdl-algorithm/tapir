@@ -13,10 +13,6 @@
 
 #include "global.hpp"
 
-namespace nav2d{
-class Nav2DSpcHistoryCorrector;
-}
-
 namespace solver {
 class BeliefNode;
 class HistorySequence;
@@ -24,12 +20,10 @@ class StateInfo;
 
 class HistoryEntry {
   public:
-    friend class DefaultHistoryCorrector;
-    friend class Histories;
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
-    friend class nav2d::Nav2DSpcHistoryCorrector;
+    friend class DefaultHistoryCorrector;
 
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();
@@ -60,10 +54,6 @@ class HistoryEntry {
      * A value of nullptr will deregister this particle from that state.
      */
     void registerState(StateInfo *info);
-    /** Registers this history entry with the given belief node,
-     * and updates the StateInfo to be informed of its usage in the given
-     * belief node and history entry.
-     */
 
     /** Returns the state associated with this history entry. */
     State const *getState() const;

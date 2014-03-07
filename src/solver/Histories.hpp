@@ -1,8 +1,8 @@
 #ifndef SOLVER_HISTORIES_HPP_
 #define SOLVER_HISTORIES_HPP_
 
+#include <map>                          // for map
 #include <memory>                       // for unique_ptr
-#include <vector>                       // for vector
 
 #include "global.hpp"
 
@@ -25,6 +25,8 @@ class Histories {
     void reset();
     /** Adds a new history sequence, starting at the given depth. */
     HistorySequence *addNew(long startDepth);
+    /** Returns the number of history sequences. */
+    long getNumberOfSequences() const;
     /** Retrieves the history sequence with the given ID. */
     HistorySequence *getHistorySequence(long seqId) const;
     /** Deletes the history sequence with the given ID. */
@@ -33,7 +35,7 @@ class Histories {
     HistoryEntry *getHistoryEntry(long seqId, long entryId) const;
 
   private:
-    std::vector<std::unique_ptr<HistorySequence>> allHistSeq_;
+    std::vector<std::unique_ptr<HistorySequence>> sequencesById_;
 };
 } /* namespace solver */
 

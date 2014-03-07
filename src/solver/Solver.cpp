@@ -69,7 +69,7 @@ void Solver::initialize() {
     actionPool_->observationPool_ = observationPool_.get();
     observationPool_->actionPool_ = actionPool_.get();
     policy_->setRoot(std::make_unique<BeliefNode>(
-            actionPool_->createActionMapping()));
+            actionPool_->createActionMapping(), 0));
     historyCorrector_->setSolver(this);
 }
 
@@ -343,8 +343,7 @@ BeliefNode *Solver::getNNBelNode(BeliefNode *currentBelief) {
             numTried++;
         }
     }
-    currentBelief->tNNComp_ = (double) (std::clock() - BeliefNode::startTime)
-        * 1000 / CLOCKS_PER_SEC;
+    currentBelief->tNNComp_ = (double)std::clock() * 1000 / CLOCKS_PER_SEC;
     if (minDist > model_->getMaxNnDistance()) {
         return nullptr;
     }
@@ -687,5 +686,25 @@ void Solver::fixLinks(HistorySequence *sequence) {
         }
         sequence->invalidLinksStartId_ = -1;
     }
+}
+
+BeliefTree *Solver::getPolicy() {
+    return policy_.get();
+}
+
+StatePool *Solver::getStatePool() {
+    return allStates_.get();
+}
+
+Model *Solver::getModel() {
+    return model_.get();
+}
+
+ActionPool *Solver::getActionPool() {
+    return actionPool_.get();
+}
+
+ObservationPool *Solver::getObservationPool() {
+    return observationPool_.get();
 }
 } /* namespace solver */

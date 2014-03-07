@@ -160,7 +160,7 @@ void DiscretizedActionTextSerializer::saveActionPool(
 std::unique_ptr<ActionPool> DiscretizedActionTextSerializer::loadActionPool(
         std::istream &/*is*/) {
     // Use the model to create a new one.
-    return solver_->model_->createActionPool();
+    return solver_->getModel()->createActionPool();
 }
 
 void DiscretizedActionTextSerializer::saveActionMapping(
@@ -194,19 +194,19 @@ void DiscretizedActionTextSerializer::saveActionMapping(
 
 std::unique_ptr<ActionMapping>
 DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
-    std::unique_ptr<DiscretizedActionMap> map(
-            static_cast<DiscretizedActionMap *>(
-            solver_->actionPool_->createActionMapping().release()));
+    std::unique_ptr<ActionMapping> map(
+            solver_->getActionPool()->createActionMapping());
+    DiscretizedActionMap &discMap = static_cast<DiscretizedActionMap &>(*map);
     std::string line;
     std::getline(is, line);
-    std::istringstream(line) >> map->nChildren_;
-    std::vector<long>::iterator codeIterator = map->actionOrder_.begin();
+    std::istringstream(line) >> discMap.nChildren_;
+    std::vector<long>::iterator codeIterator = discMap.actionOrder_.begin();
     for (int i = 0; i < 2; i++) {
         std::getline(is, line);
         std::istringstream sstr(line);
         std::string tmpStr;
         if (i == 1) {
-            map->nextActionIterator_ = codeIterator;
+            discMap.nextActionIterator_ = codeIterator;
         }
         std::getline(sstr, tmpStr, '(');
         std::getline(sstr, tmpStr, ')');
@@ -222,14 +222,14 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
             *(codeIterator++) = code;
         }
     }
-    for (long i = 0; i < map->nChildren_; i++) {
+    for (long i = 0; i < discMap.nChildren_; i++) {
         std::getline(is, line);
         std::unique_ptr<ActionNode> actionNode(std::make_unique<ActionNode>());
         std::istringstream sstr2(line);
         load(*actionNode, sstr2);
         long code = static_cast<const EnumeratedPoint *>(
                 actionNode->getAction())->getCode();
-        map->children_[code] = std::move(actionNode);
+        discMap.children_[code] = std::move(actionNode);
     }
     return std::move(map);
 }
