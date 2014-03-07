@@ -17,14 +17,14 @@
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
-#include "solver/geometry/Action.hpp"            // for Action
-#include "solver/ChangeFlags.hpp"        // for ChangeFlags
+#include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/indexing/FlaggingVisitor.hpp"
-#include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/geometry/Observation.hpp"       // for Observation
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+#include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
-#include "solver/geometry/State.hpp"             // for State, State::Hash, operator<<, operator==
+#include "solver/abstract-problem/State.hpp"             // for State, State::Hash, operator<<, operator==
 #include "solver/StatePool.hpp"
 
 #include "solver/mappings/enumerated_actions.hpp"

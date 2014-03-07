@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "BeliefNode.hpp"
-#include "ChangeFlags.hpp"              // for ChangeFlags
+#include "changes/ChangeFlags.hpp"              // for ChangeFlags
 #include "StateInfo.hpp"                // for StateInfo
 
 namespace solver {

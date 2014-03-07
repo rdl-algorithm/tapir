@@ -3,12 +3,12 @@
 
 #include <memory>
 
-#include "geometry/Action.hpp"                   // for Action
-#include "geometry/Observation.hpp"              // for Observation
-#include "geometry/State.hpp"
+#include "abstract-problem/Action.hpp"                   // for Action
+#include "abstract-problem/Observation.hpp"              // for Observation
+#include "abstract-problem/State.hpp"
 
-#include "TransitionParameters.hpp"
-#include "ChangeFlags.hpp"              // for ChangeFlags
+#include "abstract-problem/TransitionParameters.hpp"
+#include "changes/ChangeFlags.hpp"              // for ChangeFlags
 
 
 #include "global.hpp"

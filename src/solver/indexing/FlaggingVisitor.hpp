@@ -1,7 +1,7 @@
 #ifndef SOLVER_FLAGGINGVISITOR_HPP_
 #define SOLVER_FLAGGINGVISITOR_HPP_
 
-#include "solver/ChangeFlags.hpp"
+#include "solver/changes/ChangeFlags.hpp"
 
 #include "SpatialIndexVisitor.hpp"
 

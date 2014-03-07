@@ -9,11 +9,12 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "geometry/Action.hpp"                   // for Action
-#include "ChangeFlags.hpp"               // for ChangeFlags
-#include "Model.hpp"                    // for Model, Model::StepResult
-#include "geometry/Observation.hpp"              // for Observation
-#include "geometry/State.hpp"
+#include "abstract-problem/Action.hpp"                   // for Action
+#include "abstract-problem/Model.hpp"                    // for Model, Model::StepResult
+#include "abstract-problem/Observation.hpp"              // for Observation
+#include "abstract-problem/State.hpp"
+
+#include "changes/ChangeFlags.hpp"               // for ChangeFlags
 
 namespace solver {
 class ActionPool;

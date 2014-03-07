@@ -4,8 +4,8 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "geometry/Action.hpp"
-#include "geometry/Observation.hpp"
+#include "abstract-problem/Action.hpp"
+#include "abstract-problem/Observation.hpp"
 
 #include "global.hpp"
 

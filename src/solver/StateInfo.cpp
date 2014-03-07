@@ -6,8 +6,8 @@
 #include <utility>                      // for move
 #include <vector>                       // for vector, vector<>::iterator
 
-#include "ChangeFlags.hpp"              // for ChangeFlags, ChangeFlags::UNCHANGED
-#include "geometry/State.hpp"                    // for State
+#include "changes/ChangeFlags.hpp"              // for ChangeFlags, ChangeFlags::UNCHANGED
+#include "abstract-problem/State.hpp"                    // for State
 
 namespace solver {
 class BeliefNode;

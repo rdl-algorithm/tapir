@@ -1,16 +1,23 @@
 #include "Model.hpp"
 
-#include "ActionNode.hpp"
-#include "BeliefNode.hpp"
-#include "mappings/ActionMapping.hpp"
-#include "mappings/ObservationMapping.hpp"
+#include "solver/ActionNode.hpp"
+#include "solver/BeliefNode.hpp"
 
-#include "indexing/RTree.hpp"
-#include "indexing/StateIndex.hpp"
+#include "solver/mappings/ActionMapping.hpp"
+#include "solver/mappings/ActionPool.hpp"
+#include "solver/mappings/ObservationMapping.hpp"
+#include "solver/mappings/ObservationPool.hpp"
 
+#include "solver/indexing/StateIndex.hpp"
+#include "solver/indexing/RTree.hpp"
+
+#include "solver/changes/DefaultHistoryCorrector.hpp"
+#include "solver/changes/HistoryCorrector.hpp"
+
+#include "Action.hpp"        // for Action
+#include "State.hpp"                    // for State
+#include "Observation.hpp"              // for Observation
 #include "TransitionParameters.hpp"
-#include "HistoryCorrector.hpp"
-#include "DefaultHistoryCorrector.hpp"
 
 namespace solver {
 std::unique_ptr<TransitionParameters> Model::generateTransition(

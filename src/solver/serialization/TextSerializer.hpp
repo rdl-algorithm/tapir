@@ -4,9 +4,9 @@
 #include <iosfwd>                       // for ostream, istream
 #include <memory>                       // for unique_ptr
 
-#include "solver/geometry/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "Serializer.hpp"               // for Serializer
-#include "solver/geometry/State.hpp"
+#include "solver/abstract-problem/State.hpp"
 
 #include "global.hpp"
 

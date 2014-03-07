@@ -1,4 +1,4 @@
-MODULE_NAME = geometry
+MODULE_NAME = changes
 
 ifdef HAS_ROOT_MAKEFILE
 

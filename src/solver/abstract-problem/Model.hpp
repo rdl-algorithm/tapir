@@ -7,16 +7,17 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "indexing/StateIndex.hpp"
-#include "geometry/Action.hpp"        // for Action
-#include "geometry/State.hpp"                    // for State
-#include "geometry/Observation.hpp"              // for Observation
-#include "mappings/ActionPool.hpp"
-#include "mappings/ObservationPool.hpp"
+#include "solver/mappings/ActionPool.hpp"
+#include "solver/mappings/ObservationPool.hpp"
 
-#include "ChangeFlags.hpp"               // for ChangeFlags
+#include "solver/indexing/StateIndex.hpp"
+
+#include "solver/changes/HistoryCorrector.hpp"
+
+#include "Action.hpp"        // for Action
+#include "State.hpp"                    // for State
+#include "Observation.hpp"              // for Observation
 #include "TransitionParameters.hpp"
-#include "HistoryCorrector.hpp"
 
 namespace solver {
 class BeliefNode;

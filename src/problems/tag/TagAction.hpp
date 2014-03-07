@@ -6,8 +6,8 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "solver/geometry/Action.hpp"
-#include "solver/geometry/EnumeratedPoint.hpp"             // for EnumeratedPoint
+#include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/EnumeratedPoint.hpp"             // for EnumeratedPoint
 
 namespace tag {
 enum class ActionType : long {

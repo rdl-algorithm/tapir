@@ -5,8 +5,8 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include "geometry/Action.hpp"                   // for Action
-#include "geometry/Observation.hpp"              // for Observation
+#include "abstract-problem/Action.hpp"                   // for Action
+#include "abstract-problem/Observation.hpp"              // for Observation
 #include "mappings/ObservationMapping.hpp"
 #include "global.hpp"
 
@@ -15,7 +15,6 @@ class BeliefNode;
 
 class ActionNode {
   public:
-    friend class Solver;
     friend class TextSerializer;
 
     /** Constructs an action node without an action!! */

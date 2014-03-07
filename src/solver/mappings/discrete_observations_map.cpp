@@ -7,9 +7,9 @@
 
 #include "solver/BeliefNode.hpp"
 #include "solver/BeliefTree.hpp"
-#include "solver/Model.hpp"
+#include "solver/abstract-problem/Model.hpp"
 
-#include "solver/geometry/Observation.hpp"
+#include "solver/abstract-problem/Observation.hpp"
 
 #include "ActionMapping.hpp"
 #include "ActionPool.hpp"

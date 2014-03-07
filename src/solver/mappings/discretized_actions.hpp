@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "solver/serialization/Serializer.hpp"
-#include "solver/geometry/Action.hpp"
-#include "solver/Model.hpp"
+#include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/Model.hpp"
 
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"

@@ -11,9 +11,9 @@
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
 
-#include "geometry/Action.hpp"                   // for Action
-#include "geometry/Observation.hpp"              // for Observation
-#include "geometry/State.hpp"                    // for State
+#include "abstract-problem/Action.hpp"                   // for Action
+#include "abstract-problem/Observation.hpp"              // for Observation
+#include "abstract-problem/State.hpp"                    // for State
 
 #include "mappings/ActionMapping.hpp"
 

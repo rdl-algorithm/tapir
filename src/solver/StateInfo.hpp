@@ -5,8 +5,8 @@
 #include <unordered_set>                          // for seteset(state.copy());
 #include <vector>                       // for vector
 
-#include "ChangeFlags.hpp"               // for ChangeFlags
-#include "geometry/State.hpp"
+#include "changes/ChangeFlags.hpp"               // for ChangeFlags
+#include "abstract-problem/State.hpp"
 
 #include "global.hpp"
 

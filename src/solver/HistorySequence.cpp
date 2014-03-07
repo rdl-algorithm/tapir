@@ -8,10 +8,10 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "geometry/Action.hpp"                   // for Action
-#include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
+#include "abstract-problem/Action.hpp"                   // for Action
+#include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
 #include "HistoryEntry.hpp"             // for HistoryEntry
-#include "geometry/Observation.hpp"              // for Observation
+#include "abstract-problem/Observation.hpp"              // for Observation
 #include "StateInfo.hpp"                // for StateInfo
 
 namespace solver {

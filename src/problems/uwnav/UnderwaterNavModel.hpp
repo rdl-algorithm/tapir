@@ -12,8 +12,8 @@
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/ModelWithProgramOptions.hpp"
 #include "solver/Action.hpp"            // for Action
-#include "solver/ChangeFlags.hpp"               // for ChangeFlags
-#include "solver/Model.hpp"                    // for Model
+#include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags
+#include "solver/abstract-problem/Model.hpp"                    // for Model
 #include "solver/Observation.hpp"              // for Observation
 #include "uwnav.hpp"
 

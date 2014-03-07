@@ -6,8 +6,8 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "solver/geometry/Action.hpp"
-#include "solver/geometry/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/EnumeratedPoint.hpp"
 
 namespace nav2d {
 class Nav2DModel;

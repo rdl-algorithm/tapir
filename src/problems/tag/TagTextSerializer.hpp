@@ -4,12 +4,12 @@
 #include <iosfwd>                       // for istream, ostream
 #include <memory>                       // for unique_ptr
 
-#include "solver/geometry/Action.hpp"
+#include "solver/abstract-problem/Action.hpp"
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/discrete_observations_map.hpp"
-#include "solver/geometry/State.hpp"
+#include "solver/abstract-problem/State.hpp"
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
-#include "solver/geometry/Observation.hpp"
+#include "solver/abstract-problem/Observation.hpp"
 
 namespace solver {
 class Solver;

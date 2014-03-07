@@ -5,7 +5,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "solver/Model.hpp"
+#include "solver/abstract-problem/Model.hpp"
 
 #include "solver/serialization/Serializer.hpp"
 

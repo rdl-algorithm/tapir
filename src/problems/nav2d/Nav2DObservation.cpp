@@ -10,7 +10,7 @@
 
 #include "global.hpp"
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
-#include "solver/geometry/Observation.hpp"             // for Observation
+#include "solver/abstract-problem/Observation.hpp"             // for Observation
 
 namespace nav2d {
 

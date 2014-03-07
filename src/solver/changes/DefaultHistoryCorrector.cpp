@@ -2,13 +2,13 @@
 
 #include <memory>
 
-#include "HistoryEntry.hpp"
-#include "HistorySequence.hpp"
-#include "Model.hpp"
-#include "Solver.hpp"
-#include "StatePool.hpp"
+#include "solver/HistoryEntry.hpp"
+#include "solver/HistorySequence.hpp"
+#include "solver/Solver.hpp"
+#include "solver/StatePool.hpp"
 
-#include "solver/geometry/State.hpp"
+#include "solver/abstract-problem/Model.hpp"
+#include "solver/abstract-problem/State.hpp"
 
 namespace solver {
 

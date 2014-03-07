@@ -9,11 +9,13 @@
 #include <unordered_set>                // for unordered_set
 #include <vector>                       // for vector
 
-#include "ChangeFlags.hpp"               // for ChangeFlags
-#include "geometry/State.hpp"                    // for State, operator==
-#include "StateInfo.hpp"                // for StateInfo
-
 #include "global.hpp"
+
+#include "changes/ChangeFlags.hpp"               // for ChangeFlags
+#include "indexing/StateIndex.hpp"
+#include "abstract-problem/State.hpp"                    // for State, operator==
+
+#include "StateInfo.hpp"                // for StateInfo
 
 namespace solver {
 class Model;

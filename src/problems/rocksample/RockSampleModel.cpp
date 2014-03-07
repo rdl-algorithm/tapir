@@ -22,15 +22,15 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
-#include "solver/geometry/Action.hpp"            // for Action
-#include "solver/geometry/Observation.hpp"       // for Observation
-#include "solver/geometry/State.hpp"       // for State
+#include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/abstract-problem/Observation.hpp"       // for Observation
+#include "solver/abstract-problem/State.hpp"       // for State
 
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/enumerated_observations.hpp"
 
-#include "solver/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/Model.hpp"             // for Model::StepResult, Model
+#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 #include "solver/StatePool.hpp"
 
 #include "RockSampleAction.hpp"         // for RockSampleAction

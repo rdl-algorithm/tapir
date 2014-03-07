@@ -5,8 +5,8 @@
 #include <memory>
 #include <vector>
 
-#include "solver/geometry/Point.hpp"
-#include "solver/geometry/Vector.hpp"
+#include "solver/abstract-problem/Point.hpp"
+#include "solver/abstract-problem/Vector.hpp"
 
 #include "Point2D.hpp"
 

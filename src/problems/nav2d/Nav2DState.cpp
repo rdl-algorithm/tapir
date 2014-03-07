@@ -10,7 +10,7 @@
 
 #include "global.hpp"
 #include "problems/shared/geometry/Point2D.hpp"  // for Point2D
-#include "solver/geometry/State.hpp"             // for State
+#include "solver/abstract-problem/State.hpp"             // for State
 #include "problems/shared/geometry/utilities.hpp"
 
 namespace nav2d {

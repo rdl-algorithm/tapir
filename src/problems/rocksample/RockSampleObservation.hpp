@@ -6,8 +6,8 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "solver/geometry/EnumeratedPoint.hpp"
-#include "solver/geometry/Observation.hpp"
+#include "solver/abstract-problem/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/Observation.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
 

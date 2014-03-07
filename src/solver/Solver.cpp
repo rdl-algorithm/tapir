@@ -16,28 +16,29 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "geometry/Action.hpp"                   // for Action
-#include "geometry/Observation.hpp"              // for Observation
-#include "geometry/State.hpp"                    // for State, operator<<
+#include "abstract-problem/Action.hpp"                   // for Action
+#include "abstract-problem/Model.hpp"                    // for Model::StepResult, Model
+#include "abstract-problem/Observation.hpp"              // for Observation
+#include "abstract-problem/State.hpp"                    // for State, operator<<
+
+#include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
 
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"
-
-#include "ActionNode.hpp"               // for BeliefNode, BeliefNode::startTime
-#include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
-#include "BeliefTree.hpp"               // for BeliefTree
-#include "ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
-#include "Histories.hpp"                // for Histories
-#include "HistoryEntry.hpp"             // for HistoryEntry
-#include "HistorySequence.hpp"          // for HistorySequence
-#include "Model.hpp"                    // for Model::StepResult, Model
-#include "StateInfo.hpp"                // for StateInfo
-#include "StatePool.hpp"                // for StatePool
 
 #include "serialization/Serializer.hpp"               // for Serializer
 
 #include "indexing/RTree.hpp"
 #include "indexing/SpatialIndexVisitor.hpp"
+
+#include "ActionNode.hpp"               // for BeliefNode, BeliefNode::startTime
+#include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
+#include "BeliefTree.hpp"               // for BeliefTree
+#include "Histories.hpp"                // for Histories
+#include "HistoryEntry.hpp"             // for HistoryEntry
+#include "HistorySequence.hpp"          // for HistorySequence
+#include "StateInfo.hpp"                // for StateInfo
+#include "StatePool.hpp"                // for StatePool
 
 using std::cout;
 using std::endl;

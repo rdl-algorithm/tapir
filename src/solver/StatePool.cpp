@@ -8,9 +8,8 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "ChangeFlags.hpp"               // for ChangeFlags
-#include "Model.hpp"
-#include "geometry/State.hpp"
+#include "changes/ChangeFlags.hpp"               // for ChangeFlags
+#include "abstract-problem/State.hpp"
 #include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
 
 namespace solver {

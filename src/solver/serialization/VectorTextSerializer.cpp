@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "solver/geometry/Vector.hpp"
-#include "solver/geometry/VectorLP.hpp"
+#include "solver/abstract-problem/Vector.hpp"
+#include "solver/abstract-problem/VectorLP.hpp"
 
 namespace solver {
 void VectorTextSerializer::save(std::vector<double> const &vector, std::ostream &os) {

@@ -4,7 +4,7 @@
 #include <boost/program_options.hpp>    // for variables_map, variable_value, program_options
 
 #include "global.hpp"                     // for RandomGenerator
-#include "solver/Model.hpp"             // for Model
+#include "solver/abstract-problem/Model.hpp"             // for Model
 
 namespace po = boost::program_options;
 

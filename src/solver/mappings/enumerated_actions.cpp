@@ -10,10 +10,10 @@
 
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
-#include "solver/Model.hpp"
+#include "solver/abstract-problem/Model.hpp"
 
-#include "solver/geometry/Action.hpp"
-#include "solver/geometry/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/EnumeratedPoint.hpp"
 
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"

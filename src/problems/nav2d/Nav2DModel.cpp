@@ -27,9 +27,9 @@
 
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
-#include "solver/geometry/Action.hpp"            // for Action
-#include "solver/geometry/Observation.hpp"       // for Observation
-#include "solver/geometry/State.hpp"       // for State
+#include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/abstract-problem/Observation.hpp"       // for Observation
+#include "solver/abstract-problem/State.hpp"       // for State
 
 #include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/approximate_observations.hpp"
@@ -37,8 +37,8 @@
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/FlaggingVisitor.hpp"
 
-#include "solver/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/Model.hpp"             // for Model::StepResult, Model
+#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 #include "solver/StatePool.hpp"
 
 #include "Nav2DAction.hpp"         // for Nav2DAction

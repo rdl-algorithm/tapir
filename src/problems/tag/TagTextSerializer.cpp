@@ -4,9 +4,9 @@
 
 #include "global.hpp"                     // for make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/geometry/Action.hpp"
-#include "solver/geometry/Observation.hpp"
-#include "solver/geometry/State.hpp"             // for State
+#include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/Observation.hpp"
+#include "solver/abstract-problem/State.hpp"             // for State
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
 #include "solver/mappings/enumerated_actions.hpp"

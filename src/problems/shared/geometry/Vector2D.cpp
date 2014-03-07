@@ -10,8 +10,8 @@
 
 #include "Point2D.hpp"
 
-#include "solver/geometry/Point.hpp"
-#include "solver/geometry/Vector.hpp"
+#include "solver/abstract-problem/Point.hpp"
+#include "solver/abstract-problem/Vector.hpp"
 
 #include "utilities.hpp"
 #include "global.hpp"

@@ -7,8 +7,8 @@
 #include <vector>                       // for vector
 
 #include "problems/shared/geometry/Point2D.hpp"  // for Point2D
-#include "solver/geometry/State.hpp"             // for State
-#include "solver/geometry/Vector.hpp"             // for Vector
+#include "solver/abstract-problem/State.hpp"             // for State
+#include "solver/abstract-problem/Vector.hpp"             // for Vector
 
 #include "global.hpp"
 

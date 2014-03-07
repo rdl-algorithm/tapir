@@ -13,13 +13,12 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
-#include "solver/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/Model.hpp"             // for Model::StepResult, Model
-#include "solver/TransitionParameters.hpp"
-
-#include "solver/geometry/Action.hpp"            // for Action
-#include "solver/geometry/Observation.hpp"       // for Observation
-#include "solver/geometry/State.hpp"
+#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+#include "solver/abstract-problem/TransitionParameters.hpp"
+#include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/abstract-problem/Observation.hpp"       // for Observation
+#include "solver/abstract-problem/State.hpp"
 
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/discrete_observations_map.hpp"

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <vector>
 
-#include "solver/Model.hpp"
+#include "solver/abstract-problem/Model.hpp"
 #include "solver/serialization/Serializer.hpp"
 
 #include "ObservationPool.hpp"

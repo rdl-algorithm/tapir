@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
-#include "solver/geometry/State.hpp"
-#include "solver/geometry/Vector.hpp"             // for State
+#include "solver/abstract-problem/State.hpp"
+#include "solver/abstract-problem/Vector.hpp"             // for State
 
 namespace tag {
 class TagState : public solver::Vector {

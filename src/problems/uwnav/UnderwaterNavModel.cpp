@@ -14,7 +14,7 @@
 #include <vector>                       // for vector, vector<>::iterator
 
 #include "global.hpp"                     // for RandomGenerator
-#include "solver/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::REWARD, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE
+#include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::REWARD, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE
 #include "solver/Observation.hpp"              // for Observation
 #include "solver/State.hpp"                    // for State
 #include "solver/StatePool.hpp"

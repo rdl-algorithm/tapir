@@ -1,7 +1,7 @@
 #ifndef SOLVER_APPROXIMATE_OBSERVATIONS_HPP_
 #define SOLVER_APPROXIMATE_OBSERVATIONS_HPP_
 
-#include "solver/Model.hpp"
+#include "solver/abstract-problem/Model.hpp"
 #include "solver/serialization/Serializer.hpp"
 
 #include "ObservationPool.hpp"

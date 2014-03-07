@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "solver/geometry/Point.hpp"
+#include "solver/abstract-problem/Point.hpp"
 
 namespace debug {
 void show_message(std::string message, bool print, bool bp_branch) {
