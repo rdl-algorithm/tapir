@@ -25,7 +25,8 @@ BeliefNode *BeliefTree::setRoot(std::unique_ptr<BeliefNode> root) {
     allNodes_.clear();
     root_ = std::move(root);
     BeliefNode *rootPtr = root_.get();
-    allNodes_.push_back(rootPtr);
+    allNodes_.push_back(nullptr);
+    setNode(0, rootPtr);
     return rootPtr;
 }
 

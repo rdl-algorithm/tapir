@@ -147,8 +147,7 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
     std::getline(is, line);
     std::istringstream sstr(line);
     std::string tmpStr;
-    long id;
-    sstr >> tmpStr >> id >> tmpStr >> tmpStr >> seqLength;
+    sstr >> tmpStr >> seq.id_ >> tmpStr >> tmpStr >> seqLength;
     sstr >> tmpStr >> tmpStr >> seq.startDepth_;
     for (int i = 0; i < seqLength; i++) {
         std::getline(is, line);
@@ -278,7 +277,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
     os << "BELIEFTREE-BEGIN" << endl;
-    os << "#nodes: " << tree.getNumberOfNodes();
+    os << "#nodes: " << tree.getNumberOfNodes() << endl;
     for (BeliefNode *node : tree.allNodes_) {
         os << "NODE # " << node->id_ << endl;
         save(*node, os);
@@ -303,14 +302,13 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
     std::string tmpStr;
     std::istringstream(line) >> tmpStr >> nNodes;
     tree.allNodes_.assign(nNodes, nullptr);
-    tree.allNodes_[0] = tree.getRoot();
-    tree.allNodes_[0]->id_ = 0;
+    tree.setNode(0, tree.getRoot());
 
     std::getline(is, line);
     while ((line.find("BELIEFTREE-END") == std::string::npos)) {
         long nodeId;
         std::istringstream(line) >> tmpStr >> tmpStr >> nodeId;
-        BeliefNode *node = tree.allNodes_[nodeId];
+        BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
         if (node->getNActChildren() > 0) {
             node->updateBestValue();
