@@ -366,11 +366,10 @@ void Solver::updateHeuristicProbabilities(double valImprovement) {
     }
     double totP = 0.0;
     for (int i = 0; i < 2; i++) {
-        heuristicProbability_[i] =
-            ((1 - heuristicExploreCoefficient_) * heuristicWeight_[i]
-             / totWRollout + heuristicExploreCoefficient_
-             / 2) * heuristicUseCount_[i]
-            / timeUsedPerHeuristic_[i];
+        heuristicProbability_[i] = ((1 - heuristicExploreCoefficient_)
+                * heuristicWeight_[i] / totWRollout
+                + heuristicExploreCoefficient_ / 2);
+        heuristicProbability_[i] *= heuristicUseCount_[i] / timeUsedPerHeuristic_[i];
         totP += heuristicProbability_[i];
     }
     for (int i = 0; i < 2; i++) {

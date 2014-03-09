@@ -90,7 +90,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     minVal_(-(crashPenalty_ + maxSpeed_ * costPerUnitDistance_
             + maxRotationalSpeed_ * costPerRevolution_)
             / (1 - getDiscountFactor())),
-    maxVal_(0),
+    maxVal_(goalReward_),
     mapArea_(),
     startAreas_(),
     totalStartArea_(0),
@@ -127,7 +127,6 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
         }
     }
     inFile.close();
-
     cout << "Constructed the Nav2DModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "nStVars: " << nStVars_ << endl;
