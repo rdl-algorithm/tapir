@@ -1,5 +1,5 @@
-#ifndef SOLVER_VECTORTEXTSERIALIZER_HPP_
-#define SOLVER_VECTORTEXTSERIALIZER_HPP_
+#ifndef SOLVER_VECTORLPTEXTSERIALIZER_HPP_
+#define SOLVER_VECTORLPTEXTSERIALIZER_HPP_
 
 #include "Serializer.hpp"
 
@@ -11,11 +11,11 @@ namespace solver {
  * If you use a custom subclass of State/Observation/Action you will need
  * to override the serialization for that subclass.
  */
-class VectorTextSerializer : virtual public Serializer {
+class VectorLPTextSerializer : virtual public Serializer {
   public:
-    VectorTextSerializer() = default;
-    virtual ~VectorTextSerializer() = default;
-    _NO_COPY_OR_MOVE(VectorTextSerializer);
+    VectorLPTextSerializer() = default;
+    virtual ~VectorLPTextSerializer() = default;
+    _NO_COPY_OR_MOVE(VectorLPTextSerializer);
 
     /** Saves a vector to an output stream. */
     virtual void save(std::vector<double> const &vector, std::ostream &os);
@@ -35,4 +35,4 @@ class VectorTextSerializer : virtual public Serializer {
 };
 } /* namespace solver */
 
-#endif /* SOLVER_VECTORTEXTSERIALIZER_HPP_ */
+#endif /* SOLVER_VECTORLPTEXTSERIALIZER_HPP_ */

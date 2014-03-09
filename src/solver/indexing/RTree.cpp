@@ -6,8 +6,7 @@
 #include <spatialindex/RTree.h>
 #include <spatialindex/tools/Tools.h>
 
-#include "solver/abstract-problem/State.hpp"
-#include "solver/abstract-problem/Vector.hpp"
+#include "solver/abstract-problem/VectorState.hpp"
 #include "solver/StateInfo.hpp"
 
 #include "SpatialIndexVisitor.hpp"
@@ -56,7 +55,7 @@ void RTree::reset() {
 
 void RTree::addStateInfo(StateInfo *stateInfo) {
     SpatialIndex::id_type stateId = stateInfo->getId();
-    std::vector<double> vectorData = static_cast<Vector const *>(
+    std::vector<double> vectorData = static_cast<VectorState const *>(
             stateInfo->getState())->asVector();
     SpatialIndex::Point point(&vectorData[0], nSDim_);
     tree_->insertData(0, nullptr, point, stateId);
@@ -64,7 +63,7 @@ void RTree::addStateInfo(StateInfo *stateInfo) {
 
 void RTree::removeStateInfo(StateInfo *stateInfo) {
     SpatialIndex::id_type stateId = stateInfo->getId();
-    std::vector<double> vectorData = static_cast<Vector const *>(
+    std::vector<double> vectorData = static_cast<VectorState const *>(
             stateInfo->getState())->asVector();
     SpatialIndex::Point point(&vectorData[0], nSDim_);
     tree_->deleteData(point, stateId);

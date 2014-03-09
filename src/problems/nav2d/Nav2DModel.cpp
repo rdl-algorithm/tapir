@@ -341,22 +341,25 @@ std::unique_ptr<Nav2DState> Nav2DModel::extrapolateState(
         double rotationalSpeed, double moveRatio) {
     Point2D position = state.getPosition();
     double direction = state.getDirection();
-    Point2D newPosition(position);
-    double newDirection(direction);
+    Point2D newPosition;
+    double newDirection;
     if (rotationalSpeed == 0.0) {
-        newPosition += Vector2D(moveRatio * speed * timeStepLength_,
+        newDirection = direction;
+        newPosition = position + Vector2D(moveRatio * speed * timeStepLength_,
                 direction);
-    } else if (speed == 0.0) {
-        newDirection += moveRatio * rotationalSpeed * timeStepLength_;
     } else {
-        double absSpeed = std::abs(rotationalSpeed);
-        double radius = speed / (2 * M_PI * absSpeed);
-        double absDeltaInRadians = 2 * M_PI * moveRatio * absSpeed * timeStepLength_;
-        double forwardDistance = radius * std::sin(absDeltaInRadians);
-        double sideDistance = radius - (radius * std::cos(absDeltaInRadians));
-        newPosition += Vector2D(forwardDistance, direction);
-        double sideDirection = direction + (rotationalSpeed > 0 ? 0.25 : -0.25);
-        newPosition += Vector2D(sideDistance, sideDirection);
+        newDirection = direction + moveRatio * rotationalSpeed * timeStepLength_;
+        newPosition = position;
+        if (speed != 0.0) {
+            double absSpeed = std::abs(rotationalSpeed);
+            double radius = speed / (2 * M_PI * absSpeed);
+            double absDeltaInRadians = 2 * M_PI * moveRatio * absSpeed * timeStepLength_;
+            double forwardDistance = radius * std::sin(absDeltaInRadians);
+            double sideDistance = radius - (radius * std::cos(absDeltaInRadians));
+            newPosition += Vector2D(forwardDistance, direction);
+            double sideDirection = direction + (rotationalSpeed > 0 ? 0.25 : -0.25);
+            newPosition += Vector2D(sideDistance, sideDirection);
+        }
     }
     return std::make_unique<Nav2DState>(newPosition, newDirection,
             costPerUnitDistance_,

@@ -22,10 +22,12 @@ class Point {
      */
     virtual std::unique_ptr<Point> copy() const = 0;
 
-    virtual double distanceTo(Point const &otherPoint) const = 0;
+    virtual double distanceTo(Point const &/*otherPoint*/) const {
+        return std::numeric_limits<double>::infinity();
+    }
     virtual bool equals(Point const &otherPoint) const = 0;
     virtual std::size_t hash() const = 0;
-    virtual void print(std::ostream &os) const = 0;
+    virtual void print(std::ostream &/*os*/) const {};
 
     friend std::ostream &operator<<(std::ostream &os, Point const &point);
     friend bool operator==(Point const &s1, Point const &s2);

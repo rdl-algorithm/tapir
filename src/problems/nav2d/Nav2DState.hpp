@@ -8,12 +8,12 @@
 
 #include "problems/shared/geometry/Point2D.hpp"  // for Point2D
 #include "solver/abstract-problem/State.hpp"             // for State
-#include "solver/abstract-problem/Vector.hpp"             // for Vector
+#include "solver/abstract-problem/VectorState.hpp"             // for Vector
 
 #include "global.hpp"
 
 namespace nav2d {
-class Nav2DState : public solver::Vector {
+class Nav2DState : public solver::VectorState {
     friend class Nav2DTextSerializer;
   public:
     Nav2DState(double x, double y, double direction,

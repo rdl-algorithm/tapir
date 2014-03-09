@@ -9,10 +9,10 @@
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/abstract-problem/State.hpp"
-#include "solver/abstract-problem/Vector.hpp"             // for State
+#include "solver/abstract-problem/VectorState.hpp"
 
 namespace tag {
-class TagState : public solver::Vector {
+class TagState : public solver::VectorState {
     friend class TagTextSerializer;
   public:
     TagState(GridPosition robotPos, GridPosition opponentPos, bool _isTagged);

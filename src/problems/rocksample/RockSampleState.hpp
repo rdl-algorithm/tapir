@@ -8,10 +8,10 @@
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "solver/abstract-problem/State.hpp"             // for State
-#include "solver/abstract-problem/Vector.hpp"             // for Vector
+#include "solver/abstract-problem/VectorState.hpp"             // for VectorState
 
 namespace rocksample {
-class RockSampleState : public solver::Vector {
+class RockSampleState : public solver::VectorState {
     friend class RockSampleTextSerializer;
   public:
     RockSampleState(GridPosition position, std::vector<bool> rockStates);

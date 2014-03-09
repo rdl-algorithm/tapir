@@ -27,8 +27,6 @@
 #include "solver/abstract-problem/Action.hpp"              // for Observation
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State, operator<<
-#include "solver/abstract-problem/Vector.hpp"
-#include "solver/abstract-problem/VectorLP.hpp"
 
 #include "Serializer.hpp"               // for Serializer
 

@@ -41,11 +41,13 @@ If required, change build settings via the root Makefile.
 
 Alternatively, specific problems can be built by running "make" from within the
 problem's source folder, or by specifying that problem as a target, e.g.
-"make tag". For debugging output, prefix the make target with "debug-", e.g.
-"make debug-all" or "make debug-tag".
+"make tag".
 
-For more documentation of the build system being used for this project, see
-[this README](.make/README.md).
+If you want debugging output, set add "CFG=debug" to the arguments for make,
+e.g. "make all CFG=debug" or "make tag CFG=debug".
+
+For additional documentation of the build system being used for this project,
+see [this README](.make/README.md).
 
 Usage
 -----
@@ -59,54 +61,123 @@ default parameter values for each problem.
 
 Implementing a POMDP Problem
 -----------------------------
-Implementation of a specific POMDP problem requires an implementation of the following
-interfaces:
+At its core, implementation of a specific POMDP problem is done via an
+implementation of the [Model](src/solver/abstract-problem/Model.hpp) interface.
 
-- **Model** (solver/Model.hpp)
+Typically this will also involve implementations for
+[State](src/solver/abstract-problem/State.hpp),
+[Action](src/solver/abstract-problem/Action.hpp), and
+[Observation](src/solver/abstract-problem/Observation.hpp).
+Alternatively, you can use [VectorLP](src/solver/abstract-problem/VectorLP.hpp),
+for State, Action, or Observation - VectorLP represents a vector in
+R<sup>n</sup> using the L<sup>p</sup>-norm.
 
+Implementations of the serialization methods in
+[Serializer](src/solver/serialization/Serializer/hpp)
+are also required; a default implementation for serializing the state of the
+solver is given in
+[TextSerializer](src/solver/serialization/TextSerializer/hpp),
+but any remaining pure virtual methods will still require implementation;
+Serialization methods for VectorLP are given in
+[VectorLPTextSerializer](src/solver/serialization/VectorLPTextSerializer.cpp).
+
+In addition to these core classes, you also need to define how actions and
+observations are mapped out; this is defined by
+[ActionMapping](src/solver/mappings/ActionMapping.hpp) and
+[ObservationMapping](src/solver/mappings/ObservationMapping.hpp).
+Many default implementations of these mappings are given in
+[src/solver/mappings](src/solver/mappings); to use one of them, simply make your
+Model inherit from the relevant abstract Model classes, and make your serializer
+inherit from the relevant abstract Serializer classes. See
+[TagModel](src/problems/tag/TagModel.cpp) and
+[TagTextSerializer](src/problems/tag/TagTextSerializer.cpp) for an example that
+uses
+[EnumeratedActionMap](src/solver/mappings/enumerated_actions.hpp) and
+[DiscreteObservationMap](src/solver/mappings/discrete_observations.hpp).
+
+Further description is given below:
+
+- **[Model](src/solver/abstract-problem/Model.hpp)**
     Implements a POMDP model of the problem, including black box simulation
     methods for generating next states and observations. See
-    problems/tag/TagModel for an example.
+    [TagModel](src/problems/tag/TagModel.hpp) for an example.
 
     **NOTE:**
     A partial implementation with some default parameters, and allowing
     configuration of these parameters via a config file and/or command line
     arguments, is given in
-    problems/shared/ModelWithProgramOptions.hpp and
-    problems/shared/ProgramOptions.hpp
+    [ModelWithProgramOptions](src/problems/shared/ModelWithProgramOptions.hpp) and
+    [ProgramOptions](src/problems/shared/ProgramOptions.hpp)
 
-- **VectorState** (solver/VectorState.hpp)
+- **[State](src/solver/abstract-problem/State.hpp)**
+    Represents a state within the state space of the problem.
+    See [TagState](src/problems/tag/TagState.cpp) for an example.
 
-    Represents a state located within a fixed-dimensional normed vector space.
-    The core implementation requires only the asVector() and print(...)
-    methods; the default distance metric is the Manhattan or L<sub>1</sub>
-    distance, but this can be changed by overriding the distanceTo(...) method.
+    The core implementation requires only the following:
+    - copy() --- duplicates the state
+    - equals(Point const &) --- identifies equivalent states
+    - hash() --- hashes the state for storage in an std::unordered_map
 
-    This is necessary in order to store states within a spatial index
-    (currently an R*-tree), which can then be used to make spatial queries for
-    affected states when changes occur; this space is also required for
-    calculating nearest neighbours within the belief space in order to use the
-    policy-based rollout heuristic. See problems/tag/TagState for an example.
+    Also useful (though not required) are:
+    - distanceTo(Point const &) -- defines a distance metric over the states;
+        the default is an infinite distance between any pair of states.
+        This distance metric is used to calculate nearest neighbours in the belief
+        space, so if the default is used nearest neighbour checks should be
+        disabled (maxNnDistance = -1)
+    - print(std::ostream &) --- generates a human-readable text representation
+        of the state.
 
-    **NOTE:**
-    If embedding in a vector space doesn't make much sense for the specific
-    topology of the problem (e.g. a discrete topology), the following steps
-    should be taken instead:
-    - disable nearest neighbour checks for beliefs (e.g. set maxNnComparisons = 0),
-    or change the algorithm used for finding distance between beliefs. 
-    - implement State (instead of VectorState)
-    - if model changes must be handled, implement StateIndex to handle querying
-    for affected states, to use instead of the default R*-tree
+    In order to be able to make changes to the policy when changes to the model
+    occur, states also need to be stored within a
+    [StateIndex](src/solver/indexing/StateIndex.hpp). The default implementation
+    is an [R*-tree](src/solver/indexing/RTree.cpp), which allows spatial range
+    queries. In order to use this implementation, the State needs to implement
+    the [VectorState](src/solver/abstract-problem/VectorState.hpp) interface.
+    This adds an asVector() method, which must return an std::vector<double>
+    representation of the state - this is a necessity for the R*-tree.
 
-- **TextSerializer** (solver/TextSerializer.hpp)
+    Alternatively, a custom StateIndex implementation can be given by
+    implementing StateIndex and returing an instance of your custom
+    implementation for Model::createStateIndex.
 
-    Manages the saving and loading of the solution policy - the only required
-    methods are saveState(...) and loadState(...), which handle the saving
-    and loading of individual states.
+- **[Action](src/solver/abstract-problem/Action.hpp)**
+    Represents an action within the action space of the problem.
+    See [TagAction](src/problems/tag/TagAction.cpp) for an example.
+
+    Like State, the Action interface requires copy(), equals(...), and hash(),
+    and custom implementations can be given for distanceTo(...) and print(...).
+
+- **[Observation](src/solver/abstract-problem/Observation.hpp)**
+    Represents an observation within the action space of the problem.
+    See [TagObservation](src/problems/tag/TagObservation.cpp) for an example.
+
+    Like State, the Observation interface requires copy(), equals(...),
+    and hash(), and custom implementations can be given for
+    distanceTo(...) and print(...).
+
+- **[Serializer](src/solver/serialization/Serializer.hpp)**
+    Manages the saving and loading of the solution policy.
+    Standard implementations for all of the required methods are given in
+    [TextSerializer](src/solver/serialization/TextSerializer.cpp),
+    [VectorTextSerializer](src/solver/serialization/VectorTextSerializer.cpp),
+    and the various serialization methods for each mapping in
+    [src/solver/mappings](src/solver/mappings).
+
+    If you use custom implementations for any of the classes, you will need to
+    also give implementations for their serialization. For an example, see
+    [TagTextSerializer](src/problems/tag/TagTextSerializer.cpp) - because the
+    tag problem uses custom implementations for State, Action and Observation,
+    the serialization also uses custom methods to load and save those objects.
+
+- **[ActionMapping](src/solver/mappings/ActionMapping.hpp)**
+
+- **[ObservationMapping](src/solver/mappings/ObservationMapping.hpp)**
 
 For additional convenience, template methods to generate binaries for an
 individual problem are given in:
-- problems/shared/solve.hpp --- initial offline policy generation;
-    see problems/tag/solve.cpp for a usage example.
-- problems/shared/simulate.hpp --- simulation with online POMDP solution;
-    see problems/tag/simulate.cpp for a usage example.
+- [solve.hpp](src/problems/shared/solve.hpp) --- initial offline policy
+    generation; see [solve.cpp for Tag](src/problems/tag/solve.cpp)
+    for a usage example.
+- [simulate.hpp](src/problems/shared/simulate.hpp) --- simulation with online
+    POMDP solution; see [simulate.cpp for Tag](src/problems/tag/simulate.cpp)
+    for a usage example.
