@@ -5,42 +5,36 @@ TARGET_NAMES_$(n) := $(TARGET_NAMES)
 # ----------------------------------------------------------------------
 # Directories, file patterns, and directory dependencies
 # ----------------------------------------------------------------------
-define problem_defaults
-TGTS_$(n)_$(1)        := $(patsubst %,$(_BIN_$(n)_$(1)),$(TARGET_NAMES_$(n)))
-OUTPUTS_TO_CLEAN_$(n)_$(1) += $$(TGTS_$(n)_$(1))
-OBJS_TGT_$(n)_$(1)    := $$(patsubst $(_BIN_$(n)_$(1)),$(_O_$(n)_$(1)),$$(TGTS_$(n)_$(1)))
-OBJS_NTGT_$(n)_$(1)   := $$(filter-out $$(OBJS_TGT_$(n)_$(1)),$(OBJS_$(n)_$(1)))
+TGTS_$(n)             := $(patsubst %,$(_BIN_$(n)),$(TARGET_NAMES_$(n)))
+OUTPUTS_TO_CLEAN_$(n) += $(TGTS_$(n))
+OBJS_TGT_$(n)         := $(patsubst $(_BIN_$(n)),$(_O_$(n)),$(TGTS_$(n)))
+OBJS_NTGT_$(n)        := $(filter-out $(OBJS_TGT_$(n)),$(OBJS_$(n)))
 
 # Directory prerequsites
-$$(TGTS_$(n)_$(1)): | $$(BINDIR_$(n)_$(1))
-endef
-$(foreach cfg,$(CFGS),$(eval $(call problem_defaults,$(cfg))))
+$(TGTS_$(n)): | $(BINDIR_$(n))
 
 # ----------------------------------------------------------------------
 # Targets
 # ----------------------------------------------------------------------
 
 # Dependencies for the linker
-define dependencies_template
-LINKER_DEPS_$(n)_$(1) := $(EXTRA_LINKER_DEPS_$(n)_$(1)) $$$$(OBJS_NTGT_$(n)_$(1))
-LINKER_DEPS_$(n)_$(1) += $$$$(LIB_solver_$(1))
-LINKER_DEPS_$(n)_$(1) += -lboost_program_options -lspatialindex
-endef 
-$(foreach cfg,$(CFGS),$(eval $(call dependencies_template,$(cfg))))
+LINKER_DEPS_$(n) := $(EXTRA_LINKER_DEPS_$(n)) $(OBJS_NTGT_$(n))
+LINKER_DEPS_$(n) += $$(LIB_solver)
+LINKER_DEPS_$(n) += -lboost_program_options -lspatialindex
 
 # Linking rule for the executable targets.
 define problem_build_template
-$(TGTS_$(n)_$(1)): $(_BIN_$(n)_$(1)): $(_O_$(n)_$(1)) $$(LINKER_DEPS_$(n)_$(1))
-	$$(LINK_CMD_$(1)) $$< $(LINKER_DEPS_$(n)_$(1))
+$(TGTS_$(n)): $(_BIN_$(n)): $(_O_$(n)) $$(LINKER_DEPS_$(n))
+	$$(LINK_CMD) $$< $(LINKER_DEPS_$(n))
 
 # Executables will be copied to the main folder for convenience
-build-$(1)-$(n): $(TGTS_$(n)_$(1))
+build-$(n): $$(TGTS_$(n))
 	cp $$^ $(d)
 
 # Rebuild if this makefile changes.
-$(TGTS_$(n)_$(1)): .make/problem-template.mk
+$(TGTS_$(n)): .make/problem-template.mk
 endef
-$(foreach cfg,$(CFGS),$(eval $(call problem_build_template,$(cfg))))
+$(eval $(problem_build_template))
 
 # To clean we must also clean the copied executables.
 .PHONY: clean-mains-$(n)

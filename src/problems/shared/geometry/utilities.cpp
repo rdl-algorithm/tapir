@@ -6,7 +6,7 @@ namespace geometry {
 double normalizeTurn(double turn) {
     double numRotations;
     turn = std::modf(turn, &numRotations);
-    if (turn < -0.5) {
+    if (turn <= -0.5) {
         turn += 1;
     } else if (turn > 0.5) {
         turn -= 1;

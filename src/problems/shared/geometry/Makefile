@@ -1,4 +1,4 @@
-MODULE_NAME = geometry_utils
+MODULE_NAME = geometry
 
 ifdef HAS_ROOT_MAKEFILE
 
