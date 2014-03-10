@@ -4,7 +4,12 @@
 .settings
 EMPTY_HEADER.hpp
 
+# Local configuration
+knitro/*
+local.cmake
+
 # Binaries
+build/*
 builds/*
 simulate
 solve

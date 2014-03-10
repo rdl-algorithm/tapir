@@ -7,6 +7,7 @@
 #include "global.hpp"
 
 namespace solver {
+class ActionMappingEntry;
 class ActionNode;
 
 class ActionMapping {
@@ -23,17 +24,18 @@ class ActionMapping {
     /** Creates a new action node for the given action. */
     virtual ActionNode *createActionNode(Action const &action) = 0;
 
-    /** Returns the number of distinct action nodes used within this mapping. */
+    /** Returns the number of child nodes associated with this mapping.
+     */
     virtual long getNChildren() const = 0;
+    /** Returns all the entries associated with children in this mapping (i.e.
+     * containing non-null action nodes).
+     */
+    virtual std::vector<ActionMappingEntry const *> getChildEntries() const = 0;
 
     /** Returns true iff there is another action that needs to be explored. */
-    virtual bool hasActionToTry() const = 0;
-    /** Returns the next action to attempt, if any. */
-    virtual std::unique_ptr<Action> getNextActionToTry() = 0;
-
-    /** Chooses a next action with the UCB algorithm. */
-    virtual std::unique_ptr<Action> getSearchAction(
-            double exploreCofficient) = 0;
+    virtual bool hasRolloutActions() const = 0;
+    /** Returns a number of actions that should be attempted for this node. */
+    virtual std::vector<std::unique_ptr<Action>> getRolloutActions() const = 0;
 
     /** Updates the calculation of which action is optimal. */
     virtual void updateBestValue() = 0;
@@ -41,9 +43,16 @@ class ActionMapping {
     virtual std::unique_ptr<Action> getBestAction() const = 0;
     /** Returns the best q-value */
     virtual double getBestMeanQValue() const = 0;
+};
 
+class ActionMappingEntry {
+  public:
+    ActionMappingEntry() = default;
+    virtual ~ActionMappingEntry() = default;
+    _NO_COPY_OR_MOVE(ActionMappingEntry);
 
-    virtual std::vector<ActionNode *> getChildren() const = 0;
+    virtual std::unique_ptr<Action> getAction() const = 0;
+    virtual ActionNode *getActionNode() const = 0;
 };
 } /* namespace solver */
 

@@ -32,6 +32,11 @@ class RandomAccessSet {
         return elements_.cend();
     }
 
+    void reset() {
+        map_.reset();
+        elements_.reset();
+    }
+
     long size() const {
         return elements_.size();
     }

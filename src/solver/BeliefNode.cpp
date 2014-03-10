@@ -45,15 +45,11 @@ BeliefNode::~BeliefNode() {
 }
 
 bool BeliefNode::hasActionToTry() const {
-    return actionMap_->hasActionToTry();
+    return actionMap_->hasRolloutActions();
 }
 
-std::unique_ptr<Action> BeliefNode::getNextActionToTry() const {
-    return actionMap_->getNextActionToTry();
-}
-
-std::unique_ptr<Action> BeliefNode::getSearchAction(double exploreCoefficient) {
-    return actionMap_->getSearchAction(exploreCoefficient);
+std::vector<std::unique_ptr<Action>> BeliefNode::getRolloutActions() const {
+    return actionMap_->getRolloutActions();
 }
 
 std::unique_ptr<Action> BeliefNode::getBestAction() const {

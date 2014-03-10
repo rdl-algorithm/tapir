@@ -14,7 +14,7 @@ class ModelWithProgramOptions : public virtual solver::Model {
         randGen_(randGen),
         discountFactor_(vm["problem.discountFactor"].as<double>()),
         nParticles_(vm["ABT.nParticles"].as<long>()),
-        maxTrials_(vm["ABT.maxTrials"].as<long>()),
+        historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
         maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
         heuristicExploreCoefficient_(
                 vm["ABT.heuristicExploreCoefficient"].as<double>()),
@@ -38,8 +38,8 @@ class ModelWithProgramOptions : public virtual solver::Model {
     virtual long getNParticles() override {
         return nParticles_;
     }
-    virtual long getMaxTrials() override {
-        return maxTrials_;
+    virtual long getNumberOfHistoriesPerStep() override {
+        return historiesPerStep_;
     }
     virtual long getMaximumDepth() override {
         return maximumDepth_;
@@ -68,7 +68,7 @@ class ModelWithProgramOptions : public virtual solver::Model {
 
     // ABT parameters
     long nParticles_;
-    long maxTrials_;
+    long historiesPerStep_;
     long maximumDepth_;
 
     double heuristicExploreCoefficient_;

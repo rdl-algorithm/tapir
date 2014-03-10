@@ -60,11 +60,11 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual long getNChildren() const override;
     virtual long size() const;
 
+    virtual bool hasRolloutActions() const override;
+    virtual std::vector<std::unique_ptr<Action>> getRolloutActions() const override;
+
     virtual bool hasActionToTry() const override;
     virtual std::unique_ptr<Action> getNextActionToTry() override;
-
-    virtual std::unique_ptr<Action> getSearchAction(
-            double exploreCofficient) override;
 
     virtual void updateBestValue() override;
     virtual std::unique_ptr<Action> getBestAction() const override;

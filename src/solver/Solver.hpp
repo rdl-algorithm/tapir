@@ -49,10 +49,10 @@ class Solver {
     void setSerializer(Serializer *serializer);
 
     /** Generates a starting policy for the solver, by generating the given
-     * number (maxTrials) of episodes, and terminating episodes when the
+     * number (historiesPerStep) of episodes, and terminating episodes when the
      * depth reaches maximumDepth.
      */
-    void genPol(long maxTrials, long maximumDepth);
+    void genPol(long historiesPerStep, long maximumDepth);
     /** Runs a single simulation up to a maximum of nSteps steps, returning
      * the total discounted reward.
      *
@@ -119,7 +119,7 @@ class Solver {
             Observation const &obs,
             long timeStep);
     /** Improves the solution, with the root at the given node. */
-    void improveSol(BeliefNode *startNode, long maxTrials,
+    void improveSol(BeliefNode *startNode, long historiesPerStep,
             long maximumDepth);
 
     /* ------------------ Methods for handling model changes ------------------- */
@@ -151,10 +151,10 @@ class Solver {
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;
 
-    /** The rollout mode that was used in the last rollout. */
-    RolloutMode lastRolloutMode_;
-    /** The coefficient that determines how much to explore heuristics
-     * vs. exploiting them.
+    std::vector<SearchStrategy> searchStrategies_;
+    std::vector<SearchStrategy> rolloutStrategies_;
+    /** The coefficient that determines how much to explore search/rollout
+     * strategies vs. exploiting them.
      */
     double heuristicExploreCoefficient_;
     /** The time used by each rollout heuristic. */

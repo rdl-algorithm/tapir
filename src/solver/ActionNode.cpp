@@ -12,12 +12,10 @@
 
 namespace solver {
 ActionNode::ActionNode() :
-    ActionNode(nullptr, nullptr) {
+    ActionNode(nullptr) {
 }
 
-ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping,
-        Action const *action) :
-    action_((action == nullptr) ? nullptr : action->copy()),
+ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
     nParticles_(0),
     totalQValue_(0),
     meanQValue_(0),
@@ -71,9 +69,5 @@ std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Observation const &ob
         added = true;
     }
     return std::make_pair(beliefChild, added);
-}
-
-Action const *ActionNode::getAction() const {
-    return action_.get();
 }
 } /* namespace solver */

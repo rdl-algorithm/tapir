@@ -17,11 +17,10 @@ class ActionNode {
   public:
     friend class TextSerializer;
 
-    /** Constructs an action node without an action!! */
+    /** Constructs an action node without an observation mapping! */
     ActionNode();
-    /** Creates an empty action node with the given action */
-    ActionNode(std::unique_ptr<ObservationMapping> mapping,
-            Action const *action);
+    /** Creates an empty action node with the given observation mapping.*/
+    ActionNode(std::unique_ptr<ObservationMapping> mapping);
 
     // Default destructor; copying and moving disallowed!
     ~ActionNode();
@@ -57,12 +56,7 @@ class ActionNode {
      */
     std::pair<BeliefNode *, bool> createOrGetChild(Observation const &obs);
 
-    /** Returns the action used within this ActionNode. */
-    Action const *getAction() const;
-
   private:
-    /** The action for this node. */
-    std::unique_ptr<Action> action_;
     /** The number of particles being counted towards the q-value for this
      * node.
      */

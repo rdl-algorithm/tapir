@@ -130,7 +130,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     cout << "Constructed the Nav2DModel" << endl;
     cout << "Discount: " << getDiscountFactor() << endl;
     cout << "nStVars: " << nStVars_ << endl;
-    cout << "maxTrials: " << getMaxTrials() << endl;
+    cout << "historiesPerStep: " << getNumberOfHistoriesPerStep() << endl;
     cout << endl << endl;
 //    cout << "Testing random initial states:" << endl;
 //    for (int i = 0; i < 2; i++) {

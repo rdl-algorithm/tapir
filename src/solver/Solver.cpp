@@ -78,9 +78,9 @@ void Solver::setSerializer(Serializer *serializer) {
     serializer_ = serializer;
 }
 
-void Solver::genPol(long maxTrials, long maximumDepth) {
+void Solver::genPol(long historiesPerStep, long maximumDepth) {
     // Start expanding the tree.
-    for (long i = 0; i < maxTrials; i++) {
+    for (long i = 0; i < historiesPerStep; i++) {
         singleSearch(model_->getDiscountFactor(), maximumDepth);
     }
     cout << "MDP heuristic used ";
@@ -107,6 +107,13 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
 
 void Solver::continueSearch(HistorySequence *sequence,
         double discountFactor, long maximumDepth) {
+    while (true) {
+        HistoryEntry *lastEntry = sequence->getEntry(sequence->getLength() - 1);
+        if (model_->isTerminal(*lastEntry->getState())) {
+            debug::show_message("WARNING: Attempted to continue sequence from"
+                    " a terminal state.");
+        }
+    }
     HistorySequence *currHistSeq = sequence;
     HistoryEntry *currHistEntry = sequence->getEntry(
             sequence->histSeq_.size() - 1);
@@ -119,7 +126,8 @@ void Solver::continueSearch(HistorySequence *sequence,
     bool rolloutUsed = false;
     bool done = model_->isTerminal(*currHistEntry->getState());
     if (done) {
-        debug::show_message("NOTE: sampled a terminal particle.");
+        debug::show_message("WARNING: Attempted to continue sequence from"
+                " a terminal state.");
     }
 
     long currentDepth = currHistSeq->startDepth_ + currHistEntry->entryId_ + 1;
@@ -129,8 +137,7 @@ void Solver::continueSearch(HistorySequence *sequence,
         double qVal = 0;
         if (!currNode->hasActionToTry()) {
             // If all actions have been attempted, use UCB
-            std::unique_ptr<Action> action = currNode->getSearchAction(
-                        model_->getUcbExploreCoefficient());
+            std::unique_ptr<Action> action = currNode->getSearchAction();
             result = model_->generateStep(*currHistEntry->getState(), *action);
             done = result.isTerminal;
         } else {
@@ -251,7 +258,7 @@ std::pair<Model::StepResult, double> Solver::getRolloutAction(
         BeliefNode *belNode, State const &state, double startDiscount,
         double discountFactor) {
     // We will try the next action that has not yet been tried.
-    std::unique_ptr<Action> action = belNode->getNextActionToTry();
+    std::unique_ptr<Action> action = belNode->getRolloutActions();
     Model::StepResult result = model_->generateStep(state, *action);
     double qVal = 0;
 
@@ -392,7 +399,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     *totImpTime = 0.0;
     std::clock_t chTimeStart, chTimeEnd, impSolTimeStart, impSolTimeEnd;
     *actualNSteps = nSteps;
-    long maxTrials = model_->getMaxTrials();
+    long historiesPerStep = model_->getNumberOfHistoriesPerStep();
     long maximumDepth = model_->getMaximumDepth();
     double discFactor = model_->getDiscountFactor();
     double currDiscFactor = 1.0;
@@ -443,7 +450,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
             itCh++;
         }
         impSolTimeStart = std::clock();
-        improveSol(currNode, maxTrials, maximumDepth);
+        improveSol(currNode, historiesPerStep, maximumDepth);
         impSolTimeEnd = std::clock();
         *totImpTime += ((impSolTimeEnd - impSolTimeStart) * 1000
                 / CLOCKS_PER_SEC);
@@ -519,7 +526,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
-        action = currentBelief->getNextActionToTry();
+        action = currentBelief->getRolloutActions();
     }
     Model::StepResult result = model_->generateStep(currentState, *action);
     if (result.isTerminal) {
@@ -537,7 +544,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     return result;
 }
 
-void Solver::improveSol(BeliefNode *startNode, long maxTrials,
+void Solver::improveSol(BeliefNode *startNode, long historiesPerStep,
         long maximumDepth) {
     if (startNode->getNParticles() == 0) {
         debug::show_message("ERROR: No particles in the BeliefNode!");
@@ -557,7 +564,7 @@ void Solver::improveSol(BeliefNode *startNode, long maxTrials,
     }
 
     std::vector<StateInfo *> samples;
-    for (long i = 0; i < maxTrials; i++) {
+    for (long i = 0; i < historiesPerStep; i++) {
         long index = std::uniform_int_distribution<long>(
                 0, nonTerminalStates.size() - 1)(*randGen_);
         samples.push_back(nonTerminalStates[index]);

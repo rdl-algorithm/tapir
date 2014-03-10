@@ -24,90 +24,76 @@ namespace solver {
 std::unique_ptr<ActionPool>
     ModelWithEnumeratedActions::createActionPool() {
     return std::make_unique<EnumeratedActionPool>(getRandomGenerator(),
+            getUcbExploreCoefficient(),
             getAllActionsInOrder());
 }
 
 /* --------------------- EnumeratedActionPool --------------------- */
 EnumeratedActionPool::EnumeratedActionPool(RandomGenerator *randGen,
+        double ucbExplorationCoefficient,
         std::vector<std::unique_ptr<EnumeratedPoint>> actions) :
     randGen_(randGen),
+    ucbExplorationCoefficient_(ucbExplorationCoefficient),
     allActions_(std::move(actions)) {
 }
 
 std::unique_ptr<ActionMapping>
     EnumeratedActionPool::createActionMapping() {
     return std::make_unique<EnumeratedActionMap>(observationPool_,
-            allActions_, generateActionOrder());
-}
-
-std::vector<long> EnumeratedActionPool::generateActionOrder() {
-    std::vector<long> actions(allActions_.size());
-    for (long i = 0; i < (long)actions.size(); i++) {
-        actions[i] = i;
-    }
-    std::shuffle(actions.begin(), actions.end(), *randGen_);
-    return actions;
+            allActions_);
 }
 
 /* ---------------------- EnumeratedActionMap ---------------------- */
 EnumeratedActionMap::EnumeratedActionMap(ObservationPool *observationPool,
-        std::vector<std::unique_ptr<EnumeratedPoint>> const &allActions,
-        std::vector<long> actionOrder) :
-                allActions_(allActions),
+        double ucbExplorationCoefficient,
+        std::vector<std::unique_ptr<EnumeratedPoint>> const &allActions) :
                 observationPool_(observationPool),
-                children_(allActions_.size()),
+                ucbExplorationCoefficient_(ucbExplorationCoefficient),
+                allActions_(allActions),
+                entries_(allActions_.size()),
                 nChildren_(0),
-                actionOrder_(actionOrder),
-                nextActionIterator_(actionOrder_.cbegin()),
                 bestAction_(nullptr),
                 bestMeanQValue_(-std::numeric_limits<double>::infinity()) {
 }
 
 ActionNode* EnumeratedActionMap::getActionNode(Action const &action) const {
     long code = static_cast<EnumeratedPoint const &>(action).getCode();
-    return children_[code].get();
+    return entries_[code]->getActionNode();
 }
 
 ActionNode* EnumeratedActionMap::createActionNode(Action const &action) {
     long code = static_cast<EnumeratedPoint const &>(action).getCode();
-    children_[code] = std::make_unique<ActionNode>(
-            observationPool_->createObservationMapping(), &action);
+    entries_[code] = std::make_unique<EnumeratedActionMapEntry>(
+            action, std::make_unique<ActionNode>(
+                    observationPool_->createObservationMapping()));
     nChildren_++;
-    return children_[code].get();
+    return entries_[code]->getActionNode();
 }
 
-long EnumeratedActionMap::getNChildren() const{
+std::vector<ActionMappingEntry const *> EnumeratedActionMap::getChildEntries() const {
+    std::vector<ActionMappingEntry const *> returnEntries;
+    for (std::unique_ptr<EnumeratedActionMapEntry> &entry : entries_) {
+        if (entry != nullptr) {
+            returnEntries.push_back(entry.get());
+        }
+    }
+    return returnEntries;
+}
+
+long EnumeratedActionMap::getNChildren() const {
     return nChildren_;
 }
 
-long EnumeratedActionMap::size() const {
-    return allActions_.size();
+bool EnumeratedActionMap::hasRolloutActions() const {
+    return actionsToTry_.size() > 0;
 }
 
-bool EnumeratedActionMap::hasActionToTry() const {
-    return nextActionIterator_ != actionOrder_.cend();
-}
-
-std::unique_ptr<Action> EnumeratedActionMap::getNextActionToTry() {
-    return allActions_[*(nextActionIterator_++)]->copy();
-}
-
-std::unique_ptr<Action> EnumeratedActionMap::getSearchAction(
-        double exploreCoefficient) {
-    double maxVal = -std::numeric_limits<double>::infinity();
-    Action const *bestAction = nullptr;
-    for (std::unique_ptr<ActionNode> const &node : children_) {
-        if (node == nullptr) {
-            continue;
-        }
-        double tmpVal = node->getMeanQValue() + exploreCoefficient * std::sqrt(
-                std::log(getNChildren()) / node->getNParticles());
-        if (maxVal < tmpVal) {
-            maxVal = tmpVal;
-            bestAction = node->getAction();
-        }
+std::vector<std::unique_ptr<Action>> EnumeratedActionMap::getRolloutActions() const {
+    std::vector<std::unique_ptr<Action>> actions;
+    for (long code : actionsToTry_) {
+        actions.push_back(std::move(allActions_[code]->copy()));
     }
-    return bestAction->copy();
+    return actions;
 }
 
 void EnumeratedActionMap::updateBestValue() {
@@ -117,14 +103,14 @@ void EnumeratedActionMap::updateBestValue() {
         debug::show_message("WARNING: No children - could not update Q-value!");
         return;
     }
-    for (std::unique_ptr<ActionNode> const &node : children_) {
-        if (node == nullptr) {
+    for (std::unique_ptr<EnumeratedActionMapEntry> const &entry : entries_) {
+        if (entry == nullptr) {
             continue;
         }
-        double meanQValue = node->getMeanQValue();
+        double meanQValue = entry->getActionNode()->getMeanQValue();
         if (bestMeanQValue_ < meanQValue) {
             bestMeanQValue_ = meanQValue;
-            bestAction_ = node->getAction();
+            bestAction_ = entry->getAction();
         }
     }
 }
@@ -137,12 +123,19 @@ double EnumeratedActionMap::getBestMeanQValue() const {
     return bestMeanQValue_;
 }
 
-std::vector<ActionNode *> EnumeratedActionMap::getChildren() const {
-    std::vector<ActionNode *> children;
-    for (std::unique_ptr<ActionNode> const &node : children_) {
-        children.push_back(node.get());
-    }
-    return children;
+/* ------------------- EnumeratedActionMapEntry ------------------- */
+EnumeratedActionMapEntry::EnumeratedActionMapEntry(Action const &action,
+        std::unique_ptr<ActionNode> childNode) :
+    action_(action.copy()),
+    childNode_(std::move(childNode)) {
+}
+
+std::unique_ptr<Action> EnumeratedActionMapEntry::getAction() const {
+    return action_->copy();
+}
+
+ActionNode *EnumeratedActionMapEntry::getActionNode() const {
+    return childNode_.get();
 }
 
 /* ------------------- EnumeratedActionTextSerializer ------------------- */
@@ -161,25 +154,20 @@ void EnumeratedActionTextSerializer::saveActionMapping(
     EnumeratedActionMap const &enumMap = (
             static_cast<EnumeratedActionMap const &>(map));
     os << enumMap.getNChildren() << " action children" << std::endl;
-    std::vector<long>::const_iterator it = enumMap.actionOrder_.cbegin();
-    os << "Tried   (";
-    for (; it != enumMap.nextActionIterator_; it++) {
+    os << "Untried (";
+    for (std::vector<long>::iterator it = enumMap.actionsToTry_.begin();
+            it != enumMap.actionsToTry_.end(); it++) {
         os << *enumMap.allActions_[*it];
-        if (std::next(it) != enumMap.nextActionIterator_) {
-            os << ", ";
-        }
-    }
-    os << ")" << std::endl << "Untried (";
-    for (; it != enumMap.actionOrder_.cend(); it++) {
-        os << *enumMap.allActions_[*it];
-        if (std::next(it) != enumMap.actionOrder_.cend()) {
+        if (std::next(it) != enumMap.actionsToTry_.end()) {
             os << ", ";
         }
     }
     os << ")" << std::endl;
-    for (std::unique_ptr<ActionNode> const &child : enumMap.children_) {
-        if (child != nullptr) {
-            save(*child, os);
+    for (std::unique_ptr<EnumeratedActionMapEntry> const &entry : enumMap.entries_) {
+        if (entry != nullptr) {
+            saveAction(entry->getAction().get(), os);
+            os << " ";
+            save(*entry->getActionNode(), os);
             os << std::endl;
         }
     }
@@ -191,44 +179,40 @@ EnumeratedActionTextSerializer::loadActionMapping(std::istream &is) {
             solver_->getActionPool()->createActionMapping());
 
     EnumeratedActionMap &enumMap = static_cast<EnumeratedActionMap &>(*map);
+    enumMap.actionsToTry_.reset();
 
     std::string line;
 
     std::getline(is, line);
     std::istringstream(line) >> enumMap.nChildren_;
 
-    std::vector<long>::iterator codeIterator = enumMap.actionOrder_.begin();
-    for (int i = 0; i < 2; i++) {
-        std::getline(is, line);
-        std::istringstream sstr(line);
-        std::string tmpStr;
-        if (i == 1) {
-            enumMap.nextActionIterator_ = codeIterator;
-        }
-        std::getline(sstr, tmpStr, '(');
-        std::getline(sstr, tmpStr, ')');
-        if (tmpStr == "") {
-            continue;
-        }
-        std::istringstream sstr2(tmpStr);
-        std::string actionString;
-        while (!sstr2.eof()) {
-            std::getline(sstr2, actionString, ',');
-            std::istringstream sstr3(actionString);
-            std::unique_ptr<Action> action = loadAction(sstr3);
-            long code = static_cast<EnumeratedPoint const &>(*action).getCode();
-            *(codeIterator++) = code;
-        }
+    std::getline(is, line);
+    std::istringstream sstr(line);
+    std::string tmpStr;
+    std::getline(sstr, tmpStr, '(');
+    std::getline(sstr, tmpStr, ')');
+    if (tmpStr == "") {
+        continue;
+    }
+    std::istringstream sstr2(tmpStr);
+    std::string actionString;
+    while (!sstr2.eof()) {
+        std::getline(sstr2, actionString, ',');
+        std::istringstream sstr3(actionString);
+        std::unique_ptr<Action> action = loadAction(sstr3);
+        long code = static_cast<EnumeratedPoint const &>(*action).getCode();
+        enumMap.actionsToTry_.add(code);
     }
 
     for (long i = 0; i < enumMap.nChildren_; i++) {
         std::getline(is, line);
         std::istringstream sstr2(line);
+        std::unique_ptr<Action> action(loadAction(sstr2));
         std::unique_ptr<ActionNode> actionNode(std::make_unique<ActionNode>());
         load(*actionNode, sstr2);
-        long code = static_cast<const EnumeratedPoint *>(
-                actionNode->getAction())->getCode();
-        enumMap.children_[code] = std::move(actionNode);
+        long code = static_cast<const EnumeratedPoint &>(*action).getCode();
+        enumMap.entries_[code] = std::make_unique<EnumeratedActionMapEntry>(
+                *action, std::move(actionNode));
     }
     return std::move(map);
 }

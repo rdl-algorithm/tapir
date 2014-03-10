@@ -14,6 +14,9 @@
 #include "solver/changes/DefaultHistoryCorrector.hpp"
 #include "solver/changes/HistoryCorrector.hpp"
 
+#include "solver/search/SearchStrategy.hpp"
+#include "solver/search/UcbSearchStrategy.hpp"
+
 #include "Action.hpp"        // for Action
 #include "State.hpp"                    // for State
 #include "Observation.hpp"              // for Observation
@@ -34,7 +37,7 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
     ObservationMapping *obsMap = previousBelief->getMapping()->getActionNode(
             action)->getMapping();
     BeliefNode *childNode = obsMap->getBelief(obs);
-    while (true) {
+    while (particles.size() < getNParticles()) {
         long index = std::uniform_int_distribution<long>(0,
                 previousParticles.size() - 1)(*getRandomGenerator());
         State const *state = previousParticles[index];
@@ -53,7 +56,7 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
     ObservationMapping *obsMap = previousBelief->getMapping()->getActionNode(
             action)->getMapping();
     BeliefNode *childNode = obsMap->getBelief(obs);
-    while (true) {
+    while (particles.size() < getNParticles()) {
         std::unique_ptr<State> state = sampleStateUniform();
         StepResult result = generateStep(*state, action);
         if (obsMap->getBelief(*result.observation) == childNode) {
@@ -61,6 +64,25 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
         }
     }
     return particles;
+}
+
+// Default = no changes.
+std::vector<long> Model::loadChanges(char const */*changeFilename*/) {
+    return std::vector<long>{};
+}
+
+// Default = do nothing.
+void Model::update(long /*time*/, StatePool */*pool*/) {
+}
+
+// Default = do nothing.
+void Model::drawEnv(std::ostream &/*os*/) {
+}
+
+// Default = do nothing.
+void Model::drawSimulationState(
+        std::vector<State const *> /*particles*/, State const &/*state*/,
+        std::ostream &/*os*/) {
 }
 
 std::unique_ptr<StateIndex> Model::createStateIndex() {

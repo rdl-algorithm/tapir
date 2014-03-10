@@ -1,5 +1,5 @@
 nParticles: 15000
-maxTrials: 15000
+historiesPerStep: 15000
 minimumDiscount: 0.001
 rolloutExploreTh: 0.5
 ctrlCorrectProb: 0.8

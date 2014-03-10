@@ -52,15 +52,13 @@ class HistorySequence {
             Action const &action, Observation const &obs,
             double immediateReward);
 
+
     /** Returns true iff the last state is terminal. */
     bool isTerminal() const;
-
     /** Returns the length of this sequence. */
     long getLength() const;
-
     /** Returns the history entry in this sequence with the given ID. */
     HistoryEntry *getEntry(long entryId) const;
-
     /** Returns the states in this sequence as a vector. */
     std::vector<State const *> getStates() const;
 

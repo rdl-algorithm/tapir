@@ -39,11 +39,11 @@ class BeliefNode {
     /** Returns true iff there is another action that needs to be explored. */
     bool hasActionToTry() const;
     /** Returns the next action to attempt, if any. */
-    std::unique_ptr<Action> getNextActionToTry() const;
+    std::vector<std::unique_ptr<Action>> getRolloutActions() const;
 
     /** Chooses the next action to search, from a multi-armed bandit problem
      * (probably using a UCB algorithm). */
-    std::unique_ptr<Action> getSearchAction(double ucbExploreCoefficient);
+    std::unique_ptr<Action> getSearchAction();
 
     /** Updates the calculation of which action is optimal. */
     void updateBestValue();

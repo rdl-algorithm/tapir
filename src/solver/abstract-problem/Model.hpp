@@ -14,6 +14,8 @@
 
 #include "solver/changes/HistoryCorrector.hpp"
 
+#include "solver/search/SearchStrategy.hpp"
+
 #include "Action.hpp"        // for Action
 #include "State.hpp"                    // for State
 #include "Observation.hpp"              // for Observation
@@ -49,14 +51,14 @@ class Model {
 
 
     // ABT algorithm parameters
-    /** Returns the default number of particles per belief - this number will
-     * be generated if particle depletion occurs.
+    /** Returns the preferred number of particles per belief - this number will
+     * be regenerated if particle depletion is detected.
      */
     virtual long getNParticles() = 0;
     /** Returns the maximum number of trials (i.e. simulated episodes) to run
-     * in a single time step.State
+     * in a single time step.
      */
-    virtual long getMaxTrials() = 0;
+    virtual long getNumberOfHistoriesPerStep() = 0;
 
     /** Returns the maximum depth allowed in the tree. */
     virtual long getMaximumDepth() = 0;
@@ -72,7 +74,6 @@ class Model {
      * A reasonable default value is 1.0.
      */
     virtual double getUcbExploreCoefficient() = 0;
-
 
     /** Returns the maximum number of nodes to check when searching
      * for a nearest-neighbor belief node.
@@ -101,7 +102,7 @@ class Model {
      * including the next state, observation, and reward.
      */
     struct StepResult {
-        std::unique_ptr<Action> action = 0;
+        std::unique_ptr<Action> action = nullptr;
         std::unique_ptr<TransitionParameters> transitionParameters = nullptr;
         std::unique_ptr<Observation> observation = nullptr;
         double reward = 0;
@@ -168,20 +169,20 @@ class Model {
 
     /* -------------- Methods for handling model changes ---------------- */
     /** Loads future model changes from the given file. */
-    virtual std::vector<long> loadChanges(char const *changeFilename) = 0;
+    virtual std::vector<long> loadChanges(char const *changeFilename);
     /** Updates the model to reflect the changes at the given time,
      * and marks the affected states within the state pool.
      */
-    virtual void update(long time, StatePool *pool) = 0;
+    virtual void update(long time, StatePool *pool);
 
     /* --------------- Pretty printing methods ----------------- */
     /** Draws the environment map onto the given output stream. */
-    virtual void drawEnv(std::ostream &/*os*/) {}
+    virtual void drawEnv(std::ostream &/*os*/);
     /** Draws the current belief and/or the current state in the context of the
      * overall map onto the given output stream.
      */
     virtual void drawSimulationState(std::vector<State const *> /*particles*/,
-            State const &/*state*/, std::ostream &/*os*/) {}
+            State const &/*state*/, std::ostream &/*os*/);
 
     /* --------------- Data structure customization ----------------- */
     // These are factory methods to allow the data structures used to
@@ -191,18 +192,27 @@ class Model {
      * have been used in a StatePool.
      */
     virtual std::unique_ptr<StateIndex> createStateIndex();
-    /** Creates an ActionPool, which manages actions & creates
-     * ActionMappings
-     */
-    virtual std::unique_ptr<ActionPool> createActionPool() = 0;
-    /** Creates an ObservationPool, which manages observations & creates
-     * ObservationMappings.
-     */
-    virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
-    /** Creates a HistoryCorrector; defaults to general one, but can
+    /** Creates a HistoryCorrector; defaults to a general one, but can
      * be made problem-specific.
      */
     virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector();
+    /** Creates an ActionPool, which manages actions and creates
+     * ActionMappings
+     */
+    virtual std::unique_ptr<ActionPool> createActionPool() = 0;
+    /** Creates an ObservationPool, which manages observations and creates
+     * ObservationMappings.
+     */
+    virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
+    /** Defines the search strategies to be used within the tree; defaults
+     * to a single strategy (UCB).
+     */
+    virtual std::vector<SearchStrategy> createSearchStrategies();
+    /** Defines the rollout strategies that will be used once a leaf node is
+     * reached; defaults to a single-step rollout using the heuristic value for
+     * this model.
+     */
+    virtual std::vector<SearchStrategy> createRolloutStrategies();
 };
 } /* namespace solver */
 
