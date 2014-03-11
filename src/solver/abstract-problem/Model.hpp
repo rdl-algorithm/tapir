@@ -204,15 +204,16 @@ class Model {
      * ObservationMappings.
      */
     virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
-    /** Defines the search strategies to be used within the tree; defaults
+    /** Defines the search strategy to be used within the tree; defaults
      * to a single strategy (UCB).
+     * Note:
      */
-    virtual std::vector<SearchStrategy> createSearchStrategies();
-    /** Defines the rollout strategies that will be used once a leaf node is
+    virtual std::vector<SearchStrategy> getSearchStrategy();
+    /** Defines the rollout strategythat will be used once a leaf node is
      * reached; defaults to a single-step rollout using the heuristic value for
      * this model.
      */
-    virtual std::vector<SearchStrategy> createRolloutStrategies();
+    virtual std::unique_ptr<SearchStrategy> getRolloutStrategy();
 };
 } /* namespace solver */
 

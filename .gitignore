@@ -18,6 +18,7 @@ solve
 core
 *.log
 *.pol
+*.m
 
 # backup files
 *~

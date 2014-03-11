@@ -303,46 +303,27 @@ std::pair<Model::StepResult, double> Solver::getRolloutAction(
     return std::make_pair(std::move(result), qVal);
 }
 
-double Solver::rolloutPolHelper(BeliefNode *currNode, State const &state,
-        double discountFactor) {
-    if (currNode == nullptr) {
-        // debug::show_message("WARNING: nullptr in rolloutPolHelper!");
-        return model_->getHeuristicValue(state);
-    } else if (currNode->getNParticles() == 0) {
-        // debug::show_message("WARNING: nParticles == 0 in rolloutPolHelper");
-        return model_->getHeuristicValue(state);
-    } else if (currNode->getNActChildren() == 0) {
-        // debug::show_message("WARNING: No children in rolloutPolHelper");
-        return model_->getHeuristicValue(state);
-    }
-
-    std::unique_ptr<Action> action = currNode->getBestAction();
-    Model::StepResult result = model_->generateStep(state, *action);
-    currNode = currNode->getChild(*action, *result.observation);
-    double qVal = result.reward;
-    if (!result.isTerminal) {
-        qVal += (discountFactor * rolloutPolHelper(
-                         currNode, *result.nextState, discountFactor));
-    }
-    return qVal;
-}
-
-BeliefNode *Solver::getNNBelNode(BeliefNode *currentBelief) {
-    if (model_->getMaxNnDistance() < 0) {
+BeliefNode *Solver::getNNBelNode(BeliefNode *belief,
+        double maxNnDistance, long maxNnComparisons) {
+    if (maxNnDistance < 0) {
         return nullptr;
     }
     double minDist = std::numeric_limits<double>::infinity();
-    BeliefNode *nnBel = currentBelief->nnBel_;
+    BeliefNode *nnBel = belief->nnBel_;
+    if (nnBel != nullptr) {
+        minDist = belief->distL1Independent(nnBel);
+    }
+
     long numTried = 0;
     for (BeliefNode *otherBelief : policy_->allNodes_) {
-        if (currentBelief == otherBelief) {
+        if (belief == otherBelief) {
             continue;
         }
-        if (numTried >= model_->getMaxNnComparisons()) {
+        if (numTried >= maxNnComparisons) {
             break;
         } else {
-            if (currentBelief->tNNComp_ < otherBelief->tLastAddedParticle_) {
-                double distance = currentBelief->distL1Independent(otherBelief);
+            if (belief->tNNComp_ < otherBelief->tLastAddedParticle_) {
+                double distance = belief->distL1Independent(otherBelief);
                 if (distance < minDist) {
                     minDist = distance;
                     nnBel = otherBelief;
@@ -351,11 +332,11 @@ BeliefNode *Solver::getNNBelNode(BeliefNode *currentBelief) {
             numTried++;
         }
     }
-    currentBelief->tNNComp_ = (double)std::clock() * 1000 / CLOCKS_PER_SEC;
-    if (minDist > model_->getMaxNnDistance()) {
+    belief->tNNComp_ = (double)std::clock() * 1000 / CLOCKS_PER_SEC;
+    if (minDist > maxNnDistance) {
         return nullptr;
     }
-    currentBelief->nnBel_ = nnBel;
+    belief->nnBel_ = nnBel;
     return nnBel;
 }
 
@@ -497,7 +478,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
 
 Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         State const &currentState) {
-    // Particle sampling and variance estimation.
+     /* Particle sampling and variance estimation. */
 //    State const *state = currentBelief->sampleAParticle(randGen_)->getState();
 //    cout << "Sampled particle: " << *state << endl;
 //
@@ -509,24 +490,24 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 //    }
 //    cout << "Est. mean inter-particle distance: " << totalDistance / 100 << endl;
 
-//    cout << "Action children: " << endl;
-//    std::multimap<double, Action const *> actionValues;
-//    for (ActionNode *node : currentBelief->getMapping()->getChildren()) {
-//        if (node == nullptr) {
-//            continue;
-//        }
-//        if (std::isnan(node->meanQValue_)) {
-//            debug::show_message("ERROR: NaN value!");
-//        }
-//        actionValues.emplace(node->meanQValue_, node->action_.get());
-//    }
-//    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-//        cout << *it->second << " " << it->first << endl;
-//    }
+    /* Displaying the available actions and associated values. */
+    cout << "Action children: " << endl;
+    std::multimap<double, ActionMappingEntry const *> actionValues;
+    for (ActionMappingEntry &entry : currentBelief->getMapping()->getChildEntries()) {
+        actionValues.emplace(entry.getActionNode()->meanQValue_, &entry);
+    }
+    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
+        cout << *it->second->getAction() << " " << it->first <<  " with ";
+        cout << it->second->getActionNode()->getNParticles() << " particles";
+        cout << endl;
+    }
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
-        action = currentBelief->getRolloutActions();
+        debug::show_message("WARNING: No actions evaluated! Selecting a random action...");
+        std::vector<std::unique_ptr<Action>> rolloutActions = currentBelief->getRolloutActions();
+        long index = std::uniform_int_distribution<long>(0, rolloutActions.size() - 1)(*randGen_);
+        action = std::move(rolloutActions[index]);
     }
     Model::StepResult result = model_->generateStep(currentState, *action);
     if (result.isTerminal) {
@@ -610,13 +591,11 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         HistorySequence *histSeq = allHistories_->addNew(timeStep);
         HistoryEntry *histEntry = histSeq->addEntry(stateInfo, currentDiscount * discountFactor);
         histEntry->registerNode(nextNode);
-
-//        State *state = stateInfo->getState();
-//        if (!model_->isTerminal(*state)) {
-//            histEntry->immediateReward_ = model_->getDefaultVal();
-//            histEntry->totalDiscountedReward_ = (
-//                    histEntry->discount_ * histEntry->immediateReward_);
-//        }
+        State *state = stateInfo->getState();
+        if (!model_->isTerminal(*state)) {
+            // Use the heuristic value for non-terminal particles.
+            histEntry->reward_ = model_->getHeuristicValue(*state);
+        }
         backup(histSeq);
     }
     return nextNode;

@@ -11,6 +11,7 @@ namespace solver {
 class BeliefNode;
 class HistorySequence;
 class SearchInstance;
+class Solver;
 
 class SearchStrategy {
   public:
@@ -18,16 +19,14 @@ class SearchStrategy {
     virtual ~SearchStrategy() = default;
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver,
-           BeliefNode *currentNode, HistorySequence *sequence,
-           double discountFactor, long maximumDepth) = 0;
+           Solver *solver, HistorySequence *sequence) = 0;
 };
 
 class SearchInstance {
   public:
-    SearchInstance(Solver *solver,
-            BeliefNode *currentNode, HistorySequence *sequence,
-            double discountFactor, long maximumDepth);
+    SearchInstance(Solver *solver, HistorySequence *sequence,
+            BeliefNode *currentNode, double discountFactor, long maximumDepth);
+    SearchInstance(Solver *solver, HistorySequence *sequence);
     virtual ~SearchInstance() = default;
     _NO_COPY_OR_MOVE(SearchInstance);
 
@@ -36,16 +35,21 @@ class SearchInstance {
      * selected. If the selected action is null, the search will terminate.
      */
     virtual std::pair<SearchStatus, std::unique_ptr<Action>> getStatusAndNextAction() = 0;
+    /** A default implementation to handle extending sequences; this probably
+     * shouldn't need to be changed.
+     */
     virtual SearchStatus extendSequence();
+    /** A method that allows custom behaviour after the search is complete. */
+    virtual void finishSearch(SearchStatus status);
   protected:
     Solver *solver_;
     Model *model_;
-    BeliefNode *currentNode_;
     HistorySequence *sequence_;
+    BeliefNode *currentNode_;
     double discountFactor_;
     long maximumDepth_;
 };
 
 } /* namespace solver */
 
-#endif /* SOLVER_SearchStrategy_HPP_ */
+#endif /* SOLVER_SEARCHSTRATEGY_HPP_ */

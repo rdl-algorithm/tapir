@@ -103,12 +103,8 @@ class Solver {
     /** Attempts to find another belief node near enough to this one to be
      * suitable for the policy-based rollout heuristic.
      */
-    BeliefNode *getNNBelNode(BeliefNode *b);
-    /** Helper method for policy-based rollout. */
-    double rolloutPolHelper(BeliefNode *currNode, State const &state, double disc);
-    /** Updates the overall weighting of the different heuristic heuristics
-     * based on their performance.
-     */
+    BeliefNode *getNNBelNode(BeliefNode *belief,
+                    double maxNnDistance, long maxNnComparisons);
     void updateHeuristicProbabilities(double valImprovement);
 
     /* ------------------ Simulation methods ------------------- */
@@ -151,20 +147,8 @@ class Solver {
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;
 
-    std::vector<SearchStrategy> searchStrategies_;
-    std::vector<SearchStrategy> rolloutStrategies_;
-    /** The coefficient that determines how much to explore search/rollout
-     * strategies vs. exploiting them.
-     */
-    double heuristicExploreCoefficient_;
-    /** The time used by each rollout heuristic. */
-    double timeUsedPerHeuristic_[2];
-    /** The weight associated with each rollout heuristic. */
-    double heuristicWeight_[2];
-    /** The calculated probability for the usage of each rollout heuristic. */
-    double heuristicProbability_[2];
-    /** The number of times each rollout heuristic has been used. */
-    long heuristicUseCount_[2];
+    std::unique_ptr<SearchStrategy> searchStrategy_;
+    std::unique_ptr<SearchStrategy> rolloutStrategy_;
 };
 } /* namespace solver */
 

@@ -10,10 +10,8 @@ class NnRolloutStrategy: public SearchStrategy {
     NnRolloutStrategy(long maxNnComparisons, double maxNnDistance);
     virtual ~NnRolloutStrategy() = default;
 
-    virtual SearchStatus extendSequence(BeliefNode *currentNode,
-            HistorySequence *sequence,
-            double discountFactor,
-            long maximumDepth);
+    virtual std::unique_ptr<SearchInstance> createSearchInstance(
+           Solver *solver, HistorySequence *sequence) = 0;
   private:
     long maxNnComparisons_;
     double maxNnDistance_;
@@ -21,15 +19,14 @@ class NnRolloutStrategy: public SearchStrategy {
 
 class NnRolloutInstance: public SearchInstance {
   public:
-    NnRolloutInstance(double explorationCoefficient,
-            Solver *solver,
-            BeliefNode *currentNode, HistorySequence *sequence,
-            double discountFactor, long maximumDepth);
+    NnRolloutInstance(long maxNnComparisons, double maxNnDistance,
+            Solver *solver, HistorySequence *sequence);
 
-    virtual std::unique_ptr<Action> getNextAction();
-    virtual SearchStatus getStatus();
+    virtual std::pair<SearchStatus, std::unique_ptr<Action>> getStatusAndNextAction() = 0;
   private:
-    BeliefNode *neighborNode_;
+    BeliefNode *rootNeighborNode_;
+    BeliefNode *currentNeighborNode_;
+    std::unique_ptr<Action> previousAction_;
 }; /* namespace solver */
 
 #endif /* SOLVER_NNROLLOUTSTRATEGY_HPP_ */

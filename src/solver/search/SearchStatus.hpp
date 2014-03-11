@@ -9,8 +9,9 @@ enum class SearchStatus : long {
     REACHED_ROLLOUT_NODE = 2,
     ROLLING_OUT = 3,
     ROLLOUT_COMPLETE = 4,
-    TERMINATED = 5,
-    HIT_DEPTH_LIMIT = 6
+    HIT_TERMINAL_STATE = 5,
+    HIT_DEPTH_LIMIT = 6,
+    ERROR = 7
 };
 
 } /* namespace solver */
