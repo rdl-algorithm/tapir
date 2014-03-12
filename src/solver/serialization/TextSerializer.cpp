@@ -156,7 +156,6 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
         entry->owningSequence_ = &seq;
         seq.histSeq_.push_back(std::move(entry));
     }
-    seq.isTerminal_ = model_->isTerminal(*(*seq.histSeq_.rbegin())->getState());
 }
 
 void TextSerializer::save(Histories const &histories, std::ostream &os) {
@@ -202,16 +201,15 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
 }
 
 void TextSerializer::save(ActionNode const &node, std::ostream &os) {
-    saveAction(node.action_.get(), os);
-    os << " " << node.nParticles_ << " " << node.totalQValue_ << " ";
-    os << node.meanQValue_ << " ";
+    os << node.meanQValue_ << " from " << node.nParticles_ << " particles";
+    os << " ( total " << node.totalQValue_ << " ) ";
     saveObservationMapping(*node.obsMap_, os);
 }
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
     std::string tmpStr;
-    node.action_ = loadAction(is);
-    is >> node.nParticles_ >> node.totalQValue_ >> node.meanQValue_;
+    is >> node.meanQValue_ >> tmpStr >> node.nParticles_ >> tmpStr;
+    is >> tmpStr >> tmpStr >> node.totalQValue_ >> tmpStr;
     node.obsMap_ = std::move(loadObservationMapping(is));
 }
 
@@ -219,7 +217,9 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
     if (node.getNParticles() == 0) {
         os << "No particles!" << endl;
     } else {
-        os << node.getNParticles() << " particles begin" << endl;
+        os << node.getNParticles() << " particles; ";
+        os << node.numberOfStartingSequences_ << " starts; ";
+        os << node.numberOfEndingSequences_ << " ends" << endl;
         int count = 0;
         for (auto it = node.particles_.begin(); it != node.particles_.end();
                 ++it) {
@@ -248,15 +248,16 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
     std::getline(is, line);
     if (line != "No particles!") {
         long nParticles;
-
-        std::istringstream(line) >> nParticles;
+        std::string tmpStr;
+        std::istringstream countsStream(line);
+        countsStream >> nParticles >> tmpStr >> node.numberOfStartingSequences_;
+        countsStream >> tmpStr >> node.numberOfEndingSequences_;
 
         std::getline(is, line);
         long numParticlesRead = 0;
         while (line != "particles end") {
             std::istringstream sstr(line);
             for (int i = 0; i < NUM_PARTICLES_PER_LINE; i++) {
-                std::string tmpStr;
                 long seqId, entryId;
                 sstr >> tmpStr >> seqId >> entryId >> tmpStr;
                 HistoryEntry *entry = solver_->allHistories_->getHistoryEntry(
@@ -309,7 +310,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
         if (node->getNActChildren() > 0) {
-            node->updateBestValue();
+            node->recalculateQValue();
         }
         // Ignore an empty line after each belief node.
         std::getline(is, line);

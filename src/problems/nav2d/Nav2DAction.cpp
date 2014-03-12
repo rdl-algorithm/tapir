@@ -58,7 +58,7 @@ Nav2DAction::Nav2DAction(ActionType type, Nav2DModel *model) :
 //        return;
     default:
         std::ostringstream message;
-        message << "ERROR: Invalid Action Code " << getCode();
+        message << "ERROR: Invalid Action Code " << getBinNumber();
         debug::show_message(message.str());
         return;
     }
@@ -91,22 +91,20 @@ std::size_t Nav2DAction::hash() const {
 }
 
 void Nav2DAction::print(std::ostream &os) const {
-    os << "#" << getCode() << ":" << speed_ << "/" << rotationalSpeed_;
+    os << "#" << getBinNumber() << ":" << speed_ << "/" << rotationalSpeed_;
 }
 
 double Nav2DAction::getSpeed() const {
     return speed_;
 }
-
 double Nav2DAction::getRotationalSpeed() const{
     return rotationalSpeed_;
 }
-
 ActionType Nav2DAction::getType() const {
     return type_;
 }
-
-long Nav2DAction::getCode() const {
+long Nav2DAction::getBinNumber() const {
     return static_cast<long>(type_);
 }
+
 } /* namespace nav2d */

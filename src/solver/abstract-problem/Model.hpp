@@ -54,7 +54,7 @@ class Model {
     /** Returns the preferred number of particles per belief - this number will
      * be regenerated if particle depletion is detected.
      */
-    virtual long getNParticles() = 0;
+    virtual unsigned long getNParticles() = 0;
     /** Returns the maximum number of trials (i.e. simulated episodes) to run
      * in a single time step.
      */
@@ -208,12 +208,12 @@ class Model {
      * to a single strategy (UCB).
      * Note:
      */
-    virtual std::vector<SearchStrategy> getSearchStrategy();
+    virtual std::unique_ptr<SearchStrategy> createSearchStrategy();
     /** Defines the rollout strategythat will be used once a leaf node is
      * reached; defaults to a single-step rollout using the heuristic value for
      * this model.
      */
-    virtual std::unique_ptr<SearchStrategy> getRolloutStrategy();
+    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy();
 };
 } /* namespace solver */
 

@@ -4,14 +4,15 @@
 namespace solver {
 
 enum class SearchStatus : long {
-    INITIAL = 0,
-    INSIDE_TREE = 1,
-    REACHED_ROLLOUT_NODE = 2,
-    ROLLING_OUT = 3,
-    ROLLOUT_COMPLETE = 4,
-    HIT_TERMINAL_STATE = 5,
-    HIT_DEPTH_LIMIT = 6,
-    ERROR = 7
+    UNINITIALIZED,
+    INITIAL,
+    INSIDE_TREE,
+    REACHED_ROLLOUT_NODE,
+    ROLLING_OUT,
+    ROLLOUT_COMPLETE,
+    HIT_TERMINAL_STATE,
+    HIT_DEPTH_LIMIT,
+    ERROR
 };
 
 } /* namespace solver */

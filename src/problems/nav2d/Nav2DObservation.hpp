@@ -6,7 +6,7 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "solver/abstract-problem/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/DiscretizedPoint.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 
 #include "Nav2DState.hpp"

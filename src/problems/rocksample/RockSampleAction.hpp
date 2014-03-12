@@ -7,7 +7,7 @@
 #include <vector>                       // for vector
 
 #include "solver/abstract-problem/Action.hpp"
-#include "solver/abstract-problem/EnumeratedPoint.hpp"             // for EnumeratedPoint
+#include "solver/abstract-problem/DiscretizedPoint.hpp"             // for DiscretizedPoint
 
 namespace rocksample {
 enum class ActionType : long {
@@ -19,7 +19,7 @@ enum class ActionType : long {
     CHECK = 5
 };
 
-class RockSampleAction : public solver::EnumeratedPoint {
+class RockSampleAction : public solver::DiscretizedPoint {
     friend class RockSampleTextSerializer;
   public:
     RockSampleAction(ActionType actionType, long rockNo = 0);
@@ -32,7 +32,7 @@ class RockSampleAction : public solver::EnumeratedPoint {
     double distanceTo(solver::Action const &otherAction) const override;
     void print(std::ostream &os) const override;
 
-    long getCode() const override;
+    long getBinNumber() const override;
 
     ActionType getActionType() const;
     long getRockNo() const;

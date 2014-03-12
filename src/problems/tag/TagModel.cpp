@@ -41,6 +41,7 @@ namespace po = boost::program_options;
 namespace tag {
 TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
+    ModelWithEnumeratedActions(getAllActionsInOrder()),
     moveCost_(vm["problem.moveCost"].as<double>()),
     tagReward_(vm["problem.tagReward"].as<double>()),
     failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
@@ -264,7 +265,7 @@ bool TagModel::isValid(GridPosition const &position) {
 std::unique_ptr<solver::Observation> TagModel::makeObservation(
         solver::Action const & /*action*/,
         TagState const &nextState) {
-    return std::make_unique<TagObservation>(this, nextState.getRobotPosition(),
+    return std::make_unique<TagObservation>(nextState.getRobotPosition(),
             nextState.getRobotPosition() == nextState.getOpponentPosition());
 }
 
@@ -398,7 +399,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
                 std::make_unique<TagState>(newRobotPos, newRobotPos,
                         actionType == ActionType::TAG));
     } else {
-        while (static_cast<long>(newParticles.size()) < getNParticles()) {
+        while (newParticles.size() < getNParticles()) {
             std::unique_ptr<solver::State> state = sampleStateUniform();
             solver::Model::StepResult result = generateStep(*state, action);
             if (obs == *result.observation) {
@@ -571,13 +572,12 @@ void TagModel::drawSimulationState(
     }
 }
 
-
-std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+std::vector<std::unique_ptr<solver::DiscretizedPoint>>
 TagModel::getAllActionsInOrder() {
-    std::vector<std::unique_ptr<solver::EnumeratedPoint>> allActions_;
+    std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
     for (long code = 0; code < 5; code++) {
-        allActions_.push_back(std::make_unique<TagAction>(code));
+        allActions.push_back(std::make_unique<TagAction>(code));
     }
-    return allActions_;
+    return allActions;
 }
 } /* namespace tag */

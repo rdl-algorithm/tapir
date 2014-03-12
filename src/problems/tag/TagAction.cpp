@@ -51,10 +51,9 @@ void TagAction::print(std::ostream &os) const {
     }
 }
 
-long TagAction::getCode() const {
+long TagAction::getBinNumber() const {
     return static_cast<long>(actionType_);
 }
-
 ActionType TagAction::getActionType() const {
     return actionType_;
 }

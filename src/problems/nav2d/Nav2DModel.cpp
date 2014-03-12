@@ -325,7 +325,7 @@ double Nav2DModel::getHeuristicValue(solver::State const &state) {
 	} else {
 	    reward = goalReward_ - costPerStep * numSteps;
 	}
-    if (std::isnan(reward) || std::isinf(reward)) {
+    if (!std::isfinite(reward)) {
         debug::show_message("Bad reward!");
     }
 	return reward;
@@ -767,9 +767,8 @@ long Nav2DModel::getNumberOfBins() {
     return static_cast<long>(ActionType::END);
 }
 
-std::unique_ptr<solver::EnumeratedPoint> Nav2DModel::sampleAnAction(
-        long code) {
-    return std::make_unique<Nav2DAction>(static_cast<ActionType>(code), this);
+std::unique_ptr<solver::Action> Nav2DModel::sampleAnAction(long binNumber) {
+    return std::make_unique<Nav2DAction>(static_cast<ActionType>(binNumber), this);
 }
 
 double Nav2DModel::getMaxObservationDistance() {

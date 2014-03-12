@@ -22,6 +22,7 @@ class HistoryEntry;
 
 class BeliefNode {
   public:
+    friend class ActionNode;
     friend class Solver;
     friend class TextSerializer;
 
@@ -36,21 +37,15 @@ class BeliefNode {
     ~BeliefNode();
     _NO_COPY_OR_MOVE(BeliefNode);
 
-    /** Returns true iff there is another action that needs to be explored. */
-    bool hasActionToTry() const;
-    /** Returns the next action to attempt, if any. */
-    std::vector<std::unique_ptr<Action>> getRolloutActions() const;
 
     /** Chooses the next action to search, from a multi-armed bandit problem
      * (probably using a UCB algorithm). */
     std::unique_ptr<Action> getSearchAction();
 
-    /** Updates the calculation of which action is optimal. */
-    void updateBestValue();
     /** Chooses the action with the best expected value */
     std::unique_ptr<Action> getBestAction() const;
     /** Returns the best q-value */
-    double getBestMeanQValue() const;
+    double getQValue() const;
 
 
     /** Adds the given history entry to this belief node. */
@@ -61,18 +56,8 @@ class BeliefNode {
     HistoryEntry *sampleAParticle(RandomGenerator *randGen) const;
 
 
-    /** Updates the q-value for the given action, with the given increase in
-     * the total q-value (negative values for a decrease).
-     */
-    void updateQValue(Action const &action, double increase);
-    /** Updates the q-value for the given action, with the given increase in
-     * the total q-value (negative values for a decrease), and the given
-     * change in the recorded number of particles (0 for no change, -1 for a
-     * reduction, and +1 for an increase.
-     */
-    void updateQValue(Action const &action, double increase,
-            long deltaNParticles);
-
+    /** Re-evaluates the optimal action and the Q-value. */
+    void recalculateQValue();
 
     /** Calculates the distance between this belief node and another by
      * calculating the average pairwise distance between the individual
@@ -108,6 +93,11 @@ class BeliefNode {
 private:
     /** The ID of this node. */
     long id_;
+
+    /** The number of sequences that begin at this belief. */
+    long numberOfStartingSequences_;
+    /** The number of sequences that end at this belief. */
+    long numberOfEndingSequences_;
 
     /** The time at which the last particle was added. */
     double tLastAddedParticle_;

@@ -11,7 +11,7 @@ class NnRolloutStrategy: public SearchStrategy {
     virtual ~NnRolloutStrategy() = default;
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver, HistorySequence *sequence) = 0;
+           Solver *solver, HistorySequence *sequence, long maximumDepth) override;
   private:
     long maxNnComparisons_;
     double maxNnDistance_;
@@ -20,13 +20,21 @@ class NnRolloutStrategy: public SearchStrategy {
 class NnRolloutInstance: public SearchInstance {
   public:
     NnRolloutInstance(long maxNnComparisons, double maxNnDistance,
-            Solver *solver, HistorySequence *sequence);
+            Solver *solver, HistorySequence *sequence, long maximumDepth);
+    virtual ~NnRolloutInstance() = default;
+    _NO_COPY_OR_MOVE(NnRolloutInstance);
 
-    virtual std::pair<SearchStatus, std::unique_ptr<Action>> getStatusAndNextAction() = 0;
+    virtual SearchStatus initialize() override;
+    virtual std::pair<SearchStatus, std::unique_ptr<Action>>
+    getStatusAndNextAction() override;
   private:
+    long maxNnComparisons_;
+    double maxNnDistance_;
     BeliefNode *rootNeighborNode_;
     BeliefNode *currentNeighborNode_;
     std::unique_ptr<Action> previousAction_;
-}; /* namespace solver */
+};
+
+} /* namespace solver */
 
 #endif /* SOLVER_NNROLLOUTSTRATEGY_HPP_ */

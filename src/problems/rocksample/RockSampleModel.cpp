@@ -45,6 +45,7 @@ namespace rocksample {
 RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
+    ModelWithEnumeratedActions({}),
     goodRockReward_(vm["problem.goodRockReward"].as<double>()),
     badRockPenalty_(vm["problem.badRockPenalty"].as<double>()),
     exitReward_(vm["problem.exitReward"].as<double>()),
@@ -130,6 +131,7 @@ void RockSampleModel::initialize() {
     nStVars_ = 2 + nRocks_;
     minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
+    setAllActions(getAllActionsInOrder());
 }
 
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
@@ -410,7 +412,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::BeliefNode */*previousBelief*/,
         solver::Action const &action, solver::Observation const &obs) {
     std::vector<std::unique_ptr<solver::State>> particles;
-    while (static_cast<long>(particles.size()) < getNParticles()) {
+    while (particles.size() < getNParticles()) {
         std::unique_ptr<solver::State> state = sampleStateUniform();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {
@@ -501,18 +503,18 @@ void RockSampleModel::drawSimulationState(
     }
 }
 
-std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+std::vector<std::unique_ptr<solver::DiscretizedPoint>>
 RockSampleModel::getAllActionsInOrder() {
-    std::vector<std::unique_ptr<solver::EnumeratedPoint>> allActions_;
+    std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
     for (long code = 0; code < 5 + nRocks_; code++) {
-        allActions_.push_back(std::make_unique<RockSampleAction>(code));
+        allActions.push_back(std::make_unique<RockSampleAction>(code));
     }
-    return allActions_;
+    return allActions;
 }
 
-std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+std::vector<std::unique_ptr<solver::DiscretizedPoint>>
 RockSampleModel::getAllObservationsInOrder() {
-    std::vector<std::unique_ptr<solver::EnumeratedPoint>> allObservations_;
+    std::vector<std::unique_ptr<solver::DiscretizedPoint>> allObservations_;
     for (long code = 0; code < 3; code++) {
         allObservations_.push_back(
                 std::make_unique<RockSampleObservation>(code));

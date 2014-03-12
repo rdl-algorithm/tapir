@@ -1,5 +1,5 @@
-#ifndef SOLVER_ENUMERATEDPOINT_HPP_
-#define SOLVER_ENUMERATEDPOINT_HPP_
+#ifndef SOLVER_DISCRETIZED_POINT_HPP_
+#define SOLVER_DISCRETIZED_POINT_HPP_
 
 #include <cstddef>                      // for size_t
 
@@ -12,14 +12,14 @@
 #include "global.hpp"
 
 namespace solver {
-class EnumeratedPoint : public Point {
+class DiscretizedPoint : public Point {
   public:
-    EnumeratedPoint() = default;
-    virtual ~EnumeratedPoint() = default;
-    _NO_COPY_OR_MOVE(EnumeratedPoint);
+    DiscretizedPoint() = default;
+    virtual ~DiscretizedPoint() = default;
+    _NO_COPY_OR_MOVE(DiscretizedPoint);
 
-    /** Returns the enumerated value of this point. */
-    virtual long getCode() const = 0;
+    /** Returns the bin number associated with this point. */
+    virtual long getBinNumber() const = 0;
 
     // We leave distanceTo() and copy() unimplemented, but the others are OK.
     virtual bool equals(Point const &otherPoint) const override;
@@ -28,4 +28,4 @@ class EnumeratedPoint : public Point {
 };
 } /* namespace solver */
 
-#endif /* SOLVER_ENUMERATEDPOINT_HPP_ */
+#endif /* SOLVER_DISCRETIZED_POINT_HPP_ */

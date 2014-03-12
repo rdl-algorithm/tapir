@@ -37,24 +37,23 @@ class Solver {
     ~Solver();
     _NO_COPY_OR_MOVE(Solver);
 
-    enum RolloutMode {
-        ROLLOUT_RANDHEURISTIC = 0,
-        ROLLOUT_POL = 1
-    };
-
     /** Resets and initializes the solver. */
     void initialize();
-
     /** Sets the serializer to be used by this solver. */
-    void setSerializer(Serializer *serializer);
+    void setSerializer(std::unique_ptr<Serializer> serializer);
+    /** Saves the state of the solver to the given output stream. */
+    void saveStateTo(std::ostream &os);
+    /** Loads the state of the solver from the given input stream. */
+    void loadStateFrom(std::istream &is);
 
     /** Generates a starting policy for the solver, by generating the given
      * number (historiesPerStep) of episodes, and terminating episodes when the
      * depth reaches maximumDepth.
      */
     void genPol(long historiesPerStep, long maximumDepth);
-    /** Runs a single simulation up to a maximum of nSteps steps, returning
-     * the total discounted reward.
+    /** Runs a single simulation up to a maximum of nSteps steps, and generating
+     * historiesPerStep histories every step.
+     * The return value is the resulting total discounted reward.
      *
      * Also sets trajSt, trajActId, trajObs, and trajRew to be the sequences
      * of states, actions, observations, and immediate rewards;
@@ -65,12 +64,18 @@ class Solver {
      * totImpTime will be the total amount of time spent on generating new
      * episodes to improve the policy.
      */
-    double runSim(long nSteps, std::vector<long> &changeTimes,
+    double runSim(long nSteps, long historiesPerStep, std::vector<long> &changeTimes,
             std::vector<std::unique_ptr<State>> &trajSt,
             std::vector<std::unique_ptr<Action>> &trajAction,
             std::vector<std::unique_ptr<Observation>> &trajObs,
             std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
             double *totImpTime);
+
+    /** Attempts to find another belief node near enough to this one to be
+     * suitable for the policy-based rollout heuristic.
+     */
+    BeliefNode *getNNBelNode(BeliefNode *belief,
+                    double maxNnDistance, long maxNnComparisons);
 
     /* ------------------ Simple getters. ------------------- */
     /** Returns the policy. */
@@ -83,29 +88,21 @@ class Solver {
     ActionPool *getActionPool();
     /** Returns the observation pool. */
     ObservationPool *getObservationPool();
-
   private:
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
-    void singleSearch(double discountFactor, long maximumDepth);
+    void singleSearch(long maximumDepth);
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-            long startDepth, double discountFactor, long maximumDepth);
+            long startDepth, long maximumDepth);
     /** Continues a pre-existing history sequence from its endpoint. */
-    void continueSearch(HistorySequence *sequence,
-            double discountFactor, long maximumDepth);
-    /** Performs a backup on the given history sequence. */
-    void backup(HistorySequence *sequence);
+    void continueSearch(HistorySequence *sequence, long maximumDepth);
 
-    /** Uses a rollout method to select an action and get results. */
-    std::pair<Model::StepResult, double> getRolloutAction(BeliefNode *belNode,
-            State const &state, double startDiscount, double discountFactor);
-    /** Attempts to find another belief node near enough to this one to be
-     * suitable for the policy-based rollout heuristic.
-     */
-    BeliefNode *getNNBelNode(BeliefNode *belief,
-                    double maxNnDistance, long maxNnComparisons);
-    void updateHeuristicProbabilities(double valImprovement);
+    /* ------------------ Tree backup methods ------------------- */
+    /** Calculates the discounted total rewards for this sequence. */
+    void calculateDiscountedTotalRewards(HistorySequence *sequence);
+    /** Performs or negates a backup on the given sequence. */
+    void backup(HistorySequence *sequence, bool doBackup);
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
@@ -119,16 +116,17 @@ class Solver {
             long maximumDepth);
 
     /* ------------------ Methods for handling model changes ------------------- */
+    /** Applies the model changes that have been marked within the state pool */
     void applyChanges();
+    /** Fixes the mismatch between a modified sequence and the tree structure. */
     void fixLinks(HistorySequence *sequence);
-    /** Negates a backup on the given history sequence. */
-    void undoBackup(HistorySequence *sequence);
 
     /* ------------------ Private data fields ------------------- */
-    /** The serializer to be used with this solver. */
-    Serializer *serializer_;
     /** The random number generator used. */
     RandomGenerator *randGen_;
+    /** The serializer to be used with this solver. */
+    std::unique_ptr<Serializer> serializer_;
+
     /** The POMDP model */
     std::unique_ptr<Model> model_;
 
@@ -147,7 +145,9 @@ class Solver {
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;
 
+    /** The strategy to use when searching within the tree. */
     std::unique_ptr<SearchStrategy> searchStrategy_;
+    /** The strategy to use when rolling out. */
     std::unique_ptr<SearchStrategy> rolloutStrategy_;
 };
 } /* namespace solver */

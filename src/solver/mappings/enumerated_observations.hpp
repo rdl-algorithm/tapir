@@ -15,7 +15,7 @@
 namespace solver {
 class ActionPool;
 class BeliefNode;
-class EnumeratedPoint;
+class DiscretizedPoint;
 
 class ModelWithEnumeratedObservations : virtual public solver::Model {
 public:
@@ -24,28 +24,28 @@ public:
     _NO_COPY_OR_MOVE(ModelWithEnumeratedObservations);
 
     virtual std::unique_ptr<ObservationPool> createObservationPool() override;
-    virtual std::vector<std::unique_ptr<EnumeratedPoint>>
+    virtual std::vector<std::unique_ptr<DiscretizedPoint>>
     getAllObservationsInOrder() = 0;
 };
 
 class EnumeratedObservationPool: public solver::ObservationPool {
   public:
     EnumeratedObservationPool(
-            std::vector<std::unique_ptr<EnumeratedPoint>> observations);
+            std::vector<std::unique_ptr<DiscretizedPoint>> observations);
     virtual ~EnumeratedObservationPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationPool);
 
     virtual std::unique_ptr<ObservationMapping>
     createObservationMapping() override;
 private:
-  std::vector<std::unique_ptr<EnumeratedPoint>> observations_;
+  std::vector<std::unique_ptr<DiscretizedPoint>> observations_;
 };
 
 class EnumeratedObservationMap: public solver::ObservationMapping {
   public:
     friend class EnumeratedObservationTextSerializer;
     EnumeratedObservationMap(ActionPool *actionPool,
-            std::vector<std::unique_ptr<EnumeratedPoint>>
+            std::vector<std::unique_ptr<DiscretizedPoint>>
             const &allObservations);
 
     // Default destructor; copying and moving disallowed!
@@ -57,7 +57,7 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
   private:
-    std::vector<std::unique_ptr<EnumeratedPoint>> const &allObservations_;
+    std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations_;
     ActionPool *actionPool_;
     std::vector<std::unique_ptr<BeliefNode>> children_;
 };

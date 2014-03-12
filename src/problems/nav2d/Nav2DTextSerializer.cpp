@@ -85,7 +85,7 @@ void Nav2DTextSerializer::saveAction(solver::Action const *action,
         return;
     }
     Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
-    os << "#" << a.getCode() << ": ";
+    os << "#" << a.getBinNumber() << ": ";
     saveDouble(a.speed_, os, false, 1);
     os << "/";
     saveDouble(a.rotationalSpeed_, os, true, 3);

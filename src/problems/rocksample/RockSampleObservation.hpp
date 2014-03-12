@@ -6,13 +6,13 @@
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
-#include "solver/abstract-problem/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/DiscretizedPoint.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
 
 namespace rocksample {
-class RockSampleObservation : public solver::EnumeratedPoint {
+class RockSampleObservation : public solver::DiscretizedPoint {
     friend class RockSampleTextSerializer;
   public:
     RockSampleObservation();
@@ -29,7 +29,7 @@ class RockSampleObservation : public solver::EnumeratedPoint {
     std::size_t hash() const override;
     void print(std::ostream &os) const override;
 
-    long getCode() const override;
+    long getBinNumber() const override;
 
     bool isEmpty() const;
     bool isGood() const;

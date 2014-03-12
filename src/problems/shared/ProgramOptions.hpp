@@ -52,7 +52,7 @@ class ProgramOptions {
     virtual po::options_description getABTOptions() {
         po::options_description sbt("ABT settings");
         sbt.add_options()
-                ("ABT.nParticles", po::value<long>(),
+                ("ABT.nParticles", po::value<unsigned long>(),
                         "default number of particles per belief - this number"
                         " will be generated if particle depletion occurs.")
                 ("ABT.historiesPerStep", po::value<long>(),

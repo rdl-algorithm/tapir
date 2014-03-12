@@ -11,7 +11,7 @@ class RandomRolloutStrategy: public SearchStrategy {
     virtual ~RandomRolloutStrategy() = default;
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver, HistorySequence *sequence);
+           Solver *solver, HistorySequence *sequence, long maximumDepth) override;
   private:
     long maxNSteps_;
 };
@@ -19,12 +19,15 @@ class RandomRolloutStrategy: public SearchStrategy {
 class RandomRolloutInstance: public SearchInstance {
   public:
     RandomRolloutInstance(long maxNSteps,
-            Solver *solver, HistorySequence *sequence);
+            Solver *solver, HistorySequence *sequence, long maximumDepth);
 
-    virtual std::pair<SearchStatus, std::unique_ptr<Action>> getStatusAndNextAction() = 0;
+    virtual std::pair<SearchStatus, std::unique_ptr<Action>>
+    getStatusAndNextAction() override;
   private:
     long maxNSteps_;
     long currentNSteps_;
+};
+
 } /* namespace solver */
 
 #endif /* SOLVER_RANDOMROLLOUTSTRATEGY_HPP_ */

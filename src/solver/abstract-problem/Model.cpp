@@ -16,6 +16,7 @@
 
 #include "solver/search/SearchStrategy.hpp"
 #include "solver/search/UcbSearchStrategy.hpp"
+#include "solver/search/RandomRolloutStrategy.hpp"
 
 #include "Action.hpp"        // for Action
 #include "State.hpp"                    // for State
@@ -91,5 +92,13 @@ std::unique_ptr<StateIndex> Model::createStateIndex() {
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
     return std::make_unique<DefaultHistoryCorrector>(this);
+}
+
+std::unique_ptr<SearchStrategy> Model::createSearchStrategy() {
+    return std::make_unique<UcbSearchStrategy>(getUcbExploreCoefficient());
+}
+
+std::unique_ptr<SearchStrategy> Model::createRolloutStrategy() {
+    return std::make_unique<RandomRolloutStrategy>(2);
 }
 } /* namespace solver */

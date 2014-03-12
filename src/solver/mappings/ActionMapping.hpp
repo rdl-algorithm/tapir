@@ -36,9 +36,11 @@ class ActionMapping {
     virtual bool hasRolloutActions() const = 0;
     /** Returns a number of actions that should be attempted for this node. */
     virtual std::vector<std::unique_ptr<Action>> getRolloutActions() const = 0;
+    /** Returns a random action to use for a rollout. */
+    virtual std::unique_ptr<Action> getRandomRolloutAction() const = 0;
 
     /** Updates the calculation of which action is optimal. */
-    virtual void updateBestValue() = 0;
+    virtual void update() = 0;
     /** Chooses the action with the best expected value */
     virtual std::unique_ptr<Action> getBestAction() const = 0;
     /** Returns the best q-value */

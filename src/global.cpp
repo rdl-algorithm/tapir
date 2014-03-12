@@ -11,7 +11,7 @@ void show_message(std::string message, bool print, bool bp_branch) {
         std::cerr << message << std::endl;
     }
     if (bp_branch) {
-        // Do nothing! This is a nice place for a breakpoint!
+        std::cerr << "";
     }
 }
 

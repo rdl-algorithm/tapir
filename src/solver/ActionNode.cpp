@@ -6,6 +6,8 @@
 
 #include "global.hpp"                     // for make_unique
 
+#include "BeliefNode.hpp"
+
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
 #include "mappings/ObservationMapping.hpp"       // for ObservationMapping
@@ -18,7 +20,7 @@ ActionNode::ActionNode() :
 ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
     nParticles_(0),
     totalQValue_(0),
-    meanQValue_(0),
+    meanQValue_(-std::numeric_limits<double>::infinity()),
     obsMap_(std::move(mapping)) {
 }
 
@@ -26,19 +28,42 @@ ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
 ActionNode::~ActionNode() {
 }
 
-void ActionNode::updateQValue(double increase) {
-    totalQValue_ += increase;
+void ActionNode::changeTotalQValue(double deltaQ, long deltaNParticles) {
+    totalQValue_ += deltaQ;
+    nParticles_ += deltaNParticles;
+    recalculateQValue();
+}
+
+void ActionNode::updateSequenceCount(Observation const &observation,
+        double discountFactor, long deltaNParticles) {
+    BeliefNode *childBelief = getChild(observation);
+
+    long newSequenceCount = childBelief->getNParticles();
+    newSequenceCount -= childBelief->numberOfStartingSequences_;
+    newSequenceCount += childBelief->numberOfEndingSequences_;
+    long oldSequenceCount = newSequenceCount - deltaNParticles;
+
+    double oldChildQ = childBelief->getQValue();
+    childBelief->recalculateQValue();
+    double newChildQ = childBelief->getQValue();
+
+    if (oldSequenceCount != 0) {
+        totalQValue_ -= oldSequenceCount * discountFactor * oldChildQ;
+    }
+    if (newSequenceCount != 0) {
+        totalQValue_ += newSequenceCount * discountFactor * newChildQ;
+    }
+    nParticles_ += deltaNParticles;
+    recalculateQValue();
+}
+
+void ActionNode::recalculateQValue() {
     if (nParticles_ > 0) {
         meanQValue_ = totalQValue_ / nParticles_;
     } else {
-        meanQValue_ = 0;
+        totalQValue_ = 0;
+        meanQValue_ = -std::numeric_limits<double>::infinity();
     }
-}
-
-void ActionNode::updateQValue(double increase,
-        long deltaNParticles) {
-    nParticles_ += deltaNParticles;
-    updateQValue(increase);
 }
 
 long ActionNode::getNParticles() const {
@@ -49,7 +74,7 @@ double ActionNode::getTotalQValue () const {
     return totalQValue_;
 }
 
-double ActionNode::getMeanQValue () const {
+double ActionNode::getQValue () const {
     return meanQValue_;
 }
 

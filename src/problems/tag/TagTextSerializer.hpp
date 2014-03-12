@@ -17,7 +17,7 @@ class Solver;
 
 namespace tag {
 class TagTextSerializer: virtual public solver::TextSerializer,
-        virtual public solver::EnumeratedActionTextSerializer,
+        virtual public solver::DiscretizedActionTextSerializer,
         virtual public solver::DiscreteObservationTextSerializer {
   public:
     TagTextSerializer(solver::Solver *solver);

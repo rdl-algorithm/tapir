@@ -11,12 +11,14 @@
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"
 
+#include "RandomAccessSet.hpp"
 #include "global.hpp"
 
 namespace solver {
 class ActionPool;
 class ActionNode;
-class EnumeratedPoint;
+class DiscretizedPoint;
+class DiscretizedActionMapEntry;
 
 class ModelWithDiscretizedActions : virtual public solver::Model {
 public:
@@ -26,7 +28,7 @@ public:
 
     virtual std::unique_ptr<ActionPool> createActionPool() override;
     virtual long getNumberOfBins() = 0;
-    virtual std::unique_ptr<EnumeratedPoint> sampleAnAction(long code) = 0;
+    virtual std::unique_ptr<Action> sampleAnAction(long binNumber) = 0;
 };
 
 class DiscretizedActionPool: public solver::ActionPool {
@@ -37,7 +39,6 @@ class DiscretizedActionPool: public solver::ActionPool {
     _NO_COPY_OR_MOVE(DiscretizedActionPool);
 
     virtual std::unique_ptr<ActionMapping> createActionMapping() override;
-    virtual std::vector<long> generateActionOrder();
 private:
   ModelWithDiscretizedActions *model_;
   long numberOfBins_;
@@ -46,9 +47,11 @@ private:
 class DiscretizedActionMap: public solver::ActionMapping {
   public:
     friend class DiscretizedActionTextSerializer;
+    friend class DiscretizedActionMapEntry;
+
     DiscretizedActionMap(ObservationPool *observationPool,
             ModelWithDiscretizedActions *model,
-            long numberOfBins, std::vector<long> actionOrder);
+            long numberOfBins);
 
     // Default destructor; copying and moving disallowed!
     virtual ~DiscretizedActionMap() = default;
@@ -58,31 +61,45 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual ActionNode *createActionNode(Action const &action) override;
 
     virtual long getNChildren() const override;
-    virtual long size() const;
+    virtual std::vector<ActionMappingEntry const *> getChildEntries() const override;
 
     virtual bool hasRolloutActions() const override;
     virtual std::vector<std::unique_ptr<Action>> getRolloutActions() const override;
+    virtual std::unique_ptr<Action> getRandomRolloutAction() const override;
 
-    virtual bool hasActionToTry() const override;
-    virtual std::unique_ptr<Action> getNextActionToTry() override;
-
-    virtual void updateBestValue() override;
+    virtual void update() override;
     virtual std::unique_ptr<Action> getBestAction() const override;
     virtual double getBestMeanQValue() const override;
-    virtual std::vector<ActionNode *> getChildren() const override;
   private:
     ObservationPool *observationPool_;
     ModelWithDiscretizedActions *model_;
     long numberOfBins_;
 
-    std::vector<std::unique_ptr<ActionNode>> children_;
+    std::vector<std::unique_ptr<DiscretizedActionMapEntry>> entries_;
     long nChildren_;
 
-    std::vector<long> actionOrder_;
-    std::vector<long>::const_iterator nextActionIterator_;
+    abt::RandomAccessSet<long> binsToTry_;
 
-    long bestActionCode_;
+    long bestBinNumber;
     double bestMeanQValue_;
+};
+
+class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
+  public:
+    DiscretizedActionMapEntry(long binNumber,
+            DiscretizedActionMap *map,
+            std::unique_ptr<ActionNode> childNode);
+    virtual ~DiscretizedActionMapEntry() = default;
+    _NO_COPY_OR_MOVE(DiscretizedActionMapEntry);
+
+    virtual std::unique_ptr<Action> getAction() const override;
+    virtual ActionNode *getActionNode() const override;
+
+    virtual long getBinNumber() const;
+  private:
+    long binNumber_;
+    DiscretizedActionMap *map_;
+    std::unique_ptr<ActionNode> childNode_;
 };
 
 class DiscretizedActionTextSerializer: virtual public solver::Serializer {

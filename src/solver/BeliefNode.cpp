@@ -33,6 +33,8 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap) :
 
 BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
     id_(id),
+    numberOfStartingSequences_(0),
+    numberOfEndingSequences_(0),
     tLastAddedParticle_(0),
     tNNComp_(-1.0),
     nnBel_(nullptr),
@@ -44,24 +46,12 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
 BeliefNode::~BeliefNode() {
 }
 
-bool BeliefNode::hasActionToTry() const {
-    return actionMap_->hasRolloutActions();
-}
-
-std::vector<std::unique_ptr<Action>> BeliefNode::getRolloutActions() const {
-    return actionMap_->getRolloutActions();
-}
-
 std::unique_ptr<Action> BeliefNode::getBestAction() const {
     return actionMap_->getBestAction();
 }
 
-double BeliefNode::getBestMeanQValue() const {
+double BeliefNode::getQValue() const {
     return actionMap_->getBestMeanQValue();
-}
-
-void BeliefNode::updateBestValue() {
-    actionMap_->updateBestValue();
 }
 
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
@@ -80,14 +70,8 @@ HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
     return particles_.get(index);
 }
 
-void BeliefNode::updateQValue(Action const &action, double increase) {
-    updateQValue(action, increase, 0);
-}
-
-void BeliefNode::updateQValue(Action const &action, double increase,
-        long deltaNParticles) {
-    actionMap_->getActionNode(action)->updateQValue(increase, deltaNParticles);
-    updateBestValue();
+void BeliefNode::recalculateQValue() {
+    actionMap_->update();
 }
 
 double BeliefNode::distL1Independent(BeliefNode *b) const {

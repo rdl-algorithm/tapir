@@ -53,12 +53,17 @@ class HistorySequence {
             double immediateReward);
 
 
-    /** Returns true iff the last state is terminal. */
-    bool isTerminal() const;
+    /** Returns the starting depth of this sequence. */
+    long getStartDepth() const;
     /** Returns the length of this sequence. */
     long getLength() const;
     /** Returns the history entry in this sequence with the given ID. */
     HistoryEntry *getEntry(long entryId) const;
+    /** Returns the first entry in this sequence. */
+    HistoryEntry *getFirstEntry() const;
+    /** Returns the last entry in this sequence. */
+    HistoryEntry *getLastEntry() const;
+
     /** Returns the states in this sequence as a vector. */
     std::vector<State const *> getStates() const;
 
@@ -80,8 +85,6 @@ class HistorySequence {
     /** The starting depth of this sequence. */
     long startDepth_;
 
-    /** True iff this sequence ends in a terminal state. */
-    bool isTerminal_;
     /** Usually -1, but will take a non-negative value iff the links between
      * his sequence and the belief tree have been invalidated and must be
      * fixed - this should only happen when history sequences are being

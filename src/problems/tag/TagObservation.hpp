@@ -7,7 +7,7 @@
 #include <vector>                       // for vector
 
 #include "problems/shared/GridPosition.hpp"
-#include "solver/abstract-problem/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/DiscretizedPoint.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
@@ -15,12 +15,10 @@
 namespace tag {
 class TagModel;
 
-class TagObservation : public solver::EnumeratedPoint {
+class TagObservation : public solver::Point {
     friend class TagTextSerializer;
   public:
-    TagObservation(TagModel *model, GridPosition myPosition,
-            bool seesOpponent = false);
-    TagObservation(TagModel *model, long code);
+    TagObservation(GridPosition myPosition, bool seesOpponent = false);
 
     virtual ~TagObservation() = default;
     _NO_COPY_OR_MOVE(TagObservation);
@@ -31,13 +29,10 @@ class TagObservation : public solver::EnumeratedPoint {
     std::size_t hash() const override;
     void print(std::ostream &os) const override;
 
-    long getCode() const override;
-
     GridPosition getPosition() const;
     bool seesOpponent() const;
 
   private:
-    TagModel *model_;
     GridPosition position_;
     bool seesOpponent_;
 };

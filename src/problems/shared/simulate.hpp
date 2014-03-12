@@ -94,8 +94,8 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     solver::Solver solver(&randGen, std::move(newModel));
     std::unique_ptr<solver::Serializer> serializer(
             std::make_unique<SerializerType>(&solver));
-    solver.setSerializer(serializer.get());
-    serializer->load(inFile);
+    solver.setSerializer(std::move(serializer));
+    solver.loadStateFrom(inFile);
     inFile.close();
 
     std::vector<long> changeTimes;
@@ -122,7 +122,8 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         double totT;
         double totChTime, totImpTime;
         tStart = std::clock();
-        val = solver.runSim(nSteps, changeTimes, trajSt, trajAction, trajObs,
+        val = solver.runSim(nSteps, model->getNumberOfHistoriesPerStep(),
+                changeTimes, trajSt, trajAction, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
         totT = (double)(std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
 
@@ -147,11 +148,12 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
     if (savePolicy) {
         // Write the final policy to a file.
-        cout << "Saving final policy" << endl;
+        cout << "Saving final policy..." << endl;
         std::ofstream outFile;
         outFile.open("final.pol");
-        serializer->save(outFile);
+        solver.saveStateTo(outFile);
         outFile.close();
+        cout << "Finished saving." << endl;
     }
 
     return 0;

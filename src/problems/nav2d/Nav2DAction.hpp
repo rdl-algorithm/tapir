@@ -7,7 +7,7 @@
 #include <vector>                       // for vector
 
 #include "solver/abstract-problem/Action.hpp"
-#include "solver/abstract-problem/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/DiscretizedPoint.hpp"
 
 namespace nav2d {
 class Nav2DModel;
@@ -26,7 +26,7 @@ enum class ActionType {
     END // Not an action, but must be last to count the number of actions.
 };
 
-class Nav2DAction : public solver::EnumeratedPoint {
+class Nav2DAction : public solver::DiscretizedPoint {
     friend class Nav2DTextSerializer;
   public:
     Nav2DAction(ActionType type, double speed, double rotationalSpeed);
@@ -47,9 +47,8 @@ class Nav2DAction : public solver::EnumeratedPoint {
 
     double getSpeed() const;
     double getRotationalSpeed() const;
-
     ActionType getType() const;
-    long getCode() const;
+    long getBinNumber() const override;
 
   private:
     ActionType type_;

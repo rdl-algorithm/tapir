@@ -25,7 +25,7 @@ HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
     reward_(0),
     totalDiscountedReward_(0),
     owningSequence_(owningSequence),
-    owningBeliefNode_(nullptr),
+    associatedBeliefNode_(nullptr),
     changeFlags_(ChangeFlags::UNCHANGED) {
 }
 
@@ -42,6 +42,15 @@ HistoryEntry::~HistoryEntry() {
 State const *HistoryEntry::getState() const {
     return stateInfo_->getState();
 }
+Action const *HistoryEntry::getAction() const{
+    return action_.get();
+}
+Observation const *HistoryEntry::getObservation() const {
+    return observation_.get();
+}
+BeliefNode *HistoryEntry::getAssociatedBeliefNode() const {
+    return associatedBeliefNode_;
+}
 
 void HistoryEntry::resetChangeFlags() {
     changeFlags_ = ChangeFlags::UNCHANGED;
@@ -52,16 +61,16 @@ void HistoryEntry::setChangeFlags(ChangeFlags flags) {
 }
 
 void HistoryEntry::registerNode(BeliefNode *node) {
-    if (owningBeliefNode_ == node) {
+    if (associatedBeliefNode_ == node) {
         return;
     }
-    if (owningBeliefNode_ != nullptr) {
-        owningBeliefNode_->removeParticle(this);
-        owningBeliefNode_ = nullptr;
+    if (associatedBeliefNode_ != nullptr) {
+        associatedBeliefNode_->removeParticle(this);
+        associatedBeliefNode_ = nullptr;
     }
     if (node != nullptr) {
-        owningBeliefNode_ = node;
-        owningBeliefNode_->addParticle(this);
+        associatedBeliefNode_ = node;
+        associatedBeliefNode_->addParticle(this);
     }
 }
 

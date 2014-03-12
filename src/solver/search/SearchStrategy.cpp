@@ -1,51 +1,52 @@
 #include "SearchStrategy.hpp"
 
 #include "solver/BeliefNode.hpp"
+#include "solver/BeliefTree.hpp"
 #include "solver/HistoryEntry.hpp"
 #include "solver/HistorySequence.hpp"
+#include "solver/Solver.hpp"
+#include "solver/StatePool.hpp"
 
 #include "SearchStatus.hpp"
 
 namespace solver {
 SearchInstance::SearchInstance(Solver *solver,  HistorySequence *sequence,
-        BeliefNode *currentNode, double discountFactor, long maximumDepth) :
+        long maximumDepth) :
                 solver_(solver),
                 model_(solver_->getModel()),
                 sequence_(sequence),
-                currentNode_(currentNode),
-                discountFactor_(discountFactor),
-                maximumDepth_(maximumDepth) {
+                currentNode_(sequence->getLastEntry()->getAssociatedBeliefNode()),
+                discountFactor_(model_->getDiscountFactor()),
+                maximumDepth_(maximumDepth),
+                status_(SearchStatus::UNINITIALIZED) {
 }
 
-SearchInstance::SearchInstance(Solver *solver, HistorySequence *sequence) :
-        SearchInstance(solver, sequence,
-                sequence->getEntry(sequence->getLength()-1)->owningBeliefNode_,
-                solver->getModel()->getDiscountFactor(),
-                solver->getModel()->getMaximumDepth()) {
+SearchStatus SearchInstance::initialize() {
+    status_ = SearchStatus::INITIAL;
+    return status_;
 }
 
 SearchStatus SearchInstance::extendSequence() {
-    HistoryEntry *currentEntry = sequence_->getEntry(
-            sequence_->getLength() - 1);
-    SearchStatus status = SearchStatus::INITIAL;
+    if (status_ != SearchStatus::INITIAL) {
+        debug::show_message("WARNING: Attempted to search without initializing.");
+        return status_;
+    }
+    HistoryEntry *currentEntry = sequence_->getLastEntry();
+    status_ = SearchStatus::INITIAL;
     if (model_->isTerminal(*currentEntry->getState())) {
         debug::show_message("WARNING: Attempted to continue sequence from"
                 " a terminal state.");
-        sequence_->isTerminal_ = true;
-        status = SearchStatus::HIT_TERMINAL_STATE;
-        finishSearch(status);
-        return status;
+        status_ = SearchStatus::HIT_TERMINAL_STATE;
+        return status_;
     }
-    long currentDepth = sequence_->startDepth_ + currentEntry->entryId_;
-    double currentDiscount = currentEntry->discount_;
-    while (true) {
+    for (long currentDepth = sequence_->getStartDepth() + currentEntry->entryId_;; currentDepth++) {
         if (currentDepth == maximumDepth_) {
             // We have hit the depth limit.
-            status = SearchStatus::HIT_DEPTH_LIMIT;
+            status_ = SearchStatus::HIT_DEPTH_LIMIT;
             break;
         }
         std::unique_ptr<Action> action;
-        std::tie(status, action) = getStatusAndNextAction();
+        std::tie(status_, action) = getStatusAndNextAction();
         if (action == nullptr) {
             break;
         }
@@ -57,28 +58,26 @@ SearchStatus SearchInstance::extendSequence() {
                 result.transitionParameters);
         currentEntry->observation_ = result.observation->copy();
 
-        // Now we continue to the next history entry.
-        currentDepth++;
+        // Now we make a new history entry!
         // Add the next state to the pool
         StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(
                 *result.nextState);
         // Step forward in the history, and update the belief node.
-        currentDiscount *= discountFactor_;
-        currentEntry = sequence_->addEntry(nextStateInfo, currentDiscount);
+        currentEntry = sequence_->addEntry(nextStateInfo,
+                currentEntry->discount_ * discountFactor_);
         currentNode_ = solver_->getPolicy()->createOrGetChild(
                 currentNode_, *result.action, *result.observation);
         currentEntry->registerNode(currentNode_);
         if (result.isTerminal) {
-            sequence_->isTerminal_ = true;
-            status = SearchStatus::HIT_TERMINAL_STATE;
+            status_ = SearchStatus::HIT_TERMINAL_STATE;
             break;
         }
     }
-    finishSearch(status);
-    return status;
+    return status_;
 }
 
-void SearchInstance::finishSearch(SearchStatus status) {
+SearchStatus SearchInstance::finalize() {
+    return status_;
 }
 
 } /* namespace solver */

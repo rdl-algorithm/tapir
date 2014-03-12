@@ -34,7 +34,7 @@ namespace po = boost::program_options;
 namespace solver {
 class ActionMapping;
 class StatePool;
-class EnumeratedPoint;
+class DiscretizedPoint;
 } /* namespace solver */
 
 namespace nav2d {
@@ -156,8 +156,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
             std::ostream &os) override;
 
     virtual long getNumberOfBins() override;
-    virtual std::unique_ptr<solver::EnumeratedPoint> sampleAnAction(
-            long code) override;
+    virtual std::unique_ptr<solver::Action> sampleAnAction(long binNumber) override;
 
     virtual double getMaxObservationDistance() override;
 

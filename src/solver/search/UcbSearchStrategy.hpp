@@ -11,7 +11,7 @@ class UcbSearchStrategy: public SearchStrategy {
     virtual ~UcbSearchStrategy() = default;
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver, HistorySequence *sequence);
+           Solver *solver, HistorySequence *sequence, long maximumDepth) override;
   private:
     double explorationCoefficient_;
 };
@@ -19,11 +19,15 @@ class UcbSearchStrategy: public SearchStrategy {
 class UcbSearchInstance: public SearchInstance {
   public:
     UcbSearchInstance(double explorationCoefficient,
-            Solver *solver, HistorySequence *sequence);
+            Solver *solver, HistorySequence *sequence,
+            long maximumDepth);
 
-    virtual std::pair<SearchStatus, std::unique_ptr<Action>> getStatusAndNextAction() = 0;
+    virtual std::pair<SearchStatus, std::unique_ptr<Action>>
+    getStatusAndNextAction() override;
   private:
     double explorationCoefficient_;
-}; /* namespace solver */
+};
+
+} /* namespace solver */
 
 #endif /* SOLVER_UCBSEARCHSTRATEGY_HPP_ */

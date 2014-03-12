@@ -9,7 +9,7 @@
 #include "solver/BeliefTree.hpp"
 #include "solver/abstract-problem/Model.hpp"
 
-#include "solver/abstract-problem/EnumeratedPoint.hpp"
+#include "solver/abstract-problem/DiscretizedPoint.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 
 #include "ActionMapping.hpp"
@@ -32,7 +32,7 @@ std::unique_ptr<ObservationPool>
 
 /* --------------------- EnumeratedObservationPool --------------------- */
 EnumeratedObservationPool::EnumeratedObservationPool(
-        std::vector<std::unique_ptr<EnumeratedPoint>> observations) :
+        std::vector<std::unique_ptr<DiscretizedPoint>> observations) :
     observations_(std::move(observations)) {
 }
 
@@ -45,7 +45,7 @@ std::unique_ptr<ObservationMapping>
 
 /* ---------------------- EnumeratedObservationMap ---------------------- */
 EnumeratedObservationMap::EnumeratedObservationMap(ActionPool *actionPool,
-        std::vector<std::unique_ptr<EnumeratedPoint>> const &allObservations) :
+        std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations) :
                 allObservations_(allObservations),
                 actionPool_(actionPool),
                 children_(allObservations_.size()) {
@@ -57,13 +57,13 @@ long EnumeratedObservationMap::size() const {
 
 BeliefNode* EnumeratedObservationMap::getBelief(
         Observation const &obs) const {
-    long code = static_cast<EnumeratedPoint const &>(obs).getCode();
+    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
     return children_[code].get();
 }
 
 BeliefNode* EnumeratedObservationMap::createBelief(
         const Observation& obs) {
-    long code = static_cast<EnumeratedPoint const &>(obs).getCode();
+    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
     children_[code] = std::make_unique<BeliefNode>(
             actionPool_->createActionMapping());
     return children_[code].get();

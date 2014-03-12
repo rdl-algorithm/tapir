@@ -7,7 +7,7 @@
 #include <vector>                       // for vector
 
 #include "solver/abstract-problem/Action.hpp"
-#include "solver/abstract-problem/EnumeratedPoint.hpp"             // for EnumeratedPoint
+#include "solver/abstract-problem/DiscretizedPoint.hpp"             // for DiscretizedPoint
 
 namespace tag {
 enum class ActionType : long {
@@ -18,7 +18,7 @@ enum class ActionType : long {
     TAG = 4,
 };
 
-class TagAction : public solver::EnumeratedPoint {
+class TagAction : public solver::DiscretizedPoint {
     friend class TagTextSerializer;
   public:
     TagAction(ActionType actionType);
@@ -31,8 +31,7 @@ class TagAction : public solver::EnumeratedPoint {
     double distanceTo(solver::Action const &otherAction) const override;
     void print(std::ostream &os) const override;
 
-    long getCode() const override;
-
+    long getBinNumber() const override;
     ActionType getActionType() const;
   private:
     ActionType actionType_;

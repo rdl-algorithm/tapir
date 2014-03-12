@@ -57,7 +57,7 @@ void RockSampleAction::print(std::ostream &os) const {
     }
 }
 
-long RockSampleAction::getCode() const {
+long RockSampleAction::getBinNumber() const {
     long code = static_cast<long>(actionType_);
     if (actionType_ == ActionType::CHECK) {
         code += rockNo_;

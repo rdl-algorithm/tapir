@@ -26,22 +26,26 @@ class ActionNode {
     ~ActionNode();
     _NO_COPY_OR_MOVE(ActionNode);
 
-    /** Updates the q-value, as would occur on adding the given amount to the
-     * total (negative for a decrease).
+    /** Changes the q-value directly - this should be used only for the end
+     * of a sequence.
      */
-    void updateQValue(double increase);
-    /** Updates the q-value, as would occur on adding the given amount to the
-     * total, and changing the number of particles by deltaNParticles (e.g.
-     * +1 to count a new particle; -1 to remove a particle.
+    void changeTotalQValue(double deltaQ, long deltaNParticles);
+    /** Updates the # of sequences that pass through this action node
+     * with the given observation, and keep going from there.
      */
-    void updateQValue(double increase, long deltaNParticles);
+    void updateSequenceCount(Observation const &observation,
+            double discountFactor, long deltaNParticles);
+    /** Recalculates the mean q-value; to be used after the total or the
+     * particle count changes.
+     */
+    void recalculateQValue();
 
     /** Returns the number of particles counted towards the q-value. */
     long getNParticles() const;
     /** Returns the total q-value for this node. */
-    double getTotalQValue () const;
-    /** Returns the mean q-value for this node. */
-    double getMeanQValue () const;
+    double getTotalQValue() const;
+    /** Returns the q-value for this node. */
+    double getQValue() const;
 
     /** Returns the observation mapping for this node. */
     ObservationMapping *getMapping();

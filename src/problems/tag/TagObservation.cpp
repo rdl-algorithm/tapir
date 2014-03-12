@@ -14,23 +14,14 @@
 #include "TagModel.hpp"
 
 namespace tag {
-TagObservation::TagObservation(TagModel *model, GridPosition position,
+TagObservation::TagObservation(GridPosition position,
             bool _seesOpponent) :
-                    model_(model),
                     position_(position),
                     seesOpponent_(_seesOpponent) {
 }
-
-TagObservation::TagObservation(TagModel *model, long code) :
-        model_(model),
-        position_((code / 2) / model_->nCols_,
-                (code / 2) % model_->nCols_),
-        seesOpponent_(code % 2) {
-}
-
 std::unique_ptr<solver::Observation>
 TagObservation::copy() const {
-    return std::make_unique<TagObservation>(model_, position_, seesOpponent_);
+    return std::make_unique<TagObservation>(position_, seesOpponent_);
 }
 
 double TagObservation::distanceTo(
@@ -48,7 +39,11 @@ bool TagObservation::equals(
 }
 
 std::size_t TagObservation::hash() const {
-    return getCode();
+    std::size_t hashValue = 0;
+    abt::hash_combine(hashValue, position_.i);
+    abt::hash_combine(hashValue, position_.j);
+    abt::hash_combine(hashValue, seesOpponent_);
+    return hashValue;
 }
 
 void TagObservation::print(std::ostream &os) const {
@@ -58,11 +53,6 @@ void TagObservation::print(std::ostream &os) const {
     } else {
         os << "UNSEEN";
     }
-}
-
-long TagObservation::getCode() const {
-    return (seesOpponent_ ? 0 : 1) + 2 * (position_.j +
-            model_->nCols_ * position_.i);
 }
 
 GridPosition TagObservation::getPosition() const {

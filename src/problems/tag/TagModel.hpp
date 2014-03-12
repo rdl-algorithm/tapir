@@ -124,8 +124,7 @@ class TagModel: virtual public ModelWithProgramOptions,
             solver::State const &state,
             std::ostream &os) override;
 
-    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
-    getAllActionsInOrder() override;
+    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
 
   private:
     /** Initialises the required data structures and variables */

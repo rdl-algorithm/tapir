@@ -63,7 +63,7 @@ void RockSampleObservation::print(std::ostream &os) const {
     }
 }
 
-long RockSampleObservation::getCode() const {
+long RockSampleObservation::getBinNumber() const {
     return isEmpty_ ? 0 : (isGood_ ? 1 : 2);
 }
 

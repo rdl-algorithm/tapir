@@ -1,5 +1,10 @@
 #include "UcbSearchStrategy.hpp"
 
+#include "solver/mappings/ActionMapping.hpp"
+
+#include "solver/ActionNode.hpp"
+#include "solver/BeliefNode.hpp"
+
 namespace solver {
 
 UcbSearchStrategy::UcbSearchStrategy(double explorationCoefficient) :
@@ -7,19 +12,18 @@ UcbSearchStrategy::UcbSearchStrategy(double explorationCoefficient) :
 }
 
 std::unique_ptr<SearchInstance> UcbSearchStrategy::createSearchInstance(
-       Solver *solver, HistorySequence *sequence) {
+       Solver *solver, HistorySequence *sequence, long maximumDepth) {
     return std::make_unique<UcbSearchInstance>(explorationCoefficient_,
-            solver, sequence);
+            solver, sequence, maximumDepth);
 }
 
 UcbSearchInstance::UcbSearchInstance(double explorationCoefficient,
-        Solver *solver, HistorySequence *sequence) :
-    SearchInstance(solver, sequence),
+        Solver *solver, HistorySequence *sequence, long maximumDepth) :
+    SearchInstance(solver, sequence, maximumDepth),
     explorationCoefficient_(explorationCoefficient) {
 }
 
-virtual std::pair<SearchStatus, std::unique_ptr<Action>>
-UcbSearchInstance::getStatusAndNextAction() {
+std::pair<SearchStatus, std::unique_ptr<Action>> UcbSearchInstance::getStatusAndNextAction() {
     double bestValue = -std::numeric_limits<double>::infinity();
     std::unique_ptr<Action> bestAction = nullptr;
     ActionMapping *mapping = currentNode_->getMapping();
@@ -28,8 +32,11 @@ UcbSearchInstance::getStatusAndNextAction() {
     }
     for (ActionMappingEntry const *entry : currentNode_->getMapping()->getChildEntries()) {
         ActionNode *node = entry->getActionNode();
-        double tmpValue = node->getMeanQValue() + (explorationCoefficient_ * std::sqrt(
+        double tmpValue = node->getQValue() + (explorationCoefficient_ * std::sqrt(
                         std::log(currentNode_->getNParticles() / node->getNParticles())));
+        if (!std::isfinite(tmpValue)) {
+            debug::show_message("ERROR: Infinite/NaN value!?");
+        }
         if (bestValue < tmpValue) {
             bestValue = tmpValue;
             bestAction = entry->getAction();

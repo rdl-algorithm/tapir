@@ -45,8 +45,8 @@ using std::endl;
 
 namespace solver {
 Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
-    serializer_(nullptr),
     randGen_(randGen),
+    serializer_(nullptr),
     model_(std::move(model)),
     actionPool_(model_->createActionPool()),
     observationPool_(model_->createObservationPool()),
@@ -54,15 +54,11 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     allHistories_(std::make_unique<Histories>()),
     policy_(std::make_unique<BeliefTree>()),
     historyCorrector_(model_->createHistoryCorrector()),
-    lastRolloutMode_(ROLLOUT_RANDHEURISTIC),
-    heuristicExploreCoefficient_(this->model_->getHeuristicExploreCoefficient()),
-    timeUsedPerHeuristic_{ 1.0, 1.0 },
-    heuristicWeight_{ 1.0, 1.0 },
-    heuristicProbability_{ 0.5, 0.5 },
-    heuristicUseCount_{ 1, 1 } {
+    searchStrategy_(model_->createSearchStrategy()),
+    rolloutStrategy_(model_->createRolloutStrategy()) {
 }
 
-// Default destructor, not in .hpp
+// Default destructor
 Solver::~Solver() {
 }
 
@@ -73,234 +69,156 @@ void Solver::initialize() {
             actionPool_->createActionMapping(), 0));
     historyCorrector_->setSolver(this);
 }
-
-void Solver::setSerializer(Serializer *serializer) {
-    serializer_ = serializer;
+void Solver::setSerializer(std::unique_ptr<Serializer> serializer) {
+    serializer_ = std::move(serializer);
 }
+void Solver::saveStateTo(std::ostream &os) {
+    serializer_->save(os);
+}
+void Solver::loadStateFrom(std::istream &is) {
+    serializer_->load(is);
+}
+
 
 void Solver::genPol(long historiesPerStep, long maximumDepth) {
     // Start expanding the tree.
     for (long i = 0; i < historiesPerStep; i++) {
-        singleSearch(model_->getDiscountFactor(), maximumDepth);
+        singleSearch(maximumDepth);
     }
-    cout << "MDP heuristic used ";
-    cout << heuristicUseCount_[ROLLOUT_RANDHEURISTIC] - 1 << " times; Took ";
-    cout << timeUsedPerHeuristic_[ROLLOUT_RANDHEURISTIC] << "ms" << endl;
-    cout << "NN heuristic used ";
-    cout << heuristicUseCount_[ROLLOUT_POL] - 1 << " times; Took ";
-    cout << timeUsedPerHeuristic_[ROLLOUT_POL] << "ms" << endl;
 }
 
-void Solver::singleSearch(double discountFactor, long maximumDepth) {
+void Solver::singleSearch(long maximumDepth) {
     StateInfo *stateInfo = allStates_->createOrGetInfo(*model_->sampleAnInitState());
-    singleSearch(policy_->getRoot(), stateInfo, 0, discountFactor, maximumDepth);
+    singleSearch(policy_->getRoot(), stateInfo, 0, maximumDepth);
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-        long startDepth, double discountFactor, long maximumDepth) {
+        long startDepth, long maximumDepth) {
     HistorySequence *sequence = allHistories_->addNew(startDepth);
     HistoryEntry *entry = sequence->addEntry(startStateInfo,
-            std::pow(discountFactor, startDepth));
+            std::pow(model_->getDiscountFactor(), startDepth));
     entry->registerNode(startNode);
-    continueSearch(sequence, discountFactor, maximumDepth);
+    continueSearch(sequence, maximumDepth);
 }
 
-void Solver::continueSearch(HistorySequence *sequence,
-        double discountFactor, long maximumDepth) {
-    while (true) {
-        HistoryEntry *lastEntry = sequence->getEntry(sequence->getLength() - 1);
-        if (model_->isTerminal(*lastEntry->getState())) {
-            debug::show_message("WARNING: Attempted to continue sequence from"
-                    " a terminal state.");
+void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
+    if (model_->isTerminal(*sequence->getLastEntry()->getState())) {
+        debug::show_message("WARNING: Attempted to continue sequence from a terminal state.");
+        return;
+    }
+    SearchStatus status = SearchStatus::UNINITIALIZED;
+
+    std::unique_ptr<SearchInstance> searchInstance = nullptr;
+    searchInstance = searchStrategy_->createSearchInstance(this, sequence, maximumDepth);
+    status = searchInstance->initialize();
+    if (status != SearchStatus::INITIAL) {
+        debug::show_message("WARNING: Search algorithm could not initialize!?");
+    }
+    status = searchInstance->extendSequence();
+    if (status == SearchStatus::REACHED_ROLLOUT_NODE) {
+        searchInstance = rolloutStrategy_->createSearchInstance(this, sequence,
+                maximumDepth);
+        status = searchInstance->initialize();
+        if (status != SearchStatus::INITIAL) {
+            debug::show_message("WARNING: Rollout algorithm could not initialize!?");
         }
+        status = searchInstance->extendSequence();
     }
-    HistorySequence *currHistSeq = sequence;
-    HistoryEntry *currHistEntry = sequence->getEntry(
-            sequence->histSeq_.size() - 1);
-    double currentDiscount = currHistEntry->discount_;
-    BeliefNode *currNode = currHistEntry->owningBeliefNode_;
-
-    BeliefNode *sequenceRoot = sequence->getEntry(0)->owningBeliefNode_;
-    double initialRootQValue = sequenceRoot->getBestMeanQValue();
-
-    bool rolloutUsed = false;
-    bool done = model_->isTerminal(*currHistEntry->getState());
-    if (done) {
-        debug::show_message("WARNING: Attempted to continue sequence from"
-                " a terminal state.");
-    }
-
-    long currentDepth = currHistSeq->startDepth_ + currHistEntry->entryId_ + 1;
-    while (!done && currentDepth <= maximumDepth) {
-        currentDepth++;
-        Model::StepResult result;
-        double qVal = 0;
-        if (!currNode->hasActionToTry()) {
-            // If all actions have been attempted, use UCB
-            std::unique_ptr<Action> action = currNode->getSearchAction();
-            result = model_->generateStep(*currHistEntry->getState(), *action);
-            done = result.isTerminal;
-        } else {
-            // Otherwise use the rollout method
-            std::tie(result, qVal) = getRolloutAction(currNode,
-                        *currHistEntry->getState(), currentDiscount,
-                        discountFactor);
-            rolloutUsed = true;
-            done = true;
+    if (status == SearchStatus::ROLLOUT_COMPLETE || status == SearchStatus::HIT_DEPTH_LIMIT) {
+        HistoryEntry *lastEntry = sequence->getLastEntry();
+        State const *lastState = lastEntry->getState();
+        if (model_->isTerminal(*lastState)) {
+            debug::show_message("ERROR: Status should be terminal, but it wasn't!");
         }
-        sequence->isTerminal_ = result.isTerminal;
-        currHistEntry->reward_ = result.reward;
-        currHistEntry->action_ = result.action->copy();
-        currHistEntry->transitionParameters_ = std::move(
-                result.transitionParameters);
-        currHistEntry->observation_ = result.observation->copy();
-
-        // Add the next state to the pool
-        StateInfo *nextStateInfo = allStates_->createOrGetInfo(*result.nextState);
-
-        // Step forward in the history, and update the belief node.
-        currentDiscount *= discountFactor;
-        currHistEntry = currHistSeq->addEntry(nextStateInfo, currentDiscount);
-        currNode = policy_->createOrGetChild(currNode, *result.action,
-                *result.observation);
-        currHistEntry->registerNode(currNode);
-
-        if (rolloutUsed) {
-            // Assign a heuristic value to the final history entry.
-            currHistEntry->totalDiscountedReward_ = qVal;
-        }
+        lastEntry->totalDiscountedReward_ = model_->getHeuristicValue(*lastState);
+    } else if (status == SearchStatus::HIT_TERMINAL_STATE) {
+    } else {
+        debug::show_message("ERROR: Search failed!?");
+        return;
     }
-    backup(currHistSeq);
-    if (rolloutUsed) {
-        updateHeuristicProbabilities(
-                sequenceRoot->getBestMeanQValue() - initialRootQValue);
-    }
-    rolloutUsed = false;
+    backup(sequence, true);
 }
 
-void Solver::backup(HistorySequence *sequence) {
+void Solver::backup(HistorySequence *sequence, bool doBackup) {
     std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
-            sequence->histSeq_.rbegin());
+                sequence->histSeq_.rbegin());
     double totalReward = (*itHist)->totalDiscountedReward_;
-    (*itHist)->hasBeenBackedUp_ = true;
     if ((*itHist)->action_ != nullptr) {
         debug::show_message("ERROR: End of sequence has an action!?");
     }
+
+    if (doBackup) {
+        if ((*itHist)->hasBeenBackedUp_) {
+            // do nothing
+        } else {
+            (*itHist)->associatedBeliefNode_->numberOfEndingSequences_++;
+        }
+    } else {
+        if ((*itHist)->hasBeenBackedUp_) {
+            (*itHist)->associatedBeliefNode_->numberOfEndingSequences_--;
+        } else {
+            debug::show_message("ERROR: Trying to undo but not backed up!?");
+        }
+    }
+
+    (*itHist)->hasBeenBackedUp_ = doBackup;
     itHist++;
     bool isFirst = true;
-    bool propagating = true;
-    double deltaQValue = 0;
     for (; itHist != sequence->histSeq_.rend(); itHist++) {
         HistoryEntry *entry = itHist->get();
-        BeliefNode *node = entry->owningBeliefNode_;
+        if (!doBackup && !entry->hasBeenBackedUp_) {
+            debug::show_message("ERROR: Trying to undo but not backed up!?");
+        }
+        BeliefNode *node = entry->associatedBeliefNode_;
+
+        long deltaNParticles = 0;
+        if (doBackup && !entry->hasBeenBackedUp_) {
+            deltaNParticles = 1;
+        } else if (!doBackup && entry->hasBeenBackedUp_) {
+            deltaNParticles = -1;
+        }
+
         double previousTotalReward;
         if (entry->hasBeenBackedUp_) {
             previousTotalReward = entry->totalDiscountedReward_;
         } else {
             previousTotalReward = 0;
         }
-        totalReward = entry->totalDiscountedReward_ = entry->discount_
-                * entry->reward_ + totalReward;
-        if (propagating) {
-            if (isFirst) {
-                deltaQValue = totalReward - previousTotalReward;
-            } else {
-                deltaQValue *= model_->getDiscountFactor();
-            }
-            double previousQValue = node->getBestMeanQValue();
-            node->updateQValue(*entry->action_, deltaQValue,
-                    entry->hasBeenBackedUp_ ? 0 : +1);
-            deltaQValue = node->getBestMeanQValue() - previousQValue;
-            if (deltaQValue == 0) {
-                propagating = false;
-            }
-        }
-        entry->hasBeenBackedUp_ = true;
-    }
-}
-
-void Solver::undoBackup(HistorySequence *sequence) {
-    std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist =
-            (sequence->histSeq_.rbegin());
-    if (!(*itHist)->hasBeenBackedUp_) {
-        debug::show_message("ERROR: Trying to undo but not backed up!?");
-    }
-    (*itHist)->hasBeenBackedUp_ = false;
-    itHist++;
-    bool isFirst = true;
-    bool propagating = true;
-    double deltaQValue = 0;
-    for (; itHist != sequence->histSeq_.rend(); itHist++) {
-        HistoryEntry *entry = itHist->get();
-        BeliefNode *node = entry->owningBeliefNode_;
-        if (!entry->hasBeenBackedUp_) {
-            debug::show_message("ERROR: Trying to undo but not backed up!?");
-        }
-        if (propagating) {
-            if (isFirst) {
-                deltaQValue = -entry->totalDiscountedReward_;
-            } else {
-                deltaQValue *= model_->getDiscountFactor();
-            }
-            double previousQValue = node->getBestMeanQValue();
-            node->updateQValue(*entry->action_, deltaQValue,
-                    entry->hasBeenBackedUp_ ? 0 : -1);
-            deltaQValue = node->getBestMeanQValue() - previousQValue;
-            if (deltaQValue == 0) {
-                propagating = false;
-            }
-        }
-        entry->hasBeenBackedUp_ = false;
-    }
-}
-
-std::pair<Model::StepResult, double> Solver::getRolloutAction(
-        BeliefNode *belNode, State const &state, double startDiscount,
-        double discountFactor) {
-    // We will try the next action that has not yet been tried.
-    std::unique_ptr<Action> action = belNode->getRolloutActions();
-    Model::StepResult result = model_->generateStep(state, *action);
-    double qVal = 0;
-
-    if (std::bernoulli_distribution(
-                heuristicProbability_[ROLLOUT_RANDHEURISTIC])(*randGen_)) {
-        lastRolloutMode_ = ROLLOUT_RANDHEURISTIC;
-    } else {
-        lastRolloutMode_ = ROLLOUT_POL;
-    }
-    std::clock_t startTime, endTime;
-    if (lastRolloutMode_ == ROLLOUT_POL) {
-        startTime = std::clock();
-        // Find a nearest neighbor as an approximation.
-        BeliefNode *currNode = getNNBelNode(belNode);
-        if (currNode == nullptr) {
-            timeUsedPerHeuristic_[ROLLOUT_POL] +=
-                (std::clock() - startTime) * 1000.0 / CLOCKS_PER_SEC;
-            lastRolloutMode_ = ROLLOUT_RANDHEURISTIC;
-            // Use RANDHEURISTIC instead.
+        totalReward = entry->discount_* entry->reward_ + totalReward;
+        if (doBackup) {
+            entry->totalDiscountedReward_ = totalReward;
         } else {
-            currNode = currNode->getChild(*action, *result.observation);
-            qVal = rolloutPolHelper(currNode, *result.nextState,
-                        discountFactor);
-            qVal *= startDiscount * discountFactor;
-            lastRolloutMode_ = ROLLOUT_POL;
-            endTime = std::clock();
+            entry->totalDiscountedReward_ = 0;
         }
-    }
-    if (lastRolloutMode_ == ROLLOUT_RANDHEURISTIC) {
-        startTime = std::clock();
-        if (!result.isTerminal) {
-            qVal = model_->getHeuristicValue(*result.nextState);
-            qVal *= startDiscount * discountFactor;
-        }
-        lastRolloutMode_ = ROLLOUT_RANDHEURISTIC;
-        endTime = std::clock();
-    }
-    timeUsedPerHeuristic_[lastRolloutMode_] +=
-        (endTime - startTime) * 1000.0 / CLOCKS_PER_SEC;
-    heuristicUseCount_[lastRolloutMode_]++;
+        double deltaTotalReward = totalReward - previousTotalReward;
 
-    return std::make_pair(std::move(result), qVal);
+        ActionNode *actionNode = node->getMapping()->getActionNode(*entry->action_);
+        if (isFirst) {
+            actionNode->changeTotalQValue(deltaTotalReward, deltaNParticles);
+        } else {
+            actionNode->updateSequenceCount(*entry->observation_, model_->getDiscountFactor(),
+                    deltaNParticles);
+        }
+
+        // Special handling for the first entry in the sequence
+        if (itHist+1 == sequence->histSeq_.rend()) {
+            node->recalculateQValue();
+            if (doBackup) {
+                if (entry->hasBeenBackedUp_) {
+                    // do nothing
+                } else {
+                    node->numberOfStartingSequences_++;
+                }
+            } else {
+                if (entry->hasBeenBackedUp_) {
+                    node->numberOfStartingSequences_--;
+                } else {
+                    // do nothing
+                }
+            }
+        }
+        entry->hasBeenBackedUp_ = doBackup;
+    }
 }
 
 BeliefNode *Solver::getNNBelNode(BeliefNode *belief,
@@ -340,32 +258,8 @@ BeliefNode *Solver::getNNBelNode(BeliefNode *belief,
     return nnBel;
 }
 
-void Solver::updateHeuristicProbabilities(double valImprovement) {
-    if (valImprovement < 0.0) {
-        valImprovement = 0.0;
-    }
-    heuristicWeight_[lastRolloutMode_] *= std::exp(
-                heuristicExploreCoefficient_
-                * (valImprovement / model_->getMaxVal())
-                / (2 * heuristicProbability_[lastRolloutMode_]));
-    double totWRollout = 0.0;
-    for (int i = 0; i < 2; i++) {
-        totWRollout += heuristicWeight_[i];
-    }
-    double totP = 0.0;
-    for (int i = 0; i < 2; i++) {
-        heuristicProbability_[i] = ((1 - heuristicExploreCoefficient_)
-                * heuristicWeight_[i] / totWRollout
-                + heuristicExploreCoefficient_ / 2);
-        heuristicProbability_[i] *= heuristicUseCount_[i] / timeUsedPerHeuristic_[i];
-        totP += heuristicProbability_[i];
-    }
-    for (int i = 0; i < 2; i++) {
-        heuristicProbability_[i] /= totP;
-    }
-}
-
-double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
+double Solver::runSim(long nSteps, long historiesPerStep,
+        std::vector<long> &changeTimes,
         std::vector<std::unique_ptr<State>> &trajSt,
         std::vector<std::unique_ptr<Action>> &trajAction,
         std::vector<std::unique_ptr<Observation>> &trajObs,
@@ -380,7 +274,6 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
     *totImpTime = 0.0;
     std::clock_t chTimeStart, chTimeEnd, impSolTimeStart, impSolTimeEnd;
     *actualNSteps = nSteps;
-    long historiesPerStep = model_->getNumberOfHistoriesPerStep();
     long maximumDepth = model_->getMaximumDepth();
     double discFactor = model_->getDiscountFactor();
     double currDiscFactor = 1.0;
@@ -416,7 +309,7 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
                     std::ostringstream message;
                     message << "ERROR: Impossible simulation history! Includes ";
                     message << *state2;
-                    debug::show_message(message.str());
+                    debug::show_message(message.str(), true, false);
                 }
             }
             applyChanges();
@@ -447,32 +340,21 @@ double Solver::runSim(long nSteps, std::vector<long> &changeTimes,
         currDiscFactor = currDiscFactor * discFactor;
         cout << "Discount: " << currDiscFactor << "; Total Reward: "
              << discountedTotalReward << endl;
-        if (result.isTerminal) {
-            *actualNSteps = timeStep;
-            cout << "Final state: " << endl;
-            model_->drawSimulationState(std::vector<const State *>{},
-                    *currentState, cout);
-            break;
-        }
 
         BeliefNode *nextNode = currNode->getChild(*result.action,
                     *result.observation);
         if (nextNode == nullptr) {
-            nextNode = addChild(currNode, *result.action, *result.observation,
-                    timeStep);
+            nextNode = addChild(currNode, *result.action, *result.observation, timeStep);
         }
         cout << "Simulation state: " << endl;
-        model_->drawSimulationState(nextNode->getStates(),
-                *currentState, cout);
+        model_->drawSimulationState(nextNode->getStates(), *currentState, cout);
         cout << endl;
         currNode = nextNode;
+        if (result.isTerminal) {
+            *actualNSteps = timeStep;
+            break;
+        }
     }
-    cout << "MDP heuristic used ";
-    cout << heuristicUseCount_[ROLLOUT_RANDHEURISTIC] - 1 << " times; Took ";
-    cout << timeUsedPerHeuristic_[ROLLOUT_RANDHEURISTIC] << "ms" << endl;
-    cout << "NN heuristic used ";
-    cout << heuristicUseCount_[ROLLOUT_POL] - 1 << " times; Took ";
-    cout << timeUsedPerHeuristic_[ROLLOUT_POL] << "ms" << endl;
     return discountedTotalReward;
 }
 
@@ -493,8 +375,8 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     /* Displaying the available actions and associated values. */
     cout << "Action children: " << endl;
     std::multimap<double, ActionMappingEntry const *> actionValues;
-    for (ActionMappingEntry &entry : currentBelief->getMapping()->getChildEntries()) {
-        actionValues.emplace(entry.getActionNode()->meanQValue_, &entry);
+    for (ActionMappingEntry const *entry : currentBelief->getMapping()->getChildEntries()) {
+        actionValues.emplace(entry->getActionNode()->getQValue(), entry);
     }
     for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
         cout << *it->second->getAction() << " " << it->first <<  " with ";
@@ -505,9 +387,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
         debug::show_message("WARNING: No actions evaluated! Selecting a random action...");
-        std::vector<std::unique_ptr<Action>> rolloutActions = currentBelief->getRolloutActions();
-        long index = std::uniform_int_distribution<long>(0, rolloutActions.size() - 1)(*randGen_);
-        action = std::move(rolloutActions[index]);
+        action = currentBelief->getMapping()->getRandomRolloutAction();
     }
     Model::StepResult result = model_->generateStep(currentState, *action);
     if (result.isTerminal) {
@@ -528,7 +408,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 void Solver::improveSol(BeliefNode *startNode, long historiesPerStep,
         long maximumDepth) {
     if (startNode->getNParticles() == 0) {
-        debug::show_message("ERROR: No particles in the BeliefNode!");
+        debug::show_message("ERROR: No particles in the BeliefNode!", true, false);
         std::exit(10);
     }
 
@@ -551,11 +431,10 @@ void Solver::improveSol(BeliefNode *startNode, long historiesPerStep,
         samples.push_back(nonTerminalStates[index]);
     }
 
-    double disc = model_->getDiscountFactor();
     HistoryEntry *entry = startNode->particles_.get(0);
     long depth = entry->entryId_ + entry->owningSequence_->startDepth_;
     for (StateInfo *sample : samples) {
-        singleSearch(startNode, sample, depth, disc, maximumDepth);
+        singleSearch(startNode, sample, depth, maximumDepth);
     }
 }
 
@@ -591,12 +470,12 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         HistorySequence *histSeq = allHistories_->addNew(timeStep);
         HistoryEntry *histEntry = histSeq->addEntry(stateInfo, currentDiscount * discountFactor);
         histEntry->registerNode(nextNode);
-        State *state = stateInfo->getState();
+        State const *state = stateInfo->getState();
         if (!model_->isTerminal(*state)) {
             // Use the heuristic value for non-terminal particles.
-            histEntry->reward_ = model_->getHeuristicValue(*state);
+            histEntry->totalDiscountedReward_ = model_->getHeuristicValue(*state);
         }
-        backup(histSeq);
+        backup(histSeq, true);
     }
     return nextNode;
 }
@@ -630,8 +509,8 @@ void Solver::applyChanges() {
     std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
     while (it != affectedSequences.end()) {
         HistorySequence *sequence = *it;
-        undoBackup(sequence);
-        if (changes::hasFlag(sequence->getEntry(0)->changeFlags_,
+        backup(sequence, false);
+        if (changes::hasFlag(sequence->getFirstEntry()->changeFlags_,
                 ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
             allHistories_->deleteHistorySequence(sequence->id_);
@@ -647,12 +526,13 @@ void Solver::applyChanges() {
     for (HistorySequence *sequence : affectedSequences) {
         fixLinks(sequence);
         sequence->resetChangeFlags();
-        if (sequence->isTerminal()) {
-            backup(sequence);
-        } else {
-            continueSearch(sequence, model_->getDiscountFactor(),
-                    model_->getMaximumDepth());
+        HistoryEntry *lastEntry = sequence->getLastEntry();
+        State const *lastState = lastEntry->getState();
+        // If it didn't end in a terminal state, we apply the heuristic.
+        if (!model_->isTerminal(*lastState)) {
+            lastEntry->totalDiscountedReward_ = model_->getHeuristicValue(*lastState);
         }
+        backup(sequence, true);
     }
 }
 
@@ -666,7 +546,7 @@ void Solver::fixLinks(HistorySequence *sequence) {
             HistoryEntry *entry = historyIterator->get();
             HistoryEntry *nextEntry = (historyIterator + 1)->get();
             BeliefNode *nextNode = policy_->createOrGetChild(
-                    entry->owningBeliefNode_, *entry->action_,
+                    entry->associatedBeliefNode_, *entry->action_,
                     *entry->observation_);
             nextEntry->registerNode(nextNode);
         }
@@ -677,19 +557,15 @@ void Solver::fixLinks(HistorySequence *sequence) {
 BeliefTree *Solver::getPolicy() {
     return policy_.get();
 }
-
 StatePool *Solver::getStatePool() {
     return allStates_.get();
 }
-
 Model *Solver::getModel() {
     return model_.get();
 }
-
 ActionPool *Solver::getActionPool() {
     return actionPool_.get();
 }
-
 ObservationPool *Solver::getObservationPool() {
     return observationPool_.get();
 }

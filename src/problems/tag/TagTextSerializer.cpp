@@ -69,8 +69,7 @@ std::unique_ptr<solver::Observation> TagTextSerializer::loadObservation(
     std::string tmpStr;
     std::istringstream(obsString) >> i >> j >> tmpStr;
     bool seesOpponent = tmpStr == "SEEN";
-    return std::make_unique<TagObservation>(dynamic_cast<TagModel *>(
-            model_), GridPosition(i, j), seesOpponent);
+    return std::make_unique<TagObservation>(GridPosition(i, j), seesOpponent);
 }
 
 

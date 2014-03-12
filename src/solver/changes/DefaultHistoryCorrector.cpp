@@ -31,9 +31,6 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         State const *state = entry->getState();
 
         hitTerminalState = model_->isTerminal(*state);
-        if (hitTerminalState) {
-            sequence->isTerminal_ = true;
-        }
         if (hitTerminalState || entry->action_ == nullptr) {
             entry->action_ = nullptr;
             entry->observation_ = nullptr;
@@ -80,7 +77,9 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
                             entry->transitionParameters_.get(),
                             *nextEntry->getState()));
             if (!newObservation->equals(*entry->observation_)) {
-                sequence->invalidLinksStartId_ = entry->entryId_;
+                if (sequence->invalidLinksStartId_ == -1) {
+                    sequence->invalidLinksStartId_ = entry->entryId_;
+                }
                 entry->observation_ = std::move(newObservation);
             }
         }

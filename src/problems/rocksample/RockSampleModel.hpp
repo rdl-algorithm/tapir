@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 namespace solver {
 class ActionMapping;
 class StatePool;
-class EnumeratedPoint;
+class DiscretizedPoint;
 } /* namespace solver */
 
 namespace rocksample {
@@ -121,9 +121,8 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
             solver::State const &state,
             std::ostream &os) override;
 
-    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
-    getAllActionsInOrder() override;
-    virtual std::vector<std::unique_ptr<solver::EnumeratedPoint>>
+    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
+    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>>
     getAllObservationsInOrder() override;
 
   private:

@@ -32,9 +32,9 @@ class RandomAccessSet {
         return elements_.cend();
     }
 
-    void reset() {
-        map_.reset();
-        elements_.reset();
+    void clear() {
+        map_.clear();
+        elements_.clear();
     }
 
     long size() const {
@@ -43,7 +43,6 @@ class RandomAccessSet {
 
     void add(Element entry) {
         if (contains(entry)) {
-            debug::show_message("ERROR: should not be adding duplicate entry!");
             return;
         }
         elements_.push_back(entry);
@@ -51,6 +50,9 @@ class RandomAccessSet {
     }
 
     void remove(Element entry) {
+        if (!contains(entry)) {
+            return;
+        }
         long index = map_[entry];
         long lastIndex = elements_.size() - 1;
 
