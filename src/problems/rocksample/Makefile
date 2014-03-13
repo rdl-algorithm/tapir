@@ -3,7 +3,10 @@ MODULE_NAME = rocksample
 ifdef HAS_ROOT_MAKEFILE
 
 TARGET_NAMES := solve simulate
+EXTRA_LINKER_DEPS_rocksample := -lboost_regex
 include .make/problem-template.mk
+
+
 
 else
 ROOT = ../../..

@@ -51,6 +51,19 @@ void hash_combine(std::size_t &seed, T const &v) {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
+template <typename T>
+void printWithWidth(T value , std::ostream &os, int width) {
+    std::streamsize oldWidth = os.width(width);
+    std::ios_base::fmtflags flags = std::ios_base::fixed;
+    flags = os.flags(flags);
+    os << value;
+    os.flags(flags);
+    os.width(oldWidth);
+}
+void printDouble(double value, std::ostream &os,
+        bool showpos = false,
+        int precision = 7,
+        int numDigitsBeforePoint = 2);
 }
 
 namespace debug {

@@ -1,6 +1,7 @@
 #include "Solver.hpp"
 
 #include <cmath>                        // for pow, exp
+#include <cstdio>
 #include <ctime>                        // for clock, clock_t, CLOCKS_PER_SEC
 
 #include <algorithm>                    // for max
@@ -39,6 +40,8 @@
 #include "HistorySequence.hpp"          // for HistorySequence
 #include "StateInfo.hpp"                // for StateInfo
 #include "StatePool.hpp"                // for StatePool
+
+#include <boost/regex.hpp>
 
 using std::cout;
 using std::endl;
@@ -282,14 +285,13 @@ double Solver::runSim(long nSteps, long historiesPerStep,
     BeliefNode *currNode = policy_->getRoot();
     std::unique_ptr<State> currentState = model_->sampleAnInitState();
     trajSt.push_back(currentState->copy());
-
-    cout << "Initial simulation state:" << endl;
-    model_->drawSimulationState(currNode->getStates(), *currentState, cout);
-    cout << endl;
-
     std::vector<long>::iterator itCh = changeTimes.begin();
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
-        cout << "t-" << timeStep << endl;
+        cout << endl << endl << "t-" << timeStep << endl;
+        std::stringstream prevStream;
+        prevStream << "BEFORE:" << endl;
+        model_->drawSimulationState(currNode, *currentState, prevStream);
+
         allStates_->createOrGetInfo(*currentState);
         if (itCh != changeTimes.end() && timeStep == *itCh) {
             // Apply the changes to the model.
@@ -329,6 +331,24 @@ double Solver::runSim(long nSteps, long historiesPerStep,
         *totImpTime += ((impSolTimeEnd - impSolTimeStart) * 1000
                 / CLOCKS_PER_SEC);
 
+        std::stringstream newStream;
+        newStream << "AFTER:" << endl;
+        model_->drawSimulationState(currNode, *currentState, newStream);
+
+        cout << "STATE: " << *currentState << endl;
+        cout << "BELIEF #" << currNode->getId() << endl;
+        while (prevStream.good() || newStream.good()) {
+            std::string s1, s2;
+            std::getline(prevStream, s1);
+            std::getline(newStream, s2);
+            boost::regex rgx("\\x1b\\[[0-9;]*m");
+            std::string s1Text = boost::regex_replace(s1, rgx, "");
+            std::string s2Text = boost::regex_replace(s2, rgx, "");
+            cout << s1 << std::setw(30 - s1Text.size()) << "";
+            cout << s2 << std::setw(30 - s2Text.size()) << "";
+            cout << endl;
+        }
+
         Model::StepResult result = simAStep(currNode, *currentState);
         currentState = result.nextState->copy();
 
@@ -346,15 +366,16 @@ double Solver::runSim(long nSteps, long historiesPerStep,
         if (nextNode == nullptr) {
             nextNode = addChild(currNode, *result.action, *result.observation, timeStep);
         }
-        cout << "Simulation state: " << endl;
-        model_->drawSimulationState(nextNode->getStates(), *currentState, cout);
-        cout << endl;
         currNode = nextNode;
         if (result.isTerminal) {
             *actualNSteps = timeStep;
             break;
         }
     }
+    cout << endl << endl << "Final State:" << endl;
+    cout << *currentState << endl;
+    cout << "Belief #" << currNode->getId() << endl;
+    model_->drawSimulationState(currNode, *currentState, cout);
     return discountedTotalReward;
 }
 
@@ -371,18 +392,6 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 //        totalDistance += s1->distanceTo(*s2);
 //    }
 //    cout << "Est. mean inter-particle distance: " << totalDistance / 100 << endl;
-
-    /* Displaying the available actions and associated values. */
-    cout << "Action children: " << endl;
-    std::multimap<double, ActionMappingEntry const *> actionValues;
-    for (ActionMappingEntry const *entry : currentBelief->getMapping()->getChildEntries()) {
-        actionValues.emplace(entry->getActionNode()->getQValue(), entry);
-    }
-    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-        cout << *it->second->getAction() << " " << it->first <<  " with ";
-        cout << it->second->getActionNode()->getNParticles() << " particles";
-        cout << endl;
-    }
 
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {

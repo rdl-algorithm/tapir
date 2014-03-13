@@ -7,6 +7,7 @@
 #include <fstream>                      // for operator<<, basic_ostream, endl, basic_ostream<>::__ostream_type, ifstream, basic_ostream::operator<<, basic_istream, basic_istream<>::__istream_type
 #include <initializer_list>
 #include <iostream>                     // for cout
+#include <map>
 #include <memory>                       // for unique_ptr, default_delete
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
 #include <set>                          // for set, _Rb_tree_const_iterator, set<>::iterator
@@ -19,18 +20,23 @@
 #include <boost/program_options.hpp>    // for variables_map, variable_value
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
+
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
 #include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/abstract-problem/State.hpp"       // for State
 
+#include "solver/mappings/ActionMapping.hpp"
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/enumerated_observations.hpp"
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+
+#include "solver/ActionNode.hpp"
+#include "solver/BeliefNode.hpp"
 #include "solver/StatePool.hpp"
 
 #include "RockSampleAction.hpp"         // for RockSampleAction
@@ -459,12 +465,13 @@ void RockSampleModel::drawEnv(std::ostream &os) {
 }
 
 void RockSampleModel::drawSimulationState(
-        std::vector<solver::State const *> particles,
+        solver::BeliefNode *belief,
         solver::State const &state, std::ostream &os) {
     RockSampleState const &rockSampleState =
             static_cast<RockSampleState const &>(state);
-    os << "Belief has " << particles.size() << " particles." << endl;
-    os << state << endl;
+    std::vector<solver::State const *> particles = belief->getStates();
+    os << belief->getQValue();
+    os << " from " << particles.size() << " particles." << endl;
     GridPosition pos(rockSampleState.getPosition());
     std::vector<double> goodProportions(nRocks_);
     for (solver::State const *particle : particles) {
@@ -499,6 +506,20 @@ void RockSampleModel::drawSimulationState(
                 os << "\033[0m";
             }
         }
+        os << endl;
+    }
+    os << "Action children: " << endl;
+    std::multimap<double, solver::ActionMappingEntry const *> actionValues;
+    for (solver::ActionMappingEntry const *entry : belief->getMapping()->getChildEntries()) {
+        actionValues.emplace(entry->getActionNode()->getQValue(), entry);
+    }
+    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
+        abt::printDouble(it->first, os, false, 3, 3);
+        os << ": ";
+        std::ostringstream sstr;
+        sstr << *it->second->getAction();
+        abt::printWithWidth(sstr.str(), os, 7);
+        abt::printWithWidth(it->second->getActionNode()->getNParticles(), os, 6);
         os << endl;
     }
 }

@@ -30,21 +30,6 @@ Nav2DTextSerializer::Nav2DTextSerializer(solver::Solver *solver) :
     solver::Serializer(solver) {
 }
 
-void Nav2DTextSerializer::saveDouble(double value, std::ostream &os,
-        bool showpos, int precision) {
-    std::streamsize oldPrecision = os.precision(precision);
-    std::streamsize width = os.width(precision + 3);
-    std::ios_base::fmtflags flags = std::ios_base::fixed;
-    if (showpos) {
-        flags |= std::ios_base::showpos;
-    }
-    flags = os.flags(flags);
-    os <<  value;
-    os.flags(flags);
-    os.width(width);
-    os.precision(oldPrecision);
-}
-
 void Nav2DTextSerializer::saveState(solver::State const *state,
         std::ostream &os) {
     if (state == nullptr) {
@@ -54,11 +39,11 @@ void Nav2DTextSerializer::saveState(solver::State const *state,
     Nav2DState const &navState =
         static_cast<Nav2DState const &>(*state);
     os << "(";
-    saveDouble(navState.getX(), os);
+    abt::printDouble(navState.getX(), os);
     os << " ";
-    saveDouble(navState.getY(), os);
+    abt::printDouble(navState.getY(), os);
     os << "):";
-    saveDouble(navState.getDirection(), os, true);
+    abt::printDouble(navState.getDirection(), os, true);
 }
 
 std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
@@ -86,9 +71,9 @@ void Nav2DTextSerializer::saveAction(solver::Action const *action,
     }
     Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
     os << "#" << a.getBinNumber() << ": ";
-    saveDouble(a.speed_, os, false, 1);
+    abt::printDouble(a.speed_, os, false, 1);
     os << "/";
-    saveDouble(a.rotationalSpeed_, os, true, 3);
+    abt::printDouble(a.rotationalSpeed_, os, true, 3);
 }
 
 std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
@@ -121,9 +106,9 @@ void Nav2DTextSerializer::saveTransitionParameters(
     os << "T:(";
     if (tp != nullptr) {
         Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
-        saveDouble(tp2.speed, os);
+        abt::printDouble(tp2.speed, os);
         os << "/";
-        saveDouble(tp2.rotationalSpeed, os, true);
+        abt::printDouble(tp2.rotationalSpeed, os, true);
         os << " " << tp2.moveRatio << " ";
         if (tp2.reachedGoal) {
             os << "G";

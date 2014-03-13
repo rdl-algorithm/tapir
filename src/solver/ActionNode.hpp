@@ -65,6 +65,13 @@ class ActionNode {
      * node.
      */
     long nParticles_;
+
+    /** The total q-value from sequences that end with
+     * subsequent belief nodes.
+     */
+    double totalQFromEnds_;
+    /** The total q-value from subsequent belief nodes.  */
+    double totalQFromBeliefs_;
     /** The total q-value of this node. */
     double totalQValue_;
     /** The mean q-value of this node. */

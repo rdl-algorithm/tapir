@@ -19,6 +19,8 @@ ActionNode::ActionNode() :
 
 ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
     nParticles_(0),
+    totalQFromEnds_(0),
+    totalQFromBeliefs_(0),
     totalQValue_(0),
     meanQValue_(-std::numeric_limits<double>::infinity()),
     obsMap_(std::move(mapping)) {

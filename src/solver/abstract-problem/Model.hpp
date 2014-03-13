@@ -181,7 +181,7 @@ class Model {
     /** Draws the current belief and/or the current state in the context of the
      * overall map onto the given output stream.
      */
-    virtual void drawSimulationState(std::vector<State const *> /*particles*/,
+    virtual void drawSimulationState(BeliefNode *belief,
             State const &/*state*/, std::ostream &/*os*/);
 
     /* --------------- Data structure customization ----------------- */

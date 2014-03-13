@@ -81,8 +81,7 @@ void Model::drawEnv(std::ostream &/*os*/) {
 }
 
 // Default = do nothing.
-void Model::drawSimulationState(
-        std::vector<State const *> /*particles*/, State const &/*state*/,
+void Model::drawSimulationState(BeliefNode */*belief*/, State const &/*state*/,
         std::ostream &/*os*/) {
 }
 
