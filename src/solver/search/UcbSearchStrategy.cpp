@@ -19,7 +19,7 @@ std::unique_ptr<SearchInstance> UcbSearchStrategy::createSearchInstance(
 
 UcbSearchInstance::UcbSearchInstance(double explorationCoefficient,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
-    SearchInstance(solver, sequence, maximumDepth),
+    AbstractSearchInstance(solver, sequence, maximumDepth),
     explorationCoefficient_(explorationCoefficient) {
 }
 

@@ -10,7 +10,7 @@
 #include "SearchStatus.hpp"
 
 namespace solver {
-SearchInstance::SearchInstance(Solver *solver,  HistorySequence *sequence,
+AbstractSearchInstance::AbstractSearchInstance(Solver *solver,  HistorySequence *sequence,
         long maximumDepth) :
                 solver_(solver),
                 model_(solver_->getModel()),
@@ -21,12 +21,12 @@ SearchInstance::SearchInstance(Solver *solver,  HistorySequence *sequence,
                 status_(SearchStatus::UNINITIALIZED) {
 }
 
-SearchStatus SearchInstance::initialize() {
+SearchStatus AbstractSearchInstance::initialize() {
     status_ = SearchStatus::INITIAL;
     return status_;
 }
 
-SearchStatus SearchInstance::extendSequence() {
+SearchStatus AbstractSearchInstance::extendSequence() {
     if (status_ != SearchStatus::INITIAL) {
         debug::show_message("WARNING: Attempted to search without initializing.");
         return status_;
@@ -76,7 +76,7 @@ SearchStatus SearchInstance::extendSequence() {
     return status_;
 }
 
-SearchStatus SearchInstance::finalize() {
+SearchStatus AbstractSearchInstance::finalize() {
     return status_;
 }
 

@@ -140,6 +140,10 @@ void RockSampleModel::initialize() {
     setAllActions(getAllActionsInOrder());
 }
 
+double RockSampleModel::getDefaultVal() {
+    return minVal_;
+}
+
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
     return std::make_unique<RockSampleState>(startPos_, sampleRocks());
 }
@@ -211,10 +215,6 @@ double RockSampleModel::getHeuristicValue(solver::State const &state) {
     currentDiscount *= std::pow(getDiscountFactor(), nCols_ - currentPos.j);
     qVal += currentDiscount * exitReward_;
     return qVal;
-}
-
-double RockSampleModel::getDefaultVal() {
-    return minVal_;
 }
 
 std::pair<std::unique_ptr<RockSampleState>,
@@ -464,14 +464,11 @@ void RockSampleModel::drawEnv(std::ostream &os) {
     }
 }
 
-void RockSampleModel::drawSimulationState(
-        solver::BeliefNode *belief,
+void RockSampleModel::drawSimulationState(solver::BeliefNode *belief,
         solver::State const &state, std::ostream &os) {
     RockSampleState const &rockSampleState =
             static_cast<RockSampleState const &>(state);
     std::vector<solver::State const *> particles = belief->getStates();
-    os << belief->getQValue();
-    os << " from " << particles.size() << " particles." << endl;
     GridPosition pos(rockSampleState.getPosition());
     std::vector<double> goodProportions(nRocks_);
     for (solver::State const *particle : particles) {
@@ -506,20 +503,6 @@ void RockSampleModel::drawSimulationState(
                 os << "\033[0m";
             }
         }
-        os << endl;
-    }
-    os << "Action children: " << endl;
-    std::multimap<double, solver::ActionMappingEntry const *> actionValues;
-    for (solver::ActionMappingEntry const *entry : belief->getMapping()->getChildEntries()) {
-        actionValues.emplace(entry->getActionNode()->getQValue(), entry);
-    }
-    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-        abt::printDouble(it->first, os, false, 3, 3);
-        os << ": ";
-        std::ostringstream sstr;
-        sstr << *it->second->getAction();
-        abt::printWithWidth(sstr.str(), os, 7);
-        abt::printWithWidth(it->second->getActionNode()->getNParticles(), os, 6);
         os << endl;
     }
 }

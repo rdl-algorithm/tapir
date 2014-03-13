@@ -30,7 +30,7 @@ override INCDIRS     += -I$(ROOT)/src
 
 override CPPFLAGS    += $(INCDIRS)
 ifeq ($(CFG),debug)
-  override CPPFLAGS           += -DDEBUG
+  override CPPFLAGS  += -DDEBUG
 endif
 
 # Compile flags
@@ -50,10 +50,10 @@ endif
 
 # Configuration-specific flags
 ifeq ($(CFG),release)
-  override CXXFLAGS           += -O3
+  override CXXFLAGS  += -O3
 endif
 ifeq ($(CFG),debug)
-  override CXXFLAGS           += -O0 -g3
+  override CXXFLAGS  += -O0 -g3
 endif
 
 # ----------------------------------------------------------------------

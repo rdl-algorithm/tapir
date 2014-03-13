@@ -110,10 +110,6 @@ std::unique_ptr<Action> DiscretizedActionMap::getRandomRolloutAction() const {
 void DiscretizedActionMap::update() {
     bestBinNumber = -1;
     bestMeanQValue_ = -std::numeric_limits<double>::infinity();
-    if (getNChildren() == 0) {
-        debug::show_message("WARNING: No children - could not update Q-value!");
-        return;
-    }
     for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : entries_) {
         if (entry == nullptr) {
             continue;
@@ -139,6 +135,12 @@ std::unique_ptr<Action> DiscretizedActionMap::getBestAction() const {
 }
 
 double DiscretizedActionMap::getBestMeanQValue() const {
+    /*
+    if (!std::isfinite(bestMeanQValue_)) {
+        debug::show_message("NOTE: non-finite q-value in mapping.",
+                false, true);
+    }
+    */
     return bestMeanQValue_;
 }
 

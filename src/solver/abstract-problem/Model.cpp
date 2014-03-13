@@ -86,7 +86,7 @@ void Model::drawSimulationState(BeliefNode */*belief*/, State const &/*state*/,
 }
 
 std::unique_ptr<StateIndex> Model::createStateIndex() {
-    return std::make_unique<RTree>(getNStVars());
+    return std::make_unique<RTree>(getNumberOfStateVariables());
 }
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
@@ -94,10 +94,10 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
 }
 
 std::unique_ptr<SearchStrategy> Model::createSearchStrategy() {
-    return std::make_unique<UcbSearchStrategy>(getUcbExploreCoefficient());
+    return std::make_unique<UcbSearchStrategy>(1.0);
 }
 
 std::unique_ptr<SearchStrategy> Model::createRolloutStrategy() {
-    return std::make_unique<RandomRolloutStrategy>(2);
+    return std::make_unique<RandomRolloutStrategy>(1);
 }
 } /* namespace solver */

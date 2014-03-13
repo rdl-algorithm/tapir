@@ -33,7 +33,6 @@ ActionNode::~ActionNode() {
 void ActionNode::changeTotalQValue(double deltaQ, long deltaNParticles) {
     totalQValue_ += deltaQ;
     nParticles_ += deltaNParticles;
-    recalculateQValue();
 }
 
 void ActionNode::updateSequenceCount(Observation const &observation,
@@ -41,13 +40,20 @@ void ActionNode::updateSequenceCount(Observation const &observation,
     BeliefNode *childBelief = getChild(observation);
 
     long newSequenceCount = childBelief->getNParticles();
-    newSequenceCount -= childBelief->numberOfStartingSequences_;
-    newSequenceCount += childBelief->numberOfEndingSequences_;
+    newSequenceCount -= childBelief->numberOfHeads_;
+    newSequenceCount -= childBelief->numberOfTails_;
     long oldSequenceCount = newSequenceCount - deltaNParticles;
 
     double oldChildQ = childBelief->getQValue();
+    if (oldSequenceCount != 0 && !std::isfinite(oldChildQ)) {
+        debug::show_message("ERROR: Non-finite old Q");
+    }
+
     childBelief->recalculateQValue();
     double newChildQ = childBelief->getQValue();
+    if (newSequenceCount != 0 && !std::isfinite(newChildQ)) {
+        debug::show_message("ERROR: Non-finite old Q");
+    }
 
     if (oldSequenceCount != 0) {
         totalQValue_ -= oldSequenceCount * discountFactor * oldChildQ;
@@ -55,8 +61,6 @@ void ActionNode::updateSequenceCount(Observation const &observation,
     if (newSequenceCount != 0) {
         totalQValue_ += newSequenceCount * discountFactor * newChildQ;
     }
-    nParticles_ += deltaNParticles;
-    recalculateQValue();
 }
 
 void ActionNode::recalculateQValue() {
@@ -77,6 +81,10 @@ double ActionNode::getTotalQValue () const {
 }
 
 double ActionNode::getQValue () const {
+    if (!std::isfinite(meanQValue_)) {
+          debug::show_message("NOTE: non-finite q-value in action node.",
+                  false, true);
+      }
     return meanQValue_;
 }
 

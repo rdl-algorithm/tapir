@@ -16,7 +16,7 @@ class UcbSearchStrategy: public SearchStrategy {
     double explorationCoefficient_;
 };
 
-class UcbSearchInstance: public SearchInstance {
+class UcbSearchInstance: public AbstractSearchInstance {
   public:
     UcbSearchInstance(double explorationCoefficient,
             Solver *solver, HistorySequence *sequence,

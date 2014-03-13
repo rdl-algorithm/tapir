@@ -23,7 +23,7 @@ HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
     entryId_(entryId),
     discount_(discount),
     reward_(0),
-    totalDiscountedReward_(0),
+    rewardFromHere_(0),
     owningSequence_(owningSequence),
     associatedBeliefNode_(nullptr),
     changeFlags_(ChangeFlags::UNCHANGED) {

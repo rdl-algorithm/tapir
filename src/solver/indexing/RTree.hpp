@@ -1,7 +1,11 @@
 #ifndef SOLVER_RTREE_HPP_
 #define SOLVER_RTREE_HPP_
 
+#include <cstring>
+
+#include <limits>
 #include <memory>
+#include <string>
 
 #include <spatialindex/SpatialIndex.h>
 #include <spatialindex/RTree.h>

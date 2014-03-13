@@ -23,7 +23,7 @@ std::unique_ptr<SearchInstance> NnRolloutStrategy::createSearchInstance(
 
 NnRolloutInstance::NnRolloutInstance(long maxNnComparisons, double maxNnDistance,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
-        SearchInstance(solver, sequence, maximumDepth),
+        AbstractSearchInstance(solver, sequence, maximumDepth),
         maxNnComparisons_(maxNnComparisons),
         maxNnDistance_(maxNnDistance),
         rootNeighborNode_(nullptr),

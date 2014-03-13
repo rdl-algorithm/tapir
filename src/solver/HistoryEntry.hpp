@@ -21,7 +21,7 @@ class StateInfo;
 class HistoryEntry {
   public:
     friend class HistorySequence;
-    friend class SearchInstance;
+    friend class AbstractSearchInstance;
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;
@@ -92,7 +92,7 @@ class HistoryEntry {
     /** Non-discounted reward. */
     double reward_;
     /** Total discounted reward. */
-    double totalDiscountedReward_;
+    double rewardFromHere_;
 
     /** The history sequence that owns this entry. */
     HistorySequence *owningSequence_;

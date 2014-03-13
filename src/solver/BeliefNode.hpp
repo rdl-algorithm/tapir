@@ -95,9 +95,9 @@ private:
     long id_;
 
     /** The number of sequences that begin at this belief. */
-    long numberOfStartingSequences_;
+    long numberOfHeads_;
     /** The number of sequences that end at this belief. */
-    long numberOfEndingSequences_;
+    long numberOfTails_;
 
     /** The time at which the last particle was added. */
     double tLastAddedParticle_;

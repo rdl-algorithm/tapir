@@ -110,7 +110,7 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     os << " ";
     saveObservation(entry.observation_.get(), os);
     os << " " << entry.discount_ << " " << entry.reward_ << " "
-       << entry.totalDiscountedReward_ << " );";
+       << entry.rewardFromHere_ << " );";
     os << " S: ";
     saveState(entry.stateInfo_->getState(), os);
 }
@@ -125,7 +125,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     entry.transitionParameters_ = std::move(loadTransitionParameters(is));
     entry.observation_ = std::move(loadObservation(is));
     is >> entry.discount_ >> entry.reward_;
-    is >> entry.totalDiscountedReward_ >> tmpStr;
+    is >> entry.rewardFromHere_ >> tmpStr;
     entry.hasBeenBackedUp_ = true;
     entry.registerState(solver_->allStates_->getInfoById(stateId));
 }
@@ -218,8 +218,8 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
         os << "No particles!" << endl;
     } else {
         os << node.getNParticles() << " particles; ";
-        os << node.numberOfStartingSequences_ << " starts; ";
-        os << node.numberOfEndingSequences_ << " ends" << endl;
+        os << node.numberOfHeads_ << " starts; ";
+        os << node.numberOfTails_ << " ends" << endl;
         int count = 0;
         for (auto it = node.particles_.begin(); it != node.particles_.end();
                 ++it) {
@@ -250,8 +250,8 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
         long nParticles;
         std::string tmpStr;
         std::istringstream countsStream(line);
-        countsStream >> nParticles >> tmpStr >> node.numberOfStartingSequences_;
-        countsStream >> tmpStr >> node.numberOfEndingSequences_;
+        countsStream >> nParticles >> tmpStr >> node.numberOfHeads_;
+        countsStream >> tmpStr >> node.numberOfTails_;
 
         std::getline(is, line);
         long numParticlesRead = 0;

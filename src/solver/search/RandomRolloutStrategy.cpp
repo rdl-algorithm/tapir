@@ -18,7 +18,7 @@ std::unique_ptr<SearchInstance> RandomRolloutStrategy::createSearchInstance(
 
 RandomRolloutInstance::RandomRolloutInstance(long maxNSteps, Solver *solver,
         HistorySequence *sequence, long maximumDepth) :
-                SearchInstance(solver, sequence, maximumDepth),
+                AbstractSearchInstance(solver, sequence, maximumDepth),
                 maxNSteps_(maxNSteps),
                 currentNSteps_(0) {
 }

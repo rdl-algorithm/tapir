@@ -7,12 +7,11 @@
 #include "solver/HistoryEntry.hpp"
 
 namespace solver {
-MultipleStrategiesExp3::MultipleStrategiesExp3(
-        std::vector<std::unique_ptr<SearchStrategy>> strategies,
-        Model *model, double strategyExplorationCoefficient) :
-                strategies_(),
-                model_(model),
-                strategyExplorationCoefficient_(strategyExplorationCoefficient) {
+MultipleStrategiesExp3::MultipleStrategiesExp3(double strategyExplorationCoefficient,
+        std::vector<std::unique_ptr<SearchStrategy>> strategies, Model *model) :
+            strategyExplorationCoefficient_(strategyExplorationCoefficient),
+            strategies_(),
+            model_(model) {
     for (unsigned long index = 0; index < strategies.size(); index++) {
         StrategyInfo info;
         info.strategyNo = index;
@@ -75,8 +74,10 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo,
 MultipleStrategiesExp3Instance::MultipleStrategiesExp3Instance(
         MultipleStrategiesExp3 *parent,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
-                SearchInstance(solver, sequence, maximumDepth),
                 parent_(parent),
+                solver_(solver),
+                sequence_(sequence),
+                maximumDepth_(maximumDepth),
                 failedStrategies_(),
                 currentStrategyNo_(0),
                 currentInstance_(nullptr),
@@ -86,32 +87,29 @@ MultipleStrategiesExp3Instance::MultipleStrategiesExp3Instance(
 
 SearchStatus MultipleStrategiesExp3Instance::initialize() {
     initialRootQValue_ = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
-    status_ = SearchStatus::UNINITIALIZED;
     while (true) {
         StrategyInfo *info = parent_->sampleAStrategy(failedStrategies_);
         if (info == nullptr) {
             // We are out of strategies, so we give up.
-            break;
+            return  SearchStatus::UNINITIALIZED;;
         }
         currentStrategyNo_ = info->strategyNo;
         currentInstance_ = info->strategy->createSearchInstance(solver_, sequence_, maximumDepth_);
         currentInstanceStartTime_ = std::clock();
-        status_ = currentInstance_->initialize();
-        if (status_ == SearchStatus::INITIAL) {
+        if (currentInstance_->initialize() == SearchStatus::INITIAL) {
             // This strategy seems OK, so we'll try it.
-            break;
+            return SearchStatus::INITIAL;
         }
         // The strategy failed to initialize; we should record the failed attempt.
         failedStrategies_.insert(currentStrategyNo_);
         double timeTaken = (std::clock() - currentInstanceStartTime_) * 1000.0 / CLOCKS_PER_SEC;
         parent_->updateStrategyWeights(currentStrategyNo_, timeTaken, 0.0);
     }
-    return status_;
+    return SearchStatus::UNINITIALIZED;
 }
 
-std::pair<SearchStatus, std::unique_ptr<Action>>
-MultipleStrategiesExp3Instance::getStatusAndNextAction() {
-    return currentInstance_->getStatusAndNextAction();
+SearchStatus MultipleStrategiesExp3Instance::extendSequence() {
+    return currentInstance_->extendSequence();
 }
 
 SearchStatus MultipleStrategiesExp3Instance::finalize() {
@@ -119,6 +117,6 @@ SearchStatus MultipleStrategiesExp3Instance::finalize() {
     double newRootQValue = sequence_->getEntry(0)->getAssociatedBeliefNode()->getQValue();
     double deltaQ = newRootQValue - initialRootQValue_;
     parent_->updateStrategyWeights(currentStrategyNo_, timeUsed, deltaQ);
-    return status_;
+    return currentInstance_->finalize();
 }
 } /* namespace solver */

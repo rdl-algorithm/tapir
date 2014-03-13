@@ -59,20 +59,10 @@ class ProgramOptions {
                         "the number of episodes to sample for each step.")
                 ("ABT.maximumDepth", po::value<double>(),
                         "maximum Depth allowed before search stops.")
-                ("ABT.heuristicExploreCoefficient", po::value<double>(),
-                        "determines the ratio between exploration and"
-                        " exploitation for the UCB action selection - higher"
-                        " values mean more exploration.")
-                ("ABT.ucbExploreCoefficient", po::value<double>(),
-                        "determines the ratio between exploration and"
-                        " exploitation for the UCB action selection - higher"
-                        " values mean more exploration.")
-                ("ABT.maxNnComparisons", po::value<long>(),
-                        "maximum number of nearest-neighbor comparisons to"
-                        " make before stopping.")
-                ("ABT.maxNnDistance", po::value<double>(),
-                        "Maximum distance for a node to be considered a valid"
-                        "nearest-neighbor")
+                ("ABT.searchStrategy", po::value<std::string>(),
+                        "the search strategy to use")
+                ("ABT.rolloutStrategy", po::value<std::string>(),
+                        "the rollout strategy to use")
                 ("ABT.maxObservationDistance", po::value<double>(),
                         "Maximum distance between observations to group them"
                         "together - only applicable if approximate"

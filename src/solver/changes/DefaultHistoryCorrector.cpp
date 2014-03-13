@@ -35,7 +35,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
             entry->action_ = nullptr;
             entry->observation_ = nullptr;
             entry->reward_ = 0;
-            entry->totalDiscountedReward_ = 0;
+            entry->rewardFromHere_ = 0;
             historyIterator++;
             break;
         }

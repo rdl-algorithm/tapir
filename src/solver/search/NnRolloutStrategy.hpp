@@ -17,7 +17,7 @@ class NnRolloutStrategy: public SearchStrategy {
     double maxNnDistance_;
 };
 
-class NnRolloutInstance: public SearchInstance {
+class NnRolloutInstance: public AbstractSearchInstance {
   public:
     NnRolloutInstance(long maxNnComparisons, double maxNnDistance,
             Solver *solver, HistorySequence *sequence, long maximumDepth);

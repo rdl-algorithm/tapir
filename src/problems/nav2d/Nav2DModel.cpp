@@ -28,8 +28,11 @@
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
 #include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/abstract-problem/State.hpp"       // for State
+
+#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 
 #include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/approximate_observations.hpp"
@@ -37,8 +40,8 @@
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/FlaggingVisitor.hpp"
 
-#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+#include "solver/ActionNode.hpp"
+#include "solver/BeliefNode.hpp"
 #include "solver/StatePool.hpp"
 
 #include "Nav2DAction.hpp"         // for Nav2DAction
@@ -147,6 +150,10 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
 //    }
 //    cout << "Random state drawn:" << endl;
 //    drawState(*sampleAnInitState(), cout);
+}
+
+double Nav2DModel::getDefaultVal() {
+    return minVal_;
 }
 
 std::string Nav2DModel::areaTypeToString(Nav2DModel::AreaType type) {
@@ -329,10 +336,6 @@ double Nav2DModel::getHeuristicValue(solver::State const &state) {
         debug::show_message("Bad reward!");
     }
 	return reward;
-}
-
-double Nav2DModel::getDefaultVal() {
-    return minVal_;
 }
 
 std::unique_ptr<Nav2DState> Nav2DModel::extrapolateState(
@@ -696,11 +699,11 @@ void Nav2DModel::drawEnv(std::ostream &os) {
     }
 }
 
-void Nav2DModel::drawSimulationState(
-        std::vector<solver::State const *> particles,
+void Nav2DModel::drawSimulationState(solver::BeliefNode *belief,
         solver::State const &state,
         std::ostream &os) {
     Nav2DState const &navState = static_cast<Nav2DState const &>(state);
+    std::vector<solver::State const *> particles = belief->getStates();
     double minX = mapArea_.getLowerLeft().getX();
     double maxX = mapArea_.getUpperRight().getX();
     double minY = mapArea_.getLowerLeft().getY();
@@ -759,8 +762,6 @@ void Nav2DModel::drawSimulationState(
         }
         os << endl;
     }
-    os << "Actual state: " << state << " with value ";
-    os << getHeuristicValue(state) << endl;
 }
 
 long Nav2DModel::getNumberOfBins() {

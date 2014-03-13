@@ -26,9 +26,7 @@ class ActionNode {
     ~ActionNode();
     _NO_COPY_OR_MOVE(ActionNode);
 
-    /** Changes the q-value directly - this should be used only for the end
-     * of a sequence.
-     */
+    /** Changes the q-value directly. */
     void changeTotalQValue(double deltaQ, long deltaNParticles);
     /** Updates the # of sequences that pass through this action node
      * with the given observation, and keep going from there.

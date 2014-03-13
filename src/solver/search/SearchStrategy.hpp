@@ -25,23 +25,31 @@ class SearchStrategy {
 
 class SearchInstance {
   public:
-    SearchInstance(Solver *solver, HistorySequence *sequence,
+    /** Initializes the search. */
+    virtual SearchStatus initialize() = 0;
+    /** Extends the sequence. */
+    virtual SearchStatus extendSequence() = 0;
+    /** Finalizes the search. */
+    virtual SearchStatus finalize() = 0;
+};
+
+class AbstractSearchInstance : public SearchInstance {
+  public:
+    AbstractSearchInstance(Solver *solver, HistorySequence *sequence,
             long maximumDepth);
-    virtual ~SearchInstance() = default;
-    _NO_COPY_OR_MOVE(SearchInstance);
+    virtual ~AbstractSearchInstance() = default;
+    _NO_COPY_OR_MOVE(AbstractSearchInstance);
 
     /** The key method that defines how the search will proceed.
      * This method returns the current search status, and the next action
      * selected. If the selected action is null, the search will terminate.
      */
     virtual std::pair<SearchStatus, std::unique_ptr<Action>> getStatusAndNextAction() = 0;
-    /** Initializes the search. */
     virtual SearchStatus initialize();
     /** A default implementation to handle extending sequences; this probably
      * shouldn't need to be changed.
      */
     virtual SearchStatus extendSequence();
-    /** Finalizes the search. */
     virtual SearchStatus finalize();
   protected:
     Solver *solver_;

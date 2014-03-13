@@ -18,14 +18,16 @@ $(TGTS_$(n)): | $(BINDIR_$(n))
 # ----------------------------------------------------------------------
 
 # Dependencies for the linker
-LINKER_DEPS_$(n) := $(OBJS_NTGT_$(n))
-LINKER_DEPS_$(n) += $$(LIB_solver)
-LINKER_DEPS_$(n) += -lboost_program_options -lspatialindex
+LINKER_DEPS_$(n) := $(OBJS_NTGT_$(n)) $$(LIB_solver)
 LINKER_DEPS_$(n) += $(EXTRA_LINKER_DEPS_$(n))
+
+LIBRARIES_$(n) := -lboost_program_options -lspatialindex -lboost_regex
+LIBRARIES_$(n) += $(EXTRA_LIBRARIES_$(n))
+
 # Linking rule for the executable targets.
 define problem_build_template
 $(TGTS_$(n)): $(_BIN_$(n)): $(_O_$(n)) $$(LINKER_DEPS_$(n))
-	$$(LINK_CMD) $$< $(LINKER_DEPS_$(n))
+	$$(LINK_CMD) $$< $(LINKER_DEPS_$(n)) $(LIBRARIES_$(n))
 
 # Executables will be copied to the main folder for convenience
 build-$(n): $$(TGTS_$(n))

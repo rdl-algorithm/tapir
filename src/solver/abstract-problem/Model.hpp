@@ -43,11 +43,13 @@ class Model {
     virtual double getDiscountFactor() = 0;
 
     /** Returns the number of state variables */
-    virtual long getNStVars() = 0;
+    virtual long getNumberOfStateVariables() = 0;
     /** Returns a lower bound on the q-value. */
     virtual double getMinVal() = 0;
     /** Returns an upper bound on the q-value. */
     virtual double getMaxVal() = 0;
+    /** Returns the default q-value */
+    virtual double getDefaultVal() = 0;
 
 
     // ABT algorithm parameters
@@ -63,28 +65,6 @@ class Model {
     /** Returns the maximum depth allowed in the tree. */
     virtual long getMaximumDepth() = 0;
 
-    /** Returns the exploration coefficient used for selecting a rollout
-     * heuristic - this should be a value between 0 and 1, where a 1 results in
-     * both heuristics being equally probable.
-     * A reasonable default value is 0.5.
-     */
-    virtual double getHeuristicExploreCoefficient() = 0;
-    /** Returns the exploration/exploitation ratio for UCB; higher
-     * values mean more exploration.
-     * A reasonable default value is 1.0.
-     */
-    virtual double getUcbExploreCoefficient() = 0;
-
-    /** Returns the maximum number of nodes to check when searching
-     * for a nearest-neighbor belief node.
-     */
-    virtual long getMaxNnComparisons() = 0;
-    /** Returns the maximum allowable distance when searching for
-     * a nearest-neighbor belief node.
-     */
-    virtual double getMaxNnDistance() = 0;
-
-
     /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the belief vector. */
     virtual std::unique_ptr<State> sampleAnInitState() = 0;
@@ -94,8 +74,6 @@ class Model {
     virtual bool isTerminal(State const &state) = 0;
     /** Approximates the q-value of a state */
     virtual double getHeuristicValue(State const &state) = 0;
-    /** Returns the default q-value */
-    virtual double getDefaultVal() = 0;
 
     /* --------------- Black box dynamics ----------------- */
     /** Represents the results of a complete step in the model,
@@ -184,7 +162,7 @@ class Model {
     virtual void drawSimulationState(BeliefNode *belief,
             State const &/*state*/, std::ostream &/*os*/);
 
-    /* --------------- Data structure customization ----------------- */
+    /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to
     // be managed in a customizable way.
 

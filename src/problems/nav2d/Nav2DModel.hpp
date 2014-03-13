@@ -86,7 +86,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
 
     /***** Start implementation of Model's methods *****/
     // Simple getters
-    virtual long getNStVars() override {
+    virtual long getNumberOfStateVariables() override {
         return nStVars_;
     }
     virtual double getMinVal() override {
@@ -95,6 +95,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual double getMaxVal() override {
         return maxVal_;
     }
+    virtual double getDefaultVal() override;
 
     // Other methods
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;
@@ -103,7 +104,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
 
     virtual bool isTerminal(solver::State const &state) override;
     virtual double getHeuristicValue(solver::State const &state) override;
-    virtual double getDefaultVal() override;
+
 
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::TransitionParameters> generateTransition(
@@ -150,8 +151,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     /** Displays an individual point on the map. */
     virtual void dispPoint(AreaType type, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
-    virtual void drawSimulationState(
-            std::vector<solver::State const *> particles,
+    virtual void drawSimulationState(solver::BeliefNode *belief,
             solver::State const &state,
             std::ostream &os) override;
 

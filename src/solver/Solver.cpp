@@ -133,7 +133,7 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
         if (model_->isTerminal(*lastState)) {
             debug::show_message("ERROR: Status should be terminal, but it wasn't!");
         }
-        lastEntry->totalDiscountedReward_ = model_->getHeuristicValue(*lastState);
+        lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
     } else if (status == SearchStatus::HIT_TERMINAL_STATE) {
     } else {
         debug::show_message("ERROR: Search failed!?");
@@ -142,86 +142,98 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     backup(sequence, true);
 }
 
-void Solver::backup(HistorySequence *sequence, bool doBackup) {
-    std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
-                sequence->histSeq_.rbegin());
-    double totalReward = (*itHist)->totalDiscountedReward_;
-    if ((*itHist)->action_ != nullptr) {
+void Solver::updateSequenceStartEndCounts(HistorySequence *sequence,
+        bool doBackup) {
+    HistoryEntry *lastEntry = sequence->getLastEntry();
+    if (lastEntry->getAction() != nullptr) {
         debug::show_message("ERROR: End of sequence has an action!?");
     }
 
+    for (std::unique_ptr<HistoryEntry> &entry : sequence->histSeq_) {
+        if (!doBackup && !entry->hasBeenBackedUp_) {
+            debug::show_message("ERROR: Undoing backup, but it's already undone!");
+        } else if (doBackup && entry->hasBeenBackedUp_) {
+            debug::show_message("ERROR: Doing backup, but it's already done!");
+        }
+    }
+
     if (doBackup) {
-        if ((*itHist)->hasBeenBackedUp_) {
+        if (lastEntry->hasBeenBackedUp_) {
             // do nothing
         } else {
-            (*itHist)->associatedBeliefNode_->numberOfEndingSequences_++;
+            lastEntry->associatedBeliefNode_->numberOfTails_++;
         }
     } else {
-        if ((*itHist)->hasBeenBackedUp_) {
-            (*itHist)->associatedBeliefNode_->numberOfEndingSequences_--;
+        if (lastEntry->hasBeenBackedUp_) {
+            lastEntry->associatedBeliefNode_->numberOfTails_--;
         } else {
-            debug::show_message("ERROR: Trying to undo but not backed up!?");
+            // do nothing
         }
     }
 
+    HistoryEntry *firstEntry = sequence->getFirstEntry();
+    if (doBackup) {
+        if (firstEntry->hasBeenBackedUp_) {
+            // do nothing
+        } else {
+            firstEntry->associatedBeliefNode_->numberOfHeads_++;
+        }
+    } else {
+        if (firstEntry->hasBeenBackedUp_) {
+            firstEntry->associatedBeliefNode_->numberOfHeads_--;
+        } else {
+            // do nothing
+        }
+    }
+}
+
+void Solver::backup(HistorySequence *sequence, bool doBackup) {
+    updateSequenceStartEndCounts(sequence, doBackup);
+    double discountFactor = model_->getDiscountFactor();
+
+    std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
+                sequence->histSeq_.rbegin());
+    // Retrieve the value of the last entry.
+    double totalReward = (*itHist)->rewardFromHere_;
     (*itHist)->hasBeenBackedUp_ = doBackup;
     itHist++;
-    bool isFirst = true;
+
+    bool addFullReward = true;
+    // Normal update for the rest of the sequence.
     for (; itHist != sequence->histSeq_.rend(); itHist++) {
         HistoryEntry *entry = itHist->get();
-        if (!doBackup && !entry->hasBeenBackedUp_) {
-            debug::show_message("ERROR: Trying to undo but not backed up!?");
-        }
         BeliefNode *node = entry->associatedBeliefNode_;
 
-        long deltaNParticles = 0;
-        if (doBackup && !entry->hasBeenBackedUp_) {
-            deltaNParticles = 1;
-        } else if (!doBackup && entry->hasBeenBackedUp_) {
-            deltaNParticles = -1;
-        }
+        // Apply the discount
+        totalReward *= discountFactor;
+        // Calculate the reward from this entry.
+        entry->rewardFromHere_ = totalReward = entry->reward_ + totalReward;
 
-        double previousTotalReward;
-        if (entry->hasBeenBackedUp_) {
-            previousTotalReward = entry->totalDiscountedReward_;
-        } else {
-            previousTotalReward = 0;
+        long deltaNParticles = 1;
+        double deltaQ = entry->reward_;
+        if (addFullReward) {
+            deltaQ = totalReward;
         }
-        totalReward = entry->discount_* entry->reward_ + totalReward;
-        if (doBackup) {
-            entry->totalDiscountedReward_ = totalReward;
-        } else {
-            entry->totalDiscountedReward_ = 0;
+        // If we're undoing it, we negate the values.
+        if (!doBackup) {
+            deltaNParticles = -deltaNParticles;
+            deltaQ = -deltaQ;
         }
-        double deltaTotalReward = totalReward - previousTotalReward;
 
         ActionNode *actionNode = node->getMapping()->getActionNode(*entry->action_);
-        if (isFirst) {
-            actionNode->changeTotalQValue(deltaTotalReward, deltaNParticles);
+        actionNode->changeTotalQValue(deltaQ, deltaNParticles);
+        if (addFullReward) {
+            actionNode->getChild(*entry->observation_)->recalculateQValue();
+            addFullReward = false;
         } else {
-            actionNode->updateSequenceCount(*entry->observation_, model_->getDiscountFactor(),
-                    deltaNParticles);
+            actionNode->updateSequenceCount(*entry->observation_,
+                    model_->getDiscountFactor(), deltaNParticles);
         }
-
-        // Special handling for the first entry in the sequence
-        if (itHist+1 == sequence->histSeq_.rend()) {
-            node->recalculateQValue();
-            if (doBackup) {
-                if (entry->hasBeenBackedUp_) {
-                    // do nothing
-                } else {
-                    node->numberOfStartingSequences_++;
-                }
-            } else {
-                if (entry->hasBeenBackedUp_) {
-                    node->numberOfStartingSequences_--;
-                } else {
-                    // do nothing
-                }
-            }
-        }
+        actionNode->recalculateQValue();
         entry->hasBeenBackedUp_ = doBackup;
     }
+    // The belief node also needs to recalculate its q value.
+    sequence->getFirstEntry()->associatedBeliefNode_->recalculateQValue();
 }
 
 BeliefNode *Solver::getNNBelNode(BeliefNode *belief,
@@ -261,6 +273,27 @@ BeliefNode *Solver::getNNBelNode(BeliefNode *belief,
     return nnBel;
 }
 
+void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
+    os << belief->getQValue();
+    os << " from " << belief->getNParticles() << " p." << endl;
+    os << belief->numberOfHeads_ << " heads" << endl;
+    os << belief->numberOfTails_ << " ends" << endl;
+    os << "Action children: " << endl;
+    std::multimap<double, solver::ActionMappingEntry const *> actionValues;
+    for (solver::ActionMappingEntry const *entry : belief->getMapping()->getChildEntries()) {
+        actionValues.emplace(entry->getActionNode()->getQValue(), entry);
+    }
+    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
+        abt::printDouble(it->first, os, false, 3, 3);
+        os << ": ";
+        std::ostringstream sstr;
+        sstr << *it->second->getAction();
+        abt::printWithWidth(sstr.str(), os, 7);
+        abt::printWithWidth(it->second->getActionNode()->getNParticles(), os, 6);
+        os << endl;
+    }
+}
+
 double Solver::runSim(long nSteps, long historiesPerStep,
         std::vector<long> &changeTimes,
         std::vector<std::unique_ptr<State>> &trajSt,
@@ -290,7 +323,7 @@ double Solver::runSim(long nSteps, long historiesPerStep,
         cout << endl << endl << "t-" << timeStep << endl;
         std::stringstream prevStream;
         prevStream << "BEFORE:" << endl;
-        model_->drawSimulationState(currNode, *currentState, prevStream);
+        printBelief(currNode, prevStream);
 
         allStates_->createOrGetInfo(*currentState);
         if (itCh != changeTimes.end() && timeStep == *itCh) {
@@ -333,10 +366,12 @@ double Solver::runSim(long nSteps, long historiesPerStep,
 
         std::stringstream newStream;
         newStream << "AFTER:" << endl;
-        model_->drawSimulationState(currNode, *currentState, newStream);
+        printBelief(currNode, newStream);
 
         cout << "STATE: " << *currentState << endl;
+        cout << "HEURISTIC VALUE: " << model_->getHeuristicValue(*currentState) << endl;
         cout << "BELIEF #" << currNode->getId() << endl;
+        model_->drawSimulationState(currNode, *currentState, cout);
         while (prevStream.good() || newStream.good()) {
             std::string s1, s2;
             std::getline(prevStream, s1);
@@ -344,8 +379,8 @@ double Solver::runSim(long nSteps, long historiesPerStep,
             boost::regex rgx("\\x1b\\[[0-9;]*m");
             std::string s1Text = boost::regex_replace(s1, rgx, "");
             std::string s2Text = boost::regex_replace(s2, rgx, "");
-            cout << s1 << std::setw(30 - s1Text.size()) << "";
-            cout << s2 << std::setw(30 - s2Text.size()) << "";
+            cout << s1 << std::setw(35 - s1Text.size()) << "";
+            cout << s2 << std::setw(35 - s2Text.size()) << "";
             cout << endl;
         }
 
@@ -482,7 +517,7 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         State const *state = stateInfo->getState();
         if (!model_->isTerminal(*state)) {
             // Use the heuristic value for non-terminal particles.
-            histEntry->totalDiscountedReward_ = model_->getHeuristicValue(*state);
+            histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
         }
         backup(histSeq, true);
     }
@@ -539,7 +574,7 @@ void Solver::applyChanges() {
         State const *lastState = lastEntry->getState();
         // If it didn't end in a terminal state, we apply the heuristic.
         if (!model_->isTerminal(*lastState)) {
-            lastEntry->totalDiscountedReward_ = model_->getHeuristicValue(*lastState);
+            lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
         }
         backup(sequence, true);
     }

@@ -16,7 +16,7 @@ class RandomRolloutStrategy: public SearchStrategy {
     long maxNSteps_;
 };
 
-class RandomRolloutInstance: public SearchInstance {
+class RandomRolloutInstance: public AbstractSearchInstance {
   public:
     RandomRolloutInstance(long maxNSteps,
             Solver *solver, HistorySequence *sequence, long maximumDepth);

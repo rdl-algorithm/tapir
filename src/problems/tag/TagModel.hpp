@@ -62,7 +62,7 @@ class TagModel: virtual public ModelWithProgramOptions,
 
     /***** Start implementation of Model's virtual methods *****/
     // Simple getters
-    long getNStVars() override {
+    long getNumberOfStateVariables() override {
         return nStVars_;
     }
     double getMinVal() override {
@@ -71,6 +71,7 @@ class TagModel: virtual public ModelWithProgramOptions,
     double getMaxVal() override {
         return maxVal_;
     }
+    double getDefaultVal() override;
 
     // Other virtual methods
     std::unique_ptr<solver::State> sampleAnInitState() override;
@@ -79,7 +80,6 @@ class TagModel: virtual public ModelWithProgramOptions,
 
     bool isTerminal(solver::State const &state) override;
     double getHeuristicValue(solver::State const &state) override;
-    double getDefaultVal() override;
 
     /* --------------- Black box dynamics ----------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
@@ -120,7 +120,7 @@ class TagModel: virtual public ModelWithProgramOptions,
     /** Displays a single cell of the map. */
     void dispCell(TagCellType cellType, std::ostream &os);
     void drawEnv(std::ostream &os) override;
-    void drawSimulationState(std::vector<solver::State const *> particles,
+    void drawSimulationState(solver::BeliefNode *belief,
             solver::State const &state,
             std::ostream &os) override;
 

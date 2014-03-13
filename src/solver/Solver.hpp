@@ -88,6 +88,8 @@ class Solver {
     ActionPool *getActionPool();
     /** Returns the observation pool. */
     ObservationPool *getObservationPool();
+
+    void printBelief(BeliefNode *belief, std::ostream &os);
   private:
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
@@ -99,8 +101,11 @@ class Solver {
     void continueSearch(HistorySequence *sequence, long maximumDepth);
 
     /* ------------------ Tree backup methods ------------------- */
-    /** Calculates the discounted total rewards for this sequence. */
-    void calculateDiscountedTotalRewards(HistorySequence *sequence);
+    /** Updates the sequence counts for the belief nodes at the
+     * start and end of the sequence.
+     */
+    void updateSequenceStartEndCounts(HistorySequence *sequence,
+            bool doBackup);
     /** Performs or negates a backup on the given sequence. */
     void backup(HistorySequence *sequence, bool doBackup);
 

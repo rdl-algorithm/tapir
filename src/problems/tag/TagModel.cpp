@@ -17,18 +17,24 @@
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
+
 #include "solver/abstract-problem/Action.hpp"            // for Action
-#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/indexing/FlaggingVisitor.hpp"
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
+#include "solver/abstract-problem/State.hpp"             // for State, State::Hash, operator<<, operator==
+
+#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
+
+#include "solver/indexing/FlaggingVisitor.hpp"
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
-#include "solver/abstract-problem/State.hpp"             // for State, State::Hash, operator<<, operator==
-#include "solver/StatePool.hpp"
 
 #include "solver/mappings/enumerated_actions.hpp"
 #include "solver/mappings/discrete_observations_map.hpp"
+
+#include "solver/ActionNode.hpp"
+#include "solver/BeliefNode.hpp"
+#include "solver/StatePool.hpp"
 
 #include "TagAction.hpp"
 #include "TagObservation.hpp"
@@ -111,6 +117,10 @@ void TagModel::initialize() {
     }
 }
 
+double TagModel::getDefaultVal() {
+    return minVal_;
+}
+
 GridPosition TagModel::randomEmptyCell() {
     GridPosition pos;
     while (true) {
@@ -152,10 +162,6 @@ double TagModel::getHeuristicValue(solver::State const &state) {
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
     qVal += finalDiscount * tagReward_;
     return qVal;
-}
-
-double TagModel::getDefaultVal() {
-    return minVal_;
 }
 
 std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
@@ -518,13 +524,11 @@ void TagModel::drawEnv(std::ostream &os) {
     }
 }
 
-void TagModel::drawSimulationState(
-        std::vector<solver::State const *> particles,
+void TagModel::drawSimulationState(solver::BeliefNode *belief,
         solver::State const &state,
         std::ostream &os) {
     TagState const &tagState = static_cast<TagState const &>(state);
-    os << "Belief has " << particles.size() << " particles." << endl;
-    os << state << endl;
+    std::vector<solver::State const *> particles = belief->getStates();
     std::vector<std::vector<long>> particleCounts(nRows_,
             std::vector<long>(nCols_));
     for (solver::State const *particle : particles) {
