@@ -34,8 +34,6 @@ class TextSerializer : virtual public Serializer {
     virtual ~TextSerializer() = default;
     _NO_COPY_OR_MOVE(TextSerializer);
 
-    static const int NUM_PARTICLES_PER_LINE = 5;
-
     virtual void saveTransitionParameters(TransitionParameters const *tp,
             std::ostream &os) override;
     virtual std::unique_ptr<TransitionParameters> loadTransitionParameters(
@@ -59,6 +57,12 @@ class TextSerializer : virtual public Serializer {
     virtual void load(BeliefNode &node, std::istream &is) override;
     virtual void save(BeliefTree const &tree, std::ostream &os) override;
     virtual void load(BeliefTree &tree, std::istream &is) override;
+
+    static const int NUM_PARTICLES_PER_LINE = 5;
+
+    virtual int getActionColumnWidth();
+    virtual int getTPColumnWidth();
+    virtual int getObservationColumnWidth();
 };
 } /* namespace solver */
 

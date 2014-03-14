@@ -6,18 +6,18 @@
 #include "solver/abstract-problem/Point.hpp"
 
 namespace abt {
-void printDouble(double value, std::ostream &os, bool showpos, int precision,
-        int numDigitsBeforePoint) {
+void printDouble(double value, std::ostream &os, int width,
+        int precision,
+        std::ios_base::fmtflags flags,
+        std::ostream::char_type fillCh) {
     std::streamsize oldPrecision = os.precision(precision);
-    std::streamsize width = os.width(precision + numDigitsBeforePoint + 2);
-    std::ios_base::fmtflags flags = std::ios_base::fixed;
-    if (showpos) {
-        flags |= std::ios_base::showpos;
-    }
-    flags = os.flags(flags);
+    std::streamsize oldWidth = os.width(width);
+    std::ostream::char_type oldFillCh = os.fill(fillCh);
+    std::ios_base::fmtflags oldflags = os.flags(flags);
     os << value;
-    os.flags(flags);
-    os.width(width);
+    os.flags(oldflags);
+    os.fill(oldFillCh);
+    os.width(oldWidth);
     os.precision(oldPrecision);
 }
 }

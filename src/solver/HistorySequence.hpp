@@ -35,12 +35,12 @@ class HistorySequence {
     ~HistorySequence();
     _NO_COPY_OR_MOVE(HistorySequence);
 
-    /** Adds a new entry with the given state info and current discount. */
-    HistoryEntry *addEntry(StateInfo *stateInfo, double discount);
+    /** Adds a new entry with the given state info. */
+    HistoryEntry *addEntry(StateInfo *stateInfo);
     /** Adds a new entry with the given current discount, as
      * well as the given action,observation and immediate reward.
      */
-    HistoryEntry *addEntry(StateInfo *stateInfo, double discount,
+    HistoryEntry *addEntry(StateInfo *stateInfo,
             Action const &action, Observation const &obs,
             double immediateReward);
     /** Adds a new entry at the specified position (index),
@@ -48,7 +48,7 @@ class HistorySequence {
      * discount.
      */
     HistoryEntry *insertEntry(long index,
-            StateInfo *stateInfo, double discount,
+            StateInfo *stateInfo,
             Action const &action, Observation const &obs,
             double immediateReward);
 

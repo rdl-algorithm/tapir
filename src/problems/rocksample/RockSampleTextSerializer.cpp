@@ -183,4 +183,14 @@ std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(
     }
 }
 
+
+int RockSampleTextSerializer::getActionColumnWidth(){
+    return 7;
+}
+int RockSampleTextSerializer::getTPColumnWidth() {
+    return 0;
+}
+int RockSampleTextSerializer::getObservationColumnWidth() {
+    return 4;
+}
 } /* namespace rocksample */

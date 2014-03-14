@@ -37,6 +37,11 @@ class TagTextSerializer: virtual public solver::TextSerializer,
 
     void saveAction(solver::Action const *action, std::ostream &os) override;
     std::unique_ptr<solver::Action> loadAction(std::istream &is) override;
+
+
+    virtual int getActionColumnWidth() override;
+    virtual int getTPColumnWidth() override;
+    virtual int getObservationColumnWidth() override;
 };
 } /* namespace tag */
 

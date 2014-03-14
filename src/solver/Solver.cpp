@@ -98,8 +98,7 @@ void Solver::singleSearch(long maximumDepth) {
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
         long startDepth, long maximumDepth) {
     HistorySequence *sequence = allHistories_->addNew(startDepth);
-    HistoryEntry *entry = sequence->addEntry(startStateInfo,
-            std::pow(model_->getDiscountFactor(), startDepth));
+    HistoryEntry *entry = sequence->addEntry(startStateInfo);
     entry->registerNode(startNode);
     continueSearch(sequence, maximumDepth);
 }
@@ -284,12 +283,14 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
         actionValues.emplace(entry->getActionNode()->getQValue(), entry);
     }
     for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-        abt::printDouble(it->first, os, false, 3, 3);
+        abt::printDouble(it->first, os, 8, 2,
+                std::ios_base::fixed | std::ios_base::showpos);
         os << ": ";
         std::ostringstream sstr;
         sstr << *it->second->getAction();
-        abt::printWithWidth(sstr.str(), os, 7);
-        abt::printWithWidth(it->second->getActionNode()->getNParticles(), os, 6);
+        abt::printWithWidth(sstr.str(), os, 17);
+        abt::printWithWidth(it->second->getActionNode()->getNParticles(),
+                os, 8);
         os << endl;
     }
 }
@@ -379,8 +380,8 @@ double Solver::runSim(long nSteps, long historiesPerStep,
             boost::regex rgx("\\x1b\\[[0-9;]*m");
             std::string s1Text = boost::regex_replace(s1, rgx, "");
             std::string s2Text = boost::regex_replace(s2, rgx, "");
-            cout << s1 << std::setw(35 - s1Text.size()) << "";
-            cout << s2 << std::setw(35 - s2Text.size()) << "";
+            cout << s1 << std::setw(40 - s1Text.size()) << "";
+            cout << s2 << std::setw(40 - s2Text.size()) << "";
             cout << endl;
         }
 
@@ -492,9 +493,6 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
     for (HistoryEntry *entry : currNode->particles_) {
         particles.push_back(entry->getState());
     }
-
-    double discountFactor = model_->getDiscountFactor();
-    double currentDiscount = std::pow(discountFactor, timeStep);
     // Attempt to generate particles for next state based on the current belief,
     // the observation, and the action.
     std::vector<std::unique_ptr<State>> nextParticles(
@@ -512,7 +510,7 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
 
         // Create a new history sequence and entry for the new particle.
         HistorySequence *histSeq = allHistories_->addNew(timeStep);
-        HistoryEntry *histEntry = histSeq->addEntry(stateInfo, currentDiscount * discountFactor);
+        HistoryEntry *histEntry = histSeq->addEntry(stateInfo);
         histEntry->registerNode(nextNode);
         State const *state = stateInfo->getState();
         if (!model_->isTerminal(*state)) {

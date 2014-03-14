@@ -238,8 +238,11 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
         std::getline(is, line);
         std::istringstream sstr2(line);
         long binNumber;
-        sstr2 >> tmpStr >> binNumber >> tmpStr;
-        std::unique_ptr<ActionNode> actionNode(std::make_unique<ActionNode>());
+        sstr2 >> tmpStr >> binNumber;
+        std::getline(sstr2, tmpStr, '(');
+        std::getline(sstr2, tmpStr, ')');
+        std::getline(sstr2, tmpStr, ':');
+        std::unique_ptr<ActionNode> actionNode = std::make_unique<ActionNode>();
         load(*actionNode, sstr2);
         discMap.entries_[binNumber] = std::make_unique<DiscretizedActionMapEntry>(
                 binNumber, &discMap, std::move(actionNode));

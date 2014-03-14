@@ -63,8 +63,7 @@ SearchStatus AbstractSearchInstance::extendSequence() {
         StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(
                 *result.nextState);
         // Step forward in the history, and update the belief node.
-        currentEntry = sequence_->addEntry(nextStateInfo,
-                currentEntry->discount_ * discountFactor_);
+        currentEntry = sequence_->addEntry(nextStateInfo);
         currentNode_ = solver_->getPolicy()->createOrGetChild(
                 currentNode_, *result.action, *result.observation);
         currentEntry->registerNode(currentNode_);

@@ -29,8 +29,8 @@ TagTextSerializer::TagTextSerializer(solver::Solver *solver) :
 void TagTextSerializer::saveState(solver::State const *state, std::ostream &os) {
     TagState const &tagState = static_cast<TagState const &>(*state);
     os << tagState.robotPos_.i << " " << tagState.robotPos_.j << " "
-       <<tagState.opponentPos_.i << " " << tagState.opponentPos_.j << " "
-       << tagState.isTagged_;
+       << tagState.opponentPos_.i << " " << tagState.opponentPos_.j << " "
+       << (tagState.isTagged_ ? "T" : "_");
 }
 
 std::unique_ptr<solver::State> TagTextSerializer::loadState(std::istream &is) {
@@ -39,8 +39,9 @@ std::unique_ptr<solver::State> TagTextSerializer::loadState(std::istream &is) {
     GridPosition robotPos(i, j);
     is >> i >> j;
     GridPosition opponentPos(i, j);
-    bool isTagged;
-    is >> isTagged;
+    std::string taggedString;
+    is >> taggedString;
+    bool isTagged = (taggedString == "T");
     return std::make_unique<TagState>(robotPos, opponentPos, isTagged);
 }
 
@@ -49,12 +50,12 @@ void TagTextSerializer::saveObservation(solver::Observation const *obs,
         std::ostream &os) {
     if (obs == nullptr) {
         os << "()";
-        return;
+    } else {
+        TagObservation const &observation = static_cast<TagObservation const &>(
+                *obs);
+        os << "(" << observation.position_.i << " " << observation.position_.j;
+        os << " " << (observation.seesOpponent_ ? "SEEN" : "UNSEEN") << ")";
     }
-    TagObservation const &observation = static_cast<TagObservation const &>(
-            *obs);
-    os << "(" << observation.position_.i << " " << observation.position_.j;
-    os << " " << (observation.seesOpponent_ ? "SEEN" : "UNSEEN") << ")";
 }
 
 std::unique_ptr<solver::Observation> TagTextSerializer::loadObservation(
@@ -130,5 +131,16 @@ std::unique_ptr<solver::Action> TagTextSerializer::loadAction(
         return std::make_unique<TagAction>(
                 static_cast<ActionType>(code));
     }
+}
+
+
+int TagTextSerializer::getActionColumnWidth(){
+    return 5;
+}
+int TagTextSerializer::getTPColumnWidth() {
+    return 0;
+}
+int TagTextSerializer::getObservationColumnWidth() {
+    return 12;
 }
 } /* namespace tag */

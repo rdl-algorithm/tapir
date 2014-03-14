@@ -27,6 +27,8 @@ class Nav2DOptions : public ProgramOptions {
                         "number of steps for interpolation")
                 ("problem.crashPenalty", po::value<double>(),
                         "penalty for crashing")
+                ("problem.boundsHitPenalty", po::value<double>(),
+                        "penalty for hitting the problem bounds")
                 ("problem.goalReward", po::value<double>(),
                         "reward for reaching the goal")
                 ("problem.maxSpeed", po::value<double>(),

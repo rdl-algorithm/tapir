@@ -2,6 +2,7 @@
 
 #include <cstddef>                      // for size_t
 
+#include <iomanip>
 #include <iostream>
 #include <map>                          // for _Rb_tree_iterator, map<>::mapped_type
 #include <sstream>                      // for stringstream
@@ -44,11 +45,7 @@ std::unique_ptr<TransitionParameters> TextSerializer::loadTransitionParameters(
 
 void TextSerializer::save(StateInfo const &info, std::ostream &os) {
     os << "State ";
-    std::streamsize width = os.width(6);
-    std::ios_base::fmtflags flags = os.setf(std::ios::right);
-    os << info.id_;
-    os.width(width);
-    os.flags(flags);
+    os << std::setw(6) << info.id_;
     os << " : ";
     saveState(info.state_.get(), os);
 }
@@ -61,7 +58,7 @@ void TextSerializer::load(StateInfo &info, std::istream &is) {
 
 void TextSerializer::save(StatePool const &pool, std::ostream &os) {
     os << "STATESPOOL-BEGIN" << endl;
-    os << "#states: " << pool.stateInfoMap_.size() << endl;
+    os << "numStates: " << pool.stateInfoMap_.size() << endl;
     for (std::unique_ptr<StateInfo> const &stateInfo : pool.statesByIndex_) {
         save(*stateInfo, os);
         os << endl;
@@ -98,20 +95,43 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
 
 void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     os << "HistoryEntry < ";
-    std::streamsize width = os.width(5);
-    os << entry.owningSequence_->id_;
-    os.width(width);
-    os << " " << entry.entryId_ << " >: (S ";
-    os << entry.stateInfo_->id_;
+    os << entry.owningSequence_->id_ << " " << entry.entryId_ << " >: (S";
+    abt::printWithWidth(entry.stateInfo_->id_, os, 6,
+            std::ios_base::left);
+
     os << " ";
-    saveAction(entry.action_.get(), os);
+    std::stringstream sstr;
+    saveAction(entry.action_.get(), sstr);
+    abt::printWithWidth(sstr.str(), os,
+            getActionColumnWidth(),
+            std::ios_base::left);
+
     os << " ";
-    saveTransitionParameters(entry.transitionParameters_.get(), os);
+    sstr.clear();
+    sstr.str("");
+    saveTransitionParameters(entry.transitionParameters_.get(), sstr);
+    abt::printWithWidth(sstr.str(), os,
+            getTPColumnWidth(),
+            std::ios_base::left);
+
     os << " ";
-    saveObservation(entry.observation_.get(), os);
-    os << " " << entry.discount_ << " " << entry.reward_ << " "
-       << entry.rewardFromHere_ << " );";
-    os << " S: ";
+    sstr.clear();
+    sstr.str("");
+    saveObservation(entry.observation_.get(), sstr);
+    abt::printWithWidth(sstr.str(), os,
+            getObservationColumnWidth(),
+            std::ios_base::left);
+
+    os << " r:";
+    abt::printDouble(entry.reward_, os, 6, 2,
+            std::ios_base::fixed | std::ios_base::showpos
+                    | std::ios_base::left);
+
+    os << " v:";
+    abt::printDouble(entry.rewardFromHere_, os, 0, 1,
+                std::ios_base::fixed | std::ios_base::showpos);
+
+    os << ");   S:";
     saveState(entry.stateInfo_->getState(), os);
 }
 
@@ -120,12 +140,16 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     long stateId;
     long seqId;
     is >> tmpStr >> tmpStr >> seqId >> entry.entryId_;
-    is >> tmpStr >> tmpStr >> stateId;
+    std::getline(is, tmpStr, 'S');
+    is >> stateId;
     entry.action_ = std::move(loadAction(is));
     entry.transitionParameters_ = std::move(loadTransitionParameters(is));
     entry.observation_ = std::move(loadObservation(is));
-    is >> entry.discount_ >> entry.reward_;
-    is >> entry.rewardFromHere_ >> tmpStr;
+    std::getline(is, tmpStr, ':');
+    is >> entry.reward_;
+    std::getline(is, tmpStr, ':');
+    std::getline(is, tmpStr, ')');
+    std::istringstream(tmpStr) >> entry.rewardFromHere_;
     entry.hasBeenBackedUp_ = true;
     entry.registerState(solver_->allStates_->getInfoById(stateId));
 }
@@ -160,7 +184,7 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
 
 void TextSerializer::save(Histories const &histories, std::ostream &os) {
     os << "HISTORIES-BEGIN" << endl;
-    os << "#histories: " << histories.getNumberOfSequences() << endl;
+    os << "numHistories: " << histories.getNumberOfSequences() << endl;
     for (std::unique_ptr<HistorySequence> const &seq : histories.sequencesById_) {
         save(*seq, os);
     }
@@ -225,10 +249,9 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
                 ++it) {
             HistoryEntry const *entry = *it;
             os << "( ";
-            std::streamsize width = os.width(5);
             os << entry->owningSequence_->id_;
-            os.width(width);
-            os << " " << entry->entryId_ << " )";
+            os << " ";
+            os << entry->entryId_ << " )";
             count += 1;
             if (count >= NUM_PARTICLES_PER_LINE
                     || (it+1) == node.particles_.end()) {
@@ -276,9 +299,9 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
     os << "BELIEFTREE-BEGIN" << endl;
-    os << "#nodes: " << tree.getNumberOfNodes() << endl;
+    os << "numNodes: " << tree.getNumberOfNodes() << endl;
     for (BeliefNode *node : tree.allNodes_) {
-        os << "NODE # " << node->id_ << endl;
+        os << "NODE " << node->id_ << endl;
         save(*node, os);
         os << endl;
     }
@@ -306,15 +329,23 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
     std::getline(is, line);
     while ((line.find("BELIEFTREE-END") == std::string::npos)) {
         long nodeId;
-        std::istringstream(line) >> tmpStr >> tmpStr >> nodeId;
+        std::istringstream(line) >> tmpStr >> nodeId;
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
-        if (node->getNActChildren() > 0) {
-            node->recalculateQValue();
-        }
+        node->recalculateQValue();
         // Ignore an empty line after each belief node.
         std::getline(is, line);
         std::getline(is, line);
     }
+}
+
+int TextSerializer::getActionColumnWidth(){
+    return 0;
+}
+int TextSerializer::getTPColumnWidth() {
+    return 0;
+}
+int TextSerializer::getObservationColumnWidth() {
+    return 0;
 }
 } /* namespace solver */

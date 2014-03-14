@@ -68,6 +68,9 @@ void Nav2DTransition::print(std::ostream &os) const {
     if (hadCollision) {
         os << "C";
     }
+    if (hitBounds) {
+        os << "B";
+    }
 }
 
 Nav2DModel::Nav2DModel(RandomGenerator *randGen,
@@ -77,6 +80,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     costPerUnitTime_(vm["problem.costPerUnitTime"].as<double>()),
     interpolationStepCount_(vm["problem.interpolationStepCount"].as<double>()),
     crashPenalty_(vm["problem.crashPenalty"].as<double>()),
+    boundsHitPenalty_(vm["problem.boundsHitPenalty"].as<double>()),
     goalReward_(vm["problem.goalReward"].as<double>()),
     maxSpeed_(vm["problem.maxSpeed"].as<double>()),
     costPerUnitDistance_(vm["problem.costPerUnitDistance"].as<double>()),
@@ -389,7 +393,7 @@ std::unique_ptr<solver::TransitionParameters> Nav2DModel::generateTransition(
         Point2D currentPosition = currentState->getPosition();
         if (!mapArea_.contains(currentPosition)) {
             transition->moveRatio = previousRatio;
-            transition->hadCollision = true;
+            transition->hitBounds = true;
 			break;
  		}
         if (isInside(currentPosition, AreaType::OBSTACLE)) {
@@ -449,6 +453,9 @@ double Nav2DModel::generateReward(
     }
     if (tp2.hadCollision) {
         reward -= crashPenalty_;
+    }
+    if (tp2.hitBounds) {
+        reward -= boundsHitPenalty_;
     }
     return reward;
 }

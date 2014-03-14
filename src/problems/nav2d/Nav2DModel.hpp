@@ -47,6 +47,7 @@ struct Nav2DTransition : public solver::TransitionParameters {
     double moveRatio = 0.0; // 0.0 = same position; 1.0 = full move
     bool reachedGoal = false;
     bool hadCollision = false;
+    bool hitBounds = false;
 
     void print(std::ostream &os) const override;
 };
@@ -191,6 +192,8 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     long interpolationStepCount_;
     /** Penalty for crashing. */
     double crashPenalty_;
+    /** Penalty for hitting the bounds. */
+    double boundsHitPenalty_;
     /** Reward for reaching a goal area. */
     double goalReward_;
 

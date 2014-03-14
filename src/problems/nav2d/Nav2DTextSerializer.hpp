@@ -44,6 +44,11 @@ class Nav2DTextSerializer : virtual public solver::TextSerializer,
             std::ostream &os) override;
     std::unique_ptr<solver::Observation> loadObservation(
             std::istream &is) override;
+
+
+    virtual int getActionColumnWidth() override;
+    virtual int getTPColumnWidth() override;
+    virtual int getObservationColumnWidth() override;
 };
 } /* namespace nav2d */
 

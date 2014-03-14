@@ -39,11 +39,12 @@ void Nav2DTextSerializer::saveState(solver::State const *state,
     Nav2DState const &navState =
         static_cast<Nav2DState const &>(*state);
     os << "(";
-    abt::printDouble(navState.getX(), os);
+    abt::printDouble(navState.getX(), os, 10, 7);
     os << " ";
-    abt::printDouble(navState.getY(), os);
+    abt::printDouble(navState.getY(), os, 10, 7);
     os << "):";
-    abt::printDouble(navState.getDirection(), os, true);
+    abt::printDouble(navState.getDirection(), os, 10, 7,
+            std::ios_base::fixed | std::ios_base::showpos);
 }
 
 std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
@@ -66,37 +67,38 @@ std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
 void Nav2DTextSerializer::saveAction(solver::Action const *action,
         std::ostream &os) {
     if (action == nullptr) {
-        os << "NULL";
-        return;
+        os << "A:()";
+    } else {
+        Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
+        os << "A" << a.getBinNumber() << ":(";
+        abt::printDouble(a.speed_, os, 5, 3);
+        os << "/";
+        abt::printDouble(a.rotationalSpeed_, os, 6, 3,
+                std::ios_base::fixed | std::ios_base::showpos);
+        os << ")";
     }
-    Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
-    os << "#" << a.getBinNumber() << ": ";
-    abt::printDouble(a.speed_, os, false, 1);
-    os << "/";
-    abt::printDouble(a.rotationalSpeed_, os, true, 3);
 }
 
 std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
         std::istream &is) {
     std::string tmpStr;
-    is >> tmpStr;
-    if (tmpStr == "NULL") {
+    // The action code lies between 'A' and ':'
+    std::getline(is, tmpStr, 'A');
+    std::getline(is, tmpStr, ':');
+    // No code means no action;
+    if (tmpStr.find_first_not_of(' ') == std::string::npos) {
+        std::getline(is, tmpStr, ')');
         return nullptr;
     }
     long code;
     double speed, rotationalSpeed;
-    std::string tmpStr2;
-    {
-        std::istringstream sstr(tmpStr);
-        std::getline(sstr, tmpStr2, '#');
-        // The action code lies between '#' and ':'
-        std::getline(sstr, tmpStr2, ':');
-        std::istringstream(tmpStr2) >> code;
-    }
+    std::istringstream(tmpStr) >> code;
 
-    std::getline(is, tmpStr2, '/');
-    std::istringstream(tmpStr2) >> speed;
-    is >> rotationalSpeed;
+    std::getline(is, tmpStr, '(');
+    std::getline(is, tmpStr, '/');
+    std::istringstream(tmpStr) >> speed;
+    std::getline(is, tmpStr, ')');
+    std::istringstream(tmpStr) >> rotationalSpeed;
     return std::make_unique<Nav2DAction>(static_cast<ActionType>(code),
             speed, rotationalSpeed);
 }
@@ -106,16 +108,19 @@ void Nav2DTextSerializer::saveTransitionParameters(
     os << "T:(";
     if (tp != nullptr) {
         Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
-        abt::printDouble(tp2.speed, os);
+        abt::printDouble(tp2.speed, os, 9, 7);
         os << "/";
-        abt::printDouble(tp2.rotationalSpeed, os, true);
+        abt::printDouble(tp2.rotationalSpeed, os, 10, 7,
+                std::ios_base::fixed | std::ios_base::showpos);
         os << " " << tp2.moveRatio << " ";
         if (tp2.reachedGoal) {
             os << "G";
-        } else if (tp2.hadCollision) {
+        }
+        if (tp2.hadCollision) {
             os << "C";
-        } else {
-            os << "_";
+        }
+        if (tp2.hitBounds) {
+            os << "B";
         }
     }
     os << ")";
@@ -144,6 +149,8 @@ Nav2DTextSerializer::loadTransitionParameters(
             tp->reachedGoal = true;
         } else if (c == 'C') {
             tp->hadCollision = true;
+        } else if (c == 'B')  {
+            tp->hitBounds = true;
         }
     }
     return std::move(tp);
@@ -179,4 +186,14 @@ std::unique_ptr<solver::Observation> Nav2DTextSerializer::loadObservation(
             *loadState(sstr)));
 }
 
+
+int Nav2DTextSerializer::getActionColumnWidth(){
+    return 17;
+}
+int Nav2DTextSerializer::getTPColumnWidth() {
+    return 28;
+}
+int Nav2DTextSerializer::getObservationColumnWidth() {
+    return 6;
+}
 } /* namespace nav2d */

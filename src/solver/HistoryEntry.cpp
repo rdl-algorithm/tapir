@@ -10,18 +10,16 @@ namespace solver {
 class HistorySequence;
 
 HistoryEntry::HistoryEntry() :
-    HistoryEntry(1.0, nullptr, 0) {
+    HistoryEntry(nullptr, 0) {
 }
 
-HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
-        long entryId) :
+HistoryEntry::HistoryEntry(HistorySequence* owningSequence, long entryId) :
     stateInfo_(nullptr),
     action_(nullptr),
     transitionParameters_(nullptr),
     observation_(nullptr),
     hasBeenBackedUp_(false),
     entryId_(entryId),
-    discount_(discount),
     reward_(0),
     rewardFromHere_(0),
     owningSequence_(owningSequence),
@@ -30,9 +28,8 @@ HistoryEntry::HistoryEntry(double discount, HistorySequence* owningSequence,
 }
 
 HistoryEntry::HistoryEntry(StateInfo *stateInfo,
-        double discount, HistorySequence* owningSequence,
-        long entryId) :
-                HistoryEntry(discount, owningSequence, entryId) {
+        HistorySequence* owningSequence, long entryId) :
+                HistoryEntry(owningSequence, entryId) {
     registerState(stateInfo);
 }
 

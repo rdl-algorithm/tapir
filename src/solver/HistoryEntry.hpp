@@ -31,13 +31,11 @@ class HistoryEntry {
     /** Constructs a new history entry with the given cumulative discount,
      * owning sequence, and entry ID.
      */
-    HistoryEntry(double discount, HistorySequence *owningSequence,
-            long entryId);
+    HistoryEntry(HistorySequence *owningSequence, long entryId);
     /** Constructs a new history entry with the given state info,
      *  cumulative discount, owning sequence, and entry ID.
      */
-    HistoryEntry(StateInfo *stateInfo, double discount,
-            HistorySequence *owningSequence,
+    HistoryEntry(StateInfo *stateInfo, HistorySequence *owningSequence,
             long entryId);
 
     /** Destroys this HistoryEntry. */
@@ -87,8 +85,6 @@ class HistoryEntry {
     bool hasBeenBackedUp_;
     /** The id of the specific entry within the sequence. */
     long entryId_;
-    /** Net discount factor, as applies to the immediate reward. */
-    double discount_;
     /** Non-discounted reward. */
     double reward_;
     /** Total discounted reward. */

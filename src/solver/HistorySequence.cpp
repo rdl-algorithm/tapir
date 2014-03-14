@@ -33,18 +33,18 @@ HistorySequence::HistorySequence(long startDepth, long id) :
 HistorySequence::~HistorySequence() {
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, double discount) {
+HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, discount, this, histSeq_.size());
+                stateInfo, this, histSeq_.size());
     HistoryEntry *newEntryReturn = newEntry.get();
     histSeq_.push_back(std::move(newEntry));
     return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, double discount,
+HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo,
         Action const &action, Observation const &obs, double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, discount, this, histSeq_.size());
+                stateInfo, this, histSeq_.size());
     newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
     newEntry->reward_ = immediateReward;
@@ -54,11 +54,11 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo, double discount,
 }
 
 HistoryEntry *HistorySequence::insertEntry(long index,
-        StateInfo *stateInfo, double discount,
+        StateInfo *stateInfo,
         Action const &action, Observation const &obs,
         double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, discount, this, histSeq_.size());
+                stateInfo, this, histSeq_.size());
     newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
     newEntry->reward_ = immediateReward;
