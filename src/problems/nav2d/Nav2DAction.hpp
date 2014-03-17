@@ -3,6 +3,7 @@
 
 #include <cstddef>                      // for size_t
 
+#include <memory>
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
 
@@ -11,26 +12,15 @@
 
 namespace nav2d {
 class Nav2DModel;
-
-enum class ActionType {
-    FORWARD,
-//    FORWARD_1,
-//    FORWARD_2,
-    LEFT,
-//    TURN_LEFT_1,
-//    TURN_LEFT_2,
-    RIGHT,
-//    TURN_RIGHT_1,
-//    TURN_RIGHT_2,
-//    DO_NOTHING,
-    END // Not an action, but must be last to count the number of actions.
-};
+class Nav2DSpcHistoryCorrector;
 
 class Nav2DAction : public solver::DiscretizedPoint {
     friend class Nav2DTextSerializer;
+    friend class Nav2DSpcHistoryCorrector;
   public:
-    Nav2DAction(ActionType type, double speed, double rotationalSpeed);
-    Nav2DAction(ActionType type, Nav2DModel *model);
+    Nav2DAction(double speed, double rotationalSpeed, long binNumber);
+    Nav2DAction(double speed, double rotationalSpeed, Nav2DModel *model);
+    Nav2DAction(long binNo, Nav2DModel *model);
 
     virtual ~Nav2DAction() = default;
     // Copy constructor is allowed, but not others.
@@ -47,13 +37,24 @@ class Nav2DAction : public solver::DiscretizedPoint {
 
     double getSpeed() const;
     double getRotationalSpeed() const;
-    ActionType getType() const;
     long getBinNumber() const override;
 
-  private:
-    ActionType type_;
+    static long getNumberOfBins();
+    static double getValue(long index,
+            std::vector<double> const &cutoffs);
+    static long getIndex(double value,
+            std::vector<double> const &cutoffs);
+
+    static double getSpeed(long binNo, Nav2DModel *model);
+    static double getRotationalSpeed(long binNo, Nav2DModel *model);
+    static long calculateBinNumber(double speed,
+            double rotationalSpeed, Nav2DModel *model);
+private:
+    static std::vector<double> SPEED_CUTOFFS;
+    static std::vector<double> ROTATIONAL_SPEED_CUTOFFS;
     double speed_;
     double rotationalSpeed_;
+    long binNumber_;
 };
 } /* namespace nav2d */
 

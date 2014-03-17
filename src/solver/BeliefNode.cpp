@@ -33,8 +33,7 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap) :
 
 BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
     id_(id),
-    numberOfHeads_(0),
-    numberOfTails_(0),
+    numberOfSequenceEdges_(0),
     tLastAddedParticle_(0),
     tNNComp_(-1.0),
     nnBel_(nullptr),

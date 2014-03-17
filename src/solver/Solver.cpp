@@ -98,8 +98,8 @@ void Solver::singleSearch(long maximumDepth) {
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
         long startDepth, long maximumDepth) {
     HistorySequence *sequence = allHistories_->addNew(startDepth);
-    HistoryEntry *entry = sequence->addEntry(startStateInfo);
-    entry->registerNode(startNode);
+    sequence->addEntry(startStateInfo);
+    sequence->registerStartingNode(startNode);
     continueSearch(sequence, maximumDepth);
 }
 
@@ -138,10 +138,12 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
         debug::show_message("ERROR: Search failed!?");
         return;
     }
+    // Register and backup.
+    sequence->registerRestOfSequence(true, policy_.get());
     backup(sequence, true);
 }
 
-void Solver::updateSequenceStartEndCounts(HistorySequence *sequence,
+void Solver::checkSequence(HistorySequence *sequence,
         bool doBackup) {
     HistoryEntry *lastEntry = sequence->getLastEntry();
     if (lastEntry->getAction() != nullptr) {
@@ -149,45 +151,20 @@ void Solver::updateSequenceStartEndCounts(HistorySequence *sequence,
     }
 
     for (std::unique_ptr<HistoryEntry> &entry : sequence->histSeq_) {
+        if (entry->associatedBeliefNode_ == nullptr) {
+            debug::show_message("ERROR: Attempted to backup, but no belief"
+                    " node is associated with this entry!");
+        }
         if (!doBackup && !entry->hasBeenBackedUp_) {
             debug::show_message("ERROR: Undoing backup, but it's already undone!");
         } else if (doBackup && entry->hasBeenBackedUp_) {
             debug::show_message("ERROR: Doing backup, but it's already done!");
         }
     }
-
-    if (doBackup) {
-        if (lastEntry->hasBeenBackedUp_) {
-            // do nothing
-        } else {
-            lastEntry->associatedBeliefNode_->numberOfTails_++;
-        }
-    } else {
-        if (lastEntry->hasBeenBackedUp_) {
-            lastEntry->associatedBeliefNode_->numberOfTails_--;
-        } else {
-            // do nothing
-        }
-    }
-
-    HistoryEntry *firstEntry = sequence->getFirstEntry();
-    if (doBackup) {
-        if (firstEntry->hasBeenBackedUp_) {
-            // do nothing
-        } else {
-            firstEntry->associatedBeliefNode_->numberOfHeads_++;
-        }
-    } else {
-        if (firstEntry->hasBeenBackedUp_) {
-            firstEntry->associatedBeliefNode_->numberOfHeads_--;
-        } else {
-            // do nothing
-        }
-    }
 }
 
 void Solver::backup(HistorySequence *sequence, bool doBackup) {
-    updateSequenceStartEndCounts(sequence, doBackup);
+    checkSequence(sequence, doBackup);
     double discountFactor = model_->getDiscountFactor();
 
     std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
@@ -275,8 +252,7 @@ BeliefNode *Solver::getNNBelNode(BeliefNode *belief,
 void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     os << belief->getQValue();
     os << " from " << belief->getNParticles() << " p." << endl;
-    os << belief->numberOfHeads_ << " heads" << endl;
-    os << belief->numberOfTails_ << " ends" << endl;
+    os << belief->numberOfSequenceEdges_ << " edges" << endl;
     os << "Action children: " << endl;
     std::multimap<double, solver::ActionMappingEntry const *> actionValues;
     for (solver::ActionMappingEntry const *entry : belief->getMapping()->getChildEntries()) {
@@ -511,12 +487,13 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         // Create a new history sequence and entry for the new particle.
         HistorySequence *histSeq = allHistories_->addNew(timeStep);
         HistoryEntry *histEntry = histSeq->addEntry(stateInfo);
-        histEntry->registerNode(nextNode);
         State const *state = stateInfo->getState();
         if (!model_->isTerminal(*state)) {
             // Use the heuristic value for non-terminal particles.
             histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
         }
+        // Register and backup
+        histSeq->registerStartingNode(nextNode);
         backup(histSeq, true);
     }
     return nextNode;
@@ -551,10 +528,17 @@ void Solver::applyChanges() {
     std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
     while (it != affectedSequences.end()) {
         HistorySequence *sequence = *it;
+
+        // Undo backup and deregister.
         backup(sequence, false);
+        sequence->registerRestOfSequence(false, nullptr);
+
         if (changes::hasFlag(sequence->getFirstEntry()->changeFlags_,
                 ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
+            // Deregister the starting node as well.
+            sequence->registerStartingNode(nullptr);
+            // Now remove the sequence entirely.
             allHistories_->deleteHistorySequence(sequence->id_);
         } else {
             it++;
@@ -566,7 +550,6 @@ void Solver::applyChanges() {
 
     // Clear flags and fix up all the sequences.
     for (HistorySequence *sequence : affectedSequences) {
-        fixLinks(sequence);
         sequence->resetChangeFlags();
         HistoryEntry *lastEntry = sequence->getLastEntry();
         State const *lastState = lastEntry->getState();
@@ -574,25 +557,10 @@ void Solver::applyChanges() {
         if (!model_->isTerminal(*lastState)) {
             lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
         }
-        backup(sequence, true);
-    }
-}
 
-void Solver::fixLinks(HistorySequence *sequence) {
-    if (sequence->invalidLinksStartId_ != -1) {
-        std::vector<std::unique_ptr<HistoryEntry>>::iterator
-        historyIterator = (sequence->histSeq_.begin()
-                + sequence->invalidLinksStartId_);
-        for ( ; (historyIterator + 1) != sequence->histSeq_.end();
-                historyIterator++) {
-            HistoryEntry *entry = historyIterator->get();
-            HistoryEntry *nextEntry = (historyIterator + 1)->get();
-            BeliefNode *nextNode = policy_->createOrGetChild(
-                    entry->associatedBeliefNode_, *entry->action_,
-                    *entry->observation_);
-            nextEntry->registerNode(nextNode);
-        }
-        sequence->invalidLinksStartId_ = -1;
+        // Now we register and then backup.
+        sequence->registerRestOfSequence(true, policy_.get());
+        backup(sequence, true);
     }
 }
 

@@ -114,7 +114,7 @@ SearchStatus MultipleStrategiesExp3Instance::extendSequence() {
 
 SearchStatus MultipleStrategiesExp3Instance::finalize() {
     double timeUsed = (std::clock() - currentInstanceStartTime_) * 1000.0 / CLOCKS_PER_SEC;
-    double newRootQValue = sequence_->getEntry(0)->getAssociatedBeliefNode()->getQValue();
+    double newRootQValue = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
     double deltaQ = newRootQValue - initialRootQValue_;
     parent_->updateStrategyWeights(currentStrategyNo_, timeUsed, deltaQ);
     return currentInstance_->finalize();

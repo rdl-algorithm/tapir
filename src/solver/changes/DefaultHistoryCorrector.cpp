@@ -77,9 +77,6 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
                             entry->transitionParameters_.get(),
                             *nextEntry->getState()));
             if (!newObservation->equals(*entry->observation_)) {
-                if (sequence->invalidLinksStartId_ == -1) {
-                    sequence->invalidLinksStartId_ = entry->entryId_;
-                }
                 entry->observation_ = std::move(newObservation);
             }
         }
@@ -91,7 +88,6 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
                 historyIterator;
         for (; historyIterator != sequence->histSeq_.end(); historyIterator++) {
             (*historyIterator)->registerState(nullptr);
-            (*historyIterator)->registerNode(nullptr);
         }
         sequence->histSeq_.erase(firstDeletedEntry, sequence->histSeq_.end());
     }

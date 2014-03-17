@@ -23,6 +23,7 @@ class HistoryEntry;
 class BeliefNode {
   public:
     friend class ActionNode;
+    friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
 
@@ -93,11 +94,8 @@ class BeliefNode {
 private:
     /** The ID of this node. */
     long id_;
-
-    /** The number of sequences that begin at this belief. */
-    long numberOfHeads_;
-    /** The number of sequences that end at this belief. */
-    long numberOfTails_;
+    /** The number of sequences that begin or end at this belief. */
+    long numberOfSequenceEdges_;
 
     /** The time at which the last particle was added. */
     double tLastAddedParticle_;

@@ -101,11 +101,8 @@ class Solver {
     void continueSearch(HistorySequence *sequence, long maximumDepth);
 
     /* ------------------ Tree backup methods ------------------- */
-    /** Updates the sequence counts for the belief nodes at the
-     * start and end of the sequence.
-     */
-    void updateSequenceStartEndCounts(HistorySequence *sequence,
-            bool doBackup);
+    /** Checks the validity of a sequence w.r.t backup. */
+    void checkSequence(HistorySequence *sequence, bool doBackup);
     /** Performs or negates a backup on the given sequence. */
     void backup(HistorySequence *sequence, bool doBackup);
 
@@ -123,8 +120,6 @@ class Solver {
     /* ------------------ Methods for handling model changes ------------------- */
     /** Applies the model changes that have been marked within the state pool */
     void applyChanges();
-    /** Fixes the mismatch between a modified sequence and the tree structure. */
-    void fixLinks(HistorySequence *sequence);
 
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */

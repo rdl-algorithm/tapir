@@ -1,4 +1,4 @@
-#include "discrete_observations_map.hpp"
+#include "discrete_observations.hpp"
 
 #include <iostream>
 #include <memory>

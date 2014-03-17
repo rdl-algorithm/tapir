@@ -21,7 +21,7 @@
 #include "solver/abstract-problem/State.hpp"
 
 #include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations_map.hpp"
+#include "solver/mappings/discrete_observations.hpp"
 
 #include "TagAction.hpp"
 

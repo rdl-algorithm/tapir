@@ -4,14 +4,21 @@
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "abstract-problem/Action.hpp"                   // for Action
 #include "changes/ChangeFlags.hpp"               // for ChangeFlags
+
+#include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
 #include "abstract-problem/State.hpp"
 
 #include "global.hpp"
 
+namespace nav2d {
+class Nav2DSpcHistoryCorrector;
+}
+
 namespace solver {
+class BeliefNode;
+class BeliefTree;
 class HistoryEntry;
 class StateInfo;
 
@@ -21,6 +28,7 @@ class HistorySequence {
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;
+    friend class nav2d::Nav2DSpcHistoryCorrector;
 
     /** Constructs an empty history sequence starting at depth 0, without
      * assigning an ID.
@@ -63,7 +71,6 @@ class HistorySequence {
     HistoryEntry *getFirstEntry() const;
     /** Returns the last entry in this sequence. */
     HistoryEntry *getLastEntry() const;
-
     /** Returns the states in this sequence as a vector. */
     std::vector<State const *> getStates() const;
 
@@ -73,6 +80,17 @@ class HistorySequence {
     void setChangeFlags(long index, ChangeFlags flags);
 
   private:
+    /** Changes the belief node that is considered to be the root of this
+     *  sequence - use a value of nullptr to detach the sequence entirely.
+     */
+    void registerStartingNode(BeliefNode *startNode);
+    /** Registers or deregisters the sequence, apart from its starting
+     * belief node.
+     * If registering, the policy must be supplied as the creation of
+     * new belief nodes may be required.
+     */
+    void registerRestOfSequence(bool registering, BeliefTree *policy);
+
     /** Sets the given change flags for this sequence. */
     void setChangeFlags(ChangeFlags flags);
     /** Resets the range affected indices for this sequence. */
@@ -84,13 +102,6 @@ class HistorySequence {
     long id_;
     /** The starting depth of this sequence. */
     long startDepth_;
-
-    /** Usually -1, but will take a non-negative value iff the links between
-     * his sequence and the belief tree have been invalidated and must be
-     * fixed - this should only happen when history sequences are being
-     * revised due to model changes.
-     */
-    long invalidLinksStartId_;
 
     /** The actual sequence of history entries. */
     std::vector<std::unique_ptr<HistoryEntry>> histSeq_;

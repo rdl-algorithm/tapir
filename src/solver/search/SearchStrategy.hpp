@@ -25,6 +25,8 @@ class SearchStrategy {
 
 class SearchInstance {
   public:
+    SearchInstance() = default;
+    virtual ~SearchInstance() = default;
     /** Initializes the search. */
     virtual SearchStatus initialize() = 0;
     /** Extends the sequence. */

@@ -9,9 +9,13 @@
 #include "global.hpp"                     // for make_unique
 
 #include "abstract-problem/Action.hpp"                   // for Action
-#include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
-#include "HistoryEntry.hpp"             // for HistoryEntry
 #include "abstract-problem/Observation.hpp"              // for Observation
+
+#include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
+
+#include "BeliefNode.hpp"
+#include "BeliefTree.hpp"
+#include "HistoryEntry.hpp"             // for HistoryEntry
 #include "StateInfo.hpp"                // for StateInfo
 
 namespace solver {
@@ -22,7 +26,6 @@ HistorySequence::HistorySequence() :
 HistorySequence::HistorySequence(long startDepth, long id) :
     id_(id),
     startDepth_(startDepth),
-    invalidLinksStartId_(-1),
     histSeq_(),
     startAffectedIdx_(std::numeric_limits<long>::max()),
     endAffectedIdx_(-1),
@@ -90,6 +93,7 @@ std::vector<State const *> HistorySequence::getStates() const {
     return states;
 }
 
+
 void HistorySequence::resetChangeFlags() {
     changeFlags_ = ChangeFlags::UNCHANGED;
     for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
@@ -104,8 +108,56 @@ void HistorySequence::setChangeFlags(long index, ChangeFlags flags) {
     addAffectedIndex(index);
 }
 
-// These are private and ought not to be called outside HistorySequence.
 
+void HistorySequence::registerStartingNode(BeliefNode *startNode) {
+    HistoryEntry *firstEntry = getFirstEntry();
+    if (firstEntry->isRegisteredAsParticle_) {
+        firstEntry->associatedBeliefNode_->numberOfSequenceEdges_--;
+    }
+    firstEntry->registerNode(startNode);
+    if (firstEntry->isRegisteredAsParticle_) {
+        firstEntry->associatedBeliefNode_->numberOfSequenceEdges_++;
+    }
+}
+
+void HistorySequence::registerRestOfSequence(bool registering,
+        BeliefTree *policy) {
+    bool isFirst = true;
+    std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = histSeq_.begin();
+    BeliefNode *currentNode = (*historyIterator)->associatedBeliefNode_;
+    while (true) {
+        HistoryEntry *entry = historyIterator->get();
+        if (isFirst) {
+            isFirst = false;
+        } else {
+            if (registering) {
+                entry->registerNode(currentNode);
+            } else {
+                entry->registerNode(nullptr);
+            }
+        }
+        if (entry->action_ == nullptr) {
+            if (!isFirst) {
+                if (registering) {
+                    currentNode->numberOfSequenceEdges_++;
+                } else {
+                    currentNode->numberOfSequenceEdges_--;
+                }
+            }
+            break;
+        }
+        if (registering) {
+            currentNode = policy->createOrGetChild(currentNode,
+                    *entry->action_, *entry->observation_);
+            historyIterator++;
+        } else {
+            historyIterator++;
+            currentNode = (*historyIterator)->associatedBeliefNode_;
+        }
+    }
+}
+
+// These are private and ought not to be called outside HistorySequence.
 void HistorySequence::setChangeFlags(ChangeFlags flags) {
     changeFlags_ |= flags;
 }

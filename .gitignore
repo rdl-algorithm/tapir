@@ -5,12 +5,14 @@
 EMPTY_HEADER.hpp
 
 # Local configuration
-knitro/*
 local.cmake
 
+# Other libraries
+knitro/*
+
 # Binaries
-build/*
 builds/*
+build/*
 simulate
 solve
 

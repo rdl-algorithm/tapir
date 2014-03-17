@@ -10,8 +10,8 @@
 #include "SearchStatus.hpp"
 
 namespace solver {
-AbstractSearchInstance::AbstractSearchInstance(Solver *solver,  HistorySequence *sequence,
-        long maximumDepth) :
+AbstractSearchInstance::AbstractSearchInstance(Solver *solver,
+        HistorySequence *sequence, long maximumDepth) :
                 solver_(solver),
                 model_(solver_->getModel()),
                 sequence_(sequence),
@@ -66,7 +66,7 @@ SearchStatus AbstractSearchInstance::extendSequence() {
         currentEntry = sequence_->addEntry(nextStateInfo);
         currentNode_ = solver_->getPolicy()->createOrGetChild(
                 currentNode_, *result.action, *result.observation);
-        currentEntry->registerNode(currentNode_);
+        currentEntry->associatedBeliefNode_ = currentNode_;
         if (result.isTerminal) {
             status_ = SearchStatus::HIT_TERMINAL_STATE;
             break;

@@ -42,7 +42,6 @@ class Nav2DState : public solver::VectorState {
     double getY() const;
     double getDirection() const;
     bool hadCollision() const;
-
   private:
     geometry::Point2D position_;
     double direction_;

@@ -5,11 +5,14 @@
 #include <memory>                       // for unique_ptr
 
 #include "solver/abstract-problem/Action.hpp"
-#include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations_map.hpp"
-#include "solver/abstract-problem/State.hpp"
-#include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 #include "solver/abstract-problem/Observation.hpp"
+#include "solver/abstract-problem/State.hpp"
+
+#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/discrete_observations.hpp"
+
+#include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
+
 
 namespace solver {
 class Solver;

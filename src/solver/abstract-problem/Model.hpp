@@ -186,6 +186,7 @@ class Model {
      * to a single strategy (UCB).
      * Note:
      */
+
     virtual std::unique_ptr<SearchStrategy> createSearchStrategy();
     /** Defines the rollout strategythat will be used once a leaf node is
      * reached; defaults to a single-step rollout using the heuristic value for

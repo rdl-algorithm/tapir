@@ -30,7 +30,7 @@
 #include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
 
 #include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations_map.hpp"
+#include "solver/mappings/discrete_observations.hpp"
 
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"

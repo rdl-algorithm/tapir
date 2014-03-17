@@ -11,7 +11,7 @@
 #include "solver/abstract-problem/State.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 
-#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/enumerated_observations.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
@@ -90,17 +90,14 @@ std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
         std::getline(is, tmpStr, ')');
         return nullptr;
     }
-    long code;
     double speed, rotationalSpeed;
-    std::istringstream(tmpStr) >> code;
-
     std::getline(is, tmpStr, '(');
     std::getline(is, tmpStr, '/');
     std::istringstream(tmpStr) >> speed;
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> rotationalSpeed;
-    return std::make_unique<Nav2DAction>(static_cast<ActionType>(code),
-            speed, rotationalSpeed);
+    return std::make_unique<Nav2DAction>(speed, rotationalSpeed,
+            dynamic_cast<Nav2DModel *>(model_));
 }
 
 void Nav2DTextSerializer::saveTransitionParameters(

@@ -37,7 +37,10 @@ void Histories::deleteHistorySequence(long seqId) {
     HistorySequence *sequence = getHistorySequence(seqId);
     for (std::unique_ptr<HistoryEntry> &entry : sequence->histSeq_) {
         entry->registerState(nullptr);
-        entry->registerNode(nullptr);
+        if (entry->isRegisteredAsParticle_) {
+            debug::show_message("ERROR: sequence should be deregistered"
+                    " before deletion.");
+        }
     }
     if (seqId < static_cast<long>(sequencesById_.size()) - 1) {
         sequencesById_[seqId] = std::move(sequencesById_[sequencesById_.size()-1]);

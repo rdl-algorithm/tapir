@@ -244,6 +244,13 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
 
     /** The changes (scheduled for simulation). */
     std::map<long, std::vector<Nav2DChange>> changes_;
+
+  public:
+    double getTimeStepLength() const { return timeStepLength_; }
+    double getMaxSpeed() const { return maxSpeed_; }
+    double getCostPerUnitDistance() const { return costPerUnitDistance_; }
+    double getMaxRotationalSpeed() const { return maxRotationalSpeed_; }
+    double getCostPerRevolution() const { return costPerRevolution_; }
 };
 } /* namespace nav2d */
 

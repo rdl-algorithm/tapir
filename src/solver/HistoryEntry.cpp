@@ -24,6 +24,7 @@ HistoryEntry::HistoryEntry(HistorySequence* owningSequence, long entryId) :
     rewardFromHere_(0),
     owningSequence_(owningSequence),
     associatedBeliefNode_(nullptr),
+    isRegisteredAsParticle_(false),
     changeFlags_(ChangeFlags::UNCHANGED) {
 }
 
@@ -45,6 +46,9 @@ Action const *HistoryEntry::getAction() const{
 Observation const *HistoryEntry::getObservation() const {
     return observation_.get();
 }
+TransitionParameters const *HistoryEntry::getTransitionParameters() const {
+    return transitionParameters_.get();
+}
 BeliefNode *HistoryEntry::getAssociatedBeliefNode() const {
     return associatedBeliefNode_;
 }
@@ -58,14 +62,14 @@ void HistoryEntry::setChangeFlags(ChangeFlags flags) {
 }
 
 void HistoryEntry::registerNode(BeliefNode *node) {
-    if (associatedBeliefNode_ == node) {
-        return;
-    }
-    if (associatedBeliefNode_ != nullptr) {
+    // If it's registered, we deregister it.
+    if (isRegisteredAsParticle_) {
+        isRegisteredAsParticle_ = false;
         associatedBeliefNode_->removeParticle(this);
-        associatedBeliefNode_ = nullptr;
     }
+    // Then we register it with the new node.
     if (node != nullptr) {
+        isRegisteredAsParticle_ = true;
         associatedBeliefNode_ = node;
         associatedBeliefNode_->addParticle(this);
     }

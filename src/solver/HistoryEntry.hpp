@@ -10,6 +10,9 @@
 #include "abstract-problem/TransitionParameters.hpp"
 #include "changes/ChangeFlags.hpp"              // for ChangeFlags
 
+namespace nav2d {
+class Nav2DSpcHistoryCorrector;
+}
 
 #include "global.hpp"
 
@@ -21,10 +24,12 @@ class StateInfo;
 class HistoryEntry {
   public:
     friend class HistorySequence;
+    friend class Histories;
     friend class AbstractSearchInstance;
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;
+    friend class nav2d::Nav2DSpcHistoryCorrector;
 
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();
@@ -60,6 +65,10 @@ class HistoryEntry {
     Action const *getAction() const;
     /** Returns the observation associated with this history entry. */
     Observation const *getObservation() const;
+    /** Returns the transition parameters associated with this
+     * history entry.
+     */
+    TransitionParameters const *getTransitionParameters() const;
     /** Returns the belief node associated with this history entry. */
     BeliefNode *getAssociatedBeliefNode() const;
 
@@ -94,6 +103,8 @@ class HistoryEntry {
     HistorySequence *owningSequence_;
     /** The belief node this entry is associated with. */
     BeliefNode *associatedBeliefNode_;
+    /** Whether the belief node has this entry registered as a particle. */
+    bool isRegisteredAsParticle_;
 
     /** The flags associated with current POMDP model updates. */
     ChangeFlags changeFlags_;

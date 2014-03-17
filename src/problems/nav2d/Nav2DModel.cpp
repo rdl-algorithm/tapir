@@ -139,21 +139,6 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     cout << "nStVars: " << nStVars_ << endl;
     cout << "historiesPerStep: " << getNumberOfHistoriesPerStep() << endl;
     cout << endl << endl;
-//    cout << "Testing random initial states:" << endl;
-//    for (int i = 0; i < 2; i++) {
-//        std::unique_ptr<solver::State> state = sampleAnInitState();
-//        cout << *state << " ==> " << getHeuristicValue(*state) << endl;
-//    }
-//    cout << "Testing random states:" << endl;
-//    for (int i = 0; i < 2; i++) {
-//        std::unique_ptr<Nav2DState> state(
-//                static_cast<Nav2DState *>(sampleStateUniform().release()));
-//        cout << *state << " ==> " << getHeuristicValue(*state) << endl;
-//        cout << getClosestPointOfType(state->getPosition(),
-//                AreaType::GOAL) << endl;
-//    }
-//    cout << "Random state drawn:" << endl;
-//    drawState(*sampleAnInitState(), cout);
 }
 
 double Nav2DModel::getDefaultVal() {
@@ -517,8 +502,8 @@ std::vector<long> Nav2DModel::loadChanges(char const *changeFilename) {
 
 void Nav2DModel::update(long time, solver::StatePool *pool) {
     for (Nav2DChange &change : changes_[time]) {
-        cout << areaTypeToString(change.type) << " " << change.id;
-        cout << " " << change.area << endl;
+        // cout << areaTypeToString(change.type) << " " << change.id;
+        // cout << " " << change.area << endl;
         addArea(change.id, change.area, change.type);
         solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
         solver::RTree *tree = static_cast<solver::RTree *>(
@@ -772,11 +757,11 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode *belief,
 }
 
 long Nav2DModel::getNumberOfBins() {
-    return static_cast<long>(ActionType::END);
+    return Nav2DAction::getNumberOfBins();
 }
 
 std::unique_ptr<solver::Action> Nav2DModel::sampleAnAction(long binNumber) {
-    return std::make_unique<Nav2DAction>(static_cast<ActionType>(binNumber), this);
+    return std::make_unique<Nav2DAction>(binNumber, this);
 }
 
 double Nav2DModel::getMaxObservationDistance() {
