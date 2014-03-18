@@ -31,20 +31,23 @@ class StateInfo {
     ~StateInfo();
     _NO_COPY_OR_MOVE(StateInfo);
 
-    /** Returns the ID of this state. */
-    long getId() const;
-    /** Sets the ID of this state to the given ID. */
-    void setId(long id);
-
+    /* ----------------- History entry registration  ----------------- */
     /** Registers a history entry as containing this state. */
     void addHistoryEntry(HistoryEntry *entry);
     /** Deregisters a history entry that no longer contains this state. */
     void removeHistoryEntry(HistoryEntry *entry);
 
+    /* ---------------------- Simple setters  ---------------------- */
+    /** Sets the ID of this state to the given ID. */
+    void setId(long id);
+    /* ---------------------- Simple getters  ---------------------- */
+    /** Returns the ID of this state. */
+    long getId() const;
     /** Returns the state held by this StateInfo. */
     State const *getState() const;
 
   private:
+    /* ---------------------- Model change handling  ---------------------- */
     void resetChangeFlags();
     void setChangeFlags(ChangeFlags flags);
 

@@ -17,12 +17,16 @@ class ProgramOptions {
         po::options_description generic("Generic options");
         generic.add_options()
                 ("help,h", "produce help message")
-                ("cfg,c", po::value<std::string>()->default_value("tests/default.cfg"),
+                ("cfg,f", po::value<std::string>()->default_value("tests/default.cfg"),
                         "config file path")
                 ("policy,p", po::value<std::string>()->default_value("pol.pol"),
                         "policy file path (output)")
                 ("seed,s", po::value<unsigned long>()->default_value(0),
-                        "RNG seed; use a value of 0 to seed using the current time");
+                        "RNG seed; use a value of 0 to seed using the current time")
+                ("color,c", po::value<bool>()->default_value(false)->implicit_value(true),
+                        "whether to use color output")
+                ("verbose,v", po::value<bool>()->default_value(false)->implicit_value(true),
+                        "whether to use verbose output");
         return generic;
     }
 
@@ -32,19 +36,17 @@ class ProgramOptions {
         simulation.add_options()
                 ("log,l", po::value<std::string>()->default_value("log.log"),
                         "file to log changes to")
-                ("changes.hasChanges,u", po::bool_switch(),
+                ("changes.hasChanges,u", po::value<bool>()->default_value(false)->implicit_value(true),
                         "whether the PODMP model will change at runtime.")
-                ("changes.changesPath,v", po::value<std::string>(),
+                ("changes.changesPath,g", po::value<std::string>(),
                         "path to the file with runtime changes to the POMDP model")
                 ("simulation.nSteps,n", po::value<long>(),
                         "maximum number of steps to simulate")
-                ("simulation.nRuns", po::value<long>(),
+                ("simulation.nRuns,r", po::value<long>(),
                         "number of times to run the simulation")
-                ("simulation.savePolicy,z", po::bool_switch(),
+                ("simulation.savePolicy,a", po::value<bool>()->default_value(false)->implicit_value(true),
                         "whether to save the policy to a fiel after simulation"
-                        "completes (this policy can be very large).")
-                ("simulation.color", po::value<bool>(),
-                        "whether to use color output");
+                        "completes (this policy can be very large).");
         return simulation;
     }
 

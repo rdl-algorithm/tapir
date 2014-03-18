@@ -33,26 +33,28 @@ StateInfo::StateInfo(State const &state) :
 StateInfo::~StateInfo() {
 }
 
-long StateInfo::getId() const {
-    return id_;
-}
-
-void StateInfo::setId(long id) {
-    id_ = id;
-}
-
-State const *StateInfo::getState() const {
-    return state_.get();
-}
-
+/* ----------------- History entry registration  ----------------- */
 void StateInfo::addHistoryEntry(HistoryEntry *entry) {
     usedInHistoryEntries_.insert(entry);
 }
-
 void StateInfo::removeHistoryEntry(HistoryEntry *entry) {
     usedInHistoryEntries_.erase(entry);
 }
 
+/* ---------------------- Simple setters  ---------------------- */
+void StateInfo::setId(long id) {
+    id_ = id;
+}
+
+/* ---------------------- Simple getters  ---------------------- */
+long StateInfo::getId() const {
+    return id_;
+}
+State const *StateInfo::getState() const {
+    return state_.get();
+}
+
+/* ---------------------- Model change handling  ---------------------- */
 void StateInfo::resetChangeFlags() {
     changeFlags_ = ChangeFlags::UNCHANGED;
 }

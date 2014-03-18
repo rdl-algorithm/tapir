@@ -83,20 +83,17 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     inFile.close();
 
     initialize();
-    cout << "Constructed the TagModel" << endl;
-    cout << "Discount: " << getDiscountFactor() << endl;
-    cout << "Size: " << nRows_ << " by " << nCols_ << endl;
-    cout << "move cost: " << moveCost_ << endl;
-    cout << "nActions: " << nActions_ << endl;
-    cout << "nStVars: " << nStVars_ << endl;
-    cout << "Example States: " << endl;
-    for (int i = 0; i < 5; i++) {
-        std::unique_ptr<solver::State> state = sampleAnInitState();
-        cout << *state << " Heuristic: " << getHeuristicValue(*state) << endl;
+    if (hasVerboseOutput()) {
+        cout << "Constructed the TagModel" << endl;
+        cout << "Discount: " << getDiscountFactor() << endl;
+        cout << "Size: " << nRows_ << " by " << nCols_ << endl;
+        cout << "move cost: " << moveCost_ << endl;
+        cout << "nActions: " << nActions_ << endl;
+        cout << "nStVars: " << nStVars_ << endl;
+        cout << "nParticles: " << getNParticles() << endl;
+        cout << "Environment:" << endl << endl;
+        drawEnv(cout);
     }
-    cout << "nParticles: " << getNParticles() << endl;
-    cout << "Environment:" << endl << endl;
-    drawEnv(cout);
 }
 
 void TagModel::initialize() {
@@ -461,8 +458,10 @@ std::vector<long> TagModel::loadChanges(char const *changeFilename) {
 
 void TagModel::update(long time, solver::StatePool *pool) {
     for (TagChange &change : changes_[time]) {
-        cout << change.changeType << " " << change.i0 << " " << change.j0 << " "
-                << change.i1 << " " << change.j1 << endl;
+        if (hasVerboseOutput()) {
+            cout << change.changeType << " " << change.i0 << " " << change.j0;
+            cout << " " << change.i1 << " " << change.j1 << endl;
+        }
         if (change.changeType == "Add Obstacles") {
             for (long i = static_cast<long>(change.i0); i <= change.i1; i++) {
                 for (long j = static_cast<long>(change.j0); j <= change.j1; j++) {
@@ -537,14 +536,23 @@ void TagModel::drawSimulationState(solver::BeliefNode *belief,
         particleCounts[opponentPos.i][opponentPos.j] += 1;
     }
 
+    std::vector<int> colors {196,
+        161, 126, 91, 56, 21,
+        26, 31, 36, 41, 46};
+    if (hasColorOutput()) {
+        os << "Color map: ";
+        for (int color : colors) {
+            os << "\033[38;5;" << color << "m";
+            os << '*';
+            os << "\033[0m";
+        }
+        os << endl;
+    }
     for (std::size_t i = 0; i < envMap_.size(); i++) {
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
             double proportion = (double) particleCounts[i][j]
                     / particles.size();
             if (hasColorOutput()) {
-                std::vector<int> colors {196,
-                    161, 126, 91, 56, 21,
-                    26, 31, 36, 41, 46};
                 if (proportion > 0) {
                     int color = colors[proportion * (colors.size() - 1)];
                     os << "\033[38;5;" << color << "m";

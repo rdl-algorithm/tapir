@@ -25,7 +25,8 @@ public:
                 maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
                 searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
                 rolloutStrategyString_(vm["ABT.rolloutStrategy"].as<std::string>()),
-                hasColorOutput_(vm["simulation.color"].as<bool>()) {
+                hasColorOutput_(vm["color"].as<bool>()),
+                hasVerboseOutput_(vm["verbose"].as<bool>()) {
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -49,10 +50,14 @@ public:
     virtual long getMaximumDepth() override {
         return maximumDepth_;
     }
-    virtual bool hasColorOutput() {
+    virtual bool hasColorOutput() override {
         return hasColorOutput_;
     }
-    virtual std::unique_ptr<solver::SearchStrategy> parseStrategy(std::string strategyString) {
+    virtual bool hasVerboseOutput() override {
+        return hasVerboseOutput_;
+    }
+    virtual std::unique_ptr<solver::SearchStrategy> parseStrategy(
+            solver::Solver *solver, std::string strategyString) {
         boost::regex pattern(" *(.+?)\\((.*)\\) *");
         boost::smatch results;
         if (!boost::regex_match(strategyString, results, pattern)) {
@@ -87,19 +92,22 @@ public:
         if (strategyType == "ucb") {
             double explorationCoefficient;
             std::istringstream(args[0]) >> explorationCoefficient;
-            return std::make_unique<solver::UcbSearchStrategy>(explorationCoefficient);
+            return std::make_unique<solver::UcbSearchStrategy>(solver,
+                    explorationCoefficient);
         }
         if (strategyType == "nn") {
             long maxNnComparisons;
             double maxNnDistance;
             std::istringstream(args[0]) >> maxNnComparisons;
             std::istringstream(args[1]) >> maxNnDistance;
-            return std::make_unique<solver::NnRolloutStrategy>(maxNnComparisons, maxNnDistance);
+            return std::make_unique<solver::NnRolloutStrategy>(solver,
+                    maxNnComparisons, maxNnDistance);
         }
         if (strategyType == "random") {
             long maxNSteps;
             std::istringstream(args[0]) >> maxNSteps;
-            return std::make_unique<solver::RandomRolloutStrategy>(maxNSteps);
+            return std::make_unique<solver::RandomRolloutStrategy>(solver,
+                    maxNSteps);
         }
         if (strategyType == "exp3") {
             std::vector<std::unique_ptr<solver::SearchStrategy>> strategies;
@@ -108,18 +116,20 @@ public:
             std::istringstream(*it) >> strategyExplorationCoefficient;
             it++;
             for (; it != args.end(); it++) {
-                strategies.push_back(parseStrategy(*it));
+                strategies.push_back(parseStrategy(solver, *it));
             }
-            return std::make_unique<solver::MultipleStrategiesExp3>(strategyExplorationCoefficient,
-                    std::move(strategies), this);
+            return std::make_unique<solver::MultipleStrategiesExp3>(solver,
+                    strategyExplorationCoefficient, std::move(strategies));
         }
         return nullptr;
     }
-    virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy() override {
-        return parseStrategy(searchStrategyString_);
+    virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(
+            solver::Solver *solver) override {
+        return parseStrategy(solver, searchStrategyString_);
     }
-    virtual std::unique_ptr<solver::SearchStrategy> createRolloutStrategy() override {
-        return parseStrategy(rolloutStrategyString_);
+    virtual std::unique_ptr<solver::SearchStrategy> createRolloutStrategy(
+            solver::Solver *solver) override {
+        return parseStrategy(solver, rolloutStrategyString_);
     }
 
 private:
@@ -137,6 +147,7 @@ private:
     std::string rolloutStrategyString_;
 
     bool hasColorOutput_;
+    bool hasVerboseOutput_;
 };
 
 #endif /* MODELWITHPROGRAMOPTIONS_HPP_ */

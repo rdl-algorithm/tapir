@@ -1,8 +1,6 @@
 #ifndef SOLVER_BELIEFNODE_HPP_
 #define SOLVER_BELIEFNODE_HPP_
 
-#include <ctime>                        // for clock_t
-
 #include <map>                          // for map, map<>::value_compare
 #include <memory>                       // for unique_ptr
 #include <set>
@@ -22,7 +20,6 @@ class HistoryEntry;
 
 class BeliefNode {
   public:
-    friend class ActionNode;
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
@@ -38,17 +35,7 @@ class BeliefNode {
     ~BeliefNode();
     _NO_COPY_OR_MOVE(BeliefNode);
 
-
-    /** Chooses the next action to search, from a multi-armed bandit problem
-     * (probably using a UCB algorithm). */
-    std::unique_ptr<Action> getSearchAction();
-
-    /** Chooses the action with the best expected value */
-    std::unique_ptr<Action> getBestAction() const;
-    /** Returns the best q-value */
-    double getQValue() const;
-
-
+    /* -------------- Particle management / sampling ---------------- */
     /** Adds the given history entry to this belief node. */
     void addParticle(HistoryEntry *newHistEntry);
     /** Removes the given history entry from this belief node. */
@@ -56,7 +43,7 @@ class BeliefNode {
     /** Samples a particle from this node. */
     HistoryEntry *sampleAParticle(RandomGenerator *randGen) const;
 
-
+    /* ----------------- Q-value update methods. ------------------- */
     /** Re-evaluates the optimal action and the Q-value. */
     void recalculateQValue();
 
@@ -67,17 +54,29 @@ class BeliefNode {
     double distL1Independent(BeliefNode *b) const;
 
 
-    /** Returns the id of this node. */
-    long getId() const;
+    /* -------------------- Simple setters ---------------------- */
     /** Sets the id of this node. */
     void setId(long id);
-    /** Returns the number of particles in this node. */
-    long getNParticles() const;
-    /** Returns an array containing all of the states within this node. */
-    std::vector<State const *> getStates() const;
-    /** Returns the current number of action children of this node. */
-    long getNActChildren() const;
 
+    /* -------------------- Simple getters ---------------------- */
+    /** Returns the id of this node. */
+    long getId() const;
+    /** Chooses the action with the best expected value. */
+    std::unique_ptr<Action> getBestAction() const;
+    /** Returns the best q-value */
+    double getQValue() const;
+    /** Returns the number of particles in this node. */
+    long getNumberOfParticles() const;
+    /** Returns the number of particles that are actually the start or end
+     * of a sequence.
+     */
+    long getNumberOfSequenceEdges() const;
+    /** Returns a vector containing all of the states contained in node. */
+    std::vector<State const *> getStates() const;
+    /** Returns the time at which the last change occurred. */
+    double getTimeOfLastChange() const;
+
+    /* -------------------- Tree-related methods  ---------------------- */
     /** Returns the action mapping for this node. */
     ActionMapping *getMapping();
     /** Returns the belief node child corresponding to the given action and
@@ -97,15 +96,10 @@ private:
     /** The number of sequences that begin or end at this belief. */
     long numberOfSequenceEdges_;
 
-    /** The time at which the last particle was added. */
-    double tLastAddedParticle_;
-    /** The time at which the last belief node comparison was done. */
-    double tNNComp_;
-    /** A previously found near neighbor for this belief node. */
-    BeliefNode *nnBel_;
-
     /** The set of particles belonging to this node. */
     abt::RandomAccessSet<HistoryEntry *> particles_;
+    /** The time at which the last particle modification occurred. */
+    double tLastChange_;
 
     /** A mapping of actions to action children for this node. */
     std::unique_ptr<ActionMapping> actionMap_;

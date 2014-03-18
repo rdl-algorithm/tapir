@@ -16,11 +16,14 @@ class Solver;
 
 class SearchStrategy {
   public:
-    SearchStrategy() = default;
+    SearchStrategy(Solver *solver);
     virtual ~SearchStrategy() = default;
+    _NO_COPY_OR_MOVE(SearchStrategy);
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver, HistorySequence *sequence, long maximumDepth) = 0;
+            HistorySequence *sequence, long maximumDepth) = 0;
+  protected:
+    Solver *solver_;
 };
 
 class SearchInstance {

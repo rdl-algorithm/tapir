@@ -39,11 +39,11 @@ void Nav2DTextSerializer::saveState(solver::State const *state,
     Nav2DState const &navState =
         static_cast<Nav2DState const &>(*state);
     os << "(";
-    abt::printDouble(navState.getX(), os, 10, 7);
+    abt::print_double(navState.getX(), os, 10, 7);
     os << " ";
-    abt::printDouble(navState.getY(), os, 10, 7);
+    abt::print_double(navState.getY(), os, 10, 7);
     os << "):";
-    abt::printDouble(navState.getDirection(), os, 10, 7,
+    abt::print_double(navState.getDirection(), os, 10, 7,
             std::ios_base::fixed | std::ios_base::showpos);
 }
 
@@ -71,9 +71,9 @@ void Nav2DTextSerializer::saveAction(solver::Action const *action,
     } else {
         Nav2DAction const &a = static_cast<Nav2DAction const &>(*action);
         os << "A" << a.getBinNumber() << ":(";
-        abt::printDouble(a.speed_, os, 5, 3);
+        abt::print_double(a.speed_, os, 5, 3);
         os << "/";
-        abt::printDouble(a.rotationalSpeed_, os, 6, 3,
+        abt::print_double(a.rotationalSpeed_, os, 6, 3,
                 std::ios_base::fixed | std::ios_base::showpos);
         os << ")";
     }
@@ -105,9 +105,9 @@ void Nav2DTextSerializer::saveTransitionParameters(
     os << "T:(";
     if (tp != nullptr) {
         Nav2DTransition const &tp2 = static_cast<Nav2DTransition const &>(*tp);
-        abt::printDouble(tp2.speed, os, 9, 7);
+        abt::print_double(tp2.speed, os, 9, 7);
         os << "/";
-        abt::printDouble(tp2.rotationalSpeed, os, 10, 7,
+        abt::print_double(tp2.rotationalSpeed, os, 10, 7,
                 std::ios_base::fixed | std::ios_base::showpos);
         os << " " << tp2.moveRatio << " ";
         if (tp2.reachedGoal) {

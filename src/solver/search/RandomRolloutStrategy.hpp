@@ -7,11 +7,11 @@
 namespace solver {
 class RandomRolloutStrategy: public SearchStrategy {
   public:
-    RandomRolloutStrategy(long maxNSteps);
+    RandomRolloutStrategy(Solver *solver, long maxNSteps);
     virtual ~RandomRolloutStrategy() = default;
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver, HistorySequence *sequence, long maximumDepth) override;
+            HistorySequence *sequence, long maximumDepth) override;
   private:
     long maxNSteps_;
 };

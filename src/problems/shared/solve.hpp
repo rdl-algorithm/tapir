@@ -1,8 +1,6 @@
 #ifndef SOLVE_HPP_
 #define SOLVE_HPP_
 
-#include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
-
 #include <fstream>                      // for operator<<, endl, ostream, ofstream, basic_ostream, basic_ostream<>::__ostream_type
 #include <iostream>                     // for cout
 #include <memory>                       // for unique_ptr
@@ -69,10 +67,10 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     solver.initialize();
 
     double totT;
-    std::clock_t tStart;
-    tStart = std::clock();
+    double tStart;
+    tStart = abt::clock_ms();
     solver.genPol(model->getNumberOfHistoriesPerStep(), model->getMaximumDepth());
-    totT = (std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
+    totT = abt::clock_ms() - tStart;
 
     std::ofstream os;
     os.open(polPath.c_str());

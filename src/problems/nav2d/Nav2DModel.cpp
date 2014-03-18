@@ -134,11 +134,13 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
         }
     }
     inFile.close();
-    cout << "Constructed the Nav2DModel" << endl;
-    cout << "Discount: " << getDiscountFactor() << endl;
-    cout << "nStVars: " << nStVars_ << endl;
-    cout << "historiesPerStep: " << getNumberOfHistoriesPerStep() << endl;
-    cout << endl << endl;
+
+    if (hasVerboseOutput()) {
+        cout << "Constructed the Nav2DModel" << endl;
+        cout << "Discount: " << getDiscountFactor() << endl;
+        cout << "historiesPerStep: " << getNumberOfHistoriesPerStep() << endl;
+        cout << endl << endl;
+    }
 }
 
 double Nav2DModel::getDefaultVal() {
@@ -502,8 +504,6 @@ std::vector<long> Nav2DModel::loadChanges(char const *changeFilename) {
 
 void Nav2DModel::update(long time, solver::StatePool *pool) {
     for (Nav2DChange &change : changes_[time]) {
-        // cout << areaTypeToString(change.type) << " " << change.id;
-        // cout << " " << change.area << endl;
         addArea(change.id, change.area, change.type);
         solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
         solver::RTree *tree = static_cast<solver::RTree *>(
@@ -718,6 +718,19 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode *belief,
         particleCounts[pI][pJ] += 1;
     }
 
+
+    std::vector<int> colors {22, 28, 34, 40, 46,
+            82, 118, 154, 190, 226,
+            227, 228, 229, 230, 231 };
+    if (hasColorOutput()) {
+        os << "Color map: ";
+        for (int color : colors) {
+            os << "\033[38;5;" << color << "m";
+            os << '*';
+            os << "\033[0m";
+        }
+        os << endl;
+    }
     long stateI = nRows - (int)std::round(navState.getY() * nRows / height - 0.5);
     long stateJ = (int)std::round(navState.getX() * nCols / width + 0.5);
     double proportion = (double)particleCounts[stateI][stateJ] / particles.size();
@@ -733,9 +746,6 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode *belief,
                 continue;
             }
             if (hasColorOutput()) {
-                std::vector<int> colors {22, 28, 34, 40, 46,
-                        82, 118, 154, 190, 226,
-                        227, 228, 229, 230, 231 };
                 int color = colors[proportion * (colors.size() - 1)];
                 os << "\033[38;5;" << color << "m";
             }

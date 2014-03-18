@@ -24,14 +24,14 @@ struct StrategyInfo {
 class MultipleStrategiesExp3: public SearchStrategy {
     friend class MultipleStrategiesExp3Instance;
   public:
-    MultipleStrategiesExp3(double strategyExplorationCoefficient,
-            std::vector<std::unique_ptr<SearchStrategy>> strategies,
-            Model *model);
+    MultipleStrategiesExp3(Solver *solver,
+            double strategyExplorationCoefficient,
+            std::vector<std::unique_ptr<SearchStrategy>> strategies);
     virtual ~MultipleStrategiesExp3() = default;
     _NO_COPY_OR_MOVE(MultipleStrategiesExp3);
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver, HistorySequence *sequence, long maximumDepth) override;
+           HistorySequence *sequence, long maximumDepth) override;
 
     virtual StrategyInfo *sampleAStrategy(
             std::unordered_set<long> strategiesToExclude = {});
@@ -62,7 +62,7 @@ class MultipleStrategiesExp3Instance: public SearchInstance {
     std::unordered_set<long> failedStrategies_;
     long currentStrategyNo_;
     std::unique_ptr<SearchInstance> currentInstance_;
-    std::clock_t currentInstanceStartTime_;
+    double currentInstanceStartTime_;
     double initialRootQValue_;
 };
 

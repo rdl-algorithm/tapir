@@ -7,11 +7,11 @@
 namespace solver {
 class UcbSearchStrategy: public SearchStrategy {
   public:
-    UcbSearchStrategy(double explorationCoefficient);
+    UcbSearchStrategy(Solver *solver, double explorationCoefficient);
     virtual ~UcbSearchStrategy() = default;
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           Solver *solver, HistorySequence *sequence, long maximumDepth) override;
+            HistorySequence *sequence, long maximumDepth) override;
   private:
     double explorationCoefficient_;
 };

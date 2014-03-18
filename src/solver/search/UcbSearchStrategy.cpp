@@ -7,14 +7,16 @@
 
 namespace solver {
 
-UcbSearchStrategy::UcbSearchStrategy(double explorationCoefficient) :
+UcbSearchStrategy::UcbSearchStrategy(Solver *solver,
+        double explorationCoefficient) :
+        SearchStrategy(solver),
         explorationCoefficient_(explorationCoefficient) {
 }
 
 std::unique_ptr<SearchInstance> UcbSearchStrategy::createSearchInstance(
-       Solver *solver, HistorySequence *sequence, long maximumDepth) {
+        HistorySequence *sequence, long maximumDepth) {
     return std::make_unique<UcbSearchInstance>(explorationCoefficient_,
-            solver, sequence, maximumDepth);
+            solver_, sequence, maximumDepth);
 }
 
 UcbSearchInstance::UcbSearchInstance(double explorationCoefficient,
@@ -33,7 +35,7 @@ std::pair<SearchStatus, std::unique_ptr<Action>> UcbSearchInstance::getStatusAnd
     for (ActionMappingEntry const *entry : currentNode_->getMapping()->getChildEntries()) {
         ActionNode *node = entry->getActionNode();
         double tmpValue = node->getQValue() + (explorationCoefficient_ * std::sqrt(
-                        std::log(currentNode_->getNParticles() / node->getNParticles())));
+                        std::log(currentNode_->getNumberOfParticles() / node->getNParticles())));
         if (!std::isfinite(tmpValue)) {
             debug::show_message("ERROR: Infinite/NaN value!?");
         }

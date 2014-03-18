@@ -37,6 +37,7 @@ HistoryEntry::HistoryEntry(StateInfo *stateInfo,
 HistoryEntry::~HistoryEntry() {
 }
 
+/* ----------------- Simple getters ------------------- */
 State const *HistoryEntry::getState() const {
     return stateInfo_->getState();
 }
@@ -53,14 +54,18 @@ BeliefNode *HistoryEntry::getAssociatedBeliefNode() const {
     return associatedBeliefNode_;
 }
 
+/* ----------------- Change flagging ------------------- */
 void HistoryEntry::resetChangeFlags() {
     changeFlags_ = ChangeFlags::UNCHANGED;
 }
-
 void HistoryEntry::setChangeFlags(ChangeFlags flags) {
     changeFlags_ |= flags;
 }
 
+/* -------------- Registration methods ---------------- */
+bool HistoryEntry::isRegisteredAsParticle() const {
+    return isRegisteredAsParticle_;
+}
 void HistoryEntry::registerNode(BeliefNode *node) {
     // If it's registered, we deregister it.
     if (isRegisteredAsParticle_) {

@@ -24,12 +24,10 @@ class StateInfo;
 class HistoryEntry {
   public:
     friend class HistorySequence;
-    friend class Histories;
     friend class AbstractSearchInstance;
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;
-    friend class nav2d::Nav2DSpcHistoryCorrector;
 
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();
@@ -42,23 +40,11 @@ class HistoryEntry {
      */
     HistoryEntry(StateInfo *stateInfo, HistorySequence *owningSequence,
             long entryId);
-
     /** Destroys this HistoryEntry. */
     ~HistoryEntry();
-
     _NO_COPY_OR_MOVE(HistoryEntry);
 
-
-    /** Registers this history entry as a particle of the given belief node.
-     * A value of nullptr will deregister this particle from that node.
-     */
-    void registerNode(BeliefNode *node);
-    /** Registers this history entry as one of the particles that contains
-     * the given state.
-     * A value of nullptr will deregister this particle from that state.
-     */
-    void registerState(StateInfo *info);
-
+    /* ----------------- Simple getters ------------------- */
     /** Returns the state associated with this history entry. */
     State const *getState() const;
     /** Returns the action associated with this history entry. */
@@ -72,10 +58,24 @@ class HistoryEntry {
     /** Returns the belief node associated with this history entry. */
     BeliefNode *getAssociatedBeliefNode() const;
 
+    /* ----------------- Change flagging ------------------- */
     /**  Resets the changes that apply to this history entry. */
     void resetChangeFlags();
     /** Sets the given flags for this history entry. */
     void setChangeFlags(ChangeFlags flags);
+
+    /* -------------- Registration methods ---------------- */
+    /** Returns true iff this entry is already registered as a particle. */
+    bool isRegisteredAsParticle() const;
+    /** Registers this history entry as a particle of the given belief node.
+     * A value of nullptr will deregister this particle from that node.
+     */
+    void registerNode(BeliefNode *node);
+    /** Registers this history entry as one of the particles that contains
+     * the given state.
+     * A value of nullptr will deregister this particle from that state.
+     */
+    void registerState(StateInfo *info);
 
   private:
     /** The state information for this history entry. */
@@ -84,7 +84,6 @@ class HistoryEntry {
     std::unique_ptr<Action> action_;
     /** Extra information about the transition, if any is needed. */
     std::unique_ptr<TransitionParameters> transitionParameters_;
-
     /** Observation received in this entry. */
     std::unique_ptr<Observation> observation_;
 

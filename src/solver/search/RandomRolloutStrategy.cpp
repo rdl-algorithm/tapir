@@ -6,14 +6,15 @@
 
 namespace solver {
 
-RandomRolloutStrategy::RandomRolloutStrategy(long maxNSteps) :
+RandomRolloutStrategy::RandomRolloutStrategy(Solver *solver, long maxNSteps) :
+        SearchStrategy(solver),
     maxNSteps_(maxNSteps) {
 }
 
 std::unique_ptr<SearchInstance> RandomRolloutStrategy::createSearchInstance(
-       Solver *solver, HistorySequence *sequence, long maximumDepth) {
+        HistorySequence *sequence, long maximumDepth) {
     return std::make_unique<RandomRolloutInstance>(
-            maxNSteps_, solver, sequence, maximumDepth);
+            maxNSteps_, solver_, sequence, maximumDepth);
 }
 
 RandomRolloutInstance::RandomRolloutInstance(long maxNSteps, Solver *solver,

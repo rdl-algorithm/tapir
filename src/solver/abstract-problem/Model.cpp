@@ -76,15 +76,6 @@ std::vector<long> Model::loadChanges(char const */*changeFilename*/) {
 void Model::update(long /*time*/, StatePool */*pool*/) {
 }
 
-// Default = do nothing.
-void Model::drawEnv(std::ostream &/*os*/) {
-}
-
-// Default = do nothing.
-void Model::drawSimulationState(BeliefNode */*belief*/, State const &/*state*/,
-        std::ostream &/*os*/) {
-}
-
 std::unique_ptr<StateIndex> Model::createStateIndex() {
     return std::make_unique<RTree>(getNumberOfStateVariables());
 }
@@ -93,11 +84,28 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
     return std::make_unique<DefaultHistoryCorrector>(this);
 }
 
-std::unique_ptr<SearchStrategy> Model::createSearchStrategy() {
-    return std::make_unique<UcbSearchStrategy>(1.0);
+std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
+    return std::make_unique<UcbSearchStrategy>(solver, 1.0);
 }
 
-std::unique_ptr<SearchStrategy> Model::createRolloutStrategy() {
-    return std::make_unique<RandomRolloutStrategy>(1);
+std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
+    return std::make_unique<RandomRolloutStrategy>(solver, 1);
+}
+
+/* --------------- Pretty printing methods ----------------- */
+// Default = do nothing.
+void Model::drawEnv(std::ostream &/*os*/) {
+}
+void Model::drawSimulationState(BeliefNode */*belief*/, State const &/*state*/,
+        std::ostream &/*os*/) {
+}
+std::string Model::getName() {
+    return "Default Model";
+}
+bool Model::hasColorOutput() {
+    return false;
+}
+bool Model::hasVerboseOutput() {
+    return false;
 }
 } /* namespace solver */

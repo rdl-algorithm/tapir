@@ -24,18 +24,7 @@ StatePool::StatePool(std::unique_ptr<StateIndex> stateIndex) :
 StatePool::~StatePool() {
 }
 
-StateInfo *StatePool::getInfo(State const &state) const {
-    StateInfoMap::const_iterator it = stateInfoMap_.find(&state);
-    if (it == stateInfoMap_.end()) {
-        return nullptr;
-    }
-    return it->second;
-}
-
-StateInfo *StatePool::getInfoById(long id) const {
-    return statesByIndex_[id].get();
-}
-
+/* ------------------ Mutators for the pool ------------------- */
 void StatePool::reset() {
     stateInfoMap_.clear();
     statesByIndex_.clear();
@@ -74,14 +63,27 @@ StateInfo *StatePool::createOrGetInfo(State const &state) {
     return add(std::make_unique<StateInfo>(state.copy()));
 }
 
+/* ------------------ Pool getters ------------------- */
+StateInfo *StatePool::getInfo(State const &state) const {
+    StateInfoMap::const_iterator it = stateInfoMap_.find(&state);
+    if (it == stateInfoMap_.end()) {
+        return nullptr;
+    }
+    return it->second;
+}
+StateInfo *StatePool::getInfoById(long id) const {
+    return statesByIndex_[id].get();
+}
+
+/* ------------------ State index manipulation ------------------- */
 StateIndex *StatePool::getStateIndex() const {
     return stateIndex_.get();
 }
-
 void StatePool::addToStateIndex(StateInfo *stateInfo) const {
     stateIndex_->addStateInfo(stateInfo);
 }
 
+/* ------------------ Flagging of changes at states ------------------- */
 void StatePool::resetChangeFlags(StateInfo *stateInfo) {
     stateInfo->resetChangeFlags();
     changedStates_.erase(stateInfo);

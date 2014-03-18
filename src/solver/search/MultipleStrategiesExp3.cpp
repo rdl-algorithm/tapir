@@ -5,13 +5,16 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/HistorySequence.hpp"
 #include "solver/HistoryEntry.hpp"
+#include "solver/Solver.hpp"
 
 namespace solver {
-MultipleStrategiesExp3::MultipleStrategiesExp3(double strategyExplorationCoefficient,
-        std::vector<std::unique_ptr<SearchStrategy>> strategies, Model *model) :
+MultipleStrategiesExp3::MultipleStrategiesExp3(Solver *solver,
+        double strategyExplorationCoefficient,
+        std::vector<std::unique_ptr<SearchStrategy>> strategies) :
+                SearchStrategy(solver),
             strategyExplorationCoefficient_(strategyExplorationCoefficient),
             strategies_(),
-            model_(model) {
+            model_(solver_->getModel()) {
     for (unsigned long index = 0; index < strategies.size(); index++) {
         StrategyInfo info;
         info.strategyNo = index;
@@ -23,9 +26,9 @@ MultipleStrategiesExp3::MultipleStrategiesExp3(double strategyExplorationCoeffic
 }
 
 std::unique_ptr<SearchInstance> MultipleStrategiesExp3::createSearchInstance(
-       Solver *solver, HistorySequence *sequence, long maximumDepth) {
+       HistorySequence *sequence, long maximumDepth) {
     return std::make_unique<MultipleStrategiesExp3Instance>(this,
-            solver, sequence, maximumDepth);
+            solver_, sequence, maximumDepth);
 }
 
 StrategyInfo *MultipleStrategiesExp3::sampleAStrategy(
@@ -94,15 +97,16 @@ SearchStatus MultipleStrategiesExp3Instance::initialize() {
             return  SearchStatus::UNINITIALIZED;;
         }
         currentStrategyNo_ = info->strategyNo;
-        currentInstance_ = info->strategy->createSearchInstance(solver_, sequence_, maximumDepth_);
-        currentInstanceStartTime_ = std::clock();
+        currentInstance_ = info->strategy->createSearchInstance(
+                sequence_, maximumDepth_);
+        currentInstanceStartTime_ = abt::clock_ms();
         if (currentInstance_->initialize() == SearchStatus::INITIAL) {
             // This strategy seems OK, so we'll try it.
             return SearchStatus::INITIAL;
         }
         // The strategy failed to initialize; we should record the failed attempt.
         failedStrategies_.insert(currentStrategyNo_);
-        double timeTaken = (std::clock() - currentInstanceStartTime_) * 1000.0 / CLOCKS_PER_SEC;
+        double timeTaken = abt::clock_ms() - currentInstanceStartTime_;
         parent_->updateStrategyWeights(currentStrategyNo_, timeTaken, 0.0);
     }
     return SearchStatus::UNINITIALIZED;
@@ -113,7 +117,7 @@ SearchStatus MultipleStrategiesExp3Instance::extendSequence() {
 }
 
 SearchStatus MultipleStrategiesExp3Instance::finalize() {
-    double timeUsed = (std::clock() - currentInstanceStartTime_) * 1000.0 / CLOCKS_PER_SEC;
+    double timeUsed = abt::clock_ms() - currentInstanceStartTime_;
     double newRootQValue = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
     double deltaQ = newRootQValue - initialRootQValue_;
     parent_->updateStrategyWeights(currentStrategyNo_, timeUsed, deltaQ);

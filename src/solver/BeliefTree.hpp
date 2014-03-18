@@ -15,7 +15,6 @@ class BeliefNode;
 
 class BeliefTree {
   public:
-    friend class Solver;
     friend class TextSerializer;
 
     /* Constructs an empty belief tree. */
@@ -25,27 +24,29 @@ class BeliefTree {
     ~BeliefTree();
     _NO_COPY_OR_MOVE(BeliefTree);
 
-    /** Returns the number of belief nodes. */
-    long getNumberOfNodes() const;
-
+    /* -------------- Node setters and getters ---------------- */
     /** Resets the tree and sets it root to be the given new node. */
     BeliefNode *setRoot(std::unique_ptr<BeliefNode> root);
-
     /** Returns the root node. */
     BeliefNode *getRoot() const;
 
+    /** Sets the child with the given ID. */
+    void setNode(long id, BeliefNode *node);
+    /** Retrieves the node with the given ID. */
+
+    BeliefNode *getNode(long id) const;
+    /** Returns the number of belief nodes. */
+    long getNumberOfNodes() const;
+    /** Retrieves a vector of all belief nodes within the policy. */
+    std::vector<BeliefNode *> getNodes();
+
+    /* ------------------- Tree modification ------------------- */
     /**
      * Adds a child belief node to the given belief node; this node will be
      * added to the flattened node list if and only if it is actually new.
      */
     BeliefNode *createOrGetChild(BeliefNode *node, Action const &action,
             Observation const &obs);
-
-    /** Retrieves the node with the given ID. */
-    BeliefNode *getNode(long id);
-
-    /** Sets the child with the given ID. */
-    void setNode(long id, BeliefNode *node);
 
 private:
     std::unique_ptr<BeliefNode> root_;

@@ -59,11 +59,11 @@ std::size_t Nav2DAction::hash() const {
 
 void Nav2DAction::print(std::ostream &os) const {
     os << "A";
-    abt::printWithWidth(getBinNumber(), os, 2);
+    abt::print_with_width(getBinNumber(), os, 2);
     os << ":(";
-    abt::printDouble(speed_, os, 5, 3);
+    abt::print_double(speed_, os, 5, 3);
     os << "/";
-    abt::printDouble(rotationalSpeed_, os, 6, 3,
+    abt::print_double(rotationalSpeed_, os, 6, 3,
             std::ios_base::fixed | std::ios_base::showpos);
     os << ")";
 }

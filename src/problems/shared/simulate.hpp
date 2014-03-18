@@ -1,8 +1,6 @@
 #ifndef SIMULATE_HPP_
 #define SIMULATE_HPP_
 
-#include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
-
 #include <fstream>                      // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, ofstream, endl, ostream, ifstream
 #include <iostream>                     // for cout
 #include <memory>                       // for unique_ptr
@@ -117,15 +115,15 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     os.open(logPath.c_str());
 
     for (long i = 0; i < nRuns; i++) {
-        std::clock_t tStart;
+        double tStart;
         long actualNSteps;
         double totT;
         double totChTime, totImpTime;
-        tStart = std::clock();
+        tStart = abt::clock_ms();
         val = solver.runSim(nSteps, model->getNumberOfHistoriesPerStep(),
                 changeTimes, trajSt, trajAction, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
-        totT = (double)(std::clock() - tStart) * 1000 / CLOCKS_PER_SEC;
+        totT = abt::clock_ms() - tStart;
 
         os << "Val:  " << val << endl;
         itS = trajSt.begin();

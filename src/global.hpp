@@ -1,6 +1,8 @@
 #ifndef GLOBAL_HPP_
 #define GLOBAL_HPP_
 
+#include <ctime>
+
 #include <memory>                       // for unique_ptr
 #include <random>                       // for default_random_engine
 #include <sstream>
@@ -46,14 +48,18 @@ namespace std {
 }
 
 namespace abt {
+inline double clock_ms() {
+    return std::clock() * 1000.0 / CLOCKS_PER_SEC;
+}
+
 template<class T>
-void hash_combine(std::size_t &seed, T const &v) {
+inline void hash_combine(std::size_t &seed, T const &v) {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 template <typename T>
-void printWithWidth(T value , std::ostream &os, int width,
+void print_with_width(T value , std::ostream &os, int width,
         std::ios_base::fmtflags flags = std::ios_base::fixed) {
     std::streamsize oldWidth = os.width(width);
     std::ios_base::fmtflags oldFlags = os.flags(flags);
@@ -62,7 +68,7 @@ void printWithWidth(T value , std::ostream &os, int width,
     os.width(oldWidth);
 }
 
-void printDouble(double value, std::ostream &os, int width = 10,
+void print_double(double value, std::ostream &os, int width = 10,
         int precision = 7,
         std::ios_base::fmtflags flags = std::ios_base::fixed,
         std::ostream::char_type fillCh = ' ');

@@ -96,13 +96,13 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
 void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     os << "HistoryEntry < ";
     os << entry.owningSequence_->id_ << " " << entry.entryId_ << " >: (S";
-    abt::printWithWidth(entry.stateInfo_->id_, os, 6,
+    abt::print_with_width(entry.stateInfo_->id_, os, 6,
             std::ios_base::left);
 
     os << " ";
     std::stringstream sstr;
     saveAction(entry.action_.get(), sstr);
-    abt::printWithWidth(sstr.str(), os,
+    abt::print_with_width(sstr.str(), os,
             getActionColumnWidth(),
             std::ios_base::left);
 
@@ -110,7 +110,7 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     sstr.clear();
     sstr.str("");
     saveTransitionParameters(entry.transitionParameters_.get(), sstr);
-    abt::printWithWidth(sstr.str(), os,
+    abt::print_with_width(sstr.str(), os,
             getTPColumnWidth(),
             std::ios_base::left);
 
@@ -118,17 +118,17 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     sstr.clear();
     sstr.str("");
     saveObservation(entry.observation_.get(), sstr);
-    abt::printWithWidth(sstr.str(), os,
+    abt::print_with_width(sstr.str(), os,
             getObservationColumnWidth(),
             std::ios_base::left);
 
     os << " r:";
-    abt::printDouble(entry.reward_, os, 6, 2,
+    abt::print_double(entry.reward_, os, 6, 2,
             std::ios_base::fixed | std::ios_base::showpos
                     | std::ios_base::left);
 
     os << " v:";
-    abt::printDouble(entry.rewardFromHere_, os, 0, 1,
+    abt::print_double(entry.rewardFromHere_, os, 0, 1,
                 std::ios_base::fixed | std::ios_base::showpos);
 
     os << ");   S:";
@@ -227,21 +227,21 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
 void TextSerializer::save(ActionNode const &node, std::ostream &os) {
     os << node.meanQValue_ << " from " << node.nParticles_ << " particles";
     os << " ( total " << node.totalQValue_ << " ) ";
-    saveObservationMapping(*node.obsMap_, os);
+    saveObservationMapping(*node.observationMap_, os);
 }
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
     std::string tmpStr;
     is >> node.meanQValue_ >> tmpStr >> node.nParticles_ >> tmpStr;
     is >> tmpStr >> tmpStr >> node.totalQValue_ >> tmpStr;
-    node.obsMap_ = std::move(loadObservationMapping(is));
+    node.observationMap_ = std::move(loadObservationMapping(is));
 }
 
 void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
-    if (node.getNParticles() == 0) {
+    if (node.getNumberOfParticles() == 0) {
         os << "No particles!" << endl;
     } else {
-        os << node.getNParticles() << " particles; ";
+        os << node.getNumberOfParticles() << " particles; ";
         os << node.numberOfSequenceEdges_ << " edges. " << endl;
         int count = 0;
         for (auto it = node.particles_.begin(); it != node.particles_.end();
@@ -281,7 +281,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
             for (int i = 0; i < NUM_PARTICLES_PER_LINE; i++) {
                 long seqId, entryId;
                 sstr >> tmpStr >> seqId >> entryId >> tmpStr;
-                HistorySequence *sequence = solver_->allHistories_->getHistorySequence(
+                HistorySequence *sequence = solver_->allHistories_->getSequence(
                         seqId);
                 HistoryEntry *entry = sequence->getEntry(entryId);
                 entry->registerNode(&node);

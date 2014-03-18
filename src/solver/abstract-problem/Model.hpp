@@ -34,7 +34,6 @@ class Model {
     virtual ~Model() = default;
     _NO_COPY_OR_MOVE(Model);
 
-    virtual std::string getName() = 0;
     virtual RandomGenerator *getRandomGenerator() = 0;
 
     /* ---------- Virtual getters for important model parameters  ---------- */
@@ -75,7 +74,7 @@ class Model {
     /** Approximates the q-value of a state */
     virtual double getHeuristicValue(State const &state) = 0;
 
-    /* --------------- Black box dynamics ----------------- */
+    /* -------------------- Black box dynamics ---------------------- */
     /** Represents the results of a complete step in the model,
      * including the next state, observation, and reward.
      */
@@ -153,15 +152,6 @@ class Model {
      */
     virtual void update(long time, StatePool *pool);
 
-    /* --------------- Pretty printing methods ----------------- */
-    /** Draws the environment map onto the given output stream. */
-    virtual void drawEnv(std::ostream &/*os*/);
-    /** Draws the current belief and/or the current state in the context of the
-     * overall map onto the given output stream.
-     */
-    virtual void drawSimulationState(BeliefNode *belief,
-            State const &/*state*/, std::ostream &/*os*/);
-
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to
     // be managed in a customizable way.
@@ -182,17 +172,29 @@ class Model {
      * ObservationMappings.
      */
     virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
-    /** Defines the search strategy to be used within the tree; defaults
-     * to a single strategy (UCB).
-     * Note:
-     */
 
-    virtual std::unique_ptr<SearchStrategy> createSearchStrategy();
-    /** Defines the rollout strategythat will be used once a leaf node is
-     * reached; defaults to a single-step rollout using the heuristic value for
-     * this model.
+    /** Creates a search strategy for use by the given solver. Multiple
+     * strategies should be combined into one, as is done, for example, in
+     * MultipleStrategiesExp3.
      */
-    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy();
+    virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver);
+    /** Creates a rollout strategy for use by the given solver. */
+    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(Solver *solver);
+
+    /* --------------- Pretty printing methods ----------------- */
+     /** Draws the environment map onto the given output stream. */
+     virtual void drawEnv(std::ostream &/*os*/);
+     /** Draws the current belief and/or the current state in the context of the
+      * overall map onto the given output stream.
+      */
+     virtual void drawSimulationState(BeliefNode *belief,
+             State const &/*state*/, std::ostream &/*os*/);
+    /** Returns the name of this model. */
+    virtual std::string getName();
+    /** Returns whether color output is available. */
+    virtual bool hasColorOutput();
+    /** Returns whether verbose output should be used. */
+    virtual bool hasVerboseOutput();
 };
 } /* namespace solver */
 

@@ -21,6 +21,7 @@ BeliefTree::BeliefTree() :
 BeliefTree::~BeliefTree() {
 }
 
+/* -------------- Node setters and getters ---------------- */
 BeliefNode *BeliefTree::setRoot(std::unique_ptr<BeliefNode> root) {
     allNodes_.clear();
     root_ = std::move(root);
@@ -29,28 +30,18 @@ BeliefNode *BeliefTree::setRoot(std::unique_ptr<BeliefNode> root) {
     setNode(0, rootPtr);
     return rootPtr;
 }
-
-long BeliefTree::getNumberOfNodes() const {
-    return allNodes_.size();
-}
-
 BeliefNode *BeliefTree::getRoot() const {
     return root_.get();
 }
 
-BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
-        Action const &action, Observation const &obs) {
-    bool isNew;
-    BeliefNode *childNode;
-    std::tie(childNode, isNew) = node->createOrGetChild(action, obs);
-    if (isNew) {
-        allNodes_.push_back(nullptr);
-        setNode(allNodes_.size() - 1, childNode);
+void BeliefTree::setNode(long id, BeliefNode *node) {
+    if (allNodes_[id] != nullptr) {
+        debug::show_message("ERROR: Node already exists - overwriting!!");
     }
-    return childNode;
+    allNodes_[id] = node;
+    node->setId(id);
 }
-
-BeliefNode *BeliefTree::getNode(long id) {
+BeliefNode *BeliefTree::getNode(long id) const {
     BeliefNode *node = allNodes_[id];
     if (node->getId() != id) {
         std::ostringstream message;
@@ -61,11 +52,23 @@ BeliefNode *BeliefTree::getNode(long id) {
     return allNodes_[id];
 }
 
-void BeliefTree::setNode(long id, BeliefNode *node) {
-    if (allNodes_[id] != nullptr) {
-        debug::show_message("ERROR: Node already exists - overwriting!!");
+long BeliefTree::getNumberOfNodes() const {
+    return allNodes_.size();
+}
+std::vector<BeliefNode *> BeliefTree::getNodes() {
+    return allNodes_;
+}
+
+/* ------------------- Tree modification ------------------- */
+BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
+        Action const &action, Observation const &obs) {
+    bool isNew;
+    BeliefNode *childNode;
+    std::tie(childNode, isNew) = node->createOrGetChild(action, obs);
+    if (isNew) {
+        allNodes_.push_back(nullptr);
+        setNode(allNodes_.size() - 1, childNode);
     }
-    allNodes_[id] = node;
-    node->setId(id);
+    return childNode;
 }
 } /* namespace solver */

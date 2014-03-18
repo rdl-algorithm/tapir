@@ -23,6 +23,8 @@ class StateIndex;
 
 class StatePool {
     friend class Solver;
+    friend class TextSerializer;
+
   public:
     struct Hash {
         std::size_t operator()(State const *state) const {
@@ -38,23 +40,24 @@ class StatePool {
     typedef std::unordered_map<State const *, StateInfo *,
             Hash, EqualityTest> StateInfoMap;
 
-    friend class TextSerializer;
-
     StatePool(std::unique_ptr<StateIndex> stateIndex);
     ~StatePool();
     _NO_COPY_OR_MOVE(StatePool);
 
+    /* ------------------ Mutators for the pool ------------------- */
     void reset();
-
-    StateInfo *getInfo(State const &state) const;
-    StateInfo *getInfoById(long stId) const;
-
     StateInfo *add(std::unique_ptr<StateInfo> stateInfo);
     StateInfo *createOrGetInfo(State const &state);
 
+    /* ------------------ Pool getters ------------------- */
+    StateInfo *getInfo(State const &state) const;
+    StateInfo *getInfoById(long stId) const;
+
+    /* ------------------ State index manipulation ------------------- */
     StateIndex *getStateIndex() const;
     void addToStateIndex(StateInfo *stateInfo) const;
 
+    /* ------------------ Flagging of changes at states ------------------- */
     void resetChangeFlags(StateInfo *stateInfo);
     void setChangeFlags(StateInfo *stateInfo, ChangeFlags flags);
     void resetAffectedStates();

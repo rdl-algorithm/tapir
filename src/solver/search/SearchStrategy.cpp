@@ -10,6 +10,10 @@
 #include "SearchStatus.hpp"
 
 namespace solver {
+SearchStrategy::SearchStrategy(Solver *solver) :
+    solver_(solver) {
+}
+
 AbstractSearchInstance::AbstractSearchInstance(Solver *solver,
         HistorySequence *sequence, long maximumDepth) :
                 solver_(solver),

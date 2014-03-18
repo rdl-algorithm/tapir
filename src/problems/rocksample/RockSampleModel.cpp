@@ -90,24 +90,16 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     inFile.close();
 
     initialize();
-    cout << "Constructed the RockSampleModel" << endl;
-    cout << "Discount: " << getDiscountFactor() << endl;
-    cout << "Size: " << nRows_ << " by " << nCols_ << endl;
-    cout << "Start: " << startPos_.i << " " << startPos_.j << endl;
-    cout << "nRocks: " << nRocks_ << endl;
-    cout << "Rock 0: " << rockPositions_[0] << endl;
-    cout << "Rock 1: " << rockPositions_[1] << endl;
-    cout << "good rock reward: " << goodRockReward_ << endl;
-    cout << "nStVars: " << nStVars_ << endl;
-    cout << "Random initial states:" << endl;
-    cout << *sampleAnInitState() << endl;
-    cout << *sampleAnInitState() << endl;
-    cout << *sampleAnInitState() << endl;
-    cout << *sampleAnInitState() << endl;
-
-    cout << "nParticles: " << getNParticles() << endl;
-    cout << "Environment:" << endl;
-    drawEnv(cout);
+    if (hasVerboseOutput()) {
+        cout << "Constructed the RockSampleModel" << endl;
+        cout << "Discount: " << getDiscountFactor() << endl;
+        cout << "Size: " << nRows_ << " by " << nCols_ << endl;
+        cout << "Start: " << startPos_.i << " " << startPos_.j << endl;
+        cout << "nRocks: " << nRocks_ << endl;
+        cout << "good rock reward: " << goodRockReward_ << endl;
+        cout << "Environment:" << endl;
+        drawEnv(cout);
+    }
 }
 
 void RockSampleModel::initialize() {
@@ -181,6 +173,8 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
 }
 
 double RockSampleModel::getHeuristicValue(solver::State const &state) {
+    return 0;
+
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
     double qVal = 0;
@@ -483,13 +477,23 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode *belief,
     for (long i = 0; i < nRocks_; i++) {
         goodProportions[i] /= particles.size();
     }
+
+    std::vector<int> colors {196,
+        161, 126, 91, 56, 21,
+        26, 31, 36, 41, 46};
+    if (hasColorOutput()) {
+        os << "Color map: ";
+        for (int color : colors) {
+            os << "\033[38;5;" << color << "m";
+            os << '*';
+            os << "\033[0m";
+        }
+        os << endl;
+    }
     for (std::size_t i = 0; i < envMap_.size(); i++) {
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
             long rockNo = envMap_[i][j] - ROCK;
             if (rockNo >= 0 && hasColorOutput()) {
-                std::vector<int> colors {196,
-                    161, 126, 91, 56, 21,
-                    26, 31, 36, 41, 46};
                 int color =
                         colors[goodProportions[rockNo] * (colors.size() - 1)];
                 os << "\033[38;5;" << color << "m";

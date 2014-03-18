@@ -37,6 +37,7 @@ class Solver {
     ~Solver();
     _NO_COPY_OR_MOVE(Solver);
 
+    /* ------------------ Initialization methods ------------------- */
     /** Resets and initializes the solver. */
     void initialize();
     /** Sets the serializer to be used by this solver. */
@@ -46,6 +47,7 @@ class Solver {
     /** Loads the state of the solver from the given input stream. */
     void loadStateFrom(std::istream &is);
 
+    /* ------------------ Solution methods ------------------- */
     /** Generates a starting policy for the solver, by generating the given
      * number (historiesPerStep) of episodes, and terminating episodes when the
      * depth reaches maximumDepth.
@@ -71,12 +73,6 @@ class Solver {
             std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
             double *totImpTime);
 
-    /** Attempts to find another belief node near enough to this one to be
-     * suitable for the policy-based rollout heuristic.
-     */
-    BeliefNode *getNNBelNode(BeliefNode *belief,
-                    double maxNnDistance, long maxNnComparisons);
-
     /* ------------------ Simple getters. ------------------- */
     /** Returns the policy. */
     BeliefTree *getPolicy();
@@ -89,7 +85,6 @@ class Solver {
     /** Returns the observation pool. */
     ObservationPool *getObservationPool();
 
-    void printBelief(BeliefNode *belief, std::ostream &os);
   private:
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
@@ -101,25 +96,28 @@ class Solver {
     void continueSearch(HistorySequence *sequence, long maximumDepth);
 
     /* ------------------ Tree backup methods ------------------- */
-    /** Checks the validity of a sequence w.r.t backup. */
-    void checkSequence(HistorySequence *sequence, bool doBackup);
     /** Performs or negates a backup on the given sequence. */
-    void backup(HistorySequence *sequence, bool doBackup);
+    void backup(HistorySequence *sequence, bool backingUp);
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
     Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
+    /** Improves the solution, with the root at the given node. */
+    void improveSol(BeliefNode *startNode, long historiesPerStep,
+            long maximumDepth);
     /** Handles particle depletion during the simulation. */
     BeliefNode *addChild(BeliefNode *currNode, Action const &action,
             Observation const &obs,
             long timeStep);
-    /** Improves the solution, with the root at the given node. */
-    void improveSol(BeliefNode *startNode, long historiesPerStep,
-            long maximumDepth);
 
-    /* ------------------ Methods for handling model changes ------------------- */
+
+    /* -------------- Methods for handling model changes --------------- */
     /** Applies the model changes that have been marked within the state pool */
     void applyChanges();
+
+    /* ------------------ Display methods  ------------------- */
+    /** Shows a belief node in a nice, readable way. */
+    void printBelief(BeliefNode *belief, std::ostream &os);
 
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */

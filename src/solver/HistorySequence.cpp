@@ -36,6 +36,43 @@ HistorySequence::HistorySequence(long startDepth, long id) :
 HistorySequence::~HistorySequence() {
 }
 
+bool HistorySequence::backupIsValid(bool backingUp) {
+    HistoryEntry *lastEntry = getLastEntry();
+    if (lastEntry->getAction() != nullptr) {
+        debug::show_message("ERROR: End of sequence has an action!?");
+        return false;
+    }
+
+    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+        if (!entry->isRegisteredAsParticle()
+                || entry->associatedBeliefNode_ == nullptr) {
+            debug::show_message("ERROR: Attempted to backup, but no belief"
+                    " node is associated with this entry!");
+            return false;
+        }
+        if (!backingUp && !entry->hasBeenBackedUp_) {
+            debug::show_message("ERROR: Undoing backup, but it's already undone!");
+            return false;
+        } else if (backingUp && entry->hasBeenBackedUp_) {
+            debug::show_message("ERROR: Doing backup, but it's already done!");
+            return false;
+        }
+    }
+    return true;
+}
+
+/* ----------- Methods to add or remove history entries ------------- */
+void HistorySequence::reset() {
+    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+        entry->registerState(nullptr);
+        if (entry->isRegisteredAsParticle()) {
+            debug::show_message("ERROR: sequence should be fully deregistered"
+                    " before deletion.");
+        }
+    }
+    histSeq_.clear();
+}
+
 HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
                 stateInfo, this, histSeq_.size());
@@ -70,6 +107,14 @@ HistoryEntry *HistorySequence::insertEntry(long index,
     return newEntryReturn;
 }
 
+/* ------------------ Simple setters ------------------- */
+void HistorySequence::setId(long id) {
+    id_ = id;
+}
+/* ------------------ Simple getters ------------------- */
+long HistorySequence::getId() const {
+    return id_;
+}
 long HistorySequence::getStartDepth() const {
     return startDepth_;
 }
@@ -94,21 +139,7 @@ std::vector<State const *> HistorySequence::getStates() const {
 }
 
 
-void HistorySequence::resetChangeFlags() {
-    changeFlags_ = ChangeFlags::UNCHANGED;
-    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
-        entry->resetChangeFlags();
-    }
-    resetAffectedIndices();
-}
-
-void HistorySequence::setChangeFlags(long index, ChangeFlags flags) {
-    setChangeFlags(flags);
-    getEntry(index)->setChangeFlags(flags);
-    addAffectedIndex(index);
-}
-
-
+/* -------------- Registration methods ---------------- */
 void HistorySequence::registerStartingNode(BeliefNode *startNode) {
     HistoryEntry *firstEntry = getFirstEntry();
     if (firstEntry->isRegisteredAsParticle_) {
@@ -155,6 +186,22 @@ void HistorySequence::registerRestOfSequence(bool registering,
             currentNode = (*historyIterator)->associatedBeliefNode_;
         }
     }
+}
+
+
+/* -------------- Change flagging methods ---------------- */
+void HistorySequence::resetChangeFlags() {
+    changeFlags_ = ChangeFlags::UNCHANGED;
+    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+        entry->resetChangeFlags();
+    }
+    resetAffectedIndices();
+}
+
+void HistorySequence::setChangeFlags(long index, ChangeFlags flags) {
+    setChangeFlags(flags);
+    getEntry(index)->setChangeFlags(flags);
+    addAffectedIndex(index);
 }
 
 // These are private and ought not to be called outside HistorySequence.

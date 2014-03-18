@@ -1,7 +1,5 @@
 #include "BeliefNode.hpp"
 
-#include <ctime>                        // for clock, CLOCKS_PER_SEC, clock_t
-
 #include <map>                          // for _Rb_tree_iterator, map<>::iterator, map
 #include <memory>                       // for unique_ptr
 #include <random>                       // for uniform_int_distribution
@@ -34,10 +32,8 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap) :
 BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
     id_(id),
     numberOfSequenceEdges_(0),
-    tLastAddedParticle_(0),
-    tNNComp_(-1.0),
-    nnBel_(nullptr),
     particles_(),
+    tLastChange_(-1),
     actionMap_(std::move(actionMap)) {
 }
 
@@ -45,34 +41,29 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
 BeliefNode::~BeliefNode() {
 }
 
-std::unique_ptr<Action> BeliefNode::getBestAction() const {
-    return actionMap_->getBestAction();
-}
-
-double BeliefNode::getQValue() const {
-    return actionMap_->getBestMeanQValue();
-}
-
+/* -------------- Particle management / sampling ---------------- */
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
-    tLastAddedParticle_ = (double)std::clock() * 1000 / CLOCKS_PER_SEC;
+    tLastChange_ = abt::clock_ms();
     particles_.add(newHistEntry);
 }
 
 void BeliefNode::removeParticle(HistoryEntry *histEntry) {
+    tLastChange_ = abt::clock_ms();
     particles_.remove(histEntry);
 }
 
-
 HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
     long index = std::uniform_int_distribution<long>(
-                                 0, getNParticles() - 1)(*randGen);
+                                 0, getNumberOfParticles() - 1)(*randGen);
     return particles_.get(index);
 }
 
+/* ----------------- Q-value update methods. ------------------- */
 void BeliefNode::recalculateQValue() {
     actionMap_->update();
 }
 
+/* ----------------- Useful calculations ------------------- */
 double BeliefNode::distL1Independent(BeliefNode *b) const {
     double dist = 0.0;
     for (HistoryEntry *entry1 : particles_) {
@@ -80,7 +71,7 @@ double BeliefNode::distL1Independent(BeliefNode *b) const {
             dist += entry1->getState()->distanceTo(*entry2->getState());
         }
     }
-    double averageDist = dist / (getNParticles() * b->getNParticles());
+    double averageDist = dist / (getNumberOfParticles() * b->getNumberOfParticles());
     if (averageDist < 0) {
         debug::show_message("ERROR: Distance < 0 between beliefs.");
     } else if (averageDist == 0) {
@@ -89,18 +80,27 @@ double BeliefNode::distL1Independent(BeliefNode *b) const {
     return averageDist;
 }
 
-long BeliefNode::getId() const {
-    return id_;
-}
-
+/* -------------------- Simple setters ---------------------- */
 void BeliefNode::setId(long id) {
     id_ = id;
 }
 
-long BeliefNode::getNParticles() const {
+/* -------------------- Simple getters ---------------------- */
+long BeliefNode::getId() const {
+    return id_;
+}
+std::unique_ptr<Action> BeliefNode::getBestAction() const {
+    return actionMap_->getBestAction();
+}
+double BeliefNode::getQValue() const {
+    return actionMap_->getBestMeanQValue();
+}
+long BeliefNode::getNumberOfParticles() const {
     return particles_.size();
 }
-
+long BeliefNode::getNumberOfSequenceEdges() const {
+    return numberOfSequenceEdges_;
+}
 std::vector<State const *> BeliefNode::getStates() const {
     std::vector<State const *> states;
     for (HistoryEntry *entry : particles_) {
@@ -108,11 +108,11 @@ std::vector<State const *> BeliefNode::getStates() const {
     }
     return states;
 }
-
-long BeliefNode::getNActChildren() const {
-    return actionMap_->getNChildren();
+double BeliefNode::getTimeOfLastChange() const {
+    return tLastChange_;
 }
 
+/* -------------------- Tree-related methods  ---------------------- */
 ActionMapping *BeliefNode::getMapping() {
     return actionMap_.get();
 }

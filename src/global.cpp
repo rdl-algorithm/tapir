@@ -6,7 +6,7 @@
 #include "solver/abstract-problem/Point.hpp"
 
 namespace abt {
-void printDouble(double value, std::ostream &os, int width,
+void print_double(double value, std::ostream &os, int width,
         int precision,
         std::ios_base::fmtflags flags,
         std::ostream::char_type fillCh) {

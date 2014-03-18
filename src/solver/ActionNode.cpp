@@ -19,11 +19,9 @@ ActionNode::ActionNode() :
 
 ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
     nParticles_(0),
-    totalQFromEnds_(0),
-    totalQFromBeliefs_(0),
     totalQValue_(0),
     meanQValue_(-std::numeric_limits<double>::infinity()),
-    obsMap_(std::move(mapping)) {
+    observationMap_(std::move(mapping)) {
 }
 
 // Default destructor
@@ -35,17 +33,18 @@ void ActionNode::changeTotalQValue(double deltaQ, long deltaNParticles) {
     nParticles_ += deltaNParticles;
 }
 
-void ActionNode::updateSequenceCount(Observation const &observation,
-        double discountFactor, long deltaNParticles) {
+void ActionNode::updateChildQValue(Observation const &observation,
+        double discountFactor, long deltaNSequences) {
     BeliefNode *childBelief = getChild(observation);
 
-    long nSequences = childBelief->getNParticles() - childBelief->numberOfSequenceEdges_;
+    long nSequences = childBelief->getNumberOfParticles();
+    nSequences -= childBelief->getNumberOfSequenceEdges();
     long newSequenceCount, oldSequenceCount;
-    if (deltaNParticles > 0) {
+    if (deltaNSequences > 0) {
         newSequenceCount = nSequences;
-        oldSequenceCount = nSequences - deltaNParticles;
+        oldSequenceCount = nSequences - deltaNSequences;
     } else {
-        newSequenceCount = nSequences + deltaNParticles;
+        newSequenceCount = nSequences + deltaNSequences;
         oldSequenceCount = nSequences;
     }
 
@@ -94,18 +93,18 @@ double ActionNode::getQValue () const {
 }
 
 ObservationMapping *ActionNode::getMapping() {
-    return obsMap_.get();
+    return observationMap_.get();
 }
 
 BeliefNode *ActionNode::getChild(Observation const &obs) const {
-    return obsMap_->getBelief(obs);
+    return observationMap_->getBelief(obs);
 }
 
 std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Observation const &obs) {
     BeliefNode *beliefChild = getChild(obs);
     bool added = false;
     if (beliefChild == nullptr) {
-        beliefChild = obsMap_->createBelief(obs);
+        beliefChild = observationMap_->createBelief(obs);
         added = true;
     }
     return std::make_pair(beliefChild, added);
