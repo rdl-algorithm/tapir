@@ -114,10 +114,6 @@ void TagModel::initialize() {
     }
 }
 
-double TagModel::getDefaultVal() {
-    return minVal_;
-}
-
 GridPosition TagModel::randomEmptyCell() {
     GridPosition pos;
     while (true) {
@@ -147,6 +143,10 @@ bool TagModel::isTerminal(solver::State const &state) {
 }
 
 double TagModel::getHeuristicValue(solver::State const &state) {
+    if (!heuristicEnabled()) {
+        return getDefaultVal();
+    }
+
     TagState const &tagState = static_cast<TagState const &>(state);
     if (tagState.isTagged()) {
         return 0;

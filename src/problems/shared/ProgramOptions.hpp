@@ -16,7 +16,7 @@ class ProgramOptions {
     virtual po::options_description getGenericOptions() {
         po::options_description generic("Generic options");
         generic.add_options()
-                ("help,h", "produce help message")
+                ("help", "produce help message")
                 ("cfg,f", po::value<std::string>()->default_value("tests/default.cfg"),
                         "config file path")
                 ("policy,p", po::value<std::string>()->default_value("pol.pol"),
@@ -45,15 +45,15 @@ class ProgramOptions {
                 ("simulation.nRuns,r", po::value<long>(),
                         "number of times to run the simulation")
                 ("simulation.savePolicy,a", po::value<bool>()->default_value(false)->implicit_value(true),
-                        "whether to save the policy to a fiel after simulation"
-                        "completes (this policy can be very large).");
+                        "whether to save the policy to a file after simulation"
+                        " completes (this policy can be very large).");
         return simulation;
     }
 
     /** Returns configuration options for the ABT */
     virtual po::options_description getABTOptions() {
-        po::options_description sbt("ABT settings");
-        sbt.add_options()
+        po::options_description abt("ABT settings");
+        abt.add_options()
                 ("ABT.nParticles", po::value<unsigned long>(),
                         "default number of particles per belief - this number"
                         " will be generated if particle depletion occurs.")
@@ -67,9 +67,9 @@ class ProgramOptions {
                         "the rollout strategy to use")
                 ("ABT.maxObservationDistance", po::value<double>(),
                         "Maximum distance between observations to group them"
-                        "together - only applicable if approximate"
-                        "observations are being used");
-        return sbt;
+                        " together - only applicable if approximate"
+                        " observations are being used");
+        return abt;
     }
 
     /** Returns configurations options for the specific problem */
@@ -86,6 +86,10 @@ class ProgramOptions {
      */
     virtual po::options_description getHeuristicOptions() {
         po::options_description heuristic("Heuristic settings");
+        heuristic.add_options()
+                ("heuristic.enabled,h", po::value<bool>()->default_value(true)->implicit_value(true),
+                        "whether any heuristic should be used - no heuristic"
+                        " means a default value will always be returned.");
         return heuristic;
     }
 };

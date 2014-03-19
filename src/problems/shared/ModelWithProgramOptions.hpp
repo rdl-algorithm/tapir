@@ -26,7 +26,8 @@ public:
                 searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
                 rolloutStrategyString_(vm["ABT.rolloutStrategy"].as<std::string>()),
                 hasColorOutput_(vm["color"].as<bool>()),
-                hasVerboseOutput_(vm["verbose"].as<bool>()) {
+                hasVerboseOutput_(vm["verbose"].as<bool>()),
+                heuristicEnabled_(vm["heuristic.enabled"].as<bool>()) {
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -55,6 +56,9 @@ public:
     }
     virtual bool hasVerboseOutput() override {
         return hasVerboseOutput_;
+    }
+    virtual bool heuristicEnabled() {
+        return heuristicEnabled_;
     }
     virtual std::unique_ptr<solver::SearchStrategy> parseStrategy(
             solver::Solver *solver, std::string strategyString) {
@@ -148,6 +152,7 @@ private:
 
     bool hasColorOutput_;
     bool hasVerboseOutput_;
+    bool heuristicEnabled_;
 };
 
 #endif /* MODELWITHPROGRAMOPTIONS_HPP_ */

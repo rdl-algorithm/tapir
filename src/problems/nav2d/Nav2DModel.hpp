@@ -96,7 +96,9 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual double getMaxVal() override {
         return maxVal_;
     }
-    virtual double getDefaultVal() override;
+    virtual double getDefaultVal() override {
+        return 0;
+    }
 
     // Other methods
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;

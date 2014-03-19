@@ -19,11 +19,11 @@ class Nav2DOptions : public ProgramOptions {
         problem.add_options()
                 ("problem.mapPath,m", po::value<std::string>(),
                         "path to map file")
-                ("problem.timeStepLength,m", po::value<double>(),
+                ("problem.timeStepLength", po::value<double>(),
                         "number of time units per time step")
-                ("problem.costPerUnitTime,m", po::value<double>(),
+                ("problem.costPerUnitTime", po::value<double>(),
                         "cost per unit time")
-                ("problem.interpolationStepCount,m", po::value<double>(),
+                ("problem.interpolationStepCount", po::value<double>(),
                         "number of steps for interpolation")
                 ("problem.crashPenalty", po::value<double>(),
                         "penalty for crashing")

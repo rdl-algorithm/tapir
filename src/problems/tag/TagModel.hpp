@@ -71,7 +71,9 @@ class TagModel: virtual public ModelWithProgramOptions,
     double getMaxVal() override {
         return maxVal_;
     }
-    double getDefaultVal() override;
+    double getDefaultVal() override {
+        return 0;
+    }
 
     // Other virtual methods
     std::unique_ptr<solver::State> sampleAnInitState() override;

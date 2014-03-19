@@ -143,10 +143,6 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     }
 }
 
-double Nav2DModel::getDefaultVal() {
-    return minVal_;
-}
-
 std::string Nav2DModel::areaTypeToString(Nav2DModel::AreaType type) {
     switch(type) {
     case AreaType::EMPTY:
@@ -297,6 +293,10 @@ bool Nav2DModel::isTerminal(solver::State const &state) {
 }
 
 double Nav2DModel::getHeuristicValue(solver::State const &state) {
+    if (!heuristicEnabled()) {
+        return getDefaultVal();
+    }
+
     Nav2DState const &navState = static_cast<Nav2DState const &>(state);
     Point2D closestPoint = getClosestPointOfType(navState.getPosition(),
             AreaType::GOAL);

@@ -132,10 +132,6 @@ void RockSampleModel::initialize() {
     setAllActions(getAllActionsInOrder());
 }
 
-double RockSampleModel::getDefaultVal() {
-    return minVal_;
-}
-
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
     return std::make_unique<RockSampleState>(startPos_, sampleRocks());
 }
@@ -173,7 +169,9 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
 }
 
 double RockSampleModel::getHeuristicValue(solver::State const &state) {
-    return 0;
+    if (!heuristicEnabled()) {
+        return getDefaultVal();
+    }
 
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
