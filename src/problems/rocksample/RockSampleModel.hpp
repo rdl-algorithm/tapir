@@ -127,6 +127,26 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>>
     getAllObservationsInOrder() override;
 
+    /* ----------- Non-virtual methods for RockSampleModel ------------- */
+    /**
+     * Generates a next state for the given state and action;
+     * returns true if the action was legal, and false if it was illegal.
+     */
+    std::pair<std::unique_ptr<RockSampleState>, bool> makeNextState(
+            RockSampleState const &state,
+            RockSampleAction const &action);
+    /** Generates an observation given a next state (i.e. after the action)
+     * and an action.
+     */
+    std::unique_ptr<RockSampleObservation> makeObservation(
+            RockSampleAction const &action,
+            RockSampleState const &nextState);
+    /** Retrieves the reward via the next state. */
+    double makeReward(RockSampleState const &state,
+            RockSampleAction const &action,
+            RockSampleState const &nextState,
+            bool isLegal);
+
   private:
     /**
      * Finds and counts the rocks on the map, and initializes the required
@@ -140,23 +160,6 @@ class RockSampleModel : virtual public ModelWithProgramOptions,
     std::vector<bool> sampleRocks();
     /** Decodes rocks from an integer. */
     std::vector<bool> decodeRocks(long val);
-
-    /**
-     * Generates a next state for the given state and action;
-     * returns true if the action was legal, and false if it was illegal.
-     */
-    std::pair<std::unique_ptr<RockSampleState>, bool> makeNextState(
-            RockSampleState const &state, solver::Action const &action);
-    /** Generates an observation given a next state (i.e. after the action)
-     * and an action.
-     */
-    std::unique_ptr<RockSampleObservation> makeObservation(
-            solver::Action const &action,
-            RockSampleState const &nextState);
-    /** Retrieves the reward via the next state. */
-    double makeReward(RockSampleState const &state,
-            solver::Action const &action, RockSampleState const &nextState,
-            bool isLegal);
 
     /** The reward for sampling a good rock. */
     double goodRockReward_;

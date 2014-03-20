@@ -4,6 +4,7 @@ ifdef HAS_ROOT_MAKEFILE
 
 CHILD_FOLDERS := geometry
 include .make/template.mk
+include .make/build.mk
 
 else
 ROOT = ../../..

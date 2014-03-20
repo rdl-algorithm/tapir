@@ -36,7 +36,7 @@ _D_$(n)          := $(OBJDIR_$(n))/%.d
 
 OBJS_$(n)        := $(patsubst $(_CPP_$(n)),$(_O_$(n)),$(SRCS_$(n)))
 DEPS_$(n)        := $(patsubst $(_O_$(n)),$(_D_$(n)),$(OBJS_$(n)))
-OUTPUTS_TO_CLEAN_$(n)  = $(OBJS_$(n)) $(DEPS_$(n))
+OUTPUTS_TO_CLEAN_$(n)  := $(OBJS_$(n)) $(DEPS_$(n))
 
 # Directory prerequsites
 $(OBJS_$(n)):| $(OBJDIR_$(n))
@@ -68,7 +68,7 @@ $(OBJS_$(n)): Makefile .make/template.mk
 # The "clean" command cleans all configurations
 define clean_recipe
 clean-$(n):
-	@rm -f $(OUTPUTS_TO_CLEAN_$(n))
+	@rm -f $$(OUTPUTS_TO_CLEAN_$(n))
 	@echo Cleaned $(n)
 endef
 $(eval $(clean_recipe))

@@ -1,8 +1,7 @@
 #ifndef MODELWITHPROGRAMOPTIONS_HPP_
 #define MODELWITHPROGRAMOPTIONS_HPP_
 
-#include <boost/program_options.hpp>    // for variables_map, variable_value, program_options
-#include <boost/regex.hpp>    // for variables_map, variable_value, program_options
+#include <boost/program_options.hpp>    // for variables_map, variable_value, program_option
 
 #include "global.hpp"                     // for RandomGenerator
 
@@ -12,6 +11,8 @@
 #include "solver/search/RandomRolloutStrategy.hpp"
 #include "solver/search/MultipleStrategiesExp3.hpp"
 #include "solver/search/NnRolloutStrategy.hpp"
+
+#include "strategy_parsers.hpp"
 
 namespace po = boost::program_options;
 
@@ -23,11 +24,16 @@ public:
                 nParticles_(vm["ABT.nParticles"].as<unsigned long>()),
                 historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
                 maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
+                allParser_(),
                 searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
                 rolloutStrategyString_(vm["ABT.rolloutStrategy"].as<std::string>()),
                 hasColorOutput_(vm["color"].as<bool>()),
                 hasVerboseOutput_(vm["verbose"].as<bool>()),
                 heuristicEnabled_(vm["heuristic.enabled"].as<bool>()) {
+        registerParser("ucb", std::make_unique<UcbSearchParser>());
+        registerParser("nn", std::make_unique<NnRolloutParser>());
+        registerParser("random", std::make_unique<RandomRolloutParser>());
+        registerParser("exp3", std::make_unique<Exp3Parser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -60,72 +66,13 @@ public:
     virtual bool heuristicEnabled() {
         return heuristicEnabled_;
     }
+    virtual void registerParser(std::string name,
+            std::unique_ptr<StrategyParser> parser) {
+        allParser_.addParser(name, std::move(parser));
+    }
     virtual std::unique_ptr<solver::SearchStrategy> parseStrategy(
             solver::Solver *solver, std::string strategyString) {
-        boost::regex pattern(" *(.+?)\\((.*)\\) *");
-        boost::smatch results;
-        if (!boost::regex_match(strategyString, results, pattern)) {
-            return nullptr;
-        }
-        std::string strategyType = results[1];
-        std::string argsString = results[2];
-
-        std::vector<std::string> args;
-        std::string::iterator prevIter = argsString.begin();
-        int parenCount = 0;
-        for (std::string::iterator charIter = argsString.begin();
-                charIter != argsString.end(); charIter++) {
-            if (*charIter == '(') {
-                parenCount++;
-                continue;
-            }
-            if (*charIter == ')') {
-                parenCount--;
-                continue;
-            }
-            if (*charIter == ',' && parenCount == 0) {
-                if (prevIter != charIter) {
-                    args.push_back(std::string(prevIter, charIter));
-                }
-                prevIter = charIter + 1;
-            }
-        }
-        if (prevIter != argsString.end()) {
-            args.push_back(std::string(prevIter, argsString.end()));
-        }
-        if (strategyType == "ucb") {
-            double explorationCoefficient;
-            std::istringstream(args[0]) >> explorationCoefficient;
-            return std::make_unique<solver::UcbSearchStrategy>(solver,
-                    explorationCoefficient);
-        }
-        if (strategyType == "nn") {
-            long maxNnComparisons;
-            double maxNnDistance;
-            std::istringstream(args[0]) >> maxNnComparisons;
-            std::istringstream(args[1]) >> maxNnDistance;
-            return std::make_unique<solver::NnRolloutStrategy>(solver,
-                    maxNnComparisons, maxNnDistance);
-        }
-        if (strategyType == "random") {
-            long maxNSteps;
-            std::istringstream(args[0]) >> maxNSteps;
-            return std::make_unique<solver::RandomRolloutStrategy>(solver,
-                    maxNSteps);
-        }
-        if (strategyType == "exp3") {
-            std::vector<std::unique_ptr<solver::SearchStrategy>> strategies;
-            std::vector<std::string>::iterator it = args.begin();
-            double strategyExplorationCoefficient;
-            std::istringstream(*it) >> strategyExplorationCoefficient;
-            it++;
-            for (; it != args.end(); it++) {
-                strategies.push_back(parseStrategy(solver, *it));
-            }
-            return std::make_unique<solver::MultipleStrategiesExp3>(solver,
-                    strategyExplorationCoefficient, std::move(strategies));
-        }
-        return nullptr;
+        return allParser_.parseStrategy(solver, strategyString);
     }
     virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(
             solver::Solver *solver) override {
@@ -146,6 +93,8 @@ private:
     unsigned long nParticles_;
     long historiesPerStep_;
     long maximumDepth_;
+
+    AllStrategiesParser allParser_;
 
     std::string searchStrategyString_;
     std::string rolloutStrategyString_;

@@ -42,6 +42,7 @@
 #include "RockSampleAction.hpp"         // for RockSampleAction
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
 #include "RockSampleState.hpp"          // for RockSampleState
+#include "RockSampleLegalRolloutStrategy.hpp"
 
 using std::cout;
 using std::endl;
@@ -70,6 +71,8 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
     maxVal_(0) // depends on nRocks
          {
+    registerParser("legal", std::make_unique<RockSampleLegalParser>());
+
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -211,12 +214,11 @@ double RockSampleModel::getHeuristicValue(solver::State const &state) {
 
 std::pair<std::unique_ptr<RockSampleState>,
         bool> RockSampleModel::makeNextState(
-        RockSampleState const &state, solver::Action const &action) {
+        RockSampleState const &state, RockSampleAction const &action) {
     GridPosition pos(state.getPosition());
     std::vector<bool> rockStates(state.getRockStates());
     bool isValid = true;
-    RockSampleAction const &a = static_cast<RockSampleAction const &>(action);
-    ActionType actionType = a.getActionType();
+    ActionType actionType = action.getActionType();
     if (actionType == ActionType::CHECK) {
         // Do nothing - the state remains the same.
     } else if (actionType == ActionType::SAMPLE) {
@@ -253,14 +255,13 @@ std::pair<std::unique_ptr<RockSampleState>,
 }
 
 std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
-        solver::Action const &action,
+        RockSampleAction const &action,
         RockSampleState const &nextState) {
-    RockSampleAction const &a = static_cast<RockSampleAction const &>(action);
-    ActionType actionType = a.getActionType();
+    ActionType actionType = action.getActionType();
     if (actionType < ActionType::CHECK) {
         return std::make_unique<RockSampleObservation>();
     }
-    long rockNo = a.getRockNo();
+    long rockNo = action.getRockNo();
     GridPosition pos(nextState.getPosition());
     std::vector<bool> rockStates(nextState.getRockStates());
     double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
@@ -271,7 +272,8 @@ std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
 }
 
 double RockSampleModel::makeReward(RockSampleState const &state,
-        solver::Action const &action, RockSampleState const &nextState,
+        RockSampleAction const &action,
+        RockSampleState const &nextState,
         bool isLegal) {
     if (!isLegal) {
         return -illegalMovePenalty_;
@@ -280,7 +282,7 @@ double RockSampleModel::makeReward(RockSampleState const &state,
         return exitReward_;
     }
 
-    ActionType actionType = static_cast<RockSampleAction const &>(action).getActionType();
+    ActionType actionType = action.getActionType();
     if (actionType == ActionType::SAMPLE) {
         GridPosition pos = state.getPosition();
         int rockNo = envMap_[pos.i][pos.j] - ROCK;
@@ -300,7 +302,7 @@ std::unique_ptr<solver::State> RockSampleModel::generateNextState(
            solver::Action const &action,
            solver::TransitionParameters const */*tp*/) {
     return makeNextState(static_cast<RockSampleState const &>(state),
-            action).first;
+            static_cast<RockSampleAction const &>(action)).first;
 }
 
 std::unique_ptr<solver::Observation> RockSampleModel::generateObservation(
@@ -308,7 +310,8 @@ std::unique_ptr<solver::Observation> RockSampleModel::generateObservation(
         solver::Action const &action,
         solver::TransitionParameters const */*tp*/,
         solver::State const &nextState) {
-    return makeObservation(action,
+    return makeObservation(
+            static_cast<RockSampleAction const &>(action),
             static_cast<RockSampleState const &>(nextState));
 }
 
@@ -319,10 +322,14 @@ double RockSampleModel::generateReward(
         solver::State const */*nextState*/) {
     RockSampleState const &rockSampleState = (
             static_cast<RockSampleState const &>(state));
+    RockSampleAction const &rockSampleAction = (
+            static_cast<RockSampleAction const &>(action));
     std::unique_ptr<RockSampleState> nextState;
     bool isLegal;
-    std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
-    return makeReward(rockSampleState, action, *nextState, isLegal);
+    std::tie(nextState, isLegal) = makeNextState(rockSampleState,
+            rockSampleAction);
+    return makeReward(rockSampleState, rockSampleAction,
+            *nextState, isLegal);
 }
 
 solver::Model::StepResult RockSampleModel::generateStep(
@@ -330,14 +337,18 @@ solver::Model::StepResult RockSampleModel::generateStep(
         solver::Action const &action) {
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
+    RockSampleAction const &rockSampleAction = (
+                static_cast<RockSampleAction const &>(action));
     solver::Model::StepResult result;
     result.action = action.copy();
 
     bool isLegal;
     std::unique_ptr<RockSampleState> nextState;
-    std::tie(nextState, isLegal) = makeNextState(rockSampleState, action);
-    result.observation = makeObservation(action, *nextState);
-    result.reward = makeReward(rockSampleState, action, *nextState, isLegal);
+    std::tie(nextState, isLegal) = makeNextState(rockSampleState,
+            rockSampleAction);
+    result.observation = makeObservation(rockSampleAction, *nextState);
+    result.reward = makeReward(rockSampleState, rockSampleAction,
+            *nextState, isLegal);
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);
     return result;
@@ -397,10 +408,12 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     } else {
         // It's not a CHECK action, so we just add each resultant state.
         for (solver::State const *state : previousParticles) {
-            RockSampleState const *rockSampleState =
-                static_cast<RockSampleState const *>(state);
+            RockSampleState const *rockSampleState = (
+                    static_cast<RockSampleState const *>(state));
+            RockSampleAction const &rockSampleAction = (
+                    static_cast<RockSampleAction const &>(action));
             newParticles.push_back(makeNextState(*rockSampleState,
-                            action).first);
+                    rockSampleAction).first);
         }
     }
     return newParticles;

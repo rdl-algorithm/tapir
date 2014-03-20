@@ -52,8 +52,15 @@ endif
 ifeq ($(CFG),release)
   override CXXFLAGS  += -O3
 endif
+ifeq ($(CFG),perf)
+  override CXXFLAGS  += -O3 -ggdb3
+endif
+ifeq ($(CFG),gprof)
+  override CXXFLAGS  += -O3 -pg
+  override LDFLAGS   += -pg
+endif
 ifeq ($(CFG),debug)
-  override CXXFLAGS  += -O0 -g3
+  override CXXFLAGS  += -O0 -ggdb3
 endif
 
 # ----------------------------------------------------------------------
@@ -103,8 +110,11 @@ include .make/stack.mk
 # Redirection handling.
 # ----------------------------------------------------------------------
 ifdef REDIRECT
+# If the target wasn't found, check the global targets.
+%-$(REDIRECT): % ;
+
 # If the target can't be found, check local targets.
-%-$(REDIRECT): $(PATH_$(REDIRECT))/% ;
+# %-$(REDIRECT): $(PATH_$(REDIRECT))/% ;
 # If not, check for a global target.
-$(PATH_$(REDIRECT))/% : % ;
+# $(PATH_$(REDIRECT))/% : % ;
 endif

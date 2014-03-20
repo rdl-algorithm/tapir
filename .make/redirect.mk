@@ -1,6 +1,7 @@
 dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
 .PHONY: $(MAKECMDGOALS) call-top
+# TARGETS := $(MAKECMDGOALS)
 TARGETS := $(addsuffix -$(MODULE_NAME),$(MAKECMDGOALS))
 
 default: TARGETS += build-$(MODULE_NAME)
