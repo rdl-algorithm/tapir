@@ -37,15 +37,16 @@ RockSampleLegalRolloutInstance::getStatusAndNextAction() {
         return std::make_pair(solver::SearchStatus::ROLLOUT_COMPLETE, nullptr);
     }
     currentNSteps_++;
-    std::vector<std::unique_ptr<solver::Action>> rolloutActions = currentNode_->getMapping()->getRolloutActions();
+    std::vector<std::unique_ptr<solver::Action>> rolloutActions = (
+            currentNode_->getMapping()->getUnvisitedActions());
     RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
     RockSampleState const &state = static_cast<RockSampleState const &>(
             *sequence_->getLastEntry()->getState());
 
+    // Check for legal actions
     std::vector<RockSampleAction const *> legalActions;
     for (std::unique_ptr<solver::Action> &action : rolloutActions) {
         RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(*action);
-
         if (model.makeNextState(state, rsAction).second) {
             legalActions.push_back(&rsAction);
         }
@@ -54,7 +55,7 @@ RockSampleLegalRolloutInstance::getStatusAndNextAction() {
     // If there's no legal action we still pick an illegal one...
     if (legalActions.empty()) {
         return std::make_pair(solver::SearchStatus::ROLLING_OUT,
-                currentNode_->getMapping()->getRandomRolloutAction());
+                currentNode_->getMapping()->getRandomUnvisitedAction());
     }
 
     // Otherwise, we sample one of the legal actions at random.

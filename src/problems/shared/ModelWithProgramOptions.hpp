@@ -7,11 +7,6 @@
 
 #include "solver/abstract-problem/Model.hpp"             // for Model
 
-#include "solver/search/UcbSearchStrategy.hpp"
-#include "solver/search/RandomRolloutStrategy.hpp"
-#include "solver/search/MultipleStrategiesExp3.hpp"
-#include "solver/search/NnRolloutStrategy.hpp"
-
 #include "strategy_parsers.hpp"
 
 namespace po = boost::program_options;

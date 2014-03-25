@@ -72,88 +72,106 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     if (seed == 0) {
         seed = std::time(nullptr);
     }
-    cout << "Seed: " << seed << endl;
+    cout << "Seed: " << seed << endl << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
     randGen.discard(10);
 
-    std::ifstream inFile;
-    inFile.open(polPath);
-    if (!inFile.is_open()) {
-        std::ostringstream message;
-        message << "Failed to open " << polPath;
-        debug::show_message(message.str());
-        return 1;
-    }
-
-    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
-                vm);
-    ModelType *model = newModel.get();
-    solver::Solver solver(&randGen, std::move(newModel));
-    std::unique_ptr<solver::Serializer> serializer(
-            std::make_unique<SerializerType>(&solver));
-    solver.setSerializer(std::move(serializer));
-    solver.loadStateFrom(inFile);
-    inFile.close();
-
-    std::vector<long> changeTimes;
-    if (hasChanges) {
-        changeTimes = model->loadChanges(changesPath.c_str());
-    }
-    std::vector<std::unique_ptr<solver::State>> trajSt;
-    std::vector<std::unique_ptr<solver::Action>> trajAction;
-    std::vector<std::unique_ptr<solver::Observation>> trajObs;
-    std::vector<double> trajRew;
-    double val;
-    long j;
-    std::vector<std::unique_ptr<solver::State>>::iterator itS;
-    std::vector<std::unique_ptr<solver::Action>>::iterator itA;
-    std::vector<std::unique_ptr<solver::Observation>>::iterator itO;
-    std::vector<double>::iterator itR;
-    std::vector<double>::iterator itD;
     std::ofstream os;
     os.open(logPath.c_str());
 
+    double totalReward = 0;
+    double totalTime = 0;
+    double totalNSteps = 0;
     for (long i = 0; i < nRuns; i++) {
-        double tStart;
+        cout << "Run #" << i+1 << endl;
+        cout << "Loading policy... " << endl;
+
+        std::ifstream inFile;
+        inFile.open(polPath);
+        if (!inFile.is_open()) {
+            std::ostringstream message;
+            message << "Failed to open " << polPath;
+            debug::show_message(message.str());
+            return 1;
+        }
+
+        std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
+                    vm);
+        ModelType *model = newModel.get();
+        solver::Solver solver(&randGen, std::move(newModel));
+        std::unique_ptr<solver::Serializer> serializer(
+                std::make_unique<SerializerType>(&solver));
+        solver.setSerializer(std::move(serializer));
+        solver.loadStateFrom(inFile);
+        inFile.close();
+        std::vector<long> changeTimes;
+        if (hasChanges) {
+            changeTimes = model->loadChanges(changesPath.c_str());
+        }
+
+        std::vector<std::unique_ptr<solver::State>> trajSt;
+        std::vector<std::unique_ptr<solver::Action>> trajAction;
+        std::vector<std::unique_ptr<solver::Observation>> trajObs;
+        std::vector<double> trajRew;
         long actualNSteps;
-        double totT;
-        double totChTime, totImpTime;
-        tStart = abt::clock_ms();
-        val = solver.runSim(nSteps, model->getNumberOfHistoriesPerStep(),
+        double totT, totChTime, totImpTime;
+        cout << "Running..." << endl;
+
+        double tStart = abt::clock_ms();
+        double reward = solver.runSim(nSteps,
+                model->getNumberOfHistoriesPerStep(),
                 changeTimes, trajSt, trajAction, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
         totT = abt::clock_ms() - tStart;
 
-        os << "Val:  " << val << endl;
+        totalReward += reward;
+        totalTime += totT;
+        totalNSteps += actualNSteps;
+
+        os << "Reward: " << reward << endl;
+
+        std::vector<std::unique_ptr<solver::State>>::iterator itS;
         itS = trajSt.begin();
         os << "Init: ( " << **itS << endl;
         os << " )\n";
         itS++;
+
+        long j;
+        std::vector<std::unique_ptr<solver::Action>>::iterator itA;
+        std::vector<std::unique_ptr<solver::Observation>>::iterator itO;
+        std::vector<double>::iterator itR;
         for (itA = trajAction.begin(), itO = trajObs.begin(), itR =
                  trajRew.begin(), j = 0; itA != trajAction.end();
              itS++, itA++, itO++, itR++, j++) {
             os << "Step-" << j << " " << **itA;
-            os << " ( " << **itS << ") " << **itO << *itR << endl;
+            os << "S: ( " << **itS << " ); O: " << **itO;
+            os << " R: " << *itR << endl;
         }
-        cout << "Total discounted reward: " << val << endl;
+        cout << "Total discounted reward: " << reward << endl;
         cout << "# of steps: " << actualNSteps << endl;
         cout << "Time spent on changes: " << totChTime << "ms" << endl;
         cout << "Time spent on policy updates: " << totImpTime << "ms" << endl;
         cout << "Total time taken: " << totT << "ms" << endl;
+        if (savePolicy) {
+            // Write the final policy to a file.
+            cout << "Saving final policy..." << endl;
+            std::ofstream outFile;
+            std::ostringstream sstr;
+            sstr << "final-" << i << ".pol";
+            outFile.open(sstr.str());
+            solver.saveStateTo(outFile);
+            outFile.close();
+            cout << "Finished saving." << endl;
+        }
+        cout << "Run complete!" << endl << endl;
     }
     os.close();
 
-    if (savePolicy) {
-        // Write the final policy to a file.
-        cout << "Saving final policy..." << endl;
-        std::ofstream outFile;
-        outFile.open("final.pol");
-        solver.saveStateTo(outFile);
-        outFile.close();
-        cout << "Finished saving." << endl;
-    }
-
+    cout << nRuns << " runs completed.";
+    cout << "Mean reward: " << totalReward / nRuns;
+    cout << "Mean number of steps: " << totalNSteps / nRuns;
+    cout << "Mean time taken: " << totalTime / nRuns;
     return 0;
 }
 

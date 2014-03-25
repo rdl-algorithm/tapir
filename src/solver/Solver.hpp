@@ -18,12 +18,14 @@
 
 namespace solver {
 class ActionPool;
+class BackpropagationStrategy;
 class BeliefNode;
 class BeliefTree;
 class Histories;
 class HistoryEntry;
 class HistorySequence;
 class ObservationPool;
+class SearchStrategy;
 class Serializer;
 class StateInfo;
 class StatePool;
@@ -96,13 +98,17 @@ class Solver {
     void continueSearch(HistorySequence *sequence, long maximumDepth);
 
     /* ------------------ Tree backup methods ------------------- */
+    /** Calculates the discounted rewards from each entry to the end of
+     * the sequence.
+     */
+    void calculateRewards(HistorySequence *sequence);
     /** Performs or negates a backup on the given sequence. */
     void backup(HistorySequence *sequence, bool backingUp);
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
     Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
-    /** Improves the solution, with the root at the given node. */
+    /** Improves the solution,searchStrategy_ with the root at the given node. */
     void improveSol(BeliefNode *startNode, long historiesPerStep,
             long maximumDepth);
     /** Handles particle depletion during the simulation. */
@@ -144,9 +150,11 @@ class Solver {
     std::unique_ptr<HistoryCorrector> historyCorrector_;
 
     /** The strategy to use when searching within the tree. */
-    std::unique_ptr<SearchStrategy> searchStrategy_;
+    std::unique_ptr<SearchStrategy> selectionStrategy_;
     /** The strategy to use when rolling out. */
     std::unique_ptr<SearchStrategy> rolloutStrategy_;
+    /** The strategy to use for backpropagation. */
+    std::unique_ptr<BackpropagationStrategy> backpropagationStrategy_;
 };
 } /* namespace solver */
 

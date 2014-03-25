@@ -1,4 +1,4 @@
-#include "UcbSearchStrategy.hpp"
+#include "UcbSelectionStrategy.hpp"
 
 #include "solver/mappings/ActionMapping.hpp"
 
@@ -7,35 +7,34 @@
 
 namespace solver {
 
-UcbSearchStrategy::UcbSearchStrategy(Solver *solver,
+RockSampleLegalUcbSelector::RockSampleLegalUcbSelector(Solver *solver,
         double explorationCoefficient) :
         SearchStrategy(solver),
         explorationCoefficient_(explorationCoefficient) {
 }
 
-std::unique_ptr<SearchInstance> UcbSearchStrategy::createSearchInstance(
+std::unique_ptr<SearchInstance> RockSampleLegalUcbSelector::createSearchInstance(
         HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<UcbSearchInstance>(explorationCoefficient_,
+    return std::make_unique<RockSampleLegalUcbSelectorInstance>(explorationCoefficient_,
             solver_, sequence, maximumDepth);
 }
 
-UcbSearchInstance::UcbSearchInstance(double explorationCoefficient,
+RockSampleLegalUcbSelectorInstance::RockSampleLegalUcbSelectorInstance(double explorationCoefficient,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
     AbstractSearchInstance(solver, sequence, maximumDepth),
     explorationCoefficient_(explorationCoefficient) {
 }
 
-std::pair<SearchStatus, std::unique_ptr<Action>> UcbSearchInstance::getStatusAndNextAction() {
+std::pair<SearchStatus, std::unique_ptr<Action>> RockSampleLegalUcbSelectorInstance::getStatusAndNextAction() {
     double bestValue = -std::numeric_limits<double>::infinity();
     std::unique_ptr<Action> bestAction = nullptr;
     ActionMapping *mapping = currentNode_->getMapping();
-    if (mapping->hasRolloutActions()) {
+    if (mapping->hasUnvisitedActions()) {
         return std::make_pair(SearchStatus::REACHED_ROLLOUT_NODE, nullptr);
     }
-    for (ActionMappingEntry const *entry : currentNode_->getMapping()->getChildEntries()) {
-        ActionNode *node = entry->getActionNode();
-        double tmpValue = node->getQValue() + (explorationCoefficient_ * std::sqrt(
-                        std::log(currentNode_->getNumberOfParticles() / node->getNParticles())));
+    for (ActionMappingEntry const *entry : mapping->getChildEntries()) {
+        double tmpValue = entry->getMeanQValue() + (explorationCoefficient_ * std::sqrt(
+                        std::log(mapping->getTotalVisitCount() / entry->getVisitCount())));
         if (!std::isfinite(tmpValue)) {
             debug::show_message("ERROR: Infinite/NaN value!?");
         }

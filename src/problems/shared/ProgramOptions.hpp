@@ -57,7 +57,7 @@ class ProgramOptions {
                 ("ABT.nParticles", po::value<unsigned long>(),
                         "default number of particles per belief - this number"
                         " will be generated if particle depletion occurs.")
-                ("ABT.historiesPerStep", po::value<long>(),
+                ("ABT.historiesPerStep,i", po::value<long>(),
                         "the number of episodes to sample for each step.")
                 ("ABT.maximumDepth", po::value<double>(),
                         "maximum Depth allowed before search stops.")

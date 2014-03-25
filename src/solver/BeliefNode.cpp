@@ -31,7 +31,6 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap) :
 
 BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
     id_(id),
-    numberOfSequenceEdges_(0),
     particles_(),
     tLastChange_(-1),
     actionMap_(std::move(actionMap)) {
@@ -60,7 +59,7 @@ HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
 
 /* ----------------- Q-value update methods. ------------------- */
 void BeliefNode::recalculateQValue() {
-    actionMap_->update();
+    actionMap_->updateQValue();
 }
 
 /* ----------------- Useful calculations ------------------- */
@@ -97,9 +96,6 @@ double BeliefNode::getQValue() const {
 }
 long BeliefNode::getNumberOfParticles() const {
     return particles_.size();
-}
-long BeliefNode::getNumberOfSequenceEdges() const {
-    return numberOfSequenceEdges_;
 }
 std::vector<State const *> BeliefNode::getStates() const {
     std::vector<State const *> states;

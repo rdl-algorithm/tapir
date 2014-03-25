@@ -36,7 +36,7 @@ HistorySequence::HistorySequence(long startDepth, long id) :
 HistorySequence::~HistorySequence() {
 }
 
-bool HistorySequence::backupIsValid(bool backingUp) {
+bool HistorySequence::testBackup(bool backingUp) {
     HistoryEntry *lastEntry = getLastEntry();
     if (lastEntry->getAction() != nullptr) {
         debug::show_message("ERROR: End of sequence has an action!?");
@@ -138,56 +138,26 @@ std::vector<State const *> HistorySequence::getStates() const {
     return states;
 }
 
-
-/* -------------- Registration methods ---------------- */
-void HistorySequence::registerStartingNode(BeliefNode *startNode) {
-    HistoryEntry *firstEntry = getFirstEntry();
-    if (firstEntry->isRegisteredAsParticle_) {
-        firstEntry->associatedBeliefNode_->numberOfSequenceEdges_--;
-    }
-    firstEntry->registerNode(startNode);
-    if (firstEntry->isRegisteredAsParticle_) {
-        firstEntry->associatedBeliefNode_->numberOfSequenceEdges_++;
-    }
-}
-
-void HistorySequence::registerRestOfSequence(bool registering,
-        BeliefTree *policy) {
-    bool isFirst = true;
+void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
+    bool registering = (startNode != nullptr);
     std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = histSeq_.begin();
-    BeliefNode *currentNode = (*historyIterator)->associatedBeliefNode_;
-    while (true) {
+    if (registering && (*historyIterator)->isRegisteredAsParticle()) {
+        debug::show_message("WARNING: Already registered this seqeuence!");
+        registerWith(nullptr, policy);
+        registerWith(startNode, policy);
+    }
+    BeliefNode *currentNode = startNode;
+    for (; historyIterator != histSeq_.end(); historyIterator++) {
         HistoryEntry *entry = historyIterator->get();
-        if (isFirst) {
-            isFirst = false;
-        } else {
-            if (registering) {
-                entry->registerNode(currentNode);
-            } else {
-                entry->registerNode(nullptr);
-            }
-        }
-        if (entry->action_ == nullptr) {
-            if (!isFirst) {
-                if (registering) {
-                    currentNode->numberOfSequenceEdges_++;
-                } else {
-                    currentNode->numberOfSequenceEdges_--;
-                }
-            }
-            break;
-        }
         if (registering) {
+            entry->registerNode(currentNode);
             currentNode = policy->createOrGetChild(currentNode,
                     *entry->action_, *entry->observation_);
-            historyIterator++;
         } else {
-            historyIterator++;
-            currentNode = (*historyIterator)->associatedBeliefNode_;
+            entry->registerNode(nullptr);
         }
     }
 }
-
 
 /* -------------- Change flagging methods ---------------- */
 void HistorySequence::resetChangeFlags() {

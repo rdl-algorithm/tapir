@@ -30,7 +30,7 @@ RandomRolloutInstance::getStatusAndNextAction() {
         return std::make_pair(SearchStatus::ROLLOUT_COMPLETE, nullptr);
     }
     currentNSteps_++;
-    std::unique_ptr<Action> action = currentNode_->getMapping()->getRandomRolloutAction();
+    std::unique_ptr<Action> action = currentNode_->getMapping()->getRandomUnvisitedAction();
     return std::make_pair(SearchStatus::ROLLING_OUT, std::move(action));
 }
 

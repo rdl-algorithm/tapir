@@ -44,15 +44,14 @@ class BeliefNode {
     HistoryEntry *sampleAParticle(RandomGenerator *randGen) const;
 
     /* ----------------- Q-value update methods. ------------------- */
-    /** Re-evaluates the optimal action and the Q-value. */
     void recalculateQValue();
 
+    /* ---------------- Useful calculations ------------------ */
     /** Calculates the distance between this belief node and another by
      * calculating the average pairwise distance between the individual
      * particles.
      */
     double distL1Independent(BeliefNode *b) const;
-
 
     /* -------------------- Simple setters ---------------------- */
     /** Sets the id of this node. */
@@ -67,10 +66,6 @@ class BeliefNode {
     double getQValue() const;
     /** Returns the number of particles in this node. */
     long getNumberOfParticles() const;
-    /** Returns the number of particles that are actually the start or end
-     * of a sequence.
-     */
-    long getNumberOfSequenceEdges() const;
     /** Returns a vector containing all of the states contained in node. */
     std::vector<State const *> getStates() const;
     /** Returns the time at which the last change occurred. */
@@ -93,8 +88,6 @@ class BeliefNode {
 private:
     /** The ID of this node. */
     long id_;
-    /** The number of sequences that begin or end at this belief. */
-    long numberOfSequenceEdges_;
 
     /** The set of particles belonging to this node. */
     abt::RandomAccessSet<HistoryEntry *> particles_;

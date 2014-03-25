@@ -84,7 +84,7 @@ NnRolloutInstance::getStatusAndNextAction() {
     // If this is our first action, it *must* be one of the previously
     // unselected rollout actions.
     if (previousAction_ == nullptr) {
-        previousAction_ = currentNode_->getMapping()->getRandomRolloutAction();
+        previousAction_ = currentNode_->getMapping()->getRandomUnvisitedAction();
         return std::make_pair(SearchStatus::ROLLING_OUT, previousAction_->copy());
     }
     HistoryEntry *previousEntry = sequence_->getEntry(sequence_->getLength() - 2);

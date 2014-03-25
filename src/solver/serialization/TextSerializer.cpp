@@ -225,15 +225,10 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
 }
 
 void TextSerializer::save(ActionNode const &node, std::ostream &os) {
-    os << node.meanQValue_ << " from " << node.nParticles_ << " particles";
-    os << " ( total " << node.totalQValue_ << " ) ";
     saveObservationMapping(*node.observationMap_, os);
 }
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
-    std::string tmpStr;
-    is >> node.meanQValue_ >> tmpStr >> node.nParticles_ >> tmpStr;
-    is >> tmpStr >> tmpStr >> node.totalQValue_ >> tmpStr;
     node.observationMap_ = std::move(loadObservationMapping(is));
 }
 
@@ -241,8 +236,7 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
     if (node.getNumberOfParticles() == 0) {
         os << "No particles!" << endl;
     } else {
-        os << node.getNumberOfParticles() << " particles; ";
-        os << node.numberOfSequenceEdges_ << " edges. " << endl;
+        os << node.getNumberOfParticles() << " particles;";
         int count = 0;
         for (auto it = node.particles_.begin(); it != node.particles_.end();
                 ++it) {
@@ -272,7 +266,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
         long nParticles;
         std::string tmpStr;
         std::istringstream countsStream(line);
-        countsStream >> nParticles >> tmpStr >> node.numberOfSequenceEdges_;
+        countsStream >> nParticles;
 
         std::getline(is, line);
         long numParticlesRead = 0;

@@ -48,7 +48,8 @@ EnumeratedObservationMap::EnumeratedObservationMap(ActionPool *actionPool,
         std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations) :
                 allObservations_(allObservations),
                 actionPool_(actionPool),
-                children_(allObservations_.size()) {
+                children_(allObservations_.size()),
+                totalVisitCount_(0) {
 }
 
 long EnumeratedObservationMap::size() const {
@@ -58,17 +59,30 @@ long EnumeratedObservationMap::size() const {
 BeliefNode* EnumeratedObservationMap::getBelief(
         Observation const &obs) const {
     long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
-    return children_[code].get();
+    return children_[code].childNode.get();
 }
 
 BeliefNode* EnumeratedObservationMap::createBelief(
         const Observation& obs) {
     long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
-    children_[code] = std::make_unique<BeliefNode>(
-            actionPool_->createActionMapping());
-    return children_[code].get();
+    children_[code].childNode = std::make_unique<BeliefNode>(actionPool_->createActionMapping());
+    return children_[code].childNode.get();
 }
 
+void EnumeratedObservationMap::updateVisitCount(Observation const &obs,
+        long deltaNVisits) {
+    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
+    children_[code].visitCount += deltaNVisits;
+    totalVisitCount_ += deltaNVisits;
+}
+long EnumeratedObservationMap::getVisitCount(Observation const &obs) const {
+    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
+    return children_[code].visitCount;
+
+}
+long EnumeratedObservationMap::getTotalVisitCount() const {
+    return totalVisitCount_;
+}
 
 /* ------------------ EnumeratedObservationTextSerializer ------------------ */
 void EnumeratedObservationTextSerializer::saveObservationPool(
@@ -85,20 +99,21 @@ EnumeratedObservationTextSerializer::loadObservationPool(
 
 void EnumeratedObservationTextSerializer::saveObservationMapping(
         ObservationMapping const &map, std::ostream &os) {
-    os << "{";
     EnumeratedObservationMap const &enumMap = (
             static_cast<EnumeratedObservationMap const &>(map));
+    os << enumMap.totalVisitCount_ << " visits {";
     bool isFirst = true;
     for (int i = 0; i < enumMap.size(); i++) {
-        BeliefNode *child = enumMap.children_[i].get();
-        if (child != nullptr) {
+        EnumeratedObservationMapEntry const &entry = enumMap.children_[i];
+        if (entry.childNode != nullptr) {
             if (isFirst) {
                 isFirst = false;
             } else {
                 os << ", ";
             }
             saveObservation(enumMap.allObservations_[i].get(), os);
-            os << ":" << child->getId();
+            os << ":" << entry.childNode->getId();
+            os << " " << entry.visitCount << " v.";
         }
     }
     os << "}";
@@ -107,6 +122,9 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
 std::unique_ptr<ObservationMapping>
 EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
     std::unique_ptr<ObservationMapping> map(solver_->getObservationPool()->createObservationMapping());
+    EnumeratedObservationMap &enumMap = (
+                static_cast<EnumeratedObservationMap &>(*map));
+    is >> enumMap.totalVisitCount_;
     std::string tmpStr;
     std::getline(is, tmpStr, '{');
     std::getline(is, tmpStr, '}');
@@ -126,8 +144,13 @@ EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
         }
         long childId;
         sstr2 >> childId;
+        long visitCount;
+        sstr2 >> visitCount;
+        long code = static_cast<DiscretizedPoint const &>(*obs).getBinNumber();
         BeliefNode *node = map->createBelief(*obs);
         solver_->getPolicy()->setNode(childId, node);
+
+        enumMap.children_[code].visitCount = visitCount;
     }
     return std::move(map);
 }

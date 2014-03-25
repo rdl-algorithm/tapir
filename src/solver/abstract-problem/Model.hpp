@@ -14,8 +14,6 @@
 
 #include "solver/changes/HistoryCorrector.hpp"
 
-#include "solver/search/SearchStrategy.hpp"
-
 #include "Action.hpp"        // for Action
 #include "State.hpp"                    // for State
 #include "Observation.hpp"              // for Observation
@@ -23,6 +21,8 @@
 
 namespace solver {
 class BeliefNode;
+class BackpropagationStrategy;
+class SearchStrategy;
 class StatePool;
 
 class Model {
@@ -180,6 +180,9 @@ class Model {
     virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver);
     /** Creates a rollout strategy for use by the given solver. */
     virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(Solver *solver);
+    /** Creates a backpropagation strategy for use by the given solver. */
+    virtual std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
+            Solver *solver);
 
     /* --------------- Pretty printing methods ----------------- */
      /** Draws the environment map onto the given output stream. */

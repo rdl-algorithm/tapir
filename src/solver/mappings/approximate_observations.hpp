@@ -1,7 +1,10 @@
 #ifndef SOLVER_APPROXIMATE_OBSERVATIONS_HPP_
 #define SOLVER_APPROXIMATE_OBSERVATIONS_HPP_
 
+#include "solver/BeliefNode.hpp"
+
 #include "solver/abstract-problem/Model.hpp"
+
 #include "solver/serialization/Serializer.hpp"
 
 #include "ObservationPool.hpp"
@@ -36,6 +39,12 @@ class ApproximateObservationPool: public solver::ObservationPool {
     double maxDistance_;
 };
 
+struct ApproximateObservationMapEntry {
+    std::unique_ptr<Observation> observation = nullptr;
+    std::unique_ptr<BeliefNode> childNode = nullptr;
+    long visitCount = 0;
+};
+
 class ApproximateObservationMap: public solver::ObservationMapping {
   public:
     friend class ApproximateObservationTextSerializer;
@@ -47,13 +56,19 @@ class ApproximateObservationMap: public solver::ObservationMapping {
 
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
+
+    virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
+    virtual long getVisitCount(Observation const &obs) const override;
+    virtual long getTotalVisitCount() const override;
   private:
+    ApproximateObservationMapEntry const *getEntry(Observation const &obs) const;
+    ApproximateObservationMapEntry *getEntry(Observation const &obs);
+
     ActionPool *actionPool_;
     double maxDistance_;
-    typedef std::pair<std::unique_ptr<Observation>,
-            std::unique_ptr<BeliefNode>> Entry;
-    typedef std::vector<Entry> ChildMappingVector;
-    ChildMappingVector children_;
+    std::vector<ApproximateObservationMapEntry> children_;
+
+    long totalVisitCount_;
 };
 
 

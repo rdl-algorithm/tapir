@@ -25,6 +25,13 @@ class ObservationMapping {
 
     /** Creates a new belief node for the given observation */
     virtual BeliefNode *createBelief(Observation const &obs) = 0;
+
+    /** Updates the visit count for the given observation. */
+    virtual void updateVisitCount(Observation const &obs, long deltaNVisits) = 0;
+    /** Returns the visit count for the given observation. */
+    virtual long getVisitCount(Observation const &obs) const = 0;
+    /** Returns the total visit count among all observations. */
+    virtual long getTotalVisitCount() const = 0;
 };
 } /* namespace solver */
 

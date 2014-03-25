@@ -23,8 +23,9 @@ class StateInfo;
 
 class HistoryEntry {
   public:
-    friend class HistorySequence;
+    friend class AbstractBackpropagationStrategy;
     friend class AbstractSearchInstance;
+    friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;

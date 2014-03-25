@@ -6,7 +6,10 @@
 #include <sstream>
 #include <vector>
 
+#include "solver/BeliefNode.hpp"
+
 #include "solver/abstract-problem/Model.hpp"
+
 #include "solver/serialization/Serializer.hpp"
 
 #include "ObservationPool.hpp"
@@ -14,7 +17,6 @@
 
 namespace solver {
 class ActionPool;
-class BeliefNode;
 class DiscretizedPoint;
 
 class ModelWithEnumeratedObservations : virtual public solver::Model {
@@ -35,10 +37,14 @@ class EnumeratedObservationPool: public solver::ObservationPool {
     virtual ~EnumeratedObservationPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationPool);
 
-    virtual std::unique_ptr<ObservationMapping>
-    createObservationMapping() override;
+    virtual std::unique_ptr<ObservationMapping> createObservationMapping() override;
 private:
   std::vector<std::unique_ptr<DiscretizedPoint>> observations_;
+};
+
+struct EnumeratedObservationMapEntry {
+    std::unique_ptr<BeliefNode> childNode = nullptr;
+    long visitCount = 0;
 };
 
 class EnumeratedObservationMap: public solver::ObservationMapping {
@@ -56,10 +62,16 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
 
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
+
+    virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
+    virtual long getVisitCount(Observation const &obs) const override;
+    virtual long getTotalVisitCount() const override;
   private:
     std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations_;
     ActionPool *actionPool_;
-    std::vector<std::unique_ptr<BeliefNode>> children_;
+    std::vector<EnumeratedObservationMapEntry> children_;
+
+    long totalVisitCount_;
 };
 
 class EnumeratedObservationTextSerializer: virtual public solver::Serializer {

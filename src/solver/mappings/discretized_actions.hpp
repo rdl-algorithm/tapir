@@ -57,19 +57,35 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual ~DiscretizedActionMap() = default;
     _NO_COPY_OR_MOVE(DiscretizedActionMap);
 
+    /* -------------- Creation and retrieval of nodes. ---------------- */
     virtual ActionNode *getActionNode(Action const &action) const override;
     virtual ActionNode *createActionNode(Action const &action) override;
 
+    /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNChildren() const override;
     virtual std::vector<ActionMappingEntry const *> getChildEntries() const override;
+    virtual ActionMappingEntry const *getEntry(Action const &action) const override;
 
-    virtual bool hasRolloutActions() const override;
-    virtual std::vector<std::unique_ptr<Action>> getRolloutActions() const override;
-    virtual std::unique_ptr<Action> getRandomRolloutAction() const override;
-
-    virtual void update() override;
+    /* -------------- Retrieval of general statistics. ---------------- */
+    virtual long getTotalVisitCount() const override;
     virtual std::unique_ptr<Action> getBestAction() const override;
     virtual double getBestMeanQValue() const override;
+
+    /* ------------ Methods for retrieving unvisited actions -------------- */
+    virtual bool hasUnvisitedActions() const override;
+    virtual std::vector<std::unique_ptr<Action>> getUnvisitedActions() const override;
+    virtual std::unique_ptr<Action> getRandomUnvisitedAction() const override;
+
+    /* ------------ Easy getters for entry values. -------------- */
+    virtual long getVisitCount(Action const &action) const override;
+    virtual double getTotalQValue(Action const &action) const override;
+    virtual double getMeanQValue(Action const &action) const override;
+
+    /* --------------- Methods for updating the values ----------------- */
+    virtual void updateVisitCount(Action const &action, long deltaNVisits) override;
+    virtual void updateTotalQValue(Action const &action, double deltaQ) override;
+    virtual void updateQValue() override;
+
   private:
     ObservationPool *observationPool_;
     ModelWithDiscretizedActions *model_;
@@ -80,11 +96,15 @@ class DiscretizedActionMap: public solver::ActionMapping {
 
     abt::RandomAccessSet<long> binsToTry_;
 
-    long bestBinNumber;
+    long bestBinNumber_;
     double bestMeanQValue_;
+
+    long totalVisitCount_;
 };
 
 class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
+    friend class DiscretizedActionMap;
+    friend class DiscretizedActionTextSerializer;
   public:
     DiscretizedActionMapEntry(long binNumber,
             DiscretizedActionMap *map,
@@ -94,12 +114,18 @@ class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
 
     virtual std::unique_ptr<Action> getAction() const override;
     virtual ActionNode *getActionNode() const override;
+    virtual long getVisitCount() const override;
+    virtual double getTotalQValue() const override;
+    virtual double getMeanQValue() const override;
 
     virtual long getBinNumber() const;
   private:
     long binNumber_;
     DiscretizedActionMap *map_;
     std::unique_ptr<ActionNode> childNode_;
+    long visitCount_;
+    double totalQValue_;
+    double meanQValue_;
 };
 
 class DiscretizedActionTextSerializer: virtual public solver::Serializer {

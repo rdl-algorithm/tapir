@@ -7,7 +7,7 @@
 #include "solver/search/MultipleStrategiesExp3.hpp"
 #include "solver/search/NnRolloutStrategy.hpp"
 #include "solver/search/RandomRolloutStrategy.hpp"
-#include "solver/search/UcbSearchStrategy.hpp"
+#include "solver/search/UcbSelectionStrategy.hpp"
 
 AllStrategiesParser::AllStrategiesParser() :
         allParsers_() {
@@ -71,7 +71,7 @@ std::unique_ptr<solver::SearchStrategy> UcbSearchParser::parseStrategy(
         std::vector<std::string> args) {
     double explorationCoefficient;
     std::istringstream(args[0]) >> explorationCoefficient;
-    return std::make_unique<solver::UcbSearchStrategy>(solver,
+    return std::make_unique<solver::RockSampleLegalUcbSelector>(solver,
             explorationCoefficient);
 }
 

@@ -18,9 +18,6 @@ ActionNode::ActionNode() :
 }
 
 ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
-    nParticles_(0),
-    totalQValue_(0),
-    meanQValue_(-std::numeric_limits<double>::infinity()),
     observationMap_(std::move(mapping)) {
 }
 
@@ -28,6 +25,7 @@ ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
 ActionNode::~ActionNode() {
 }
 
+/*
 void ActionNode::changeTotalQValue(double deltaQ, long deltaNParticles) {
     totalQValue_ += deltaQ;
     nParticles_ += deltaNParticles;
@@ -91,6 +89,7 @@ double ActionNode::getQValue () const {
       }
     return meanQValue_;
 }
+*/
 
 ObservationMapping *ActionNode::getMapping() {
     return observationMap_.get();

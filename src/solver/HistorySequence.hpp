@@ -12,10 +12,6 @@
 
 #include "global.hpp"
 
-namespace nav2d {
-class Nav2DSpcHistoryCorrector;
-}
-
 namespace solver {
 class BeliefNode;
 class BeliefTree;
@@ -24,6 +20,7 @@ class StateInfo;
 
 class HistorySequence {
   public:
+    friend class AbstractBackpropagationStrategy;
     friend class Solver;
     friend class TextSerializer;
     friend class DefaultHistoryCorrector;
@@ -44,7 +41,7 @@ class HistorySequence {
     /** A method that verifies the validity of this sequence - this shouldn't
      * be necessary.
      */
-    bool backupIsValid(bool backingUp);
+    bool testBackup(bool backingUp);
 
     /* ----------- Methods to add or remove history entries ------------- */
     /** Clears all the entries in the sequence. */
@@ -87,16 +84,19 @@ class HistorySequence {
     std::vector<State const *> getStates() const;
 
     /* -------------- Registration methods ---------------- */
+    /** Registers the sequence with the given belief node. */
+    void registerWith(BeliefNode *startNode,
+            BeliefTree *policy);
     /** Changes the belief node that is considered to be the root of this
      *  sequence - use a value of nullptr to detach the sequence entirely.
      */
-    void registerStartingNode(BeliefNode *startNode);
+    //void registerStartingNode(BeliefNode *startNode);
     /** Registers or deregisters the sequence, apart from its starting
      * belief node.
      * If registering, the policy must be supplied as the creation of
      * new belief nodes may be required.
      */
-    void registerRestOfSequence(bool registering, BeliefTree *policy);
+    //void registerRestOfSequence(bool registering, BeliefTree *policy);
 
     /* -------------- Change flagging methods ---------------- */
     /** Resets the changes for this sequence and all its entries. */

@@ -21,10 +21,15 @@
 #include "abstract-problem/Observation.hpp"              // for Observation
 #include "abstract-problem/State.hpp"                    // for State, operator<<
 
+#include "backpropagation/BackpropagationStrategy.hpp"
+
 #include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
 
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"
+
+#include "search/SearchStatus.hpp"
+#include "search/SearchStrategy.hpp"
 
 #include "serialization/Serializer.hpp"               // for Serializer
 
@@ -56,8 +61,9 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     allHistories_(std::make_unique<Histories>()),
     policy_(std::make_unique<BeliefTree>()),
     historyCorrector_(model_->createHistoryCorrector()),
-    searchStrategy_(nullptr),
-    rolloutStrategy_(nullptr) {
+    selectionStrategy_(nullptr),
+    rolloutStrategy_(nullptr),
+    backpropagationStrategy_(nullptr) {
 }
 
 // Default destructor
@@ -71,8 +77,9 @@ void Solver::initialize() {
     policy_->setRoot(std::make_unique<BeliefNode>(
             actionPool_->createActionMapping(), 0));
     historyCorrector_->setSolver(this);
-    searchStrategy_ = model_->createSearchStrategy(this);
+    selectionStrategy_ = model_->createSearchStrategy(this);
     rolloutStrategy_ = model_->createRolloutStrategy(this);
+    backpropagationStrategy_ = model_->createBackpropagationStrategy(this);
 }
 void Solver::setSerializer(std::unique_ptr<Serializer> serializer) {
     serializer_ = std::move(serializer);
@@ -217,7 +224,8 @@ double Solver::runSim(long nSteps, long historiesPerStep,
         BeliefNode *nextNode = currNode->getChild(*result.action,
                     *result.observation);
         if (nextNode == nullptr) {
-            nextNode = addChild(currNode, *result.action, *result.observation, timeStep);
+            nextNode = addChild(currNode, *result.action,
+                    *result.observation, timeStep);
         }
         currNode = nextNode;
         if (result.isTerminal) {
@@ -262,7 +270,7 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
         long startDepth, long maximumDepth) {
     HistorySequence *sequence = allHistories_->addSequence(startDepth);
     sequence->addEntry(startStateInfo);
-    sequence->registerStartingNode(startNode);
+    sequence->getFirstEntry()->associatedBeliefNode_ = startNode;
     continueSearch(sequence, maximumDepth);
 }
 
@@ -275,7 +283,7 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     SearchStatus status = SearchStatus::UNINITIALIZED;
 
     std::unique_ptr<SearchInstance> searchInstance = nullptr;
-    searchInstance = searchStrategy_->createSearchInstance(sequence,
+    searchInstance = selectionStrategy_->createSearchInstance(sequence,
             maximumDepth);
     status = searchInstance->initialize();
     if (status != SearchStatus::INITIAL) {
@@ -295,28 +303,47 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
         HistoryEntry *lastEntry = sequence->getLastEntry();
         State const *lastState = lastEntry->getState();
         if (model_->isTerminal(*lastState)) {
-            debug::show_message("ERROR: Status should be terminal, but it wasn't!");
+            debug::show_message("ERROR: Terminal state, but the search status"
+                    " didn't reflect this!");
         }
+        // Use the heuristic estimate.
         lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
     } else if (status == SearchStatus::HIT_TERMINAL_STATE) {
+        // Don't do anything for a terminal state.
     } else {
         debug::show_message("ERROR: Search failed!?");
         return;
     }
     // Register and backup.
-    sequence->registerRestOfSequence(true, policy_.get());
+    sequence->registerWith(sequence->getFirstEntry()->associatedBeliefNode_,
+            policy_.get());
     backup(sequence, true);
 }
 
 /* ------------------ Tree backup methods ------------------- */
-void Solver::backup(HistorySequence *sequence, bool backingUp) {
-    sequence->backupIsValid(backingUp);
+void Solver::calculateRewards(HistorySequence *sequence) {
     double discountFactor = model_->getDiscountFactor();
-
     std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
                 sequence->histSeq_.rbegin());
     // Retrieve the value of the last entry.
     double totalReward = (*itHist)->rewardFromHere_;
+    itHist++;
+    for (; itHist != sequence->histSeq_.rend(); itHist++) {
+           HistoryEntry *entry = itHist->get();
+           // Apply the discount
+           totalReward *= discountFactor;
+           // Include the reward from this entry.
+           entry->rewardFromHere_ = totalReward = entry->reward_ + totalReward;
+    }
+}
+
+void Solver::backup(HistorySequence *sequence, bool backingUp) {
+    sequence->testBackup(backingUp);
+    calculateRewards(sequence);
+    backpropagationStrategy_->propagate(sequence, !backingUp);
+
+    std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
+                sequence->histSeq_.rbegin());
     (*itHist)->hasBeenBackedUp_ = backingUp;
     itHist++;
 
@@ -326,16 +353,12 @@ void Solver::backup(HistorySequence *sequence, bool backingUp) {
         HistoryEntry *entry = itHist->get();
         BeliefNode *node = entry->associatedBeliefNode_;
 
-        // Apply the discount
-        totalReward *= discountFactor;
-        // Calculate the reward from this entry.
-        entry->rewardFromHere_ = totalReward = entry->reward_ + totalReward;
-
         long deltaNParticles = 1;
         double deltaQ = entry->reward_;
         if (addFullReward) {
-            deltaQ = totalReward;
+            deltaQ = entry->rewardFromHere_;
         }
+
         // If we're undoing it, we negate the values.
         if (!backingUp) {
             deltaNParticles = -deltaNParticles;
@@ -343,15 +366,15 @@ void Solver::backup(HistorySequence *sequence, bool backingUp) {
         }
 
         ActionNode *actionNode = node->getMapping()->getActionNode(*entry->action_);
-        actionNode->changeTotalQValue(deltaQ, deltaNParticles);
+        // actionNode->changeTotalQValue(deltaQ, deltaNParticles);
         if (addFullReward) {
             actionNode->getChild(*entry->observation_)->recalculateQValue();
             addFullReward = false;
         } else {
-            actionNode->updateChildQValue(*entry->observation_,
-                    model_->getDiscountFactor(), deltaNParticles);
+            //actionNode->updateChildQValue(*entry->observation_,
+            //        model_->getDiscountFactor(), deltaNParticles);
         }
-        actionNode->recalculateQValue();
+        // actionNode->recalculateQValue();
         entry->hasBeenBackedUp_ = backingUp;
     }
     // The belief node also needs to recalculate its q value.
@@ -364,7 +387,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     std::unique_ptr<Action> action = currentBelief->getBestAction();
     if (action == nullptr) {
         debug::show_message("WARNING: No actions evaluated! Selecting a random action...");
-        action = currentBelief->getMapping()->getRandomRolloutAction();
+        action = currentBelief->getMapping()->getRandomUnvisitedAction();
     }
     Model::StepResult result = model_->generateStep(currentState, *action);
     return result;
@@ -437,7 +460,8 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
             histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
         }
         // Register and backup
-        histSeq->registerStartingNode(nextNode);
+        histSeq->registerWith(histSeq->getFirstEntry()->associatedBeliefNode_,
+                    policy_.get());
         backup(histSeq, true);
     }
     return nextNode;
@@ -479,13 +503,11 @@ void Solver::applyChanges() {
 
         // Undo backup and deregister.
         backup(sequence, false);
-        sequence->registerRestOfSequence(false, nullptr);
+        sequence->registerWith(nullptr, nullptr);
 
         if (changes::hasFlag(sequence->getFirstEntry()->changeFlags_,
                 ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
-            // Deregister the starting node as well.
-            sequence->registerStartingNode(nullptr);
             // Now remove the sequence entirely.
             allHistories_->deleteSequence(sequence->id_);
         } else {
@@ -507,7 +529,8 @@ void Solver::applyChanges() {
         }
 
         // Now we register and then backup.
-        sequence->registerRestOfSequence(true, policy_.get());
+        sequence->registerWith(sequence->getFirstEntry()->associatedBeliefNode_,
+                    policy_.get());
         backup(sequence, true);
     }
 }
@@ -516,11 +539,10 @@ void Solver::applyChanges() {
 void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     os << belief->getQValue();
     os << " from " << belief->getNumberOfParticles() << " p." << endl;
-    os << belief->getNumberOfSequenceEdges() << " edges" << endl;
     os << "Action children: " << endl;
     std::multimap<double, solver::ActionMappingEntry const *> actionValues;
     for (solver::ActionMappingEntry const *entry : belief->getMapping()->getChildEntries()) {
-        actionValues.emplace(entry->getActionNode()->getQValue(), entry);
+        actionValues.emplace(entry->getMeanQValue(), entry);
     }
     for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
         abt::print_double(it->first, os, 8, 2,
@@ -529,8 +551,7 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
         std::ostringstream sstr;
         sstr << *it->second->getAction();
         abt::print_with_width(sstr.str(), os, 17);
-        abt::print_with_width(it->second->getActionNode()->getNParticles(),
-                os, 8);
+        abt::print_with_width(it->second->getVisitCount(), os, 8);
         os << endl;
     }
 }

@@ -5,6 +5,8 @@
 #include <memory>
 #include <unordered_map>
 
+#include "solver/BeliefNode.hpp"
+
 #include "solver/abstract-problem/Model.hpp"
 
 #include "solver/serialization/Serializer.hpp"
@@ -15,7 +17,6 @@
 
 namespace solver {
 class ActionPool;
-class BeliefNode;
 class DiscretePoint;
 
 class ModelWithDiscreteObservations : virtual public solver::Model {
@@ -37,6 +38,11 @@ class DiscreteObservationPool: public solver::ObservationPool {
     createObservationMapping() override;
 };
 
+struct DiscreteObservationMapEntry {
+    std::unique_ptr<BeliefNode> childNode = nullptr;
+    long visitCount = 0;
+};
+
 class DiscreteObservationMap: public solver::ObservationMapping {
   public:
     friend class DiscreteObservationTextSerializer;
@@ -48,6 +54,12 @@ class DiscreteObservationMap: public solver::ObservationMapping {
 
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
+
+    virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
+    virtual long getVisitCount(Observation const &obs) const override;
+    virtual long getTotalVisitCount() const override;
+  private:
+    ActionPool *actionPool_;
 
     struct HashContents {
         std::size_t operator()(std::unique_ptr<Observation> const &obs) const {
@@ -61,10 +73,10 @@ class DiscreteObservationMap: public solver::ObservationMapping {
         }
     };
     typedef std::unordered_map<std::unique_ptr<Observation>,
-            std::unique_ptr<BeliefNode>, HashContents, EqualContents> ChildMap;
-  private:
-    ActionPool *actionPool_;
+            DiscreteObservationMapEntry, HashContents, EqualContents> ChildMap;
     ChildMap childMap_;
+
+    long totalVisitCount_;
 };
 
 class DiscreteObservationTextSerializer: virtual public solver::Serializer {

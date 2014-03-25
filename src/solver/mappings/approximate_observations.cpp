@@ -40,30 +40,67 @@ ApproximateObservationMap::ApproximateObservationMap(ActionPool *actionPool,
         double maxDistance) :
                 actionPool_(actionPool),
                 maxDistance_(maxDistance),
-                children_() {
+                children_(),
+                totalVisitCount_(0) {
 }
 
 BeliefNode* ApproximateObservationMap::getBelief(
         Observation const &obs) const {
-    double shortestDistance = maxDistance_;
-    BeliefNode *bestNode = nullptr;
-    for (Entry const &entry : children_) {
-        double distance = entry.first->distanceTo(obs);
-        if (distance <= shortestDistance) {
-            shortestDistance = distance;
-            bestNode = entry.second.get();
-        }
+    ApproximateObservationMapEntry const *entry = getEntry(obs);
+    if (entry == nullptr) {
+        return nullptr;
     }
-    return bestNode;
+    return entry->childNode.get();
 }
 
 BeliefNode* ApproximateObservationMap::createBelief(
         const Observation& obs) {
-    Entry val = std::make_pair(obs.copy(), std::make_unique<BeliefNode>(
-            actionPool_->createActionMapping()));
-    BeliefNode *node = val.second.get();
-    children_.push_back(std::move(val));
+    ApproximateObservationMapEntry entry;
+    entry.observation = obs.copy();
+    entry.childNode = std::make_unique<BeliefNode>(actionPool_->createActionMapping());
+    BeliefNode *node = entry.childNode.get();
+    children_.push_back(std::move(entry));
     return node;
+}
+
+void ApproximateObservationMap::updateVisitCount(Observation const &obs,
+        long deltaNVisits) {
+    getEntry(obs)->visitCount += deltaNVisits;
+    totalVisitCount_ += deltaNVisits;
+}
+long ApproximateObservationMap::getVisitCount(Observation const &obs) const {
+    return getEntry(obs)->visitCount;
+}
+long ApproximateObservationMap::getTotalVisitCount() const {
+    return totalVisitCount_;
+}
+
+ApproximateObservationMapEntry const *ApproximateObservationMap::getEntry(
+        Observation const &obs) const {
+    double shortestDistance = maxDistance_;
+    ApproximateObservationMapEntry const *bestEntry = nullptr;
+    for (ApproximateObservationMapEntry const &entry : children_) {
+        double distance = entry.observation->distanceTo(obs);
+        if (distance <= shortestDistance) {
+            shortestDistance = distance;
+            bestEntry = &entry;
+        }
+    }
+    return bestEntry;
+}
+
+ApproximateObservationMapEntry *ApproximateObservationMap::getEntry(
+        Observation const &obs) {
+    double shortestDistance = maxDistance_;
+    ApproximateObservationMapEntry *bestEntry = nullptr;
+    for (ApproximateObservationMapEntry &entry : children_) {
+        double distance = entry.observation->distanceTo(obs);
+        if (distance <= shortestDistance) {
+            shortestDistance = distance;
+            bestEntry = &entry;
+        }
+    }
+    return bestEntry;
 }
 
 /* ----------------- ApproximateObservationTextSerializer ----------------- */
@@ -80,34 +117,39 @@ ApproximateObservationTextSerializer::loadObservationPool(
 
 void ApproximateObservationTextSerializer::saveObservationMapping(
         ObservationMapping const &map, std::ostream &os) {
-    os << "{";
     ApproximateObservationMap const &approxMap = (
-            static_cast<ApproximateObservationMap const &>(map));
-    for (ApproximateObservationMap::ChildMappingVector::const_iterator
-            it = approxMap.children_.cbegin();
-            it != approxMap.children_.cend(); it++) {
-        saveObservation(it->first.get(), os);
-        os << " -> " << it->second->getId();
-        if (std::next(it) != approxMap.children_.cend()) {
+                static_cast<ApproximateObservationMap const &>(map));
+    os << approxMap.totalVisitCount_ << " visits {";
+    bool isFirst = true;
+    for (ApproximateObservationMapEntry const &entry : approxMap.children_) {
+        if (isFirst) {
+            isFirst = false;
+        } else {
             os << ", ";
         }
+        saveObservation(entry.observation.get(), os);
+        os << ":" << entry.childNode->getId();
+        os << " " << entry.visitCount << " v.";
     }
-     os << "}";
+    os << "}";
 }
 
 std::unique_ptr<ObservationMapping>
 ApproximateObservationTextSerializer::loadObservationMapping(std::istream &is) {
     std::unique_ptr<ObservationMapping> map(
             solver_->getObservationPool()->createObservationMapping());
+    ApproximateObservationMap &approxMap = (
+                static_cast<ApproximateObservationMap &>(*map));
+    is >> approxMap.totalVisitCount_;
     std::string tmpStr;
     std::getline(is, tmpStr, '{');
     std::getline(is, tmpStr, '}');
     std::istringstream sstr(tmpStr);
 
-    std::string entry;
+    std::string entryString;
     while (!sstr.eof()) {
-        std::getline(sstr, entry, ',');
-        std::istringstream sstr2(entry);
+        std::getline(sstr, entryString, ',');
+        std::istringstream sstr2(entryString);
         std::unique_ptr<Observation> obs = loadObservation(sstr2);
         std::string tmpStr2;
         sstr2 >> tmpStr2;
@@ -117,7 +159,13 @@ ApproximateObservationTextSerializer::loadObservationMapping(std::istream &is) {
         }
         long childId;
         sstr2 >> childId;
-        BeliefNode *node = map->createBelief(*obs);
+        ApproximateObservationMapEntry entry;
+        sstr2 >> entry.visitCount;
+        entry.observation = std::move(obs);
+        entry.childNode = std::make_unique<BeliefNode>(
+                approxMap.actionPool_->createActionMapping());
+
+        BeliefNode *node = entry.childNode.get();
         solver_->getPolicy()->setNode(childId, node);
     }
     return std::move(map);

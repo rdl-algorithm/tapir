@@ -11,11 +11,14 @@
 #include "solver/indexing/StateIndex.hpp"
 #include "solver/indexing/RTree.hpp"
 
+#include "solver/backpropagation/BackpropagationStrategy.hpp"
+#include "solver/backpropagation/AveragePropagator.hpp"
+
 #include "solver/changes/DefaultHistoryCorrector.hpp"
 #include "solver/changes/HistoryCorrector.hpp"
 
 #include "solver/search/SearchStrategy.hpp"
-#include "solver/search/UcbSearchStrategy.hpp"
+#include "solver/search/UcbSelectionStrategy.hpp"
 #include "solver/search/RandomRolloutStrategy.hpp"
 
 #include "Action.hpp"        // for Action
@@ -85,11 +88,16 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
 }
 
 std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
-    return std::make_unique<UcbSearchStrategy>(solver, 1.0);
+    return std::make_unique<RockSampleLegalUcbSelector>(solver, 1.0);
 }
 
 std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
     return std::make_unique<RandomRolloutStrategy>(solver, 1);
+}
+
+std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
+            Solver *solver) {
+    return std::make_unique<AveragePropagator>(solver);
 }
 
 /* --------------- Pretty printing methods ----------------- */
