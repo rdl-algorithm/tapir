@@ -99,7 +99,6 @@ void Solver::genPol(long historiesPerStep, long maximumDepth) {
     }
 }
 
-
 double Solver::runSim(long nSteps, long historiesPerStep,
         std::vector<long> &changeTimes,
         std::vector<std::unique_ptr<State>> &trajSt,
@@ -114,7 +113,6 @@ double Solver::runSim(long nSteps, long historiesPerStep,
 
     *totChTime = 0.0;
     *totImpTime = 0.0;
-    double chTimeStart, chTimeEnd, impSolTimeStart, impSolTimeEnd;
     *actualNSteps = nSteps;
     long maximumDepth = model_->getMaximumDepth();
     double discFactor = model_->getDiscountFactor();
@@ -128,52 +126,37 @@ double Solver::runSim(long nSteps, long historiesPerStep,
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
         std::stringstream prevStream;
         if (model_->hasVerboseOutput()) {
-            cout << endl << endl << "t-" << timeStep << endl;
             prevStream << "Before:" << endl;
             printBelief(currNode, prevStream);
         }
 
         allStates_->createOrGetInfo(*currentState);
+
+        // If the model is changing, handle the changes.
         if (itCh != changeTimes.end() && timeStep == *itCh) {
-            // Apply the changes to the model.
             if (model_->hasVerboseOutput()) {
                 cout << "Model changing." << endl;
             }
-
-            chTimeStart = abt::clock_ms();
-            model_->update(*itCh, allStates_.get());
-            if (changes::hasFlag(allStates_->getInfo(*currentState)->changeFlags_,
-                    ChangeFlags::DELETED)) {
-                debug::show_message("ERROR: Current simulation state deleted. Exiting..");
-                std::exit(1);
-            }
-            for (std::unique_ptr<State> &state2 : trajSt) {
-                if (changes::hasFlag(
-                        allStates_->getInfo(*state2)->changeFlags_,
-                        ChangeFlags::DELETED)) {
-                    std::ostringstream message;
-                    message << "ERROR: Impossible simulation history! Includes ";
-                    message << *state2;
-                    debug::show_message(message.str(), true, false);
-                }
-            }
-            applyChanges();
-            allStates_->resetAffectedStates();
-            chTimeEnd = abt::clock_ms();
+            double chTimeStart = abt::clock_ms();
+            // Apply all the changes!
+            handleChanges(timeStep, *currentState, trajSt);
+            double chTimeEnd = abt::clock_ms();
             *totChTime += chTimeEnd - chTimeStart;
-
             if (model_->hasVerboseOutput()) {
                 cout << "Changes complete" << endl;
                 cout << "Total of " << *totChTime << " ms used for changes." << endl;
             }
             itCh++;
         }
-        impSolTimeStart = abt::clock_ms();
+
+        // Improve the policy
+        double impSolTimeStart = abt::clock_ms();
         improveSol(currNode, historiesPerStep, maximumDepth);
-        impSolTimeEnd = abt::clock_ms();
+        double impSolTimeEnd = abt::clock_ms();
         *totImpTime += impSolTimeEnd - impSolTimeStart;
 
         if (model_->hasVerboseOutput()) {
+            cout << endl << endl << "t-" << timeStep << endl;
             cout << "State: " << *currentState << endl;
             cout << "Heuristic Value: " << model_->getHeuristicValue(*currentState) << endl;
             cout << "Belief #" << currNode->getId() << endl;
@@ -341,44 +324,6 @@ void Solver::backup(HistorySequence *sequence, bool backingUp) {
     sequence->testBackup(backingUp);
     calculateRewards(sequence);
     backpropagationStrategy_->propagate(sequence, !backingUp);
-
-    std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
-                sequence->histSeq_.rbegin());
-    (*itHist)->hasBeenBackedUp_ = backingUp;
-    itHist++;
-
-    bool addFullReward = true;
-    // Normal update for the rest of the sequence.
-    for (; itHist != sequence->histSeq_.rend(); itHist++) {
-        HistoryEntry *entry = itHist->get();
-        BeliefNode *node = entry->associatedBeliefNode_;
-
-        long deltaNParticles = 1;
-        double deltaQ = entry->reward_;
-        if (addFullReward) {
-            deltaQ = entry->rewardFromHere_;
-        }
-
-        // If we're undoing it, we negate the values.
-        if (!backingUp) {
-            deltaNParticles = -deltaNParticles;
-            deltaQ = -deltaQ;
-        }
-
-        ActionNode *actionNode = node->getMapping()->getActionNode(*entry->action_);
-        // actionNode->changeTotalQValue(deltaQ, deltaNParticles);
-        if (addFullReward) {
-            actionNode->getChild(*entry->observation_)->recalculateQValue();
-            addFullReward = false;
-        } else {
-            //actionNode->updateChildQValue(*entry->observation_,
-            //        model_->getDiscountFactor(), deltaNParticles);
-        }
-        // actionNode->recalculateQValue();
-        entry->hasBeenBackedUp_ = backingUp;
-    }
-    // The belief node also needs to recalculate its q value.
-    sequence->getFirstEntry()->associatedBeliefNode_->recalculateQValue();
 }
 
 /* ------------------ Simulation methods ------------------- */
@@ -460,14 +405,41 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
             histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
         }
         // Register and backup
-        histSeq->registerWith(histSeq->getFirstEntry()->associatedBeliefNode_,
-                    policy_.get());
+        histSeq->registerWith(nextNode, policy_.get());
         backup(histSeq, true);
     }
     return nextNode;
 }
 
 /* -------------- Methods for handling model changes --------------- */
+void Solver::handleChanges(long timeStep,
+        State const &currentState,
+        std::vector<std::unique_ptr<State>> &stateHistory) {
+    // Mark the states that need changing.
+    model_->update(timeStep, allStates_.get());
+
+    // Check if the model changes have invalidated our history...
+    if (changes::hasFlag(allStates_->getInfo(currentState)->changeFlags_,
+            ChangeFlags::DELETED)) {
+        debug::show_message(
+                "ERROR: Current simulation state deleted. Exiting..");
+        std::exit(1);
+    }
+    for (std::unique_ptr<State> &state2 : stateHistory) {
+        if (changes::hasFlag(allStates_->getInfo(*state2)->changeFlags_,
+                ChangeFlags::DELETED)) {
+            std::ostringstream message;
+            message << "ERROR: Impossible simulation history! Includes ";
+            message << *state2;
+            debug::show_message(message.str(), true, false);
+        }
+    }
+
+    // Apply the changes and reset the flagged states.
+    applyChanges();
+    allStates_->resetAffectedStates();
+}
+
 void Solver::applyChanges() {
     std::unordered_set<HistorySequence *> affectedSequences;
     for (StateInfo *stateInfo : allStates_->getAffectedStates()) {

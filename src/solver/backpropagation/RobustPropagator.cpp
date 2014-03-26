@@ -1,4 +1,4 @@
-#include "AveragePropagator.hpp"
+#include "RobustPropagator.hpp"
 
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
@@ -12,15 +12,15 @@
 #include "BackpropagationStrategy.hpp"
 
 namespace solver {
-AveragePropagator::AveragePropagator(Solver *solver) :
+RobustPropagator::RobustPropagator(Solver *solver) :
         AbstractBackpropagationStrategy(solver) {
 }
 
-void AveragePropagator::updateEnd(HistoryEntry *entry, bool undo) {
+void RobustPropagator::updateEnd(HistoryEntry *entry, bool undo) {
     updateEntry(entry, undo);
 }
 
-void AveragePropagator::updateEntry(HistoryEntry *entry, bool undo) {
+void RobustPropagator::updateEntry(HistoryEntry *entry, bool undo) {
     BeliefNode *node = entry->getAssociatedBeliefNode();
     Action const &action = *entry->getAction();
     Observation const &observation = *entry->getObservation();
@@ -51,7 +51,7 @@ void AveragePropagator::updateEntry(HistoryEntry *entry, bool undo) {
     actionMapping->updateTotalQValue(action, deltaQ);
 }
 
-void AveragePropagator::updateRoot(HistoryEntry *entry, bool /*undo*/) {
+void RobustPropagator::updateRoot(HistoryEntry *entry, bool /*undo*/) {
     entry->getAssociatedBeliefNode()->recalculateQValue();
 }
 } /* namespace solver */

@@ -29,5 +29,4 @@ void AbstractBackpropagationStrategy::propagate(HistorySequence *sequence, bool 
     // Update the root.
     updateRoot(sequence->getFirstEntry(), undo);
 }
-
 } /* namespace solver */

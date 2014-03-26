@@ -236,7 +236,7 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
     if (node.getNumberOfParticles() == 0) {
         os << "No particles!" << endl;
     } else {
-        os << node.getNumberOfParticles() << " particles;";
+        os << node.getNumberOfParticles() << " particles begin" << endl;
         int count = 0;
         for (auto it = node.particles_.begin(); it != node.particles_.end();
                 ++it) {

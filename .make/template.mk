@@ -49,7 +49,7 @@ $(OBJS_$(n)):| $(OBJDIR_$(n))
 # Use "build" as the default command
 $(n): build-$(n)
 # Add local targets as prerequisites for the grouped targets
-clean-all: clean-$(n)
+clean: clean-$(n)
 build-all: build-$(n)
 
 

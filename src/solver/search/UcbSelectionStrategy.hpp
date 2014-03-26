@@ -5,10 +5,10 @@
 #include "SearchStrategy.hpp"
 
 namespace solver {
-class RockSampleLegalUcbSelector: public SearchStrategy {
+class UcbSelectionStrategy: public SearchStrategy {
   public:
-    RockSampleLegalUcbSelector(Solver *solver, double explorationCoefficient);
-    virtual ~RockSampleLegalUcbSelector() = default;
+    UcbSelectionStrategy(Solver *solver, double explorationCoefficient);
+    virtual ~UcbSelectionStrategy() = default;
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
             HistorySequence *sequence, long maximumDepth) override;
@@ -16,9 +16,9 @@ class RockSampleLegalUcbSelector: public SearchStrategy {
     double explorationCoefficient_;
 };
 
-class RockSampleLegalUcbSelectorInstance: public AbstractSearchInstance {
+class UcbSelectionInstance: public AbstractSearchInstance {
   public:
-    RockSampleLegalUcbSelectorInstance(double explorationCoefficient,
+    UcbSelectionInstance(double explorationCoefficient,
             Solver *solver, HistorySequence *sequence,
             long maximumDepth);
 

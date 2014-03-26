@@ -1,7 +1,9 @@
 #include "discrete_observations.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <sstream>
 #include <vector>
 
@@ -15,10 +17,6 @@
 #include "ActionPool.hpp"
 #include "ObservationPool.hpp"
 #include "ObservationMapping.hpp"
-
-#include <iostream>
-#include <memory>
-#include <vector>
 
 #include "global.hpp"
 
@@ -59,6 +57,10 @@ BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
     return nodePtr;
 }
 
+long DiscreteObservationMap::getNChildren() const {
+    return childMap_.size();
+}
+
 void DiscreteObservationMap::updateVisitCount(Observation const &obs,
         long deltaNVisits) {
     childMap_[obs.copy()].visitCount += deltaNVisits;
@@ -87,19 +89,23 @@ void DiscreteObservationTextSerializer::saveObservationMapping(
         ObservationMapping const &map, std::ostream &os) {
     DiscreteObservationMap const &discMap =
             (static_cast<DiscreteObservationMap const &>(map));
-    os << discMap.totalVisitCount_ << " visits {";
-    bool isFirst = true;
+    os << discMap.getNChildren() << " observation children; ";
+    os << discMap.getTotalVisitCount() << " visits {" << std::endl;
+    std::vector<std::string> lines;
     for (DiscreteObservationMap::ChildMap::value_type const &entry : discMap.childMap_) {
-        if (isFirst) {
-            isFirst = false;
-        } else {
-            os << ", ";
-        }
-        saveObservation(entry.first.get(), os);
-        os << ":" << entry.second.childNode->getId();
-        os << " " << entry.second.visitCount << " v.";
+        std::ostringstream sstr;
+        sstr << "\t";
+        saveObservation(entry.first.get(), sstr);
+        sstr << " -> NODE " << entry.second.childNode->getId();
+        sstr << "; " << entry.second.visitCount << " visits";
+        sstr << std::endl;
+        lines.push_back(sstr.str());
     }
-    os << "}";
+    std::sort(lines.begin(), lines.end());
+    for (std::string line : lines) {
+        os << line;
+    }
+    os << "}" << std::endl;
 }
 
 std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObservationMapping(
@@ -108,33 +114,33 @@ std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObser
             solver_->getObservationPool()->createObservationMapping());
     DiscreteObservationMap &discMap =
                     (static_cast<DiscreteObservationMap &>(*map));
-    is >> discMap.totalVisitCount_;
+    std::string line;
+    std::getline(is, line);
     std::string tmpStr;
-    std::getline(is, tmpStr, '{');
-    std::getline(is, tmpStr, '}');
-    std::istringstream sstr(tmpStr);
+    std::istringstream totalsStream(line);
+    long nChildren;
+    totalsStream >> nChildren >> tmpStr >> tmpStr;
+    totalsStream >> discMap.totalVisitCount_;
 
-    std::string entry;
-    while (!sstr.eof()) {
-        std::getline(sstr, entry, ',');
+    for (int i = 0; i < nChildren; i++) {
+        std::getline(is, line);
+        std::istringstream entryStream(line);
+        std::unique_ptr<Observation> obs = loadObservation(entryStream);
 
-        std::istringstream sstr2(entry);
-        std::string tmpStr2;
-        std::getline(sstr2, tmpStr2, ':');
-        std::istringstream sstr3(tmpStr2);
-        std::unique_ptr<Observation> obs = loadObservation(sstr3);
-        if (obs == nullptr) {
-            break;
-        }
+        entryStream >> tmpStr >> tmpStr;
+        std::getline(entryStream, tmpStr, ';');
         long childId;
-        sstr2 >> childId;
+        std::istringstream(tmpStr) >> childId;
         long visitCount;
-        sstr2 >> visitCount;
+        entryStream >> visitCount;
+
+        // Create the child node and set its values correctly.
         BeliefNode *node = map->createBelief(*obs);
         solver_->getPolicy()->setNode(childId, node);
-
         discMap.childMap_[obs->copy()].visitCount = visitCount;
     }
+    // Read the last line for the closing brace.
+    std::getline(is, line);
     return std::move(map);
 }
 } /* namespace solver */

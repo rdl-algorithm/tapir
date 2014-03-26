@@ -44,4 +44,4 @@ iwyu-clean: iwyu-clean-all ;
 
 iwyu-clean-all:
 	@rm -rf iwyu-out
-clean-all: iwyu-clean-all
+clean: iwyu-clean-all

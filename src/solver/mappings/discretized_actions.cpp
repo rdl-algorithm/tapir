@@ -126,6 +126,13 @@ std::unique_ptr<Action> DiscretizedActionMap::getRandomUnvisitedAction() const {
     return model_->sampleAnAction(binsToTry_.get(randomIndex));
 }
 
+void DiscretizedActionMap::deleteUnvisitedAction(long binNumber) {
+    binsToTry_.remove(binNumber);
+}
+void DiscretizedActionMap::addUnvisitedAction(long binNumber) {
+    binsToTry_.add(binNumber);
+}
+
 long DiscretizedActionMap::getVisitCount(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
     return entries_[code]->getVisitCount();
@@ -143,12 +150,12 @@ void DiscretizedActionMap::updateVisitCount(Action const &action, long deltaNVis
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
     DiscretizedActionMapEntry &entry = *entries_[code];
     if (entry.visitCount_ == 0 && deltaNVisits > 0) {
-        binsToTry_.remove(code);
+        deleteUnvisitedAction(code);
     }
     entry.visitCount_ += deltaNVisits;
     totalVisitCount_ += deltaNVisits;
     if (entry.visitCount_ == 0 && deltaNVisits < 0) {
-        binsToTry_.add(code);
+        addUnvisitedAction(code);
     }
 
     if (entry.visitCount_ <= 0) {
@@ -231,7 +238,8 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         ActionMapping const &map, std::ostream &os) {
     DiscretizedActionMap const &discMap = (
             static_cast<DiscretizedActionMap const &>(map));
-    os << discMap.getNChildren() << " action children" << std::endl;
+    os << discMap.getNChildren() << " action children; ";
+    os << discMap.getTotalVisitCount() << " visits" << std::endl;
     os << "Untried (";
     for (std::vector<long>::const_iterator it = discMap.binsToTry_.begin();
             it != discMap.binsToTry_.end(); it++) {
@@ -241,10 +249,10 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         }
     }
     os << ")" << std::endl;
-    std::multimap<double, DiscretizedActionMapEntry const *> entriesByValue;
+    std::multimap<std::pair<double, double>, DiscretizedActionMapEntry const *> entriesByValue;
     for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : discMap.entries_) {
         if (entry != nullptr) {
-            entriesByValue.emplace(entry->meanQValue_, entry.get());
+            entriesByValue.emplace(std::make_pair(entry->meanQValue_, entry->binNumber_), entry.get());
         }
     }
 
@@ -253,10 +261,9 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         os << "Action " << entry.getBinNumber() << " (";
         saveAction(entry.getAction().get(), os);
         os << "): " << entry.getMeanQValue() << " from ";
-        os << entry.getVisitCount() << " visits ( ";
-        os << entry.getTotalQValue() << " ) ";
+        os << entry.getVisitCount() << " visits; total: ";
+        os << entry.getTotalQValue() << std::endl;
         save(*entry.getActionNode(), os);
-        os << std::endl;
     }
 }
 
@@ -270,11 +277,13 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     std::string line;
 
     std::getline(is, line);
-    std::istringstream(line) >> discMap.nChildren_;
+    std::string tmpStr;
+    std::istringstream sstr4(line);
+    sstr4 >> discMap.nChildren_ >> tmpStr >> tmpStr;
+    sstr4 >> discMap.totalVisitCount_;
 
     std::getline(is, line);
     std::istringstream sstr(line);
-    std::string tmpStr;
     std::getline(sstr, tmpStr, '(');
     std::getline(sstr, tmpStr, ')');
     if (tmpStr != "") {
@@ -289,6 +298,7 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     }
 
     for (long i = 0; i < discMap.nChildren_; i++) {
+        // The first line contains info from the mapping.
         std::getline(is, line);
         std::istringstream sstr2(line);
         long binNumber;
@@ -301,8 +311,10 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
         sstr2 >> meanQValue >> tmpStr;
         sstr2 >> visitCount >> tmpStr >> tmpStr;
         sstr2 >> totalQValue >> tmpStr;
+
+        // Now we read the action node.
         std::unique_ptr<ActionNode> actionNode = std::make_unique<ActionNode>();
-        load(*actionNode, sstr2);
+        load(*actionNode, is);
         std::unique_ptr<DiscretizedActionMapEntry> entry = std::make_unique<DiscretizedActionMapEntry>(
                 binNumber, &discMap, std::move(actionNode));
         entry->meanQValue_ = meanQValue;

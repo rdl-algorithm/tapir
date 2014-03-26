@@ -38,6 +38,12 @@ HistoryEntry::~HistoryEntry() {
 }
 
 /* ----------------- Simple getters ------------------- */
+double HistoryEntry::getReward() const {
+    return reward_;
+}
+double HistoryEntry::getCumulativeReward() const {
+    return rewardFromHere_;
+}
 State const *HistoryEntry::getState() const {
     return stateInfo_->getState();
 }

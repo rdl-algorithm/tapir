@@ -58,10 +58,11 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     virtual ~EnumeratedObservationMap() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationMap);
 
-    virtual long size() const;
-
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
+
+    virtual long getNChildren() const override;
+    virtual long size() const;
 
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
     virtual long getVisitCount(Observation const &obs) const override;
@@ -71,6 +72,7 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     ActionPool *actionPool_;
     std::vector<EnumeratedObservationMapEntry> children_;
 
+    long nChildren_;
     long totalVisitCount_;
 };
 

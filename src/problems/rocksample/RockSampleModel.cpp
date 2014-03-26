@@ -42,7 +42,8 @@
 #include "RockSampleAction.hpp"         // for RockSampleAction
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
 #include "RockSampleState.hpp"          // for RockSampleState
-#include "RockSampleLegalRolloutStrategy.hpp"
+
+#include "RockSampleLegalUcbSelector.hpp"
 
 using std::cout;
 using std::endl;
@@ -71,7 +72,7 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
     maxVal_(0) // depends on nRocks
          {
-    registerParser("legal", std::make_unique<RockSampleLegalParser>());
+    registerStrategyParser("rs-legal", std::make_unique<RockSampleLegalUcbSelectorParser>());
 
     // Read the map from the file.
     std::ifstream inFile;

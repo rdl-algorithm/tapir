@@ -56,6 +56,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     std::string cfgPath = vm["cfg"].as<std::string>();
     po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
     po::notify(vm);
+    load_overrides(vm);
 
     std::string polPath = vm["policy"].as<std::string>();
     bool hasChanges = vm["changes.hasChanges"].as<bool>();
@@ -168,10 +169,10 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     }
     os.close();
 
-    cout << nRuns << " runs completed.";
-    cout << "Mean reward: " << totalReward / nRuns;
-    cout << "Mean number of steps: " << totalNSteps / nRuns;
-    cout << "Mean time taken: " << totalTime / nRuns;
+    cout << nRuns << " runs completed." << endl;
+    cout << "Mean reward: " << totalReward / nRuns << endl;
+    cout << "Mean number of steps: " << totalNSteps / nRuns << endl;
+    cout << "Mean time taken: " << totalTime / nRuns << "ms" << endl;
     return 0;
 }
 

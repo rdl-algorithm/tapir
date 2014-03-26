@@ -151,8 +151,10 @@ void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
         HistoryEntry *entry = historyIterator->get();
         if (registering) {
             entry->registerNode(currentNode);
-            currentNode = policy->createOrGetChild(currentNode,
-                    *entry->action_, *entry->observation_);
+            if (entry->action_ != nullptr) {
+                currentNode = policy->createOrGetChild(currentNode,
+                                    *entry->action_, *entry->observation_);
+            }
         } else {
             entry->registerNode(nullptr);
         }

@@ -88,14 +88,14 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
 }
 
 std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
-    return std::make_unique<RockSampleLegalUcbSelector>(solver, 1.0);
+    return std::make_unique<UcbSelectionStrategy>(solver, 1.0);
 }
 
 std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
     return std::make_unique<RandomRolloutStrategy>(solver, 1);
 }
 
-std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
+std::unique_ptr<BackpropagationStrategy> Model::createBackpropagationStrategy(
             Solver *solver) {
     return std::make_unique<AveragePropagator>(solver);
 }

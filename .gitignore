@@ -15,11 +15,13 @@ builds/*
 build/*
 simulate
 solve
+stest
 
 # Logging outputs
 core
 *.log
 *.pol
+*.pol2
 *.m
 
 # backup files

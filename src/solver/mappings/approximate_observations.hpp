@@ -57,6 +57,8 @@ class ApproximateObservationMap: public solver::ObservationMapping {
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
 
+    virtual long getNChildren() const override;
+
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
     virtual long getVisitCount(Observation const &obs) const override;
     virtual long getTotalVisitCount() const override;

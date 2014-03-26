@@ -7,25 +7,25 @@
 
 namespace solver {
 
-RockSampleLegalUcbSelector::RockSampleLegalUcbSelector(Solver *solver,
+UcbSelectionStrategy::UcbSelectionStrategy(Solver *solver,
         double explorationCoefficient) :
         SearchStrategy(solver),
         explorationCoefficient_(explorationCoefficient) {
 }
 
-std::unique_ptr<SearchInstance> RockSampleLegalUcbSelector::createSearchInstance(
+std::unique_ptr<SearchInstance> UcbSelectionStrategy::createSearchInstance(
         HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<RockSampleLegalUcbSelectorInstance>(explorationCoefficient_,
+    return std::make_unique<UcbSelectionInstance>(explorationCoefficient_,
             solver_, sequence, maximumDepth);
 }
 
-RockSampleLegalUcbSelectorInstance::RockSampleLegalUcbSelectorInstance(double explorationCoefficient,
+UcbSelectionInstance::UcbSelectionInstance(double explorationCoefficient,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
     AbstractSearchInstance(solver, sequence, maximumDepth),
     explorationCoefficient_(explorationCoefficient) {
 }
 
-std::pair<SearchStatus, std::unique_ptr<Action>> RockSampleLegalUcbSelectorInstance::getStatusAndNextAction() {
+std::pair<SearchStatus, std::unique_ptr<Action>> UcbSelectionInstance::getStatusAndNextAction() {
     double bestValue = -std::numeric_limits<double>::infinity();
     std::unique_ptr<Action> bestAction = nullptr;
     ActionMapping *mapping = currentNode_->getMapping();

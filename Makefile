@@ -91,11 +91,9 @@ all: build-all
 build: build-solver
 
 .PHONY: clean clean-all
-clean: clean-all ;
-
 clean-all:
-	@echo Removing build folders
-	@rm -rfv $(BUILDDIR) | grep -qv "directory" ; true
+	@echo Removing all build folders!
+	@rm -rfv $(ROOT)/builds | grep "directory" ; true
 
 # Some stuff used for code beautification
 include .make/beautify-settings.mk

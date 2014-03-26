@@ -108,7 +108,7 @@ class Solver {
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
     Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
-    /** Improves the solution,searchStrategy_ with the root at the given node. */
+    /** Improves the solution with the root at the given node. */
     void improveSol(BeliefNode *startNode, long historiesPerStep,
             long maximumDepth);
     /** Handles particle depletion during the simulation. */
@@ -118,6 +118,10 @@ class Solver {
 
 
     /* -------------- Methods for handling model changes --------------- */
+    /** Does all the work required for changing the model. */
+    void handleChanges(long timeStep,
+            State const &currentState,
+            std::vector<std::unique_ptr<State>> &stateHistory);
     /** Applies the model changes that have been marked within the state pool */
     void applyChanges();
 

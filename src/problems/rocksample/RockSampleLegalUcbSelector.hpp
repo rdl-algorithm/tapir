@@ -1,33 +1,45 @@
-#ifndef SOLVER_ROCKSAMPLE_LEGALUCBSELECTIONSTRATEGY_HPP_
-#define SOLVER_ROCKSAMPLE_LEGALUCBSELECTIONSTRATEGY_HPP_
+#ifndef SOLVER_ROCKSAMPLE_LEGALUCBSELECTOR_HPP_
+#define SOLVER_ROCKSAMPLE_LEGALUCBSELECTOR_HPP_
 
 #include "solver/search/SearchStatus.hpp"
 #include "solver/search/SearchStrategy.hpp"
 
-namespace solver {
-class RockSampleLegalUcbSelector: public SearchStrategy {
+#include "problems/shared/parsers.hpp"
+
+namespace rocksample {
+class RockSampleLegalUcbSelector: public solver::SearchStrategy {
   public:
-    RockSampleLegalUcbSelector(Solver *solver, double explorationCoefficient);
+    RockSampleLegalUcbSelector(solver::Solver *solver, double explorationCoefficient);
     virtual ~RockSampleLegalUcbSelector() = default;
 
-    virtual std::unique_ptr<SearchInstance> createSearchInstance(
-            HistorySequence *sequence, long maximumDepth) override;
+    virtual std::unique_ptr<solver::SearchInstance> createSearchInstance(
+            solver::HistorySequence *sequence, long maximumDepth) override;
   private:
     double explorationCoefficient_;
 };
 
-class RockSampleLegalUcbSelectorInstance: public AbstractSearchInstance {
+class RockSampleLegalUcbSelectorInstance: public solver::AbstractSearchInstance {
   public:
     RockSampleLegalUcbSelectorInstance(double explorationCoefficient,
-            Solver *solver, HistorySequence *sequence,
+            solver::Solver *solver, solver::HistorySequence *sequence,
             long maximumDepth);
 
-    virtual std::pair<SearchStatus, std::unique_ptr<Action>>
+    virtual std::pair<solver::SearchStatus, std::unique_ptr<solver::Action>>
     getStatusAndNextAction() override;
   private:
     double explorationCoefficient_;
 };
 
+class RockSampleLegalUcbSelectorParser: public Parser<solver::SearchStrategy> {
+  public:
+    RockSampleLegalUcbSelectorParser() = default;
+    virtual ~RockSampleLegalUcbSelectorParser() = default;
+    virtual std::unique_ptr<solver::SearchStrategy> parse(
+            solver::Solver *solver,
+            ParserSet<solver::SearchStrategy> *allParser,
+            std::vector<std::string> args) override;
+};
+
 } /* namespace solver */
 
-#endif /* SOLVER_ROCKSAMPLE_LEGALUCBSELECTIONSTRATEGY_HPP_ */
+#endif /* SOLVER_ROCKSAMPLE_LEGALUCBSELECTOR_HPP_ */

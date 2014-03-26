@@ -46,6 +46,10 @@ class HistoryEntry {
     _NO_COPY_OR_MOVE(HistoryEntry);
 
     /* ----------------- Simple getters ------------------- */
+    /** Returns the immediate reward for this entry. */
+    double getReward() const;
+    /** Returns the cumulative discounted reward, starting at this entry. */
+    double getCumulativeReward() const;
     /** Returns the state associated with this history entry. */
     State const *getState() const;
     /** Returns the action associated with this history entry. */

@@ -8,6 +8,18 @@
 
 namespace po = boost::program_options;
 
+void load_overrides(po::variables_map &vm) {
+    if (!vm["sel"].empty()) {
+        vm.at("ABT.selectionStrategy") = vm["sel"];
+    }
+    if (!vm["rol"].empty()) {
+        vm.at("ABT.rolloutStrategy") = vm["rol"];
+    }
+    if (!vm["bp"].empty()) {
+        vm.at("ABT.backpropagationStrategy") = vm["bp"];
+    }
+}
+
 class ProgramOptions {
   public:
     virtual ~ProgramOptions() = default;
@@ -54,6 +66,12 @@ class ProgramOptions {
     virtual po::options_description getABTOptions() {
         po::options_description abt("ABT settings");
         abt.add_options()
+                ("sel", po::value<std::string>(),
+                        "overriding alias for ABT.selectionStrategy")
+                ("rol", po::value<std::string>(),
+                        "overriding alias for ABT.rolloutStrategy")
+                ("bp", po::value<std::string>(),
+                        "overriding alias for ABT.backpropagationStrategy")
                 ("ABT.nParticles", po::value<unsigned long>(),
                         "default number of particles per belief - this number"
                         " will be generated if particle depletion occurs.")
@@ -61,10 +79,12 @@ class ProgramOptions {
                         "the number of episodes to sample for each step.")
                 ("ABT.maximumDepth", po::value<double>(),
                         "maximum Depth allowed before search stops.")
-                ("ABT.searchStrategy", po::value<std::string>(),
+                ("ABT.selectionStrategy", po::value<std::string>(),
                         "the search strategy to use")
                 ("ABT.rolloutStrategy", po::value<std::string>(),
                         "the rollout strategy to use")
+                ("ABT.backpropagationStrategy", po::value<std::string>(),
+                        "the backpropagation strategy to use")
                 ("ABT.maxObservationDistance", po::value<double>(),
                         "Maximum distance between observations to group them"
                         " together - only applicable if approximate"

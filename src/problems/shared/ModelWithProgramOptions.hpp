@@ -7,7 +7,7 @@
 
 #include "solver/abstract-problem/Model.hpp"             // for Model
 
-#include "strategy_parsers.hpp"
+#include "parsers.hpp"
 
 namespace po = boost::program_options;
 
@@ -19,16 +19,21 @@ public:
                 nParticles_(vm["ABT.nParticles"].as<unsigned long>()),
                 historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
                 maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
-                allParser_(),
-                searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
+                strategyParsers_(),
+                backpropParsers_(),
+                selectionStrategyString_(vm["ABT.selectionStrategy"].as<std::string>()),
                 rolloutStrategyString_(vm["ABT.rolloutStrategy"].as<std::string>()),
+                backpropagationStrategyString_(vm["ABT.backpropagationStrategy"].as<std::string>()),
                 hasColorOutput_(vm["color"].as<bool>()),
                 hasVerboseOutput_(vm["verbose"].as<bool>()),
                 heuristicEnabled_(vm["heuristic.enabled"].as<bool>()) {
-        registerParser("ucb", std::make_unique<UcbSearchParser>());
-        registerParser("nn", std::make_unique<NnRolloutParser>());
-        registerParser("random", std::make_unique<RandomRolloutParser>());
-        registerParser("exp3", std::make_unique<Exp3Parser>());
+        registerStrategyParser("ucb", std::make_unique<UcbSearchParser>());
+        registerStrategyParser("nn", std::make_unique<NnRolloutParser>());
+        registerStrategyParser("random", std::make_unique<RandomRolloutParser>());
+        registerStrategyParser("exp3", std::make_unique<Exp3Parser>());
+
+        registerBackpropagationParser("avg", std::make_unique<AveragePropagatorParser>());
+        registerBackpropagationParser("max", std::make_unique<MaximumPropagatorParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -61,21 +66,25 @@ public:
     virtual bool heuristicEnabled() {
         return heuristicEnabled_;
     }
-    virtual void registerParser(std::string name,
-            std::unique_ptr<StrategyParser> parser) {
-        allParser_.addParser(name, std::move(parser));
+    virtual void registerStrategyParser(std::string name,
+            std::unique_ptr<Parser<solver::SearchStrategy>> parser) {
+        strategyParsers_.addParser(name, std::move(parser));
     }
-    virtual std::unique_ptr<solver::SearchStrategy> parseStrategy(
-            solver::Solver *solver, std::string strategyString) {
-        return allParser_.parseStrategy(solver, strategyString);
+    virtual void registerBackpropagationParser(std::string name,
+            std::unique_ptr<Parser<solver::BackpropagationStrategy>> parser) {
+        backpropParsers_.addParser(name, std::move(parser));
     }
     virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(
             solver::Solver *solver) override {
-        return parseStrategy(solver, searchStrategyString_);
+        return strategyParsers_.parse(solver, selectionStrategyString_);
     }
     virtual std::unique_ptr<solver::SearchStrategy> createRolloutStrategy(
             solver::Solver *solver) override {
-        return parseStrategy(solver, rolloutStrategyString_);
+        return strategyParsers_.parse(solver, rolloutStrategyString_);
+    }
+    virtual std::unique_ptr<solver::BackpropagationStrategy> createBackpropagationStrategy(
+            solver::Solver *solver) override {
+        return backpropParsers_.parse(solver, backpropagationStrategyString_);
     }
 
 private:
@@ -89,10 +98,12 @@ private:
     long historiesPerStep_;
     long maximumDepth_;
 
-    AllStrategiesParser allParser_;
+    ParserSet<solver::SearchStrategy> strategyParsers_;
+    ParserSet<solver::BackpropagationStrategy> backpropParsers_;
 
-    std::string searchStrategyString_;
+    std::string selectionStrategyString_;
     std::string rolloutStrategyString_;
+    std::string backpropagationStrategyString_;
 
     bool hasColorOutput_;
     bool hasVerboseOutput_;
