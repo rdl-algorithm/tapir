@@ -51,7 +51,8 @@ DiscretizedActionMap::DiscretizedActionMap(ObservationPool *observationPool,
                 nChildren_(0),
                 binsToTry_(),
                 bestBinNumber_(-1),
-                bestMeanQValue_(-std::numeric_limits<double>::infinity()),
+                highestQValue_(-std::numeric_limits<double>::infinity()),
+                robustQValue_(-std::numeric_limits<double>::infinity()),
                 totalVisitCount_(0) {
     for (long i = 0; i < numberOfBins_; i++) {
         binsToTry_.add(i);
@@ -102,10 +103,12 @@ std::unique_ptr<Action> DiscretizedActionMap::getBestAction() const {
     }
     return model_->sampleAnAction(bestBinNumber_);
 }
-double DiscretizedActionMap::getBestMeanQValue() const {
-    return bestMeanQValue_;
+double DiscretizedActionMap::getMaxQValue() const {
+    return highestQValue_;
 }
-
+double DiscretizedActionMap::getRobustQValue() const {
+    return robustQValue_;
+}
 
 bool DiscretizedActionMap::hasUnvisitedActions() const {
     return binsToTry_.size() > 0;
@@ -174,9 +177,12 @@ void DiscretizedActionMap::updateTotalQValue(Action const &action, double deltaQ
         entry.meanQValue_ = entry.totalQValue_ / entry.visitCount_;
     }
 }
-void DiscretizedActionMap::updateQValue() {
+void DiscretizedActionMap::update() {
     bestBinNumber_ = -1;
-    bestMeanQValue_ = -std::numeric_limits<double>::infinity();
+    highestQValue_ = -std::numeric_limits<double>::infinity();
+
+    long highestVisitCount = -1;
+    robustQValue_ = -std::numeric_limits<double>::infinity();
     for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : entries_) {
         if (entry == nullptr) {
             continue;
@@ -185,9 +191,16 @@ void DiscretizedActionMap::updateQValue() {
             continue;
         }
         double meanQValue = entry->meanQValue_;
-        if (bestMeanQValue_ < meanQValue) {
-            bestMeanQValue_ = meanQValue;
-            bestBinNumber_ = entry->getBinNumber();
+        if (meanQValue > highestQValue_) {
+            highestQValue_ = meanQValue;
+            bestBinNumber_ = entry->binNumber_;
+        }
+
+        if (entry->visitCount_ > highestVisitCount) {
+            highestVisitCount = entry->visitCount_;
+            robustQValue_ = meanQValue;
+        } else if (entry->visitCount_ == highestVisitCount && meanQValue > robustQValue_) {
+            robustQValue_ = meanQValue;
         }
     }
 }

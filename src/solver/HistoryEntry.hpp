@@ -10,10 +10,6 @@
 #include "abstract-problem/TransitionParameters.hpp"
 #include "changes/ChangeFlags.hpp"              // for ChangeFlags
 
-namespace nav2d {
-class Nav2DSpcHistoryCorrector;
-}
-
 #include "global.hpp"
 
 namespace solver {
@@ -46,6 +42,8 @@ class HistoryEntry {
     _NO_COPY_OR_MOVE(HistoryEntry);
 
     /* ----------------- Simple getters ------------------- */
+    /** Returns the id of this entry (0 = first entry in the sequence). */
+    long getId() const;
     /** Returns the immediate reward for this entry. */
     double getReward() const;
     /** Returns the cumulative discounted reward, starting at this entry. */

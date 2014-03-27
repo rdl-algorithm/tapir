@@ -38,10 +38,12 @@ public:
     /* -------------- Retrieval of general statistics. ---------------- */
     /** Returns the total number of times children have been visited. */
     virtual long getTotalVisitCount() const = 0;
-    /** Chooses the action with the best expected value */
+    /** Chooses the action with the highest q-value. */
     virtual std::unique_ptr<Action> getBestAction() const = 0;
-    /** Returns the best q-value */
-    virtual double getBestMeanQValue() const = 0;
+    /** Returns the best q-value. */
+    virtual double getMaxQValue() const = 0;
+    /** Returns the robust q-value. */
+    virtual double getRobustQValue() const = 0;
 
     /* ------------ Methods for retrieving unvisited actions -------------- */
     /** Returns true iff there is another action that has not been visited. */
@@ -66,8 +68,8 @@ public:
      * given amount to the total.
      */
     virtual void updateTotalQValue(Action const &action, double deltaQ)= 0;
-    /** Recalculates which action is optimal. */
-    virtual void updateQValue() = 0;
+    /** Updates the optimal q-value. */
+    virtual void update() = 0;
 };
 
 class ActionMappingEntry {

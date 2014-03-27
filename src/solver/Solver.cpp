@@ -126,6 +126,12 @@ double Solver::runSim(long nSteps, long historiesPerStep,
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
         std::stringstream prevStream;
         if (model_->hasVerboseOutput()) {
+            cout << endl << endl << "t-" << timeStep << endl;
+            cout << "State: " << *currentState << endl;
+            cout << "Heuristic Value: " << model_->getHeuristicValue(*currentState) << endl;
+            cout << "Belief #" << currNode->getId() << endl;
+            model_->drawSimulationState(currNode, *currentState, cout);
+
             prevStream << "Before:" << endl;
             printBelief(currNode, prevStream);
         }
@@ -156,11 +162,6 @@ double Solver::runSim(long nSteps, long historiesPerStep,
         *totImpTime += impSolTimeEnd - impSolTimeStart;
 
         if (model_->hasVerboseOutput()) {
-            cout << endl << endl << "t-" << timeStep << endl;
-            cout << "State: " << *currentState << endl;
-            cout << "Heuristic Value: " << model_->getHeuristicValue(*currentState) << endl;
-            cout << "Belief #" << currNode->getId() << endl;
-            model_->drawSimulationState(currNode, *currentState, cout);
 
             std::stringstream newStream;
             newStream << "After:" << endl;
@@ -189,7 +190,7 @@ double Solver::runSim(long nSteps, long historiesPerStep,
 
         if (model_->hasVerboseOutput()) {
             if (result.isTerminal) {
-                cout << " Reached a terminal state!" << endl;
+                cout << "Reached a terminal state!" << endl;
             }
             cout << "Action: " << *result.action << endl;
             cout << "Transition: ";
@@ -510,7 +511,9 @@ void Solver::applyChanges() {
 /* ------------------ Display methods  ------------------- */
 void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     os << belief->getQValue();
-    os << " from " << belief->getNumberOfParticles() << " p." << endl;
+    os << " from " << belief->getNumberOfParticles() << " p.";
+    os << "  with " << belief->getNumberOfStartingSequences() << " starts.";
+    os << endl;
     os << "Action children: " << endl;
     std::multimap<double, solver::ActionMappingEntry const *> actionValues;
     for (solver::ActionMappingEntry const *entry : belief->getMapping()->getChildEntries()) {

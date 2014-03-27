@@ -112,7 +112,7 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
     for (int i = 0; i < enumMap.size(); i++) {
         EnumeratedObservationMapEntry const &entry = enumMap.children_[i];
         if (entry.childNode != nullptr) {
-            // os << "";
+            os << "\t";
             saveObservation(enumMap.allObservations_[i].get(), os);
             os << " -> NODE " << entry.childNode->getId();
             os << "; " << entry.visitCount << " visits";

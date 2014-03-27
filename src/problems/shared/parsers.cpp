@@ -6,6 +6,7 @@
 
 #include "solver/backpropagation/AveragePropagator.hpp"
 #include "solver/backpropagation/MaximumPropagator.hpp"
+#include "solver/backpropagation/RobustPropagator.hpp"
 
 #include "solver/search/SearchStrategy.hpp"
 #include "solver/search/MultipleStrategiesExp3.hpp"
@@ -110,4 +111,11 @@ std::unique_ptr<solver::BackpropagationStrategy> MaximumPropagatorParser::parse(
         ParserSet<solver::BackpropagationStrategy> */*allParser*/,
         std::vector<std::string> /*args*/) {
     return std::make_unique<solver::MaximumPropagator>(solver);
+}
+
+std::unique_ptr<solver::BackpropagationStrategy> RobustPropagatorParser::parse(
+        solver::Solver *solver,
+        ParserSet<solver::BackpropagationStrategy> */*allParser*/,
+        std::vector<std::string> /*args*/) {
+    return std::make_unique<solver::RobustPropagator>(solver);
 }

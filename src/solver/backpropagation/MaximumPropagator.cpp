@@ -13,99 +13,82 @@
 
 namespace solver {
 MaximumPropagator::MaximumPropagator(Solver *solver) :
-        AbstractBackpropagationStrategy(solver) {
-}
-
-void MaximumPropagator::updateEnd(HistoryEntry *entry, bool undo) {
-    BeliefNode *node = entry->getAssociatedBeliefNode();
-    Action const &action = *entry->getAction();
-    Observation const &observation = *entry->getObservation();
-
-    ActionMapping *actionMapping = node->getMapping();
-    ActionNode *actionNode = actionMapping->getActionNode(action);
-    ObservationMapping *obsMapping = actionNode->getMapping();
-
-    long deltaNVisits;
-    if (undo) {
-        deltaNVisits = -1;
-    } else {
-        deltaNVisits = 1;
-    }
-
-    // Update the visit count of the observation.
-    obsMapping->updateVisitCount(observation, deltaNVisits);
-
-    // Now we update the action mapping.
-    actionMapping->updateVisitCount(action, deltaNVisits);
-    double deltaQ = entry->getCumulativeReward();
-    if (undo) {
-        deltaQ = -deltaQ;
-    }
-    actionMapping->updateTotalQValue(action, deltaQ);
+        AbstractBackpropagationStrategy(solver),
+        deltaQ_(0),
+        isSecondLastEntry_(false) {
 }
 
 void MaximumPropagator::updateEntry(HistoryEntry *entry, bool undo) {
-    BeliefNode *node = entry->getAssociatedBeliefNode();
-    Action const &action = *entry->getAction();
-    Observation const &observation = *entry->getObservation();
-
-    ActionMapping *actionMapping = node->getMapping();
-    ActionNode *actionNode = actionMapping->getActionNode(action);
-
-    ObservationMapping *obsMapping = actionNode->getMapping();
-    BeliefNode *childNode = obsMapping->getBelief(observation);
-
-    long deltaNVisits;
-    if (undo) {
-        deltaNVisits = -1;
-    } else {
-        deltaNVisits = 1;
+    // If the entry is the last in the sequence, we don't update the node.
+    if (entry->getAction() == nullptr) {
+        deltaQ_ = 0;
+        isSecondLastEntry_ = true;
+        return;
     }
 
-    // Retrieve the visit counts and discount factor.
-    long newVisitCount = childNode->getMapping()->getTotalVisitCount();
-    long oldVisitCount = newVisitCount - deltaNVisits;
+    // Derived values.
+    BeliefNode *currentNode = entry->getAssociatedBeliefNode();
+    Action const &action = *entry->getAction();
+    ActionMapping *actionMap = currentNode->getMapping();
+    ObservationMapping *obsMap = actionMap->getActionNode(action)->getMapping();
+    long deltaNVisits = undo ? -1 : 1;
     double discountFactor = solver_->getModel()->getDiscountFactor();
 
-    // Calculated change in the total q-value of the action.
-    long deltaQ = 0;
+    // We base our visit counts off the number of visits from this node
+    // that did not begin in this node.
+    long oldVisitCount = actionMap->getTotalVisitCount();
+    oldVisitCount -= currentNode->getNumberOfStartingSequences();
+    long newVisitCount = oldVisitCount + deltaNVisits;
 
-    // Calculate the previous contribution to the q-value.
-    double oldChildQ = childNode->getQValue();
+    // Update the visit counts for the current node.
+    actionMap->updateVisitCount(action, deltaNVisits);
+    obsMap->updateVisitCount(*entry->getObservation(), deltaNVisits);
+
+    // This will hold the effect of the changes to the current node on its parent.
+    double parentDeltaQ = 0;
+
+    // Remove the old contribution, if any
     if (oldVisitCount > 0) {
-        // Remove the value previously associated with the child's Q-value.
-        deltaQ = -discountFactor * oldVisitCount * oldChildQ;
-        if (!std::isfinite(oldChildQ)) {
-            debug::show_message("ERROR: Non-finite old Q!");
+        double q = actionMap->getMaxQValue();
+        if (std::isfinite(q)) {
+            parentDeltaQ -= discountFactor * oldVisitCount * q;
+        } else {
+            debug::show_message("ERROR: non-finite old Q!");
         }
     }
 
-    // Update the child's q-value calculation and the observation visit count.
-    childNode->recalculateQValue();
-    obsMapping->updateVisitCount(observation, deltaNVisits);
-
-    // Calculate the new contribution to the q-value.
-    double newChildQ = childNode->getQValue();
-    if (newVisitCount > 0) {
-        deltaQ += discountFactor * newVisitCount * newChildQ;
-        if (!std::isfinite(newChildQ)) {
-            debug::show_message("ERROR: Non-finite new Q!");
-        }
-    }
-
-    // Now add in the contribution from the immediate reward
-    if (undo) {
-        deltaQ -= entry->getReward();
+    // Include the immediate reward
+    double immediateQ;
+    if (isSecondLastEntry_) {
+        // The second-last entry should also include the heuristic value
+        immediateQ = entry->getCumulativeReward();
     } else {
-        deltaQ += entry->getReward();
+        immediateQ = entry->getReward();
+    }
+    if (undo) {
+        deltaQ_ -= immediateQ;
+    } else {
+        deltaQ_ += immediateQ;
     }
 
-    // Now update the viist count and q-value for the action.
-    actionMapping->updateVisitCount(action, deltaNVisits);
-    actionMapping->updateTotalQValue(action, deltaQ);
-}
-void MaximumPropagator::updateRoot(HistoryEntry *entry, bool /*undo*/) {
-    // Update the q-value of the root.
-    entry->getAssociatedBeliefNode()->recalculateQValue();
+    // Update the mapping and force it to recalculate.
+    actionMap->updateTotalQValue(action, deltaQ_);
+    actionMap->update();
+
+    // Add the new contribution, if any.
+    if (newVisitCount > 0) {
+        double q = actionMap->getMaxQValue();
+        if (std::isfinite(q)) {
+            parentDeltaQ += discountFactor * newVisitCount * q;
+        } else {
+            debug::show_message("ERROR: non-finite new Q!");
+        }
+    }
+
+    // Store the calculated value.
+    deltaQ_ = parentDeltaQ;
+
+    // If we were, we're not in the second-last entry any more.
+    isSecondLastEntry_ = false;
 }
 } /* namespace solver */

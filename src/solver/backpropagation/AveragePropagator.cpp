@@ -16,42 +16,31 @@ AveragePropagator::AveragePropagator(Solver *solver) :
         AbstractBackpropagationStrategy(solver) {
 }
 
-void AveragePropagator::updateEnd(HistoryEntry *entry, bool undo) {
-    updateEntry(entry, undo);
-}
-
 void AveragePropagator::updateEntry(HistoryEntry *entry, bool undo) {
-    BeliefNode *node = entry->getAssociatedBeliefNode();
-    Action const &action = *entry->getAction();
-    Observation const &observation = *entry->getObservation();
-
-    ActionMapping *actionMapping = node->getMapping();
-    ActionNode *actionNode = actionMapping->getActionNode(action);
-
-    ObservationMapping *obsMapping = actionNode->getMapping();
-    BeliefNode *childNode = obsMapping->getBelief(observation);
-
-    long deltaNVisits;
-    if (undo) {
-        deltaNVisits = -1;
-    } else {
-        deltaNVisits = 1;
+    // If the entry is the last in the sequence, we don't update.
+    if (entry->getAction() == nullptr) {
+        return;
     }
 
-    // Update the child's q-value calculation and the visit count.
-    childNode->recalculateQValue();
-    obsMapping->updateVisitCount(observation, deltaNVisits);
+    // Derived values
+    Action const &action = *entry->getAction();
+    ActionMapping *actionMapping = entry->getAssociatedBeliefNode()->getMapping();
+    long deltaNVisits = undo ? -1 : 1;
 
-    // Now we update the action mapping.
+    // Update the visit counts for the current node.
     actionMapping->updateVisitCount(action, deltaNVisits);
+    actionMapping->getActionNode(action)->getMapping()->updateVisitCount(
+            *entry->getObservation(), deltaNVisits);
+
+    // Calculate the q-value based on the cumulative reward for this sequence,
+    // from this point onward.
     double deltaQ = entry->getCumulativeReward();
     if (undo) {
         deltaQ = -deltaQ;
     }
-    actionMapping->updateTotalQValue(action, deltaQ);
-}
 
-void AveragePropagator::updateRoot(HistoryEntry *entry, bool /*undo*/) {
-    entry->getAssociatedBeliefNode()->recalculateQValue();
+    // Update the mapping and force it to recalculate.
+    actionMapping->updateTotalQValue(action, deltaQ);
+    actionMapping->update();
 }
 } /* namespace solver */

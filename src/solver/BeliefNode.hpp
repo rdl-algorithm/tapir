@@ -66,6 +66,8 @@ class BeliefNode {
     double getQValue() const;
     /** Returns the number of particles in this node. */
     long getNumberOfParticles() const;
+    /** Returns the number of sequences starting from this node. */
+    long getNumberOfStartingSequences() const;
     /** Returns a vector containing all of the states contained in node. */
     std::vector<State const *> getStates() const;
     /** Returns the time at which the last change occurred. */
@@ -91,6 +93,8 @@ private:
 
     /** The set of particles belonging to this node. */
     abt::RandomAccessSet<HistoryEntry *> particles_;
+    /** The number of sequences that start at this node. */
+    long nStartingSequences_;
     /** The time at which the last particle modification occurred. */
     double tLastChange_;
 

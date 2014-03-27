@@ -9,10 +9,10 @@ class RobustPropagator : public AbstractBackpropagationStrategy {
 public:
     RobustPropagator(Solver *solver);
     virtual ~RobustPropagator() = default;
-
-    virtual void updateEnd(HistoryEntry *entry, bool undo) override;
     virtual void updateEntry(HistoryEntry *entry, bool undo) override;
-    virtual void updateRoot(HistoryEntry *entry, bool undo) override;
+private:
+    double deltaQ_;
+    bool isSecondLastEntry_;
 };
 
 } /* namespace solver */

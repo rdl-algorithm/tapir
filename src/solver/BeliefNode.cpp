@@ -32,6 +32,7 @@ BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap) :
 BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
     id_(id),
     particles_(),
+    nStartingSequences_(0),
     tLastChange_(-1),
     actionMap_(std::move(actionMap)) {
 }
@@ -44,11 +45,17 @@ BeliefNode::~BeliefNode() {
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
     tLastChange_ = abt::clock_ms();
     particles_.add(newHistEntry);
+    if (newHistEntry->getId() == 0) {
+        nStartingSequences_++;
+    }
 }
 
 void BeliefNode::removeParticle(HistoryEntry *histEntry) {
     tLastChange_ = abt::clock_ms();
     particles_.remove(histEntry);
+    if (histEntry->getId() == 0) {
+        nStartingSequences_--;
+    }
 }
 
 HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
@@ -59,7 +66,7 @@ HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
 
 /* ----------------- Q-value update methods. ------------------- */
 void BeliefNode::recalculateQValue() {
-    actionMap_->updateQValue();
+    actionMap_->update();
 }
 
 /* ----------------- Useful calculations ------------------- */
@@ -92,10 +99,13 @@ std::unique_ptr<Action> BeliefNode::getBestAction() const {
     return actionMap_->getBestAction();
 }
 double BeliefNode::getQValue() const {
-    return actionMap_->getBestMeanQValue();
+    return actionMap_->getMaxQValue();
 }
 long BeliefNode::getNumberOfParticles() const {
     return particles_.size();
+}
+long BeliefNode::getNumberOfStartingSequences() const {
+    return nStartingSequences_;
 }
 std::vector<State const *> BeliefNode::getStates() const {
     std::vector<State const *> states;

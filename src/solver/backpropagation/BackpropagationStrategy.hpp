@@ -28,16 +28,8 @@ public:
     virtual ~AbstractBackpropagationStrategy() = default;
     _NO_COPY_OR_MOVE(AbstractBackpropagationStrategy);
 
-    /** Updates the backpropagation w.r.t. the given entry. */
+    /** Updates w.r.t. an individual history entry. */
     virtual void updateEntry(HistoryEntry *entry, bool undo) = 0;
-    /** Updates the backpropagation w.r.t. the second-last entry in the
-     * sequence - the final entry is not directly used.
-     */
-    virtual void updateEnd(HistoryEntry *entry, bool undo) = 0;
-    /** Updates the calculations at the root of the sequence, after propagation
-     * is complete.
-     */
-    virtual void updateRoot(HistoryEntry *entry, bool undo) = 0;
 
     virtual void propagate(HistorySequence *sequence, bool undo = false);
 protected:

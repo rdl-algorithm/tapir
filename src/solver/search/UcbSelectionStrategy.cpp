@@ -26,12 +26,13 @@ UcbSelectionInstance::UcbSelectionInstance(double explorationCoefficient,
 }
 
 std::pair<SearchStatus, std::unique_ptr<Action>> UcbSelectionInstance::getStatusAndNextAction() {
-    double bestValue = -std::numeric_limits<double>::infinity();
-    std::unique_ptr<Action> bestAction = nullptr;
     ActionMapping *mapping = currentNode_->getMapping();
     if (mapping->hasUnvisitedActions()) {
         return std::make_pair(SearchStatus::REACHED_ROLLOUT_NODE, nullptr);
     }
+
+    double bestValue = -std::numeric_limits<double>::infinity();
+    std::unique_ptr<Action> bestAction = nullptr;
     for (ActionMappingEntry const *entry : mapping->getChildEntries()) {
         double tmpValue = entry->getMeanQValue() + (explorationCoefficient_ * std::sqrt(
                         std::log(mapping->getTotalVisitCount() / entry->getVisitCount())));

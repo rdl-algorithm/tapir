@@ -41,6 +41,7 @@ class RockSampleObservation;
 class RockSampleModel : virtual public ModelWithProgramOptions,
     virtual public solver::ModelWithEnumeratedActions,
     virtual public solver::ModelWithEnumeratedObservations {
+friend class RockSampleMdpSolver;
   public:
     RockSampleModel(RandomGenerator *randGen, po::variables_map vm);
     ~RockSampleModel() = default;

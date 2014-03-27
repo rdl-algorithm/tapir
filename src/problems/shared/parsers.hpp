@@ -7,7 +7,6 @@
 
 #include "solver/search/SearchStrategy.hpp"
 
-
 template <typename TargetType> class Parser;
 
 std::pair<std::string, std::vector<std::string>> split_function(std::string text);
@@ -117,6 +116,16 @@ class MaximumPropagatorParser : public Parser<solver::BackpropagationStrategy> {
 public:
     MaximumPropagatorParser() = default;
     ~MaximumPropagatorParser() = default;
+    virtual std::unique_ptr<solver::BackpropagationStrategy> parse(
+            solver::Solver *solver,
+            ParserSet<solver::BackpropagationStrategy> *allParser,
+            std::vector<std::string> args) override;
+};
+
+class RobustPropagatorParser : public Parser<solver::BackpropagationStrategy> {
+public:
+    RobustPropagatorParser() = default;
+    ~RobustPropagatorParser() = default;
     virtual std::unique_ptr<solver::BackpropagationStrategy> parse(
             solver::Solver *solver,
             ParserSet<solver::BackpropagationStrategy> *allParser,

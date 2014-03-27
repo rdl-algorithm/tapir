@@ -38,6 +38,9 @@ HistoryEntry::~HistoryEntry() {
 }
 
 /* ----------------- Simple getters ------------------- */
+long HistoryEntry::getId() const {
+    return entryId_;
+}
 double HistoryEntry::getReward() const {
     return reward_;
 }

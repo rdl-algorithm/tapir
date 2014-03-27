@@ -34,6 +34,7 @@ public:
 
         registerBackpropagationParser("avg", std::make_unique<AveragePropagatorParser>());
         registerBackpropagationParser("max", std::make_unique<MaximumPropagatorParser>());
+        registerBackpropagationParser("rob", std::make_unique<RobustPropagatorParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
