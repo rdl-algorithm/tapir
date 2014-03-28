@@ -10,8 +10,8 @@ AbstractBackpropagationStrategy::AbstractBackpropagationStrategy(Solver *solver)
 }
 
 void AbstractBackpropagationStrategy::propagate(HistorySequence *sequence, bool undo) {
-    for (std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = sequence->histSeq_.rbegin();
-            itHist != sequence->histSeq_.rend(); itHist++) {
+    for (std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = sequence->entrySequence_.rbegin();
+            itHist != sequence->entrySequence_.rend(); itHist++) {
         HistoryEntry *entry = itHist->get();
         updateEntry(entry, undo);
         entry->hasBeenBackedUp_ = !undo;

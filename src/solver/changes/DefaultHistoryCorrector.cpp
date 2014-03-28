@@ -23,9 +23,9 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
     }
     bool hitTerminalState = false;
     std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = (
-        sequence->histSeq_.begin() + sequence->startAffectedIdx_);
+        sequence->entrySequence_.begin() + sequence->startAffectedIdx_);
     std::vector<std::unique_ptr<HistoryEntry>>::iterator firstUnchanged = (
-            sequence->histSeq_.begin() + sequence->endAffectedIdx_ + 1);
+            sequence->entrySequence_.begin() + sequence->endAffectedIdx_ + 1);
     for (; historyIterator != firstUnchanged; historyIterator++) {
         HistoryEntry *entry = historyIterator->get();
         State const *state = entry->getState();
@@ -83,13 +83,13 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
     }
     // If we hit a terminal state before the end of the sequence,
     // we must remove the remaining entries in the sequence.
-    if (hitTerminalState && historyIterator != sequence->histSeq_.end()) {
+    if (hitTerminalState && historyIterator != sequence->entrySequence_.end()) {
         std::vector<std::unique_ptr<HistoryEntry>>::iterator firstDeletedEntry =
                 historyIterator;
-        for (; historyIterator != sequence->histSeq_.end(); historyIterator++) {
+        for (; historyIterator != sequence->entrySequence_.end(); historyIterator++) {
             (*historyIterator)->registerState(nullptr);
         }
-        sequence->histSeq_.erase(firstDeletedEntry, sequence->histSeq_.end());
+        sequence->entrySequence_.erase(firstDeletedEntry, sequence->entrySequence_.end());
     }
 }
 

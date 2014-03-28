@@ -53,10 +53,9 @@ int main(int argc, char const *argv[]) {
     randGen.discard(10);
 
     RockSampleModel model(&randGen, vm);
-    RockSampleMdpSolver solver(&model);
-    solver.solve();
+    RockSampleMdpSolver *solver = model.getMdpSolver();
     std::ofstream outFile;
     outFile.open("mdp-solution.txt");
-    solver.save(outFile);
+    solver->save(outFile);
     outFile.close();
 }

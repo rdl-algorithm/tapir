@@ -151,13 +151,13 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> entry.rewardFromHere_;
     entry.hasBeenBackedUp_ = true;
-    entry.registerState(solver_->allStates_->getInfoById(stateId));
+    entry.registerState(solver_->statePool_->getInfoById(stateId));
 }
 
 void TextSerializer::save(HistorySequence const &seq, std::ostream &os) {
-    os << "HistorySequence " << seq.id_ << " - length " << seq.histSeq_.size()
+    os << "HistorySequence " << seq.id_ << " - length " << seq.entrySequence_.size()
        << " at depth " << seq.startDepth_ << endl;
-    for (std::unique_ptr<HistoryEntry> const &entry : seq.histSeq_) {
+    for (std::unique_ptr<HistoryEntry> const &entry : seq.entrySequence_) {
         save(*entry, os);
         os << endl;
     }
@@ -178,7 +178,7 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
         sstr.str(line);
         load(*entry, sstr);
         entry->owningSequence_ = &seq;
-        seq.histSeq_.push_back(std::move(entry));
+        seq.entrySequence_.push_back(std::move(entry));
     }
 }
 
@@ -275,7 +275,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
             for (int i = 0; i < NUM_PARTICLES_PER_LINE; i++) {
                 long seqId, entryId;
                 sstr >> tmpStr >> seqId >> entryId >> tmpStr;
-                HistorySequence *sequence = solver_->allHistories_->getSequence(
+                HistorySequence *sequence = solver_->histories_->getSequence(
                         seqId);
                 HistoryEntry *entry = sequence->getEntry(entryId);
                 entry->registerNode(&node);
@@ -325,7 +325,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         std::istringstream(line) >> tmpStr >> nodeId;
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
-        node->recalculateQValue();
+        node->getMapping()->update();
         // Ignore an empty line after each belief node.
         std::getline(is, line);
         std::getline(is, line);

@@ -42,8 +42,10 @@ public:
     virtual std::unique_ptr<Action> getBestAction() const = 0;
     /** Returns the best q-value. */
     virtual double getMaxQValue() const = 0;
-    /** Returns the robust q-value. */
-    virtual double getRobustQValue() const = 0;
+    /** Returns the robust q-value (optional) */
+    virtual double getRobustQValue() const {
+        return -std::numeric_limits<double>::infinity();
+    }
 
     /* ------------ Methods for retrieving unvisited actions -------------- */
     /** Returns true iff there is another action that has not been visited. */

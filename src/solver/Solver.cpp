@@ -57,8 +57,8 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     model_(std::move(model)),
     actionPool_(model_->createActionPool()),
     observationPool_(model_->createObservationPool()),
-    allStates_(std::make_unique<StatePool>(model_->createStateIndex())),
-    allHistories_(std::make_unique<Histories>()),
+    statePool_(std::make_unique<StatePool>(model_->createStateIndex())),
+    histories_(std::make_unique<Histories>()),
     policy_(std::make_unique<BeliefTree>()),
     historyCorrector_(model_->createHistoryCorrector()),
     selectionStrategy_(nullptr),
@@ -136,7 +136,7 @@ double Solver::runSim(long nSteps, long historiesPerStep,
             printBelief(currNode, prevStream);
         }
 
-        allStates_->createOrGetInfo(*currentState);
+        statePool_->createOrGetInfo(*currentState);
 
         // If the model is changing, handle the changes.
         if (itCh != changeTimes.end() && timeStep == *itCh) {
@@ -162,7 +162,6 @@ double Solver::runSim(long nSteps, long historiesPerStep,
         *totImpTime += impSolTimeEnd - impSolTimeStart;
 
         if (model_->hasVerboseOutput()) {
-
             std::stringstream newStream;
             newStream << "After:" << endl;
             printBelief(currNode, newStream);
@@ -231,7 +230,7 @@ BeliefTree *Solver::getPolicy() {
     return policy_.get();
 }
 StatePool *Solver::getStatePool() {
-    return allStates_.get();
+    return statePool_.get();
 }
 Model *Solver::getModel() {
     return model_.get();
@@ -245,14 +244,14 @@ ObservationPool *Solver::getObservationPool() {
 
 /* ------------------ Episode sampling methods ------------------- */
 void Solver::singleSearch(long maximumDepth) {
-    StateInfo *stateInfo = allStates_->createOrGetInfo(
+    StateInfo *stateInfo = statePool_->createOrGetInfo(
             *model_->sampleAnInitState());
     singleSearch(policy_->getRoot(), stateInfo, 0, maximumDepth);
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
         long startDepth, long maximumDepth) {
-    HistorySequence *sequence = allHistories_->addSequence(startDepth);
+    HistorySequence *sequence = histories_->addSequence(startDepth);
     sequence->addEntry(startStateInfo);
     sequence->getFirstEntry()->associatedBeliefNode_ = startNode;
     continueSearch(sequence, maximumDepth);
@@ -308,11 +307,11 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
 void Solver::calculateRewards(HistorySequence *sequence) {
     double discountFactor = model_->getDiscountFactor();
     std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
-                sequence->histSeq_.rbegin());
+                sequence->entrySequence_.rbegin());
     // Retrieve the value of the last entry.
     double totalReward = (*itHist)->rewardFromHere_;
     itHist++;
-    for (; itHist != sequence->histSeq_.rend(); itHist++) {
+    for (; itHist != sequence->entrySequence_.rend(); itHist++) {
            HistoryEntry *entry = itHist->get();
            // Apply the discount
            totalReward *= discountFactor;
@@ -395,10 +394,10 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
         debug::show_message("ERROR: Failed to generate new particles!");
     }
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
-        StateInfo *stateInfo = allStates_->createOrGetInfo(*uniqueStatePtr);
+        StateInfo *stateInfo = statePool_->createOrGetInfo(*uniqueStatePtr);
 
         // Create a new history sequence and entry for the new particle.
-        HistorySequence *histSeq = allHistories_->addSequence(timeStep);
+        HistorySequence *histSeq = histories_->addSequence(timeStep);
         HistoryEntry *histEntry = histSeq->addEntry(stateInfo);
         State const *state = stateInfo->getState();
         if (!model_->isTerminal(*state)) {
@@ -417,17 +416,17 @@ void Solver::handleChanges(long timeStep,
         State const &currentState,
         std::vector<std::unique_ptr<State>> &stateHistory) {
     // Mark the states that need changing.
-    model_->update(timeStep, allStates_.get());
+    model_->update(timeStep, statePool_.get());
 
     // Check if the model changes have invalidated our history...
-    if (changes::hasFlag(allStates_->getInfo(currentState)->changeFlags_,
+    if (changes::hasFlag(statePool_->getInfo(currentState)->changeFlags_,
             ChangeFlags::DELETED)) {
         debug::show_message(
                 "ERROR: Current simulation state deleted. Exiting..");
         std::exit(1);
     }
     for (std::unique_ptr<State> &state2 : stateHistory) {
-        if (changes::hasFlag(allStates_->getInfo(*state2)->changeFlags_,
+        if (changes::hasFlag(statePool_->getInfo(*state2)->changeFlags_,
                 ChangeFlags::DELETED)) {
             std::ostringstream message;
             message << "ERROR: Impossible simulation history! Includes ";
@@ -438,12 +437,12 @@ void Solver::handleChanges(long timeStep,
 
     // Apply the changes and reset the flagged states.
     applyChanges();
-    allStates_->resetAffectedStates();
+    statePool_->resetAffectedStates();
 }
 
 void Solver::applyChanges() {
     std::unordered_set<HistorySequence *> affectedSequences;
-    for (StateInfo *stateInfo : allStates_->getAffectedStates()) {
+    for (StateInfo *stateInfo : statePool_->getAffectedStates()) {
         for (HistoryEntry *entry : stateInfo->usedInHistoryEntries_) {
             HistorySequence *sequence = entry->owningSequence_;
             long entryId = entry->entryId_;
@@ -482,7 +481,7 @@ void Solver::applyChanges() {
                 ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
             // Now remove the sequence entirely.
-            allHistories_->deleteSequence(sequence->id_);
+            histories_->deleteSequence(sequence->id_);
         } else {
             it++;
         }

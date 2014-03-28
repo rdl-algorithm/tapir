@@ -40,6 +40,7 @@
 #include "solver/StatePool.hpp"
 
 #include "RockSampleAction.hpp"         // for RockSampleAction
+#include "RockSampleMdpSolver.hpp"
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
 #include "RockSampleState.hpp"          // for RockSampleState
 
@@ -68,6 +69,8 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     rockPositions_(), // push rocks
     mapText_(), // push rows
     envMap_(), // push rows
+    usingExactMdp_(vm["heuristic.exactMdp"].as<bool>()),
+    mdpSolver_(nullptr),
     nStVars_(), // depends on nRocks
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
     maxVal_(0) // depends on nRocks
@@ -98,9 +101,7 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         cout << "Constructed the RockSampleModel" << endl;
         cout << "Discount: " << getDiscountFactor() << endl;
         cout << "Size: " << nRows_ << " by " << nCols_ << endl;
-        cout << "Start: " << startPos_.i << " " << startPos_.j << endl;
         cout << "nRocks: " << nRocks_ << endl;
-        cout << "good rock reward: " << goodRockReward_ << endl;
         cout << "Environment:" << endl;
         drawEnv(cout);
     }
@@ -134,6 +135,17 @@ void RockSampleModel::initialize() {
     minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
     setAllActions(getAllActionsInOrder());
+
+    if (heuristicEnabled() && usingExactMdp_) {
+        if (hasVerboseOutput()) {
+            cout << "Solving MDP...    ";
+        }
+        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
+        mdpSolver_->solve();
+        if (hasVerboseOutput()) {
+            cout << "Done." << endl;
+        }
+    }
 }
 
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
@@ -158,11 +170,21 @@ std::vector<bool> RockSampleModel::sampleRocks() {
 }
 
 std::vector<bool> RockSampleModel::decodeRocks(long val) {
-    std::vector<bool> isRockGood;
+    std::vector<bool> rockStates;
     for (int j = 0; j < nRocks_; j++) {
-        isRockGood.push_back(val &  (1 << j));
+        rockStates.push_back(val &  (1 << j));
     }
-    return isRockGood;
+    return rockStates;
+}
+
+long RockSampleModel::encodeRocks(std::vector<bool> rockStates) {
+    long value = 0;
+    for (int j = 0; j < nRocks_; j++) {
+        if (rockStates[j]) {
+            value += (1 << j);
+        }
+    }
+    return value;
 }
 
 bool RockSampleModel::isTerminal(solver::State const &state) {
@@ -179,6 +201,11 @@ double RockSampleModel::getHeuristicValue(solver::State const &state) {
 
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
+
+    if (usingExactMdp_) {
+        return mdpSolver_->getQValue(rockSampleState);
+    }
+
     double qVal = 0;
     double currentDiscount = 1;
     GridPosition currentPos(rockSampleState.getPosition());

@@ -33,8 +33,8 @@ class BeliefTree {
     /** Sets the child with the given ID. */
     void setNode(long id, BeliefNode *node);
     /** Retrieves the node with the given ID. */
-
     BeliefNode *getNode(long id) const;
+
     /** Returns the number of belief nodes. */
     long getNumberOfNodes() const;
     /** Retrieves a vector of all belief nodes within the policy. */

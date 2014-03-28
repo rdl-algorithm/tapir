@@ -22,6 +22,7 @@
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 
+#include "RockSampleMdpSolver.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
 
@@ -35,6 +36,7 @@ class DiscretizedPoint;
 
 namespace rocksample {
 class RockSampleAction;
+class RockSampleMdpSolver;
 class RockSampleState;
 class RockSampleObservation;
 
@@ -59,6 +61,11 @@ friend class RockSampleMdpSolver;
 
     virtual std::string getName() override {
         return "RockSample";
+    }
+
+    /** Returns the MDP solver, if any is in use. */
+    virtual RockSampleMdpSolver *getMdpSolver() {
+        return mdpSolver_.get();
     }
 
     /***** Start implementation of Model's methods *****/
@@ -161,6 +168,8 @@ friend class RockSampleMdpSolver;
     std::vector<bool> sampleRocks();
     /** Decodes rocks from an integer. */
     std::vector<bool> decodeRocks(long val);
+    /** Encodes rocks to an integer. */
+    long encodeRocks(std::vector<bool> rockStates);
 
     /** The reward for sampling a good rock. */
     double goodRockReward_;
@@ -188,6 +197,9 @@ friend class RockSampleMdpSolver;
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
     std::vector<std::vector<RSCellType>> envMap_;
+
+    bool usingExactMdp_;
+    std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 
     // Generic problem parameters
     long nStVars_;

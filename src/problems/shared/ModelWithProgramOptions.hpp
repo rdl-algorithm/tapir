@@ -32,9 +32,9 @@ public:
         registerStrategyParser("random", std::make_unique<RandomRolloutParser>());
         registerStrategyParser("exp3", std::make_unique<Exp3Parser>());
 
-        registerBackpropagationParser("avg", std::make_unique<AveragePropagatorParser>());
+        registerBackpropagationParser("mean", std::make_unique<AveragePropagatorParser>());
         registerBackpropagationParser("max", std::make_unique<MaximumPropagatorParser>());
-        registerBackpropagationParser("rob", std::make_unique<RobustPropagatorParser>());
+        registerBackpropagationParser("robust", std::make_unique<RobustPropagatorParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;

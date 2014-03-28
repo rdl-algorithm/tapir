@@ -21,10 +21,10 @@ class HistoryEntry {
   public:
     friend class AbstractBackpropagationStrategy;
     friend class AbstractSearchInstance;
+    friend class DefaultHistoryCorrector;
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
-    friend class DefaultHistoryCorrector;
 
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();
@@ -90,22 +90,20 @@ class HistoryEntry {
     /** Observation received in this entry. */
     std::unique_ptr<Observation> observation_;
 
-    /** True iff this entry has been processed in a Bellman backup,
-     * false otherwise.
-     */
+    /** True iff this entry has been backpropagated, and false otherwise. */
     bool hasBeenBackedUp_;
     /** The id of the specific entry within the sequence. */
     long entryId_;
     /** Non-discounted reward. */
     double reward_;
-    /** Total discounted reward. */
+    /** Cumulative discounted reward, starting from this action. */
     double rewardFromHere_;
 
     /** The history sequence that owns this entry. */
     HistorySequence *owningSequence_;
     /** The belief node this entry is associated with. */
     BeliefNode *associatedBeliefNode_;
-    /** Whether the belief node has this entry registered as a particle. */
+    /** Whether a belief node has this entry registered as a particle. */
     bool isRegisteredAsParticle_;
 
     /** The flags associated with current POMDP model updates. */

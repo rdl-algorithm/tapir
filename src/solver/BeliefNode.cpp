@@ -64,11 +64,6 @@ HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
     return particles_.get(index);
 }
 
-/* ----------------- Q-value update methods. ------------------- */
-void BeliefNode::recalculateQValue() {
-    actionMap_->update();
-}
-
 /* ----------------- Useful calculations ------------------- */
 double BeliefNode::distL1Independent(BeliefNode *b) const {
     double dist = 0.0;

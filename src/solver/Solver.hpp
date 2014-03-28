@@ -138,22 +138,22 @@ class Solver {
     /** The POMDP model */
     std::unique_ptr<Model> model_;
 
-    /** The pool of actions. */
+    /** The pool of actions (used to generate action mappings) */
     std::unique_ptr<ActionPool> actionPool_;
-    /** The pool of observations. */
+    /** The pool of observations (used to generate observation mappings) */
     std::unique_ptr<ObservationPool> observationPool_;
 
     /** The pool of states. */
-    std::unique_ptr<StatePool> allStates_;
+    std::unique_ptr<StatePool> statePool_;
     /** The full collection of simulated histories. */
-    std::unique_ptr<Histories> allHistories_;
+    std::unique_ptr<Histories> histories_;
     /** The tree that stores the policy */
     std::unique_ptr<BeliefTree> policy_;
 
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;
 
-    /** The strategy to use when searching within the tree. */
+    /** The strategy to use when selecting nodes within the tree. */
     std::unique_ptr<SearchStrategy> selectionStrategy_;
     /** The strategy to use when rolling out. */
     std::unique_ptr<SearchStrategy> rolloutStrategy_;

@@ -53,16 +53,16 @@ public:
 
     /** Saves the sate of the solver. */
     virtual void save(std::ostream &os) {
-        save(*(solver_->allStates_), os);
-        save(*(solver_->allHistories_), os);
+        save(*(solver_->statePool_), os);
+        save(*(solver_->histories_), os);
         saveActionPool(*(solver_->actionPool_), os);
         saveObservationPool(*(solver_->observationPool_), os);
         save(*(solver_->policy_), os);
     }
     /** Loads the state of the solver. */
     virtual void load(std::istream &is) {
-        load(*(solver_->allStates_), is);
-        load(*(solver_->allHistories_), is);
+        load(*(solver_->statePool_), is);
+        load(*(solver_->histories_), is);
         solver_->actionPool_ = loadActionPool(is);
         solver_->observationPool_ = loadObservationPool(is);
         solver_->initialize();

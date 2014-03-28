@@ -43,7 +43,7 @@ SearchStatus AbstractSearchInstance::extendSequence() {
         status_ = SearchStatus::HIT_TERMINAL_STATE;
         return status_;
     }
-    for (long currentDepth = sequence_->getStartDepth() + currentEntry->entryId_;; currentDepth++) {
+    for (long currentDepth = sequence_->getStartDepth() + currentEntry->getId();; currentDepth++) {
         if (currentDepth == maximumDepth_) {
             // We have hit the depth limit.
             status_ = SearchStatus::HIT_DEPTH_LIMIT;

@@ -20,7 +20,6 @@ class HistoryEntry;
 
 class BeliefNode {
   public:
-    friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
 
@@ -42,9 +41,6 @@ class BeliefNode {
     void removeParticle(HistoryEntry *histEntry);
     /** Samples a particle from this node. */
     HistoryEntry *sampleAParticle(RandomGenerator *randGen) const;
-
-    /* ----------------- Q-value update methods. ------------------- */
-    void recalculateQValue();
 
     /* ---------------- Useful calculations ------------------ */
     /** Calculates the distance between this belief node and another by

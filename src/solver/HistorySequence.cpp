@@ -26,7 +26,7 @@ HistorySequence::HistorySequence() :
 HistorySequence::HistorySequence(long startDepth, long id) :
     id_(id),
     startDepth_(startDepth),
-    histSeq_(),
+    entrySequence_(),
     startAffectedIdx_(std::numeric_limits<long>::max()),
     endAffectedIdx_(-1),
     changeFlags_(ChangeFlags::UNCHANGED) {
@@ -43,7 +43,7 @@ bool HistorySequence::testBackup(bool backingUp) {
         return false;
     }
 
-    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+    for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
         if (!entry->isRegisteredAsParticle()
                 || entry->associatedBeliefNode_ == nullptr) {
             debug::show_message("ERROR: Attempted to backup, but no belief"
@@ -63,33 +63,33 @@ bool HistorySequence::testBackup(bool backingUp) {
 
 /* ----------- Methods to add or remove history entries ------------- */
 void HistorySequence::reset() {
-    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+    for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
         entry->registerState(nullptr);
         if (entry->isRegisteredAsParticle()) {
             debug::show_message("ERROR: sequence should be fully deregistered"
                     " before deletion.");
         }
     }
-    histSeq_.clear();
+    entrySequence_.clear();
 }
 
 HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, this, histSeq_.size());
+                stateInfo, this, entrySequence_.size());
     HistoryEntry *newEntryReturn = newEntry.get();
-    histSeq_.push_back(std::move(newEntry));
+    entrySequence_.push_back(std::move(newEntry));
     return newEntryReturn;
 }
 
 HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo,
         Action const &action, Observation const &obs, double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, this, histSeq_.size());
+                stateInfo, this, entrySequence_.size());
     newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
     newEntry->reward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
-    histSeq_.push_back(std::move(newEntry));
+    entrySequence_.push_back(std::move(newEntry));
     return newEntryReturn;
 }
 
@@ -98,12 +98,12 @@ HistoryEntry *HistorySequence::insertEntry(long index,
         Action const &action, Observation const &obs,
         double immediateReward) {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, this, histSeq_.size());
+                stateInfo, this, entrySequence_.size());
     newEntry->action_ = action.copy();
     newEntry->observation_ = obs.copy();
     newEntry->reward_ = immediateReward;
     HistoryEntry *newEntryReturn = newEntry.get();
-    histSeq_.insert(histSeq_.begin() + index, std::move(newEntry));
+    entrySequence_.insert(entrySequence_.begin() + index, std::move(newEntry));
     return newEntryReturn;
 }
 
@@ -119,20 +119,20 @@ long HistorySequence::getStartDepth() const {
     return startDepth_;
 }
 long HistorySequence::getLength() const {
-    return histSeq_.size();
+    return entrySequence_.size();
 }
 HistoryEntry *HistorySequence::getEntry(long entryId) const {
-    return histSeq_[entryId].get();
+    return entrySequence_[entryId].get();
 }
 HistoryEntry *HistorySequence::getFirstEntry() const {
-    return histSeq_.begin()->get();
+    return entrySequence_.begin()->get();
 }
 HistoryEntry *HistorySequence::getLastEntry() const {
-    return histSeq_.rbegin()->get();
+    return entrySequence_.rbegin()->get();
 }
 std::vector<State const *> HistorySequence::getStates() const {
     std::vector<State const *> states;
-    for (std::unique_ptr<HistoryEntry> const &entry : histSeq_) {
+    for (std::unique_ptr<HistoryEntry> const &entry : entrySequence_) {
         states.push_back(entry->getState());
     }
     return states;
@@ -140,14 +140,14 @@ std::vector<State const *> HistorySequence::getStates() const {
 
 void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
     bool registering = (startNode != nullptr);
-    std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = histSeq_.begin();
+    std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = entrySequence_.begin();
     if (registering && (*historyIterator)->isRegisteredAsParticle()) {
         debug::show_message("WARNING: Already registered this seqeuence!");
         registerWith(nullptr, policy);
         registerWith(startNode, policy);
     }
     BeliefNode *currentNode = startNode;
-    for (; historyIterator != histSeq_.end(); historyIterator++) {
+    for (; historyIterator != entrySequence_.end(); historyIterator++) {
         HistoryEntry *entry = historyIterator->get();
         if (registering) {
             entry->registerNode(currentNode);
@@ -164,7 +164,7 @@ void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
 /* -------------- Change flagging methods ---------------- */
 void HistorySequence::resetChangeFlags() {
     changeFlags_ = ChangeFlags::UNCHANGED;
-    for (std::unique_ptr<HistoryEntry> &entry : histSeq_) {
+    for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
         entry->resetChangeFlags();
     }
     resetAffectedIndices();

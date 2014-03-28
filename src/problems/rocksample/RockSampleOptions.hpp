@@ -36,6 +36,9 @@ class RockSampleOptions : public ProgramOptions {
     po::options_description getHeuristicOptions() {
         po::options_description heuristic("RockSample heuristic configuration");
         heuristic.add(ProgramOptions::getHeuristicOptions());
+        heuristic.add_options()
+                ("heuristic.exactMdp", po::value<bool>()->default_value(false)->implicit_value(true),
+                        "path to map file");
         return heuristic;
     }
 };

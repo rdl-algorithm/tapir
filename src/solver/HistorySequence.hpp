@@ -21,9 +21,9 @@ class StateInfo;
 class HistorySequence {
   public:
     friend class AbstractBackpropagationStrategy;
+    friend class DefaultHistoryCorrector;
     friend class Solver;
     friend class TextSerializer;
-    friend class DefaultHistoryCorrector;
 
     /** Constructs an empty history sequence starting at depth 0, without
      * assigning an ID.
@@ -117,7 +117,7 @@ private:
     long startDepth_;
 
     /** The actual sequence of history entries. */
-    std::vector<std::unique_ptr<HistoryEntry>> histSeq_;
+    std::vector<std::unique_ptr<HistoryEntry>> entrySequence_;
 
     /** The start and end of where this sequence is affected by changes. */
     long startAffectedIdx_, endAffectedIdx_;
