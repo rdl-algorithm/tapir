@@ -15,6 +15,7 @@ builds/*
 build/*
 simulate
 solve
+solve-mdp
 stest
 
 # Logging outputs
