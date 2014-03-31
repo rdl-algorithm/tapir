@@ -157,7 +157,7 @@ double Solver::runSim(long nSteps, long historiesPerStep,
 
         // Improve the policy
         double impSolTimeStart = abt::clock_ms();
-        improveSol(currNode, historiesPerStep, maximumDepth);
+        improveSolution(currNode, historiesPerStep, maximumDepth);
         double impSolTimeEnd = abt::clock_ms();
         *totImpTime += impSolTimeEnd - impSolTimeStart;
 
@@ -338,7 +338,7 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     return result;
 }
 
-void Solver::improveSol(BeliefNode *startNode, long historiesPerStep,
+void Solver::improveSolution(BeliefNode *startNode, long historiesPerStep,
         long maximumDepth) {
     if (startNode->getNumberOfParticles() == 0) {
         debug::show_message("ERROR: No particles in the BeliefNode!", true, false);

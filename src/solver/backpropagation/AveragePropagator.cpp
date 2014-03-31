@@ -24,12 +24,11 @@ void AveragePropagator::updateEntry(HistoryEntry *entry, bool undo) {
 
     // Derived values
     Action const &action = *entry->getAction();
-    ActionMapping *actionMapping = entry->getAssociatedBeliefNode()->getMapping();
+    ActionMapping *actionMap = entry->getAssociatedBeliefNode()->getMapping();
     long deltaNVisits = undo ? -1 : 1;
 
-    // Update the visit counts for the current node.
-    actionMapping->updateVisitCount(action, deltaNVisits);
-    actionMapping->getActionNode(action)->getMapping()->updateVisitCount(
+    // Update the visit count for the observation.
+    actionMap->getActionNode(action)->getMapping()->updateVisitCount(
             *entry->getObservation(), deltaNVisits);
 
     // Calculate the q-value based on the cumulative reward for this sequence,
@@ -39,8 +38,7 @@ void AveragePropagator::updateEntry(HistoryEntry *entry, bool undo) {
         deltaQ = -deltaQ;
     }
 
-    // Update the mapping and force it to recalculate.
-    actionMapping->updateTotalQValue(action, deltaQ);
-    actionMapping->update();
+    // Update the mapping!
+    actionMap->update(action, deltaNVisits, deltaQ);
 }
 } /* namespace solver */

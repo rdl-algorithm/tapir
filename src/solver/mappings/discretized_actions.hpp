@@ -70,7 +70,9 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual long getTotalVisitCount() const override;
     virtual std::unique_ptr<Action> getBestAction() const override;
     virtual double getMaxQValue() const override;
+    virtual std::unique_ptr<Action> getRobustAction() const override;
     virtual double getRobustQValue() const override;
+
 
     /* ------------ Methods for retrieving unvisited actions -------------- */
     virtual bool hasUnvisitedActions() const override;
@@ -86,9 +88,8 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual double getMeanQValue(Action const &action) const override;
 
     /* --------------- Methods for updating the values ----------------- */
-    virtual void updateVisitCount(Action const &action, long deltaNVisits) override;
-    virtual void updateTotalQValue(Action const &action, double deltaQ) override;
-    virtual void update() override;
+    virtual void update(Action const &action, long deltaNVisits, double deltaQ) override;
+    virtual void recalculate() override;
 
   private:
     ObservationPool *observationPool_;
@@ -102,6 +103,9 @@ class DiscretizedActionMap: public solver::ActionMapping {
 
     long bestBinNumber_;
     double highestQValue_;
+
+    long robustBinNumber_;
+    long highestVisitCount_;
     double robustQValue_;
 
     long totalVisitCount_;

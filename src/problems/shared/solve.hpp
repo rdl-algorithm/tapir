@@ -72,13 +72,12 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     tStart = abt::clock_ms();
     solver.genPol(model->getNumberOfHistoriesPerStep(), model->getMaximumDepth());
     totT = abt::clock_ms() - tStart;
+    cout << "Total solving time: " << totT << "ms" << endl;
 
     std::ofstream os;
     os.open(polPath.c_str());
     solver.saveStateTo(os);
     os.close();
-
-    cout << "Total solving time: " << totT << "ms" << endl;
     return 0;
 }
 

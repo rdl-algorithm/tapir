@@ -40,8 +40,7 @@ void MaximumPropagator::updateEntry(HistoryEntry *entry, bool undo) {
     oldVisitCount -= currentNode->getNumberOfStartingSequences();
     long newVisitCount = oldVisitCount + deltaNVisits;
 
-    // Update the visit counts for the current node.
-    actionMap->updateVisitCount(action, deltaNVisits);
+    // Update the visit count for the observations.
     obsMap->updateVisitCount(*entry->getObservation(), deltaNVisits);
 
     // This will hold the effect of the changes to the current node on its parent.
@@ -71,9 +70,8 @@ void MaximumPropagator::updateEntry(HistoryEntry *entry, bool undo) {
         deltaQ_ += immediateQ;
     }
 
-    // Update the mapping and force it to recalculate.
-    actionMap->updateTotalQValue(action, deltaQ_);
-    actionMap->update();
+    // Update the mapping!
+    actionMap->update(action, deltaNVisits, deltaQ_);
 
     // Add the new contribution, if any.
     if (newVisitCount > 0) {

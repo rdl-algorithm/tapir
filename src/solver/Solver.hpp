@@ -109,7 +109,7 @@ class Solver {
     /** Simulates a single step. */
     Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
     /** Improves the solution with the root at the given node. */
-    void improveSol(BeliefNode *startNode, long historiesPerStep,
+    void improveSolution(BeliefNode *startNode, long historiesPerStep,
             long maximumDepth);
     /** Handles particle depletion during the simulation. */
     BeliefNode *addChild(BeliefNode *currNode, Action const &action,

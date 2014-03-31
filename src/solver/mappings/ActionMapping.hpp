@@ -42,6 +42,12 @@ public:
     virtual std::unique_ptr<Action> getBestAction() const = 0;
     /** Returns the best q-value. */
     virtual double getMaxQValue() const = 0;
+    /** Returns the robust action (i.e. the action with the highest
+     * visit count (optional).
+     */
+    virtual std::unique_ptr<Action> getRobustAction() const {
+        return nullptr;
+    }
     /** Returns the robust q-value (optional) */
     virtual double getRobustQValue() const {
         return -std::numeric_limits<double>::infinity();
@@ -64,14 +70,12 @@ public:
     virtual double getMeanQValue(Action const &action) const = 0;
 
     /* --------------- Methods for updating the values ----------------- */
-    /** Adds or removes visits associated with the given action. */
-    virtual void updateVisitCount(Action const &action, long deltaNVisits) = 0;
-    /** Updates the q-value associated with a given action, by adding the
-     * given amount to the total.
-     */
-    virtual void updateTotalQValue(Action const &action, double deltaQ)= 0;
-    /** Updates the optimal q-value. */
-    virtual void update() = 0;
+    /** Updates the given action, by adding the given number of visits and the
+     * given change in the total q-value.
+    */
+    virtual void update(Action const &action, long deltaNVisits, double deltaQ) = 0;
+    /** Recalculates the q-values. */
+    virtual void recalculate() = 0;
 };
 
 class ActionMappingEntry {

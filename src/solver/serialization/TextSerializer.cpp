@@ -325,7 +325,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         std::istringstream(line) >> tmpStr >> nodeId;
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
-        node->getMapping()->update();
+        node->getMapping()->recalculate();
         // Ignore an empty line after each belief node.
         std::getline(is, line);
         std::getline(is, line);

@@ -52,6 +52,8 @@ DiscretizedActionMap::DiscretizedActionMap(ObservationPool *observationPool,
                 binsToTry_(),
                 bestBinNumber_(-1),
                 highestQValue_(-std::numeric_limits<double>::infinity()),
+                robustBinNumber_(-1),
+                highestVisitCount_(-1),
                 robustQValue_(-std::numeric_limits<double>::infinity()),
                 totalVisitCount_(0) {
     for (long i = 0; i < numberOfBins_; i++) {
@@ -106,6 +108,12 @@ std::unique_ptr<Action> DiscretizedActionMap::getBestAction() const {
 double DiscretizedActionMap::getMaxQValue() const {
     return highestQValue_;
 }
+std::unique_ptr<Action> DiscretizedActionMap::getRobustAction() const {
+    if (robustBinNumber_ == -1) {
+        return nullptr;
+    }
+    return model_->sampleAnAction(robustBinNumber_);
+}
 double DiscretizedActionMap::getRobustQValue() const {
     return robustQValue_;
 }
@@ -149,9 +157,12 @@ double DiscretizedActionMap::getMeanQValue(Action const &action) const {
     return entries_[code]->getMeanQValue();
 }
 
-void DiscretizedActionMap::updateVisitCount(Action const &action, long deltaNVisits) {
+void DiscretizedActionMap::update(Action const &action, long deltaNVisits,
+        double deltaQ) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
     DiscretizedActionMapEntry &entry = *entries_[code];
+
+    // Update the visit counts
     if (entry.visitCount_ == 0 && deltaNVisits > 0) {
         deleteUnvisitedAction(code);
     }
@@ -161,28 +172,30 @@ void DiscretizedActionMap::updateVisitCount(Action const &action, long deltaNVis
         addUnvisitedAction(code);
     }
 
-    if (entry.visitCount_ <= 0) {
-        entry.meanQValue_ = -std::numeric_limits<double>::infinity();
-    } else {
-        entry.meanQValue_ = entry.totalQValue_ / entry.visitCount_;
-    }
-}
-void DiscretizedActionMap::updateTotalQValue(Action const &action, double deltaQ) {
-    long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    DiscretizedActionMapEntry &entry = *entries_[code];
+    // Update the total Q
     entry.totalQValue_ += deltaQ;
+
+    // Update the mean Q
+    double changeInMeanQ = -entry.meanQValue_;
     if (entry.visitCount_ <= 0) {
         entry.meanQValue_ = -std::numeric_limits<double>::infinity();
     } else {
         entry.meanQValue_ = entry.totalQValue_ / entry.visitCount_;
     }
+    changeInMeanQ += entry.meanQValue_;
+
+    // Simply recalculate to find the best action.
+    recalculate();
 }
-void DiscretizedActionMap::update() {
+
+void DiscretizedActionMap::recalculate() {
     bestBinNumber_ = -1;
     highestQValue_ = -std::numeric_limits<double>::infinity();
 
-    long highestVisitCount = -1;
+    robustBinNumber_ = -1;
+    highestVisitCount_ = -1;
     robustQValue_ = -std::numeric_limits<double>::infinity();
+
     for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : entries_) {
         if (entry == nullptr) {
             continue;
@@ -195,12 +208,10 @@ void DiscretizedActionMap::update() {
             highestQValue_ = meanQValue;
             bestBinNumber_ = entry->binNumber_;
         }
-
-        if (entry->visitCount_ > highestVisitCount) {
-            highestVisitCount = entry->visitCount_;
+        if (entry->visitCount_ > highestVisitCount_ || (entry->visitCount_ == highestVisitCount_ && meanQValue > robustQValue_)) {
+            highestVisitCount_ = entry->visitCount_;
             robustQValue_ = meanQValue;
-        } else if (entry->visitCount_ == highestVisitCount && meanQValue > robustQValue_) {
-            robustQValue_ = meanQValue;
+            robustBinNumber_ = entry->binNumber_;
         }
     }
 }
