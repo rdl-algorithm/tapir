@@ -21,20 +21,16 @@
 #include "RandomAccessSet.hpp"
 
 namespace solver {
+BeliefNode::BeliefNode() :
+    BeliefNode(-1) {
+}
+
 BeliefNode::BeliefNode(long id) :
-    BeliefNode(nullptr, id) {
-}
-
-BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap) :
-        BeliefNode(std::move(actionMap), -1) {
-}
-
-BeliefNode::BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id) :
-    id_(id),
-    particles_(),
-    nStartingSequences_(0),
-    tLastChange_(-1),
-    actionMap_(std::move(actionMap)) {
+        id_(id),
+        particles_(),
+        nStartingSequences_(0),
+        tLastChange_(-1),
+        actionMap_(nullptr) {
 }
 
 // Do-nothing destructor
@@ -113,7 +109,12 @@ double BeliefNode::getTimeOfLastChange() const {
     return tLastChange_;
 }
 
-/* -------------------- Tree-related methods  ---------------------- */
+/* -------------------- Tree-related setters  ---------------------- */
+void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
+    actionMap_ = std::move(mapping);
+}
+
+/* -------------------- Tree-related getters  ---------------------- */
 ActionMapping *BeliefNode::getMapping() {
     return actionMap_.get();
 }
@@ -126,6 +127,7 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
     return node->getChild(obs);
 }
 
+/* -------------------- Tree-related methods  ---------------------- */
 std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Action const &action,
         Observation const &obs) {
     ActionNode *actionNode = actionMap_->getActionNode(action);

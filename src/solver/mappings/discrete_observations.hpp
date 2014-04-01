@@ -17,6 +17,7 @@
 
 namespace solver {
 class ActionPool;
+class DiscreteObservationMapEntry;
 class DiscretePoint;
 
 class ModelWithDiscreteObservations : virtual public solver::Model {
@@ -38,11 +39,6 @@ class DiscreteObservationPool: public solver::ObservationPool {
     createObservationMapping() override;
 };
 
-struct DiscreteObservationMapEntry {
-    std::unique_ptr<BeliefNode> childNode = nullptr;
-    long visitCount = 0;
-};
-
 class DiscreteObservationMap: public solver::ObservationMapping {
   public:
     friend class DiscreteObservationTextSerializer;
@@ -56,6 +52,7 @@ class DiscreteObservationMap: public solver::ObservationMapping {
     virtual BeliefNode *createBelief(Observation const &obs) override;
 
     virtual long getNChildren() const override;
+    virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
 
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
     virtual long getVisitCount(Observation const &obs) const override;
@@ -75,11 +72,34 @@ class DiscreteObservationMap: public solver::ObservationMapping {
         }
     };
     typedef std::unordered_map<std::unique_ptr<Observation>,
-            DiscreteObservationMapEntry, HashContents, EqualContents> ChildMap;
+            std::unique_ptr<DiscreteObservationMapEntry>,
+            HashContents, EqualContents> ChildMap;
     ChildMap childMap_;
 
     long totalVisitCount_;
 };
+
+class DiscreteObservationMapEntry : public solver::ObservationMappingEntry {
+    friend class DiscreteObservationMap;
+    friend class DiscreteObservationTextSerializer;
+public:
+    DiscreteObservationMapEntry(DiscreteObservationMap *map,
+            Observation const &observation,
+            std::unique_ptr<BeliefNode> childNode);
+    virtual ~DiscreteObservationMapEntry() = default;
+    _NO_COPY_OR_MOVE(DiscreteObservationMapEntry);
+
+    virtual ObservationMapping *getMapping() const override;
+    virtual std::unique_ptr<Observation> getObservation() const override;
+    virtual BeliefNode *getBeliefNode() const override;
+    virtual long getVisitCount() const override;
+private:
+    DiscreteObservationMap *map_ = nullptr;
+    std::unique_ptr<Observation> observation_;
+    std::unique_ptr<BeliefNode> childNode_ = nullptr;
+    long visitCount_ = 0;
+};
+
 
 class DiscreteObservationTextSerializer: virtual public solver::Serializer {
   public:

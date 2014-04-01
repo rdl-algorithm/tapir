@@ -22,6 +22,7 @@
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 
+#include "legal_actions.hpp"
 #include "RockSampleMdpSolver.hpp"
 
 #include "global.hpp"                     // for RandomGenerator

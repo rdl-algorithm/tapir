@@ -9,6 +9,7 @@
 namespace solver {
 class ActionMappingEntry;
 class ActionNode;
+class BeliefNode;
 
 class ActionMapping {
 public:
@@ -18,6 +19,18 @@ public:
     // Default destructor; copying and moving disallowed!
     virtual ~ActionMapping() = default;
     _NO_COPY_OR_MOVE(ActionMapping);
+
+    /** Initializes this mapping w.r.t. the given belief node.
+     *
+     * This is optional; it can allow initialization of mappings based on
+     * parameters of the given node, including the history of actions and
+     * observations.
+     *
+     * This method is called when creating a new belief node, but is not
+     * called when a belief node is deserialized, as the relevant parameters
+     * can simply be stored for serialization.
+     */
+    virtual void initialize(BeliefNode */*node*/) {}
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     /** Retrieves the action node (if any) corresponding to this action. */
@@ -84,6 +97,8 @@ public:
     virtual ~ActionMappingEntry() = default;
     _NO_COPY_OR_MOVE(ActionMappingEntry);
 
+    /** Returns the mapping this entry belongs to. */
+    virtual ActionMapping *getMapping() const = 0;
     /** Returns the action for this entry. */
     virtual std::unique_ptr<Action> getAction() const = 0;
     /** Returns the action node for this entry. */

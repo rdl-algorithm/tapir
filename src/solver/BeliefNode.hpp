@@ -23,12 +23,10 @@ class BeliefNode {
     friend class Solver;
     friend class TextSerializer;
 
+    /** Constructs a new belief node with no ID (-1). */
+    BeliefNode();
     /** Constructs a new belief node with the given ID and no action mapping. */
     BeliefNode(long id);
-    /** Constructs a new belief node with no ID (-1). */
-    BeliefNode(std::unique_ptr<ActionMapping> actionMap);
-    /** Constructs a new belief node with the given ID. */
-    BeliefNode(std::unique_ptr<ActionMapping> actionMap, long id);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefNode();
@@ -69,13 +67,19 @@ class BeliefNode {
     /** Returns the time at which the last change occurred. */
     double getTimeOfLastChange() const;
 
-    /* -------------------- Tree-related methods  ---------------------- */
+    /* -------------------- Tree-related setters  ---------------------- */
+    /** Sets the mapping for this node. */
+    void setMapping(std::unique_ptr<ActionMapping> mapping);
+
+    /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
     ActionMapping *getMapping();
     /** Returns the belief node child corresponding to the given action and
      * observation
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
+
+    /* -------------------- Tree-related methods  ---------------------- */
     /** Adds a child for the given action and observation;
      * returns the child node, and a boolean which is true iff a new node was
      * actually created.

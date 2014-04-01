@@ -74,8 +74,10 @@ Solver::~Solver() {
 void Solver::initialize() {
     actionPool_->observationPool_ = observationPool_.get();
     observationPool_->actionPool_ = actionPool_.get();
-    policy_->setRoot(std::make_unique<BeliefNode>(
-            actionPool_->createActionMapping(), 0));
+    std::unique_ptr<BeliefNode> root = std::make_unique<BeliefNode>();
+    root->setMapping(actionPool_->createActionMapping(root.get()));
+    policy_->setRoot(std::move(root));
+
     historyCorrector_->setSolver(this);
     selectionStrategy_ = model_->createSelectionStrategy(this);
     rolloutStrategy_ = model_->createRolloutStrategy(this);

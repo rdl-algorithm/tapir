@@ -3,8 +3,9 @@
 
 #include "global.hpp"
 
+#include "ActionMapping.hpp"
+
 namespace solver {
-class ActionMapping;
 class BeliefNode;
 class ObservationPool;
 
@@ -15,7 +16,17 @@ public:
     virtual ~ActionPool() = default;
     _NO_COPY_OR_MOVE(ActionPool);
 
+    /** Creates a default action mapping. */
     virtual std::unique_ptr<ActionMapping> createActionMapping() = 0;
+
+    /** Creates a default action mapping, then initializes it based on the
+     * given belief node.
+     */
+    virtual std::unique_ptr<ActionMapping> createActionMapping(BeliefNode *node) {
+        std::unique_ptr<ActionMapping> map = createActionMapping();
+        map->initialize(node);
+        return map;
+    }
 protected:
     ObservationPool *observationPool_ = nullptr;
 };

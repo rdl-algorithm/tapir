@@ -47,7 +47,6 @@ namespace po = boost::program_options;
 namespace tag {
 TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
-    ModelWithEnumeratedActions(getAllActionsInOrder()),
     moveCost_(vm["problem.moveCost"].as<double>()),
     tagReward_(vm["problem.tagReward"].as<double>()),
     failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
@@ -63,6 +62,7 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
     maxVal_(tagReward_)
     {
+    setAllActions(getAllActionsInOrder());
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();

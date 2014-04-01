@@ -13,6 +13,7 @@
 
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
+#include "legal_actions.hpp"
 #include "global.hpp"
 
 namespace solver {

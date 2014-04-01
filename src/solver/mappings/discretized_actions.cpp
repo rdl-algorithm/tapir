@@ -35,8 +35,7 @@ DiscretizedActionPool::DiscretizedActionPool(
                 numberOfBins_(numberOfBins) {
 }
 
-std::unique_ptr<ActionMapping>
-    DiscretizedActionPool::createActionMapping() {
+std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping() {
     return std::make_unique<DiscretizedActionMap>(observationPool_,
             model_, numberOfBins_);
 }
@@ -56,6 +55,13 @@ DiscretizedActionMap::DiscretizedActionMap(ObservationPool *observationPool,
                 highestVisitCount_(-1),
                 robustQValue_(-std::numeric_limits<double>::infinity()),
                 totalVisitCount_(0) {
+}
+
+// Default destructor.
+DiscretizedActionMap::~DiscretizedActionMap() {
+}
+
+void DiscretizedActionMap::initialize(BeliefNode */*node*/) {
     for (long i = 0; i < numberOfBins_; i++) {
         binsToTry_.add(i);
     }
@@ -228,6 +234,14 @@ DiscretizedActionMapEntry::DiscretizedActionMapEntry(long binNumber,
                 meanQValue_(-std::numeric_limits<double>::infinity()) {
 }
 
+// Default destructor.
+DiscretizedActionMapEntry::~DiscretizedActionMapEntry() {
+}
+
+/** Returns the mapping this entry belongs to. */
+ActionMapping *DiscretizedActionMapEntry::getMapping() const {
+    return map_;
+}
 std::unique_ptr<Action> DiscretizedActionMapEntry::getAction() const {
     return map_->model_->sampleAnAction(binNumber_);
 }
@@ -264,6 +278,9 @@ void DiscretizedActionTextSerializer::saveActionMapping(
             static_cast<DiscretizedActionMap const &>(map));
     os << discMap.getNChildren() << " action children; ";
     os << discMap.getTotalVisitCount() << " visits" << std::endl;
+
+    saveCustomMappingData(discMap, os);
+
     os << "Untried (";
     for (std::vector<long>::const_iterator it = discMap.binsToTry_.begin();
             it != discMap.binsToTry_.end(); it++) {
@@ -290,21 +307,24 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         save(*entry.getActionNode(), os);
     }
 }
+void DiscretizedActionTextSerializer::saveCustomMappingData(
+        DiscretizedActionMap const &/*map*/, std::ostream &/*os*/) {
+}
 
 std::unique_ptr<ActionMapping>
 DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     std::unique_ptr<ActionMapping> map(
             solver_->getActionPool()->createActionMapping());
     DiscretizedActionMap &discMap = static_cast<DiscretizedActionMap &>(*map);
-    discMap.binsToTry_.clear();
 
     std::string line;
-
     std::getline(is, line);
     std::string tmpStr;
     std::istringstream sstr4(line);
     sstr4 >> discMap.nChildren_ >> tmpStr >> tmpStr;
     sstr4 >> discMap.totalVisitCount_;
+
+    loadCustomMappingData(discMap, is);
 
     std::getline(is, line);
     std::istringstream sstr(line);
@@ -348,6 +368,10 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     }
     return std::move(map);
 }
+void DiscretizedActionTextSerializer::loadCustomMappingData(
+        DiscretizedActionMap &/*map*/, std::istream &/*is*/) {
+}
+
 } /* namespace solver */
 
 

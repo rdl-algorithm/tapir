@@ -22,7 +22,7 @@ class ActionPool;
 
 class ModelWithEnumeratedActions : virtual public solver::ModelWithDiscretizedActions {
   public:
-    ModelWithEnumeratedActions(std::vector<std::unique_ptr<DiscretizedPoint>> allActions);
+    ModelWithEnumeratedActions();
     virtual ~ModelWithEnumeratedActions() = default;
     _NO_COPY_OR_MOVE(ModelWithEnumeratedActions);
 

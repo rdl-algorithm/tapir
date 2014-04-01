@@ -40,10 +40,11 @@
 #include "solver/StatePool.hpp"
 
 #include "RockSampleAction.hpp"         // for RockSampleAction
-#include "RockSampleMdpSolver.hpp"
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
 #include "RockSampleState.hpp"          // for RockSampleState
 
+#include "legal_actions.hpp"
+#include "RockSampleMdpSolver.hpp"
 #include "RockSampleLegalUcbSelector.hpp"
 
 using std::cout;
@@ -54,7 +55,6 @@ namespace rocksample {
 RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         po::variables_map vm) :
     ModelWithProgramOptions(randGen, vm),
-    ModelWithEnumeratedActions({}),
     goodRockReward_(vm["problem.goodRockReward"].as<double>()),
     badRockPenalty_(vm["problem.badRockPenalty"].as<double>()),
     exitReward_(vm["problem.exitReward"].as<double>()),
@@ -138,12 +138,13 @@ void RockSampleModel::initialize() {
 
     if (heuristicEnabled() && usingExactMdp_) {
         if (hasVerboseOutput()) {
-            cout << "Solving MDP...    ";
+            cout << "Solving MDP...";
+            cout.flush();
         }
         mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
         mdpSolver_->solve();
         if (hasVerboseOutput()) {
-            cout << "Done." << endl;
+            cout << "     Done." << endl;
         }
     }
 }

@@ -39,7 +39,7 @@ class DiscretizedActionPool: public solver::ActionPool {
     _NO_COPY_OR_MOVE(DiscretizedActionPool);
 
     virtual std::unique_ptr<ActionMapping> createActionMapping() override;
-private:
+  protected:
   ModelWithDiscretizedActions *model_;
   long numberOfBins_;
 };
@@ -53,8 +53,13 @@ class DiscretizedActionMap: public solver::ActionMapping {
             ModelWithDiscretizedActions *model,
             long numberOfBins);
 
+    /** Initializes this mapping by adding all of the actions as actions
+     * to be tried.
+     */
+    void initialize(BeliefNode *node) override;
+
     // Default destructor; copying and moving disallowed!
-    virtual ~DiscretizedActionMap() = default;
+    virtual ~DiscretizedActionMap();
     _NO_COPY_OR_MOVE(DiscretizedActionMap);
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
@@ -91,7 +96,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual void update(Action const &action, long deltaNVisits, double deltaQ) override;
     virtual void recalculate() override;
 
-  private:
+  protected:
     ObservationPool *observationPool_;
     ModelWithDiscretizedActions *model_;
     long numberOfBins_;
@@ -118,9 +123,12 @@ class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
     DiscretizedActionMapEntry(long binNumber,
             DiscretizedActionMap *map,
             std::unique_ptr<ActionNode> childNode);
-    virtual ~DiscretizedActionMapEntry() = default;
+
+    // Default destructor; copying and moving disallowed!
+    virtual ~DiscretizedActionMapEntry();
     _NO_COPY_OR_MOVE(DiscretizedActionMapEntry);
 
+    virtual ActionMapping *getMapping() const override;
     virtual std::unique_ptr<Action> getAction() const override;
     virtual ActionNode *getActionNode() const override;
     virtual long getVisitCount() const override;
@@ -128,7 +136,7 @@ class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
     virtual double getMeanQValue() const override;
 
     virtual long getBinNumber() const;
-  private:
+  protected:
     long binNumber_;
     DiscretizedActionMap *map_;
     std::unique_ptr<ActionNode> childNode_;
@@ -149,8 +157,12 @@ class DiscretizedActionTextSerializer: virtual public solver::Serializer {
             std::istream &is) override;
     virtual void saveActionMapping(ActionMapping const &map,
             std::ostream &os) override;
+    virtual void saveCustomMappingData(DiscretizedActionMap const &map,
+            std::ostream &os);
     virtual std::unique_ptr<ActionMapping> loadActionMapping(
             std::istream &is) override;
+    virtual void loadCustomMappingData(DiscretizedActionMap &map,
+                std::istream &is);
 };
 } /* namespace solver */
 

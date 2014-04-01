@@ -21,10 +21,9 @@
 
 namespace solver {
 /* ------------------- ModelWithEnumeratedActions ------------------- */
-ModelWithEnumeratedActions::ModelWithEnumeratedActions(
-        std::vector<std::unique_ptr<DiscretizedPoint>> allActions) :
+ModelWithEnumeratedActions::ModelWithEnumeratedActions() :
         ModelWithDiscretizedActions(),
-        allActions_(std::move(allActions)) {
+        allActions_() {
 }
 
 long ModelWithEnumeratedActions::getNumberOfBins() {

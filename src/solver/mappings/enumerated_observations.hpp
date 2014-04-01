@@ -18,6 +18,7 @@
 namespace solver {
 class ActionPool;
 class DiscretizedPoint;
+class EnumeratedObservationMapEntry;
 
 class ModelWithEnumeratedObservations : virtual public solver::Model {
 public:
@@ -42,13 +43,9 @@ private:
   std::vector<std::unique_ptr<DiscretizedPoint>> observations_;
 };
 
-struct EnumeratedObservationMapEntry {
-    std::unique_ptr<BeliefNode> childNode = nullptr;
-    long visitCount = 0;
-};
-
 class EnumeratedObservationMap: public solver::ObservationMapping {
   public:
+    friend class EnumeratedObservationMapEntry;
     friend class EnumeratedObservationTextSerializer;
     EnumeratedObservationMap(ActionPool *actionPool,
             std::vector<std::unique_ptr<DiscretizedPoint>>
@@ -61,8 +58,9 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
 
-    virtual long getNChildren() const override;
     virtual long size() const;
+    virtual long getNChildren() const override;
+    virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
 
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
     virtual long getVisitCount(Observation const &obs) const override;
@@ -70,10 +68,30 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
   private:
     std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations_;
     ActionPool *actionPool_;
-    std::vector<EnumeratedObservationMapEntry> children_;
+    std::vector<std::unique_ptr<EnumeratedObservationMapEntry>> children_;
 
     long nChildren_;
     long totalVisitCount_;
+};
+
+class EnumeratedObservationMapEntry : public solver::ObservationMappingEntry {
+    friend class EnumeratedObservationMap;
+    friend class EnumeratedObservationTextSerializer;
+public:
+    EnumeratedObservationMapEntry(EnumeratedObservationMap *map,
+            long index, std::unique_ptr<BeliefNode> childNode);
+    virtual ~EnumeratedObservationMapEntry() = default;
+    _NO_COPY_OR_MOVE(EnumeratedObservationMapEntry);
+
+    virtual ObservationMapping *getMapping() const override;
+    virtual std::unique_ptr<Observation> getObservation() const override;
+    virtual BeliefNode *getBeliefNode() const override;
+    virtual long getVisitCount() const override;
+private:
+    EnumeratedObservationMap *map_;
+    long index_;
+    std::unique_ptr<BeliefNode> childNode_;
+    long visitCount_;
 };
 
 class EnumeratedObservationTextSerializer: virtual public solver::Serializer {

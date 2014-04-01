@@ -74,10 +74,13 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     totT = abt::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 
+    cout << "Saving to file...";
+    cout.flush();
     std::ofstream os;
     os.open(polPath.c_str());
     solver.saveStateTo(os);
     os.close();
+    cout << "    Done." << endl;
     return 0;
 }
 
