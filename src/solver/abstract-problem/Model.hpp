@@ -173,11 +173,11 @@ class Model {
      */
     virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
 
-    /** Creates a search strategy for use by the given solver. Multiple
+    /** Creates a selection strategy for use by the given solver. Multiple
      * strategies should be combined into one, as is done, for example, in
      * MultipleStrategiesExp3.
      */
-    virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver);
+    virtual std::unique_ptr<SearchStrategy> createSelectionStrategy(Solver *solver);
     /** Creates a rollout strategy for use by the given solver. */
     virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(Solver *solver);
     /** Creates a backpropagation strategy for use by the given solver. */

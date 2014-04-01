@@ -19,7 +19,8 @@ public:
                 nParticles_(vm["ABT.nParticles"].as<unsigned long>()),
                 historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
                 maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
-                strategyParsers_(),
+                selectionParsers_(),
+                rolloutParsers_(),
                 backpropParsers_(),
                 selectionStrategyString_(vm["ABT.selectionStrategy"].as<std::string>()),
                 rolloutStrategyString_(vm["ABT.rolloutStrategy"].as<std::string>()),
@@ -27,10 +28,12 @@ public:
                 hasColorOutput_(vm["color"].as<bool>()),
                 hasVerboseOutput_(vm["verbose"].as<bool>()),
                 heuristicEnabled_(vm["heuristic.enabled"].as<bool>()) {
-        registerStrategyParser("ucb", std::make_unique<UcbSearchParser>());
-        registerStrategyParser("nn", std::make_unique<NnRolloutParser>());
-        registerStrategyParser("random", std::make_unique<RandomRolloutParser>());
-        registerStrategyParser("exp3", std::make_unique<Exp3Parser>());
+        registerSelectionParser("ucb", std::make_unique<UcbSearchParser>());
+        registerSelectionParser("exp3", std::make_unique<Exp3Parser>());
+
+        registerRolloutParser("nn", std::make_unique<NnRolloutParser>());
+        registerRolloutParser("random", std::make_unique<RandomRolloutParser>());
+        registerRolloutParser("exp3", std::make_unique<Exp3Parser>());
 
         registerBackpropagationParser("mean", std::make_unique<AveragePropagatorParser>());
         registerBackpropagationParser("max", std::make_unique<MaximumPropagatorParser>());
@@ -67,21 +70,25 @@ public:
     virtual bool heuristicEnabled() {
         return heuristicEnabled_;
     }
-    virtual void registerStrategyParser(std::string name,
+    virtual void registerSelectionParser(std::string name,
             std::unique_ptr<Parser<solver::SearchStrategy>> parser) {
-        strategyParsers_.addParser(name, std::move(parser));
+        selectionParsers_.addParser(name, std::move(parser));
+    }
+    virtual void registerRolloutParser(std::string name,
+            std::unique_ptr<Parser<solver::SearchStrategy>> parser) {
+        rolloutParsers_.addParser(name, std::move(parser));
     }
     virtual void registerBackpropagationParser(std::string name,
             std::unique_ptr<Parser<solver::BackpropagationStrategy>> parser) {
         backpropParsers_.addParser(name, std::move(parser));
     }
-    virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(
+    virtual std::unique_ptr<solver::SearchStrategy> createSelectionStrategy(
             solver::Solver *solver) override {
-        return strategyParsers_.parse(solver, selectionStrategyString_);
+        return selectionParsers_.parse(solver, selectionStrategyString_);
     }
     virtual std::unique_ptr<solver::SearchStrategy> createRolloutStrategy(
             solver::Solver *solver) override {
-        return strategyParsers_.parse(solver, rolloutStrategyString_);
+        return rolloutParsers_.parse(solver, rolloutStrategyString_);
     }
     virtual std::unique_ptr<solver::BackpropagationStrategy> createBackpropagationStrategy(
             solver::Solver *solver) override {
@@ -99,7 +106,8 @@ private:
     long historiesPerStep_;
     long maximumDepth_;
 
-    ParserSet<solver::SearchStrategy> strategyParsers_;
+    ParserSet<solver::SearchStrategy> selectionParsers_;
+    ParserSet<solver::SearchStrategy> rolloutParsers_;
     ParserSet<solver::BackpropagationStrategy> backpropParsers_;
 
     std::string selectionStrategyString_;

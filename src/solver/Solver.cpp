@@ -77,7 +77,7 @@ void Solver::initialize() {
     policy_->setRoot(std::make_unique<BeliefNode>(
             actionPool_->createActionMapping(), 0));
     historyCorrector_->setSolver(this);
-    selectionStrategy_ = model_->createSearchStrategy(this);
+    selectionStrategy_ = model_->createSelectionStrategy(this);
     rolloutStrategy_ = model_->createRolloutStrategy(this);
     backpropagationStrategy_ = model_->createBackpropagationStrategy(this);
 }

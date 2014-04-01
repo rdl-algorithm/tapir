@@ -87,7 +87,7 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
     return std::make_unique<DefaultHistoryCorrector>(this);
 }
 
-std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
+std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
     return std::make_unique<UcbSelectionStrategy>(solver, 1.0);
 }
 
