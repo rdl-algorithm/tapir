@@ -40,17 +40,15 @@ EnumeratedObservationPool::EnumeratedObservationPool(Solver *solver,
 
 std::unique_ptr<ObservationMapping>
     EnumeratedObservationPool::createObservationMapping() {
-    return std::make_unique<EnumeratedObservationMap>(
-            getSolver()->getActionPool(), observations_);
+    return std::make_unique<EnumeratedObservationMap>(observations_);
 }
 
 
 /* ---------------------- EnumeratedObservationMap ---------------------- */
-EnumeratedObservationMap::EnumeratedObservationMap(ActionPool *actionPool,
+EnumeratedObservationMap::EnumeratedObservationMap(
         std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations) :
                 owningActionNode_(nullptr),
                 allObservations_(allObservations),
-                actionPool_(actionPool),
                 children_(allObservations_.size()),
                 nChildren_(0),
                 totalVisitCount_(0) {
@@ -81,8 +79,6 @@ BeliefNode* EnumeratedObservationMap::createBelief(
             this, code, std::make_unique<BeliefNode>()));
     BeliefNode *node = entry->childNode_.get();
     node->setParentEntry(entry.get());
-    actionPool_->createMappingFor(node);
-
     children_[code] = std::move(entry);
     nChildren_++;
     return node;

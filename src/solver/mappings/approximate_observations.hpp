@@ -45,7 +45,7 @@ class ApproximateObservationMapEntry;
 class ApproximateObservationMap: public solver::ObservationMapping {
   public:
     friend class ApproximateObservationTextSerializer;
-    ApproximateObservationMap(ActionPool *actionPool, double maxDistance);
+    ApproximateObservationMap(double maxDistance);
 
     // Default destructor; copying and moving disallowed!
     virtual ~ApproximateObservationMap() = default;
@@ -74,7 +74,6 @@ class ApproximateObservationMap: public solver::ObservationMapping {
 
 
     ActionNode *owningActionNode_;
-    ActionPool *actionPool_;
     double maxDistance_;
     std::vector<std::unique_ptr<ApproximateObservationMapEntry>> children_;
 

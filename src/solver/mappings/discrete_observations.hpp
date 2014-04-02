@@ -43,7 +43,7 @@ class DiscreteObservationPool: public solver::ObservationPool {
 class DiscreteObservationMap: public solver::ObservationMapping {
   public:
     friend class DiscreteObservationTextSerializer;
-    DiscreteObservationMap(ActionPool *actionPool);
+    DiscreteObservationMap();
 
     // Default destructor; copying and moving disallowed!
     virtual ~DiscreteObservationMap() = default;
@@ -67,7 +67,6 @@ class DiscreteObservationMap: public solver::ObservationMapping {
     virtual long getTotalVisitCount() const override;
   private:
     ActionNode *owningActionNode_;
-    ActionPool *actionPool_;
 
     struct HashContents {
         std::size_t operator()(std::unique_ptr<Observation> const &obs) const {

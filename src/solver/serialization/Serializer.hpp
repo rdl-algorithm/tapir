@@ -6,6 +6,12 @@
 
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"
+
+#include "solver/mappings/ActionPool.hpp"
+#include "solver/mappings/ObservationPool.hpp"
+
+#include "solver/search/BeliefData.hpp"
+
 #include "solver/Solver.hpp"                   // for Solver
 
 #include "global.hpp"
@@ -121,6 +127,12 @@ public:
     /** Loads a mapping of observations to belief nodes. */
     virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
             std::istream &is) = 0;
+
+    /* --------------- Saving extra belief data ----------------- */
+    /** Saves belief data. */
+    virtual void saveBeliefData(BeliefData const *data, std::ostream &os) = 0;
+    /** Loads belief data. */
+    virtual std::unique_ptr<BeliefData> loadBeliefData(std::istream &is) = 0;
 
     /* --------------- Saving the state pool ----------------- */
 

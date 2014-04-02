@@ -48,9 +48,8 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
   public:
     friend class EnumeratedObservationMapEntry;
     friend class EnumeratedObservationTextSerializer;
-    EnumeratedObservationMap(ActionPool *actionPool,
-            std::vector<std::unique_ptr<DiscretizedPoint>>
-            const &allObservations);
+    EnumeratedObservationMap(
+            std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations);
 
     // Default destructor; copying and moving disallowed!
     virtual ~EnumeratedObservationMap() = default;
@@ -75,7 +74,6 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
   private:
     ActionNode *owningActionNode_;
     std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations_;
-    ActionPool *actionPool_;
     std::vector<std::unique_ptr<EnumeratedObservationMapEntry>> children_;
 
     long nChildren_;

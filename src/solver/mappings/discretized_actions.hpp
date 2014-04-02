@@ -161,12 +161,8 @@ class DiscretizedActionTextSerializer: virtual public solver::Serializer {
             std::istream &is) override;
     virtual void saveActionMapping(ActionMapping const &map,
             std::ostream &os) override;
-    virtual void saveCustomMappingData(DiscretizedActionMap const &map,
-            std::ostream &os);
     virtual std::unique_ptr<ActionMapping> loadActionMapping(
             std::istream &is) override;
-    virtual void loadCustomMappingData(DiscretizedActionMap &map,
-                std::istream &is);
 };
 } /* namespace solver */
 

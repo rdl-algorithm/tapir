@@ -7,12 +7,16 @@
 #include "global.hpp"                     // for make_unique
 
 #include "abstract-problem/Observation.hpp"
+
 #include "mappings/ActionMapping.hpp"
+#include "mappings/ActionPool.hpp"
 
 #include "BeliefNode.hpp"               // for BeliefNode
+#include "Solver.hpp"
 
 namespace solver {
-BeliefTree::BeliefTree() :
+BeliefTree::BeliefTree(Solver *solver) :
+    solver_(solver),
     root_(nullptr),
     allNodes_() {
 }
@@ -66,6 +70,11 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
     BeliefNode *childNode;
     std::tie(childNode, isNew) = node->createOrGetChild(action, obs);
     if (isNew) {
+        BeliefData *data = node->getBeliefData();
+        if (data != nullptr) {
+                childNode->setBeliefData(data->createChildData(action, obs));
+        }
+        solver_->getActionPool()->createMappingFor(childNode);
         allNodes_.push_back(nullptr);
         setNode(allNodes_.size() - 1, childNode);
     }

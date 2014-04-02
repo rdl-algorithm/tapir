@@ -7,22 +7,21 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "solver/mappings/ActionPool.hpp"
-#include "solver/mappings/ObservationPool.hpp"
-
-#include "solver/indexing/StateIndex.hpp"
-
-#include "solver/changes/HistoryCorrector.hpp"
-
 #include "Action.hpp"        // for Action
 #include "State.hpp"                    // for State
 #include "Observation.hpp"              // for Observation
 #include "TransitionParameters.hpp"
 
 namespace solver {
+class ActionPool;
+class BeliefData;
 class BeliefNode;
 class BackpropagationStrategy;
+class HistoryCorrector;
+class ObservationPool;
 class SearchStrategy;
+class Solver;
+class StateIndex;
 class StatePool;
 
 class Model {
@@ -184,6 +183,8 @@ class Model {
     /** Creates a backpropagation strategy for use by the given solver. */
     virtual std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
             Solver *solver);
+
+    virtual std::unique_ptr<BeliefData> createRootBeliefData();
 
     /* --------------- Pretty printing methods ----------------- */
      /** Draws the environment map onto the given output stream. */

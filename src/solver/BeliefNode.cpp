@@ -8,6 +8,10 @@
 #include <utility>                      // for pair, make_pair, move
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
+#include "RandomAccessSet.hpp"
+
+#include "ActionNode.hpp"               // for ActionNode
+#include "HistoryEntry.hpp"             // for HistoryEntry
 
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
@@ -16,19 +20,14 @@
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"
 
-#include "ActionNode.hpp"               // for ActionNode
-#include "HistoryEntry.hpp"             // for HistoryEntry
+#include "search/BeliefData.hpp"
 
-#include "RandomAccessSet.hpp"
 
 namespace solver {
 BeliefNode::BeliefNode() :
-    BeliefNode(-1) {
-}
-
-BeliefNode::BeliefNode(long id) :
-        id_(id),
+        id_(-1),
         parentEntry_(nullptr),
+        data_(nullptr),
         particles_(),
         nStartingSequences_(0),
         tLastChange_(-1),
@@ -119,6 +118,9 @@ void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
 void BeliefNode::setParentEntry(ObservationMappingEntry *entry) {
     parentEntry_ =  entry;
 }
+void BeliefNode::setBeliefData(std::unique_ptr<BeliefData> data) {
+    data_ = std::move(data);
+}
 
 /* -------------------- Tree-related getters  ---------------------- */
 ActionMapping *BeliefNode::getMapping() const {
@@ -132,6 +134,9 @@ ActionNode *BeliefNode::getParentActionNode() const {
         return nullptr;
     }
     return parentEntry_->getMapping()->getOwner();
+}
+BeliefData *BeliefNode::getBeliefData() const {
+    return data_.get();
 }
 BeliefNode *BeliefNode::getParentBelief() const {
     if (parentEntry_ == nullptr) {

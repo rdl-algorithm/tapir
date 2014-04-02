@@ -35,17 +35,15 @@ ApproximateObservationPool::ApproximateObservationPool(
 }
 
 std::unique_ptr<ObservationMapping> ApproximateObservationPool::createObservationMapping() {
-    return std::make_unique<ApproximateObservationMap>(
-            getSolver()->getActionPool(), maxDistance_);
+    return std::make_unique<ApproximateObservationMap>(maxDistance_);
 }
 
 /* ---------------------- ApproximateObservationMap ---------------------- */
-ApproximateObservationMap::ApproximateObservationMap(ActionPool *actionPool,
-        double maxDistance) :
+ApproximateObservationMap::ApproximateObservationMap(double maxDistance) :
         owningActionNode_(nullptr),
-        actionPool_(actionPool),
-        maxDistance_(maxDistance), children_(), totalVisitCount_(
-                0) {
+        maxDistance_(maxDistance),
+        children_(),
+        totalVisitCount_(0) {
 }
 
 void ApproximateObservationMap::setOwner(ActionNode *owner) {
@@ -68,8 +66,6 @@ BeliefNode* ApproximateObservationMap::createBelief(const Observation& obs) {
                     this, obs, std::make_unique<BeliefNode>()));
     BeliefNode *node = entry->childNode_.get();
     node->setParentEntry(entry.get());
-    actionPool_->createMappingFor(node);
-
     children_.push_back(std::move(entry));
     return node;
 }

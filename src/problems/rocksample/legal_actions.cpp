@@ -15,10 +15,37 @@
 #include "solver/mappings/ObservationMapping.hpp"
 
 namespace rocksample {
+/* ---------------------- LegalActionsBeliefData --------------------- */
+LegalActionsBeliefData::LegalActionsBeliefData(RockSampleModel *model,
+        GridPosition position) :
+        model_(model),
+        position_(position) {
+}
+
+std::unique_ptr<solver::BeliefData> LegalActionsBeliefData::createChildData(
+        solver::Action const &action,
+        solver::Observation const &/*observation*/) {
+    RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(action);
+
+    bool isLegal;
+    GridPosition nextPosition;
+    std::tie(nextPosition, isLegal) = model_->makeNextPosition(position_, rsAction);
+    if (!isLegal && model_->usingOnlyLegal()) {
+        debug::show_message("ERROR: An illegal action was taken!?");
+    }
+    return std::make_unique<LegalActionsBeliefData>(model_, nextPosition);
+}
+
 /* ------------------------ LegalActionsModel ----------------------- */
 std::unique_ptr<solver::ActionPool> LegalActionsModel::createActionPool(
         solver::Solver *solver) {
     return std::make_unique<LegalActionsPool>(solver, this, getNumberOfBins());
+}
+
+std::unique_ptr<solver::BeliefData> LegalActionsModel::createRootBeliefData() {
+    RockSampleModel *model = dynamic_cast<RockSampleModel *>(this);
+    return std::make_unique<LegalActionsBeliefData>(
+            model, model->getStartPosition());
 }
 
 /* ------------------------ LegalActionsPool ----------------------- */
@@ -34,31 +61,20 @@ std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping() {
 /* ------------------------- LegalActionsMap ------------------------ */
 LegalActionsMap::LegalActionsMap(solver::ObservationPool *observationPool,
             solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                    solver::DiscretizedActionMap(observationPool, model, numberOfBins),
-                    position_() {
+                    solver::DiscretizedActionMap(
+                            observationPool, model, numberOfBins) {
 }
 void LegalActionsMap::initialize() {
-    solver::ObservationMappingEntry *obsEntry = owningBeliefNode_->getParentEntry();
     RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
-    if (obsEntry == nullptr) {
-        position_ = model.getStartPosition();
-    } else {
-        solver::ActionMappingEntry *actEntry = obsEntry->getMapping()->getOwner()->getParentEntry();
-        std::unique_ptr<solver::Action> action = actEntry->getAction();
-        RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(*action);
-        LegalActionsMap *parentMap = static_cast<LegalActionsMap *>(actEntry->getMapping());
-        bool isLegal;
-        std::tie(position_, isLegal) = model.makeNextPosition(parentMap->position_, rsAction);
-        if (!isLegal && model.usingOnlyLegal()) {
-            debug::show_message("An illegal action was taken!?");
-        }
-    }
+    LegalActionsBeliefData const &data = (
+            static_cast<LegalActionsBeliefData const &>(
+                    *owningBeliefNode_->getBeliefData()));
     for (std::unique_ptr<solver::DiscretizedPoint> const &action : model.getAllActionsInOrder()) {
         RockSampleAction const &rsAction =
                 static_cast<RockSampleAction const &>(*action);
         GridPosition nextPosition;
         bool isLegal;
-        std::tie(nextPosition, isLegal) = model.makeNextPosition(position_, rsAction);
+        std::tie(nextPosition, isLegal) = model.makeNextPosition(data.position_, rsAction);
         if (isLegal || !model.usingOnlyLegal()) {
             addUnvisitedAction(rsAction.getBinNumber());
         }
@@ -66,27 +82,30 @@ void LegalActionsMap::initialize() {
 }
 
 /* --------------------- LegalActionsTextSerializer -------------------- */
-void LegalActionsTextSerializer::saveCustomMappingData(
-        solver::DiscretizedActionMap const &map, std::ostream &os) {
-    LegalActionsMap const &legalMap = static_cast<LegalActionsMap const &>(map);
+void LegalActionsTextSerializer::saveBeliefData(solver::BeliefData const *data,
+        std::ostream &os) {
     os << std::endl;
     os << "CUSTOM DATA:" << std::endl;
-    os << "Position: " << legalMap.position_ << std::endl;
-    os << std::endl; // Blank line
+    LegalActionsBeliefData const &legalData = (
+                static_cast<LegalActionsBeliefData const &>(*data));
+    os << "Position: " << legalData.position_ << std::endl;
+    os << std::endl;
 }
-void LegalActionsTextSerializer::loadCustomMappingData(
-        solver::DiscretizedActionMap &map, std::istream &is) {
-    LegalActionsMap &legalMap = static_cast<LegalActionsMap &>(map);
-    std::string line;
+std::unique_ptr<solver::BeliefData> LegalActionsTextSerializer::loadBeliefData(
+        std::istream &is) {
 
+    std::string line;
     std::getline(is, line); // Blank line
     std::getline(is, line); // Header
 
     std::getline(is, line);
     std::string tmpStr;
-    std::istringstream(line) >> tmpStr >> legalMap.position_;
+    GridPosition position;
+    std::istringstream(line) >> tmpStr >> position;
 
     std::getline(is, line); // Blank line
-}
 
+    RockSampleModel *model = dynamic_cast<RockSampleModel *>(model_);
+    return std::make_unique<LegalActionsBeliefData>(model, position);
+}
 } /* namespace rocksample */

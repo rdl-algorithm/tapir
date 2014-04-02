@@ -12,13 +12,14 @@
 namespace solver {
 class ActionMapping;
 class BeliefNode;
+class Solver;
 
 class BeliefTree {
   public:
     friend class TextSerializer;
 
     /* Constructs an empty belief tree. */
-    BeliefTree();
+    BeliefTree(Solver *solver);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefTree();
@@ -49,6 +50,7 @@ class BeliefTree {
             Observation const &obs);
 
 private:
+    Solver *solver_;
     std::unique_ptr<BeliefNode> root_;
     std::vector<BeliefNode *> allNodes_;
 };

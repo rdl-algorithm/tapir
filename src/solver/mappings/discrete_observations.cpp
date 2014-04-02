@@ -33,14 +33,12 @@ DiscreteObservationPool::DiscreteObservationPool(Solver *solver) :
 }
 
 std::unique_ptr<ObservationMapping> DiscreteObservationPool::createObservationMapping() {
-    return std::make_unique<DiscreteObservationMap>(
-            getSolver()->getActionPool());
+    return std::make_unique<DiscreteObservationMap>();
 }
 
 /* ---------------------- DiscreteObservationMap ---------------------- */
-DiscreteObservationMap::DiscreteObservationMap(ActionPool *actionPool) :
+DiscreteObservationMap::DiscreteObservationMap() :
         owningActionNode_(nullptr),
-        actionPool_(actionPool),
         childMap_(),
         totalVisitCount_(0) {
 }
@@ -66,8 +64,6 @@ BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
                     this, obs, std::make_unique<BeliefNode>()));
     BeliefNode *node = entry->childNode_.get();
     node->setParentEntry(entry.get());
-    actionPool_->createMappingFor(node);
-
     childMap_.emplace(obs.copy(), std::move(entry));
     return node;
 }

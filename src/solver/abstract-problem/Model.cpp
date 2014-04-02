@@ -17,6 +17,7 @@
 #include "solver/changes/DefaultHistoryCorrector.hpp"
 #include "solver/changes/HistoryCorrector.hpp"
 
+#include "solver/search/BeliefData.hpp"
 #include "solver/search/SearchStrategy.hpp"
 #include "solver/search/UcbSelectionStrategy.hpp"
 #include "solver/search/RandomRolloutStrategy.hpp"
@@ -98,6 +99,10 @@ std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
 std::unique_ptr<BackpropagationStrategy> Model::createBackpropagationStrategy(
             Solver *solver) {
     return std::make_unique<AveragePropagator>(solver);
+}
+
+std::unique_ptr<BeliefData> Model::createRootBeliefData() {
+    return nullptr;
 }
 
 /* --------------- Pretty printing methods ----------------- */

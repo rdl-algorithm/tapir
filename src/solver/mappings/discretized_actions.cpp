@@ -16,8 +16,9 @@
 #include "solver/abstract-problem/Action.hpp"
 #include "solver/abstract-problem/DiscretizedPoint.hpp"
 
-#include "ActionPool.hpp"
 #include "ActionMapping.hpp"
+#include "ActionPool.hpp"
+#include "ObservationMapping.hpp"
 #include "ObservationPool.hpp"
 
 namespace solver {
@@ -292,7 +293,6 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         ActionMapping const &map, std::ostream &os) {
     DiscretizedActionMap const &discMap = (
             static_cast<DiscretizedActionMap const &>(map));
-    saveCustomMappingData(discMap, os);
     os << discMap.getNChildren() << " action children; ";
     os << discMap.getTotalVisitCount() << " visits" << std::endl;
 
@@ -322,17 +322,12 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         save(*entry.getActionNode(), os);
     }
 }
-void DiscretizedActionTextSerializer::saveCustomMappingData(
-        DiscretizedActionMap const &/*map*/, std::ostream &/*os*/) {
-}
 
 std::unique_ptr<ActionMapping>
 DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     std::unique_ptr<ActionMapping> map(
             solver_->getActionPool()->createActionMapping());
     DiscretizedActionMap &discMap = static_cast<DiscretizedActionMap &>(*map);
-
-    loadCustomMappingData(discMap, is);
 
     std::string line;
     std::getline(is, line);
@@ -387,9 +382,6 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
         discMap.entries_[binNumber] = std::move(entry);
     }
     return std::move(map);
-}
-void DiscretizedActionTextSerializer::loadCustomMappingData(
-        DiscretizedActionMap &/*map*/, std::istream &/*is*/) {
 }
 
 } /* namespace solver */

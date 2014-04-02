@@ -24,9 +24,12 @@
 #include "backpropagation/BackpropagationStrategy.hpp"
 
 #include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
+#include "changes/HistoryCorrector.hpp"
 
 #include "mappings/ActionMapping.hpp"
+#include "mappings/ActionPool.hpp"
 #include "mappings/ObservationMapping.hpp"
+#include "mappings/ObservationPool.hpp"
 
 #include "search/SearchStatus.hpp"
 #include "search/SearchStrategy.hpp"
@@ -57,7 +60,7 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     model_(std::move(model)),
     statePool_(std::make_unique<StatePool>(model_->createStateIndex())),
     histories_(std::make_unique<Histories>()),
-    policy_(std::make_unique<BeliefTree>()),
+    policy_(std::make_unique<BeliefTree>(this)),
     actionPool_(nullptr),
     observationPool_(nullptr),
     historyCorrector_(nullptr),
@@ -76,8 +79,10 @@ void Solver::initializeEmpty() {
     observationPool_ = model_->createObservationPool(this);
 
     std::unique_ptr<BeliefNode> root = std::make_unique<BeliefNode>();
+    BeliefNode *rootPtr = root.get();
     policy_->setRoot(std::move(root));
-    actionPool_->createMappingFor(policy_->getRoot());
+    rootPtr->setBeliefData(model_->createRootBeliefData());
+    actionPool_->createMappingFor(rootPtr);
 
     initialize();
 }

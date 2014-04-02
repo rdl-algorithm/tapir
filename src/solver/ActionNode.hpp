@@ -5,14 +5,17 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
+#include "global.hpp"
+
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
+
 #include "mappings/ObservationMapping.hpp"
-#include "global.hpp"
 
 namespace solver {
 class ActionMappingEntry;
 class BeliefNode;
+class ObservationMapping;
 
 class ActionNode {
   public:

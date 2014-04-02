@@ -45,7 +45,6 @@
 
 #include "legal_actions.hpp"
 #include "RockSampleMdpSolver.hpp"
-#include "RockSampleLegalUcbSelector.hpp"
 
 using std::cout;
 using std::endl;
@@ -76,8 +75,6 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
     maxVal_(0) // depends on nRocks
          {
-    registerSelectionParser("legal-ucb", std::make_unique<RockSampleLegalUcbSelectorParser>());
-
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();

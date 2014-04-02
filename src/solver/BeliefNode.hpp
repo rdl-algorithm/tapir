@@ -7,15 +7,20 @@
 #include <utility>                      // for pair
 
 #include "global.hpp"                     // for RandomGenerator
+#include "RandomAccessSet.hpp"
 
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/State.hpp"
 #include "abstract-problem/Observation.hpp"              // for Observation
-#include "RandomAccessSet.hpp"
+
+#include "mappings/ActionMapping.hpp"
+
+#include "search/BeliefData.hpp"
 
 namespace solver {
 class ActionMapping;
 class ActionNode;
+class BeliefData;
 class HistoryEntry;
 class ObservationMappingEntry;
 
@@ -26,8 +31,6 @@ class BeliefNode {
 
     /** Constructs a new belief node with no ID (-1). */
     BeliefNode();
-    /** Constructs a new belief node with the given ID and no action mapping. */
-    BeliefNode(long id);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefNode();
@@ -73,12 +76,16 @@ class BeliefNode {
     void setMapping(std::unique_ptr<ActionMapping> mapping);
     /** Sets the parent entry for this node. */
     void setParentEntry(ObservationMappingEntry *entry);
+    /** Sets the belief data for this node. */
+    void setBeliefData(std::unique_ptr<BeliefData> data);
 
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
     ActionMapping *getMapping() const;
     /** Returns the parent entry for this node. */
     ObservationMappingEntry *getParentEntry() const;
+    /** Returns the belief data for this node. */
+    BeliefData *getBeliefData() const;
     /** Returns the parent action node of this belief. */
     ActionNode *getParentActionNode() const;
     /** Returns the parent belief of this belief. */
@@ -106,6 +113,8 @@ private:
 
     /** The observation entry that is this node's parent / owner. */
     ObservationMappingEntry *parentEntry_;
+
+    std::unique_ptr<BeliefData> data_;
 
     /** The set of particles belonging to this node. */
     abt::RandomAccessSet<HistoryEntry *> particles_;

@@ -10,6 +10,7 @@
 
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
+
 #include "mappings/ObservationMapping.hpp"       // for ObservationMapping
 
 namespace solver {
