@@ -69,7 +69,8 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     rockPositions_(), // push rocks
     mapText_(), // push rows
     envMap_(), // push rows
-    usingExactMdp_(vm["heuristic.exactMdp"].as<bool>()),
+    usingOnlyLegal_(vm["heuristics.useOnlyLegal"].as<bool>()),
+    usingExactMdp_(vm["heuristics.exactMdp"].as<bool>()),
     mdpSolver_(nullptr),
     nStVars_(), // depends on nRocks
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
@@ -241,46 +242,70 @@ double RockSampleModel::getHeuristicValue(solver::State const &state) {
     return qVal;
 }
 
-std::pair<std::unique_ptr<RockSampleState>,
-        bool> RockSampleModel::makeNextState(
-        RockSampleState const &state, RockSampleAction const &action) {
-    GridPosition pos(state.getPosition());
-    std::vector<bool> rockStates(state.getRockStates());
-    bool isValid = true;
+std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
+        GridPosition pos,
+        RockSampleAction const &action) {
     ActionType actionType = action.getActionType();
+    bool isValid = true;
     if (actionType == ActionType::CHECK) {
         // Do nothing - the state remains the same.
     } else if (actionType == ActionType::SAMPLE) {
         int rockNo = envMap_[pos.i][pos.j] - ROCK;
-        if (0 <= rockNo && rockNo < nRocks_) {
-            rockStates[rockNo] = false;
+        if (rockNo < 0 || rockNo >= nRocks_) {
+            isValid = false;
+        }
+    } else if (actionType == ActionType::NORTH) {
+        if (pos.i > 0) {
+            pos.i -= 1;
         } else {
-            // std::ostringstream message;
-            // message << "Cannot sample at " << pos << " - no rock!";
-            // debug::show_message(message.str());
+            isValid = false;
+        }
+    } else if (actionType == ActionType::EAST) {
+        if (pos.j < nCols_ - 1) {
+            pos.j += 1;
+        } else {
+            isValid = false;
+        }
+    } else if (actionType == ActionType::SOUTH) {
+        if (pos.i < nRows_ - 1) {
+            pos.i += 1;
+        } else {
+            isValid = false;
+        }
+    } else if (actionType == ActionType::WEST) {
+        if (pos.j > 0) {
+            pos.j -= 1;
+        } else {
             isValid = false;
         }
     } else {
-        if (actionType == ActionType::NORTH) {
-            pos.i -= 1;
-        } else if (actionType == ActionType::EAST) {
-            pos.j += 1;
-        } else if (actionType == ActionType::SOUTH) {
-            pos.i += 1;
-        } else if (actionType == ActionType::WEST) {
-            pos.j -= 1;
-        } else {
-            std::ostringstream message;
-            message << "Invalid action: " << action;
-        }
-        // If the position is now invalid, reset it.
-        if (pos.i < 0 || pos.i >= nRows_ || pos.j < 0 || pos.j >= nCols_) {
-            pos = state.getPosition();
-            isValid = false;
-        }
+        std::ostringstream message;
+        message << "Invalid action: " << action;
+        debug::show_message(message.str());
+        isValid = false;
     }
-    return std::make_pair(std::make_unique<RockSampleState>(pos, rockStates),
-            isValid);
+    return std::make_pair(pos, isValid);
+}
+
+std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState(
+        RockSampleState const &state, RockSampleAction const &action) {
+
+    GridPosition nextPos;
+    bool isValid;
+    std::tie(nextPos, isValid) = makeNextPosition(state.getPosition(), action);
+    if (!isValid) {
+        return std::make_pair(std::make_unique<RockSampleState>(state), false);
+    }
+
+    std::vector<bool> rockStates(state.getRockStates());
+    ActionType actionType = action.getActionType();
+    if (actionType == ActionType::SAMPLE) {
+        int rockNo = envMap_[nextPos.i][nextPos.j] - ROCK;
+        rockStates[rockNo] = false;
+    }
+
+    return std::make_pair(std::make_unique<RockSampleState>(nextPos, rockStates),
+            true);
 }
 
 std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(

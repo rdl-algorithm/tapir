@@ -105,12 +105,12 @@ class ProgramOptions {
      * problem
      */
     virtual po::options_description getHeuristicOptions() {
-        po::options_description heuristic("Heuristic settings");
-        heuristic.add_options()
-                ("heuristic.enabled,h", po::value<bool>()->default_value(true)->implicit_value(true),
+        po::options_description heuristics("Heuristic settings");
+        heuristics.add_options()
+                ("heuristics.enabled,h", po::value<bool>()->default_value(true)->implicit_value(true),
                         "whether any heuristic should be used - no heuristic"
                         " means a default value will always be returned.");
-        return heuristic;
+        return heuristics;
     }
 };
 

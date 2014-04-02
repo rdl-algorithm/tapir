@@ -26,12 +26,13 @@ public:
     virtual ~ModelWithDiscreteObservations() = default;
     _NO_COPY_OR_MOVE(ModelWithDiscreteObservations);
 
-    virtual std::unique_ptr<ObservationPool> createObservationPool() override;
+    virtual std::unique_ptr<ObservationPool> createObservationPool(
+            Solver *solver) override;
 };
 
 class DiscreteObservationPool: public solver::ObservationPool {
   public:
-    DiscreteObservationPool() = default;
+    DiscreteObservationPool(Solver *solver);
     virtual ~DiscreteObservationPool() = default;
     _NO_COPY_OR_MOVE(DiscreteObservationPool);
 
@@ -48,16 +49,24 @@ class DiscreteObservationMap: public solver::ObservationMapping {
     virtual ~DiscreteObservationMap() = default;
     _NO_COPY_OR_MOVE(DiscreteObservationMap);
 
+    /* -------------- Association with an action node ---------------- */
+    virtual void setOwner(ActionNode *owner) override;
+    virtual ActionNode *getOwner() const override;
+
+    /* -------------- Creation and retrieval of nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
 
+    /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNChildren() const override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
 
+    /* ------------- Methods for accessing visit counts. --------------- */
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
     virtual long getVisitCount(Observation const &obs) const override;
     virtual long getTotalVisitCount() const override;
   private:
+    ActionNode *owningActionNode_;
     ActionPool *actionPool_;
 
     struct HashContents {

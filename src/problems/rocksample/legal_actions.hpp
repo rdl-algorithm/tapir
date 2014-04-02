@@ -4,6 +4,8 @@
 #include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/enumerated_actions.hpp"
 
+#include "problems/shared/GridPosition.hpp"
+
 namespace rocksample {
 class RockSampleModel;
 
@@ -13,12 +15,14 @@ public:
     virtual ~LegalActionsModel() = default;
     _NO_COPY_OR_MOVE(LegalActionsModel);
 
-    virtual std::unique_ptr<solver::ActionPool> createActionPool() override;
+    virtual std::unique_ptr<solver::ActionPool> createActionPool(
+            solver::Solver *solver) override;
 };
 
 class LegalActionsPool: public solver::DiscretizedActionPool {
   public:
-    LegalActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins);
+    LegalActionsPool( solver::Solver *solver,
+            solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~LegalActionsPool() = default;
     _NO_COPY_OR_MOVE(LegalActionsPool);
 
@@ -27,13 +31,16 @@ class LegalActionsPool: public solver::DiscretizedActionPool {
 };
 
 class LegalActionsMap : public solver::DiscretizedActionMap {
+    friend class LegalActionsTextSerializer;
 public:
     LegalActionsMap(solver::ObservationPool *observationPool,
             solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~LegalActionsMap() = default;
     _NO_COPY_OR_MOVE(LegalActionsMap);
 
-    void initialize(solver::BeliefNode *node) override;
+    void initialize() override;
+private:
+   GridPosition position_;
 };
 
 class LegalActionsTextSerializer : public solver::DiscretizedActionTextSerializer {

@@ -3,6 +3,9 @@
 
 #include <cmath>                        // for abs, pow, sqrt
 
+#include <iostream>
+#include <sstream>
+
 struct GridPosition {
     long i;
     long j;
@@ -23,6 +26,16 @@ struct GridPosition {
 inline std::ostream &operator<<(std::ostream &os, GridPosition const &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";
     return os;
+}
+
+inline std::istream &operator>>(std::istream &is, GridPosition &obj) {
+    std::string tmpStr;
+    std::getline(is, tmpStr, '(');
+    std::getline(is, tmpStr, ',');
+    std::istringstream(tmpStr) >> obj.i;
+    std::getline(is, tmpStr, ')');
+    std::istringstream(tmpStr) >> obj.j;
+    return is;
 }
 
 inline bool operator==(GridPosition const &lhs, GridPosition const &rhs) {

@@ -23,13 +23,14 @@ public:
     virtual ~ModelWithApproximateObservations() = default;
     _NO_COPY_OR_MOVE(ModelWithApproximateObservations);
 
-    virtual std::unique_ptr<ObservationPool> createObservationPool() override;
+    virtual std::unique_ptr<ObservationPool> createObservationPool(
+            Solver *solver) override;
     virtual double getMaxObservationDistance() = 0;
 };
 
 class ApproximateObservationPool: public solver::ObservationPool {
   public:
-    ApproximateObservationPool(double maxDistance);
+    ApproximateObservationPool(Solver *solver, double maxDistance);
     virtual ~ApproximateObservationPool() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationPool);
 
@@ -50,6 +51,10 @@ class ApproximateObservationMap: public solver::ObservationMapping {
     virtual ~ApproximateObservationMap() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationMap);
 
+    /* -------------- Association with an action node ---------------- */
+    virtual void setOwner(ActionNode *owner) override;
+    virtual ActionNode *getOwner() const override;
+
     /* -------------- Creation and retrieval of nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
@@ -62,12 +67,13 @@ class ApproximateObservationMap: public solver::ObservationMapping {
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
     virtual long getVisitCount(Observation const &obs) const override;
     virtual long getTotalVisitCount() const override;
-
   private:
     /* --------------- Private methods to find entries. ----------------- */
     virtual ApproximateObservationMapEntry const *getApproxEntry(Observation const &obs) const;
     virtual ApproximateObservationMapEntry *getApproxEntry(Observation const &obs);
 
+
+    ActionNode *owningActionNode_;
     ActionPool *actionPool_;
     double maxDistance_;
     std::vector<std::unique_ptr<ApproximateObservationMapEntry>> children_;

@@ -22,20 +22,34 @@
 
 namespace solver {
 /* ------------------- ModelWithDiscreteObservations ------------------- */
-std::unique_ptr<ObservationPool> ModelWithDiscreteObservations::createObservationPool() {
-    return std::make_unique<DiscreteObservationPool>();
+std::unique_ptr<ObservationPool> ModelWithDiscreteObservations::createObservationPool(
+        Solver *solver) {
+    return std::make_unique<DiscreteObservationPool>(solver);
 }
 
 /* --------------------- DiscreteObservationPool --------------------- */
+DiscreteObservationPool::DiscreteObservationPool(Solver *solver) :
+        ObservationPool(solver) {
+}
+
 std::unique_ptr<ObservationMapping> DiscreteObservationPool::createObservationMapping() {
-    return std::make_unique<DiscreteObservationMap>(actionPool_);
+    return std::make_unique<DiscreteObservationMap>(
+            getSolver()->getActionPool());
 }
 
 /* ---------------------- DiscreteObservationMap ---------------------- */
 DiscreteObservationMap::DiscreteObservationMap(ActionPool *actionPool) :
+        owningActionNode_(nullptr),
         actionPool_(actionPool),
         childMap_(),
         totalVisitCount_(0) {
+}
+
+void DiscreteObservationMap::setOwner(ActionNode *owner) {
+    owningActionNode_ = owner;
+}
+ActionNode *DiscreteObservationMap::getOwner() const {
+    return owningActionNode_;
 }
 
 BeliefNode* DiscreteObservationMap::getBelief(Observation const &obs) const {
@@ -51,7 +65,8 @@ BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
             std::make_unique<DiscreteObservationMapEntry>(
                     this, obs, std::make_unique<BeliefNode>()));
     BeliefNode *node = entry->childNode_.get();
-    node->setMapping(actionPool_->createActionMapping(node));
+    node->setParentEntry(entry.get());
+    actionPool_->createMappingFor(node);
 
     childMap_.emplace(obs.copy(), std::move(entry));
     return node;
@@ -108,7 +123,7 @@ void DiscreteObservationTextSerializer::saveObservationPool(
 std::unique_ptr<ObservationPool> DiscreteObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->getModel()->createObservationPool();
+    return solver_->getModel()->createObservationPool(solver_);
 }
 
 void DiscreteObservationTextSerializer::saveObservationMapping(
@@ -166,8 +181,11 @@ std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObser
                             &discMap, *obs, std::make_unique<BeliefNode>()));
         entry->visitCount_ = visitCount;
 
-        // Add the node to the tree index.
+        // Update the node's parent entry.
         BeliefNode *node = entry->childNode_.get();
+        node->setParentEntry(entry.get());
+
+        // Add the node to the tree index.
         solver_->getPolicy()->setNode(childId, node);
 
         // Add the entry to the map

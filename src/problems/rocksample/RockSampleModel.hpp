@@ -42,7 +42,7 @@ class RockSampleState;
 class RockSampleObservation;
 
 class RockSampleModel : virtual public ModelWithProgramOptions,
-    virtual public solver::ModelWithEnumeratedActions,
+    virtual public LegalActionsModel,
     virtual public solver::ModelWithEnumeratedObservations {
 friend class RockSampleMdpSolver;
   public:
@@ -60,13 +60,21 @@ friend class RockSampleMdpSolver;
         GOAL = -2,
     };
 
+    /** Returns the name of this problem. */
     virtual std::string getName() override {
         return "RockSample";
     }
-
+    /** Returns true if only legal actions should be used. */
+    virtual bool usingOnlyLegal() {
+        return usingOnlyLegal_;
+    }
     /** Returns the MDP solver, if any is in use. */
     virtual RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
+    }
+    /** Returns the starting position for this problem. */
+    virtual GridPosition getStartPosition() {
+        return startPos_;
     }
 
     /***** Start implementation of Model's methods *****/
@@ -137,6 +145,9 @@ friend class RockSampleMdpSolver;
     getAllObservationsInOrder() override;
 
     /* ----------- Non-virtual methods for RockSampleModel ------------- */
+    /** Generates the next position for the given position and action. */
+    std::pair<GridPosition, bool> makeNextPosition(GridPosition pos,
+            RockSampleAction const &action);
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
@@ -199,7 +210,11 @@ friend class RockSampleMdpSolver;
     /** The environment map in vector form. */
     std::vector<std::vector<RSCellType>> envMap_;
 
+    /** True iff we're using only legal actions. */
+    bool usingOnlyLegal_;
+    /** True iff we're using the exact MDP solution. */
     bool usingExactMdp_;
+    /** The solver for the exact MDP, if used. */
     std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 
     // Generic problem parameters

@@ -14,6 +14,7 @@
 #include "abstract-problem/State.hpp"                    // for State
 
 #include "mappings/ActionMapping.hpp"
+#include "mappings/ObservationMapping.hpp"
 
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry
@@ -27,6 +28,7 @@ BeliefNode::BeliefNode() :
 
 BeliefNode::BeliefNode(long id) :
         id_(id),
+        parentEntry_(nullptr),
         particles_(),
         nStartingSequences_(0),
         tLastChange_(-1),
@@ -112,12 +114,44 @@ double BeliefNode::getTimeOfLastChange() const {
 /* -------------------- Tree-related setters  ---------------------- */
 void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
     actionMap_ = std::move(mapping);
+    actionMap_->setOwner(this);
+}
+void BeliefNode::setParentEntry(ObservationMappingEntry *entry) {
+    parentEntry_ =  entry;
 }
 
 /* -------------------- Tree-related getters  ---------------------- */
-ActionMapping *BeliefNode::getMapping() {
+ActionMapping *BeliefNode::getMapping() const {
     return actionMap_.get();
 }
+ObservationMappingEntry *BeliefNode::getParentEntry() const{
+    return parentEntry_;
+}
+ActionNode *BeliefNode::getParentActionNode() const {
+    if (parentEntry_ == nullptr) {
+        return nullptr;
+    }
+    return parentEntry_->getMapping()->getOwner();
+}
+BeliefNode *BeliefNode::getParentBelief() const {
+    if (parentEntry_ == nullptr) {
+        return nullptr;
+    }
+    return getParentActionNode()->getParentEntry()->getMapping()->getOwner();
+}
+std::unique_ptr<Observation> BeliefNode::getLastObservation() const {
+    if (parentEntry_ == nullptr) {
+        return nullptr;
+    }
+    return parentEntry_->getObservation();
+}
+std::unique_ptr<Action> BeliefNode::getLastAction() const {
+    if (parentEntry_ == nullptr) {
+        return nullptr;
+    }
+    return getParentActionNode()->getParentEntry()->getAction();
+}
+
 
 BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) const {
     ActionNode *node = actionMap_->getActionNode(action);

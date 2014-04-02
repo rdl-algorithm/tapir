@@ -27,7 +27,7 @@ public:
                 backpropagationStrategyString_(vm["ABT.backpropagationStrategy"].as<std::string>()),
                 hasColorOutput_(vm["color"].as<bool>()),
                 hasVerboseOutput_(vm["verbose"].as<bool>()),
-                heuristicEnabled_(vm["heuristic.enabled"].as<bool>()) {
+                heuristicEnabled_(vm["heuristics.enabled"].as<bool>()) {
         registerSelectionParser("ucb", std::make_unique<UcbSearchParser>());
         registerSelectionParser("exp3", std::make_unique<Exp3Parser>());
 

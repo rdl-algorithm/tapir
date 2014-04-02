@@ -55,12 +55,12 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     randGen_(randGen),
     serializer_(nullptr),
     model_(std::move(model)),
-    actionPool_(model_->createActionPool()),
-    observationPool_(model_->createObservationPool()),
     statePool_(std::make_unique<StatePool>(model_->createStateIndex())),
     histories_(std::make_unique<Histories>()),
     policy_(std::make_unique<BeliefTree>()),
-    historyCorrector_(model_->createHistoryCorrector()),
+    actionPool_(nullptr),
+    observationPool_(nullptr),
+    historyCorrector_(nullptr),
     selectionStrategy_(nullptr),
     rolloutStrategy_(nullptr),
     backpropagationStrategy_(nullptr) {
@@ -71,14 +71,18 @@ Solver::~Solver() {
 }
 
 /* ------------------ Initialization methods ------------------- */
-void Solver::initialize() {
-    actionPool_->observationPool_ = observationPool_.get();
-    observationPool_->actionPool_ = actionPool_.get();
-    std::unique_ptr<BeliefNode> root = std::make_unique<BeliefNode>();
-    root->setMapping(actionPool_->createActionMapping(root.get()));
-    policy_->setRoot(std::move(root));
+void Solver::initializeEmpty() {
+    actionPool_ = model_->createActionPool(this);
+    observationPool_ = model_->createObservationPool(this);
 
-    historyCorrector_->setSolver(this);
+    std::unique_ptr<BeliefNode> root = std::make_unique<BeliefNode>();
+    policy_->setRoot(std::move(root));
+    actionPool_->createMappingFor(policy_->getRoot());
+
+    initialize();
+}
+void Solver::initialize() {
+    historyCorrector_ = model_->createHistoryCorrector(this);
     selectionStrategy_ = model_->createSelectionStrategy(this);
     rolloutStrategy_ = model_->createRolloutStrategy(this);
     backpropagationStrategy_ = model_->createBackpropagationStrategy(this);

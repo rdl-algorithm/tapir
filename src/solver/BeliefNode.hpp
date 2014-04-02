@@ -17,6 +17,7 @@ namespace solver {
 class ActionMapping;
 class ActionNode;
 class HistoryEntry;
+class ObservationMappingEntry;
 
 class BeliefNode {
   public:
@@ -70,10 +71,22 @@ class BeliefNode {
     /* -------------------- Tree-related setters  ---------------------- */
     /** Sets the mapping for this node. */
     void setMapping(std::unique_ptr<ActionMapping> mapping);
+    /** Sets the parent entry for this node. */
+    void setParentEntry(ObservationMappingEntry *entry);
 
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
-    ActionMapping *getMapping();
+    ActionMapping *getMapping() const;
+    /** Returns the parent entry for this node. */
+    ObservationMappingEntry *getParentEntry() const;
+    /** Returns the parent action node of this belief. */
+    ActionNode *getParentActionNode() const;
+    /** Returns the parent belief of this belief. */
+    BeliefNode *getParentBelief() const;
+    /** Returns the last observation received before this belief. */
+    std::unique_ptr<Observation> getLastObservation() const;
+    /** Returns the last action taken before this belief. */
+    std::unique_ptr<Action> getLastAction() const;
     /** Returns the belief node child corresponding to the given action and
      * observation
      */
@@ -90,6 +103,9 @@ class BeliefNode {
 private:
     /** The ID of this node. */
     long id_;
+
+    /** The observation entry that is this node's parent / owner. */
+    ObservationMappingEntry *parentEntry_;
 
     /** The set of particles belonging to this node. */
     abt::RandomAccessSet<HistoryEntry *> particles_;

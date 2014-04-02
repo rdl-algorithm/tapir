@@ -12,8 +12,8 @@
 
 namespace solver {
 
-DefaultHistoryCorrector::DefaultHistoryCorrector(Model *model) :
-        HistoryCorrector(nullptr, model) {
+DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, Model *model) :
+        HistoryCorrector(solver, model) {
 }
 
 void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {

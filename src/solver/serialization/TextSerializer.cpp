@@ -225,11 +225,11 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
 }
 
 void TextSerializer::save(ActionNode const &node, std::ostream &os) {
-    saveObservationMapping(*node.observationMap_, os);
+    saveObservationMapping(*node.getMapping(), os);
 }
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
-    node.observationMap_ = std::move(loadObservationMapping(is));
+    node.setMapping(loadObservationMapping(is));
 }
 
 void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
@@ -256,7 +256,7 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
         }
         os << "particles end" << endl;
     }
-    saveActionMapping(*node.actionMap_, os);
+    saveActionMapping(*node.getMapping(), os);
 }
 
 void TextSerializer::load(BeliefNode &node, std::istream &is) {
@@ -287,7 +287,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
             std::getline(is, line);
         }
     }
-    node.actionMap_ = std::move(loadActionMapping(is));
+    node.setMapping(loadActionMapping(is));
 }
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
@@ -316,8 +316,9 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
     long nNodes;
     std::string tmpStr;
     std::istringstream(line) >> tmpStr >> nNodes;
-    tree.allNodes_.assign(nNodes, nullptr);
-    tree.setNode(0, tree.getRoot());
+
+    tree.setRoot(std::make_unique<BeliefNode>());
+    tree.allNodes_.resize(nNodes);
 
     std::getline(is, line);
     while ((line.find("BELIEFTREE-END") == std::string::npos)) {

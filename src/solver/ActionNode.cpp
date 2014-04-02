@@ -14,25 +14,35 @@
 
 namespace solver {
 ActionNode::ActionNode() :
-    ActionNode(nullptr) {
-}
-
-ActionNode::ActionNode(std::unique_ptr<ObservationMapping> mapping) :
-    observationMap_(std::move(mapping)) {
+        parentEntry_(nullptr),
+        observationMap_(nullptr) {
 }
 
 // Default destructor
 ActionNode::~ActionNode() {
 }
 
-ObservationMapping *ActionNode::getMapping() {
-    return observationMap_.get();
+/* -------------------- Tree-related setters  ---------------------- */
+void ActionNode::setMapping(std::unique_ptr<ObservationMapping> mapping) {
+    observationMap_ = std::move(mapping);
+    observationMap_->setOwner(this);
+}
+void ActionNode::setParentEntry(ActionMappingEntry *entry) {
+    parentEntry_ =  entry;
 }
 
+/* -------------------- Tree-related getters  ---------------------- */
+ObservationMapping *ActionNode::getMapping() const {
+    return observationMap_.get();
+}
+ActionMappingEntry *ActionNode::getParentEntry() const {
+    return parentEntry_;
+}
 BeliefNode *ActionNode::getChild(Observation const &obs) const {
     return observationMap_->getBelief(obs);
 }
 
+/* -------------------- Tree-related methods  ---------------------- */
 std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Observation const &obs) {
     BeliefNode *beliefChild = getChild(obs);
     bool added = false;

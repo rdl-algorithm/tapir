@@ -21,26 +21,38 @@
 
 namespace solver {
 /* ------------------- ModelWithApproximateObservations ------------------- */
-std::unique_ptr<ObservationPool> ModelWithApproximateObservations::createObservationPool() {
-    return std::make_unique<ApproximateObservationPool>(
+std::unique_ptr<ObservationPool> ModelWithApproximateObservations::createObservationPool(
+        Solver *solver) {
+    return std::make_unique<ApproximateObservationPool>(solver,
             getMaxObservationDistance());
 }
 
 /* --------------------- ApproximateObservationPool --------------------- */
-ApproximateObservationPool::ApproximateObservationPool(double maxDistance) :
+ApproximateObservationPool::ApproximateObservationPool(
+        Solver *solver, double maxDistance) :
+        ObservationPool(solver),
         maxDistance_(maxDistance) {
 }
 
 std::unique_ptr<ObservationMapping> ApproximateObservationPool::createObservationMapping() {
-    return std::make_unique<ApproximateObservationMap>(actionPool_,
-            maxDistance_);
+    return std::make_unique<ApproximateObservationMap>(
+            getSolver()->getActionPool(), maxDistance_);
 }
 
 /* ---------------------- ApproximateObservationMap ---------------------- */
 ApproximateObservationMap::ApproximateObservationMap(ActionPool *actionPool,
         double maxDistance) :
-        actionPool_(actionPool), maxDistance_(maxDistance), children_(), totalVisitCount_(
+        owningActionNode_(nullptr),
+        actionPool_(actionPool),
+        maxDistance_(maxDistance), children_(), totalVisitCount_(
                 0) {
+}
+
+void ApproximateObservationMap::setOwner(ActionNode *owner) {
+    owningActionNode_ = owner;
+}
+ActionNode *ApproximateObservationMap::getOwner() const {
+    return owningActionNode_;
 }
 
 BeliefNode* ApproximateObservationMap::getBelief(Observation const &obs) const {
@@ -55,7 +67,8 @@ BeliefNode* ApproximateObservationMap::createBelief(const Observation& obs) {
             std::make_unique<ApproximateObservationMapEntry>(
                     this, obs, std::make_unique<BeliefNode>()));
     BeliefNode *node = entry->childNode_.get();
-    node->setMapping(actionPool_->createActionMapping(node));
+    node->setParentEntry(entry.get());
+    actionPool_->createMappingFor(node);
 
     children_.push_back(std::move(entry));
     return node;
@@ -131,7 +144,7 @@ void ApproximateObservationTextSerializer::saveObservationPool(
 std::unique_ptr<ObservationPool> ApproximateObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->getModel()->createObservationPool();
+    return solver_->getModel()->createObservationPool(solver_);
 }
 
 void ApproximateObservationTextSerializer::saveObservationMapping(
@@ -190,8 +203,11 @@ std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadOb
                         &approxMap, *obs, std::make_unique<BeliefNode>()));
         entry->visitCount_ = visitCount;
 
-        // Add the node to the tree index
+        // Update the node's parent entry.
         BeliefNode *node = entry->childNode_.get();
+        node->setParentEntry(entry.get());
+
+        // Add the node to the tree index.
         solver_->getPolicy()->setNode(childId, node);
 
         // Add the entry to the vector

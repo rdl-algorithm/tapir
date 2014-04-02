@@ -8,7 +8,7 @@ class HistorySequence;
 
 class DefaultHistoryCorrector: public solver::HistoryCorrector {
 public:
-    DefaultHistoryCorrector(Model *model);
+    DefaultHistoryCorrector(Solver *solver, Model *model);
     virtual ~DefaultHistoryCorrector() = default;
 
     void reviseSequence(HistorySequence *sequence);

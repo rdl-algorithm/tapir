@@ -6,6 +6,7 @@
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 
 namespace solver {
+class ActionNode;
 class BeliefNode;
 class ObservationMappingEntry;
 
@@ -21,6 +22,12 @@ class ObservationMapping {
     ObservationMapping &operator=(ObservationMapping const &) = delete;
     ObservationMapping &operator=(ObservationMapping &&) = delete;
 
+    /* -------------- Association with an action node ---------------- */
+    /* Associates this mapping with the given action node. */
+    virtual void setOwner(ActionNode *owner) = 0;
+    /** Returns the action node that owns this mapping. */
+    virtual ActionNode *getOwner() const = 0;
+
     /* -------------- Creation and retrieval of nodes. ---------------- */
     /** Retrieves the belief node (if any) corresponding to this observation */
     virtual BeliefNode *getBelief(Observation const &obs) const = 0;
@@ -33,7 +40,7 @@ class ObservationMapping {
     /** Returns the mapping entry associated with the given observation. */
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const = 0;
 
-    /* --------------- Methods for accessing visit counts. ----------------- */
+    /* ------------- Methods for accessing visit counts. --------------- */
     /** Updates the visit count for the given observation. */
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) = 0;
     /** Returns the visit count for the given observation. */

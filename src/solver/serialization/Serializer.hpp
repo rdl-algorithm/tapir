@@ -65,8 +65,8 @@ public:
         load(*(solver_->histories_), is);
         solver_->actionPool_ = loadActionPool(is);
         solver_->observationPool_ = loadObservationPool(is);
-        solver_->initialize();
         load(*(solver_->policy_), is);
+        solver_->initialize();
     }
 
     /* --------------- Saving states & observations ----------------- */

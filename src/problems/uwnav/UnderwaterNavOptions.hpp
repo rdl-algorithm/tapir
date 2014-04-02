@@ -34,12 +34,12 @@ class UnderwaterNavOptions: public ProgramOptions {
     po::options_description getHeuristicOptions() {
         po::options_description heuristic(
             "Underwater Navigation heuristic configuration");
-        heuristic.add(ProgramOptions::getHeuristicOptions());
-        heuristic.add_options()
-                ("heuristic.rolloutExploreTh", po::value<double>(), "??")
-                ("heuristic.nVerts", po::value<long>(), "??")
-                ("heuristic.nTryCon", po::value<long>(), "??")
-                ("heuristic.maxDistCon", po::value<long>(), "??");
+        heuristics.add(ProgramOptions::getHeuristicOptions());
+        heuristics.add_options()
+                ("heuristics.rolloutExploreTh", po::value<double>(), "??")
+                ("heuristics.nVerts", po::value<long>(), "??")
+                ("heuristics.nTryCon", po::value<long>(), "??")
+                ("heuristics.maxDistCon", po::value<long>(), "??");
         return heuristic;
     }
 };

@@ -83,8 +83,8 @@ std::unique_ptr<StateIndex> Model::createStateIndex() {
     return std::make_unique<RTree>(getNumberOfStateVariables());
 }
 
-std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector() {
-    return std::make_unique<DefaultHistoryCorrector>(this);
+std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) {
+    return std::make_unique<DefaultHistoryCorrector>(solver, this);
 }
 
 std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {

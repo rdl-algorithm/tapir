@@ -53,9 +53,9 @@ class Nav2DOptions : public ProgramOptions {
 
     /** Returns configuration options for the Nav2D heuristic */
     po::options_description getHeuristicOptions() {
-        po::options_description heuristic("Nav2D heuristic configuration");
-        heuristic.add(ProgramOptions::getHeuristicOptions());
-        return heuristic;
+        po::options_description heuristics("Nav2D heuristic configuration");
+        heuristics.add(ProgramOptions::getHeuristicOptions());
+        return heuristics;
     }
 };
 } /* namespace nav2d */

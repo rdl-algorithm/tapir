@@ -20,7 +20,12 @@ public:
     virtual ~ActionMapping() = default;
     _NO_COPY_OR_MOVE(ActionMapping);
 
-    /** Initializes this mapping w.r.t. the given belief node.
+    /* -------------- Association with a belief node ---------------- */
+    /* Associates this mapping with the given belief node. */
+    virtual void setOwner(BeliefNode *owner) = 0;
+    /** Returns the belief node that owns this mapping. */
+    virtual BeliefNode *getOwner() const = 0;
+    /** Initializes this mapping (with respect to the belief node that owns it)
      *
      * This is optional; it can allow initialization of mappings based on
      * parameters of the given node, including the history of actions and
@@ -30,7 +35,7 @@ public:
      * called when a belief node is deserialized, as the relevant parameters
      * can simply be stored for serialization.
      */
-    virtual void initialize(BeliefNode */*node*/) {}
+    virtual void initialize() {}
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     /** Retrieves the action node (if any) corresponding to this action. */

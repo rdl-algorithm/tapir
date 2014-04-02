@@ -26,14 +26,15 @@ public:
     virtual ~ModelWithEnumeratedObservations() = default;
     _NO_COPY_OR_MOVE(ModelWithEnumeratedObservations);
 
-    virtual std::unique_ptr<ObservationPool> createObservationPool() override;
+    virtual std::unique_ptr<ObservationPool> createObservationPool(
+            Solver *solver) override;
     virtual std::vector<std::unique_ptr<DiscretizedPoint>>
     getAllObservationsInOrder() = 0;
 };
 
 class EnumeratedObservationPool: public solver::ObservationPool {
   public:
-    EnumeratedObservationPool(
+    EnumeratedObservationPool(Solver *solver,
             std::vector<std::unique_ptr<DiscretizedPoint>> observations);
     virtual ~EnumeratedObservationPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationPool);
@@ -55,17 +56,24 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     virtual ~EnumeratedObservationMap() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationMap);
 
+    /* -------------- Association with an action node ---------------- */
+    virtual void setOwner(ActionNode *owner) override;
+    virtual ActionNode *getOwner() const override;
+
+    /* -------------- Creation and retrieval of nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
 
-    virtual long size() const;
+    /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNChildren() const override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
 
+    /* ------------- Methods for accessing visit counts. --------------- */
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
     virtual long getVisitCount(Observation const &obs) const override;
     virtual long getTotalVisitCount() const override;
   private:
+    ActionNode *owningActionNode_;
     std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations_;
     ActionPool *actionPool_;
     std::vector<std::unique_ptr<EnumeratedObservationMapEntry>> children_;

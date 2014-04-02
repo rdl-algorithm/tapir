@@ -34,8 +34,8 @@ std::pair<SearchStatus, std::unique_ptr<Action>> UcbSelectionInstance::getStatus
     double bestValue = -std::numeric_limits<double>::infinity();
     std::unique_ptr<Action> bestAction = nullptr;
     for (ActionMappingEntry const *entry : mapping->getChildEntries()) {
-        double tmpValue = entry->getMeanQValue() + (explorationCoefficient_ * std::sqrt(
-                        std::log(mapping->getTotalVisitCount() / entry->getVisitCount())));
+        double tmpValue = entry->getMeanQValue() + explorationCoefficient_ * std::sqrt(
+                        std::log(mapping->getTotalVisitCount()) / entry->getVisitCount());
         if (!std::isfinite(tmpValue)) {
             debug::show_message("ERROR: Infinite/NaN value!?");
         }

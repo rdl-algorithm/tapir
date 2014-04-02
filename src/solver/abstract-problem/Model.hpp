@@ -163,15 +163,16 @@ class Model {
     /** Creates a HistoryCorrector; defaults to a general one, but can
      * be made problem-specific.
      */
-    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector();
+    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(
+            Solver *solver);
     /** Creates an ActionPool, which manages actions and creates
      * ActionMappings
      */
-    virtual std::unique_ptr<ActionPool> createActionPool() = 0;
+    virtual std::unique_ptr<ActionPool> createActionPool(Solver *solver) = 0;
     /** Creates an ObservationPool, which manages observations and creates
      * ObservationMappings.
      */
-    virtual std::unique_ptr<ObservationPool> createObservationPool() = 0;
+    virtual std::unique_ptr<ObservationPool> createObservationPool(Solver *solver) = 0;
 
     /** Creates a selection strategy for use by the given solver. Multiple
      * strategies should be combined into one, as is done, for example, in
