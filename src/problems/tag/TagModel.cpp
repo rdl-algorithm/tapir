@@ -587,7 +587,7 @@ void TagModel::drawSimulationState(solver::BeliefNode *belief,
 std::vector<std::unique_ptr<solver::DiscretizedPoint>>
 TagModel::getAllActionsInOrder() {
     std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
-    for (long code = 0; code < 5; code++) {
+    for (long code = 0; code < nActions_; code++) {
         allActions.push_back(std::make_unique<TagAction>(code));
     }
     return allActions;
