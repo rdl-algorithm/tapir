@@ -10,8 +10,6 @@
 #include "solver/mappings/ActionPool.hpp"
 #include "solver/mappings/ObservationPool.hpp"
 
-#include "solver/search/BeliefData.hpp"
-
 #include "solver/Solver.hpp"                   // for Solver
 
 #include "global.hpp"
@@ -21,6 +19,7 @@ class ActionMapping;
 class ActionNode;
 class BeliefNode;
 class BeliefTree;
+class HistoricalData;
 class Histories;
 class HistoryEntry;
 class HistorySequence;
@@ -129,10 +128,10 @@ public:
             std::istream &is) = 0;
 
     /* --------------- Saving extra belief data ----------------- */
-    /** Saves belief data. */
-    virtual void saveBeliefData(BeliefData const *data, std::ostream &os) = 0;
-    /** Loads belief data. */
-    virtual std::unique_ptr<BeliefData> loadBeliefData(std::istream &is) = 0;
+    /** Saves history-derived information about a belief. */
+    virtual void saveHistoricalData(HistoricalData const *data, std::ostream &os) = 0;
+    /** Loads history-derived information about a belief. */
+    virtual std::unique_ptr<HistoricalData> loadHistoricalData(std::istream &is) = 0;
 
     /* --------------- Saving the state pool ----------------- */
 

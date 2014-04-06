@@ -14,7 +14,7 @@
 
 namespace solver {
 class ActionPool;
-class BeliefData;
+class HistoricalData;
 class BeliefNode;
 class BackpropagationStrategy;
 class HistoryCorrector;
@@ -26,10 +26,7 @@ class StatePool;
 
 class Model {
   public:
-    /** Constructor - stores the RandomGenerator for this model. */
     Model() = default;
-
-    // Default destructor; copying and moving disallowed!
     virtual ~Model() = default;
     _NO_COPY_OR_MOVE(Model);
 
@@ -184,7 +181,7 @@ class Model {
     virtual std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
             Solver *solver);
 
-    virtual std::unique_ptr<BeliefData> createRootBeliefData();
+    virtual std::unique_ptr<HistoricalData> createRootInfo();
 
     /* --------------- Pretty printing methods ----------------- */
      /** Draws the environment map onto the given output stream. */

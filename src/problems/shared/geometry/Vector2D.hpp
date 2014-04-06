@@ -74,7 +74,7 @@ inline Vector2D operator*(double scalar, Vector2D const &v) {
 }
 
 inline Vector2D operator*(Vector2D const &v, double scalar) {
-	return scalar * v;
+    return scalar * v;
 }
 
 inline Point2D operator+(Point2D p, Vector2D const &v) {

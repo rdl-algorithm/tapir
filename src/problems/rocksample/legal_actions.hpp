@@ -4,7 +4,7 @@
 #include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/enumerated_actions.hpp"
 
-#include "solver/search/BeliefData.hpp"
+#include "solver/search/HistoricalData.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"
 
@@ -13,18 +13,20 @@
 namespace rocksample {
 class RockSampleModel;
 
-class LegalActionsBeliefData : public solver::BeliefData {
+class RockSampleHistoricalData : public solver::HistoricalData {
     friend class LegalActionsMap;
     friend class LegalActionsTextSerializer;
 public:
-    LegalActionsBeliefData(RockSampleModel *model,
-            GridPosition position);
-    virtual ~LegalActionsBeliefData() = default;
-    _NO_COPY_OR_MOVE(LegalActionsBeliefData);
+    RockSampleHistoricalData(RockSampleModel *model, GridPosition position);
+    virtual ~RockSampleHistoricalData() = default;
+    _NO_COPY_OR_MOVE(RockSampleHistoricalData);
 
-    std::unique_ptr<solver::BeliefData> createChildData(
+    std::unique_ptr<solver::HistoricalData> createChild(
             solver::Action const &action,
-            solver::Observation const &observation);
+            solver::Observation const &observation) override;
+
+    void print(std::ostream &os) const override;
+
 private:
     RockSampleModel *model_;
     GridPosition position_;
@@ -38,7 +40,7 @@ public:
 
     virtual std::unique_ptr<solver::ActionPool> createActionPool(
             solver::Solver *solver) override;
-    virtual std::unique_ptr<solver::BeliefData> createRootBeliefData() override;
+    virtual std::unique_ptr<solver::HistoricalData> createRootInfo() override;
 };
 
 class LegalActionsPool: public solver::DiscretizedActionPool {
@@ -67,8 +69,8 @@ public:
 class LegalActionsTextSerializer : virtual public solver::TextSerializer,
 virtual public solver::DiscretizedActionTextSerializer {
 public:
-    void saveBeliefData(solver::BeliefData const *data, std::ostream &os) override;
-    std::unique_ptr<solver::BeliefData> loadBeliefData(std::istream &is) override;
+    void saveHistoricalData(solver::HistoricalData const *data, std::ostream &os) override;
+    std::unique_ptr<solver::HistoricalData> loadHistoricalData(std::istream &is) override;
 };
 } /* namespace rocksample */
 

@@ -12,8 +12,8 @@ namespace solver {
 class VectorLP : public Vector {
 public:
     friend class VectorLPTextSerializer;
-    VectorLP(std::initializer_list<double> values, double p = 1.0);
-    VectorLP(std::vector<double> values, double p = 1.0);
+    VectorLP(std::initializer_list<double> values, double p = 2.0);
+    VectorLP(std::vector<double> values, double p = 2.0);
     virtual ~VectorLP() = default;
     _NO_COPY_OR_MOVE(VectorLP);
 

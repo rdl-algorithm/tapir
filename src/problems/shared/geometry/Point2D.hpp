@@ -41,8 +41,8 @@ private:
 
 // operator<< is defined for Point, but operator>> isn't so we define it here.
 inline std::istream &operator>>(std::istream &is, Point2D &point) {
-	point.loadFrom(is);
-	return is;
+    point.loadFrom(is);
+    return is;
 }
 } /* namespace geometry */
 

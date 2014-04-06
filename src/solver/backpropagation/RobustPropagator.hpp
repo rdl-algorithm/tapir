@@ -9,6 +9,8 @@ class RobustPropagator : public AbstractBackpropagationStrategy {
 public:
     RobustPropagator(Solver *solver);
     virtual ~RobustPropagator() = default;
+    _NO_COPY_OR_MOVE(RobustPropagator);
+
     virtual void updateEntry(HistoryEntry *entry, bool undo) override;
 private:
     double deltaQ_;

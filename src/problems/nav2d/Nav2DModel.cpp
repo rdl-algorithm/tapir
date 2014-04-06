@@ -306,27 +306,27 @@ double Nav2DModel::getHeuristicValue(solver::State const &state) {
             displacement.getDirection() - navState.getDirection()));
     long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
     numSteps += std::floor(turnAmount / (maxRotationalSpeed_
-			* timeStepLength_));
+            * timeStepLength_));
     if (numSteps <= 0) {
         numSteps = 1;
     }
-	double costPerStep = costPerUnitDistance_ * distance / numSteps;
-	costPerStep += costPerRevolution_ * turnAmount / numSteps;
-	costPerStep += costPerUnitTime_ * timeStepLength_;
+    double costPerStep = costPerUnitDistance_ * distance / numSteps;
+    costPerStep += costPerRevolution_ * turnAmount / numSteps;
+    costPerStep += costPerUnitTime_ * timeStepLength_;
 
-	double discountFactor = getDiscountFactor();
-	double reward = 0;
-	if (discountFactor < 1.0) {
-	    double finalDiscount = std::pow(discountFactor, numSteps);
-		reward = finalDiscount * goalReward_;
-		reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
-	} else {
-	    reward = goalReward_ - costPerStep * numSteps;
-	}
+    double discountFactor = getDiscountFactor();
+    double reward = 0;
+    if (discountFactor < 1.0) {
+        double finalDiscount = std::pow(discountFactor, numSteps);
+        reward = finalDiscount * goalReward_;
+        reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
+    } else {
+        reward = goalReward_ - costPerStep * numSteps;
+    }
     if (!std::isfinite(reward)) {
         debug::show_message("Bad reward!");
     }
-	return reward;
+    return reward;
 }
 
 std::unique_ptr<Nav2DState> Nav2DModel::extrapolateState(
@@ -381,8 +381,8 @@ std::unique_ptr<solver::TransitionParameters> Nav2DModel::generateTransition(
         if (!mapArea_.contains(currentPosition)) {
             transition->moveRatio = previousRatio;
             transition->hitBounds = true;
-			break;
- 		}
+            break;
+         }
         if (isInside(currentPosition, AreaType::OBSTACLE)) {
             transition->moveRatio = previousRatio;
             transition->hadCollision = true;
@@ -459,8 +459,8 @@ solver::Model::StepResult Nav2DModel::generateStep(
             nullptr, *result.nextState);
     result.reward = generateReward(state, action,
             result.transitionParameters.get(), result.nextState.get());
-	result.isTerminal = static_cast<Nav2DTransition const &>(
-			*result.transitionParameters).reachedGoal;
+    result.isTerminal = static_cast<Nav2DTransition const &>(
+            *result.transitionParameters).reachedGoal;
     return result;
 }
 

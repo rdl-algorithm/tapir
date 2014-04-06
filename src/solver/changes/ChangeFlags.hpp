@@ -40,7 +40,7 @@ inline ChangeFlags operator~(ChangeFlags const &cf) {
 }
 
 namespace changes {
-inline ChangeFlags combineFlags(std::initializer_list<ChangeFlags> flags) {
+inline ChangeFlags combine_flags(std::initializer_list<ChangeFlags> flags) {
     ChangeFlags combined = ChangeFlags::UNCHANGED;
     for (ChangeFlags flag : flags) {
         combined |= flag;
@@ -48,11 +48,11 @@ inline ChangeFlags combineFlags(std::initializer_list<ChangeFlags> flags) {
     return combined;
 }
 
-inline bool hasFlag(ChangeFlags value, ChangeFlags flag) {
+inline bool has_flag(ChangeFlags value, ChangeFlags flag) {
     return (value & flag) == flag;
 }
-
 } /* namespace changes */
+
 } /* namespace solver */
 
 #endif /* SOLVER_CHANGEFLAGS_HPP_ */

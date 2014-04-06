@@ -33,13 +33,13 @@ private:
 };
 
 inline std::ostream &operator<<(std::ostream &os, Rectangle2D const &rect) {
-	rect.print(os);
-	return os;
+    rect.print(os);
+    return os;
 }
 
 inline std::istream &operator>>(std::istream &is, Rectangle2D &rect) {
-	rect.loadFrom(is);
-	return is;
+    rect.loadFrom(is);
+    return is;
 }
 
 } /* namespace geometry */

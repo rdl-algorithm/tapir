@@ -70,9 +70,9 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
     BeliefNode *childNode;
     std::tie(childNode, isNew) = node->createOrGetChild(action, obs);
     if (isNew) {
-        BeliefData *data = node->getBeliefData();
+        HistoricalData *data = node->getHistoricalData();
         if (data != nullptr) {
-                childNode->setBeliefData(data->createChildData(action, obs));
+                childNode->setHistoricalData(data->createChild(action, obs));
         }
         solver_->getActionPool()->createMappingFor(childNode);
         allNodes_.push_back(nullptr);

@@ -39,8 +39,8 @@ class TextSerializer : virtual public Serializer {
     virtual std::unique_ptr<TransitionParameters> loadTransitionParameters(
             std::istream &is) override;
 
-    virtual void saveBeliefData(BeliefData const *data, std::ostream &os) override;
-    virtual std::unique_ptr<BeliefData> loadBeliefData(std::istream &is) override;
+    virtual void saveHistoricalData(HistoricalData const *data, std::ostream &os) override;
+    virtual std::unique_ptr<HistoricalData> loadHistoricalData(std::istream &is) override;
 
     virtual void save(StateInfo const &wrapper, std::ostream &os) override;
     virtual void load(StateInfo &wrapper, std::istream &is) override;

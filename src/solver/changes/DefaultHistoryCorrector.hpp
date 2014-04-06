@@ -10,6 +10,7 @@ class DefaultHistoryCorrector: public solver::HistoryCorrector {
 public:
     DefaultHistoryCorrector(Solver *solver, Model *model);
     virtual ~DefaultHistoryCorrector() = default;
+    _NO_COPY_OR_MOVE(DefaultHistoryCorrector);
 
     void reviseSequence(HistorySequence *sequence);
 };

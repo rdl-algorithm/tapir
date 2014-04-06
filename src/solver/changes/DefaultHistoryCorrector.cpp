@@ -40,14 +40,14 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
             break;
         }
 
-        if (changes::hasFlag(entry->changeFlags_,
+        if (changes::has_flag(entry->changeFlags_,
                         ChangeFlags::DELETED)) {
             debug::show_message("ERROR: deleted state in updateSequence.");
         }
 
         // Model::StepResult result;
         HistoryEntry *nextEntry = (historyIterator + 1)->get();
-        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::TRANSITION)) {
+        if (changes::has_flag(entry->changeFlags_, ChangeFlags::TRANSITION)) {
             entry->transitionParameters_ = model_->generateTransition(
                     *entry->getState(), *entry->action_);
             std::unique_ptr<State> nextState = model_->generateNextState(
@@ -65,12 +65,12 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
                         | ChangeFlags::TRANSITION);
             }
         }
-        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::REWARD)) {
+        if (changes::has_flag(entry->changeFlags_, ChangeFlags::REWARD)) {
             entry->reward_ = model_->generateReward(*entry->getState(),
                     *entry->action_, entry->transitionParameters_.get(),
                     nextEntry->getState());
         }
-        if (changes::hasFlag(entry->changeFlags_, ChangeFlags::OBSERVATION )) {
+        if (changes::has_flag(entry->changeFlags_, ChangeFlags::OBSERVATION )) {
             std::unique_ptr<Observation> newObservation = (
                     model_->generateObservation(entry->getState(),
                             *entry->action_,

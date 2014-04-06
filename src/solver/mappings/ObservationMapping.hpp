@@ -3,6 +3,8 @@
 
 #include <memory>                       // for unique_ptr
 
+#include "global.hpp"
+
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 
 namespace solver {
@@ -12,15 +14,9 @@ class ObservationMappingEntry;
 
 class ObservationMapping {
   public:
-    /** Creates an empty observation map */
     ObservationMapping() = default;
-
-    // Default destructor; copying and moving disallowed!
     virtual ~ObservationMapping() = default;
-    ObservationMapping(ObservationMapping const &) = delete;
-    ObservationMapping(ObservationMapping &&) = delete;
-    ObservationMapping &operator=(ObservationMapping const &) = delete;
-    ObservationMapping &operator=(ObservationMapping &&) = delete;
+    _NO_COPY_OR_MOVE(ObservationMapping);
 
     /* -------------- Association with an action node ---------------- */
     /* Associates this mapping with the given action node. */

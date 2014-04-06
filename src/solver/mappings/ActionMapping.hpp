@@ -13,10 +13,7 @@ class BeliefNode;
 
 class ActionMapping {
 public:
-    /** Creates an empty observation map */
     ActionMapping() = default;
-
-    // Default destructor; copying and moving disallowed!
     virtual ~ActionMapping() = default;
     _NO_COPY_OR_MOVE(ActionMapping);
 

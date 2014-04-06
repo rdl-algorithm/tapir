@@ -79,7 +79,7 @@ void Solver::initializeEmpty() {
     std::unique_ptr<BeliefNode> root = std::make_unique<BeliefNode>();
     BeliefNode *rootPtr = root.get();
     policy_->setRoot(std::move(root));
-    rootPtr->setBeliefData(model_->createRootBeliefData());
+    rootPtr->setHistoricalData(model_->createRootInfo());
     actionPool_->createMappingFor(rootPtr);
 
     initialize();
@@ -139,6 +139,14 @@ double Solver::runSim(long nSteps, long historiesPerStep,
             cout << "State: " << *currentState << endl;
             cout << "Heuristic Value: " << model_->getHeuristicValue(*currentState) << endl;
             cout << "Belief #" << currNode->getId() << endl;
+
+            solver::HistoricalData *data = currNode->getHistoricalData();
+            if (data != nullptr) {
+                cout << endl;
+                cout << *data;
+                cout << endl;
+            }
+
             model_->drawSimulationState(currNode, *currentState, cout);
 
             prevStream << "Before:" << endl;
@@ -430,14 +438,14 @@ void Solver::handleChanges(long timeStep,
     model_->update(timeStep, statePool_.get());
 
     // Check if the model changes have invalidated our history...
-    if (changes::hasFlag(statePool_->getInfo(currentState)->changeFlags_,
+    if (changes::has_flag(statePool_->getInfo(currentState)->changeFlags_,
             ChangeFlags::DELETED)) {
         debug::show_message(
                 "ERROR: Current simulation state deleted. Exiting..");
         std::exit(1);
     }
     for (std::unique_ptr<State> &state2 : stateHistory) {
-        if (changes::hasFlag(statePool_->getInfo(*state2)->changeFlags_,
+        if (changes::has_flag(statePool_->getInfo(*state2)->changeFlags_,
                 ChangeFlags::DELETED)) {
             std::ostringstream message;
             message << "ERROR: Impossible simulation history! Includes ";
@@ -458,13 +466,13 @@ void Solver::applyChanges() {
             HistorySequence *sequence = entry->owningSequence_;
             long entryId = entry->entryId_;
             sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
-            if (changes::hasFlag(entry->changeFlags_, ChangeFlags::DELETED)) {
+            if (changes::has_flag(entry->changeFlags_, ChangeFlags::DELETED)) {
                 if (entryId > 0) {
                     sequence->setChangeFlags(entryId - 1,
                             ChangeFlags::TRANSITION);
                 }
             }
-            if (changes::hasFlag(entry->changeFlags_,
+            if (changes::has_flag(entry->changeFlags_,
                     ChangeFlags::OBSERVATION_BEFORE)) {
                 if (entryId > 0) {
                     sequence->setChangeFlags(entryId - 1,
@@ -488,7 +496,7 @@ void Solver::applyChanges() {
         backup(sequence, false);
         sequence->registerWith(nullptr, nullptr);
 
-        if (changes::hasFlag(sequence->getFirstEntry()->changeFlags_,
+        if (changes::has_flag(sequence->getFirstEntry()->changeFlags_,
                 ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
             // Now remove the sequence entirely.
@@ -522,7 +530,7 @@ void Solver::applyChanges() {
 void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     os << belief->getQValue();
     os << " from " << belief->getNumberOfParticles() << " p.";
-    os << "  with " << belief->getNumberOfStartingSequences() << " starts.";
+    os << " with " << belief->getNumberOfStartingSequences() << " starts.";
     os << endl;
     os << "Action children: " << endl;
     std::multimap<double, solver::ActionMappingEntry const *> actionValues;

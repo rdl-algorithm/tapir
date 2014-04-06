@@ -43,10 +43,10 @@ std::unique_ptr<TransitionParameters> TextSerializer::loadTransitionParameters(
     return nullptr;
 }
 
-void TextSerializer::saveBeliefData(BeliefData const */*data*/,
+void TextSerializer::saveHistoricalData(HistoricalData const */*data*/,
         std::ostream &/*os*/) {
 }
-std::unique_ptr<BeliefData> TextSerializer::loadBeliefData(
+std::unique_ptr<HistoricalData> TextSerializer::loadHistoricalData(
         std::istream &/*is*/) {
     return nullptr;
 }
@@ -264,7 +264,7 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
         }
         os << "particles end" << endl;
     }
-    saveBeliefData(node.getBeliefData(), os);
+    saveHistoricalData(node.getHistoricalData(), os);
     saveActionMapping(*node.getMapping(), os);
 }
 
@@ -296,7 +296,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
             std::getline(is, line);
         }
     }
-    node.setBeliefData(loadBeliefData(is));
+    node.setHistoricalData(loadHistoricalData(is));
     node.setMapping(loadActionMapping(is));
 }
 

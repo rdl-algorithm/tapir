@@ -41,8 +41,7 @@ public:
     }
 
     virtual ~ModelWithProgramOptions() = default;
-    _NO_COPY_OR_MOVE(ModelWithProgramOptions)
-    ;
+    _NO_COPY_OR_MOVE(ModelWithProgramOptions);
 
 // Simple getters
     virtual RandomGenerator *getRandomGenerator() override {

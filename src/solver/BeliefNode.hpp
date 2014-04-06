@@ -15,12 +15,12 @@
 
 #include "mappings/ActionMapping.hpp"
 
-#include "search/BeliefData.hpp"
+#include "search/HistoricalData.hpp"
 
 namespace solver {
 class ActionMapping;
 class ActionNode;
-class BeliefData;
+class HistoricalData;
 class HistoryEntry;
 class ObservationMappingEntry;
 
@@ -76,16 +76,16 @@ class BeliefNode {
     void setMapping(std::unique_ptr<ActionMapping> mapping);
     /** Sets the parent entry for this node. */
     void setParentEntry(ObservationMappingEntry *entry);
-    /** Sets the belief data for this node. */
-    void setBeliefData(std::unique_ptr<BeliefData> data);
+    /** Sets the history-derived information for this node. */
+    void setHistoricalData(std::unique_ptr<HistoricalData> data);
 
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
     ActionMapping *getMapping() const;
     /** Returns the parent entry for this node. */
     ObservationMappingEntry *getParentEntry() const;
-    /** Returns the belief data for this node. */
-    BeliefData *getBeliefData() const;
+    /** Returns the history-derived information for this node. */
+    HistoricalData *getHistoricalData() const;
     /** Returns the parent action node of this belief. */
     ActionNode *getParentActionNode() const;
     /** Returns the parent belief of this belief. */
@@ -114,7 +114,7 @@ private:
     /** The observation entry that is this node's parent / owner. */
     ObservationMappingEntry *parentEntry_;
 
-    std::unique_ptr<BeliefData> data_;
+    std::unique_ptr<HistoricalData> data_;
 
     /** The set of particles belonging to this node. */
     abt::RandomAccessSet<HistoryEntry *> particles_;

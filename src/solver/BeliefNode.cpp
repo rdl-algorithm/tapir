@@ -20,7 +20,7 @@
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"
 
-#include "search/BeliefData.hpp"
+#include "search/HistoricalData.hpp"
 
 
 namespace solver {
@@ -118,7 +118,7 @@ void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
 void BeliefNode::setParentEntry(ObservationMappingEntry *entry) {
     parentEntry_ =  entry;
 }
-void BeliefNode::setBeliefData(std::unique_ptr<BeliefData> data) {
+void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
     data_ = std::move(data);
 }
 
@@ -135,7 +135,7 @@ ActionNode *BeliefNode::getParentActionNode() const {
     }
     return parentEntry_->getMapping()->getOwner();
 }
-BeliefData *BeliefNode::getBeliefData() const {
+HistoricalData *BeliefNode::getHistoricalData() const {
     return data_.get();
 }
 BeliefNode *BeliefNode::getParentBelief() const {
