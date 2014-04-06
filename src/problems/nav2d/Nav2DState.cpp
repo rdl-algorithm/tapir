@@ -72,7 +72,7 @@ void Nav2DState::print(std::ostream &os) const {
 }
 
 std::vector<double> Nav2DState::asVector() const {
-    return std::vector<double> {position_.x_, position_.y_, direction_};
+    return std::vector<double> {position_.getX(), position_.getY(), direction_};
 }
 
 geometry::Point2D Nav2DState::getPosition() const {
@@ -80,11 +80,11 @@ geometry::Point2D Nav2DState::getPosition() const {
 }
 
 double Nav2DState::getX() const {
-    return position_.x_;
+    return position_.getX();
 }
 
 double Nav2DState::getY() const {
-    return position_.y_;
+    return position_.getY();
 }
 
 double Nav2DState::getDirection() const {

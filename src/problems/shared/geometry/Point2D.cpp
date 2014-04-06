@@ -22,26 +22,6 @@ Point2D::Point2D(double x, double y) :
     y_(y) {
 }
 
-Point2D::Point2D(Point2D const &other) :
-        Point2D(other.x_, other.y_) {
-}
-
-Point2D::Point2D(Point2D &&other) :
-        Point2D(other.x_, other.y_) {
-}
-
-Point2D &Point2D::operator=(Point2D const &other) {
-    x_ = other.x_;
-    y_ = other.y_;
-    return *this;
-}
-
-Point2D &Point2D::operator=(Point2D &&other) {
-    x_ = other.x_;
-    y_ = other.y_;
-    return *this;
-}
-
 Point2D::~Point2D() {
 }
 
@@ -77,11 +57,6 @@ void Point2D::loadFrom(std::istream &is) {
     std::istringstream(tmpStr) >> x_;
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> y_;
-}
-
-std::istream &operator>>(std::istream &is, Point2D &point) {
-    point.loadFrom(is);
-    return is;
 }
 
 std::vector<double> Point2D::asVector() const {

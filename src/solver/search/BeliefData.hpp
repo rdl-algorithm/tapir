@@ -10,7 +10,14 @@ public:
 
     virtual std::unique_ptr<BeliefData> createChildData(Action const &action,
             Observation const &observation) = 0;
+    virtual void print(std::ostream &/*os*/) const {};
 };
+
+inline std::ostream &operator<<(std::ostream &os,
+		BeliefData const &data) {
+    data.print(os);
+    return os;
+}
 
 } /* namespace solver */
 

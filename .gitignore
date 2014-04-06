@@ -1,18 +1,18 @@
 # Eclipse settings
-.cproject
-.project
-.settings
-EMPTY_HEADER.hpp
+/.cproject
+/.project
+/.settings
+/EMPTY_HEADER.hpp
 
 # Local configuration
-local.cmake
+/local.cmake
 
 # Other libraries
-knitro/*
+/knitro
 
 # Binaries
-builds/*
-build/*
+/builds
+/build
 simulate
 solve
 solve-mdp

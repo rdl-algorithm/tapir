@@ -42,39 +42,6 @@ Vector2D::Vector2D(Point2D const &to, Point2D const &from) :
                 to.getY() - from.getY())) {
 }
 
-Vector2D::Vector2D(Vector2D const &other) :
-        Vector(),
-        x_(other.x_),
-        y_(other.y_),
-        magnitude_(other.magnitude_),
-        direction_(other.direction_) {
-}
-
-Vector2D::Vector2D(Vector2D &&other) :
-        Vector(),
-        x_(other.x_),
-        y_(other.y_),
-        magnitude_(other.magnitude_),
-        direction_(
-                other.direction_) {
-}
-
-Vector2D &Vector2D::operator=(Vector2D const &other) {
-    x_ = other.x_;
-    y_ = other.y_;
-    magnitude_ = other.magnitude_;
-    direction_ = other.direction_;
-    return *this;
-}
-
-Vector2D &Vector2D::operator=(Vector2D &&other) {
-    x_ = other.x_;
-    y_ = other.y_;
-    magnitude_ = other.magnitude_;
-    direction_ = other.direction_;
-    return *this;
-}
-
 Vector2D::~Vector2D() {
 }
 
@@ -111,11 +78,6 @@ void Vector2D::loadFrom(std::istream &is) {
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> y_;
     calculatePolar();
-}
-
-std::istream &operator>>(std::istream &is, Vector2D &point) {
-    point.loadFrom(is);
-    return is;
 }
 
 std::vector<double> Vector2D::asVector() const {

@@ -9,8 +9,6 @@ public:
     virtual ~TransitionParameters() = default;
 
     virtual void print(std::ostream &/*os*/) const {};
-
-    friend std::ostream &operator<<(std::ostream &os, Point const &point);
 };
 
 inline std::ostream &operator<<(std::ostream &os,

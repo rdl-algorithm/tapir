@@ -15,7 +15,6 @@ class Point {
   public:
     Point() = default;
     virtual ~Point() = default;
-    _NO_COPY_OR_MOVE(Point);
 
     /* We're not using copy constructors - instead we want to use this copy
      * method to avoid issues with "slicing".
@@ -28,10 +27,6 @@ class Point {
     virtual bool equals(Point const &otherPoint) const = 0;
     virtual std::size_t hash() const = 0;
     virtual void print(std::ostream &/*os*/) const {};
-
-    friend std::ostream &operator<<(std::ostream &os, Point const &point);
-    friend bool operator==(Point const &s1, Point const &s2);
-    friend bool operator!=(Point const &s1, Point const &s2);
 };
 
 inline std::ostream &operator<<(std::ostream &os, Point const &point) {

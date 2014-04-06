@@ -16,7 +16,6 @@ class Vector: public solver::Point {
 public:
     Vector() = default;
     virtual ~Vector() = default;
-    _NO_COPY_OR_MOVE(Vector);
 
     // copy() remains unimplemented because we have no data!
 

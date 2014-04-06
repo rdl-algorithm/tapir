@@ -13,11 +13,6 @@ public:
     Rectangle2D(Point2D lowerLeft, Point2D upperRight);
     virtual ~Rectangle2D();
 
-    Rectangle2D(Rectangle2D const &other);
-    Rectangle2D(Rectangle2D &&) = delete;
-    virtual Rectangle2D &operator=(Rectangle2D const &);
-    virtual Rectangle2D &operator=(Rectangle2D &&) = delete;
-
     virtual void print(std::ostream &os) const;
     virtual void loadFrom(std::istream &is);
 
@@ -30,7 +25,6 @@ public:
     double getArea() const;
     bool contains(Point2D point) const;
 
-    friend std::ostream &operator>>(std::istream &os, Rectangle2D const &rect);
 private:
     double calculateArea() const;
     Point2D lowerLeft_;
@@ -38,8 +32,15 @@ private:
     double area_;
 };
 
-std::ostream &operator<<(std::ostream &os, Rectangle2D const &rect);
-std::istream &operator>>(std::istream &is, Rectangle2D &rect);
+inline std::ostream &operator<<(std::ostream &os, Rectangle2D const &rect) {
+	rect.print(os);
+	return os;
+}
+
+inline std::istream &operator>>(std::istream &is, Rectangle2D &rect) {
+	rect.loadFrom(is);
+	return is;
+}
 
 } /* namespace geometry */
 

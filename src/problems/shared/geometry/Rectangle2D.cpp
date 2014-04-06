@@ -17,27 +17,11 @@ Rectangle2D::Rectangle2D(Point2D lowerLeft, Point2D upperRight) :
         area_(calculateArea()) {
 }
 
-Rectangle2D::Rectangle2D(Rectangle2D const &other) :
-        Rectangle2D(other.lowerLeft_, other.upperRight_) {
-}
-
 Rectangle2D::~Rectangle2D() {
-}
-
-Rectangle2D &Rectangle2D::operator=(Rectangle2D const &other) {
-    lowerLeft_ = other.lowerLeft_;
-    upperRight_ = other.upperRight_;
-    area_ = calculateArea();
-    return *this;
 }
 
 void Rectangle2D::print(std::ostream &os) const {
     os << "(" << lowerLeft_ << ", " << upperRight_ << ")";
-}
-
-std::ostream &operator<<(std::ostream &os, Rectangle2D const &rect) {
-    rect.print(os);
-    return os;
 }
 
 void Rectangle2D::loadFrom(std::istream &is) {
@@ -85,11 +69,6 @@ Point2D Rectangle2D::closestPointTo(Point2D const &point) const {
             return point;
         }
     }
-}
-
-std::istream &operator>>(std::istream &is, Rectangle2D &rect) {
-    rect.loadFrom(is);
-    return is;
 }
 
 Point2D Rectangle2D::sampleUniform(RandomGenerator &randGen) const {
