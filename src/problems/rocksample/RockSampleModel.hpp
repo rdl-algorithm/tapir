@@ -23,6 +23,7 @@
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 
 #include "legal_actions.hpp"
+#include "preferred_actions.hpp"
 #include "RockSampleMdpSolver.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
@@ -42,7 +43,7 @@ class RockSampleState;
 class RockSampleObservation;
 
 class RockSampleModel : virtual public ModelWithProgramOptions,
-    virtual public LegalActionsModel,
+    virtual public PreferredActionsModel,
     virtual public solver::ModelWithEnumeratedObservations {
 friend class RockSampleMdpSolver;
   public:
@@ -64,18 +65,40 @@ friend class RockSampleMdpSolver;
     virtual std::string getName() override {
         return "RockSample";
     }
+    /** Returns the number of rocks used in this model. */
+    long getNumberOfRocks() {
+        return nRocks_;
+    }
     /** Returns true if only legal actions should be used. */
-    virtual bool usingOnlyLegal() {
+    bool usingOnlyLegal() {
         return usingOnlyLegal_;
     }
+    /** Returns true if nodes should be initialized with preferred values. */
+    bool usingPreferredInit() {
+        return usingPreferredInit_;
+    }
     /** Returns the MDP solver, if any is in use. */
-    virtual RockSampleMdpSolver *getMdpSolver() {
+    RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
     }
     /** Returns the starting position for this problem. */
-    virtual GridPosition getStartPosition() {
+    GridPosition getStartPosition() {
         return startPos_;
     }
+    /** Returns the cell type for the given position. */
+    RSCellType getCellType(GridPosition p) {
+        return envMap_[p.i][p.j];
+    }
+    /** Returns the grid position for the given rock. */
+    GridPosition getRockPosition(int rockNo) {
+        return rockPositions_[rockNo];
+    }
+    /** Calculates the probability that the sensor will be accurate, at the
+     * given distance. */
+    double getSensorCorrectnessProbability(double distance) {
+        return (1 + std::pow(2, -distance / halfEfficiencyDistance_)) * 0.5;
+    }
+
 
     /***** Start implementation of Model's methods *****/
     // Simple getters
@@ -212,6 +235,9 @@ friend class RockSampleMdpSolver;
 
     /** True iff we're using only legal actions. */
     bool usingOnlyLegal_;
+    /** True iff we're using only preferred actions. */
+    bool usingPreferredInit_;
+
     /** True iff we're using the exact MDP solution. */
     bool usingExactMdp_;
     /** The solver for the exact MDP, if used. */

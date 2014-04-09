@@ -15,12 +15,7 @@ class RockSampleState : public solver::VectorState {
     friend class RockSampleTextSerializer;
   public:
     RockSampleState(GridPosition position, std::vector<bool> rockStates);
-
     virtual ~RockSampleState() = default;
-    RockSampleState(RockSampleState const &other);
-    RockSampleState(RockSampleState &&) = delete;
-    virtual RockSampleState &operator=(RockSampleState const &) = delete;
-    virtual RockSampleState &operator=(RockSampleState &&) = delete;
 
     std::unique_ptr<solver::State> copy() const override;
     double distanceTo(solver::State const &otherState) const override;

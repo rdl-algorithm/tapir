@@ -15,14 +15,14 @@
 #include "solver/mappings/ObservationMapping.hpp"
 
 namespace rocksample {
-/* ---------------------- RockSampleHistoricalData --------------------- */
-RockSampleHistoricalData::RockSampleHistoricalData(RockSampleModel *model,
+/* ---------------------- PositionData --------------------- */
+PositionData::PositionData(RockSampleModel *model,
         GridPosition position) :
         model_(model),
         position_(position) {
 }
 
-std::unique_ptr<solver::HistoricalData> RockSampleHistoricalData::createChild(
+std::unique_ptr<solver::HistoricalData> PositionData::createChild(
         solver::Action const &action,
         solver::Observation const &/*observation*/) {
     RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(action);
@@ -33,10 +33,10 @@ std::unique_ptr<solver::HistoricalData> RockSampleHistoricalData::createChild(
     if (!isLegal && model_->usingOnlyLegal()) {
         debug::show_message("ERROR: An illegal action was taken!?");
     }
-    return std::make_unique<RockSampleHistoricalData>(model_, nextPosition);
+    return std::make_unique<PositionData>(model_, nextPosition);
 }
 
-void RockSampleHistoricalData::print(std::ostream &os) const {
+void PositionData::print(std::ostream &os) const {
     os << "Position: " << position_ << std::endl;
 }
 
@@ -48,7 +48,7 @@ std::unique_ptr<solver::ActionPool> LegalActionsModel::createActionPool(
 
 std::unique_ptr<solver::HistoricalData> LegalActionsModel::createRootInfo() {
     RockSampleModel *model = dynamic_cast<RockSampleModel *>(this);
-    return std::make_unique<RockSampleHistoricalData>(
+    return std::make_unique<PositionData>(
             model, model->getStartPosition());
 }
 
@@ -70,8 +70,8 @@ LegalActionsMap::LegalActionsMap(solver::ObservationPool *observationPool,
 }
 void LegalActionsMap::initialize() {
     RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
-    RockSampleHistoricalData const &data = (
-            static_cast<RockSampleHistoricalData const &>(
+    PositionData const &data = (
+            static_cast<PositionData const &>(
                     *owningBeliefNode_->getHistoricalData()));
     for (std::unique_ptr<solver::DiscretizedPoint> const &action : model.getAllActionsInOrder()) {
         RockSampleAction const &rsAction =
@@ -90,8 +90,8 @@ void LegalActionsTextSerializer::saveHistoricalData(solver::HistoricalData const
         std::ostream &os) {
     os << std::endl;
     os << "CUSTOM DATA:" << std::endl;
-    RockSampleHistoricalData const &legalData = (
-                static_cast<RockSampleHistoricalData const &>(*data));
+    PositionData const &legalData = (
+                static_cast<PositionData const &>(*data));
     os << "Position: " << legalData.position_ << std::endl;
     os << std::endl;
 }
@@ -110,6 +110,6 @@ std::unique_ptr<solver::HistoricalData> LegalActionsTextSerializer::loadHistoric
     std::getline(is, line); // Blank line
 
     RockSampleModel *model = dynamic_cast<RockSampleModel *>(model_);
-    return std::make_unique<RockSampleHistoricalData>(model, position);
+    return std::make_unique<PositionData>(model, position);
 }
 } /* namespace rocksample */

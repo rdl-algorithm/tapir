@@ -124,9 +124,7 @@ class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
     friend class DiscretizedActionMap;
     friend class DiscretizedActionTextSerializer;
   public:
-    DiscretizedActionMapEntry(long binNumber,
-            DiscretizedActionMap *map,
-            std::unique_ptr<ActionNode> childNode);
+    DiscretizedActionMapEntry(long binNumber, DiscretizedActionMap *map);
 
     // Default destructor; copying and moving disallowed!
     virtual ~DiscretizedActionMapEntry();

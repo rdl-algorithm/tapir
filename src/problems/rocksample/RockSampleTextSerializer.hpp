@@ -14,6 +14,7 @@
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
 #include "legal_actions.hpp"
+#include "preferred_actions.hpp"
 #include "global.hpp"
 
 namespace solver {
@@ -21,7 +22,7 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-class RockSampleTextSerializer : virtual public LegalActionsTextSerializer,
+class RockSampleTextSerializer : virtual public PreferredActionsTextSerializer,
     virtual public solver::EnumeratedObservationTextSerializer {
   public:
     RockSampleTextSerializer(solver::Solver *solver);

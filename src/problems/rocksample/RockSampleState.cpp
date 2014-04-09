@@ -19,10 +19,6 @@ RockSampleState::RockSampleState(GridPosition position,
     rockStates_(rockStates) {
 }
 
-RockSampleState::RockSampleState(RockSampleState const &other) :
-    RockSampleState(other.position_, other.rockStates_) {
-}
-
 std::unique_ptr<solver::Point> RockSampleState::copy() const {
     return std::make_unique<RockSampleState>(position_, rockStates_);
 }

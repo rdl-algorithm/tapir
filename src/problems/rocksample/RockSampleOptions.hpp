@@ -39,6 +39,8 @@ class RockSampleOptions : public ProgramOptions {
         heuristics.add_options()
             ("heuristics.useOnlyLegal", po::value<bool>()->default_value(false)->implicit_value(true),
                 "whether to only use legal actions")
+            ("heuristics.usePreferredInit", po::value<bool>()->default_value(false)->implicit_value(true),
+                "whether to only use legal actions")
             ("heuristics.exactMdp,e", po::value<bool>()->default_value(false)->implicit_value(true),
                 "whether to use an exact MDP solution");
         return heuristics;

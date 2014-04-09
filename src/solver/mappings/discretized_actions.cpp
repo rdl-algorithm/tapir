@@ -88,18 +88,25 @@ ActionNode* DiscretizedActionMap::getActionNode(Action const &action) const {
 }
 ActionNode* DiscretizedActionMap::createActionNode(Action const &action) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    std::unique_ptr<DiscretizedActionMapEntry> entry = (
-            std::make_unique<DiscretizedActionMapEntry>(
-            code, this, std::make_unique<ActionNode>()));
-    ActionNode *node = entry->childNode_.get();
-    node->setMapping(observationPool_->createObservationMapping());
-    node->setParentEntry(entry.get());
 
-    entries_[code] = std::move(entry);
+
+
+    DiscretizedActionMapEntry *entry = entries_[code].get();
+    if (entry == nullptr) {
+        std::unique_ptr<DiscretizedActionMapEntry> newEntry = (
+                std::make_unique<DiscretizedActionMapEntry>(code, this));
+        entry = newEntry.get();
+    }
+    std::unique_ptr<ActionNode> actionNode = std::make_unique<ActionNode>();
+    ActionNode *node = actionNode.get();
+
+    entry->childNode_ = std::move(actionNode);
+    node->setMapping(observationPool_->createObservationMapping());
+    node->setParentEntry(entry);
+
     nChildren_++;
     return node;
 }
-
 
 long DiscretizedActionMap::getNChildren() const {
     return nChildren_;
@@ -107,7 +114,7 @@ long DiscretizedActionMap::getNChildren() const {
 std::vector<ActionMappingEntry const *> DiscretizedActionMap::getChildEntries() const {
     std::vector<ActionMappingEntry const *> returnEntries;
     for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : entries_) {
-        if (entry != nullptr) {
+        if (entry != nullptr && entry->childNode_ != nullptr) {
             returnEntries.push_back(entry.get());
         }
     }

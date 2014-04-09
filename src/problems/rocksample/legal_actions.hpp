@@ -1,5 +1,5 @@
-#ifndef ROCKSAMPLE_LEGALMAPPING_HPP_
-#define ROCKSAMPLE_LEGALMAPPING_HPP_
+#ifndef ROCKSAMPLE_LEGALACTIONS_HPP_
+#define ROCKSAMPLE_LEGALACTIONS_HPP_
 
 #include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/enumerated_actions.hpp"
@@ -13,13 +13,13 @@
 namespace rocksample {
 class RockSampleModel;
 
-class RockSampleHistoricalData : public solver::HistoricalData {
+class PositionData : public solver::HistoricalData {
     friend class LegalActionsMap;
     friend class LegalActionsTextSerializer;
 public:
-    RockSampleHistoricalData(RockSampleModel *model, GridPosition position);
-    virtual ~RockSampleHistoricalData() = default;
-    _NO_COPY_OR_MOVE(RockSampleHistoricalData);
+    PositionData(RockSampleModel *model, GridPosition position);
+    virtual ~PositionData() = default;
+    _NO_COPY_OR_MOVE(PositionData);
 
     std::unique_ptr<solver::HistoricalData> createChild(
             solver::Action const &action,
@@ -74,4 +74,4 @@ public:
 };
 } /* namespace rocksample */
 
-#endif /* ROCKSAMPLE_LEGALMAPPING_HPP_ */
+#endif /* ROCKSAMPLE_LEGALACTIONS_HPP_ */
