@@ -33,7 +33,7 @@ std::pair<SearchStatus, std::unique_ptr<Action>> UcbSelectionInstance::getStatus
 
     double bestValue = -std::numeric_limits<double>::infinity();
     std::unique_ptr<Action> bestAction = nullptr;
-    for (ActionMappingEntry const *entry : mapping->getChildEntries()) {
+    for (ActionMappingEntry const *entry : mapping->getVisitedEntries()) {
         double tmpValue = entry->getMeanQValue() + explorationCoefficient_ * std::sqrt(
                         std::log(mapping->getTotalVisitCount()) / entry->getVisitCount());
         if (!std::isfinite(tmpValue)) {

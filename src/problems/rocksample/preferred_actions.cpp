@@ -130,15 +130,19 @@ void PreferredActionsMap::initialize() {
         std::tie(nextPosition, isLegal) = model.makeNextPosition(data.position_, rsAction);
         if (isLegal || !model.usingOnlyLegal()) {
             addUnvisitedAction(rsAction.getBinNumber());
+            /*
             if (model.usingPreferredInit()) {
-                update()
+                // update()
             }
+            */
         }
     }
 
+    /*
     if (model.usingPreferredInit()) {
             preferredActions = std::unordered_set<RockSampleAction(getPreferredActions());
     }
+    */
 }
 
 std::vector<RockSampleAction> PreferredActionsMap::getPreferredActions() {
@@ -227,6 +231,7 @@ void PreferredActionsTextSerializer::saveHistoricalData(
         os << std::showpos << rockData.goodnessCount << std::noshowpos;
         os << " )" << std::endl;
     }
+    os << std::endl;
 }
 std::unique_ptr<solver::HistoricalData> PreferredActionsTextSerializer::loadHistoricalData(
         std::istream &is) {
@@ -244,9 +249,7 @@ std::unique_ptr<solver::HistoricalData> PreferredActionsTextSerializer::loadHist
     std::unique_ptr<PositionAndRockData> data = (
             std::make_unique<PositionAndRockData>(model, position));
 
-    int nRocks = model->getNumberOfRocks();
-    for (int i = 0; i < nRocks; i++ ) {
-        RockData rockData;
+    for (RockData &rockData : data->allRockData_) {
         std::getline(is, line);
         std::istringstream sstr(line);
 

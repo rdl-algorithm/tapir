@@ -39,15 +39,17 @@ public:
     virtual ActionNode *getActionNode(Action const &action) const = 0;
     /** Creates a new action node for the given action. */
     virtual ActionNode *createActionNode(Action const &action) = 0;
-
-    /* -------------- Retrieval of mapping entries. ---------------- */
     /** Returns the number of child nodes associated with this mapping. */
     virtual long getNChildren() const = 0;
-    /** Returns all the entries associated with children in this mapping (i.e.
-     * containing non-null action nodes).
+
+    /* -------------- Retrieval of mapping entries. ---------------- */
+    virtual long getNumberOfVisitedEntries() const = 0;
+    /** Returns all of the visited entries in this mapping - some may have
+     * null action nodes if the visit counts were initialized to nonzero
+     * values.
      */
-    virtual std::vector<ActionMappingEntry const *> getChildEntries() const = 0;
-    /** Returns the mapping entry associated with the given action. */
+    virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const = 0;
+    /** Returns the mapping entry (if any) associated with the given action. */
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
     /* -------------- Retrieval of general statistics. ---------------- */
@@ -97,7 +99,6 @@ class ActionMappingEntry {
 public:
     ActionMappingEntry() = default;
     virtual ~ActionMappingEntry() = default;
-    _NO_COPY_OR_MOVE(ActionMappingEntry);
 
     /** Returns the mapping this entry belongs to. */
     virtual ActionMapping *getMapping() const = 0;

@@ -51,6 +51,7 @@ DiscretizedActionMap::DiscretizedActionMap(ObservationPool *observationPool,
                 numberOfBins_(numberOfBins),
                 entries_(numberOfBins_),
                 nChildren_(0),
+                numberOfVisitedEntries_(0),
                 binsToTry_(),
                 bestBinNumber_(-1),
                 highestQValue_(-std::numeric_limits<double>::infinity()),
@@ -58,6 +59,11 @@ DiscretizedActionMap::DiscretizedActionMap(ObservationPool *observationPool,
                 highestVisitCount_(-1),
                 robustQValue_(-std::numeric_limits<double>::infinity()),
                 totalVisitCount_(0) {
+    for (int i = 0; i < numberOfBins_; i++) {
+        DiscretizedActionMapEntry &entry = entries_[i];
+        entry.binNumber_ = i;
+        entry.map_ = this;
+    }
 }
 
 // Default destructor.
@@ -81,48 +87,42 @@ void DiscretizedActionMap::initialize() {
 
 ActionNode* DiscretizedActionMap::getActionNode(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    if (entries_[code] == nullptr) {
-        return nullptr;
-    }
-    return entries_[code]->getActionNode();
+    return entries_[code].getActionNode();
 }
 ActionNode* DiscretizedActionMap::createActionNode(Action const &action) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
 
+    DiscretizedActionMapEntry &entry = entries_[code];
 
-
-    DiscretizedActionMapEntry *entry = entries_[code].get();
-    if (entry == nullptr) {
-        std::unique_ptr<DiscretizedActionMapEntry> newEntry = (
-                std::make_unique<DiscretizedActionMapEntry>(code, this));
-        entry = newEntry.get();
-    }
     std::unique_ptr<ActionNode> actionNode = std::make_unique<ActionNode>();
     ActionNode *node = actionNode.get();
-
-    entry->childNode_ = std::move(actionNode);
+    entry.childNode_ = std::move(actionNode);
     node->setMapping(observationPool_->createObservationMapping());
-    node->setParentEntry(entry);
+    node->setParentEntry(&entry);
 
     nChildren_++;
     return node;
 }
-
 long DiscretizedActionMap::getNChildren() const {
     return nChildren_;
 }
-std::vector<ActionMappingEntry const *> DiscretizedActionMap::getChildEntries() const {
+
+
+long DiscretizedActionMap::getNumberOfVisitedEntries() const {
+    return numberOfVisitedEntries_;
+}
+std::vector<ActionMappingEntry const *> DiscretizedActionMap::getVisitedEntries() const {
     std::vector<ActionMappingEntry const *> returnEntries;
-    for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : entries_) {
-        if (entry != nullptr && entry->childNode_ != nullptr) {
-            returnEntries.push_back(entry.get());
+    for (DiscretizedActionMapEntry const &entry : entries_) {
+        if (entry.visitCount_ > 0) {
+            returnEntries.push_back(&entry);
         }
     }
     return returnEntries;
 }
 ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    return entries_[code].get();
+    return &entries_[code];
 }
 
 
@@ -176,29 +176,31 @@ void DiscretizedActionMap::addUnvisitedAction(long binNumber) {
 
 long DiscretizedActionMap::getVisitCount(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    return entries_[code]->getVisitCount();
+    return entries_[code].getVisitCount();
 }
 double DiscretizedActionMap::getTotalQValue(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    return entries_[code]->getTotalQValue();
+    return entries_[code].getTotalQValue();
 }
 double DiscretizedActionMap::getMeanQValue(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    return entries_[code]->getMeanQValue();
+    return entries_[code].getMeanQValue();
 }
 
 void DiscretizedActionMap::update(Action const &action, long deltaNVisits,
         double deltaQ) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    DiscretizedActionMapEntry &entry = *entries_[code];
+    DiscretizedActionMapEntry &entry = entries_[code];
 
     // Update the visit counts
     if (entry.visitCount_ == 0 && deltaNVisits > 0) {
+        numberOfVisitedEntries_++;
         deleteUnvisitedAction(code);
     }
     entry.visitCount_ += deltaNVisits;
     totalVisitCount_ += deltaNVisits;
     if (entry.visitCount_ == 0 && deltaNVisits < 0) {
+        numberOfVisitedEntries_--;
         addUnvisitedAction(code);
     }
 
@@ -226,42 +228,27 @@ void DiscretizedActionMap::recalculate() {
     highestVisitCount_ = -1;
     robustQValue_ = -std::numeric_limits<double>::infinity();
 
-    for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : entries_) {
-        if (entry == nullptr) {
+    for (DiscretizedActionMapEntry const &entry : entries_) {
+        if (entry.childNode_ == nullptr) {
             continue;
         }
-        if (entry->visitCount_ <= 0) {
+        if (entry.visitCount_ <= 0) {
             continue;
         }
-        double meanQValue = entry->meanQValue_;
+        double meanQValue = entry.meanQValue_;
         if (meanQValue > highestQValue_) {
             highestQValue_ = meanQValue;
-            bestBinNumber_ = entry->binNumber_;
+            bestBinNumber_ = entry.binNumber_;
         }
-        if (entry->visitCount_ > highestVisitCount_ || (entry->visitCount_ == highestVisitCount_ && meanQValue > robustQValue_)) {
-            highestVisitCount_ = entry->visitCount_;
+        if (entry.visitCount_ > highestVisitCount_ || (entry.visitCount_ == highestVisitCount_ && meanQValue > robustQValue_)) {
+            highestVisitCount_ = entry.visitCount_;
             robustQValue_ = meanQValue;
-            robustBinNumber_ = entry->binNumber_;
+            robustBinNumber_ = entry.binNumber_;
         }
     }
 }
 
 /* ------------------- DiscretizedActionMapEntry ------------------- */
-DiscretizedActionMapEntry::DiscretizedActionMapEntry(long binNumber,
-        DiscretizedActionMap *map,
-        std::unique_ptr<ActionNode> childNode) :
-                binNumber_(binNumber),
-                map_(map),
-                childNode_(std::move(childNode)),
-                visitCount_(0),
-                totalQValue_(0),
-                meanQValue_(-std::numeric_limits<double>::infinity()) {
-}
-
-// Default destructor.
-DiscretizedActionMapEntry::~DiscretizedActionMapEntry() {
-}
-
 /** Returns the mapping this entry belongs to. */
 ActionMapping *DiscretizedActionMapEntry::getMapping() const {
     return map_;
@@ -300,7 +287,8 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         ActionMapping const &map, std::ostream &os) {
     DiscretizedActionMap const &discMap = (
             static_cast<DiscretizedActionMap const &>(map));
-    os << discMap.getNChildren() << " action children; ";
+    os << discMap.getNumberOfVisitedEntries() << " visited actions with ";
+    os << discMap.getNChildren() << " children; ";
     os << discMap.getTotalVisitCount() << " visits" << std::endl;
 
     os << "Untried (";
@@ -313,10 +301,16 @@ void DiscretizedActionTextSerializer::saveActionMapping(
     }
     os << ")" << std::endl;
     std::multimap<std::pair<double, double>, DiscretizedActionMapEntry const *> entriesByValue;
-    for (std::unique_ptr<DiscretizedActionMapEntry> const &entry : discMap.entries_) {
-        if (entry != nullptr) {
-            entriesByValue.emplace(std::make_pair(entry->meanQValue_, entry->binNumber_), entry.get());
+    long visitedCount = 0;
+    for (DiscretizedActionMapEntry const &entry : discMap.entries_) {
+        if (entry.visitCount_ > 0) {
+            visitedCount++;
+            entriesByValue.emplace(
+                    std::make_pair(entry.meanQValue_, entry.binNumber_), &entry);
         }
+    }
+    if (visitedCount != discMap.getNumberOfVisitedEntries()) {
+        debug::show_message("ERROR: incorrect number of visited entries!");
     }
 
     for (auto it = entriesByValue.rbegin(); it != entriesByValue.rend(); it++) {
@@ -325,8 +319,14 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         saveAction(entry.getAction().get(), os);
         os << "): " << entry.getMeanQValue() << " from ";
         os << entry.getVisitCount() << " visits; total: ";
-        os << entry.getTotalQValue() << std::endl;
-        save(*entry.getActionNode(), os);
+        os << entry.getTotalQValue();
+        ActionNode *node = entry.getActionNode();
+        if (node == nullptr) {
+            os << " NO CHILD" << std::endl;
+        } else {
+            os << std::endl;
+            save(*entry.getActionNode(), os);
+        }
     }
 }
 
@@ -340,7 +340,10 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     std::getline(is, line);
     std::string tmpStr;
     std::istringstream sstr4(line);
-    sstr4 >> discMap.nChildren_ >> tmpStr >> tmpStr;
+
+    long nVisitedEntries;
+    sstr4 >> nVisitedEntries >> tmpStr >> tmpStr >> tmpStr;
+    sstr4 >>discMap.nChildren_ >> tmpStr;
     sstr4 >> discMap.totalVisitCount_;
 
     std::getline(is, line);
@@ -358,7 +361,7 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
         }
     }
 
-    for (long i = 0; i < discMap.nChildren_; i++) {
+    for (long i = 0; i < nVisitedEntries; i++) {
         // The first line contains info from the mapping.
         std::getline(is, line);
         std::istringstream sstr2(line);
@@ -371,22 +374,31 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
         long visitCount;
         sstr2 >> meanQValue >> tmpStr;
         sstr2 >> visitCount >> tmpStr >> tmpStr;
-        sstr2 >> totalQValue >> tmpStr;
+        sstr2 >> totalQValue;
 
-        // Create an enry to hold the action node.
-        std::unique_ptr<DiscretizedActionMapEntry> entry = (
-                std::make_unique<DiscretizedActionMapEntry>(
-                binNumber, &discMap, std::make_unique<ActionNode>()));
-        entry->meanQValue_ = meanQValue;
-        entry->visitCount_ = visitCount;
-        entry->totalQValue_ = totalQValue;
+        bool hasChild = true;
+        std::string tmpStr1, tmpStr2;
+        sstr2 >> tmpStr1 >> tmpStr2;
+        if (tmpStr1 == "NO" && tmpStr2 == "CHILD") {
+            hasChild = false;
+        }
+
+        // Create an entry to hold the action node.
+        DiscretizedActionMapEntry &entry = discMap.entries_[binNumber];
+        entry.binNumber_ = binNumber;
+        entry.map_ = &discMap;
+        entry.meanQValue_ = meanQValue;
+        entry.visitCount_ = visitCount;
+        entry.totalQValue_ = totalQValue;
 
         // Read in the action node itself.
-        ActionNode *node = entry->childNode_.get();
-        load(*node, is);
-        node->setParentEntry(entry.get());
-
-        discMap.entries_[binNumber] = std::move(entry);
+        if (hasChild) {
+            entry.childNode_ = std::make_unique<ActionNode>();
+            entry.childNode_ = std::make_unique<ActionNode>();
+            ActionNode *node = entry.childNode_.get();
+            load(*node, is);
+            node->setParentEntry(&entry);
+        }
     }
     return std::move(map);
 }

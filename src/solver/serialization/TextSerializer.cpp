@@ -274,8 +274,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
     if (line != "No particles!") {
         long nParticles;
         std::string tmpStr;
-        std::istringstream countsStream(line);
-        countsStream >> nParticles;
+        std::istringstream(line) >> nParticles;
 
         std::getline(is, line);
         long numParticlesRead = 0;

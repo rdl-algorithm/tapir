@@ -534,7 +534,7 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     os << endl;
     os << "Action children: " << endl;
     std::multimap<double, solver::ActionMappingEntry const *> actionValues;
-    for (solver::ActionMappingEntry const *entry : belief->getMapping()->getChildEntries()) {
+    for (solver::ActionMappingEntry const *entry : belief->getMapping()->getVisitedEntries()) {
         actionValues.emplace(entry->getMeanQValue(), entry);
     }
     for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
