@@ -25,6 +25,8 @@ public:
             solver::Action const &action,
             solver::Observation const &observation) override;
 
+    std::vector<long> generateLegalActions() const;
+
     void print(std::ostream &os) const override;
 
 private:
@@ -43,7 +45,7 @@ public:
     virtual std::unique_ptr<solver::HistoricalData> createRootInfo() override;
 };
 
-class LegalActionsPool: public solver::DiscretizedActionPool {
+class LegalActionsPool: public solver::ActionPool {
   public:
     LegalActionsPool(solver::Solver *solver,
             solver::ModelWithDiscretizedActions *model, long numberOfBins);
@@ -52,6 +54,13 @@ class LegalActionsPool: public solver::DiscretizedActionPool {
 
     /** Creates a legal-only action mapping. */
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping() override;
+
+    /** Selects a legal action for rollout. */
+    virtual std::unique_ptr<solver::Action> getRolloutAction(solver::HistoricalData *data) const override;
+
+private:
+    solver::ModelWithDiscretizedActions *model_;
+    long numberOfBins_;
 };
 
 class LegalActionsMap : public solver::DiscretizedActionMap {

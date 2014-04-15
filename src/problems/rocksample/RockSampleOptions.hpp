@@ -41,6 +41,10 @@ class RockSampleOptions : public ProgramOptions {
                 "whether to only use legal actions")
             ("heuristics.usePreferredInit", po::value<bool>()->default_value(false)->implicit_value(true),
                 "whether to only use legal actions")
+            ("heuristics.preferredQValue", po::value<double>()->default_value(25.0),
+                "the initial q-value for preferred actions")
+            ("heuristics.preferredVisitCount", po::value<long>()->default_value(10),
+                "the initial visit count for preferred actions")
             ("heuristics.exactMdp,e", po::value<bool>()->default_value(false)->implicit_value(true),
                 "whether to use an exact MDP solution");
         return heuristics;

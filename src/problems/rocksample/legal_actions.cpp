@@ -36,6 +36,21 @@ std::unique_ptr<solver::HistoricalData> PositionData::createChild(
     return std::make_unique<PositionData>(model_, nextPosition);
 }
 
+std::vector<long> PositionData::generateLegalActions() const {
+    std::vector<long> legalActions;
+    for (std::unique_ptr<solver::DiscretizedPoint> const &action : model_->getAllActionsInOrder()) {
+        RockSampleAction const &rsAction =
+                static_cast<RockSampleAction const &>(*action);
+        GridPosition nextPosition;
+        bool isLegal;
+        std::tie(nextPosition, isLegal) = model_->makeNextPosition(position_, rsAction);
+        if (isLegal || !model_->usingOnlyLegal()) {
+            legalActions.push_back(rsAction.getBinNumber());
+        }
+    }
+    return legalActions;
+}
+
 void PositionData::print(std::ostream &os) const {
     os << "Position: " << position_ << std::endl;
 }
@@ -55,11 +70,20 @@ std::unique_ptr<solver::HistoricalData> LegalActionsModel::createRootInfo() {
 /* ------------------------ LegalActionsPool ----------------------- */
 LegalActionsPool::LegalActionsPool(solver::Solver *solver,
         solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                solver::DiscretizedActionPool(solver, model, numberOfBins) {
+                ActionPool(solver),
+                model_(model),
+                numberOfBins_(numberOfBins) {
 }
 std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping() {
     return std::make_unique<LegalActionsMap>(
             getSolver()->getObservationPool(), model_, numberOfBins_);
+}
+std::unique_ptr<solver::Action> LegalActionsPool::getRolloutAction(solver::HistoricalData *data) const {
+    PositionData const &positionData = static_cast<PositionData const &>(*data);
+    std::vector<long> legalActions = positionData.generateLegalActions();
+    long index = std::uniform_int_distribution<long>(0, legalActions.size() - 1)(
+            (*model_->getRandomGenerator()));
+    return model_->sampleAnAction(legalActions[index]);
 }
 
 /* ------------------------- LegalActionsMap ------------------------ */
@@ -70,18 +94,15 @@ LegalActionsMap::LegalActionsMap(solver::ObservationPool *observationPool,
 }
 void LegalActionsMap::initialize() {
     RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
-    PositionData const &data = (
-            static_cast<PositionData const &>(
-                    *owningBeliefNode_->getHistoricalData()));
-    for (std::unique_ptr<solver::DiscretizedPoint> const &action : model.getAllActionsInOrder()) {
-        RockSampleAction const &rsAction =
-                static_cast<RockSampleAction const &>(*action);
-        GridPosition nextPosition;
-        bool isLegal;
-        std::tie(nextPosition, isLegal) = model.makeNextPosition(data.position_, rsAction);
-        if (isLegal || !model.usingOnlyLegal()) {
-            addUnvisitedAction(rsAction.getBinNumber());
-        }
+    if (!model.usingOnlyLegal()) {
+        DiscretizedActionMap::initialize();
+        return;
+    }
+
+    PositionData const &data = static_cast<PositionData const &>(
+                    *owningBeliefNode_->getHistoricalData());
+    for (long binNumber : data.generateLegalActions()) {
+        addUnvisitedAction(binNumber);
     }
 }
 

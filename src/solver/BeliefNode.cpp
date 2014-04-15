@@ -87,8 +87,8 @@ void BeliefNode::setId(long id) {
 long BeliefNode::getId() const {
     return id_;
 }
-std::unique_ptr<Action> BeliefNode::getBestAction() const {
-    return actionMap_->getBestAction();
+std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
+    return actionMap_->getRecommendedAction();
 }
 double BeliefNode::getQValue() const {
     return actionMap_->getMaxQValue();

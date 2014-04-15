@@ -113,8 +113,8 @@ std::unique_ptr<solver::ActionMapping> PreferredActionsPool::createActionMapping
 /* ------------------------- PreferredActionsMap ------------------------ */
 PreferredActionsMap::PreferredActionsMap(solver::ObservationPool *observationPool,
             solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                    solver::DiscretizedActionMap(
-                            observationPool, model, numberOfBins) {
+                    solver::DiscretizedActionMap(observationPool, model, numberOfBins),
+                    preferredActions_() {
 }
 
 void PreferredActionsMap::initialize() {
@@ -130,26 +130,34 @@ void PreferredActionsMap::initialize() {
         std::tie(nextPosition, isLegal) = model.makeNextPosition(data.position_, rsAction);
         if (isLegal || !model.usingOnlyLegal()) {
             addUnvisitedAction(rsAction.getBinNumber());
-            /*
-            if (model.usingPreferredInit()) {
-                // update()
-            }
-            */
         }
     }
 
-    /*
     if (model.usingPreferredInit()) {
-            preferredActions = std::unordered_set<RockSampleAction(getPreferredActions());
+        generatePreferredActions();
+        for (RockSampleAction const &action : preferredActions_) {
+            long visitCount = model.getPreferredVisitCount();
+            update(action, visitCount, visitCount * model.getPreferredQValue());
+        }
     }
-    */
 }
 
-std::vector<RockSampleAction> PreferredActionsMap::getPreferredActions() {
+std::vector<RockSampleAction> PreferredActionsMap::getPreferredActions() const {
+    return preferredActions_;
+}
+
+std::unique_ptr<RockSampleAction> PreferredActionsMap::getRandomPreferredAction() const {
+    int index = std::uniform_int_distribution<int>(
+            0, preferredActions_.size() - 1)(*model_->getRandomGenerator());
+    return std::make_unique<RockSampleAction>(preferredActions_[index]);
+}
+
+void PreferredActionsMap::generatePreferredActions() {
     RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
     PositionAndRockData const &data = static_cast<PositionAndRockData const &>(
             *owningBeliefNode_->getHistoricalData());
-    std::vector<RockSampleAction> actions;
+
+    preferredActions_.clear();
 
     int nRocks = model.getNumberOfRocks();
     int rockNo = model.getCellType(data.position_) - RockSampleModel::ROCK;
@@ -157,11 +165,10 @@ std::vector<RockSampleAction> PreferredActionsMap::getPreferredActions() {
     // If the rock has more +ve than -ve observations we should sample it.
     if (rockNo >= 0 && rockNo < nRocks) {
         if (data.allRockData_[rockNo].goodnessCount > 0) {
-            actions.push_back(RockSampleAction(ActionType::SAMPLE));
-            return actions;
+            preferredActions_.push_back(RockSampleAction(ActionType::SAMPLE));
+            return;
         }
     }
-
 
     bool worthwhileRockFound = false;
     bool northWorthwhile = false;
@@ -189,20 +196,20 @@ std::vector<RockSampleAction> PreferredActionsMap::getPreferredActions() {
         }
     }
     if (!worthwhileRockFound) {
-        actions.push_back(RockSampleAction(ActionType::EAST));
-        return actions;
+        preferredActions_.push_back(RockSampleAction(ActionType::EAST));
+        return;
     }
     if (northWorthwhile) {
-        actions.push_back(RockSampleAction(ActionType::NORTH));
+        preferredActions_.push_back(RockSampleAction(ActionType::NORTH));
     }
     if (southWorthwhile) {
-        actions.push_back(RockSampleAction(ActionType::SOUTH));
+        preferredActions_.push_back(RockSampleAction(ActionType::SOUTH));
     }
     if (eastWorthwhile) {
-        actions.push_back(RockSampleAction(ActionType::EAST));
+        preferredActions_.push_back(RockSampleAction(ActionType::EAST));
     }
     if (westWorthwhile) {
-        actions.push_back(RockSampleAction(ActionType::WEST));
+        preferredActions_.push_back(RockSampleAction(ActionType::WEST));
     }
 
     // See which rocks we might want to check
@@ -210,10 +217,9 @@ std::vector<RockSampleAction> PreferredActionsMap::getPreferredActions() {
         RockData const &rockData = data.allRockData_[i];
         if (rockData.chanceGood != 0.0 && rockData.chanceGood != 1.0 &&
                 rockData.checkCount < 5 && std::abs(rockData.goodnessCount) < 2) {
-            actions.push_back(RockSampleAction(ActionType::CHECK, i));
+            preferredActions_.push_back(RockSampleAction(ActionType::CHECK, i));
         }
     }
-    return actions;
 }
 
 /* --------------------- PreferredActionsTextSerializer -------------------- */

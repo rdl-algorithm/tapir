@@ -348,10 +348,10 @@ void Solver::backup(HistorySequence *sequence, bool backingUp) {
 /* ------------------ Simulation methods ------------------- */
 Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
         State const &currentState) {
-    std::unique_ptr<Action> action = currentBelief->getBestAction();
+    std::unique_ptr<Action> action = currentBelief->getRecommendedAction();
     if (action == nullptr) {
-        debug::show_message("WARNING: No actions evaluated! Selecting a random action...");
-        action = currentBelief->getMapping()->getRandomUnvisitedAction();
+        debug::show_message("ERROR: Could not choose an action!");
+        std::exit(-2);
     }
     Model::StepResult result = model_->generateStep(currentState, *action);
     return result;

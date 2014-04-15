@@ -22,7 +22,7 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-class RockSampleTextSerializer : virtual public PreferredActionsTextSerializer,
+class RockSampleTextSerializer : virtual public LegalActionsTextSerializer,
     virtual public solver::EnumeratedObservationTextSerializer {
   public:
     RockSampleTextSerializer(solver::Solver *solver);

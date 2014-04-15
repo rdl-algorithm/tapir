@@ -10,24 +10,31 @@
 #include "SearchStatus.hpp"
 
 namespace solver {
+/* ----------------------- SearchStrategy ------------------------- */
 SearchStrategy::SearchStrategy(Solver *solver) :
     solver_(solver) {
 }
 
+/* ------------------- AbstractSearchInstance --------------------- */
 AbstractSearchInstance::AbstractSearchInstance(Solver *solver,
         HistorySequence *sequence, long maximumDepth) :
                 solver_(solver),
                 model_(solver_->getModel()),
                 sequence_(sequence),
                 currentNode_(sequence->getLastEntry()->getAssociatedBeliefNode()),
+                currentHistoricalData_(currentNode_->getHistoricalData()),
                 discountFactor_(model_->getDiscountFactor()),
                 maximumDepth_(maximumDepth),
                 status_(SearchStatus::UNINITIALIZED) {
 }
 
 SearchStatus AbstractSearchInstance::initialize() {
-    status_ = SearchStatus::INITIAL;
+    status_ = initializeCustom(currentNode_);
     return status_;
+}
+
+SearchStatus AbstractSearchInstance::initializeCustom(BeliefNode */*currentNode*/) {
+    return SearchStatus::INITIAL;
 }
 
 SearchStatus AbstractSearchInstance::extendSequence() {
@@ -49,13 +56,13 @@ SearchStatus AbstractSearchInstance::extendSequence() {
             status_ = SearchStatus::HIT_DEPTH_LIMIT;
             break;
         }
-        std::unique_ptr<Action> action;
-        std::tie(status_, action) = getStatusAndNextAction();
-        if (action == nullptr) {
+        SearchStep step = getSearchStep();
+        status_ = step.status;
+        if (step.action == nullptr) {
             break;
         }
         Model::StepResult result = model_->generateStep(
-                *currentEntry->getState(), *action);
+                *currentEntry->getState(), *step.action);
         currentEntry->reward_ = result.reward;
         currentEntry->action_ = result.action->copy();
         currentEntry->transitionParameters_ = std::move(
@@ -68,8 +75,15 @@ SearchStatus AbstractSearchInstance::extendSequence() {
                 *result.nextState);
         // Step forward in the history, and update the belief node.
         currentEntry = sequence_->addEntry(nextStateInfo);
-        currentNode_ = solver_->getPolicy()->createOrGetChild(
-                currentNode_, *result.action, *result.observation);
+        if (currentNode_ != nullptr && step.createNode) {
+            currentNode_ = solver_->getPolicy()->createOrGetChild(
+                    currentNode_, *result.action, *result.observation);
+            currentHistoricalData_ = nullptr;
+        } else {
+            currentNode_ = nullptr;
+            currentHistoricalData_ = currentHistoricalData_->createChild(
+                    *result.action, *result.observation);
+        }
         currentEntry->associatedBeliefNode_ = currentNode_;
         if (result.isTerminal) {
             status_ = SearchStatus::HIT_TERMINAL_STATE;
@@ -80,7 +94,38 @@ SearchStatus AbstractSearchInstance::extendSequence() {
 }
 
 SearchStatus AbstractSearchInstance::finalize() {
+    status_ = finalize();
     return status_;
+}
+
+SearchStatus AbstractSearchInstance::finalizeCustom() {
+    return status_;
+}
+
+/* ------------------- AbstractSelectionInstance --------------------- */
+AbstractSelectionInstance::AbstractSelectionInstance(Solver *solver,
+        HistorySequence *sequence, long maximumDepth) :
+        AbstractSearchInstance(solver, sequence, maximumDepth) {
+}
+
+SearchStep AbstractSelectionInstance::getSearchStep() {
+    return getSearchStep(sequence_, currentNode_);
+}
+
+/* ------------------- AbstractRolloutInstance --------------------- */
+AbstractRolloutInstance::AbstractRolloutInstance(Solver *solver,
+        HistorySequence *sequence, long maximumDepth) :
+        AbstractSearchInstance(solver, sequence, maximumDepth) {
+}
+
+SearchStep AbstractRolloutInstance::getSearchStep() {
+    HistoricalData *currentData;
+    if (currentNode_ != nullptr) {
+        currentData = currentNode_->getHistoricalData();
+    } else {
+        currentData = currentHistoricalData_.get();
+    }
+    return getSearchStep(solver_, sequence_, currentData);
 }
 
 } /* namespace solver */

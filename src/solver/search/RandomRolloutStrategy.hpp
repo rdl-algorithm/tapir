@@ -5,6 +5,10 @@
 #include "SearchStrategy.hpp"
 
 namespace solver {
+class HistoricalData;
+class HistorySequence;
+class Solver;
+
 class RandomRolloutStrategy: public SearchStrategy {
   public:
     RandomRolloutStrategy(Solver *solver, long maxNSteps);
@@ -16,13 +20,13 @@ class RandomRolloutStrategy: public SearchStrategy {
     long maxNSteps_;
 };
 
-class RandomRolloutInstance: public AbstractSearchInstance {
+class RandomRolloutInstance: public AbstractRolloutInstance {
   public:
     RandomRolloutInstance(long maxNSteps,
             Solver *solver, HistorySequence *sequence, long maximumDepth);
 
-    virtual std::pair<SearchStatus, std::unique_ptr<Action>>
-    getStatusAndNextAction() override;
+    virtual SearchStep getSearchStep(Solver *solver, HistorySequence *sequence,
+            HistoricalData *currentData) override;
   private:
     long maxNSteps_;
     long currentNSteps_;

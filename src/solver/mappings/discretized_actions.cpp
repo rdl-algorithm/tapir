@@ -42,6 +42,12 @@ std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping() {
             getSolver()->getObservationPool(), model_, numberOfBins_);
 }
 
+std::unique_ptr<Action> DiscretizedActionPool::getRolloutAction(HistoricalData */*data*/) const {
+    long binNumber = std::uniform_int_distribution<long>(0, numberOfBins_ - 1)(
+            (*model_->getRandomGenerator()));
+    return model_->sampleAnAction(binNumber);
+}
+
 /* ---------------------- DiscretizedActionMap ---------------------- */
 DiscretizedActionMap::DiscretizedActionMap(ObservationPool *observationPool,
         ModelWithDiscretizedActions *model, long numberOfBins) :
@@ -81,7 +87,7 @@ BeliefNode *DiscretizedActionMap::getOwner() const {
  */
 void DiscretizedActionMap::initialize() {
     for (long i = 0; i < numberOfBins_; i++) {
-        binsToTry_.add(i);
+        addUnvisitedAction(i);
     }
 }
 
@@ -126,23 +132,32 @@ ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) c
 }
 
 
-long DiscretizedActionMap::getTotalVisitCount() const {
-    return totalVisitCount_;
+std::unique_ptr<Action> DiscretizedActionMap::getRecommendedAction() const {
+    std::unique_ptr<Action> action = getEmpiricalBestAction();
+    if (action == nullptr) {
+        action = getRandomUnvisitedAction();
+    }
+    return action;
 }
-std::unique_ptr<Action> DiscretizedActionMap::getBestAction() const {
+std::unique_ptr<Action> DiscretizedActionMap::getEmpiricalBestAction() const {
     if (bestBinNumber_ == -1) {
         return nullptr;
     }
     return model_->sampleAnAction(bestBinNumber_);
-}
-double DiscretizedActionMap::getMaxQValue() const {
-    return highestQValue_;
 }
 std::unique_ptr<Action> DiscretizedActionMap::getRobustAction() const {
     if (robustBinNumber_ == -1) {
         return nullptr;
     }
     return model_->sampleAnAction(robustBinNumber_);
+}
+
+
+long DiscretizedActionMap::getTotalVisitCount() const {
+    return totalVisitCount_;
+}
+double DiscretizedActionMap::getMaxQValue() const {
+    return highestQValue_;
 }
 double DiscretizedActionMap::getRobustQValue() const {
     return robustQValue_;

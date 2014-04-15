@@ -78,7 +78,13 @@ public:
     _NO_COPY_OR_MOVE(PreferredActionsMap);
 
     void initialize() override;
-    std::vector<RockSampleAction> getPreferredActions();
+    std::vector<RockSampleAction> getPreferredActions() const;
+    std::unique_ptr<RockSampleAction> getRandomPreferredAction() const;
+
+private:
+    void generatePreferredActions();
+
+    std::vector<RockSampleAction> preferredActions_;
 };
 
 class PreferredActionsTextSerializer : virtual public solver::TextSerializer,

@@ -58,8 +58,8 @@ class BeliefNode {
     /* -------------------- Simple getters ---------------------- */
     /** Returns the id of this node. */
     long getId() const;
-    /** Chooses the action with the best expected value. */
-    std::unique_ptr<Action> getBestAction() const;
+    /** Returns the recommended action to take from this node. */
+    std::unique_ptr<Action> getRecommendedAction() const;
     /** Returns the best q-value */
     double getQValue() const;
     /** Returns the number of particles in this node. */

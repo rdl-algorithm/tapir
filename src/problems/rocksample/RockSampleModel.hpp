@@ -43,7 +43,7 @@ class RockSampleState;
 class RockSampleObservation;
 
 class RockSampleModel : virtual public ModelWithProgramOptions,
-    virtual public PreferredActionsModel,
+    virtual public LegalActionsModel,
     virtual public solver::ModelWithEnumeratedObservations {
 friend class RockSampleMdpSolver;
   public:
@@ -77,6 +77,15 @@ friend class RockSampleMdpSolver;
     bool usingPreferredInit() {
         return usingPreferredInit_;
     }
+    /** Returns the initial q-value for preferred actions. */
+    double getPreferredQValue() {
+        return preferredQValue_;
+    }
+    /** Returns the initial visit count for preferred actions. */
+    long getPreferredVisitCount() {
+        return preferredVisitCount_;
+    }
+
     /** Returns the MDP solver, if any is in use. */
     RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
@@ -235,8 +244,13 @@ friend class RockSampleMdpSolver;
 
     /** True iff we're using only legal actions. */
     bool usingOnlyLegal_;
-    /** True iff we're using only preferred actions. */
+
+    /** True iff we're initialising preferred actions with higher q-values. */
     bool usingPreferredInit_;
+    /** The initial q-value for preferred actions. */
+    double preferredQValue_;
+    /** The initial visit count for preferred actions. */
+    long preferredVisitCount_;
 
     /** True iff we're using the exact MDP solution. */
     bool usingExactMdp_;

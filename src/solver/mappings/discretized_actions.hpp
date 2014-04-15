@@ -40,6 +40,7 @@ class DiscretizedActionPool: public solver::ActionPool {
     _NO_COPY_OR_MOVE(DiscretizedActionPool);
 
     virtual std::unique_ptr<ActionMapping> createActionMapping() override;
+    virtual std::unique_ptr<Action> getRolloutAction(HistoricalData *data) const override;
   protected:
   ModelWithDiscretizedActions *model_;
   long numberOfBins_;
@@ -76,15 +77,19 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const override;
     virtual ActionMappingEntry const *getEntry(Action const &action) const override;
 
+    /* ------------------- Action recommendations. --------------------- */
+    virtual std::unique_ptr<Action> getRecommendedAction() const override;
+    virtual std::unique_ptr<Action> getEmpiricalBestAction() const override;
+    virtual std::unique_ptr<Action> getRobustAction() const override;
+
     /* -------------- Retrieval of general statistics. ---------------- */
     virtual long getTotalVisitCount() const override;
-    virtual std::unique_ptr<Action> getBestAction() const override;
     virtual double getMaxQValue() const override;
-    virtual std::unique_ptr<Action> getRobustAction() const override;
     virtual double getRobustQValue() const override;
 
-
     /* ------------ Methods for retrieving unvisited actions -------------- */
+    /** Returns true iff there is another action that has not been visited,
+     * but should be visited. */
     virtual bool hasUnvisitedActions() const override;
     virtual std::vector<std::unique_ptr<Action>> getUnvisitedActions() const override;
     virtual std::unique_ptr<Action> getRandomUnvisitedAction() const override;

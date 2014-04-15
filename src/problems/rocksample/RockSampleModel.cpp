@@ -70,6 +70,8 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     envMap_(), // push rows
     usingOnlyLegal_(vm["heuristics.useOnlyLegal"].as<bool>()),
     usingPreferredInit_(vm["heuristics.usePreferredInit"].as<bool>()),
+    preferredQValue_(vm["heuristics.preferredQValue"].as<double>()),
+    preferredVisitCount_(vm["heuristics.preferredVisitCount"].as<long>()),
     usingExactMdp_(vm["heuristics.exactMdp"].as<bool>()),
     mdpSolver_(nullptr),
     nStVars_(), // depends on nRocks

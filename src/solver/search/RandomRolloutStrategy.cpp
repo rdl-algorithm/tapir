@@ -1,14 +1,18 @@
 #include "RandomRolloutStrategy.hpp"
 
 #include "solver/BeliefNode.hpp"
+#include "solver/Solver.hpp"
+
 #include "solver/abstract-problem/Model.hpp"
+
+#include "solver/mappings/ActionPool.hpp"
 #include "solver/mappings/ActionMapping.hpp"
 
 namespace solver {
 
 RandomRolloutStrategy::RandomRolloutStrategy(Solver *solver, long maxNSteps) :
         SearchStrategy(solver),
-    maxNSteps_(maxNSteps) {
+        maxNSteps_(maxNSteps) {
 }
 
 std::unique_ptr<SearchInstance> RandomRolloutStrategy::createSearchInstance(
@@ -19,19 +23,19 @@ std::unique_ptr<SearchInstance> RandomRolloutStrategy::createSearchInstance(
 
 RandomRolloutInstance::RandomRolloutInstance(long maxNSteps, Solver *solver,
         HistorySequence *sequence, long maximumDepth) :
-                AbstractSearchInstance(solver, sequence, maximumDepth),
+        AbstractRolloutInstance(solver, sequence, maximumDepth),
                 maxNSteps_(maxNSteps),
                 currentNSteps_(0) {
 }
 
-std::pair<SearchStatus, std::unique_ptr<Action>>
-RandomRolloutInstance::getStatusAndNextAction() {
+SearchStep RandomRolloutInstance::getSearchStep(Solver *solver, HistorySequence */*sequence*/,
+        HistoricalData *currentData) {
     if (currentNSteps_ >= maxNSteps_) {
-        return std::make_pair(SearchStatus::ROLLOUT_COMPLETE, nullptr);
+        return {SearchStatus::ROLLOUT_COMPLETE, nullptr, false};
     }
     currentNSteps_++;
-    std::unique_ptr<Action> action = currentNode_->getMapping()->getRandomUnvisitedAction();
-    return std::make_pair(SearchStatus::ROLLING_OUT, std::move(action));
+    std::unique_ptr<Action> action = solver->getActionPool()->getRolloutAction(currentData);
+    return {SearchStatus::ROLLING_OUT, std::move(action), false};
 }
 
 } /* namespace solver */

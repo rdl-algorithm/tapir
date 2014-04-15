@@ -7,6 +7,7 @@
 #include "solver/BeliefNode.hpp"
 
 namespace solver {
+class HistoricalData;
 class ObservationPool;
 class Solver;
 
@@ -29,6 +30,9 @@ public:
         node->setMapping(std::move(map));
         mapPtr->initialize();
     }
+
+    /** Returns a rollout action based on the given historical data. */
+    virtual std::unique_ptr<Action> getRolloutAction(HistoricalData *data) const = 0;
 
     /** Returns the solver associated with this pool. */
     virtual Solver * getSolver() {
