@@ -15,7 +15,6 @@ class ActionMapping {
 public:
     ActionMapping() = default;
     virtual ~ActionMapping() = default;
-    _NO_COPY_OR_MOVE(ActionMapping);
 
     /* -------------- Association with a belief node ---------------- */
     /* Associates this mapping with the given belief node. */

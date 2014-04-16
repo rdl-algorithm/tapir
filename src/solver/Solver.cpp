@@ -80,7 +80,9 @@ void Solver::initializeEmpty() {
     BeliefNode *rootPtr = root.get();
     policy_->setRoot(std::move(root));
     rootPtr->setHistoricalData(model_->createRootInfo());
-    actionPool_->createMappingFor(rootPtr);
+
+    rootPtr->setMapping(actionPool_->createActionMapping());
+    rootPtr->getMapping()->initialize();
 
     initialize();
 }

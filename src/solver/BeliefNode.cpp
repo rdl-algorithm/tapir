@@ -12,6 +12,7 @@
 
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry
+#include "Solver.hpp"                   // for Solver
 
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
@@ -19,14 +20,19 @@
 
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"
+#include "mappings/ObservationPool.hpp"
 
 #include "search/HistoricalData.hpp"
 
 
 namespace solver {
 BeliefNode::BeliefNode() :
+    BeliefNode(nullptr) {
+}
+
+BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry) :
         id_(-1),
-        parentEntry_(nullptr),
+        parentEntry_(parentEntry),
         data_(nullptr),
         particles_(),
         nStartingSequences_(0),
@@ -167,11 +173,12 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
 }
 
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Action const &action,
-        Observation const &obs) {
+std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver,
+        Action const &action, Observation const &obs) {
     ActionNode *actionNode = actionMap_->getActionNode(action);
     if (actionNode == nullptr) {
         actionNode = actionMap_->createActionNode(action);
+        actionNode->setMapping(solver->getObservationPool()->createObservationMapping());
     }
     return actionNode->createOrGetChild(obs);
 }

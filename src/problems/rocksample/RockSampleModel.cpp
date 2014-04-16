@@ -105,6 +105,20 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         cout << "nRocks: " << nRocks_ << endl;
         cout << "Environment:" << endl;
         drawEnv(cout);
+        cout << endl;
+    }
+
+    // MDP solution.
+    if (heuristicEnabled() && usingExactMdp_) {
+        if (hasVerboseOutput()) {
+            cout << "Solving MDP...";
+            cout.flush();
+        }
+        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
+        mdpSolver_->solve();
+        if (hasVerboseOutput()) {
+            cout << "     Done." << endl << endl;
+        }
     }
 }
 
@@ -136,18 +150,6 @@ void RockSampleModel::initialize() {
     minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
     setAllActions(getAllActionsInOrder());
-
-    if (heuristicEnabled() && usingExactMdp_) {
-        if (hasVerboseOutput()) {
-            cout << "Solving MDP...";
-            cout.flush();
-        }
-        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
-        mdpSolver_->solve();
-        if (hasVerboseOutput()) {
-            cout << "     Done." << endl;
-        }
-    }
 }
 
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {

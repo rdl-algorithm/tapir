@@ -47,8 +47,7 @@ public:
 
 class LegalActionsPool: public solver::ActionPool {
   public:
-    LegalActionsPool(solver::Solver *solver,
-            solver::ModelWithDiscretizedActions *model, long numberOfBins);
+    LegalActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~LegalActionsPool() = default;
     _NO_COPY_OR_MOVE(LegalActionsPool);
 
@@ -66,9 +65,7 @@ private:
 class LegalActionsMap : public solver::DiscretizedActionMap {
     friend class LegalActionsTextSerializer;
 public:
-    LegalActionsMap(solver::ObservationPool *observationPool,
-            solver::ModelWithDiscretizedActions *model,
-            long numberOfBins);
+    LegalActionsMap(solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~LegalActionsMap() = default;
     _NO_COPY_OR_MOVE(LegalActionsMap);
 

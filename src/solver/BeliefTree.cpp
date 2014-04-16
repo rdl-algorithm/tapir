@@ -68,15 +68,16 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         Action const &action, Observation const &obs) {
     bool isNew;
     BeliefNode *childNode;
-    std::tie(childNode, isNew) = node->createOrGetChild(action, obs);
+    std::tie(childNode, isNew) = node->createOrGetChild(solver_, action, obs);
     if (isNew) {
-        HistoricalData *data = node->getHistoricalData();
-        if (data != nullptr) {
-                childNode->setHistoricalData(data->createChild(action, obs));
-        }
-        solver_->getActionPool()->createMappingFor(childNode);
         allNodes_.push_back(nullptr);
         setNode(allNodes_.size() - 1, childNode);
+        HistoricalData *data = node->getHistoricalData();
+        if (data != nullptr) {
+            childNode->setHistoricalData(data->createChild(action, obs));
+        }
+        childNode->setMapping(solver_->getActionPool()->createActionMapping());
+        childNode->getMapping()->initialize();
     }
     return childNode;
 }

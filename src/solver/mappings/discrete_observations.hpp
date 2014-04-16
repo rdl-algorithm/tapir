@@ -32,7 +32,7 @@ public:
 
 class DiscreteObservationPool: public solver::ObservationPool {
   public:
-    DiscreteObservationPool(Solver *solver);
+    DiscreteObservationPool() = default;
     virtual ~DiscreteObservationPool() = default;
     _NO_COPY_OR_MOVE(DiscreteObservationPool);
 
@@ -91,19 +91,13 @@ class DiscreteObservationMapEntry : public solver::ObservationMappingEntry {
     friend class DiscreteObservationMap;
     friend class DiscreteObservationTextSerializer;
 public:
-    DiscreteObservationMapEntry(DiscreteObservationMap *map,
-            Observation const &observation,
-            std::unique_ptr<BeliefNode> childNode);
-    virtual ~DiscreteObservationMapEntry() = default;
-    _NO_COPY_OR_MOVE(DiscreteObservationMapEntry);
-
     virtual ObservationMapping *getMapping() const override;
     virtual std::unique_ptr<Observation> getObservation() const override;
     virtual BeliefNode *getBeliefNode() const override;
     virtual long getVisitCount() const override;
 private:
     DiscreteObservationMap *map_ = nullptr;
-    std::unique_ptr<Observation> observation_;
+    std::unique_ptr<Observation> observation_ = nullptr;
     std::unique_ptr<BeliefNode> childNode_ = nullptr;
     long visitCount_ = 0;
 };

@@ -164,8 +164,8 @@ void PositionAndRockData::print(std::ostream &os) const {
 
 /* ------------------------ PreferredActionsModel ----------------------- */
 std::unique_ptr<solver::ActionPool> PreferredActionsModel::createActionPool(
-        solver::Solver *solver) {
-    return std::make_unique<PreferredActionsPool>(solver, this, getNumberOfBins());
+        solver::Solver */*solver*/) {
+    return std::make_unique<PreferredActionsPool>(this, getNumberOfBins());
 }
 
 std::unique_ptr<solver::HistoricalData> PreferredActionsModel::createRootInfo() {
@@ -175,15 +175,12 @@ std::unique_ptr<solver::HistoricalData> PreferredActionsModel::createRootInfo() 
 }
 
 /* ------------------------ PreferredActionsPool ----------------------- */
-PreferredActionsPool::PreferredActionsPool(solver::Solver *solver,
-        solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                ActionPool(solver),
+PreferredActionsPool::PreferredActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins) :
                 model_(model),
                 numberOfBins_(numberOfBins) {
 }
 std::unique_ptr<solver::ActionMapping> PreferredActionsPool::createActionMapping() {
-    return std::make_unique<PreferredActionsMap>(getSolver()->getObservationPool(),
-            model_, numberOfBins_);
+    return std::make_unique<PreferredActionsMap>(model_, numberOfBins_);
 }
 std::unique_ptr<solver::Action> PreferredActionsPool::getDefaultRolloutAction(solver::HistoricalData *data) const {
     PositionAndRockData const &prData = static_cast<PositionAndRockData const &>(*data);
@@ -194,9 +191,9 @@ std::unique_ptr<solver::Action> PreferredActionsPool::getDefaultRolloutAction(so
 }
 
 /* ------------------------- PreferredActionsMap ------------------------ */
-PreferredActionsMap::PreferredActionsMap(solver::ObservationPool *observationPool,
-            solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                    solver::DiscretizedActionMap(observationPool, model, numberOfBins),
+PreferredActionsMap::PreferredActionsMap(
+        solver::ModelWithDiscretizedActions *model, long numberOfBins) :
+                    solver::DiscretizedActionMap(model, numberOfBins),
                     preferredActions_() {
 }
 

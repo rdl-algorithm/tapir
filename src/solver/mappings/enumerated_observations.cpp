@@ -26,16 +26,14 @@
 namespace solver {
 /* ------------------- ModelWithEnumeratedObservations ------------------- */
 std::unique_ptr<ObservationPool>
-    ModelWithEnumeratedObservations::createObservationPool(Solver *solver) {
-    return std::make_unique<EnumeratedObservationPool>(
-            solver, getAllObservationsInOrder());
+    ModelWithEnumeratedObservations::createObservationPool(Solver */*solver*/) {
+    return std::make_unique<EnumeratedObservationPool>(getAllObservationsInOrder());
 }
 
 /* --------------------- EnumeratedObservationPool --------------------- */
-EnumeratedObservationPool::EnumeratedObservationPool(Solver *solver,
+EnumeratedObservationPool::EnumeratedObservationPool(
         std::vector<std::unique_ptr<DiscretizedPoint>> observations) :
-                ObservationPool(solver),
-    observations_(std::move(observations)) {
+                observations_(std::move(observations)) {
 }
 
 std::unique_ptr<ObservationMapping>
@@ -75,10 +73,12 @@ BeliefNode* EnumeratedObservationMap::createBelief(
         const Observation& obs) {
     long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
     std::unique_ptr<EnumeratedObservationMapEntry> entry = (
-            std::make_unique<EnumeratedObservationMapEntry>(
-            this, code, std::make_unique<BeliefNode>()));
+            std::make_unique<EnumeratedObservationMapEntry>());
+    entry->map_ = this;
+    entry->index_ = code;
+    entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
     BeliefNode *node = entry->childNode_.get();
-    node->setParentEntry(entry.get());
+
     children_[code] = std::move(entry);
     nChildren_++;
     return node;
@@ -108,14 +108,6 @@ long EnumeratedObservationMap::getTotalVisitCount() const {
 }
 
 /* ----------------- EnumeratedObservationMapEntry ----------------- */
-EnumeratedObservationMapEntry::EnumeratedObservationMapEntry(
-        EnumeratedObservationMap *map,
-        long index, std::unique_ptr<BeliefNode> childNode) :
-                map_(map),
-                index_(index),
-                childNode_(std::move(childNode)),
-                visitCount_(0) {
-}
 ObservationMapping *EnumeratedObservationMapEntry::getMapping() const {
     return map_;
 }
@@ -188,16 +180,16 @@ EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
 
         // Create the child node and set its values correctly.
         long code = static_cast<DiscretizedPoint const &>(*obs).getBinNumber();
+
         std::unique_ptr<EnumeratedObservationMapEntry> entry = (
-                std::make_unique<EnumeratedObservationMapEntry>(
-                &enumMap, code, std::make_unique<BeliefNode>()));
+                std::make_unique<EnumeratedObservationMapEntry>());
+        entry->map_ = &enumMap;
+        entry->index_ = code;
+        entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
         entry->visitCount_ = visitCount;
 
-        // Update the node's parent entry
-        BeliefNode *node = entry->childNode_.get();
-        node->setParentEntry(entry.get());
-
         // Add the node to the tree index.
+        BeliefNode *node = entry->childNode_.get();
         getSolver()->getPolicy()->setNode(childId, node);
 
         // Add the entry to the map.

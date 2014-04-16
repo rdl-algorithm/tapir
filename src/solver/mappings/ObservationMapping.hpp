@@ -16,7 +16,6 @@ class ObservationMapping {
   public:
     ObservationMapping() = default;
     virtual ~ObservationMapping() = default;
-    _NO_COPY_OR_MOVE(ObservationMapping);
 
     /* -------------- Association with an action node ---------------- */
     /* Associates this mapping with the given action node. */
@@ -49,7 +48,6 @@ class ObservationMappingEntry {
 public:
     ObservationMappingEntry() = default;
     virtual ~ObservationMappingEntry() = default;
-    _NO_COPY_OR_MOVE(ObservationMappingEntry);
 
     /** Returns the mapping this entry belongs to. */
     virtual ObservationMapping *getMapping() const = 0;

@@ -23,6 +23,7 @@ class ActionNode;
 class HistoricalData;
 class HistoryEntry;
 class ObservationMappingEntry;
+class Solver;
 
 class BeliefNode {
   public:
@@ -31,6 +32,9 @@ class BeliefNode {
 
     /** Constructs a new belief node with no ID (-1). */
     BeliefNode();
+    /** Constructs a new belief node with no ID (-1), with the given
+     * mapping entry as its parent. */
+    BeliefNode(ObservationMappingEntry *parentEntry);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefNode();
@@ -104,8 +108,8 @@ class BeliefNode {
      * returns the child node, and a boolean which is true iff a new node was
      * actually created.
      */
-    std::pair<BeliefNode *, bool> createOrGetChild(Action const &action,
-            Observation const &obs);
+    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver,
+            Action const &action, Observation const &obs);
 
 private:
     /** The ID of this node. */

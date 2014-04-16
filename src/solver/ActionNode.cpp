@@ -19,6 +19,11 @@ ActionNode::ActionNode() :
         observationMap_(nullptr) {
 }
 
+ActionNode::ActionNode(ActionMappingEntry *parentEntry) :
+        parentEntry_(parentEntry),
+        observationMap_(nullptr) {
+}
+
 // Default destructor
 ActionNode::~ActionNode() {
 }
@@ -44,13 +49,14 @@ BeliefNode *ActionNode::getChild(Observation const &obs) const {
 }
 
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Observation const &obs) {
-    BeliefNode *beliefChild = getChild(obs);
+std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(
+        Observation const &obs) {
+    BeliefNode *childNode = getChild(obs);
     bool added = false;
-    if (beliefChild == nullptr) {
-        beliefChild = observationMap_->createBelief(obs);
+    if (childNode == nullptr) {
+        childNode = observationMap_->createBelief(obs);
         added = true;
     }
-    return std::make_pair(beliefChild, added);
+    return std::make_pair(childNode, added);
 }
 } /* namespace solver */

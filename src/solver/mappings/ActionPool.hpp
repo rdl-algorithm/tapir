@@ -12,24 +12,11 @@ class ObservationPool;
 class Solver;
 
 class ActionPool {
-    friend class Solver;
 public:
-    ActionPool(Solver *solver) :
-        solver_(solver) {
-    }
+    ActionPool() = default;
     virtual ~ActionPool() = default;
-    _NO_COPY_OR_MOVE(ActionPool);
-
     /** Creates a default action mapping. */
     virtual std::unique_ptr<ActionMapping> createActionMapping() = 0;
-
-    /** Creates a mapping for the given belief node. */
-    virtual void createMappingFor(BeliefNode *node) {
-        std::unique_ptr<ActionMapping> map = createActionMapping();
-        ActionMapping *mapPtr = map.get();
-        node->setMapping(std::move(map));
-        mapPtr->initialize();
-    }
 
     /** Returns an action based on a default history-based rollout strategy;
      * an implementation is required if you want to use
@@ -37,13 +24,6 @@ public:
     virtual std::unique_ptr<Action> getDefaultRolloutAction(HistoricalData */*data*/) const {
         return nullptr;
     }
-
-    /** Returns the solver associated with this pool. */
-    virtual Solver * getSolver() {
-        return solver_;
-    }
-private:
-    Solver *solver_ = nullptr;
 };
 
 } /* namespace solver */

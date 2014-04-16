@@ -61,8 +61,7 @@ public:
 
 class PreferredActionsPool: public solver::ActionPool {
   public:
-    PreferredActionsPool(solver::Solver *solver,
-            solver::ModelWithDiscretizedActions *model, long numberOfBins);
+    PreferredActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~PreferredActionsPool() = default;
     _NO_COPY_OR_MOVE(PreferredActionsPool);
 
@@ -79,8 +78,7 @@ class PreferredActionsPool: public solver::ActionPool {
 class PreferredActionsMap : public solver::DiscretizedActionMap {
     friend class PreferredActionsTextSerializer;
 public:
-    PreferredActionsMap(solver::ObservationPool *observationPool,
-            solver::ModelWithDiscretizedActions *model,
+    PreferredActionsMap(solver::ModelWithDiscretizedActions *model,
             long numberOfBins);
     virtual ~PreferredActionsMap() = default;
     _NO_COPY_OR_MOVE(PreferredActionsMap);

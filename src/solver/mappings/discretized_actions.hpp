@@ -34,8 +34,7 @@ public:
 
 class DiscretizedActionPool: public solver::ActionPool {
   public:
-    DiscretizedActionPool(Solver *solver, ModelWithDiscretizedActions *model,
-            long numberOfBins);
+    DiscretizedActionPool(ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~DiscretizedActionPool() = default;
     _NO_COPY_OR_MOVE(DiscretizedActionPool);
 
@@ -51,9 +50,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     friend class DiscretizedActionTextSerializer;
     friend class DiscretizedActionMapEntry;
 
-    DiscretizedActionMap(ObservationPool *observationPool,
-            ModelWithDiscretizedActions *model,
-            long numberOfBins);
+    DiscretizedActionMap(ModelWithDiscretizedActions *model, long numberOfBins);
 
     /* -------------- Association with a belief node ---------------- */
     virtual void setOwner(BeliefNode *owner) override;
@@ -108,7 +105,6 @@ class DiscretizedActionMap: public solver::ActionMapping {
 
   protected:
     BeliefNode *owningBeliefNode_;
-    ObservationPool *observationPool_;
     ModelWithDiscretizedActions *model_;
     long numberOfBins_;
 

@@ -24,22 +24,19 @@
 namespace solver {
 /* ------------------- ModelWithDiscretizedActions ------------------- */
 std::unique_ptr<ActionPool>
-    ModelWithDiscretizedActions::createActionPool(Solver *solver) {
-    return std::make_unique<DiscretizedActionPool>(solver, this,
-            getNumberOfBins());
+    ModelWithDiscretizedActions::createActionPool(Solver */*solver*/) {
+    return std::make_unique<DiscretizedActionPool>(this, getNumberOfBins());
 }
 
 /* --------------------- DiscretizedActionPool --------------------- */
-DiscretizedActionPool::DiscretizedActionPool(Solver *solver,
+DiscretizedActionPool::DiscretizedActionPool(
         ModelWithDiscretizedActions *model, long numberOfBins) :
-                ActionPool(solver),
                 model_(model),
                 numberOfBins_(numberOfBins) {
 }
 
 std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping() {
-    return std::make_unique<DiscretizedActionMap>(
-            getSolver()->getObservationPool(), model_, numberOfBins_);
+    return std::make_unique<DiscretizedActionMap>(model_, numberOfBins_);
 }
 
 std::unique_ptr<Action> DiscretizedActionPool::getDefaultRolloutAction(HistoricalData */*data*/) const {
@@ -49,10 +46,9 @@ std::unique_ptr<Action> DiscretizedActionPool::getDefaultRolloutAction(Historica
 }
 
 /* ---------------------- DiscretizedActionMap ---------------------- */
-DiscretizedActionMap::DiscretizedActionMap(ObservationPool *observationPool,
-        ModelWithDiscretizedActions *model, long numberOfBins) :
+DiscretizedActionMap::DiscretizedActionMap(ModelWithDiscretizedActions *model,
+        long numberOfBins) :
                 owningBeliefNode_(nullptr),
-                observationPool_(observationPool),
                 model_(model),
                 numberOfBins_(numberOfBins),
                 entries_(numberOfBins_),
@@ -100,11 +96,9 @@ ActionNode* DiscretizedActionMap::createActionNode(Action const &action) {
 
     DiscretizedActionMapEntry &entry = entries_[code];
 
-    std::unique_ptr<ActionNode> actionNode = std::make_unique<ActionNode>();
+    std::unique_ptr<ActionNode> actionNode = std::make_unique<ActionNode>(&entry);
     ActionNode *node = actionNode.get();
     entry.childNode_ = std::move(actionNode);
-    node->setMapping(observationPool_->createObservationMapping());
-    node->setParentEntry(&entry);
 
     nChildren_++;
     return node;
@@ -408,11 +402,9 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
 
         // Read in the action node itself.
         if (hasChild) {
-            entry.childNode_ = std::make_unique<ActionNode>();
-            entry.childNode_ = std::make_unique<ActionNode>();
+            entry.childNode_ = std::make_unique<ActionNode>(&entry);
             ActionNode *node = entry.childNode_.get();
             load(*node, is);
-            node->setParentEntry(&entry);
         }
     }
     return std::move(map);

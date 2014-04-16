@@ -57,8 +57,8 @@ void PositionData::print(std::ostream &os) const {
 
 /* ------------------------ LegalActionsModel ----------------------- */
 std::unique_ptr<solver::ActionPool> LegalActionsModel::createActionPool(
-        solver::Solver *solver) {
-    return std::make_unique<LegalActionsPool>(solver, this, getNumberOfBins());
+        solver::Solver */*solver*/) {
+    return std::make_unique<LegalActionsPool>(this, getNumberOfBins());
 }
 
 std::unique_ptr<solver::HistoricalData> LegalActionsModel::createRootInfo() {
@@ -68,15 +68,12 @@ std::unique_ptr<solver::HistoricalData> LegalActionsModel::createRootInfo() {
 }
 
 /* ------------------------ LegalActionsPool ----------------------- */
-LegalActionsPool::LegalActionsPool(solver::Solver *solver,
-        solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                ActionPool(solver),
+LegalActionsPool::LegalActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins) :
                 model_(model),
                 numberOfBins_(numberOfBins) {
 }
 std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping() {
-    return std::make_unique<LegalActionsMap>(
-            getSolver()->getObservationPool(), model_, numberOfBins_);
+    return std::make_unique<LegalActionsMap>(model_, numberOfBins_);
 }
 std::unique_ptr<solver::Action> LegalActionsPool::getDefaultRolloutAction(solver::HistoricalData *data) const {
     PositionData const &positionData = static_cast<PositionData const &>(*data);
@@ -87,10 +84,9 @@ std::unique_ptr<solver::Action> LegalActionsPool::getDefaultRolloutAction(solver
 }
 
 /* ------------------------- LegalActionsMap ------------------------ */
-LegalActionsMap::LegalActionsMap(solver::ObservationPool *observationPool,
-            solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                    solver::DiscretizedActionMap(
-                            observationPool, model, numberOfBins) {
+LegalActionsMap::LegalActionsMap(solver::ModelWithDiscretizedActions *model,
+        long numberOfBins) :
+                    solver::DiscretizedActionMap(model, numberOfBins) {
 }
 void LegalActionsMap::initialize() {
     RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);

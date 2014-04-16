@@ -159,8 +159,7 @@ class Model {
     /** Creates a HistoryCorrector; defaults to a general one, but can
      * be made problem-specific.
      */
-    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(
-            Solver *solver);
+    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(Solver *solver);
     /** Creates an ActionPool, which manages actions and creates
      * ActionMappings
      */

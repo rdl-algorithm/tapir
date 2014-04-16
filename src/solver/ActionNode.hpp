@@ -23,6 +23,8 @@ class ActionNode {
 
     /** Constructs an action node without an observation mapping! */
     ActionNode();
+    /** Constructs an action node with the given entry as its parent. */
+    ActionNode(ActionMappingEntry *parentEntry);
 
     // Default destructor; copying and moving disallowed!
     ~ActionNode();
@@ -48,7 +50,8 @@ class ActionNode {
     /** Adds a child with the given observation, creating a new belief node if
      * necessary.
      */
-    std::pair<BeliefNode *, bool> createOrGetChild(Observation const &obs);
+    std::pair<BeliefNode *, bool> createOrGetChild(
+            Observation const &obs);
 
   private:
     ActionMappingEntry *parentEntry_;

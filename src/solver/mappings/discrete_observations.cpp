@@ -23,15 +23,11 @@
 namespace solver {
 /* ------------------- ModelWithDiscreteObservations ------------------- */
 std::unique_ptr<ObservationPool> ModelWithDiscreteObservations::createObservationPool(
-        Solver *solver) {
-    return std::make_unique<DiscreteObservationPool>(solver);
+        Solver */*solver*/) {
+    return std::make_unique<DiscreteObservationPool>();
 }
 
 /* --------------------- DiscreteObservationPool --------------------- */
-DiscreteObservationPool::DiscreteObservationPool(Solver *solver) :
-        ObservationPool(solver) {
-}
-
 std::unique_ptr<ObservationMapping> DiscreteObservationPool::createObservationMapping() {
     return std::make_unique<DiscreteObservationMap>();
 }
@@ -60,10 +56,12 @@ BeliefNode* DiscreteObservationMap::getBelief(Observation const &obs) const {
 
 BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
     std::unique_ptr<DiscreteObservationMapEntry> entry = (
-            std::make_unique<DiscreteObservationMapEntry>(
-                    this, obs, std::make_unique<BeliefNode>()));
+            std::make_unique<DiscreteObservationMapEntry>());
+    entry->map_ = this;
+    entry->observation_ = obs.copy();
+    entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
     BeliefNode *node = entry->childNode_.get();
-    node->setParentEntry(entry.get());
+
     childMap_.emplace(obs.copy(), std::move(entry));
     return node;
 }
@@ -88,15 +86,6 @@ long DiscreteObservationMap::getTotalVisitCount() const {
 }
 
 /* ----------------- DiscreteObservationMapEntry ----------------- */
-DiscreteObservationMapEntry::DiscreteObservationMapEntry(
-        DiscreteObservationMap *map,
-        Observation const &observation,
-        std::unique_ptr<BeliefNode> childNode) :
-                map_(map),
-                observation_(observation.copy()),
-                childNode_(std::move(childNode)),
-                visitCount_(0) {
-}
 ObservationMapping *DiscreteObservationMapEntry::getMapping() const {
     return map_;
 }
@@ -173,15 +162,14 @@ std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObser
 
         // Create the mapping entry and set its values.
         std::unique_ptr<DiscreteObservationMapEntry> entry = (
-                    std::make_unique<DiscreteObservationMapEntry>(
-                            &discMap, *obs, std::make_unique<BeliefNode>()));
+                    std::make_unique<DiscreteObservationMapEntry>());
+        entry->map_ = &discMap;
+        entry->observation_ = std::move(obs);
+        entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
         entry->visitCount_ = visitCount;
 
-        // Update the node's parent entry.
-        BeliefNode *node = entry->childNode_.get();
-        node->setParentEntry(entry.get());
-
         // Add the node to the tree index.
+        BeliefNode *node = entry->childNode_.get();
         getSolver()->getPolicy()->setNode(childId, node);
 
         // Add the entry to the map
