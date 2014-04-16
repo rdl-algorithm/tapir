@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include <boost/regex.hpp>    // for variables_map, variable_value, program_options
+#include "global.hpp"
 
 #include "solver/backpropagation/AveragePropagator.hpp"
 #include "solver/backpropagation/MaximumPropagator.hpp"
@@ -16,17 +16,20 @@
 
 std::pair<std::string, std::vector<std::string>> split_function(
         std::string text) {
-    boost::regex pattern(" *(.+?)\\((.*)\\) *");
-    boost::smatch results;
-
-    std::string argsString = "";
-    std::vector<std::string> argsVector;
-    if (!boost::regex_match(text, results, pattern)) {
-        return std::make_pair(argsString, argsVector);
+    std::size_t i0 = text.find('(');
+    std::size_t i1 = text.rfind(')');
+    if (i0 == std::string::npos || i1 == std::string::npos || i1 <= i0) {
+        return std::make_pair("", std::vector<std::string>());
     }
 
-    std::string function = results[1];
-    argsString = results[2];
+    std::string function = text.substr(0, i0);
+    abt::trim(function);
+    std::string argsString = text.substr(i0+1, i1 - i0 - 1);
+    std::vector<std::string> argsVector;
+
+    std::cout << "\"" << function << "\" ";
+    std::cout << "\"" << argsString << "\"" << std::endl;
+
     std::string::iterator prevIter = argsString.begin();
     int parenCount = 0;
     for (std::string::iterator charIter = argsString.begin();
@@ -41,13 +44,17 @@ std::pair<std::string, std::vector<std::string>> split_function(
         }
         if (*charIter == ',' && parenCount == 0) {
             if (prevIter != charIter) {
-                argsVector.push_back(std::string(prevIter, charIter));
+                std::string s(prevIter, charIter);
+                abt::trim(s);
+                argsVector.push_back(s);
             }
             prevIter = charIter + 1;
         }
     }
     if (prevIter != argsString.end()) {
-        argsVector.push_back(std::string(prevIter, argsString.end()));
+        std::string s(prevIter, argsString.end());
+        abt::trim(s);
+        argsVector.push_back(s);
     }
     return std::make_pair(function, argsVector);
 }

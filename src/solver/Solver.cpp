@@ -188,11 +188,6 @@ double Solver::runSim(long nSteps, long historiesPerStep,
                 std::string s1, s2;
                 std::getline(prevStream, s1);
                 std::getline(newStream, s2);
-                // boost::regex rgx("\\x1b\\[[0-9;]*m");
-                // std::string s1Text = boost::regex_replace(s1, rgx, "");
-                // std::string s2Text = boost::regex_replace(s2, rgx, "");
-                // cout << s1 << std::setw(40 - s1Text.size()) << "";
-                // cout << s2 << std::setw(40 - s2Text.size()) << "";
                 cout << s1 << std::setw(40 - s1.size()) << "";
                 cout << s2 << std::setw(40 - s2.size()) << "";
                 cout << endl;
