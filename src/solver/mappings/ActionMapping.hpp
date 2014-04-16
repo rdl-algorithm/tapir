@@ -42,6 +42,10 @@ public:
     virtual long getNChildren() const = 0;
 
     /* -------------- Retrieval of mapping entries. ---------------- */
+    /** Returns the number of entries in this mapping with a nonzero visit
+     * count (some of these may not have an associated action node, so this
+     * is different to the number of child nodes).
+     */
     virtual long getNumberOfVisitedEntries() const = 0;
     /** Returns all of the visited entries in this mapping - some may have
      * null action nodes if the visit counts were initialized to nonzero
@@ -52,8 +56,17 @@ public:
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
     /* ------------------- Action recommendations. --------------------- */
-    /** Returns the recommended action. */
-    virtual std::unique_ptr<Action> getRecommendedAction() const = 0;
+    /** Returns the recommended action - defaults to using the empirical best
+     * action,  or a random action that has not been tried if there is not
+     * yet an empirical best.
+     */
+    virtual std::unique_ptr<Action> getRecommendedAction() const {
+        std::unique_ptr<Action> action = getEmpiricalBestAction();
+        if (action == nullptr) {
+            action = getRandomUnvisitedAction();
+        }
+        return action;
+    }
     /** Returns the action with the highest estimated q-value. */
     virtual std::unique_ptr<Action> getEmpiricalBestAction() const = 0;
     /** Returns the robust action (i.e. the action with the highest
@@ -81,14 +94,6 @@ public:
     virtual std::vector<std::unique_ptr<Action>> getUnvisitedActions() const = 0;
     /** Returns a random unvisited action. */
     virtual std::unique_ptr<Action> getRandomUnvisitedAction() const = 0;
-
-    /* ------------ Easy getters for entry values. -------------- */
-    /** Returns the number of visits for the given action. */
-    virtual long getVisitCount(Action const &action) const = 0;
-    /** Returns the total q-value for the given action. */
-    virtual double getTotalQValue(Action const &action) const = 0;
-    /** Returns the mean q-value for the given action. */
-    virtual double getMeanQValue(Action const &action) const = 0;
 
     /* --------------- Methods for updating the values ----------------- */
     /** Updates the given action, by adding the given number of visits and the

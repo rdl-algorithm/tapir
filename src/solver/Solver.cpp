@@ -79,8 +79,8 @@ void Solver::initializeEmpty() {
     std::unique_ptr<BeliefNode> root = std::make_unique<BeliefNode>();
     BeliefNode *rootPtr = root.get();
     policy_->setRoot(std::move(root));
-    rootPtr->setHistoricalData(model_->createRootInfo());
 
+    rootPtr->setHistoricalData(model_->createRootInfo());
     rootPtr->setMapping(actionPool_->createActionMapping());
     rootPtr->getMapping()->initialize();
 

@@ -7,10 +7,12 @@
 #include "global.hpp"                     // for make_unique
 
 #include "BeliefNode.hpp"
+#include "Solver.hpp"
 
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
 
+#include "mappings/ActionPool.hpp"       // for ActionPool
 #include "mappings/ObservationMapping.hpp"       // for ObservationMapping
 
 namespace solver {
@@ -49,12 +51,13 @@ BeliefNode *ActionNode::getChild(Observation const &obs) const {
 }
 
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(
+std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver *solver,
         Observation const &obs) {
     BeliefNode *childNode = getChild(obs);
     bool added = false;
     if (childNode == nullptr) {
         childNode = observationMap_->createBelief(obs);
+        childNode->setMapping(solver->getActionPool()->createActionMapping());
         added = true;
     }
     return std::make_pair(childNode, added);

@@ -180,6 +180,6 @@ std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver,
         actionNode = actionMap_->createActionNode(action);
         actionNode->setMapping(solver->getObservationPool()->createObservationMapping());
     }
-    return actionNode->createOrGetChild(obs);
+    return actionNode->createOrGetChild(solver, obs);
 }
 } /* namespace solver */

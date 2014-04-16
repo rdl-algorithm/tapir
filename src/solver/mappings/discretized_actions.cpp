@@ -126,13 +126,6 @@ ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) c
 }
 
 
-std::unique_ptr<Action> DiscretizedActionMap::getRecommendedAction() const {
-    std::unique_ptr<Action> action = getEmpiricalBestAction();
-    if (action == nullptr) {
-        action = getRandomUnvisitedAction();
-    }
-    return action;
-}
 std::unique_ptr<Action> DiscretizedActionMap::getEmpiricalBestAction() const {
     if (bestBinNumber_ == -1) {
         return nullptr;
@@ -181,19 +174,6 @@ void DiscretizedActionMap::deleteUnvisitedAction(long binNumber) {
 }
 void DiscretizedActionMap::addUnvisitedAction(long binNumber) {
     binsToTry_.add(binNumber);
-}
-
-long DiscretizedActionMap::getVisitCount(Action const &action) const {
-    long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    return entries_[code].getVisitCount();
-}
-double DiscretizedActionMap::getTotalQValue(Action const &action) const {
-    long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    return entries_[code].getTotalQValue();
-}
-double DiscretizedActionMap::getMeanQValue(Action const &action) const {
-    long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    return entries_[code].getMeanQValue();
 }
 
 void DiscretizedActionMap::update(Action const &action, long deltaNVisits,

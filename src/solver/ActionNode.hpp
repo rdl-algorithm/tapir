@@ -16,6 +16,7 @@ namespace solver {
 class ActionMappingEntry;
 class BeliefNode;
 class ObservationMapping;
+class Solver;
 
 class ActionNode {
   public:
@@ -50,7 +51,7 @@ class ActionNode {
     /** Adds a child with the given observation, creating a new belief node if
      * necessary.
      */
-    std::pair<BeliefNode *, bool> createOrGetChild(
+    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver,
             Observation const &obs);
 
   private:

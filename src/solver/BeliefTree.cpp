@@ -76,7 +76,7 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         if (data != nullptr) {
             childNode->setHistoricalData(data->createChild(action, obs));
         }
-        childNode->setMapping(solver_->getActionPool()->createActionMapping());
+        // Initialize the child node's action mapping.
         childNode->getMapping()->initialize();
     }
     return childNode;

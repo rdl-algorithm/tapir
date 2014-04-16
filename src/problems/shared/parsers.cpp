@@ -27,9 +27,6 @@ std::pair<std::string, std::vector<std::string>> split_function(
     std::string argsString = text.substr(i0+1, i1 - i0 - 1);
     std::vector<std::string> argsVector;
 
-    std::cout << "\"" << function << "\" ";
-    std::cout << "\"" << argsString << "\"" << std::endl;
-
     std::string::iterator prevIter = argsString.begin();
     int parenCount = 0;
     for (std::string::iterator charIter = argsString.begin();

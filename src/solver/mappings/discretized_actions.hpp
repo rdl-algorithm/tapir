@@ -75,7 +75,6 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual ActionMappingEntry const *getEntry(Action const &action) const override;
 
     /* ------------------- Action recommendations. --------------------- */
-    virtual std::unique_ptr<Action> getRecommendedAction() const override;
     virtual std::unique_ptr<Action> getEmpiricalBestAction() const override;
     virtual std::unique_ptr<Action> getRobustAction() const override;
 
@@ -93,11 +92,6 @@ class DiscretizedActionMap: public solver::ActionMapping {
 
     virtual void deleteUnvisitedAction(long binNumber);
     virtual void addUnvisitedAction(long binNumber);
-
-    /* ------------ Easy getters for entry values. -------------- */
-    virtual long getVisitCount(Action const &action) const override;
-    virtual double getTotalQValue(Action const &action) const override;
-    virtual double getMeanQValue(Action const &action) const override;
 
     /* --------------- Methods for updating the values ----------------- */
     virtual void update(Action const &action, long deltaNVisits, double deltaQ) override;
