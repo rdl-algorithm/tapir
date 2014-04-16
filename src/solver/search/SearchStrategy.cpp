@@ -92,8 +92,12 @@ SearchStatus AbstractSearchInstance::extendSequence() {
                 oldData = currentNode_->getHistoricalData();
                 currentNode_ = nullptr;
             }
-            currentHistoricalData_ = oldData->createChild(
-                    *result.action, *result.observation);
+            if (oldData != nullptr) {
+                currentHistoricalData_ = oldData->createChild(
+                        *result.action, *result.observation);
+            } else {
+                currentHistoricalData_ = nullptr;
+            }
         }
         if (result.isTerminal) {
             status_ = SearchStatus::HIT_TERMINAL_STATE;
