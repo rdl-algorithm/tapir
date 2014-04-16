@@ -21,7 +21,9 @@ class SpatialIndexVisitor: public SpatialIndex::IVisitor {
     virtual void visitData(const SpatialIndex::IData &data);
     virtual void visitData(std::vector<const SpatialIndex::IData*> &v);
     virtual void visit(StateInfo *info) = 0;
-  protected:
+
+    virtual StatePool *getStatePool() const;
+  private:
     StatePool *statePool_;
 };
 

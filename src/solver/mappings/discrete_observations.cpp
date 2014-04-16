@@ -119,7 +119,7 @@ void DiscreteObservationTextSerializer::saveObservationPool(
 std::unique_ptr<ObservationPool> DiscreteObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->getModel()->createObservationPool(solver_);
+    return getSolver()->getModel()->createObservationPool(getSolver());
 }
 
 void DiscreteObservationTextSerializer::saveObservationMapping(
@@ -148,7 +148,7 @@ void DiscreteObservationTextSerializer::saveObservationMapping(
 std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObservationMapping(
         std::istream &is) {
     std::unique_ptr<ObservationMapping> map(
-            solver_->getObservationPool()->createObservationMapping());
+            getSolver()->getObservationPool()->createObservationMapping());
     DiscreteObservationMap &discMap =
                     (static_cast<DiscreteObservationMap &>(*map));
     std::string line;
@@ -182,7 +182,7 @@ std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObser
         node->setParentEntry(entry.get());
 
         // Add the node to the tree index.
-        solver_->getPolicy()->setNode(childId, node);
+        getSolver()->getPolicy()->setNode(childId, node);
 
         // Add the entry to the map
         discMap.childMap_.emplace(obs->copy(), std::move(entry));

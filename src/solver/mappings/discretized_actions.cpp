@@ -42,7 +42,7 @@ std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping() {
             getSolver()->getObservationPool(), model_, numberOfBins_);
 }
 
-std::unique_ptr<Action> DiscretizedActionPool::getRolloutAction(HistoricalData */*data*/) const {
+std::unique_ptr<Action> DiscretizedActionPool::getDefaultRolloutAction(HistoricalData */*data*/) const {
     long binNumber = std::uniform_int_distribution<long>(0, numberOfBins_ - 1)(
             (*model_->getRandomGenerator()));
     return model_->sampleAnAction(binNumber);
@@ -295,7 +295,7 @@ void DiscretizedActionTextSerializer::saveActionPool(
 std::unique_ptr<ActionPool> DiscretizedActionTextSerializer::loadActionPool(
         std::istream &/*is*/) {
     // Use the model to create a new one.
-    return solver_->getModel()->createActionPool(solver_);
+    return getSolver()->getModel()->createActionPool(getSolver());
 }
 
 void DiscretizedActionTextSerializer::saveActionMapping(
@@ -348,7 +348,7 @@ void DiscretizedActionTextSerializer::saveActionMapping(
 std::unique_ptr<ActionMapping>
 DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     std::unique_ptr<ActionMapping> map(
-            solver_->getActionPool()->createActionMapping());
+            getSolver()->getActionPool()->createActionMapping());
     DiscretizedActionMap &discMap = static_cast<DiscretizedActionMap &>(*map);
 
     std::string line;

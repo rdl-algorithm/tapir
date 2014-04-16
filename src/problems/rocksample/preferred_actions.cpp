@@ -48,6 +48,8 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
     if (rsAction.getActionType() == ActionType::SAMPLE) {
         int rockNo = model_->getCellType(position_) - RockSampleModel::ROCK;
         nextData->allRockData_[rockNo].chanceGood = 0.0;
+        nextData->allRockData_[rockNo].checkCount = 10;
+        nextData->allRockData_[rockNo].goodnessCount = -10;
     } else if (rsAction.getActionType() == ActionType::CHECK) {
         int rockNo = rsAction.getRockNo();
 
@@ -78,6 +80,78 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
     return std::move(nextData);
 }
 
+std::vector<long> PositionAndRockData::generatePreferredActions() const {
+    std::vector<long> preferredActions;
+
+    int nRocks = model_->getNumberOfRocks();
+
+    // Check if we're currently on top of a rock.
+    int rockNo = model_->getCellType(position_) - RockSampleModel::ROCK;
+    // If we are on top of a rock, and it has more +ve than -ve observations
+    // then we will sample it.
+    if (rockNo >= 0 && rockNo < nRocks) {
+        RockData const &rockData = allRockData_[rockNo];
+        if (rockData.chanceGood == 1.0 || rockData.goodnessCount > 0) {
+            preferredActions.push_back(static_cast<long>(ActionType::SAMPLE));
+            return preferredActions;
+        }
+    }
+
+    bool worthwhileRockFound = false;
+    bool northWorthwhile = false;
+    bool southWorthwhile = false;
+    bool eastWorthwhile = false;
+    bool westWorthwhile = false;
+
+    // Check to see which rocks are worthwhile.
+    for (int i = 0; i < nRocks; i++) {
+        RockData const &rockData = allRockData_[i];
+        if (rockData.chanceGood != 0.0 && rockData.goodnessCount >= 0) {
+            worthwhileRockFound = true;
+            GridPosition pos = model_->getRockPosition(i);
+            if (pos.i > position_.i) {
+                southWorthwhile = true;
+            } else if (pos.i < position_.i) {
+                northWorthwhile = true;
+            }
+
+            if (pos.j > position_.j) {
+                eastWorthwhile = true;
+            } else if (pos.j < position_.j) {
+                westWorthwhile = true;
+            }
+        }
+    }
+    // If no rocks are worthwhile head east.
+    if (!worthwhileRockFound) {
+        preferredActions.push_back(static_cast<long>(ActionType::EAST));
+        return preferredActions;
+    }
+
+    if (northWorthwhile) {
+        preferredActions.push_back(static_cast<long>(ActionType::NORTH));
+    }
+    if (southWorthwhile) {
+        preferredActions.push_back(static_cast<long>(ActionType::SOUTH));
+    }
+    if (eastWorthwhile) {
+        preferredActions.push_back(static_cast<long>(ActionType::EAST));
+    }
+    if (westWorthwhile) {
+        preferredActions.push_back(static_cast<long>(ActionType::WEST));
+    }
+
+    // See which rocks we might want to check
+    for (int i = 0; i < nRocks; i++) {
+        RockData const &rockData = allRockData_[i];
+        if (rockData.chanceGood != 0.0 && rockData.chanceGood != 1.0 &&
+                std::abs(rockData.goodnessCount) < 2) {
+            preferredActions.push_back(static_cast<long>(ActionType::CHECK) + i);
+        }
+    }
+    return preferredActions;
+}
+
 void PositionAndRockData::print(std::ostream &os) const {
     os << "Position: " << position_ << std::endl;
     os << "Chances of goodness: ";
@@ -103,11 +177,20 @@ std::unique_ptr<solver::HistoricalData> PreferredActionsModel::createRootInfo() 
 /* ------------------------ PreferredActionsPool ----------------------- */
 PreferredActionsPool::PreferredActionsPool(solver::Solver *solver,
         solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                solver::DiscretizedActionPool(solver, model, numberOfBins) {
+                ActionPool(solver),
+                model_(model),
+                numberOfBins_(numberOfBins) {
 }
 std::unique_ptr<solver::ActionMapping> PreferredActionsPool::createActionMapping() {
-    return std::make_unique<PreferredActionsMap>(
-            getSolver()->getObservationPool(), model_, numberOfBins_);
+    return std::make_unique<PreferredActionsMap>(getSolver()->getObservationPool(),
+            model_, numberOfBins_);
+}
+std::unique_ptr<solver::Action> PreferredActionsPool::getDefaultRolloutAction(solver::HistoricalData *data) const {
+    PositionAndRockData const &prData = static_cast<PositionAndRockData const &>(*data);
+    std::vector<long> preferredActions = prData.generatePreferredActions();
+    long index = std::uniform_int_distribution<long>(0, preferredActions.size() - 1)(
+            (*model_->getRandomGenerator()));
+    return model_->sampleAnAction(preferredActions[index]);
 }
 
 /* ------------------------- PreferredActionsMap ------------------------ */
@@ -134,90 +217,10 @@ void PreferredActionsMap::initialize() {
     }
 
     if (model.usingPreferredInit()) {
-        generatePreferredActions();
+        preferredActions_ = data.generatePreferredActions();
         for (RockSampleAction const &action : preferredActions_) {
             long visitCount = model.getPreferredVisitCount();
             update(action, visitCount, visitCount * model.getPreferredQValue());
-        }
-    }
-}
-
-std::vector<RockSampleAction> PreferredActionsMap::getPreferredActions() const {
-    return preferredActions_;
-}
-
-std::unique_ptr<RockSampleAction> PreferredActionsMap::getRandomPreferredAction() const {
-    int index = std::uniform_int_distribution<int>(
-            0, preferredActions_.size() - 1)(*model_->getRandomGenerator());
-    return std::make_unique<RockSampleAction>(preferredActions_[index]);
-}
-
-void PreferredActionsMap::generatePreferredActions() {
-    RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
-    PositionAndRockData const &data = static_cast<PositionAndRockData const &>(
-            *owningBeliefNode_->getHistoricalData());
-
-    preferredActions_.clear();
-
-    int nRocks = model.getNumberOfRocks();
-    int rockNo = model.getCellType(data.position_) - RockSampleModel::ROCK;
-
-    // If the rock has more +ve than -ve observations we should sample it.
-    if (rockNo >= 0 && rockNo < nRocks) {
-        if (data.allRockData_[rockNo].goodnessCount > 0) {
-            preferredActions_.push_back(RockSampleAction(ActionType::SAMPLE));
-            return;
-        }
-    }
-
-    bool worthwhileRockFound = false;
-    bool northWorthwhile = false;
-    bool southWorthwhile = false;
-    bool eastWorthwhile = false;
-    bool westWorthwhile = false;
-
-    // Check to see which rocks are worthwhile.
-    for (int i = 0; i < nRocks; i++) {
-        RockData const &rockData = data.allRockData_[i];
-        if (rockData.goodnessCount >= 0) {
-            worthwhileRockFound = true;
-            GridPosition pos = model.getRockPosition(i);
-            if (pos.i > data.position_.i) {
-                southWorthwhile = true;
-            } else if (pos.i < data.position_.i) {
-                northWorthwhile = true;
-            }
-
-            if (pos.j > data.position_.j) {
-                eastWorthwhile = true;
-            } else if (pos.j < data.position_.j) {
-                westWorthwhile = true;
-            }
-        }
-    }
-    if (!worthwhileRockFound) {
-        preferredActions_.push_back(RockSampleAction(ActionType::EAST));
-        return;
-    }
-    if (northWorthwhile) {
-        preferredActions_.push_back(RockSampleAction(ActionType::NORTH));
-    }
-    if (southWorthwhile) {
-        preferredActions_.push_back(RockSampleAction(ActionType::SOUTH));
-    }
-    if (eastWorthwhile) {
-        preferredActions_.push_back(RockSampleAction(ActionType::EAST));
-    }
-    if (westWorthwhile) {
-        preferredActions_.push_back(RockSampleAction(ActionType::WEST));
-    }
-
-    // See which rocks we might want to check
-    for (int i = 0; i < nRocks; i++) {
-        RockData const &rockData = data.allRockData_[i];
-        if (rockData.chanceGood != 0.0 && rockData.chanceGood != 1.0 &&
-                rockData.checkCount < 5 && std::abs(rockData.goodnessCount) < 2) {
-            preferredActions_.push_back(RockSampleAction(ActionType::CHECK, i));
         }
     }
 }
@@ -251,7 +254,7 @@ std::unique_ptr<solver::HistoricalData> PreferredActionsTextSerializer::loadHist
     GridPosition position;
     std::istringstream(line) >> tmpStr >> position;
 
-    RockSampleModel *model = dynamic_cast<RockSampleModel *>(model_);
+    RockSampleModel *model = dynamic_cast<RockSampleModel *>(getModel());
     std::unique_ptr<PositionAndRockData> data = (
             std::make_unique<PositionAndRockData>(model, position));
 

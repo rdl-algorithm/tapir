@@ -29,7 +29,7 @@ BeliefNode* NnRolloutStrategy::findNeighbor(BeliefNode *belief) {
     }
 
     long numTried = 0;
-    for (BeliefNode *otherBelief : solver_->getPolicy()->getNodes()) {
+    for (BeliefNode *otherBelief : getSolver()->getPolicy()->getNodes()) {
         if (belief == otherBelief) {
             continue;
         }
@@ -57,7 +57,7 @@ BeliefNode* NnRolloutStrategy::findNeighbor(BeliefNode *belief) {
 
 std::unique_ptr<SearchInstance> NnRolloutStrategy::createSearchInstance(
         HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<NnRolloutInstance>(this, solver_,
+    return std::make_unique<NnRolloutInstance>(this, getSolver(),
             sequence, maximumDepth);
 }
 
@@ -79,8 +79,8 @@ SearchStatus NnRolloutInstance::initializeCustom(BeliefNode *currentNode) {
     return SearchStatus::UNINITIALIZED;
 }
 
-SearchStep NnRolloutInstance::getSearchStep(Solver */*solver*/, HistorySequence *sequence,
-        HistoricalData */*historicalData*/) {
+SearchStep NnRolloutInstance::getSearchStep(HistoricalData */*historicalData*/) {
+    HistorySequence *sequence = getSequence();
     HistoryEntry *previousEntry = sequence->getEntry(sequence->getLength() - 2);
     currentNeighborNode_ = currentNeighborNode_->getChild(*previousAction_,
             *previousEntry->getObservation());

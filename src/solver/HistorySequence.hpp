@@ -84,19 +84,8 @@ class HistorySequence {
     std::vector<State const *> getStates() const;
 
     /* -------------- Registration methods ---------------- */
-    /** Registers the sequence with the given belief node. */
-    void registerWith(BeliefNode *startNode,
-            BeliefTree *policy);
-    /** Changes the belief node that is considered to be the root of this
-     *  sequence - use a value of nullptr to detach the sequence entirely.
-     */
-    //void registerStartingNode(BeliefNode *startNode);
-    /** Registers or deregisters the sequence, apart from its starting
-     * belief node.
-     * If registering, the policy must be supplied as the creation of
-     * new belief nodes may be required.
-     */
-    //void registerRestOfSequence(bool registering, BeliefTree *policy);
+    /** Registers the sequence with the given starting belief node. */
+    void registerWith(BeliefNode *startNode, BeliefTree *policy);
 
     /* -------------- Change flagging methods ---------------- */
     /** Resets the changes for this sequence and all its entries. */

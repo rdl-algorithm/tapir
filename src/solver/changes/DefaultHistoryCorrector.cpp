@@ -12,8 +12,8 @@
 
 namespace solver {
 
-DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, Model *model) :
-        HistoryCorrector(solver, model) {
+DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver) :
+        HistoryCorrector(solver) {
 }
 
 void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
@@ -30,7 +30,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         HistoryEntry *entry = historyIterator->get();
         State const *state = entry->getState();
 
-        hitTerminalState = model_->isTerminal(*state);
+        hitTerminalState = getModel()->isTerminal(*state);
         if (hitTerminalState || entry->action_ == nullptr) {
             entry->action_ = nullptr;
             entry->observation_ = nullptr;
@@ -48,13 +48,13 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         // Model::StepResult result;
         HistoryEntry *nextEntry = (historyIterator + 1)->get();
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::TRANSITION)) {
-            entry->transitionParameters_ = model_->generateTransition(
+            entry->transitionParameters_ = getModel()->generateTransition(
                     *entry->getState(), *entry->action_);
-            std::unique_ptr<State> nextState = model_->generateNextState(
+            std::unique_ptr<State> nextState = getModel()->generateNextState(
                     *entry->getState(), *entry->action_,
                     entry->transitionParameters_.get());
             if (!nextState->equals(*nextEntry->getState())) {
-                StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(*nextState);
+                StateInfo *nextStateInfo = getSolver()->getStatePool()->createOrGetInfo(*nextState);
                 nextEntry->registerState(nextStateInfo);
                 if (historyIterator + 1 == firstUnchanged) {
                     firstUnchanged++;
@@ -66,13 +66,13 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
             }
         }
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::REWARD)) {
-            entry->reward_ = model_->generateReward(*entry->getState(),
+            entry->reward_ = getModel()->generateReward(*entry->getState(),
                     *entry->action_, entry->transitionParameters_.get(),
                     nextEntry->getState());
         }
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::OBSERVATION )) {
             std::unique_ptr<Observation> newObservation = (
-                    model_->generateObservation(entry->getState(),
+                    getModel()->generateObservation(entry->getState(),
                             *entry->action_,
                             entry->transitionParameters_.get(),
                             *nextEntry->getState()));

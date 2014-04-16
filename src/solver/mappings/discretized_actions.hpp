@@ -40,10 +40,10 @@ class DiscretizedActionPool: public solver::ActionPool {
     _NO_COPY_OR_MOVE(DiscretizedActionPool);
 
     virtual std::unique_ptr<ActionMapping> createActionMapping() override;
-    virtual std::unique_ptr<Action> getRolloutAction(HistoricalData *data) const override;
-  protected:
-  ModelWithDiscretizedActions *model_;
-  long numberOfBins_;
+    virtual std::unique_ptr<Action> getDefaultRolloutAction(HistoricalData *data) const override;
+  private:
+    ModelWithDiscretizedActions *model_;
+    long numberOfBins_;
 };
 
 class DiscretizedActionMap: public solver::ActionMapping {

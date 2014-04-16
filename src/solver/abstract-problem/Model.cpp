@@ -20,7 +20,7 @@
 #include "solver/search/HistoricalData.hpp"
 #include "solver/search/SearchStrategy.hpp"
 #include "solver/search/UcbSelectionStrategy.hpp"
-#include "solver/search/RandomRolloutStrategy.hpp"
+#include "solver/search/DefaultRolloutStrategy.hpp"
 
 #include "Action.hpp"        // for Action
 #include "State.hpp"                    // for State
@@ -85,7 +85,7 @@ std::unique_ptr<StateIndex> Model::createStateIndex() {
 }
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) {
-    return std::make_unique<DefaultHistoryCorrector>(solver, this);
+    return std::make_unique<DefaultHistoryCorrector>(solver);
 }
 
 std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
@@ -93,7 +93,7 @@ std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
 }
 
 std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
-    return std::make_unique<RandomRolloutStrategy>(solver, 1);
+    return std::make_unique<DefaultRolloutStrategy>(solver, 1);
 }
 
 std::unique_ptr<BackpropagationStrategy> Model::createBackpropagationStrategy(

@@ -23,7 +23,9 @@ class SearchStrategy {
 
     virtual std::unique_ptr<SearchInstance> createSearchInstance(
             HistorySequence *sequence, long maximumDepth) = 0;
-  protected:
+
+    virtual Solver *getSolver() const;
+  private:
     Solver *solver_;
 };
 
@@ -73,6 +75,10 @@ class AbstractSearchInstance : public SearchInstance {
     /** Finalization method, for overriding by subclasses. */
     virtual SearchStatus finalizeCustom();
 
+    /** Returns the solver associated with this search instance. */
+    virtual Solver *getSolver() const;
+    /** Returns the history sequence associated with this search instance. */
+    virtual HistorySequence *getSequence() const;
   private:
     Solver *solver_;
     Model *model_;
@@ -92,7 +98,7 @@ public:
     _NO_COPY_OR_MOVE(AbstractSelectionInstance);
 
     virtual SearchStep getSearchStep() override;
-    virtual SearchStep getSearchStep(HistorySequence *sequence, BeliefNode *currentNode) = 0;
+    virtual SearchStep getSearchStep(BeliefNode *currentNode) = 0;
 };
 
 class AbstractRolloutInstance : public AbstractSearchInstance {
@@ -103,7 +109,7 @@ public:
     _NO_COPY_OR_MOVE(AbstractRolloutInstance);
 
     virtual SearchStep getSearchStep() override;
-    virtual SearchStep getSearchStep(Solver *solver, HistorySequence *sequence, HistoricalData *data) = 0;
+    virtual SearchStep getSearchStep(HistoricalData *data) = 0;
 };
 
 } /* namespace solver */

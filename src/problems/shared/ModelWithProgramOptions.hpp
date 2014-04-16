@@ -32,7 +32,7 @@ public:
         registerSelectionParser("exp3", std::make_unique<Exp3Parser>());
 
         registerRolloutParser("nn", std::make_unique<NnRolloutParser>());
-        registerRolloutParser("random", std::make_unique<RandomRolloutParser>());
+        registerRolloutParser("default", std::make_unique<DefaultRolloutParser>());
         registerRolloutParser("exp3", std::make_unique<Exp3Parser>());
 
         registerBackpropagationParser("mean", std::make_unique<AveragePropagatorParser>());

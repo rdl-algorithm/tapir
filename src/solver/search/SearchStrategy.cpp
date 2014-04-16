@@ -15,6 +15,10 @@ SearchStrategy::SearchStrategy(Solver *solver) :
     solver_(solver) {
 }
 
+Solver *SearchStrategy::getSolver() const {
+    return solver_;
+}
+
 /* ------------------- AbstractSearchInstance --------------------- */
 AbstractSearchInstance::AbstractSearchInstance(Solver *solver,
         HistorySequence *sequence, long maximumDepth) :
@@ -22,7 +26,7 @@ AbstractSearchInstance::AbstractSearchInstance(Solver *solver,
                 model_(solver_->getModel()),
                 sequence_(sequence),
                 currentNode_(sequence->getLastEntry()->getAssociatedBeliefNode()),
-                currentHistoricalData_(currentNode_->getHistoricalData()),
+                currentHistoricalData_(nullptr),
                 discountFactor_(model_->getDiscountFactor()),
                 maximumDepth_(maximumDepth),
                 status_(SearchStatus::UNINITIALIZED) {
@@ -79,12 +83,18 @@ SearchStatus AbstractSearchInstance::extendSequence() {
             currentNode_ = solver_->getPolicy()->createOrGetChild(
                     currentNode_, *result.action, *result.observation);
             currentHistoricalData_ = nullptr;
+            currentEntry->associatedBeliefNode_ = currentNode_;
         } else {
-            currentNode_ = nullptr;
-            currentHistoricalData_ = currentHistoricalData_->createChild(
+            HistoricalData *oldData;
+            if (currentNode_ == nullptr) {
+                oldData = currentHistoricalData_.get();
+            } else {
+                oldData = currentNode_->getHistoricalData();
+                currentNode_ = nullptr;
+            }
+            currentHistoricalData_ = oldData->createChild(
                     *result.action, *result.observation);
         }
-        currentEntry->associatedBeliefNode_ = currentNode_;
         if (result.isTerminal) {
             status_ = SearchStatus::HIT_TERMINAL_STATE;
             break;
@@ -102,6 +112,14 @@ SearchStatus AbstractSearchInstance::finalizeCustom() {
     return status_;
 }
 
+Solver *AbstractSearchInstance::getSolver() const {
+    return solver_;
+}
+
+HistorySequence *AbstractSearchInstance::getSequence() const {
+    return sequence_;
+}
+
 /* ------------------- AbstractSelectionInstance --------------------- */
 AbstractSelectionInstance::AbstractSelectionInstance(Solver *solver,
         HistorySequence *sequence, long maximumDepth) :
@@ -109,7 +127,7 @@ AbstractSelectionInstance::AbstractSelectionInstance(Solver *solver,
 }
 
 SearchStep AbstractSelectionInstance::getSearchStep() {
-    return getSearchStep(sequence_, currentNode_);
+    return getSearchStep(currentNode_);
 }
 
 /* ------------------- AbstractRolloutInstance --------------------- */
@@ -125,7 +143,7 @@ SearchStep AbstractRolloutInstance::getSearchStep() {
     } else {
         currentData = currentHistoricalData_.get();
     }
-    return getSearchStep(solver_, sequence_, currentData);
+    return getSearchStep(currentData);
 }
 
 } /* namespace solver */

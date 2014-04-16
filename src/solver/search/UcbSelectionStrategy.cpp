@@ -16,7 +16,7 @@ UcbSelectionStrategy::UcbSelectionStrategy(Solver *solver,
 std::unique_ptr<SearchInstance> UcbSelectionStrategy::createSearchInstance(
         HistorySequence *sequence, long maximumDepth) {
     return std::make_unique<UcbSelectionInstance>(explorationCoefficient_,
-            solver_, sequence, maximumDepth);
+            getSolver(), sequence, maximumDepth);
 }
 
 UcbSelectionInstance::UcbSelectionInstance(double explorationCoefficient,
@@ -26,7 +26,7 @@ UcbSelectionInstance::UcbSelectionInstance(double explorationCoefficient,
     explorationCoefficient_(explorationCoefficient) {
 }
 
-SearchStep UcbSelectionInstance::getSearchStep(HistorySequence */*sequence*/, BeliefNode *currentNode) {
+SearchStep UcbSelectionInstance::getSearchStep(BeliefNode *currentNode) {
     if (choseUnvisitedAction_) {
         // We've reached the new leaf - this (UCB) search is over.
         return {SearchStatus::REACHED_ROLLOUT_NODE, nullptr, false};

@@ -55,8 +55,8 @@ class LegalActionsPool: public solver::ActionPool {
     /** Creates a legal-only action mapping. */
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping() override;
 
-    /** Selects a legal action for rollout. */
-    virtual std::unique_ptr<solver::Action> getRolloutAction(solver::HistoricalData *data) const override;
+    /** Selects a random legal action for the rollout. */
+    virtual std::unique_ptr<solver::Action> getDefaultRolloutAction(solver::HistoricalData *data) const override;
 
 private:
     solver::ModelWithDiscretizedActions *model_;

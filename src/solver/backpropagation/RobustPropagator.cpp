@@ -32,7 +32,7 @@ void RobustPropagator::updateEntry(HistoryEntry *entry, bool undo) {
     ActionMapping *actionMap = currentNode->getMapping();
     ObservationMapping *obsMap = actionMap->getActionNode(action)->getMapping();
     long deltaNVisits = undo ? -1 : 1;
-    double discountFactor = solver_->getModel()->getDiscountFactor();
+    double discountFactor = getSolver()->getModel()->getDiscountFactor();
 
     // We base our visit counts off the number of visits from this node
     // that did not begin in this node.

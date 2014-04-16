@@ -44,12 +44,6 @@ bool HistorySequence::testBackup(bool backingUp) {
     }
 
     for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
-        if (!entry->isRegisteredAsParticle()
-                || entry->associatedBeliefNode_ == nullptr) {
-            debug::show_message("ERROR: Attempted to backup, but no belief"
-                    " node is associated with this entry!");
-            return false;
-        }
         if (!backingUp && !entry->hasBeenBackedUp_) {
             debug::show_message("ERROR: Undoing backup, but it's already undone!");
             return false;
@@ -142,7 +136,7 @@ void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
     bool registering = (startNode != nullptr);
     std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = entrySequence_.begin();
     if (registering && (*historyIterator)->isRegisteredAsParticle()) {
-        debug::show_message("WARNING: Already registered this seqeuence!");
+        debug::show_message("WARNING: Already registered this sequence!");
         registerWith(nullptr, policy);
         registerWith(startNode, policy);
     }
@@ -151,9 +145,19 @@ void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
         HistoryEntry *entry = historyIterator->get();
         if (registering) {
             entry->registerNode(currentNode);
-            if (entry->action_ != nullptr) {
-                currentNode = policy->createOrGetChild(currentNode,
+            if (currentNode != nullptr && entry->action_ != nullptr) {
+                // If a child already exists, we will use it.
+                BeliefNode *nextNode = currentNode->getChild(
+                        *entry->action_, *entry->observation_);
+                if (nextNode == nullptr) {
+                    // If no child exists, we check if one is desired.
+                    HistoryEntry *nextEntry = (historyIterator+1)->get();
+                    if (nextEntry->associatedBeliefNode_ != nullptr) {
+                        nextNode = policy->createOrGetChild(currentNode,
                                     *entry->action_, *entry->observation_);
+                    }
+                }
+                currentNode = nextNode;
             }
         } else {
             entry->registerNode(nullptr);

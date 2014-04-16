@@ -11,7 +11,7 @@
 #include "solver/search/SearchStrategy.hpp"
 #include "solver/search/MultipleStrategiesExp3.hpp"
 #include "solver/search/NnRolloutStrategy.hpp"
-#include "solver/search/RandomRolloutStrategy.hpp"
+#include "solver/search/DefaultRolloutStrategy.hpp"
 #include "solver/search/UcbSelectionStrategy.hpp"
 
 std::pair<std::string, std::vector<std::string>> split_function(
@@ -74,13 +74,13 @@ std::unique_ptr<solver::SearchStrategy> NnRolloutParser::parse(
             maxNnDistance);
 }
 
-std::unique_ptr<solver::SearchStrategy> RandomRolloutParser::parse(
+std::unique_ptr<solver::SearchStrategy> DefaultRolloutParser::parse(
         solver::Solver *solver,
         ParserSet<solver::SearchStrategy> */*allParser*/,
         std::vector<std::string> args) {
     long maxNSteps;
     std::istringstream(args[0]) >> maxNSteps;
-    return std::make_unique<solver::RandomRolloutStrategy>(solver, maxNSteps);
+    return std::make_unique<solver::DefaultRolloutStrategy>(solver, maxNSteps);
 }
 
 std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(

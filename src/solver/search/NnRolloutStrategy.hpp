@@ -36,8 +36,7 @@ class NnRolloutInstance: public AbstractRolloutInstance {
     _NO_COPY_OR_MOVE(NnRolloutInstance);
 
     virtual SearchStatus initializeCustom(BeliefNode *currentNode) override;
-    virtual SearchStep getSearchStep(Solver *solver, HistorySequence *sequence,
-            HistoricalData *historicalData) override;
+    virtual SearchStep getSearchStep(HistoricalData *historicalData) override;
   private:
     NnRolloutStrategy *strategy_;
     BeliefNode *rootNeighborNode_;

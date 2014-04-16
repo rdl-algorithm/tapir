@@ -140,7 +140,7 @@ void ApproximateObservationTextSerializer::saveObservationPool(
 std::unique_ptr<ObservationPool> ApproximateObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->getModel()->createObservationPool(solver_);
+    return getSolver()->getModel()->createObservationPool(getSolver());
 }
 
 void ApproximateObservationTextSerializer::saveObservationMapping(
@@ -170,7 +170,7 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
 std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadObservationMapping(
         std::istream &is) {
     std::unique_ptr<ObservationMapping> map(
-            solver_->getObservationPool()->createObservationMapping());
+            getSolver()->getObservationPool()->createObservationMapping());
     ApproximateObservationMap &approxMap =
             (static_cast<ApproximateObservationMap &>(*map));
     std::string line;
@@ -204,7 +204,7 @@ std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadOb
         node->setParentEntry(entry.get());
 
         // Add the node to the tree index.
-        solver_->getPolicy()->setNode(childId, node);
+        getSolver()->getPolicy()->setNode(childId, node);
 
         // Add the entry to the vector
         approxMap.children_.push_back(std::move(entry));

@@ -38,6 +38,8 @@ public:
             solver::Action const &action,
             solver::Observation const &observation) override;
 
+    std::vector<long> generatePreferredActions() const;
+
     void print(std::ostream &os) const override;
 
 private:
@@ -57,15 +59,21 @@ public:
     virtual std::unique_ptr<solver::HistoricalData> createRootInfo() override;
 };
 
-class PreferredActionsPool: public solver::DiscretizedActionPool {
+class PreferredActionsPool: public solver::ActionPool {
   public:
     PreferredActionsPool(solver::Solver *solver,
             solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~PreferredActionsPool() = default;
     _NO_COPY_OR_MOVE(PreferredActionsPool);
 
-    /** Creates a Preferred-only action mapping. */
+    /** Creates a preferred-only action mapping. */
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping() override;
+
+    /** Selects a random preferred action for the rollout. */
+    virtual std::unique_ptr<solver::Action> getDefaultRolloutAction(solver::HistoricalData *data) const override;
+  private:
+      solver::ModelWithDiscretizedActions *model_;
+      long numberOfBins_;
 };
 
 class PreferredActionsMap : public solver::DiscretizedActionMap {
@@ -78,13 +86,9 @@ public:
     _NO_COPY_OR_MOVE(PreferredActionsMap);
 
     void initialize() override;
-    std::vector<RockSampleAction> getPreferredActions() const;
-    std::unique_ptr<RockSampleAction> getRandomPreferredAction() const;
 
 private:
-    void generatePreferredActions();
-
-    std::vector<RockSampleAction> preferredActions_;
+    std::vector<long> preferredActions_;
 };
 
 class PreferredActionsTextSerializer : virtual public solver::TextSerializer,

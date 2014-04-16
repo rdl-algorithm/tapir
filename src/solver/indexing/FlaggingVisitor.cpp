@@ -12,7 +12,7 @@ FlaggingVisitor::FlaggingVisitor(StatePool *pool,
 }
 
 void FlaggingVisitor::visit(StateInfo* info) {
-    statePool_->setChangeFlags(info, flagsToSet_);
+    getStatePool()->setChangeFlags(info, flagsToSet_);
 }
 
 } /* namespace solver */

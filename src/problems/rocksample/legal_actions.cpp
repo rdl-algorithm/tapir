@@ -78,7 +78,7 @@ std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping() {
     return std::make_unique<LegalActionsMap>(
             getSolver()->getObservationPool(), model_, numberOfBins_);
 }
-std::unique_ptr<solver::Action> LegalActionsPool::getRolloutAction(solver::HistoricalData *data) const {
+std::unique_ptr<solver::Action> LegalActionsPool::getDefaultRolloutAction(solver::HistoricalData *data) const {
     PositionData const &positionData = static_cast<PositionData const &>(*data);
     std::vector<long> legalActions = positionData.generateLegalActions();
     long index = std::uniform_int_distribution<long>(0, legalActions.size() - 1)(
@@ -130,7 +130,7 @@ std::unique_ptr<solver::HistoricalData> LegalActionsTextSerializer::loadHistoric
 
     std::getline(is, line); // Blank line
 
-    RockSampleModel *model = dynamic_cast<RockSampleModel *>(model_);
+    RockSampleModel *model = dynamic_cast<RockSampleModel *>(getModel());
     return std::make_unique<PositionData>(model, position);
 }
 } /* namespace rocksample */

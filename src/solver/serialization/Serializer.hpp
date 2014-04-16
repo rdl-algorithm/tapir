@@ -29,23 +29,24 @@ class StatePool;
 
 class Serializer {
 public:
-    /** Constructs a serializer for the given solver. */
+    /** Constructs a serializer without an associated solver. */
     Serializer() :
-            solver_(nullptr),
-            model_(nullptr) {
+            solver_(nullptr) {
     }
-
+    /** Constructs a serializer for the given solver. */
     Serializer(Solver *solver) :
-            solver_(solver),
-            model_(solver_->model_.get()) {
+            solver_(solver) {
     }
 
     void setSolver(Solver *solver) {
         solver_ = solver;
     }
-
-    Solver *getSolver() {
+    Solver *getSolver() const {
         return solver_;
+    }
+
+    Model *getModel() const {
+        return solver_->getModel();
     }
 
     /** Default destructor. */
@@ -174,9 +175,8 @@ public:
     virtual void save(BeliefTree const &tree, std::ostream &os) = 0;
     /** Loads a BeliefTree. */
     virtual void load(BeliefTree &tree, std::istream &is) = 0;
-  protected:
+  private:
     Solver *solver_;
-    Model *model_;
 };
 } /* namespace solver */
 

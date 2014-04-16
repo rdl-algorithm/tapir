@@ -21,7 +21,7 @@ class UcbSelectionInstance: public AbstractSelectionInstance {
     UcbSelectionInstance(double explorationCoefficient,
             Solver *solver, HistorySequence *sequence,
             long maximumDepth);
-    virtual SearchStep getSearchStep(HistorySequence *sequence, BeliefNode *currentNode) override;
+    virtual SearchStep getSearchStep(BeliefNode *currentNode) override;
   private:
     bool choseUnvisitedAction_;
     double explorationCoefficient_;

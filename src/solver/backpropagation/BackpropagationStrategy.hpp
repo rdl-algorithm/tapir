@@ -32,7 +32,10 @@ public:
     virtual void updateEntry(HistoryEntry *entry, bool undo) = 0;
 
     virtual void propagate(HistorySequence *sequence, bool undo = false);
-protected:
+
+    /** Returns the solver associated with this backprop. strategy. */
+    virtual Solver *getSolver() const;
+private:
   Solver *solver_;
 };
 

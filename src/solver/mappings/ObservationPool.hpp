@@ -26,8 +26,6 @@ public:
     }
 private:
     Solver *solver_ = nullptr;
-protected:
-    ActionPool *actionPool_ = nullptr;
 };
 
 } /* namespace solver */

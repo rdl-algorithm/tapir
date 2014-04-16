@@ -43,7 +43,7 @@ class RockSampleState;
 class RockSampleObservation;
 
 class RockSampleModel : virtual public ModelWithProgramOptions,
-    virtual public LegalActionsModel,
+    virtual public PreferredActionsModel,
     virtual public solver::ModelWithEnumeratedObservations {
 friend class RockSampleMdpSolver;
   public:

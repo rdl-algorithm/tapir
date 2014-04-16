@@ -31,8 +31,12 @@ public:
         mapPtr->initialize();
     }
 
-    /** Returns a rollout action based on the given historical data. */
-    virtual std::unique_ptr<Action> getRolloutAction(HistoricalData *data) const = 0;
+    /** Returns an action based on a default history-based rollout strategy;
+     * an implementation is required if you want to use
+     * DefaultRolloutStrategy. */
+    virtual std::unique_ptr<Action> getDefaultRolloutAction(HistoricalData */*data*/) const {
+        return nullptr;
+    }
 
     /** Returns the solver associated with this pool. */
     virtual Solver * getSolver() {

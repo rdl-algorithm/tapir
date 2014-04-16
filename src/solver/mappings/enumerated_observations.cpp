@@ -140,7 +140,7 @@ std::unique_ptr<ObservationPool>
 EnumeratedObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->getModel()->createObservationPool(solver_);
+    return getSolver()->getModel()->createObservationPool(getSolver());
 }
 
 void EnumeratedObservationTextSerializer::saveObservationMapping(
@@ -163,7 +163,7 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
 
 std::unique_ptr<ObservationMapping>
 EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
-    std::unique_ptr<ObservationMapping> map(solver_->getObservationPool()->createObservationMapping());
+    std::unique_ptr<ObservationMapping> map(getSolver()->getObservationPool()->createObservationMapping());
     EnumeratedObservationMap &enumMap = (
                 static_cast<EnumeratedObservationMap &>(*map));
     std::string line;
@@ -198,7 +198,7 @@ EnumeratedObservationTextSerializer::loadObservationMapping(std::istream &is) {
         node->setParentEntry(entry.get());
 
         // Add the node to the tree index.
-        solver_->getPolicy()->setNode(childId, node);
+        getSolver()->getPolicy()->setNode(childId, node);
 
         // Add the entry to the map.
         enumMap.children_[code] = std::move(entry);

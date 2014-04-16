@@ -59,7 +59,7 @@ std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
     std::istringstream(tmpStr) >> x >> y;
     std::getline(is, tmpStr, ':');
     is >> direction;
-    Nav2DModel const &model = dynamic_cast<Nav2DModel const &>(*model_);
+    Nav2DModel const &model = dynamic_cast<Nav2DModel const &>(*getModel());
     return std::make_unique<Nav2DState>(x, y, direction,
             model.costPerUnitDistance_, model.costPerRevolution_);
 }
@@ -97,7 +97,7 @@ std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> rotationalSpeed;
     return std::make_unique<Nav2DAction>(speed, rotationalSpeed,
-            dynamic_cast<Nav2DModel *>(model_));
+            dynamic_cast<Nav2DModel *>(getModel()));
 }
 
 void Nav2DTextSerializer::saveTransitionParameters(

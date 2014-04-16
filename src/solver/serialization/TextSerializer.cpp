@@ -159,7 +159,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> entry.rewardFromHere_;
     entry.hasBeenBackedUp_ = true;
-    entry.registerState(solver_->statePool_->getInfoById(stateId));
+    entry.registerState(getSolver()->getStatePool()->getInfoById(stateId));
 }
 
 void TextSerializer::save(HistorySequence const &seq, std::ostream &os) {
@@ -283,7 +283,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
             for (int i = 0; i < NUM_PARTICLES_PER_LINE; i++) {
                 long seqId, entryId;
                 sstr >> tmpStr >> seqId >> entryId >> tmpStr;
-                HistorySequence *sequence = solver_->histories_->getSequence(
+                HistorySequence *sequence = getSolver()->histories_->getSequence(
                         seqId);
                 HistoryEntry *entry = sequence->getEntry(entryId);
                 entry->registerNode(&node);
