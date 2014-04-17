@@ -29,14 +29,14 @@ UcbSelectionInstance::UcbSelectionInstance(double explorationCoefficient,
 SearchStep UcbSelectionInstance::getSearchStep(BeliefNode *currentNode) {
     if (choseUnvisitedAction_) {
         // We've reached the new leaf - this (UCB) search is over.
-        return {SearchStatus::REACHED_ROLLOUT_NODE, nullptr, false};
+        return SearchStep {SearchStatus::REACHED_ROLLOUT_NODE, nullptr, false};
     }
 
     ActionMapping *mapping = currentNode->getMapping();
     // If there are unvisited actions, we take one, and we're finished with UCB.
     if (mapping->hasUnvisitedActions()) {
         choseUnvisitedAction_ = true;
-        return {SearchStatus::INSIDE_TREE, mapping->getRandomUnvisitedAction(), true};
+        return SearchStep {SearchStatus::INSIDE_TREE, mapping->getRandomUnvisitedAction(), true};
     }
 
     double bestValue = -std::numeric_limits<double>::infinity();
@@ -56,7 +56,7 @@ SearchStep UcbSelectionInstance::getSearchStep(BeliefNode *currentNode) {
         debug::show_message("ERROR: node has no actions!?");
         return SearchStep {SearchStatus::ERROR, nullptr, false};
     }
-    return {SearchStatus::INSIDE_TREE, std::move(bestAction), true};
+    return SearchStep {SearchStatus::INSIDE_TREE, std::move(bestAction), true};
 }
 
 } /* namespace solver */

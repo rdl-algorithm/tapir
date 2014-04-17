@@ -30,11 +30,11 @@ DefaultRolloutInstance::DefaultRolloutInstance(long maxNSteps, Solver *solver,
 
 SearchStep DefaultRolloutInstance::getSearchStep(HistoricalData *currentData) {
     if (currentNSteps_ >= maxNSteps_) {
-        return {SearchStatus::ROLLOUT_COMPLETE, nullptr, false};
+        return SearchStep {SearchStatus::ROLLOUT_COMPLETE, nullptr, false};
     }
     currentNSteps_++;
     std::unique_ptr<Action> action = getSolver()->getActionPool()->getDefaultRolloutAction(currentData);
-    return {SearchStatus::ROLLING_OUT, std::move(action), false};
+    return SearchStep {SearchStatus::ROLLING_OUT, std::move(action), false};
 }
 
 } /* namespace solver */

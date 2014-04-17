@@ -86,9 +86,9 @@ SearchStep NnRolloutInstance::getSearchStep(HistoricalData */*historicalData*/) 
             *previousEntry->getObservation());
 
     if (currentNeighborNode_ == nullptr) {
-        return {SearchStatus::ROLLOUT_COMPLETE, nullptr, false};
+        return SearchStep {SearchStatus::ROLLOUT_COMPLETE, nullptr, false};
     }
-    return {SearchStatus::ROLLING_OUT, currentNeighborNode_->getRecommendedAction(), false};
+    return SearchStep {SearchStatus::ROLLING_OUT, currentNeighborNode_->getRecommendedAction(), false};
 }
 
 } /* namespace solver */
