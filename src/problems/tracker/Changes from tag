@@ -1,0 +1,7 @@
+Changes from tag:
+
+TrackerModel.cpp:
+- generateReward gives reward if target is visible
+- both generateParticles to remove tag action
+- gave a bit of range in makeObservation
+- nActions_ to 4 instead of 5

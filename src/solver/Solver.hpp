@@ -91,6 +91,17 @@ class Solver {
     /** Returns the observation pool. */
     ObservationPool *getObservationPool();
 
+    /* Stuff temporarily made public - Josh */
+        /** Improves the solution with the root at the given node. */
+    void improveSolution(BeliefNode *startNode, long historiesPerStep,
+            long maximumDepth);
+        /** Handles particle depletion during the simulation. */
+    BeliefNode *addChild(BeliefNode *currNode, Action const &action,
+            Observation const &obs,
+            long timeStep);
+    Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
+    void printBelief(BeliefNode *belief, std::ostream &os);
+
   private:
     /* ------------------ Episode sampling methods ------------------- */
     /** Searches from the root node for initial policy generation. */
@@ -111,14 +122,14 @@ class Solver {
 
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
-    Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
+    //Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
     /** Improves the solution with the root at the given node. */
-    void improveSolution(BeliefNode *startNode, long historiesPerStep,
-            long maximumDepth);
+    //void improveSolution(BeliefNode *startNode, long historiesPerStep,
+    //        long maximumDepth);
     /** Handles particle depletion during the simulation. */
-    BeliefNode *addChild(BeliefNode *currNode, Action const &action,
-            Observation const &obs,
-            long timeStep);
+    //BeliefNode *addChild(BeliefNode *currNode, Action const &action,
+    //        Observation const &obs,
+    //        long timeStep);
 
 
     /* -------------- Methods for handling model changes --------------- */
@@ -131,7 +142,7 @@ class Solver {
 
     /* ------------------ Display methods  ------------------- */
     /** Shows a belief node in a nice, readable way. */
-    void printBelief(BeliefNode *belief, std::ostream &os);
+    //void printBelief(BeliefNode *belief, std::ostream &os);
 
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */
