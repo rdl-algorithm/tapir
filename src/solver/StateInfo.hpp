@@ -17,6 +17,7 @@ class HistoryEntry;
 class StateInfo {
 public:
     friend class HistoryEntry;
+    friend class Simulator;
     friend class Solver;
     friend class StatePool;
     friend class TextSerializer;

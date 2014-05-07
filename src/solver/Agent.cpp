@@ -17,6 +17,9 @@ Solver *Agent::getSolver() const {
 std::unique_ptr<Action> Agent::getPreferredAction() const {
     return currentBelief_->getRecommendedAction();
 }
+BeliefNode *Agent::getCurrentBelief() const {
+    return currentBelief_;
+}
 
 void Agent::updateBelief(Action const &action, Observation const &observation) {
     currentBelief_ = solver_->getPolicy()->createOrGetChild(currentBelief_, action, observation);

@@ -104,7 +104,7 @@ std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {
 // Default = do nothing.
 void Model::drawEnv(std::ostream &/*os*/) {
 }
-void Model::drawSimulationState(BeliefNode */*belief*/, State const &/*state*/,
+void Model::drawSimulationState(BeliefNode const */*belief*/, State const &/*state*/,
         std::ostream &/*os*/) {
 }
 std::string Model::getName() {

@@ -20,6 +20,9 @@
 
 #include "solver/serialization/Serializer.hpp"        // for Serializer
 
+#include "solver/HistoryEntry.hpp"
+#include "solver/HistorySequence.hpp"
+#include "solver/Simulator.hpp"            // for Simulator
 #include "solver/Solver.hpp"            // for Solver
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
@@ -83,14 +86,13 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     randGen.seed(seed);
     randGen.discard(10);
 
-    std::ofstream os;
-    os.open(logPath.c_str());
+    std::ofstream os(logPath);
 
     double totalReward = 0;
     double totalTime = 0;
     double totalNSteps = 0;
-    for (long i = 0; i < nRuns; i++) {
-        cout << "Run #" << i+1 << endl;
+    for (long runNumber = 0; runNumber < nRuns; runNumber++) {
+        cout << "Run #" << runNumber+1 << endl;
         cout << "Loading policy... " << endl;
 
         std::ifstream inFile;
@@ -102,68 +104,60 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             return 1;
         }
 
-        std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
-                    vm);
-        solver::Solver solver(&randGen, std::move(newModel));
-        std::unique_ptr<solver::Serializer> newSerializer(
-                std::make_unique<SerializerType>(&solver));
+        std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&randGen, vm);
+        solver::Solver solver(&randGen, std::move(solverModel));
+        std::unique_ptr<solver::Serializer> newSerializer(std::make_unique<SerializerType>(&solver));
         solver.setSerializer(std::move(newSerializer));
         solver.getSerializer()->load(inFile);
         inFile.close();
-        std::map<long, std::vector<std::unique_ptr<solver::ModelChange>>> changeSequence;
-        if (hasChanges) {
-            std::ifstream ifs(changesPath);
-            changeSequence = solver.getSerializer()->loadChangeSequence(ifs);
-        }
 
-        std::vector<std::unique_ptr<solver::State>> trajSt;
-        std::vector<std::unique_ptr<solver::Action>> trajAction;
-        std::vector<std::unique_ptr<solver::Observation>> trajObs;
-        std::vector<double> trajRew;
-        long actualNSteps;
-        double totT, totChTime, totImpTime;
+        std::unique_ptr<ModelType> simulatorModel = std::make_unique<ModelType>(&randGen, vm);
+        solver::Simulator simulator(std::move(simulatorModel), &solver);
+        if (hasChanges) {
+            simulator.loadChangeSequence(changesPath);
+        }
+        simulator.setMaxStepCount(nSteps);
         cout << "Running..." << endl;
 
         double tStart = abt::clock_ms();
-        double reward = solver.runSimulation(nSteps,
-                std::move(changeSequence), trajSt, trajAction, trajObs,
-                    trajRew, &actualNSteps, &totChTime, &totImpTime);
-        totT = abt::clock_ms() - tStart;
+        double reward = simulator.runSimulation();
+        double totT = abt::clock_ms() - tStart;
+        long actualNSteps = simulator.getStepCount();
 
         totalReward += reward;
         totalTime += totT;
         totalNSteps += actualNSteps;
 
+        os << "Run #" << runNumber+1 << endl;
         os << "Reward: " << reward << endl;
 
-        std::vector<std::unique_ptr<solver::State>>::iterator itS;
-        itS = trajSt.begin();
-        os << "Init: ( " << **itS << endl;
-        os << " )\n";
-        itS++;
+        solver::HistorySequence *sequence = simulator.getHistory();
 
-        long j;
-        std::vector<std::unique_ptr<solver::Action>>::iterator itA;
-        std::vector<std::unique_ptr<solver::Observation>>::iterator itO;
-        std::vector<double>::iterator itR;
-        for (itA = trajAction.begin(), itO = trajObs.begin(), itR =
-                 trajRew.begin(), j = 0; itA != trajAction.end();
-             itS++, itA++, itO++, itR++, j++) {
-            os << "Step-" << j << " " << **itA;
-            os << "S: ( " << **itS << " ); O: " << **itO;
-            os << " R: " << *itR << endl;
+        for (long entryNo = 0; entryNo < sequence->getLength() - 1; entryNo++) {
+            solver::HistoryEntry *entry = sequence->getEntry(entryNo);
+            os << "t = " << entryNo << endl;
+            os << "S: " << *entry->getState() << endl;
+            os << "A: " << *entry->getAction() << endl;
+            os << "O: " << *entry->getObservation() << endl;
+            os << "R: " << entry->getReward() << endl;
         }
+        os << "Final State: " << sequence->getLastEntry()->getState();
+        os << endl;
+
         cout << "Total discounted reward: " << reward << endl;
         cout << "# of steps: " << actualNSteps << endl;
-        cout << "Time spent on changes: " << totChTime << "ms" << endl;
-        cout << "Time spent on policy updates: " << totImpTime << "ms" << endl;
+        cout << "Time spent on changes: ";
+        cout << simulator.getTotalChangingTime() << "ms" << endl;
+        cout << "Time spent on policy updates: ";
+        cout << simulator.getTotalImprovementTime() << "ms" << endl;
+        cout << "ms" << endl;
         cout << "Total time taken: " << totT << "ms" << endl;
         if (savePolicy) {
             // Write the final policy to a file.
             cout << "Saving final policy..." << endl;
             std::ofstream outFile;
             std::ostringstream sstr;
-            sstr << "final-" << i << ".pol";
+            sstr << "final-" << runNumber << ".pol";
             outFile.open(sstr.str());
             solver.getSerializer()->save(outFile);
             outFile.close();
@@ -181,3 +175,4 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 }
 
 #endif /* SIMULATE_HPP_ */
+

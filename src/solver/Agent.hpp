@@ -20,6 +20,7 @@ public:
 
     Solver *getSolver() const;
     std::unique_ptr<Action> getPreferredAction() const;
+    BeliefNode *getCurrentBelief() const;
 
     void updateBelief(Action const &action, Observation const &observation);
 

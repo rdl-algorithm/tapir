@@ -165,7 +165,7 @@ friend class RockSampleMdpSolver;
     virtual void dispCell(RSCellType cellType, std::ostream &os);
 
     virtual void drawEnv(std::ostream &os) override;
-    virtual void drawSimulationState(solver::BeliefNode *belief,
+    virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 

@@ -485,7 +485,7 @@ void TagModel::drawEnv(std::ostream &os) {
     }
 }
 
-void TagModel::drawSimulationState(solver::BeliefNode *belief,
+void TagModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state, std::ostream &os) {
     TagState const &tagState = static_cast<TagState const &>(state);
     std::vector<solver::State const *> particles = belief->getStates();

@@ -131,7 +131,7 @@ class TagModel: virtual public ModelWithProgramOptions,
     /** Displays a single cell of the map. */
     void dispCell(TagCellType cellType, std::ostream &os);
     void drawEnv(std::ostream &os) override;
-    void drawSimulationState(solver::BeliefNode *belief,
+    void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 

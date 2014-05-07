@@ -23,6 +23,7 @@ class HistoryEntry {
     friend class AbstractSearchInstance;
     friend class DefaultHistoryCorrector;
     friend class HistorySequence;
+    friend class Simulator;
     friend class Solver;
     friend class TextSerializer;
 
@@ -50,6 +51,8 @@ class HistoryEntry {
     double getCumulativeReward() const;
     /** Returns the state associated with this history entry. */
     State const *getState() const;
+    /** Returns the state info associated with this history entry. */
+    StateInfo const *getStateInfo() const;
     /** Returns the action associated with this history entry. */
     Action const *getAction() const;
     /** Returns the observation associated with this history entry. */

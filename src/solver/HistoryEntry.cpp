@@ -50,6 +50,9 @@ double HistoryEntry::getCumulativeReward() const {
 State const *HistoryEntry::getState() const {
     return stateInfo_->getState();
 }
+StateInfo const *HistoryEntry::getStateInfo() const {
+    return stateInfo_;
+}
 Action const *HistoryEntry::getAction() const{
     return action_.get();
 }

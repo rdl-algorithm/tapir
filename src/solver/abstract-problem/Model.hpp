@@ -184,7 +184,7 @@ class Model {
      /** Draws the current belief and/or the current state in the context of the
       * overall map onto the given output stream.
       */
-     virtual void drawSimulationState(BeliefNode *belief,
+     virtual void drawSimulationState(BeliefNode const *belief,
              State const &/*state*/, std::ostream &/*os*/);
     /** Returns the name of this model. */
     virtual std::string getName();

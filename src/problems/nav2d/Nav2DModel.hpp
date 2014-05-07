@@ -155,7 +155,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     /** Displays an individual point on the map. */
     virtual void dispPoint(AreaType type, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
-    virtual void drawSimulationState(solver::BeliefNode *belief,
+    virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 

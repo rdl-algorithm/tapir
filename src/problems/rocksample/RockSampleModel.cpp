@@ -513,7 +513,7 @@ void RockSampleModel::drawEnv(std::ostream &os) {
     }
 }
 
-void RockSampleModel::drawSimulationState(solver::BeliefNode *belief,
+void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state, std::ostream &os) {
     RockSampleState const &rockSampleState =
             static_cast<RockSampleState const &>(state);

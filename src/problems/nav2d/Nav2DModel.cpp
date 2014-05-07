@@ -654,7 +654,7 @@ void Nav2DModel::drawEnv(std::ostream &os) {
     }
 }
 
-void Nav2DModel::drawSimulationState(solver::BeliefNode *belief,
+void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state,
         std::ostream &os) {
     Nav2DState const &navState = static_cast<Nav2DState const &>(state);

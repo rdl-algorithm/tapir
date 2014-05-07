@@ -83,29 +83,6 @@ public:
     /** Shows a belief node in a nice, readable way. */
     void printBelief(BeliefNode *belief, std::ostream &os);
 
-    /* ------------------ Simulation methods ------------------- */
-    /** Runs a single simulation up to a maximum of nSteps steps;
-     * the return value is the resulting total discounted reward.
-     *
-     * Also sets trajSt, trajActId, trajObs, and trajRew to be the sequences
-     * of states, actions, observations, and immediate rewards;
-     *
-     * actualNSteps will be the actual number of steps, which will be
-     * different to nSteps if a terminal state is reached early.
-     * totChTime will be the total amount of time spent on changing the model.
-     * totImpTime will be the total amount of time spent on generating new
-     * episodes to improve the policy.
-     */
-    double runSimulation(long nSteps,
-            std::map<long, std::vector<std::unique_ptr<ModelChange>>> changeSequence,
-            std::vector<std::unique_ptr<State>> &trajSt,
-            std::vector<std::unique_ptr<Action>> &trajAction,
-            std::vector<std::unique_ptr<Observation>> &trajObs,
-            std::vector<double> &trajRew,
-            long *actualNSteps,
-            double *totChTime,
-            double *totImpTime);
-
 private:
     /* ------------------ Initialization methods ------------------- */
     /** Partial pre-initialization - helper for full initialization,
@@ -131,17 +108,6 @@ private:
     void calculateRewards(HistorySequence *sequence);
     /** Performs or negates a backup on the given sequence. */
     void backup(HistorySequence *sequence, bool backingUp);
-
-    /* ------------------ Simulation methods ------------------- */
-    /** Simulates a single step. */
-    Model::StepResult simAStep(BeliefNode *currentBelief,
-            State const &currentState);
-
-    /* -------------- Methods for handling model changes --------------- */
-    /** Does all the work required for changing the model. */
-    void handleChanges(std::vector<std::unique_ptr<ModelChange>> changes,
-            State const &currentState,
-            std::vector<std::unique_ptr<State>> &stateHistory);
 
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */
