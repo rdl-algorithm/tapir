@@ -61,6 +61,11 @@ class HistoryEntry {
     /** Returns the belief node associated with this history entry. */
     BeliefNode *getAssociatedBeliefNode() const;
 
+    /* -------------- Registration methods ---------------- */
+    /** Returns true iff this entry is already registered as a particle. */
+    bool isRegisteredAsParticle() const;
+
+private:
     /* ----------------- Change flagging ------------------- */
     /**  Resets the changes that apply to this history entry. */
     void resetChangeFlags();
@@ -68,8 +73,6 @@ class HistoryEntry {
     void setChangeFlags(ChangeFlags flags);
 
     /* -------------- Registration methods ---------------- */
-    /** Returns true iff this entry is already registered as a particle. */
-    bool isRegisteredAsParticle() const;
     /** Registers this history entry as a particle of the given belief node.
      * A value of nullptr will deregister this particle from that node.
      */

@@ -101,7 +101,7 @@ std::unique_ptr<BackpropagationStrategy> Model::createBackpropagationStrategy(
     return std::make_unique<AveragePropagator>(solver);
 }
 
-std::unique_ptr<HistoricalData> Model::createRootInfo() {
+std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {
     return nullptr;
 }
 

@@ -61,7 +61,7 @@ std::unique_ptr<solver::ActionPool> LegalActionsModel::createActionPool(
     return std::make_unique<LegalActionsPool>(this, getNumberOfBins());
 }
 
-std::unique_ptr<solver::HistoricalData> LegalActionsModel::createRootInfo() {
+std::unique_ptr<solver::HistoricalData> LegalActionsModel::createRootHistoricalData() {
     RockSampleModel *model = dynamic_cast<RockSampleModel *>(this);
     return std::make_unique<PositionData>(
             model, model->getStartPosition());

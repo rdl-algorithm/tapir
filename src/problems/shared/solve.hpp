@@ -70,7 +70,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     double totT;
     double tStart;
     tStart = abt::clock_ms();
-    solver.genPol(model->getNumberOfHistoriesPerStep(), model->getMaximumDepth());
+    solver.improvePolicy(model->getNumberOfHistoriesPerStep(), model->getMaximumDepth());
     totT = abt::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 

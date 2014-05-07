@@ -75,6 +75,13 @@ long ApproximateObservationMap::getNChildren() const {
 ObservationMappingEntry const *ApproximateObservationMap::getEntry(Observation const &obs) const {
     return getApproxEntry(obs);
 }
+std::vector<ObservationMappingEntry const *> ApproximateObservationMap::getAllEntries() const {
+    std::vector<ObservationMappingEntry const *> returnEntries;
+    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
+        returnEntries.push_back(entry.get());
+    }
+    return returnEntries;
+}
 
 void ApproximateObservationMap::updateVisitCount(Observation const &obs,
         long deltaNVisits) {
@@ -189,11 +196,8 @@ std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadOb
         entry->map_ = &approxMap;
         entry->observation_ = std::move(obs);
         entry->visitCount_ = visitCount;
-        entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
-        BeliefNode *node = entry->childNode_.get();
+        entry->childNode_ = std::make_unique<BeliefNode>(childId, entry.get());
 
-        // Add the node to the tree index.
-        getSolver()->getPolicy()->setNode(childId, node);
         // Add the entry to the vector.
         approxMap.entries_.push_back(std::move(entry));
     }

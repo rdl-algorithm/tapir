@@ -15,7 +15,8 @@ class BeliefNode;
 class HistoryEntry;
 
 class StateInfo {
-  public:
+public:
+    friend class HistoryEntry;
     friend class Solver;
     friend class StatePool;
     friend class TextSerializer;
@@ -29,28 +30,27 @@ class StateInfo {
 
     /** Default destructor. */
     ~StateInfo();
+
     _NO_COPY_OR_MOVE(StateInfo);
 
-    /* ----------------- History entry registration  ----------------- */
-    /** Registers a history entry as containing this state. */
-    void addHistoryEntry(HistoryEntry *entry);
-    /** Deregisters a history entry that no longer contains this state. */
-    void removeHistoryEntry(HistoryEntry *entry);
-
-    /* ---------------------- Simple setters  ---------------------- */
-    /** Sets the ID of this state to the given ID. */
-    void setId(long id);
     /* ---------------------- Simple getters  ---------------------- */
     /** Returns the ID of this state. */
     long getId() const;
     /** Returns the state held by this StateInfo. */
     State const *getState() const;
 
-  private:
+private:
+    /* ----------------- History entry registration  ----------------- */
+    /** Registers a history entry as containing this state. */
+    void addHistoryEntry(HistoryEntry *entry);
+    /** Deregisters a history entry that no longer contains this state. */
+    void removeHistoryEntry(HistoryEntry *entry);
+
     /* ---------------------- Model change handling  ---------------------- */
     void resetChangeFlags();
     void setChangeFlags(ChangeFlags flags);
 
+private:
     std::unique_ptr<State const> state_;
     long id_;
 

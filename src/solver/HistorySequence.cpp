@@ -20,12 +20,11 @@
 
 namespace solver {
 HistorySequence::HistorySequence() :
-    HistorySequence(0, -1) {
+    HistorySequence(-1) {
 }
 
-HistorySequence::HistorySequence(long startDepth, long id) :
+HistorySequence::HistorySequence(long id) :
     id_(id),
-    startDepth_(startDepth),
     entrySequence_(),
     startAffectedIdx_(std::numeric_limits<long>::max()),
     endAffectedIdx_(-1),
@@ -35,6 +34,34 @@ HistorySequence::HistorySequence(long startDepth, long id) :
 // Do nothing!
 HistorySequence::~HistorySequence() {
 }
+
+/* ------------------ Simple getters ------------------- */
+long HistorySequence::getId() const {
+    return id_;
+}
+long HistorySequence::getLength() const {
+    return entrySequence_.size();
+}
+HistoryEntry *HistorySequence::getEntry(long entryId) const {
+    return entrySequence_[entryId].get();
+}
+HistoryEntry *HistorySequence::getFirstEntry() const {
+    return entrySequence_.begin()->get();
+}
+HistoryEntry *HistorySequence::getLastEntry() const {
+    return entrySequence_.rbegin()->get();
+}
+std::vector<State const *> HistorySequence::getStates() const {
+    std::vector<State const *> states;
+    for (std::unique_ptr<HistoryEntry> const &entry : entrySequence_) {
+        states.push_back(entry->getState());
+    }
+    return states;
+}
+
+
+/* ============================ PRIVATE ============================ */
+
 
 bool HistorySequence::testBackup(bool backingUp) {
     HistoryEntry *lastEntry = getLastEntry();
@@ -75,63 +102,7 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
     return newEntryReturn;
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo,
-        Action const &action, Observation const &obs, double immediateReward) {
-    std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, this, entrySequence_.size());
-    newEntry->action_ = action.copy();
-    newEntry->observation_ = obs.copy();
-    newEntry->reward_ = immediateReward;
-    HistoryEntry *newEntryReturn = newEntry.get();
-    entrySequence_.push_back(std::move(newEntry));
-    return newEntryReturn;
-}
-
-HistoryEntry *HistorySequence::insertEntry(long index,
-        StateInfo *stateInfo,
-        Action const &action, Observation const &obs,
-        double immediateReward) {
-    std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, this, entrySequence_.size());
-    newEntry->action_ = action.copy();
-    newEntry->observation_ = obs.copy();
-    newEntry->reward_ = immediateReward;
-    HistoryEntry *newEntryReturn = newEntry.get();
-    entrySequence_.insert(entrySequence_.begin() + index, std::move(newEntry));
-    return newEntryReturn;
-}
-
-/* ------------------ Simple setters ------------------- */
-void HistorySequence::setId(long id) {
-    id_ = id;
-}
-/* ------------------ Simple getters ------------------- */
-long HistorySequence::getId() const {
-    return id_;
-}
-long HistorySequence::getStartDepth() const {
-    return startDepth_;
-}
-long HistorySequence::getLength() const {
-    return entrySequence_.size();
-}
-HistoryEntry *HistorySequence::getEntry(long entryId) const {
-    return entrySequence_[entryId].get();
-}
-HistoryEntry *HistorySequence::getFirstEntry() const {
-    return entrySequence_.begin()->get();
-}
-HistoryEntry *HistorySequence::getLastEntry() const {
-    return entrySequence_.rbegin()->get();
-}
-std::vector<State const *> HistorySequence::getStates() const {
-    std::vector<State const *> states;
-    for (std::unique_ptr<HistoryEntry> const &entry : entrySequence_) {
-        states.push_back(entry->getState());
-    }
-    return states;
-}
-
+/* -------------- Registration methods ---------------- */
 void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
     bool registering = (startNode != nullptr);
     std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = entrySequence_.begin();

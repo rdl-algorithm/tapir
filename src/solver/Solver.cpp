@@ -56,9 +56,9 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
     randGen_(randGen),
     serializer_(nullptr),
     model_(std::move(model)),
-    statePool_(std::make_unique<StatePool>(model_->createStateIndex())),
-    histories_(std::make_unique<Histories>()),
-    policy_(std::make_unique<BeliefTree>(this)),
+    statePool_(nullptr),
+    histories_(nullptr),
+    policy_(nullptr),
     actionPool_(nullptr),
     observationPool_(nullptr),
     historyCorrector_(nullptr),
@@ -71,51 +71,230 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
 Solver::~Solver() {
 }
 
+/* ------------------ Simple getters. ------------------- */
+BeliefTree *Solver::getPolicy() const {
+    return policy_.get();
+}
+StatePool *Solver::getStatePool() const {
+    return statePool_.get();
+}
+Model *Solver::getModel() const {
+    return model_.get();
+}
+ActionPool *Solver::getActionPool() const {
+    return actionPool_.get();
+}
+ObservationPool *Solver::getObservationPool() const {
+    return observationPool_.get();
+}
+
 /* ------------------ Initialization methods ------------------- */
 void Solver::initializeEmpty() {
+    // Basic initialization.
+    initialize();
+
+    // Create new instances of these.
     actionPool_ = model_->createActionPool(this);
     observationPool_ = model_->createObservationPool(this);
 
-    std::unique_ptr<BeliefNode> root = std::make_unique<BeliefNode>();
-    BeliefNode *rootPtr = root.get();
-    policy_->setRoot(std::move(root));
-
-    rootPtr->setHistoricalData(model_->createRootInfo());
+    // Initialize the root node properly.
+    BeliefNode *rootPtr = policy_->getRoot();
+    rootPtr->setHistoricalData(model_->createRootHistoricalData());
     rootPtr->setMapping(actionPool_->createActionMapping());
     rootPtr->getMapping()->initialize();
+}
 
-    initialize();
-}
-void Solver::initialize() {
-    historyCorrector_ = model_->createHistoryCorrector(this);
-    selectionStrategy_ = model_->createSelectionStrategy(this);
-    rolloutStrategy_ = model_->createRolloutStrategy(this);
-    backpropagationStrategy_ = model_->createBackpropagationStrategy(this);
-}
 void Solver::setSerializer(std::unique_ptr<Serializer> serializer) {
     serializer_ = std::move(serializer);
 }
-void Solver::saveStateTo(std::ostream &os) {
+void Solver::saveStateTo(std::ostream &os) const {
     serializer_->save(os);
 }
 void Solver::loadStateFrom(std::istream &is) {
     serializer_->load(is);
 }
 
-/* ------------------ Solution methods ------------------- */
-void Solver::genPol(long historiesPerStep, long maximumDepth) {
-    // Start expanding the tree.
-    for (long i = 0; i < historiesPerStep; i++) {
-        singleSearch(maximumDepth);
+/* ------------------- Policy mutators ------------------- */
+void Solver::improvePolicy(long numberOfHistories, long maximumDepth) {
+	std::vector<StateInfo *> states;
+	// Generate the initial states.
+    for (long i = 0; i < numberOfHistories; i++) {
+    	states.push_back(statePool_->createOrGetInfo(
+    			*model_->sampleAnInitState()));
+    }
+    multipleSearches(policy_->getRoot(), states, maximumDepth);
+}
+
+void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories,
+        long maximumDepth) {
+    if (startNode->getNumberOfParticles() == 0) {
+        debug::show_message("ERROR: No particles in the BeliefNode!");
+        std::exit(10);
+    }
+
+    std::vector<StateInfo *> nonTerminalStates;
+    for (long index = 0; index < startNode->getNumberOfParticles(); index++) {
+        HistoryEntry *entry = startNode->particles_.get(index);
+        if (!model_->isTerminal(*entry->getState())) {
+            nonTerminalStates.push_back(entry->stateInfo_);
+        }
+    }
+    if (nonTerminalStates.empty()) {
+        debug::show_message("ERROR: No non-terminal particles!");
+        std::exit(11);
+    }
+
+    std::vector<StateInfo *> samples;
+    for (long i = 0; i < numberOfHistories; i++) {
+        long index = std::uniform_int_distribution<long>(
+                0, nonTerminalStates.size() - 1)(*randGen_);
+        samples.push_back(nonTerminalStates[index]);
+    }
+
+    multipleSearches(startNode, samples, maximumDepth);
+}
+
+void Solver::applyChanges() {
+    std::unordered_set<HistorySequence *> affectedSequences;
+    for (StateInfo *stateInfo : statePool_->getAffectedStates()) {
+        for (HistoryEntry *entry : stateInfo->usedInHistoryEntries_) {
+            HistorySequence *sequence = entry->owningSequence_;
+            long entryId = entry->entryId_;
+            sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
+            if (changes::has_flag(entry->changeFlags_, ChangeFlags::DELETED)) {
+                if (entryId > 0) {
+                    sequence->setChangeFlags(entryId - 1,
+                            ChangeFlags::TRANSITION);
+                }
+            }
+            if (changes::has_flag(entry->changeFlags_,
+                    ChangeFlags::OBSERVATION_BEFORE)) {
+                if (entryId > 0) {
+                    sequence->setChangeFlags(entryId - 1,
+                            ChangeFlags::OBSERVATION);
+                }
+            }
+            affectedSequences.insert(sequence);
+        }
+    }
+    if (model_->hasVerboseOutput()) {
+        cout << "Updating " << affectedSequences.size() << " histories!";
+        cout << endl;
+    }
+
+    // Delete and remove any sequences where the first entry is now invalid.
+    std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
+    while (it != affectedSequences.end()) {
+        HistorySequence *sequence = *it;
+
+        // Undo backup and deregister.
+        backup(sequence, false);
+        sequence->registerWith(nullptr, nullptr);
+
+        if (changes::has_flag(sequence->getFirstEntry()->changeFlags_,
+                ChangeFlags::DELETED)) {
+            it = affectedSequences.erase(it);
+            // Now remove the sequence entirely.
+            histories_->deleteSequence(sequence->id_);
+        } else {
+            it++;
+        }
+    }
+
+    // Revise all of the histories.
+    historyCorrector_->reviseHistories(affectedSequences);
+
+    // Clear flags and fix up all the sequences.
+    for (HistorySequence *sequence : affectedSequences) {
+        sequence->resetChangeFlags();
+        HistoryEntry *lastEntry = sequence->getLastEntry();
+        State const *lastState = lastEntry->getState();
+        // If it didn't end in a terminal state, we apply the heuristic.
+        if (!model_->isTerminal(*lastState)) {
+            lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
+        }
+
+        // Now we register and then backup.
+        sequence->registerWith(sequence->getFirstEntry()->associatedBeliefNode_,
+                    policy_.get());
+        backup(sequence, true);
+    }
+
+    // Reset the set of affected states in the pool.
+    statePool_->resetAffectedStates();
+}
+
+BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
+        Observation const &obs) {
+    BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
+
+    std::vector<State const *> particles;
+    std::vector<HistoryEntry *>::iterator it;
+    for (HistoryEntry *entry : currNode->particles_) {
+        particles.push_back(entry->getState());
+    }
+    // Attempt to generate particles for next state based on the current belief,
+    // the observation, and the action.
+    std::vector<std::unique_ptr<State>> nextParticles(
+            model_->generateParticles(currNode, action, obs, particles));
+    if (nextParticles.empty()) {
+        debug::show_message("WARNING: Could not generate based on belief!");
+        // If that fails, ignore the current belief.
+        nextParticles = model_->generateParticles(currNode, action, obs);
+    }
+    if (nextParticles.empty()) {
+        debug::show_message("ERROR: Failed to generate new particles!");
+    }
+    for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
+        StateInfo *stateInfo = statePool_->createOrGetInfo(*uniqueStatePtr);
+
+        // Create a new history sequence and entry for the new particle.
+        HistorySequence *histSeq = histories_->createSequence();
+        HistoryEntry *histEntry = histSeq->addEntry(stateInfo);
+        State const *state = stateInfo->getState();
+        if (!model_->isTerminal(*state)) {
+            // Use the heuristic value for non-terminal particles.
+            histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
+        }
+        // Register and backup
+        histSeq->registerWith(nextNode, policy_.get());
+        backup(histSeq, true);
+    }
+    return nextNode;
+}
+
+/* ------------------ Display methods  ------------------- */
+void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
+    os << belief->getQValue();
+    os << " from " << belief->getNumberOfParticles() << " p.";
+    os << " with " << belief->getNumberOfStartingSequences() << " starts.";
+    os << endl;
+    os << "Action children: " << endl;
+    std::multimap<double, solver::ActionMappingEntry const *> actionValues;
+    for (solver::ActionMappingEntry const *entry : belief->getMapping()->getVisitedEntries()) {
+        actionValues.emplace(entry->getMeanQValue(), entry);
+    }
+    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
+        abt::print_double(it->first, os, 8, 2,
+                std::ios_base::fixed | std::ios_base::showpos);
+        os << ": ";
+        std::ostringstream sstr;
+        sstr << *it->second->getAction();
+        abt::print_with_width(sstr.str(), os, 17);
+        abt::print_with_width(it->second->getVisitCount(), os, 8);
+        os << endl;
     }
 }
 
-double Solver::runSim(long nSteps, long historiesPerStep,
+/* ------------------ Simulation methods ------------------- */
+double Solver::runSimulation(long nSteps, long historiesPerStep,
         std::vector<long> &changeTimes,
         std::vector<std::unique_ptr<State>> &trajSt,
         std::vector<std::unique_ptr<Action>> &trajAction,
         std::vector<std::unique_ptr<Observation>> &trajObs,
-        std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
+        std::vector<double> &trajRew,
+        long *actualNSteps,
+        double *totChTime,
         double *totImpTime) {
     trajSt.clear();
     trajAction.clear();
@@ -176,7 +355,7 @@ double Solver::runSim(long nSteps, long historiesPerStep,
 
         // Improve the policy
         double impSolTimeStart = abt::clock_ms();
-        improveSolution(currNode, historiesPerStep, maximumDepth);
+        improvePolicy(currNode, historiesPerStep, maximumDepth);
         double impSolTimeEnd = abt::clock_ms();
         *totImpTime += impSolTimeEnd - impSolTimeStart;
 
@@ -223,8 +402,8 @@ double Solver::runSim(long nSteps, long historiesPerStep,
         BeliefNode *nextNode = currNode->getChild(*result.action,
                     *result.observation);
         if (nextNode == nullptr) {
-            nextNode = addChild(currNode, *result.action,
-                    *result.observation, timeStep);
+            debug::show_message("ERROR: Resulting belief has zero particles!!");
+            nextNode = addChild(currNode, *result.action, *result.observation);
         }
         currNode = nextNode;
         if (result.isTerminal) {
@@ -241,33 +420,39 @@ double Solver::runSim(long nSteps, long historiesPerStep,
     return discountedTotalReward;
 }
 
-/* ------------------ Simple getters. ------------------- */
-BeliefTree *Solver::getPolicy() {
-    return policy_.get();
-}
-StatePool *Solver::getStatePool() {
-    return statePool_.get();
-}
-Model *Solver::getModel() {
-    return model_.get();
-}
-ActionPool *Solver::getActionPool() {
-    return actionPool_.get();
-}
-ObservationPool *Solver::getObservationPool() {
-    return observationPool_.get();
+
+/* ============================ PRIVATE ============================ */
+
+
+/* ------------------ Initialization methods ------------------- */
+void Solver::initialize() {
+    // Core data structures
+    statePool_ = std::make_unique<StatePool>(model_->createStateIndex());
+    histories_ = std::make_unique<Histories>();
+    policy_ = std::make_unique<BeliefTree>(this);
+
+    // Serializable model-specific customizations
+    actionPool_ = nullptr;
+    observationPool_ = nullptr;
+
+    // Possible model-specific customizations
+    historyCorrector_ = model_->createHistoryCorrector(this);
+    selectionStrategy_ = model_->createSelectionStrategy(this);
+    rolloutStrategy_ = model_->createRolloutStrategy(this);
+    backpropagationStrategy_ = model_->createBackpropagationStrategy(this);
 }
 
 /* ------------------ Episode sampling methods ------------------- */
-void Solver::singleSearch(long maximumDepth) {
-    StateInfo *stateInfo = statePool_->createOrGetInfo(
-            *model_->sampleAnInitState());
-    singleSearch(policy_->getRoot(), stateInfo, 0, maximumDepth);
+void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> states,
+		long maximumDepth) {
+	for (StateInfo *stateInfo : states) {
+		singleSearch(startNode, stateInfo, maximumDepth);
+	}
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-        long startDepth, long maximumDepth) {
-    HistorySequence *sequence = histories_->addSequence(startDepth);
+		long maximumDepth) {
+    HistorySequence *sequence = histories_->createSequence();
     sequence->addEntry(startStateInfo);
     sequence->getFirstEntry()->associatedBeliefNode_ = startNode;
     continueSearch(sequence, maximumDepth);
@@ -354,79 +539,6 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
     return result;
 }
 
-void Solver::improveSolution(BeliefNode *startNode, long historiesPerStep,
-        long maximumDepth) {
-    if (startNode->getNumberOfParticles() == 0) {
-        debug::show_message("ERROR: No particles in the BeliefNode!", true, false);
-        std::exit(10);
-    }
-
-    std::vector<StateInfo *> nonTerminalStates;
-    for (long index = 0; index < startNode->getNumberOfParticles(); index++) {
-        HistoryEntry *entry = startNode->particles_.get(index);
-        if (!model_->isTerminal(*entry->getState())) {
-            nonTerminalStates.push_back(entry->stateInfo_);
-        }
-    }
-    if (nonTerminalStates.empty()) {
-        debug::show_message("ERROR: No non-terminal particles!");
-        return;
-    }
-
-    std::vector<StateInfo *> samples;
-    for (long i = 0; i < historiesPerStep; i++) {
-        long index = std::uniform_int_distribution<long>(
-                0, nonTerminalStates.size() - 1)(*randGen_);
-        samples.push_back(nonTerminalStates[index]);
-    }
-
-    HistoryEntry *entry = startNode->particles_.get(0);
-    long depth = entry->entryId_ + entry->owningSequence_->startDepth_;
-    for (StateInfo *sample : samples) {
-        singleSearch(startNode, sample, depth, maximumDepth);
-    }
-}
-
-BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
-        Observation const &obs, long timeStep) {
-    debug::show_message("WARNING: Adding particles due to depletion");
-    BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
-
-    std::vector<State const *> particles;
-    std::vector<HistoryEntry *>::iterator it;
-    for (HistoryEntry *entry : currNode->particles_) {
-        particles.push_back(entry->getState());
-    }
-    // Attempt to generate particles for next state based on the current belief,
-    // the observation, and the action.
-    std::vector<std::unique_ptr<State>> nextParticles(
-            model_->generateParticles(currNode, action, obs, particles));
-    if (nextParticles.empty()) {
-        debug::show_message("WARNING: Could not generate based on belief!");
-        // If that fails, ignore the current belief.
-        nextParticles = model_->generateParticles(currNode, action, obs);
-    }
-    if (nextParticles.empty()) {
-        debug::show_message("ERROR: Failed to generate new particles!");
-    }
-    for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
-        StateInfo *stateInfo = statePool_->createOrGetInfo(*uniqueStatePtr);
-
-        // Create a new history sequence and entry for the new particle.
-        HistorySequence *histSeq = histories_->addSequence(timeStep);
-        HistoryEntry *histEntry = histSeq->addEntry(stateInfo);
-        State const *state = stateInfo->getState();
-        if (!model_->isTerminal(*state)) {
-            // Use the heuristic value for non-terminal particles.
-            histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
-        }
-        // Register and backup
-        histSeq->registerWith(nextNode, policy_.get());
-        backup(histSeq, true);
-    }
-    return nextNode;
-}
-
 /* -------------- Methods for handling model changes --------------- */
 void Solver::handleChanges(long timeStep,
         State const &currentState,
@@ -447,102 +559,11 @@ void Solver::handleChanges(long timeStep,
             std::ostringstream message;
             message << "ERROR: Impossible simulation history! Includes ";
             message << *state2;
-            debug::show_message(message.str(), true, false);
+            debug::show_message(message.str());
         }
     }
 
-    // Apply the changes and reset the flagged states.
+    // Apply the changes
     applyChanges();
-    statePool_->resetAffectedStates();
-}
-
-void Solver::applyChanges() {
-    std::unordered_set<HistorySequence *> affectedSequences;
-    for (StateInfo *stateInfo : statePool_->getAffectedStates()) {
-        for (HistoryEntry *entry : stateInfo->usedInHistoryEntries_) {
-            HistorySequence *sequence = entry->owningSequence_;
-            long entryId = entry->entryId_;
-            sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
-            if (changes::has_flag(entry->changeFlags_, ChangeFlags::DELETED)) {
-                if (entryId > 0) {
-                    sequence->setChangeFlags(entryId - 1,
-                            ChangeFlags::TRANSITION);
-                }
-            }
-            if (changes::has_flag(entry->changeFlags_,
-                    ChangeFlags::OBSERVATION_BEFORE)) {
-                if (entryId > 0) {
-                    sequence->setChangeFlags(entryId - 1,
-                            ChangeFlags::OBSERVATION);
-                }
-            }
-            affectedSequences.insert(sequence);
-        }
-    }
-    if (model_->hasVerboseOutput()) {
-        cout << "Updating " << affectedSequences.size() << " histories!";
-        cout << endl;
-    }
-
-    // Delete and remove any sequences where the first entry is now invalid.
-    std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
-    while (it != affectedSequences.end()) {
-        HistorySequence *sequence = *it;
-
-        // Undo backup and deregister.
-        backup(sequence, false);
-        sequence->registerWith(nullptr, nullptr);
-
-        if (changes::has_flag(sequence->getFirstEntry()->changeFlags_,
-                ChangeFlags::DELETED)) {
-            it = affectedSequences.erase(it);
-            // Now remove the sequence entirely.
-            histories_->deleteSequence(sequence->id_);
-        } else {
-            it++;
-        }
-    }
-
-    // Revise all of the histories.
-    historyCorrector_->reviseHistories(affectedSequences);
-
-    // Clear flags and fix up all the sequences.
-    for (HistorySequence *sequence : affectedSequences) {
-        sequence->resetChangeFlags();
-        HistoryEntry *lastEntry = sequence->getLastEntry();
-        State const *lastState = lastEntry->getState();
-        // If it didn't end in a terminal state, we apply the heuristic.
-        if (!model_->isTerminal(*lastState)) {
-            lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
-        }
-
-        // Now we register and then backup.
-        sequence->registerWith(sequence->getFirstEntry()->associatedBeliefNode_,
-                    policy_.get());
-        backup(sequence, true);
-    }
-}
-
-/* ------------------ Display methods  ------------------- */
-void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
-    os << belief->getQValue();
-    os << " from " << belief->getNumberOfParticles() << " p.";
-    os << " with " << belief->getNumberOfStartingSequences() << " starts.";
-    os << endl;
-    os << "Action children: " << endl;
-    std::multimap<double, solver::ActionMappingEntry const *> actionValues;
-    for (solver::ActionMappingEntry const *entry : belief->getMapping()->getVisitedEntries()) {
-        actionValues.emplace(entry->getMeanQValue(), entry);
-    }
-    for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-        abt::print_double(it->first, os, 8, 2,
-                std::ios_base::fixed | std::ios_base::showpos);
-        os << ": ";
-        std::ostringstream sstr;
-        sstr << *it->second->getAction();
-        abt::print_with_width(sstr.str(), os, 17);
-        abt::print_with_width(it->second->getVisitCount(), os, 8);
-        os << endl;
-    }
 }
 } /* namespace solver */

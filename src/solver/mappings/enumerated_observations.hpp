@@ -65,6 +65,7 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNChildren() const override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
+    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;

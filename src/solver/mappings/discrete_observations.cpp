@@ -72,6 +72,13 @@ long DiscreteObservationMap::getNChildren() const {
 ObservationMappingEntry const *DiscreteObservationMap::getEntry(Observation const &obs) const {
     return childMap_.at(obs.copy()).get();
 }
+std::vector<ObservationMappingEntry const *> DiscreteObservationMap::getAllEntries() const {
+    std::vector<ObservationMappingEntry const *> returnEntries;
+    for (ChildMap::value_type const &mapEntry : childMap_) {
+        returnEntries.push_back(mapEntry.second.get());
+    }
+    return returnEntries;
+}
 
 void DiscreteObservationMap::updateVisitCount(Observation const &obs,
         long deltaNVisits) {
@@ -165,12 +172,8 @@ std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObser
                     std::make_unique<DiscreteObservationMapEntry>());
         entry->map_ = &discMap;
         entry->observation_ = std::move(obs);
-        entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
+        entry->childNode_ = std::make_unique<BeliefNode>(childId, entry.get());
         entry->visitCount_ = visitCount;
-
-        // Add the node to the tree index.
-        BeliefNode *node = entry->childNode_.get();
-        getSolver()->getPolicy()->setNode(childId, node);
 
         // Add the entry to the map
         discMap.childMap_.emplace(obs->copy(), std::move(entry));

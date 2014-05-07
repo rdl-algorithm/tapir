@@ -12,6 +12,7 @@ class HistorySequence;
 
 class Histories {
   public:
+    friend class Solver;
     friend class TextSerializer;
 
     /** Constructs an empty bundle of histories. */
@@ -21,21 +22,22 @@ class Histories {
     ~Histories() = default;
     _NO_COPY_OR_MOVE(Histories);
 
-    /** Resets the histories to be empty. */
-    void reset();
-
+    /* ------------------- Retrieving sequences ------------------- */
     /** Returns the number of history sequences. */
     long getNumberOfSequences() const;
-
-    /** Adds a new history sequence, starting at the given depth. */
-    HistorySequence *addSequence(long startDepth);
     /** Retrieves the history sequence with the given ID. */
     HistorySequence *getSequence(long seqId) const;
+
+
+  private:
+    /* ---------------- Adding / removing sequences  ---------------- */
+    /** Resets the histories to be empty. */
+    void reset();
+    /** Adds a new history sequence. */
+    HistorySequence *createSequence();
     /** Deletes the history sequence with the given ID. */
     void deleteSequence(long seqId);
 
-    /** Retrieves the history entry with the given sequence ID and entry ID. */
-    HistoryEntry *getEntry(long seqId, long entryId) const;
 
   private:
     std::vector<std::unique_ptr<HistorySequence>> sequencesById_;

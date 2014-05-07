@@ -34,6 +34,8 @@ class ObservationMapping {
     virtual long getNChildren() const = 0;
     /** Returns the mapping entry associated with the given observation. */
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const = 0;
+    /** Returns a vector of all of the entries in this mapping. */
+    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const = 0;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     /** Updates the visit count for the given observation. */

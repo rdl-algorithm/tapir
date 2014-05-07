@@ -42,7 +42,7 @@ public:
 
     virtual std::unique_ptr<solver::ActionPool> createActionPool(
             solver::Solver *solver) override;
-    virtual std::unique_ptr<solver::HistoricalData> createRootInfo() override;
+    virtual std::unique_ptr<solver::HistoricalData> createRootHistoricalData() override;
 };
 
 class LegalActionsPool: public solver::ActionPool {

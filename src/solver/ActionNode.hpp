@@ -19,9 +19,10 @@ class ObservationMapping;
 class Solver;
 
 class ActionNode {
-  public:
+    friend class BeliefNode;
     friend class TextSerializer;
 
+  public:
     /** Constructs an action node without an observation mapping! */
     ActionNode();
     /** Constructs an action node with the given entry as its parent. */
@@ -31,21 +32,23 @@ class ActionNode {
     ~ActionNode();
     _NO_COPY_OR_MOVE(ActionNode);
 
-    /* -------------------- Tree-related setters  ---------------------- */
-    /** Sets the mapping for this node. */
-    void setMapping(std::unique_ptr<ObservationMapping> mapping);
-    /** Sets the parent entry for this node. */
-    void setParentEntry(ActionMappingEntry *entry);
 
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the observation mapping for this node. */
     ObservationMapping *getMapping() const;
     /** Returns the parent entry for this node. */
     ActionMappingEntry *getParentEntry() const;
+    /** Returns the parent belief node of this action node. */
+    BeliefNode *getParentBelief() const;
     /** Returns the child corresponding to the given observation, based on
      * sufficient proximity.
      */
     BeliefNode *getChild(Observation const &obs) const;
+
+  private:
+    /* -------------------- Tree-related setters  ---------------------- */
+    /** Sets the mapping for this node. */
+    void setMapping(std::unique_ptr<ObservationMapping> mapping);
 
     /* -------------------- Tree-related methods  ---------------------- */
     /** Adds a child with the given observation, creating a new belief node if

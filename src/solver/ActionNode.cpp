@@ -30,15 +30,6 @@ ActionNode::ActionNode(ActionMappingEntry *parentEntry) :
 ActionNode::~ActionNode() {
 }
 
-/* -------------------- Tree-related setters  ---------------------- */
-void ActionNode::setMapping(std::unique_ptr<ObservationMapping> mapping) {
-    observationMap_ = std::move(mapping);
-    observationMap_->setOwner(this);
-}
-void ActionNode::setParentEntry(ActionMappingEntry *entry) {
-    parentEntry_ =  entry;
-}
-
 /* -------------------- Tree-related getters  ---------------------- */
 ObservationMapping *ActionNode::getMapping() const {
     return observationMap_.get();
@@ -46,8 +37,21 @@ ObservationMapping *ActionNode::getMapping() const {
 ActionMappingEntry *ActionNode::getParentEntry() const {
     return parentEntry_;
 }
+BeliefNode *ActionNode::getParentBelief() const {
+    return parentEntry_->getMapping()->getOwner();
+}
 BeliefNode *ActionNode::getChild(Observation const &obs) const {
     return observationMap_->getBelief(obs);
+}
+
+
+/* ============================ PRIVATE ============================ */
+
+
+/* -------------------- Tree-related setters  ---------------------- */
+void ActionNode::setMapping(std::unique_ptr<ObservationMapping> mapping) {
+    observationMap_ = std::move(mapping);
+    observationMap_->setOwner(this);
 }
 
 /* -------------------- Tree-related methods  ---------------------- */

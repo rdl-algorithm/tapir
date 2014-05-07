@@ -168,7 +168,7 @@ std::unique_ptr<solver::ActionPool> PreferredActionsModel::createActionPool(
     return std::make_unique<PreferredActionsPool>(this, getNumberOfBins());
 }
 
-std::unique_ptr<solver::HistoricalData> PreferredActionsModel::createRootInfo() {
+std::unique_ptr<solver::HistoricalData> PreferredActionsModel::createRootHistoricalData() {
     RockSampleModel *model = dynamic_cast<RockSampleModel *>(this);
     return std::make_unique<PositionAndRockData>(
             model, model->getStartPosition());
@@ -193,8 +193,7 @@ std::unique_ptr<solver::Action> PreferredActionsPool::getDefaultRolloutAction(so
 /* ------------------------- PreferredActionsMap ------------------------ */
 PreferredActionsMap::PreferredActionsMap(
         solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                    solver::DiscretizedActionMap(model, numberOfBins),
-                    preferredActions_() {
+                    solver::DiscretizedActionMap(model, numberOfBins) {
 }
 
 void PreferredActionsMap::initialize() {
@@ -214,8 +213,7 @@ void PreferredActionsMap::initialize() {
     }
 
     if (model.usingPreferredInit()) {
-        preferredActions_ = data.generatePreferredActions();
-        for (RockSampleAction const &action : preferredActions_) {
+        for (RockSampleAction const &action : data.generatePreferredActions()) {
             long visitCount = model.getPreferredVisitCount();
             update(action, visitCount, visitCount * model.getPreferredQValue());
         }

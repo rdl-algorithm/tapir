@@ -56,7 +56,7 @@ public:
 
     virtual std::unique_ptr<solver::ActionPool> createActionPool(
             solver::Solver *solver) override;
-    virtual std::unique_ptr<solver::HistoricalData> createRootInfo() override;
+    virtual std::unique_ptr<solver::HistoricalData> createRootHistoricalData() override;
 };
 
 class PreferredActionsPool: public solver::ActionPool {
@@ -84,9 +84,6 @@ public:
     _NO_COPY_OR_MOVE(PreferredActionsMap);
 
     void initialize() override;
-
-private:
-    std::vector<long> preferredActions_;
 };
 
 class PreferredActionsTextSerializer : virtual public solver::TextSerializer,

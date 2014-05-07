@@ -21,51 +21,20 @@ class StateInfo;
 class HistorySequence {
   public:
     friend class AbstractBackpropagationStrategy;
+    friend class AbstractSearchInstance;
     friend class DefaultHistoryCorrector;
+    friend class Histories;
     friend class Solver;
     friend class TextSerializer;
 
-    /** Constructs an empty history sequence starting at depth 0, without
-     * assigning an ID.
-     */
+    /** Constructs an empty history sequence, with no ID assigned. */
     HistorySequence();
-    /** Constructs an empty history sequence starting at the given depth,
-     * and assigning the given ID.
-     */
-    HistorySequence(long startDepth, long id);
+    /** Constructs an empty history sequence, assigning the given ID. */
+    HistorySequence(long id);
 
     // Default destructor; copying and moving disallowed!
     ~HistorySequence();
     _NO_COPY_OR_MOVE(HistorySequence);
-
-    /** A method that verifies the validity of this sequence - this shouldn't
-     * be necessary.
-     */
-    bool testBackup(bool backingUp);
-
-    /* ----------- Methods to add or remove history entries ------------- */
-    /** Clears all the entries in the sequence. */
-    void reset();
-    /** Adds a new entry with the given state info. */
-    HistoryEntry *addEntry(StateInfo *stateInfo);
-    /** Adds a new entry with the given current discount, as
-     * well as the given action,observation and immediate reward.
-     */
-    HistoryEntry *addEntry(StateInfo *stateInfo,
-            Action const &action, Observation const &obs,
-            double immediateReward);
-    /** Adds a new entry at the specified position (index),
-     * with the given state info, action, observation, immediate reward, and
-     * discount.
-     */
-    HistoryEntry *insertEntry(long index,
-            StateInfo *stateInfo,
-            Action const &action, Observation const &obs,
-            double immediateReward);
-
-    /* ------------------ Simple setters ------------------- */
-    /** Sets the ID of this sequence. */
-    void setId(long id);
 
     /* ------------------ Simple getters ------------------- */
     /** Returns the ID of this sequence. */
@@ -83,6 +52,18 @@ class HistorySequence {
     /** Returns the states in this sequence as a vector. */
     std::vector<State const *> getStates() const;
 
+  private:
+    /** A method that verifies the validity of this sequence - this shouldn't
+     * be necessary.
+     */
+    bool testBackup(bool backingUp);
+
+    /* ----------- Methods to add or remove history entries ------------- */
+    /** Clears all the entries in the sequence. */
+    void reset();
+    /** Adds a new entry with the given state info. */
+    HistoryEntry *addEntry(StateInfo *stateInfo);
+
     /* -------------- Registration methods ---------------- */
     /** Registers the sequence with the given starting belief node. */
     void registerWith(BeliefNode *startNode, BeliefTree *policy);
@@ -92,7 +73,6 @@ class HistorySequence {
     void resetChangeFlags();
     /** Sets the given entry as having the given flags. */
     void setChangeFlags(long index, ChangeFlags flags);
-private:
     /** Sets the given change flags for this sequence. */
     void setChangeFlags(ChangeFlags flags);
     /** Resets the range affected indices for this sequence. */
@@ -100,10 +80,9 @@ private:
     /** Adds the given index as one of those affected by changes. */
     void addAffectedIndex(long index);
 
+  private:
     /** The ID of this sequence. */
     long id_;
-    /** The starting depth of this sequence. */
-    long startDepth_;
 
     /** The actual sequence of history entries. */
     std::vector<std::unique_ptr<HistoryEntry>> entrySequence_;

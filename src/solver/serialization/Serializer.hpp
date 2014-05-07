@@ -67,12 +67,13 @@ public:
     }
     /** Loads the state of the solver. */
     virtual void load(std::istream &is) {
+    	solver_->initialize();
+
         load(*(solver_->statePool_), is);
         load(*(solver_->histories_), is);
         solver_->actionPool_ = loadActionPool(is);
         solver_->observationPool_ = loadObservationPool(is);
         load(*(solver_->policy_), is);
-        solver_->initialize();
     }
 
     /* --------------- Saving states & observations ----------------- */

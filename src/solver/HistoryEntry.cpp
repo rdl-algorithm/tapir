@@ -63,18 +63,16 @@ BeliefNode *HistoryEntry::getAssociatedBeliefNode() const {
     return associatedBeliefNode_;
 }
 
-/* ----------------- Change flagging ------------------- */
-void HistoryEntry::resetChangeFlags() {
-    changeFlags_ = ChangeFlags::UNCHANGED;
-}
-void HistoryEntry::setChangeFlags(ChangeFlags flags) {
-    changeFlags_ |= flags;
-}
-
 /* -------------- Registration methods ---------------- */
 bool HistoryEntry::isRegisteredAsParticle() const {
     return isRegisteredAsParticle_;
 }
+
+
+/* ============================ PRIVATE ============================ */
+
+
+/* -------------- Registration methods ---------------- */
 void HistoryEntry::registerNode(BeliefNode *node) {
     // If it's registered, we deregister it.
     if (isRegisteredAsParticle_) {
@@ -88,7 +86,6 @@ void HistoryEntry::registerNode(BeliefNode *node) {
         associatedBeliefNode_->addParticle(this);
     }
 }
-
 void HistoryEntry::registerState(StateInfo *info) {
     if (stateInfo_ == info) {
         return;
@@ -101,5 +98,13 @@ void HistoryEntry::registerState(StateInfo *info) {
         stateInfo_ = info;
         stateInfo_->addHistoryEntry(this);
     }
+}
+
+/* ----------------- Change flagging ------------------- */
+void HistoryEntry::resetChangeFlags() {
+    changeFlags_ = ChangeFlags::UNCHANGED;
+}
+void HistoryEntry::setChangeFlags(ChangeFlags flags) {
+    changeFlags_ |= flags;
 }
 } /* namespace solver */

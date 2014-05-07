@@ -180,7 +180,7 @@ class Model {
     virtual std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
             Solver *solver);
 
-    virtual std::unique_ptr<HistoricalData> createRootInfo();
+    virtual std::unique_ptr<HistoricalData> createRootHistoricalData();
 
     /* --------------- Pretty printing methods ----------------- */
      /** Draws the environment map onto the given output stream. */

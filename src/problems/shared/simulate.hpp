@@ -120,7 +120,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         cout << "Running..." << endl;
 
         double tStart = abt::clock_ms();
-        double reward = solver.runSim(nSteps,
+        double reward = solver.runSimulation(nSteps,
                 model->getNumberOfHistoriesPerStep(),
                 changeTimes, trajSt, trajAction, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
