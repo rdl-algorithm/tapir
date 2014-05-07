@@ -85,7 +85,7 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
         cout << "move cost: " << moveCost_ << endl;
         cout << "nActions: " << nActions_ << endl;
         cout << "nStVars: " << nStVars_ << endl;
-        cout << "nParticles: " << getNParticles() << endl;
+        cout << "minParticleCount: " << getMinParticleCount() << endl;
         cout << "Environment:" << endl << endl;
         drawEnv(cout);
     }
@@ -174,15 +174,11 @@ std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
     }
 
     GridPosition newOpponentPos = getMovedOpponentPos(robotPos, opponentPos);
-    GridPosition newRobotPos = getMovedPos(robotPos, tagAction.getActionType());
-    if (!isValid(newRobotPos)) {
-        return std::make_pair(
-                std::make_unique<TagState>(robotPos, newOpponentPos, false),
-                false);
-    }
-    return std::make_pair(
-            std::make_unique<TagState>(newRobotPos, newOpponentPos, false),
-            true);
+    GridPosition newRobotPos;
+    bool wasValid;
+    std::tie(newRobotPos, wasValid) = getMovedPos(robotPos, tagAction.getActionType());
+    return std::make_pair(std::make_unique<TagState>(newRobotPos, newOpponentPos, false),
+            wasValid);
 }
 
 std::vector<ActionType> TagModel::makeOpponentActions(
@@ -221,14 +217,10 @@ GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
     std::vector<ActionType> actions(makeOpponentActions(robotPos, opponentPos));
     ActionType action = actions[std::uniform_int_distribution<long>(0,
             actions.size() - 1)(*getRandomGenerator())];
-    GridPosition newOpponentPos = getMovedPos(opponentPos, action);
-    if (!isValid(newOpponentPos)) {
-        newOpponentPos = opponentPos;
-    }
-    return newOpponentPos;
+    return getMovedPos(opponentPos, action).first;
 }
 
-GridPosition TagModel::getMovedPos(GridPosition const &position,
+std::pair<GridPosition, bool> TagModel::getMovedPos(GridPosition const &position,
         ActionType action) {
     GridPosition movedPos = position;
     switch (action) {
@@ -252,7 +244,11 @@ GridPosition TagModel::getMovedPos(GridPosition const &position,
         debug::show_message(message.str());
         break;
     }
-    return movedPos;
+    bool wasValid = isValid(movedPos);
+    if (!wasValid) {
+        movedPos = position;
+    }
+    return std::make_pair(movedPos, wasValid);
 }
 
 bool TagModel::isValid(GridPosition const &position) {
@@ -312,6 +308,7 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         solver::BeliefNode */*previousBelief*/, solver::Action const &action,
         solver::Observation const &obs,
+        long nParticles,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
     TagObservation const &observation =
@@ -340,7 +337,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
             TagState const *tagState = static_cast<TagState const *>(state);
             GridPosition oldRobotPos(tagState->getRobotPosition());
             // Ignore states that do not match knowledge of the robot's position.
-            if (newRobotPos != getMovedPos(oldRobotPos, actionType)) {
+            if (newRobotPos != getMovedPos(oldRobotPos, actionType).first) {
                 continue;
             }
             GridPosition oldOpponentPos(tagState->getOpponentPosition());
@@ -348,21 +345,19 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
                     makeOpponentActions(oldRobotPos, oldOpponentPos));
             std::vector<ActionType> newActions;
             for (ActionType opponentAction : actions) {
-                if (getMovedPos(oldOpponentPos, opponentAction)
-                        != newRobotPos) {
+                if (getMovedPos(oldOpponentPos, opponentAction).first != newRobotPos) {
                     newActions.push_back(opponentAction);
                 }
             }
             double probability = 1.0 / newActions.size();
             for (ActionType opponentAction : newActions) {
-                GridPosition newOpponentPos = getMovedPos(oldOpponentPos,
-                        opponentAction);
+                GridPosition newOpponentPos = getMovedPos(oldOpponentPos, opponentAction).first;
                 TagState newState(newRobotPos, newOpponentPos, false);
                 weights[newState] += probability;
                 weightTotal += probability;
             }
         }
-        double scale = getNParticles() / weightTotal;
+        double scale = nParticles / weightTotal;
         for (WeightMap::iterator it = weights.begin(); it != weights.end();
                 it++) {
             double proportion = it->second * scale;
@@ -381,7 +376,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         solver::BeliefNode */*previousBelief*/, solver::Action const &action,
-        solver::Observation const &obs) {
+        solver::Observation const &obs, long nParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
     TagObservation const &observation =
             (static_cast<TagObservation const &>(obs));
@@ -390,11 +385,13 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     GridPosition newRobotPos(observation.getPosition());
     if (observation.seesOpponent()) {
         // If we saw the opponent, we must be in the same place.
-        newParticles.push_back(
+        while ((long)newParticles.size() < nParticles) {
+            newParticles.push_back(
                 std::make_unique<TagState>(newRobotPos, newRobotPos,
                         actionType == ActionType::TAG));
+        }
     } else {
-        while (newParticles.size() < getNParticles()) {
+        while ((long)newParticles.size() < nParticles) {
             std::unique_ptr<solver::State> state = sampleStateUniform();
             solver::Model::StepResult result = generateStep(*state, action);
             if (obs == *result.observation) {

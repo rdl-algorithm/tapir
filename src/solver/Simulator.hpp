@@ -30,6 +30,7 @@ public:
     HistorySequence *getHistory() const;
     long getStepCount() const;
     double getTotalChangingTime() const;
+    double getTotalReplenishingTime() const;
     double getTotalImprovementTime() const;
 
     void setChangeSequence(ChangeSequence sequence);
@@ -57,6 +58,7 @@ private:
     std::unique_ptr<HistorySequence> actualHistory_;
 
     double totalChangingTime_;
+    double totalReplenishingTime_;
     double totalImprovementTime_;
 };
 

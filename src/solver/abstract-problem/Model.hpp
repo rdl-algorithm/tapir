@@ -52,7 +52,7 @@ class Model {
     /** Returns the preferred number of particles per belief - this number will
      * be regenerated if particle depletion is detected.
      */
-    virtual unsigned long getNParticles() = 0;
+    virtual unsigned long getMinParticleCount() = 0;
     /** Returns the maximum number of trials (i.e. simulated episodes) to run
      * in a single time step.
      */
@@ -130,6 +130,7 @@ class Model {
     virtual std::vector<std::unique_ptr<State>> generateParticles(
             BeliefNode *previousBelief,
             Action const &action, Observation const &obs,
+            long nParticles,
             std::vector<State const *> const &previousParticles);
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
@@ -139,7 +140,8 @@ class Model {
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
             BeliefNode *previousBelief,
-            Action const &action, Observation const &obs);
+            Action const &action, Observation const &obs,
+            long nParticles);
 
     /* -------------- Methods for handling model changes ---------------- */
     virtual void applyChange(ModelChange const &change, StatePool *pool);

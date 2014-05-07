@@ -33,6 +33,7 @@ Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver) :
         totalDiscountedReward_(0.0),
         actualHistory_(std::make_unique<HistorySequence>()),
         totalChangingTime_(0.0),
+        totalReplenishingTime_(0.0),
         totalImprovementTime_(0.0) {
     std::unique_ptr<State> initialState = model_->sampleAnInitState();
     StateInfo *initInfo = solver_->getStatePool()->createOrGetInfo(*initialState);
@@ -63,6 +64,9 @@ long Simulator::getStepCount() const {
 }
 double Simulator::getTotalChangingTime() const {
     return totalChangingTime_;
+}
+double Simulator::getTotalReplenishingTime() const {
+    return totalReplenishingTime_;
 }
 double Simulator::getTotalImprovementTime() const {
     return totalImprovementTime_;
@@ -141,7 +145,7 @@ bool Simulator::stepSimulation() {
 
     double impSolTimeStart = abt::clock_ms();
     solver_->improvePolicy(currentBelief);
-    totalImprovementTime_ += (impSolTimeStart - abt::clock_ms());
+    totalImprovementTime_ += (abt::clock_ms() - impSolTimeStart);
 
     if (model_->hasVerboseOutput()) {
         std::stringstream newStream;
@@ -181,11 +185,11 @@ bool Simulator::stepSimulation() {
         cout << totalDiscountedReward_ << endl;
     }
 
+    double replenishTimeStart = abt::clock_ms();
+    solver_->replenishChild(currentBelief, *result.action, *result.observation);
+    totalReplenishingTime_ += abt::clock_ms() - replenishTimeStart;
     agent_->updateBelief(*result.action, *result.observation);
     currentBelief = agent_->getCurrentBelief();
-    if (currentBelief->getNumberOfParticles() == 0) {
-        debug::show_message("ERROR: Resulting belief has zero particles!!");
-    }
 
     HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     currentEntry->action_ = std::move(result.action);
@@ -198,6 +202,11 @@ bool Simulator::stepSimulation() {
     totalDiscountedReward_ += currentDiscount_ * result.reward;
     currentDiscount_ *= model_->getDiscountFactor();
     stepCount_++;
+
+    if (currentBelief->getNumberOfParticles() == 0) {
+        debug::show_message("ERROR: Resulting belief has zero particles!!");
+        return false;
+    }
 
     return !result.isTerminal;
 }

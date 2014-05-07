@@ -54,6 +54,10 @@ class ProgramOptions {
                         "path to the file with runtime changes to the POMDP model")
                 ("simulation.nSteps,n", po::value<long>(),
                         "maximum number of steps to simulate")
+                ("simulation.minParticleCount", po::value<unsigned long>(),
+                        "Minimum number of particles per belief - if the "
+                        "particle count drops below this number additional "
+                        "particles will be resampled.")
                 ("simulation.nRuns,r", po::value<long>(),
                         "number of times to run the simulation")
                 ("simulation.savePolicy,a", po::value<bool>()->default_value(false)->implicit_value(true),
@@ -72,9 +76,6 @@ class ProgramOptions {
                         "overriding alias for ABT.rolloutStrategy")
                 ("bp", po::value<std::string>(),
                         "overriding alias for ABT.backpropagationStrategy")
-                ("ABT.nParticles", po::value<unsigned long>(),
-                        "default number of particles per belief - this number"
-                        " will be generated if particle depletion occurs.")
                 ("ABT.historiesPerStep,i", po::value<long>(),
                         "the number of episodes to sample for each step.")
                 ("ABT.maximumDepth", po::value<double>(),

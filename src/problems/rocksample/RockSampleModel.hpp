@@ -155,11 +155,13 @@ friend class RockSampleMdpSolver;
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action, solver::Observation const &obs,
+            long nParticles,
             std::vector<solver::State const *> const &previousParticles) override;
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
-            solver::Observation const &obs) override;
+            solver::Observation const &obs,
+            long nParticles) override;
 
     /** Displays an individual cell of the map. */
     virtual void dispCell(RSCellType cellType, std::ostream &os);

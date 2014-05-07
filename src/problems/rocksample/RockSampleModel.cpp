@@ -412,6 +412,7 @@ solver::Model::StepResult RockSampleModel::generateStep(
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::BeliefNode */*previousBelief*/,
         solver::Action const &action, solver::Observation const &obs,
+        long nParticles,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
 
@@ -443,7 +444,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
             weights[*rockSampleState] += probability;
             weightTotal += probability;
         }
-        double scale = getNParticles() / weightTotal;
+        double scale = nParticles / weightTotal;
         for (WeightMap::value_type &it : weights) {
             double proportion = it.second * scale;
             long numToAdd = static_cast<long>(proportion);
@@ -473,9 +474,10 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
 
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::BeliefNode */*previousBelief*/,
-        solver::Action const &action, solver::Observation const &obs) {
+        solver::Action const &action, solver::Observation const &obs,
+        long nParticles) {
     std::vector<std::unique_ptr<solver::State>> particles;
-    while (particles.size() < getNParticles()) {
+    while ((long)particles.size() < nParticles) {
         std::unique_ptr<solver::State> state = sampleStateUniform();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {

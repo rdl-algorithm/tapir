@@ -75,9 +75,12 @@ public:
             long maximumDepth=-1);
     /** Applies any model changes that have been marked within the state pool */
     void applyChanges();
-    /** Handles particle depletion during the simulation. */
-    BeliefNode *addChild(BeliefNode *currNode, Action const &action,
-            Observation const &obs);
+    /** Replenishes the particle count in the child node, ensuring that it
+     * has at least the given number of particles
+     * (-1 => default == model.getMinParticleCount())
+     */
+    BeliefNode *replenishChild(BeliefNode *currNode, Action const &action,
+            Observation const &obs, long minParticleCount=-1);
 
     /* ------------------ Display methods  ------------------- */
     /** Shows a belief node in a nice, readable way. */

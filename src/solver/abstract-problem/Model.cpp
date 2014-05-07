@@ -37,12 +37,13 @@ std::unique_ptr<TransitionParameters> Model::generateTransition(
 std::vector<std::unique_ptr<State>> Model::generateParticles(
         BeliefNode *previousBelief,
         Action const &action, Observation const &obs,
+        long nParticles,
         std::vector<State const *> const &previousParticles) {
     std::vector<std::unique_ptr<State>> particles;
     ObservationMapping *obsMap = previousBelief->getMapping()->getActionNode(
             action)->getMapping();
     BeliefNode *childNode = obsMap->getBelief(obs);
-    while (particles.size() < getNParticles()) {
+    while ((long)particles.size() < nParticles) {
         long index = std::uniform_int_distribution<long>(0,
                 previousParticles.size() - 1)(*getRandomGenerator());
         State const *state = previousParticles[index];
@@ -56,12 +57,13 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
 
 std::vector<std::unique_ptr<State>> Model::generateParticles(
         BeliefNode *previousBelief,
-        Action const &action, Observation const &obs) {
+        Action const &action, Observation const &obs,
+        long nParticles) {
     std::vector<std::unique_ptr<State>> particles;
     ObservationMapping *obsMap = previousBelief->getMapping()->getActionNode(
             action)->getMapping();
     BeliefNode *childNode = obsMap->getBelief(obs);
-    while (particles.size() < getNParticles()) {
+    while ((long)particles.size() < nParticles) {
         std::unique_ptr<State> state = sampleStateUniform();
         StepResult result = generateStep(*state, action);
         if (obsMap->getBelief(*result.observation) == childNode) {

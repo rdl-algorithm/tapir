@@ -235,27 +235,46 @@ void Solver::applyChanges() {
     statePool_->resetAffectedStates();
 }
 
-BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
-        Observation const &obs) {
+BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
+        Observation const &obs, long minParticleCount) {
+    if (minParticleCount < 0) {
+        minParticleCount = model_->getMinParticleCount();
+    }
     BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
+    long particleCount = nextNode->getNumberOfParticles();
+    long deficit = minParticleCount - particleCount;
+    if (deficit <= 0) {
+        return nextNode;
+    }
+
+    if (model_->hasVerboseOutput()) {
+        cout << "Replenishing particles...          ";
+        cout.flush();
+    }
 
     std::vector<State const *> particles;
     std::vector<HistoryEntry *>::iterator it;
     for (HistoryEntry *entry : currNode->particles_) {
-        particles.push_back(entry->getState());
+        State const *state = entry->getState();
+        if (!model_->isTerminal(*state)) {
+            particles.push_back(state);
+        }
     }
+
     // Attempt to generate particles for next state based on the current belief,
     // the observation, and the action.
-    std::vector<std::unique_ptr<State>> nextParticles(
-            model_->generateParticles(currNode, action, obs, particles));
+    std::vector<std::unique_ptr<State>> nextParticles = (
+            model_->generateParticles(currNode, action, obs, deficit, particles));
     if (nextParticles.empty()) {
         debug::show_message("WARNING: Could not generate based on belief!");
         // If that fails, ignore the current belief.
-        nextParticles = model_->generateParticles(currNode, action, obs);
+        nextParticles = model_->generateParticles(currNode, action, obs, deficit);
     }
     if (nextParticles.empty()) {
         debug::show_message("ERROR: Failed to generate new particles!");
+        return nullptr;
     }
+
     for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
         StateInfo *stateInfo = statePool_->createOrGetInfo(*uniqueStatePtr);
 
@@ -267,9 +286,12 @@ BeliefNode *Solver::addChild(BeliefNode *currNode, Action const &action,
             // Use the heuristic value for non-terminal particles.
             histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
         }
-        // Register and backup
+        // Register
         histSeq->registerWith(nextNode, policy_.get());
         backup(histSeq, true);
+    }
+    if (model_->hasVerboseOutput()) {
+        cout << "Done" << std::endl;
     }
     return nextNode;
 }

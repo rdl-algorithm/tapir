@@ -119,12 +119,13 @@ class TagModel: virtual public ModelWithProgramOptions,
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
-            std::vector<solver::State const *>
-                const &previousParticles) override;
+            long nParticles,
+            std::vector<solver::State const *> const &previousParticles) override;
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
-            solver::Observation const &obs) override;
+            solver::Observation const &obs,
+            long nParticles) override;
 
     virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
@@ -165,7 +166,7 @@ class TagModel: virtual public ModelWithProgramOptions,
     /** Gets the expected coordinates after taking the given action;
      *  this may result in invalid coordinates.
      */
-    GridPosition getMovedPos(GridPosition const &position, ActionType action);
+    std::pair<GridPosition, bool> getMovedPos(GridPosition const &position, ActionType action);
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
 
