@@ -161,9 +161,6 @@ friend class RockSampleMdpSolver;
             solver::Action const &action,
             solver::Observation const &obs) override;
 
-    virtual std::vector<long> loadChanges(char const *changeFilename) override;
-    virtual void update(long time, solver::StatePool *pool) override;
-
     /** Displays an individual cell of the map. */
     virtual void dispCell(RSCellType cellType, std::ostream &os);
 

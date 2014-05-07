@@ -5,6 +5,7 @@
 #include <memory>                       // for unique_ptr
 
 #include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/ModelChange.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 #include "solver/abstract-problem/State.hpp"
 
@@ -29,6 +30,11 @@ class TagTextSerializer: virtual public solver::TextSerializer,
     TagTextSerializer(TagTextSerializer &&) = delete;
     TagTextSerializer &operator=(TagTextSerializer const &) = delete;
     TagTextSerializer &operator=(TagTextSerializer &&) = delete;
+
+    /* ------------------ Saving change sequences -------------------- */
+    virtual void saveModelChange(solver::ModelChange const &change, std::ostream &os) override;
+       virtual std::unique_ptr<solver::ModelChange> loadModelChange(std::istream &is) override;
+
 
     void saveState(solver::State const *state, std::ostream &os) override;
     std::unique_ptr<solver::State> loadState(std::istream &is) override;

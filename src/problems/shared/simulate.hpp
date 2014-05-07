@@ -3,6 +3,7 @@
 
 #include <fstream>                      // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, ofstream, endl, ostream, ifstream
 #include <iostream>                     // for cout
+#include <map>
 #include <memory>                       // for unique_ptr
 #include <string>                       // for string, char_traits, operator<<
 #include <utility>                      // for move                // IWYU pragma: keep
@@ -11,11 +12,15 @@
 #include <boost/program_options.hpp>    // for variables_map, options_description, positional_options_description, variable_value, store, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
 
 #include "global.hpp"                     // for RandomGenerator, make_unique
+
 #include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/ModelChange.hpp"       // for ModelChange
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
-#include "solver/serialization/Serializer.hpp"        // for Serializer
-#include "solver/Solver.hpp"            // for Solver
 #include "solver/abstract-problem/State.hpp"             // for operator<<, State
+
+#include "solver/serialization/Serializer.hpp"        // for Serializer
+
+#include "solver/Solver.hpp"            // for Solver
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
@@ -101,14 +106,16 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
                     vm);
         ModelType *model = newModel.get();
         solver::Solver solver(&randGen, std::move(newModel));
-        std::unique_ptr<solver::Serializer> serializer(
+        std::unique_ptr<solver::Serializer> newSerializer(
                 std::make_unique<SerializerType>(&solver));
-        solver.setSerializer(std::move(serializer));
+        solver::Serializer *serializer = newSerializer.get();
+        solver.setSerializer(std::move(newSerializer));
         solver.loadStateFrom(inFile);
         inFile.close();
-        std::vector<long> changeTimes;
+        std::map<long, std::vector<std::unique_ptr<solver::ModelChange>>> changeSequence;
         if (hasChanges) {
-            changeTimes = model->loadChanges(changesPath.c_str());
+            std::ifstream ifs(changesPath);
+            changeSequence = serializer->loadChangeSequence(ifs);
         }
 
         std::vector<std::unique_ptr<solver::State>> trajSt;
@@ -121,7 +128,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
         double tStart = abt::clock_ms();
         double reward = solver.runSimulation(nSteps,
-                changeTimes, trajSt, trajAction, trajObs,
+                std::move(changeSequence), trajSt, trajAction, trajObs,
                     trajRew, &actualNSteps, &totChTime, &totImpTime);
         totT = abt::clock_ms() - tStart;
 

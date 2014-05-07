@@ -72,12 +72,7 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
 }
 
 // Default = no changes.
-std::vector<long> Model::loadChanges(char const */*changeFilename*/) {
-    return std::vector<long>{};
-}
-
-// Default = do nothing.
-void Model::update(long /*time*/, StatePool */*pool*/) {
+void Model::applyChange(ModelChange const &/*change*/, StatePool */*pool*/) {
 }
 
 std::unique_ptr<StateIndex> Model::createStateIndex() {

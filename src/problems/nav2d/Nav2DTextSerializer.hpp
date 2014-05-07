@@ -21,13 +21,20 @@ class Solver;
 } /* namespace solver */
 
 namespace nav2d {
-class Nav2DTextSerializer : virtual public solver::TextSerializer,
-    virtual public solver::DiscretizedActionTextSerializer,
-    virtual public solver::ApproximateObservationTextSerializer {
-  public:
+class Nav2DTextSerializer: virtual public solver::TextSerializer,
+        virtual public solver::DiscretizedActionTextSerializer,
+        virtual public solver::ApproximateObservationTextSerializer {
+public:
     Nav2DTextSerializer(solver::Solver *solver);
     virtual ~Nav2DTextSerializer() = default;
-    _NO_COPY_OR_MOVE(Nav2DTextSerializer);
+    _NO_COPY_OR_MOVE(Nav2DTextSerializer)
+    ;
+
+    /* ------------------ Saving change sequences -------------------- */
+    virtual void saveModelChange(solver::ModelChange const &change,
+            std::ostream &os) override;
+    virtual std::unique_ptr<solver::ModelChange> loadModelChange(
+            std::istream &is) override;
 
     void saveState(solver::State const *state, std::ostream &os) override;
     std::unique_ptr<solver::State> loadState(std::istream &is) override;
@@ -40,11 +47,10 @@ class Nav2DTextSerializer : virtual public solver::TextSerializer,
     virtual std::unique_ptr<solver::TransitionParameters>
     loadTransitionParameters(std::istream &is) override;
 
-    void saveObservation(solver::Observation const *obs,
-            std::ostream &os) override;
-    std::unique_ptr<solver::Observation> loadObservation(
-            std::istream &is) override;
-
+    void saveObservation(solver::Observation const *obs, std::ostream &os)
+            override;
+    std::unique_ptr<solver::Observation> loadObservation(std::istream &is)
+            override;
 
     virtual int getActionColumnWidth() override;
     virtual int getTPColumnWidth() override;

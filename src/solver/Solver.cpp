@@ -18,6 +18,7 @@
 
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Model.hpp"                    // for Model::StepResult, Model
+#include "abstract-problem/ModelChange.hpp"                    // for Model::StepResult, Model
 #include "abstract-problem/Observation.hpp"              // for Observation
 #include "abstract-problem/State.hpp"                    // for State, operator<<
 
@@ -301,7 +302,7 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
 
 /* ------------------ Simulation methods ------------------- */
 double Solver::runSimulation(long nSteps,
-        std::vector<long> &changeTimes,
+        std::map<long, std::vector<std::unique_ptr<ModelChange>>> changeSequence,
         std::vector<std::unique_ptr<State>> &trajSt,
         std::vector<std::unique_ptr<Action>> &trajAction,
         std::vector<std::unique_ptr<Observation>> &trajObs,
@@ -324,7 +325,7 @@ double Solver::runSimulation(long nSteps,
     BeliefNode *currNode = policy_->getRoot();
     std::unique_ptr<State> currentState = model_->sampleAnInitState();
     trajSt.push_back(currentState->copy());
-    std::vector<long>::iterator itCh = changeTimes.begin();
+    auto changeIterator = changeSequence.begin();
     for (long timeStep = 0; timeStep < nSteps; timeStep++) {
         std::stringstream prevStream;
         if (model_->hasVerboseOutput()) {
@@ -349,20 +350,20 @@ double Solver::runSimulation(long nSteps,
         statePool_->createOrGetInfo(*currentState);
 
         // If the model is changing, handle the changes.
-        if (itCh != changeTimes.end() && timeStep == *itCh) {
+        if (changeIterator != changeSequence.end() && timeStep == changeIterator->first) {
             if (model_->hasVerboseOutput()) {
                 cout << "Model changing." << endl;
             }
             double chTimeStart = abt::clock_ms();
             // Apply all the changes!
-            handleChanges(timeStep, *currentState, trajSt);
+            handleChanges(std::move(changeIterator->second), *currentState, trajSt);
             double chTimeEnd = abt::clock_ms();
             *totChTime += chTimeEnd - chTimeStart;
             if (model_->hasVerboseOutput()) {
                 cout << "Changes complete" << endl;
                 cout << "Total of " << *totChTime << " ms used for changes." << endl;
             }
-            itCh++;
+            changeIterator++;
         }
 
         // Improve the policy
@@ -561,11 +562,13 @@ Model::StepResult Solver::simAStep(BeliefNode *currentBelief,
 }
 
 /* -------------- Methods for handling model changes --------------- */
-void Solver::handleChanges(long timeStep,
+void Solver::handleChanges(std::vector<std::unique_ptr<ModelChange>> changes,
         State const &currentState,
         std::vector<std::unique_ptr<State>> &stateHistory) {
     // Mark the states that need changing.
-    model_->update(timeStep, statePool_.get());
+    for (std::unique_ptr<ModelChange> const &change : changes) {
+        model_->applyChange(*change, statePool_.get());
+    }
 
     // Check if the model changes have invalidated our history...
     if (changes::has_flag(statePool_->getInfo(currentState)->changeFlags_,

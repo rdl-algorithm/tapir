@@ -18,6 +18,7 @@ class HistoricalData;
 class BeliefNode;
 class BackpropagationStrategy;
 class HistoryCorrector;
+class ModelChange;
 class ObservationPool;
 class SearchStrategy;
 class Solver;
@@ -141,12 +142,7 @@ class Model {
             Action const &action, Observation const &obs);
 
     /* -------------- Methods for handling model changes ---------------- */
-    /** Loads future model changes from the given file. */
-    virtual std::vector<long> loadChanges(char const *changeFilename);
-    /** Updates the model to reflect the changes at the given time,
-     * and marks the affected states within the state pool.
-     */
-    virtual void update(long time, StatePool *pool);
+    virtual void applyChange(ModelChange const &change, StatePool *pool);
 
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to

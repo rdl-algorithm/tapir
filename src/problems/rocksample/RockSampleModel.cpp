@@ -485,14 +485,6 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     return particles;
 }
 
-std::vector<long> RockSampleModel::loadChanges(char const */*changeFilename*/) {
-    std::vector<long> result;
-    return result;
-}
-
-void RockSampleModel::update(long /*time*/, solver::StatePool */*pool*/) {
-}
-
 void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
     if (cellType >= ROCK) {
         os << std::hex << cellType - ROCK;

@@ -1,7 +1,8 @@
 #ifndef SOLVER_SOLVER_HPP_
 #define SOLVER_SOLVER_HPP_
 
-#include <memory>                       // for unique_ptr
+#include <map>
+#include <memory>        // for unique_ptr
 #include <set>                          // for set
 #include <unordered_set>
 #include <utility>                      // for pair
@@ -98,7 +99,7 @@ public:
      * episodes to improve the policy.
      */
     double runSimulation(long nSteps,
-            std::vector<long> &changeTimes,
+            std::map<long, std::vector<std::unique_ptr<ModelChange>>> changeSequence,
             std::vector<std::unique_ptr<State>> &trajSt,
             std::vector<std::unique_ptr<Action>> &trajAction,
             std::vector<std::unique_ptr<Observation>> &trajObs,
@@ -140,7 +141,8 @@ private:
 
     /* -------------- Methods for handling model changes --------------- */
     /** Does all the work required for changing the model. */
-    void handleChanges(long timeStep, State const &currentState,
+    void handleChanges(std::vector<std::unique_ptr<ModelChange>> changes,
+            State const &currentState,
             std::vector<std::unique_ptr<State>> &stateHistory);
 
     /* ------------------ Private data fields ------------------- */

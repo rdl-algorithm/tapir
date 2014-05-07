@@ -15,6 +15,7 @@
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+#include "solver/abstract-problem/ModelChange.hpp"             // for ModelChange
 #include "solver/abstract-problem/TransitionParameters.hpp"
 #include "solver/abstract-problem/Action.hpp"            // for Action
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
@@ -34,6 +35,15 @@ class StatePool;
 namespace tag {
 class TagObervation;
 class TagState;
+
+/** Represents a change in the Tag model. */
+struct TagChange : solver::ModelChange {
+    std::string changeType = "";
+    double i0 = 0;
+    double i1 = 0;
+    double j0 = 0;
+    double j1 = 0;
+};
 
 class TagModel: virtual public ModelWithProgramOptions,
         virtual public solver::ModelWithEnumeratedActions,
@@ -116,8 +126,7 @@ class TagModel: virtual public ModelWithProgramOptions,
             solver::Action const &action,
             solver::Observation const &obs) override;
 
-    std::vector<long> loadChanges(char const *changeFilename) override;
-    void update(long time, solver::StatePool *pool) override;
+    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
     /** Displays a single cell of the map. */
     void dispCell(TagCellType cellType, std::ostream &os);
@@ -178,18 +187,6 @@ class TagModel: virtual public ModelWithProgramOptions,
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
     std::vector<std::vector<TagCellType>> envMap_;
-
-    /** Represents a change in the Tag model. */
-    struct TagChange {
-        std::string changeType = "";
-        double i0 = 0;
-        double i1 = 0;
-        double j0 = 0;
-        double j1 = 0;
-    };
-
-    /** The changes (scheduled for simulation). */
-    std::map<long, std::vector<TagChange>> changes_;
 
     // General problem parameters
     long nActions_, nStVars_;
