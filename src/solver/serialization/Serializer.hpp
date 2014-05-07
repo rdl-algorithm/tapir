@@ -24,6 +24,7 @@ class Histories;
 class HistoryEntry;
 class HistorySequence;
 class ObservationMapping;
+class ModelChange;
 class StateInfo;
 class StatePool;
 
@@ -76,8 +77,21 @@ public:
         load(*(solver_->policy_), is);
     }
 
-    /* --------------- Saving states & observations ----------------- */
+    /* ------------------ Saving change sequences -------------------- */
+    /** Saves a sequence of model changes. */
+    virtual void saveChangeSequence(
+            std::map<long, std::vector<std::unique_ptr<ModelChange>>> const &sequence,
+            std::ostream &os) = 0;
+    /** Loads a sequence of model changes. */
+    virtual std::map<long, std::vector<std::unique_ptr<ModelChange>>>loadChangeSequence(
+                std::istream &is) = 0;
 
+    /** Saves a single ModelChange. */
+    virtual void saveModelChange(ModelChange const &change, std::ostream &os) = 0;
+    /** Loads a single ModelChange. */
+    virtual std::unique_ptr<ModelChange> loadModelChange(std::istream &is) = 0;
+
+    /* --------------- Saving states & observations ----------------- */
     // NOTE: null values need to be handled for saving of observations
     // and of actions
 
@@ -136,7 +150,6 @@ public:
     virtual std::unique_ptr<HistoricalData> loadHistoricalData(std::istream &is) = 0;
 
     /* --------------- Saving the state pool ----------------- */
-
     /** Saves a StateInfo. */
     virtual void save(StateInfo const &wrapper, std::ostream &os) = 0;
     /** Loads a StateInfo. */
@@ -148,7 +161,6 @@ public:
 
 
     /* --------------- Saving the history sequences ----------------- */
-
     /** Saves a HistoryEntry. */
     virtual void save(HistoryEntry const &entry, std::ostream &os) = 0;
     /** Loads a HistoryEntry. */
@@ -163,7 +175,6 @@ public:
     virtual void load(Histories &histories, std::istream &is) = 0;
 
     /* --------------- Saving the policy tree ----------------- */
-
     /** Saves an ActionNode. */
     virtual void save(ActionNode const &node, std::ostream &os) = 0;
     /** Loads an ActionNode. */

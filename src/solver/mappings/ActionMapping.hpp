@@ -79,10 +79,8 @@ public:
     /* -------------- Retrieval of general statistics. ---------------- */
     /** Returns the total number of times children have been visited. */
     virtual long getTotalVisitCount() const = 0;
-
     /** Returns the best q-value. */
     virtual double getMaxQValue() const = 0;
-
     /** Returns the robust q-value (optional) */
     virtual double getRobustQValue() const {
         return -std::numeric_limits<double>::infinity();

@@ -64,16 +64,16 @@ public:
 
     /* ------------------- Policy mutators ------------------- */
     /** Improves the policy by generating the given number of histories from
-     * root node.
-     * Histories are terminated upon reaching the maximum depth in the tree.
+     * root node (-1 => default)
+     * Histories are terminated upon reaching the maximum depth in the tree
+     * (-1 => default)
      */
-    void improvePolicy(long numberOfHistories, long maximumDepth);
+    void improvePolicy(long numberOfHistories=-1, long maximumDepth=-1);
     /** Improves the policy by generating the given number of histories from
      * the given belief node.
-     * Histories are terminated upon reaching the maximum depth in the tree.
      */
-    void improvePolicy(BeliefNode *startNode, long numberOfHistories,
-            long maximumDepth);
+    void improvePolicy(BeliefNode *startNode, long numberOfHistories=-1,
+            long maximumDepth=-1);
     /** Applies any model changes that have been marked within the state pool */
     void applyChanges();
     /** Handles particle depletion during the simulation. */
@@ -85,9 +85,8 @@ public:
     void printBelief(BeliefNode *belief, std::ostream &os);
 
     /* ------------------ Simulation methods ------------------- */
-    /** Runs a single simulation up to a maximum of nSteps steps, and generating
-     * historiesPerStep histories every step.
-     * The return value is the resulting total discounted reward.
+    /** Runs a single simulation up to a maximum of nSteps steps;
+     * the return value is the resulting total discounted reward.
      *
      * Also sets trajSt, trajActId, trajObs, and trajRew to be the sequences
      * of states, actions, observations, and immediate rewards;
@@ -98,7 +97,7 @@ public:
      * totImpTime will be the total amount of time spent on generating new
      * episodes to improve the policy.
      */
-    double runSimulation(long nSteps, long historiesPerStep,
+    double runSimulation(long nSteps,
             std::vector<long> &changeTimes,
             std::vector<std::unique_ptr<State>> &trajSt,
             std::vector<std::unique_ptr<Action>> &trajAction,
@@ -116,16 +115,15 @@ private:
     void initialize();
 
     /* ------------------ Episode sampling methods ------------------- */
-    /** Runs multiple searches from the given start node, with the given start
-     *  states.
-     */
+    /** Runs multiple searches from the given start node and start states. */
     void multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
-            long maximumDepth);
+            long maximumDepth=-1);
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-            long maximumDepth);
+            long maximumDepth=-1);
     /** Continues a pre-existing history sequence from its endpoint. */
-    void continueSearch(HistorySequence *sequence, long maximumDepth);
+    void continueSearch(HistorySequence *sequence,
+            long maximumDepth=-1);
 
     /* ------------------ Tree backup methods ------------------- */
     /** Calculates the discounted rewards from each entry to the end of

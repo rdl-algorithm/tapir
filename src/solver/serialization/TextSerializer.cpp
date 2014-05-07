@@ -21,11 +21,11 @@
 #include "solver/StateInfo.hpp"                // for StateInfo, StateInfo::currId
 #include "solver/StatePool.hpp"                // for StatePool, StatePool::StateInfoSet
 
-
 #include "solver/mappings/ActionMapping.hpp"
 #include "solver/mappings/ObservationMapping.hpp"          // for ObservationMapping
 
-#include "solver/abstract-problem/Action.hpp"              // for Observation
+#include "solver/abstract-problem/Action.hpp"              // for Action
+#include "solver/abstract-problem/ModelChange.hpp"              // for ModelChange
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State, operator<<
 
@@ -34,15 +34,55 @@
 using std::endl;
 
 namespace solver {
-void TextSerializer::saveTransitionParameters(
-        TransitionParameters const */*tp*/, std::ostream &/*os*/) {
+/* ------------------ Saving change sequences -------------------- */
+void TextSerializer::saveChangeSequence(
+        std::map<long, std::vector<std::unique_ptr<ModelChange>>> const &sequence,
+        std::ostream &os) {
+    for (auto &entry : sequence) {
+        os << "t " << entry.first << " : " << entry.second.size() << std::endl;
+        for (std::unique_ptr<ModelChange> const &change : entry.second) {
+            saveModelChange(*change, os);
+            os << std::endl;
+        }
+    }
+}
+std::map<long, std::vector<std::unique_ptr<ModelChange>>> TextSerializer::loadChangeSequence(
+        std::istream &is){
+    std::map<long, std::vector<std::unique_ptr<ModelChange>>> changes;
+    std::string line;
+    while (std::getline(is, line)) {
+        std::string tmpStr;
+        long time;
+        long nChanges;
+        std::istringstream(line) >> tmpStr >> time >> tmpStr >> nChanges;
+
+        changes[time] = std::vector<std::unique_ptr<ModelChange>>();
+        for (int i = 0; i < nChanges; i++) {
+            std::getline(is, line);
+            std::istringstream sstr(line);
+            changes[time].push_back(loadModelChange(sstr));
+        }
+    }
+    return changes;
+}
+void TextSerializer::saveModelChange(ModelChange const &/*change*/, std::ostream &/*os*/) {
+    // Do nothing!
+}
+std::unique_ptr<ModelChange> TextSerializer::loadModelChange(std::istream &/*is*/) {
+    return nullptr;
 }
 
+/* ------------------ Saving transition parameters -------------------- */
+void TextSerializer::saveTransitionParameters(
+        TransitionParameters const */*tp*/, std::ostream &/*os*/) {
+    // Do nothing!
+}
 std::unique_ptr<TransitionParameters> TextSerializer::loadTransitionParameters(
         std::istream &/*is*/) {
     return nullptr;
 }
 
+/* ------------------ Saving historical data -------------------- */
 void TextSerializer::saveHistoricalData(HistoricalData const */*data*/,
         std::ostream &/*os*/) {
 }

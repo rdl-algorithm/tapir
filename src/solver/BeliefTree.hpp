@@ -16,12 +16,13 @@ class BeliefNode;
 class Solver;
 
 class BeliefTree {
-  public:
     friend class AbstractSearchInstance;
+    friend class Agent;
     friend class HistorySequence;
     friend class Solver;
     friend class TextSerializer;
 
+public:
     /* Constructs an empty belief tree. */
     BeliefTree(Solver *solver);
 

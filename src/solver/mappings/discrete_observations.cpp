@@ -176,7 +176,7 @@ std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObser
         entry->visitCount_ = visitCount;
 
         // Add the entry to the map
-        discMap.childMap_.emplace(obs->copy(), std::move(entry));
+        discMap.childMap_.emplace(entry->observation_->copy(), std::move(entry));
     }
     // Read the last line for the closing brace.
     std::getline(is, line);

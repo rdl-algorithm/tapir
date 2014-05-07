@@ -116,8 +116,15 @@ void Solver::loadStateFrom(std::istream &is) {
 
 /* ------------------- Policy mutators ------------------- */
 void Solver::improvePolicy(long numberOfHistories, long maximumDepth) {
-	std::vector<StateInfo *> states;
-	// Generate the initial states.
+    if (numberOfHistories < 0) {
+        numberOfHistories = model_->getNumberOfHistoriesPerStep();
+    }
+    if (maximumDepth < 0) {
+        maximumDepth = model_->getMaximumDepth();
+    }
+
+    // Generate the initial states.
+    std::vector<StateInfo *> states;
     for (long i = 0; i < numberOfHistories; i++) {
     	states.push_back(statePool_->createOrGetInfo(
     			*model_->sampleAnInitState()));
@@ -127,6 +134,12 @@ void Solver::improvePolicy(long numberOfHistories, long maximumDepth) {
 
 void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories,
         long maximumDepth) {
+    if (numberOfHistories < 0) {
+        numberOfHistories = model_->getNumberOfHistoriesPerStep();
+    }
+    if (maximumDepth < 0) {
+        maximumDepth = model_->getMaximumDepth();
+    }
     if (startNode->getNumberOfParticles() == 0) {
         debug::show_message("ERROR: No particles in the BeliefNode!");
         std::exit(10);
@@ -287,7 +300,7 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
 }
 
 /* ------------------ Simulation methods ------------------- */
-double Solver::runSimulation(long nSteps, long historiesPerStep,
+double Solver::runSimulation(long nSteps,
         std::vector<long> &changeTimes,
         std::vector<std::unique_ptr<State>> &trajSt,
         std::vector<std::unique_ptr<Action>> &trajAction,
@@ -304,7 +317,6 @@ double Solver::runSimulation(long nSteps, long historiesPerStep,
     *totChTime = 0.0;
     *totImpTime = 0.0;
     *actualNSteps = nSteps;
-    long maximumDepth = model_->getMaximumDepth();
     double discFactor = model_->getDiscountFactor();
     double currDiscFactor = 1.0;
     double discountedTotalReward = 0.0;
@@ -355,7 +367,7 @@ double Solver::runSimulation(long nSteps, long historiesPerStep,
 
         // Improve the policy
         double impSolTimeStart = abt::clock_ms();
-        improvePolicy(currNode, historiesPerStep, maximumDepth);
+        improvePolicy(currNode);
         double impSolTimeEnd = abt::clock_ms();
         *totImpTime += impSolTimeEnd - impSolTimeStart;
 
@@ -443,8 +455,11 @@ void Solver::initialize() {
 }
 
 /* ------------------ Episode sampling methods ------------------- */
-void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> states,
-		long maximumDepth) {
+void Solver::multipleSearches(BeliefNode *startNode,
+        std::vector<StateInfo *> states, long maximumDepth) {
+    if (maximumDepth < 0) {
+        maximumDepth = model_->getMaximumDepth();
+    }
 	for (StateInfo *stateInfo : states) {
 		singleSearch(startNode, stateInfo, maximumDepth);
 	}
@@ -452,6 +467,9 @@ void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> st
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
 		long maximumDepth) {
+    if (maximumDepth < 0) {
+        maximumDepth = model_->getMaximumDepth();
+    }
     HistorySequence *sequence = histories_->createSequence();
     sequence->addEntry(startStateInfo);
     sequence->getFirstEntry()->associatedBeliefNode_ = startNode;
@@ -459,6 +477,9 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
 }
 
 void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
+    if (maximumDepth < 0) {
+        maximumDepth = model_->getMaximumDepth();
+    }
     if (model_->isTerminal(*sequence->getLastEntry()->getState())) {
         debug::show_message("WARNING: Attempted to continue sequence"
                 " from a terminal state.");

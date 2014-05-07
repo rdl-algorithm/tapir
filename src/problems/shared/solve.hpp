@@ -59,9 +59,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     randGen.seed(seed);
     randGen.discard(10);
 
-    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
-                vm);
-    ModelType *model = newModel.get();
+    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen, vm);
     solver::Solver solver(&randGen, std::move(newModel));
     std::unique_ptr<solver::Serializer> serializer(std::make_unique<SerializerType>(&solver));
     solver.setSerializer(std::move(serializer));
@@ -70,7 +68,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     double totT;
     double tStart;
     tStart = abt::clock_ms();
-    solver.improvePolicy(model->getNumberOfHistoriesPerStep(), model->getMaximumDepth());
+    solver.improvePolicy();
     totT = abt::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 
