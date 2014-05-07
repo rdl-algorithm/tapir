@@ -35,9 +35,7 @@ using std::endl;
 
 namespace solver {
 /* ------------------ Saving change sequences -------------------- */
-void TextSerializer::saveChangeSequence(
-        std::map<long, std::vector<std::unique_ptr<ModelChange>>> const &sequence,
-        std::ostream &os) {
+void TextSerializer::saveChangeSequence(ChangeSequence const &sequence, std::ostream &os) {
     for (auto &entry : sequence) {
         os << "t " << entry.first << " : " << entry.second.size() << std::endl;
         for (std::unique_ptr<ModelChange> const &change : entry.second) {
@@ -46,7 +44,7 @@ void TextSerializer::saveChangeSequence(
         }
     }
 }
-std::map<long, std::vector<std::unique_ptr<ModelChange>>> TextSerializer::loadChangeSequence(
+ChangeSequence TextSerializer::loadChangeSequence(
         std::istream &is){
     std::map<long, std::vector<std::unique_ptr<ModelChange>>> changes;
     std::string line;

@@ -56,12 +56,10 @@ public:
     /* ------------------ Initialization methods ------------------- */
     /** Full initialization - resets all data structures. */
     void initializeEmpty();
+    /** Returns the serializer for this solver. */
+    Serializer *getSerializer();
     /** Sets the serializer to be used by this solver. */
     void setSerializer(std::unique_ptr<Serializer> serializer);
-    /** Saves the state of the solver to the given output stream. */
-    void saveStateTo(std::ostream &os) const;
-    /** Loads the state of the solver from the given input stream. */
-    void loadStateFrom(std::istream &is);
 
     /* ------------------- Policy mutators ------------------- */
     /** Improves the policy by generating the given number of histories from

@@ -35,11 +35,8 @@ class TextSerializer : virtual public Serializer {
     _NO_COPY_OR_MOVE(TextSerializer);
 
     /* ------------------ Saving change sequences -------------------- */
-    virtual void saveChangeSequence(
-            std::map<long, std::vector<std::unique_ptr<ModelChange>>> const &sequence,
-            std::ostream &os) override;
-    virtual std::map<long, std::vector<std::unique_ptr<ModelChange>>> loadChangeSequence(
-            std::istream &is) override;
+    virtual void saveChangeSequence(ChangeSequence const &sequence, std::ostream &os) override;
+    virtual ChangeSequence loadChangeSequence(std::istream &is) override;
     virtual void saveModelChange(ModelChange const &change, std::ostream &os) override;
     virtual std::unique_ptr<ModelChange> loadModelChange(std::istream &is) override;
 

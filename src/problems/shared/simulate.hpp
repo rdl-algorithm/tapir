@@ -104,18 +104,16 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
         std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
                     vm);
-        ModelType *model = newModel.get();
         solver::Solver solver(&randGen, std::move(newModel));
         std::unique_ptr<solver::Serializer> newSerializer(
                 std::make_unique<SerializerType>(&solver));
-        solver::Serializer *serializer = newSerializer.get();
         solver.setSerializer(std::move(newSerializer));
-        solver.loadStateFrom(inFile);
+        solver.getSerializer()->load(inFile);
         inFile.close();
         std::map<long, std::vector<std::unique_ptr<solver::ModelChange>>> changeSequence;
         if (hasChanges) {
             std::ifstream ifs(changesPath);
-            changeSequence = serializer->loadChangeSequence(ifs);
+            changeSequence = solver.getSerializer()->loadChangeSequence(ifs);
         }
 
         std::vector<std::unique_ptr<solver::State>> trajSt;
@@ -167,7 +165,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             std::ostringstream sstr;
             sstr << "final-" << i << ".pol";
             outFile.open(sstr.str());
-            solver.saveStateTo(outFile);
+            solver.getSerializer()->save(outFile);
             outFile.close();
             cout << "Finished saving." << endl;
         }

@@ -105,14 +105,11 @@ void Solver::initializeEmpty() {
     rootPtr->getMapping()->initialize();
 }
 
+Serializer *Solver::getSerializer() {
+    return serializer_.get();
+}
 void Solver::setSerializer(std::unique_ptr<Serializer> serializer) {
     serializer_ = std::move(serializer);
-}
-void Solver::saveStateTo(std::ostream &os) const {
-    serializer_->save(os);
-}
-void Solver::loadStateFrom(std::istream &is) {
-    serializer_->load(is);
 }
 
 /* ------------------- Policy mutators ------------------- */

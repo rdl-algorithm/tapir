@@ -24,6 +24,7 @@ class HistorySequence {
     friend class AbstractSearchInstance;
     friend class DefaultHistoryCorrector;
     friend class Histories;
+    friend class Simulator;
     friend class Solver;
     friend class TextSerializer;
 
@@ -39,8 +40,6 @@ class HistorySequence {
     /* ------------------ Simple getters ------------------- */
     /** Returns the ID of this sequence. */
     long getId() const;
-    /** Returns the starting depth of this sequence. */
-    long getStartDepth() const;
     /** Returns the length of this sequence. */
     long getLength() const;
     /** Returns the history entry in this sequence with the given ID. */

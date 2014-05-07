@@ -467,6 +467,9 @@ void Nav2DModel::applyChange(solver::ModelChange const &change,
         solver::StatePool *pool) {
     Nav2DChange const &navChange = static_cast<Nav2DChange const &>(change);
     addArea(navChange.id, navChange.area, navChange.type);
+    if (pool == nullptr) {
+        return;
+    }
     solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
     solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
     if (navChange.type == AreaType::OBSERVATION) {

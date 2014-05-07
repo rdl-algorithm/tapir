@@ -74,10 +74,9 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
 
     cout << "Saving to file...";
     cout.flush();
-    std::ofstream os;
-    os.open(polPath.c_str());
-    solver.saveStateTo(os);
-    os.close();
+    std::ofstream outFile(polPath);
+    solver.getSerializer()->save(outFile);
+    outFile.close();
     cout << "    Done." << endl;
     return 0;
 }

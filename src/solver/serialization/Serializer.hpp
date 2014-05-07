@@ -5,6 +5,7 @@
 #include <memory>                       // for unique_ptr
 
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/ModelChange.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"
 
 #include "solver/mappings/ActionPool.hpp"
@@ -24,7 +25,6 @@ class Histories;
 class HistoryEntry;
 class HistorySequence;
 class ObservationMapping;
-class ModelChange;
 class StateInfo;
 class StatePool;
 
@@ -79,12 +79,9 @@ public:
 
     /* ------------------ Saving change sequences -------------------- */
     /** Saves a sequence of model changes. */
-    virtual void saveChangeSequence(
-            std::map<long, std::vector<std::unique_ptr<ModelChange>>> const &sequence,
-            std::ostream &os) = 0;
+    virtual void saveChangeSequence(ChangeSequence const &sequence, std::ostream &os) = 0;
     /** Loads a sequence of model changes. */
-    virtual std::map<long, std::vector<std::unique_ptr<ModelChange>>>loadChangeSequence(
-                std::istream &is) = 0;
+    virtual ChangeSequence loadChangeSequence(std::istream &is) = 0;
 
     /** Saves a single ModelChange. */
     virtual void saveModelChange(ModelChange const &change, std::ostream &os) = 0;

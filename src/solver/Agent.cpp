@@ -8,14 +8,13 @@ namespace solver {
 
 Agent::Agent(Solver *solver) :
         solver_(solver),
-        currentBelief_(nullptr) {
+        currentBelief_(solver_->getPolicy()->getRoot()) {
 }
 
-void Agent::reset() {
-    currentBelief_ = solver_->getPolicy()->getRoot();
+Solver *Agent::getSolver() const {
+    return solver_;
 }
-
-std::unique_ptr<Action> Agent::getPreferredAction() {
+std::unique_ptr<Action> Agent::getPreferredAction() const {
     return currentBelief_->getRecommendedAction();
 }
 
@@ -23,8 +22,6 @@ void Agent::updateBelief(Action const &action, Observation const &observation) {
     currentBelief_ = solver_->getPolicy()->createOrGetChild(currentBelief_, action, observation);
 }
 
-Solver *Agent::getSolver() const {
-    return solver_;
-}
+
 
 } /* namespace solver */

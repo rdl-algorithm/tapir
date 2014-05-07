@@ -33,7 +33,7 @@ class TagTextSerializer: virtual public solver::TextSerializer,
 
     /* ------------------ Saving change sequences -------------------- */
     virtual void saveModelChange(solver::ModelChange const &change, std::ostream &os) override;
-       virtual std::unique_ptr<solver::ModelChange> loadModelChange(std::istream &is) override;
+    virtual std::unique_ptr<solver::ModelChange> loadModelChange(std::istream &is) override;
 
 
     void saveState(solver::State const *state, std::ostream &os) override;

@@ -19,9 +19,7 @@ public:
     _NO_COPY_OR_MOVE(Agent);
 
     Solver *getSolver() const;
-
-    void reset();
-    std::unique_ptr<Action> getPreferredAction();
+    std::unique_ptr<Action> getPreferredAction() const;
 
     void updateBelief(Action const &action, Observation const &observation);
 
