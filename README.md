@@ -11,7 +11,9 @@ http://wiki.ros.org/groovy/Installation/Ubuntu
 Note: On Ubuntu 12.04, Groovy depends on Boost 1.46, while ABT depends on Boost 1.48. To solve this, Boost 1.48 source is downloaded and referred to in ABT. Dependence on Boost 1.48 is expected to be removed in the future. 
 
 Download source and extract to ~/boost_1_48_0  
-http://www.boost.org/users/history/version_1_48_0.html
+http://www.boost.org/users/history/version_1_48_0.html  
+
+Note: You can change the location of the boost source to use by editing the CMakeLists.txt inside the abt folder.  
 
 Fix is needed for error “Threading support unavailable: it has been explicitly disabled with BOOST_DISABLE_THREADS” which occurs when ROS TF is included.  
 Open  ~/boost_1_48_0/boost/config/stdlib/libstdcpp3.hpp and change:
@@ -55,8 +57,37 @@ cd ..
 catkin_make
 ```
 
+Running:
+--------
+
+Start a roscore:  
+
+```
+roscore  
+```
+
+Start V-REP in another terminal: (Note, roscore must be started first, otherwise V-REP's ROS plugins will not load)  
+First cd into your V-REP directory, then:
+
+```
+./vrep.sh
+```
+
+Once V-REP has finished loading, open and start the tag.ttt scenario  
+
+Finally, start the tag node in another terminal: 
+
+```
+rosrun abt tag_node
+```
+The obstacles should then be generated and the simulation will begin. 
+
+
+Other:  
+------
+
 **Note about g++ on Ubuntu 12.04**  
-Ubuntu 12.04 by default ships with g++ 4.6. To have both g++ 4.8 and g++ 4.6:
+Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:
 
 ```
 sudo apt-get install g++-4.8
