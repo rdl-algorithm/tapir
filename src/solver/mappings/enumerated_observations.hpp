@@ -34,8 +34,7 @@ public:
 
 class EnumeratedObservationPool: public solver::ObservationPool {
   public:
-    EnumeratedObservationPool(Solver *solver,
-            std::vector<std::unique_ptr<DiscretizedPoint>> observations);
+    EnumeratedObservationPool(std::vector<std::unique_ptr<DiscretizedPoint>> observations);
     virtual ~EnumeratedObservationPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationPool);
 
@@ -66,6 +65,7 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNChildren() const override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
+    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
@@ -84,20 +84,15 @@ class EnumeratedObservationMapEntry : public solver::ObservationMappingEntry {
     friend class EnumeratedObservationMap;
     friend class EnumeratedObservationTextSerializer;
 public:
-    EnumeratedObservationMapEntry(EnumeratedObservationMap *map,
-            long index, std::unique_ptr<BeliefNode> childNode);
-    virtual ~EnumeratedObservationMapEntry() = default;
-    _NO_COPY_OR_MOVE(EnumeratedObservationMapEntry);
-
     virtual ObservationMapping *getMapping() const override;
     virtual std::unique_ptr<Observation> getObservation() const override;
     virtual BeliefNode *getBeliefNode() const override;
     virtual long getVisitCount() const override;
 private:
-    EnumeratedObservationMap *map_;
-    long index_;
-    std::unique_ptr<BeliefNode> childNode_;
-    long visitCount_;
+    EnumeratedObservationMap *map_ = nullptr;
+    long index_ = 0;
+    std::unique_ptr<BeliefNode> childNode_ = nullptr;
+    long visitCount_ = 0;
 };
 
 class EnumeratedObservationTextSerializer: virtual public solver::Serializer {

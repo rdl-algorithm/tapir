@@ -23,4 +23,8 @@ void SpatialIndexVisitor::visitData(const SpatialIndex::IData &data) {
 void SpatialIndexVisitor::visitData(std::vector<const SpatialIndex::IData*> &/*v*/) {
 }
 
+StatePool *SpatialIndexVisitor::getStatePool() const {
+    return statePool_;
+}
+
 } /* namespace solver */

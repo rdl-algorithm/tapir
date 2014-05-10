@@ -12,6 +12,7 @@
 
 #include "ActionNode.hpp"               // for ActionNode
 #include "HistoryEntry.hpp"             // for HistoryEntry
+#include "Solver.hpp"                   // for Solver
 
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
@@ -19,14 +20,22 @@
 
 #include "mappings/ActionMapping.hpp"
 #include "mappings/ObservationMapping.hpp"
+#include "mappings/ObservationPool.hpp"
 
 #include "search/HistoricalData.hpp"
 
 
 namespace solver {
 BeliefNode::BeliefNode() :
-        id_(-1),
-        parentEntry_(nullptr),
+    BeliefNode(-1, nullptr) {
+}
+BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry) :
+    BeliefNode(-1, parentEntry) {
+}
+BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
+        id_(id),
+        depth_(-1),
+        parentEntry_(parentEntry),
         data_(nullptr),
         particles_(),
         nStartingSequences_(0),
@@ -36,29 +45,6 @@ BeliefNode::BeliefNode() :
 
 // Do-nothing destructor
 BeliefNode::~BeliefNode() {
-}
-
-/* -------------- Particle management / sampling ---------------- */
-void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
-    tLastChange_ = abt::clock_ms();
-    particles_.add(newHistEntry);
-    if (newHistEntry->getId() == 0) {
-        nStartingSequences_++;
-    }
-}
-
-void BeliefNode::removeParticle(HistoryEntry *histEntry) {
-    tLastChange_ = abt::clock_ms();
-    particles_.remove(histEntry);
-    if (histEntry->getId() == 0) {
-        nStartingSequences_--;
-    }
-}
-
-HistoryEntry *BeliefNode::sampleAParticle(RandomGenerator *randGen) const {
-    long index = std::uniform_int_distribution<long>(
-                                 0, getNumberOfParticles() - 1)(*randGen);
-    return particles_.get(index);
 }
 
 /* ----------------- Useful calculations ------------------- */
@@ -78,17 +64,15 @@ double BeliefNode::distL1Independent(BeliefNode *b) const {
     return averageDist;
 }
 
-/* -------------------- Simple setters ---------------------- */
-void BeliefNode::setId(long id) {
-    id_ = id;
-}
-
 /* -------------------- Simple getters ---------------------- */
 long BeliefNode::getId() const {
     return id_;
 }
-std::unique_ptr<Action> BeliefNode::getBestAction() const {
-    return actionMap_->getBestAction();
+long BeliefNode::getDepth() const {
+    return depth_;
+}
+std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
+    return actionMap_->getRecommendedAction();
 }
 double BeliefNode::getQValue() const {
     return actionMap_->getMaxQValue();
@@ -108,18 +92,6 @@ std::vector<State const *> BeliefNode::getStates() const {
 }
 double BeliefNode::getTimeOfLastChange() const {
     return tLastChange_;
-}
-
-/* -------------------- Tree-related setters  ---------------------- */
-void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
-    actionMap_ = std::move(mapping);
-    actionMap_->setOwner(this);
-}
-void BeliefNode::setParentEntry(ObservationMappingEntry *entry) {
-    parentEntry_ =  entry;
-}
-void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
-    data_ = std::move(data);
 }
 
 /* -------------------- Tree-related getters  ---------------------- */
@@ -156,8 +128,6 @@ std::unique_ptr<Action> BeliefNode::getLastAction() const {
     }
     return getParentActionNode()->getParentEntry()->getAction();
 }
-
-
 BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) const {
     ActionNode *node = actionMap_->getActionNode(action);
     if (node == nullptr) {
@@ -166,13 +136,44 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
     return node->getChild(obs);
 }
 
+
+/* ============================ PRIVATE ============================ */
+
+
+/* -------------- Particle management / sampling ---------------- */
+void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
+    tLastChange_ = abt::clock_ms();
+    particles_.add(newHistEntry);
+    if (newHistEntry->getId() == 0) {
+        nStartingSequences_++;
+    }
+}
+
+void BeliefNode::removeParticle(HistoryEntry *histEntry) {
+    tLastChange_ = abt::clock_ms();
+    particles_.remove(histEntry);
+    if (histEntry->getId() == 0) {
+        nStartingSequences_--;
+    }
+}
+
+/* -------------------- Tree-related setters  ---------------------- */
+void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
+    actionMap_ = std::move(mapping);
+    actionMap_->setOwner(this);
+}
+void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
+    data_ = std::move(data);
+}
+
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Action const &action,
-        Observation const &obs) {
+std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver,
+        Action const &action, Observation const &obs) {
     ActionNode *actionNode = actionMap_->getActionNode(action);
     if (actionNode == nullptr) {
         actionNode = actionMap_->createActionNode(action);
+        actionNode->setMapping(solver->getObservationPool()->createObservationMapping());
     }
-    return actionNode->createOrGetChild(obs);
+    return actionNode->createOrGetChild(solver, obs);
 }
 } /* namespace solver */

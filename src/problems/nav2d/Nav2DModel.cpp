@@ -107,8 +107,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     obstacleTree_(nStVars_),
     goalAreaTree_(nStVars_),
     startAreaTree_(nStVars_),
-    observationAreaTree_(nStVars_),
-    changes_()
+    observationAreaTree_(nStVars_)
          {
     // Read the map from the file.
     std::ifstream inFile;
@@ -464,59 +463,23 @@ solver::Model::StepResult Nav2DModel::generateStep(
     return result;
 }
 
-std::vector<long> Nav2DModel::loadChanges(char const *changeFilename) {
-    std::vector<long> changeTimes;
-       std::ifstream ifs;
-       ifs.open(changeFilename);
-       std::string line;
-       while (std::getline(ifs, line)) {
-
-           std::string tmpStr;
-           long time;
-           long nChanges;
-           std::istringstream(line) >> tmpStr >> time >> tmpStr >> nChanges;
-
-           changes_[time] = std::vector<Nav2DChange>();
-           changeTimes.push_back(time);
-           for (int i = 0; i < nChanges; i++) {
-               std::getline(ifs, line);
-
-               Nav2DChange change;
-               std::istringstream sstr(line);
-               sstr >> change.operation;
-               if (change.operation != "ADD") {
-                   std::ostringstream message;
-                   message << "ERROR: Cannot " << change.operation;
-                   debug::show_message(message.str());
-                   continue;
-               }
-               std::string typeString;
-               sstr >> typeString;
-               change.type = parseAreaType(typeString);
-               sstr >> change.id;
-               sstr >> change.area;
-               changes_[time].push_back(change);
-           }
-       }
-       ifs.close();
-       return changeTimes;
-}
-
-void Nav2DModel::update(long time, solver::StatePool *pool) {
-    for (Nav2DChange &change : changes_[time]) {
-        addArea(change.id, change.area, change.type);
-        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
-        solver::RTree *tree = static_cast<solver::RTree *>(
-                pool->getStateIndex());
-        if (change.type == AreaType::OBSERVATION) {
-            visitor.flagsToSet_ = solver::ChangeFlags::OBSERVATION_BEFORE;
-        }
-        tree->boxQuery(visitor,
-                { change.area.getLowerLeft().getX(),
-                        change.area.getLowerLeft().getY(), -2.0 },
-                { change.area.getUpperRight().getX(),
-                        change.area.getUpperRight().getY(), -2.0 });
+void Nav2DModel::applyChange(solver::ModelChange const &change,
+        solver::StatePool *pool) {
+    Nav2DChange const &navChange = static_cast<Nav2DChange const &>(change);
+    addArea(navChange.id, navChange.area, navChange.type);
+    if (pool == nullptr) {
+        return;
     }
+    solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+    solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+    if (navChange.type == AreaType::OBSERVATION) {
+        visitor.flagsToSet_ = solver::ChangeFlags::OBSERVATION_BEFORE;
+    }
+    tree->boxQuery(visitor,
+            { navChange.area.getLowerLeft().getX(),
+                    navChange.area.getLowerLeft().getY(), -2.0 },
+            { navChange.area.getUpperRight().getX(),
+                    navChange.area.getUpperRight().getY(), -2.0 });
 }
 
 geometry::RTree *Nav2DModel::getTree(AreaType type) {
@@ -691,7 +654,7 @@ void Nav2DModel::drawEnv(std::ostream &os) {
     }
 }
 
-void Nav2DModel::drawSimulationState(solver::BeliefNode *belief,
+void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state,
         std::ostream &os) {
     Nav2DState const &navState = static_cast<Nav2DState const &>(state);

@@ -30,6 +30,32 @@ Nav2DTextSerializer::Nav2DTextSerializer(solver::Solver *solver) :
     solver::Serializer(solver) {
 }
 
+/* ------------------ Saving change sequences -------------------- */
+void Nav2DTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
+    Nav2DChange const &navChange = static_cast<Nav2DChange const &>(change);
+    Nav2DModel &navModel = dynamic_cast<Nav2DModel &>(*getModel());
+    os << navChange.operation << " ";
+    os << navModel.areaTypeToString(navChange.type) << " ";
+    os << navChange.id << " ";
+    os << navChange.area;
+}
+std::unique_ptr<solver::ModelChange> Nav2DTextSerializer::loadModelChange(std::istream &is) {
+    std::unique_ptr<Nav2DChange> change = std::make_unique<Nav2DChange>();
+    Nav2DModel &navModel = dynamic_cast<Nav2DModel &>(*getModel());
+    is >> change->operation;
+    if (change->operation != "ADD") {
+        std::ostringstream message;
+        message << "ERROR: Cannot " << change->operation;
+        debug::show_message(message.str());
+        return nullptr;
+    }
+    std::string typeString;
+    is >> typeString;
+    change->type = navModel.parseAreaType(typeString);
+    is >> change->id;
+    is >> change->area;
+    return std::move(change);
+}
 void Nav2DTextSerializer::saveState(solver::State const *state,
         std::ostream &os) {
     if (state == nullptr) {
@@ -59,7 +85,7 @@ std::unique_ptr<solver::State> Nav2DTextSerializer::loadState(
     std::istringstream(tmpStr) >> x >> y;
     std::getline(is, tmpStr, ':');
     is >> direction;
-    Nav2DModel const &model = dynamic_cast<Nav2DModel const &>(*model_);
+    Nav2DModel const &model = dynamic_cast<Nav2DModel const &>(*getModel());
     return std::make_unique<Nav2DState>(x, y, direction,
             model.costPerUnitDistance_, model.costPerRevolution_);
 }
@@ -97,7 +123,7 @@ std::unique_ptr<solver::Action> Nav2DTextSerializer::loadAction(
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> rotationalSpeed;
     return std::make_unique<Nav2DAction>(speed, rotationalSpeed,
-            dynamic_cast<Nav2DModel *>(model_));
+            dynamic_cast<Nav2DModel *>(getModel()));
 }
 
 void Nav2DTextSerializer::saveTransitionParameters(

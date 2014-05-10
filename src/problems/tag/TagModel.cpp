@@ -46,22 +46,17 @@ namespace po = boost::program_options;
 
 namespace tag {
 TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
-    ModelWithProgramOptions(randGen, vm),
-    moveCost_(vm["problem.moveCost"].as<double>()),
-    tagReward_(vm["problem.tagReward"].as<double>()),
-    failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
-    opponentStayProbability_(
-            vm["problem.opponentStayProbability"].as<double>()),
-    nRows_(0), // to be updated
-    nCols_(0), // to be updated
-    mapText_(), // will be pushed to
-    envMap_(), // will be pushed to
-    changes_(),
-    nActions_(5),
-    nStVars_(5),
-    minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
-    maxVal_(tagReward_)
-    {
+        ModelWithProgramOptions(randGen, vm), moveCost_(
+                vm["problem.moveCost"].as<double>()), tagReward_(
+                vm["problem.tagReward"].as<double>()), failedTagPenalty_(
+                vm["problem.failedTagPenalty"].as<double>()), opponentStayProbability_(
+                vm["problem.opponentStayProbability"].as<double>()), nRows_(0), // to be updated
+        nCols_(0), // to be updated
+        mapText_(), // will be pushed to
+        envMap_(), // will be pushed to
+        nActions_(5), nStVars_(5), minVal_(
+                -failedTagPenalty_ / (1 - getDiscountFactor())), maxVal_(
+                tagReward_) {
     setAllActions(getAllActionsInOrder());
     // Read the map from the file.
     std::ifstream inFile;
@@ -90,7 +85,7 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
         cout << "move cost: " << moveCost_ << endl;
         cout << "nActions: " << nActions_ << endl;
         cout << "nStVars: " << nStVars_ << endl;
-        cout << "nParticles: " << getNParticles() << endl;
+        cout << "minParticleCount: " << getMinParticleCount() << endl;
         cout << "Environment:" << endl << endl;
         drawEnv(cout);
     }
@@ -179,19 +174,15 @@ std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
     }
 
     GridPosition newOpponentPos = getMovedOpponentPos(robotPos, opponentPos);
-    GridPosition newRobotPos = getMovedPos(robotPos, tagAction.getActionType());
-    if (!isValid(newRobotPos)) {
-        return std::make_pair(
-                std::make_unique<TagState>(robotPos, newOpponentPos, false),
-                false);
-    }
-    return std::make_pair(std::make_unique<TagState>(
-                    newRobotPos, newOpponentPos, false), true);
+    GridPosition newRobotPos;
+    bool wasValid;
+    std::tie(newRobotPos, wasValid) = getMovedPos(robotPos, tagAction.getActionType());
+    return std::make_pair(std::make_unique<TagState>(newRobotPos, newOpponentPos, false),
+            wasValid);
 }
 
 std::vector<ActionType> TagModel::makeOpponentActions(
-        GridPosition const &robotPos,
-        GridPosition const &opponentPos) {
+        GridPosition const &robotPos, GridPosition const &opponentPos) {
     std::vector<ActionType> actions;
     if (robotPos.i > opponentPos.i) {
         actions.push_back(ActionType::NORTH);
@@ -224,16 +215,12 @@ GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
         return opponentPos;
     }
     std::vector<ActionType> actions(makeOpponentActions(robotPos, opponentPos));
-    ActionType action = actions[std::uniform_int_distribution<long>(
-                    0, actions.size() - 1)(*getRandomGenerator())];
-    GridPosition newOpponentPos = getMovedPos(opponentPos, action);
-    if (!isValid(newOpponentPos)) {
-        newOpponentPos = opponentPos;
-    }
-    return newOpponentPos;
+    ActionType action = actions[std::uniform_int_distribution<long>(0,
+            actions.size() - 1)(*getRandomGenerator())];
+    return getMovedPos(opponentPos, action).first;
 }
 
-GridPosition TagModel::getMovedPos(GridPosition const &position,
+std::pair<GridPosition, bool> TagModel::getMovedPos(GridPosition const &position,
         ActionType action) {
     GridPosition movedPos = position;
     switch (action) {
@@ -253,11 +240,15 @@ GridPosition TagModel::getMovedPos(GridPosition const &position,
         break;
     default:
         std::ostringstream message;
-        message << "Invalid action: " << (long)action;
+        message << "Invalid action: " << (long) action;
         debug::show_message(message.str());
         break;
     }
-    return movedPos;
+    bool wasValid = isValid(movedPos);
+    if (!wasValid) {
+        movedPos = position;
+    }
+    return std::make_pair(movedPos, wasValid);
 }
 
 bool TagModel::isValid(GridPosition const &position) {
@@ -266,14 +257,12 @@ bool TagModel::isValid(GridPosition const &position) {
 }
 
 std::unique_ptr<solver::Observation> TagModel::makeObservation(
-        solver::Action const & /*action*/,
-        TagState const &nextState) {
+        solver::Action const & /*action*/, TagState const &nextState) {
     return std::make_unique<TagObservation>(nextState.getRobotPosition(),
             nextState.getRobotPosition() == nextState.getOpponentPosition());
 }
 
-double TagModel::generateReward(
-        solver::State const &state,
+double TagModel::generateReward(solver::State const &state,
         solver::Action const &action,
         solver::TransitionParameters const */*tp*/,
         solver::State const */*nextState*/) {
@@ -291,15 +280,13 @@ double TagModel::generateReward(
 }
 
 std::unique_ptr<solver::State> TagModel::generateNextState(
-        solver::State const &state,
-        solver::Action const &action,
+        solver::State const &state, solver::Action const &action,
         solver::TransitionParameters const */*tp*/) {
     return makeNextState(static_cast<TagState const &>(state), action).first;
 }
 
 std::unique_ptr<solver::Observation> TagModel::generateObservation(
-        solver::State const */*state*/,
-        solver::Action const &action,
+        solver::State const */*state*/, solver::Action const &action,
         solver::TransitionParameters const */*tp*/,
         solver::State const &nextState) {
     return makeObservation(action, static_cast<TagState const &>(nextState));
@@ -319,14 +306,15 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
 }
 
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
-        solver::BeliefNode */*previousBelief*/,
-        solver::Action const &action, solver::Observation const &obs,
+        solver::BeliefNode */*previousBelief*/, solver::Action const &action,
+        solver::Observation const &obs,
+        long nParticles,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
-    TagObservation const &observation = (
-            static_cast<TagObservation const &>(obs));
-    ActionType actionType = (
-            static_cast<TagAction const &>(action).getActionType());
+    TagObservation const &observation =
+            (static_cast<TagObservation const &>(obs));
+    ActionType actionType =
+            (static_cast<TagAction const &>(action).getActionType());
 
     struct Hash {
         std::size_t operator()(TagState const &state) const {
@@ -340,42 +328,41 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     GridPosition newRobotPos(observation.getPosition());
     if (observation.seesOpponent()) {
         // If we saw the opponent, we must be in the same place.
-        newParticles.push_back(std::make_unique<TagState>(newRobotPos,
-                        newRobotPos, actionType == ActionType::TAG));
+        newParticles.push_back(
+                std::make_unique<TagState>(newRobotPos, newRobotPos,
+                        actionType == ActionType::TAG));
     } else {
         // We didn't see the opponent, so we must be in different places.
         for (solver::State const *state : previousParticles) {
             TagState const *tagState = static_cast<TagState const *>(state);
             GridPosition oldRobotPos(tagState->getRobotPosition());
             // Ignore states that do not match knowledge of the robot's position.
-            if (newRobotPos != getMovedPos(oldRobotPos, actionType)) {
+            if (newRobotPos != getMovedPos(oldRobotPos, actionType).first) {
                 continue;
             }
             GridPosition oldOpponentPos(tagState->getOpponentPosition());
-            std::vector<ActionType> actions(makeOpponentActions(oldRobotPos,
-                            oldOpponentPos));
+            std::vector<ActionType> actions(
+                    makeOpponentActions(oldRobotPos, oldOpponentPos));
             std::vector<ActionType> newActions;
             for (ActionType opponentAction : actions) {
-                if (getMovedPos(oldOpponentPos,
-                        opponentAction) != newRobotPos) {
+                if (getMovedPos(oldOpponentPos, opponentAction).first != newRobotPos) {
                     newActions.push_back(opponentAction);
                 }
             }
             double probability = 1.0 / newActions.size();
             for (ActionType opponentAction : newActions) {
-                GridPosition newOpponentPos = getMovedPos(oldOpponentPos,
-                        opponentAction);
+                GridPosition newOpponentPos = getMovedPos(oldOpponentPos, opponentAction).first;
                 TagState newState(newRobotPos, newOpponentPos, false);
                 weights[newState] += probability;
                 weightTotal += probability;
             }
         }
-        double scale = getNParticles() / weightTotal;
+        double scale = nParticles / weightTotal;
         for (WeightMap::iterator it = weights.begin(); it != weights.end();
-             it++) {
+                it++) {
             double proportion = it->second * scale;
             long numToAdd = static_cast<long>(proportion);
-            if (std::bernoulli_distribution(proportion-numToAdd)(
+            if (std::bernoulli_distribution(proportion - numToAdd)(
                     *getRandomGenerator())) {
                 numToAdd += 1;
             }
@@ -388,21 +375,23 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 }
 
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
-        solver::BeliefNode */*previousBelief*/,
-        solver::Action const &action, solver::Observation const &obs) {
+        solver::BeliefNode */*previousBelief*/, solver::Action const &action,
+        solver::Observation const &obs, long nParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
-    TagObservation const &observation = (
-            static_cast<TagObservation const &>(obs));
-    ActionType actionType = (
-            static_cast<TagAction const &>(action).getActionType());
+    TagObservation const &observation =
+            (static_cast<TagObservation const &>(obs));
+    ActionType actionType =
+            (static_cast<TagAction const &>(action).getActionType());
     GridPosition newRobotPos(observation.getPosition());
     if (observation.seesOpponent()) {
         // If we saw the opponent, we must be in the same place.
-        newParticles.push_back(
+        while ((long)newParticles.size() < nParticles) {
+            newParticles.push_back(
                 std::make_unique<TagState>(newRobotPos, newRobotPos,
                         actionType == ActionType::TAG));
+        }
     } else {
-        while (newParticles.size() < getNParticles()) {
+        while ((long)newParticles.size() < nParticles) {
             std::unique_ptr<solver::State> state = sampleStateUniform();
             solver::Model::StepResult result = generateStep(*state, action);
             if (obs == *result.observation) {
@@ -413,87 +402,57 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     return newParticles;
 }
 
-std::vector<long> getVector(std::istringstream &iss) {
-    std::vector<long> values;
-    std::string tmpStr;
-    std::getline(iss, tmpStr, '(');
-    std::getline(iss, tmpStr, ')');
-    std::istringstream sstr(tmpStr);
-    while (std::getline(sstr, tmpStr, ',')) {
-        values.push_back(std::atoi(tmpStr.c_str()));
+void TagModel::applyChange(solver::ModelChange const &change,
+        solver::StatePool *pool) {
+    TagChange const &tagChange = static_cast<TagChange const &>(change);
+    if (hasVerboseOutput()) {
+        cout << tagChange.changeType << " " << tagChange.i0 << " "
+                << tagChange.j0;
+        cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
     }
-    return values;
-}
-
-std::vector<long> TagModel::loadChanges(char const *changeFilename) {
-    std::vector<long> changeTimes;
-    std::ifstream ifs;
-    ifs.open(changeFilename);
-    std::string line;
-    while (std::getline(ifs, line)) {
-        std::string tmpStr;
-        long time;
-        long nChanges;
-        std::istringstream(line) >> tmpStr >> time >> tmpStr >> nChanges;
-
-        changes_[time] = std::vector<TagChange>();
-        changeTimes.push_back(time);
-        for (int i = 0; i < nChanges; i++) {
-            std::getline(ifs, line);
-            TagChange change;
-            std::istringstream sstr(line);
-            std::getline(sstr, change.changeType, ':');
-            std::vector<long> v0 = getVector(sstr);
-            std::vector<long> v1 = getVector(sstr);
-            change.i0 = v0[0];
-            change.j0 = v0[1];
-            change.i1 = v1[0];
-            change.j1 = v1[1];
-            changes_[time].push_back(change);
-        }
-    }
-    ifs.close();
-    return changeTimes;
-}
-
-void TagModel::update(long time, solver::StatePool *pool) {
-    for (TagChange &change : changes_[time]) {
-        if (hasVerboseOutput()) {
-            cout << change.changeType << " " << change.i0 << " " << change.j0;
-            cout << " " << change.i1 << " " << change.j1 << endl;
-        }
-        if (change.changeType == "Add Obstacles") {
-            for (long i = static_cast<long>(change.i0); i <= change.i1; i++) {
-                for (long j = static_cast<long>(change.j0); j <= change.j1; j++) {
-                    envMap_[i][j] = TagCellType::WALL;
-                }
+    if (tagChange.changeType == "Add Obstacles") {
+        for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
+            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1;
+                    j++) {
+                envMap_[i][j] = TagCellType::WALL;
             }
-            solver::RTree *tree =
-                    static_cast<solver::RTree *>(pool->getStateIndex());
-            solver::FlaggingVisitor visitor(pool,
-                    solver::ChangeFlags::DELETED);
-            tree->boxQuery(visitor,
-                    std::vector<double> { change.i0, change.j0, 0,       0,               0 },
-                    std::vector<double> { change.i1, change.j1, nRows_-1.0,  nCols_-1.0,  1 });
-            tree->boxQuery(visitor,
-                    std::vector<double> { 0,           0,           change.i0, change.j0, 0 },
-                    std::vector<double> { nRows_-1.0,  nCols_-1.0,  change.i1, change.j1, 1 });
-        } else if (change.changeType == "Remove Obstacles") {
-            for (long i = static_cast<long>(change.i0); i <= change.i1; i++) {
-                for (long j = static_cast<long>(change.j0); j <= change.j1; j++) {
-                    envMap_[i][j] = TagCellType::EMPTY;
-                }
-            }
-            solver::RTree *tree =
-                    static_cast<solver::RTree *>(pool->getStateIndex());
-            solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
-            tree->boxQuery(visitor,
-                    std::vector<double> { change.i0-1, change.j0-1, 0,             0,             0 },
-                    std::vector<double> { change.i1+1, change.j1+1, nRows_-1.0,    nCols_-1.0,    1 });
-            tree->boxQuery(visitor,
-                    std::vector<double> { 0,             0,             change.i0-1, change.j0-1, 0 },
-                    std::vector<double> { nRows_-1.0,    nCols_-1.0,    change.i1+1, change.j1+1, 1 });
         }
+        if (pool == nullptr) {
+            return;
+        }
+        solver::RTree *tree =
+                static_cast<solver::RTree *>(pool->getStateIndex());
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+        tree->boxQuery(visitor, std::vector<double> { tagChange.i0,
+                tagChange.j0, 0, 0, 0 }, std::vector<double> { tagChange.i1,
+                tagChange.j1, nRows_ - 1.0, nCols_ - 1.0, 1 });
+        tree->boxQuery(visitor, std::vector<double> { 0, 0, tagChange.i0,
+                tagChange.j0, 0 },
+                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, tagChange.i1,
+                        tagChange.j1, 1 });
+    } else if (tagChange.changeType == "Remove Obstacles") {
+        for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
+            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1;
+                    j++) {
+                envMap_[i][j] = TagCellType::EMPTY;
+            }
+        }
+        if (pool == nullptr) {
+            return;
+        }
+        solver::RTree *tree =
+                static_cast<solver::RTree *>(pool->getStateIndex());
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
+        tree->boxQuery(visitor,
+                std::vector<double> { tagChange.i0 - 1, tagChange.j0 - 1, 0, 0,
+                        0 },
+                std::vector<double> { tagChange.i1 + 1, tagChange.j1 + 1, nRows_
+                        - 1.0, nCols_ - 1.0, 1 });
+        tree->boxQuery(visitor,
+                std::vector<double> { 0, 0, tagChange.i0 - 1, tagChange.j0 - 1,
+                        0 },
+                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, tagChange.i1
+                        + 1, tagChange.j1 + 1, 1 });
     }
 }
 
@@ -523,22 +482,19 @@ void TagModel::drawEnv(std::ostream &os) {
     }
 }
 
-void TagModel::drawSimulationState(solver::BeliefNode *belief,
-        solver::State const &state,
-        std::ostream &os) {
+void TagModel::drawSimulationState(solver::BeliefNode const *belief,
+        solver::State const &state, std::ostream &os) {
     TagState const &tagState = static_cast<TagState const &>(state);
     std::vector<solver::State const *> particles = belief->getStates();
     std::vector<std::vector<long>> particleCounts(nRows_,
             std::vector<long>(nCols_));
     for (solver::State const *particle : particles) {
-        GridPosition opponentPos = static_cast<TagState const &>(
-                *particle).getOpponentPosition();
+        GridPosition opponentPos =
+                static_cast<TagState const &>(*particle).getOpponentPosition();
         particleCounts[opponentPos.i][opponentPos.j] += 1;
     }
 
-    std::vector<int> colors {196,
-        161, 126, 91, 56, 21,
-        26, 31, 36, 41, 46};
+    std::vector<int> colors { 196, 161, 126, 91, 56, 21, 26, 31, 36, 41, 46 };
     if (hasColorOutput()) {
         os << "Color map: ";
         for (int color : colors) {
@@ -584,8 +540,7 @@ void TagModel::drawSimulationState(solver::BeliefNode *belief,
     }
 }
 
-std::vector<std::unique_ptr<solver::DiscretizedPoint>>
-TagModel::getAllActionsInOrder() {
+std::vector<std::unique_ptr<solver::DiscretizedPoint>> TagModel::getAllActionsInOrder() {
     std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
     for (long code = 0; code < nActions_; code++) {
         allActions.push_back(std::make_unique<TagAction>(code));

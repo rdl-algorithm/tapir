@@ -16,24 +16,32 @@ UcbSelectionStrategy::UcbSelectionStrategy(Solver *solver,
 std::unique_ptr<SearchInstance> UcbSelectionStrategy::createSearchInstance(
         HistorySequence *sequence, long maximumDepth) {
     return std::make_unique<UcbSelectionInstance>(explorationCoefficient_,
-            solver_, sequence, maximumDepth);
+            getSolver(), sequence, maximumDepth);
 }
 
 UcbSelectionInstance::UcbSelectionInstance(double explorationCoefficient,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
-    AbstractSearchInstance(solver, sequence, maximumDepth),
+        AbstractSelectionInstance(solver, sequence, maximumDepth),
+    choseUnvisitedAction_(false),
     explorationCoefficient_(explorationCoefficient) {
 }
 
-std::pair<SearchStatus, std::unique_ptr<Action>> UcbSelectionInstance::getStatusAndNextAction() {
-    ActionMapping *mapping = currentNode_->getMapping();
+SearchStep UcbSelectionInstance::getSearchStep(BeliefNode *currentNode) {
+    if (choseUnvisitedAction_) {
+        // We've reached the new leaf - this (UCB) search is over.
+        return SearchStep {SearchStatus::REACHED_ROLLOUT_NODE, nullptr, false};
+    }
+
+    ActionMapping *mapping = currentNode->getMapping();
+    // If there are unvisited actions, we take one, and we're finished with UCB.
     if (mapping->hasUnvisitedActions()) {
-        return std::make_pair(SearchStatus::REACHED_ROLLOUT_NODE, nullptr);
+        choseUnvisitedAction_ = true;
+        return SearchStep {SearchStatus::INSIDE_TREE, mapping->getRandomUnvisitedAction(), true};
     }
 
     double bestValue = -std::numeric_limits<double>::infinity();
     std::unique_ptr<Action> bestAction = nullptr;
-    for (ActionMappingEntry const *entry : mapping->getChildEntries()) {
+    for (ActionMappingEntry const *entry : mapping->getVisitedEntries()) {
         double tmpValue = entry->getMeanQValue() + explorationCoefficient_ * std::sqrt(
                         std::log(mapping->getTotalVisitCount()) / entry->getVisitCount());
         if (!std::isfinite(tmpValue)) {
@@ -46,9 +54,9 @@ std::pair<SearchStatus, std::unique_ptr<Action>> UcbSelectionInstance::getStatus
     }
     if (bestAction == nullptr) {
         debug::show_message("ERROR: node has no actions!?");
-        return std::make_pair(SearchStatus::ERROR, nullptr);
+        return SearchStep {SearchStatus::ERROR, nullptr, false};
     }
-    return std::make_pair(SearchStatus::INSIDE_TREE, std::move(bestAction));
+    return SearchStep {SearchStatus::INSIDE_TREE, std::move(bestAction), true};
 }
 
 } /* namespace solver */

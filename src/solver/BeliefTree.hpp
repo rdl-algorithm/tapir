@@ -11,13 +11,18 @@
 
 namespace solver {
 class ActionMapping;
+class AbstractSearchInstance;
 class BeliefNode;
 class Solver;
 
 class BeliefTree {
-  public:
+    friend class AbstractSearchInstance;
+    friend class Agent;
+    friend class HistorySequence;
+    friend class Solver;
     friend class TextSerializer;
 
+public:
     /* Constructs an empty belief tree. */
     BeliefTree(Solver *solver);
 
@@ -25,23 +30,25 @@ class BeliefTree {
     ~BeliefTree();
     _NO_COPY_OR_MOVE(BeliefTree);
 
-    /* -------------- Node setters and getters ---------------- */
-    /** Resets the tree and sets it root to be the given new node. */
-    BeliefNode *setRoot(std::unique_ptr<BeliefNode> root);
+    /* ------------------- Simple getters --------------------- */
     /** Returns the root node. */
     BeliefNode *getRoot() const;
-
-    /** Sets the child with the given ID. */
-    void setNode(long id, BeliefNode *node);
     /** Retrieves the node with the given ID. */
     BeliefNode *getNode(long id) const;
-
     /** Returns the number of belief nodes. */
     long getNumberOfNodes() const;
     /** Retrieves a vector of all belief nodes within the policy. */
-    std::vector<BeliefNode *> getNodes();
+    std::vector<BeliefNode *> getNodes() const;
+
+
+private:
+    /* ------------------- Node index modification ------------------- */
+    /** Adds the given node to the index of nodes. */
+    void addNode(BeliefNode *node);
 
     /* ------------------- Tree modification ------------------- */
+    /** Resets the tree, creating a new root node and returning it. */
+    BeliefNode *reset();
     /**
      * Adds a child belief node to the given belief node; this node will be
      * added to the flattened node list if and only if it is actually new.

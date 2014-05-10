@@ -30,7 +30,7 @@ public:
 
 class ApproximateObservationPool: public solver::ObservationPool {
   public:
-    ApproximateObservationPool(Solver *solver, double maxDistance);
+    ApproximateObservationPool(double maxDistance);
     virtual ~ApproximateObservationPool() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationPool);
 
@@ -62,6 +62,7 @@ class ApproximateObservationMap: public solver::ObservationMapping {
     /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNChildren() const override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
+    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
 
     /* --------------- Methods for accessing visit counts. ----------------- */
     virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
@@ -75,7 +76,7 @@ class ApproximateObservationMap: public solver::ObservationMapping {
 
     ActionNode *owningActionNode_;
     double maxDistance_;
-    std::vector<std::unique_ptr<ApproximateObservationMapEntry>> children_;
+    std::vector<std::unique_ptr<ApproximateObservationMapEntry>> entries_;
 
     long totalVisitCount_;
 };
@@ -84,21 +85,15 @@ class ApproximateObservationMapEntry : public solver::ObservationMappingEntry {
     friend class ApproximateObservationMap;
     friend class ApproximateObservationTextSerializer;
 public:
-    ApproximateObservationMapEntry(ApproximateObservationMap *map,
-            Observation const &observation,
-            std::unique_ptr<BeliefNode> childNode);
-    virtual ~ApproximateObservationMapEntry() = default;
-    _NO_COPY_OR_MOVE(ApproximateObservationMapEntry);
-
     virtual ObservationMapping *getMapping() const override;
     virtual std::unique_ptr<Observation> getObservation() const override;
     virtual BeliefNode *getBeliefNode() const override;
     virtual long getVisitCount() const override;
 private:
-    ApproximateObservationMap *map_;
-    std::unique_ptr<Observation> observation_;
-    std::unique_ptr<BeliefNode> childNode_;
-    long visitCount_;
+    ApproximateObservationMap *map_ = nullptr;
+    std::unique_ptr<Observation> observation_ = nullptr;
+    std::unique_ptr<BeliefNode> childNode_ = nullptr;
+    long visitCount_ = 0;
 };
 
 class ApproximateObservationTextSerializer: virtual public solver::Serializer {

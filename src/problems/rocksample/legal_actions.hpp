@@ -1,5 +1,5 @@
-#ifndef ROCKSAMPLE_LEGALMAPPING_HPP_
-#define ROCKSAMPLE_LEGALMAPPING_HPP_
+#ifndef ROCKSAMPLE_LEGALACTIONS_HPP_
+#define ROCKSAMPLE_LEGALACTIONS_HPP_
 
 #include "solver/mappings/discretized_actions.hpp"
 #include "solver/mappings/enumerated_actions.hpp"
@@ -13,17 +13,19 @@
 namespace rocksample {
 class RockSampleModel;
 
-class RockSampleHistoricalData : public solver::HistoricalData {
+class PositionData : public solver::HistoricalData {
     friend class LegalActionsMap;
     friend class LegalActionsTextSerializer;
 public:
-    RockSampleHistoricalData(RockSampleModel *model, GridPosition position);
-    virtual ~RockSampleHistoricalData() = default;
-    _NO_COPY_OR_MOVE(RockSampleHistoricalData);
+    PositionData(RockSampleModel *model, GridPosition position);
+    virtual ~PositionData() = default;
+    _NO_COPY_OR_MOVE(PositionData);
 
     std::unique_ptr<solver::HistoricalData> createChild(
             solver::Action const &action,
             solver::Observation const &observation) override;
+
+    std::vector<long> generateLegalActions() const;
 
     void print(std::ostream &os) const override;
 
@@ -40,26 +42,30 @@ public:
 
     virtual std::unique_ptr<solver::ActionPool> createActionPool(
             solver::Solver *solver) override;
-    virtual std::unique_ptr<solver::HistoricalData> createRootInfo() override;
+    virtual std::unique_ptr<solver::HistoricalData> createRootHistoricalData() override;
 };
 
-class LegalActionsPool: public solver::DiscretizedActionPool {
+class LegalActionsPool: public solver::ActionPool {
   public:
-    LegalActionsPool(solver::Solver *solver,
-            solver::ModelWithDiscretizedActions *model, long numberOfBins);
+    LegalActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~LegalActionsPool() = default;
     _NO_COPY_OR_MOVE(LegalActionsPool);
 
     /** Creates a legal-only action mapping. */
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping() override;
+
+    /** Selects a random legal action for the rollout. */
+    virtual std::unique_ptr<solver::Action> getDefaultRolloutAction(solver::HistoricalData *data) const override;
+
+private:
+    solver::ModelWithDiscretizedActions *model_;
+    long numberOfBins_;
 };
 
 class LegalActionsMap : public solver::DiscretizedActionMap {
     friend class LegalActionsTextSerializer;
 public:
-    LegalActionsMap(solver::ObservationPool *observationPool,
-            solver::ModelWithDiscretizedActions *model,
-            long numberOfBins);
+    LegalActionsMap(solver::ModelWithDiscretizedActions *model, long numberOfBins);
     virtual ~LegalActionsMap() = default;
     _NO_COPY_OR_MOVE(LegalActionsMap);
 
@@ -74,4 +80,4 @@ public:
 };
 } /* namespace rocksample */
 
-#endif /* ROCKSAMPLE_LEGALMAPPING_HPP_ */
+#endif /* ROCKSAMPLE_LEGALACTIONS_HPP_ */

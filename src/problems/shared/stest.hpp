@@ -69,13 +69,12 @@ int stest(int argc, char const *argv[], ProgramOptions *options) {
        solver::Solver solver(&randGen, std::move(newModel));
        std::unique_ptr<solver::Serializer> serializer(std::make_unique<SerializerType>(&solver));
        solver.setSerializer(std::move(serializer));
-       solver.loadStateFrom(inFile);
+       solver.getSerializer()->load(inFile);
 
-       std::ofstream outFile;
        std::ostringstream sstr;
        sstr << polPath << "2";
-       outFile.open(sstr.str());
-       solver.saveStateTo(outFile);
+       std::ofstream outFile(sstr.str());
+       solver.getSerializer()->save(outFile);
        outFile.close();
        return 0;
 }

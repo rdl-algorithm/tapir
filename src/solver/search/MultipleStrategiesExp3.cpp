@@ -14,7 +14,7 @@ MultipleStrategiesExp3::MultipleStrategiesExp3(Solver *solver,
                 SearchStrategy(solver),
             strategyExplorationCoefficient_(strategyExplorationCoefficient),
             strategies_(),
-            model_(solver_->getModel()) {
+            model_(getSolver()->getModel()) {
     for (unsigned long index = 0; index < strategies.size(); index++) {
         StrategyInfo info;
         info.strategyNo = index;
@@ -28,7 +28,7 @@ MultipleStrategiesExp3::MultipleStrategiesExp3(Solver *solver,
 std::unique_ptr<SearchInstance> MultipleStrategiesExp3::createSearchInstance(
        HistorySequence *sequence, long maximumDepth) {
     return std::make_unique<MultipleStrategiesExp3Instance>(this,
-            solver_, sequence, maximumDepth);
+            getSolver(), sequence, maximumDepth);
 }
 
 StrategyInfo *MultipleStrategiesExp3::sampleAStrategy(

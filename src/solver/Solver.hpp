@@ -1,7 +1,8 @@
 #ifndef SOLVER_SOLVER_HPP_
 #define SOLVER_SOLVER_HPP_
 
-#include <memory>                       // for unique_ptr
+#include <map>
+#include <memory>        // for unique_ptr
 #include <set>                          // for set
 #include <unordered_set>
 #include <utility>                      // for pair
@@ -31,66 +32,68 @@ class StateInfo;
 class StatePool;
 
 class Solver {
-  public:
+public:
     friend class Serializer;
     friend class TextSerializer;
 
     Solver(RandomGenerator *randGen, std::unique_ptr<Model> model);
     ~Solver();
+
     _NO_COPY_OR_MOVE(Solver);
-
-    /* ------------------ Initialization methods ------------------- */
-    /** Fully initializes the solver, creating an empty state. */
-    void initializeEmpty();
-    /** Initializes the solver; not necessarily in an empty state (e.g. after
-     * loading from a file).
-     */
-    void initialize();
-    /** Sets the serializer to be used by this solver. */
-    void setSerializer(std::unique_ptr<Serializer> serializer);
-    /** Saves the state of the solver to the given output stream. */
-    void saveStateTo(std::ostream &os);
-    /** Loads the state of the solver from the given input stream. */
-    void loadStateFrom(std::istream &is);
-
-    /* ------------------ Solution methods ------------------- */
-    /** Generates a starting policy for the solver, by generating the given
-     * number (historiesPerStep) of episodes, and terminating episodes when the
-     * depth reaches maximumDepth.
-     */
-    void genPol(long historiesPerStep, long maximumDepth);
-    /** Runs a single simulation up to a maximum of nSteps steps, and generating
-     * historiesPerStep histories every step.
-     * The return value is the resulting total discounted reward.
-     *
-     * Also sets trajSt, trajActId, trajObs, and trajRew to be the sequences
-     * of states, actions, observations, and immediate rewards;
-     *
-     * actualNSteps will be the actual number of steps, which will be
-     * different to nSteps if a terminal state is reached early.
-     * totChTime will be the total amount of time spent on changing the model.
-     * totImpTime will be the total amount of time spent on generating new
-     * episodes to improve the policy.
-     */
-    double runSim(long nSteps, long historiesPerStep, std::vector<long> &changeTimes,
-            std::vector<std::unique_ptr<State>> &trajSt,
-            std::vector<std::unique_ptr<Action>> &trajAction,
-            std::vector<std::unique_ptr<Observation>> &trajObs,
-            std::vector<double> &trajRew, long *actualNSteps, double *totChTime,
-            double *totImpTime);
 
     /* ------------------ Simple getters. ------------------- */
     /** Returns the policy. */
-    BeliefTree *getPolicy();
+    BeliefTree *getPolicy() const;
     /** Returns the state pool. */
-    StatePool *getStatePool();
+    StatePool *getStatePool() const;
     /** Returns the model. */
-    Model *getModel();
+    Model *getModel() const;
     /** Returns the action pool. */
-    ActionPool *getActionPool();
+    ActionPool *getActionPool() const;
     /** Returns the observation pool. */
-    ObservationPool *getObservationPool();
+    ObservationPool *getObservationPool() const;
 
+    /* ------------------ Initialization methods ------------------- */
+    /** Full initialization - resets all data structures. */
+    void initializeEmpty();
+    /** Returns the serializer for this solver. */
+    Serializer *getSerializer();
+    /** Sets the serializer to be used by this solver. */
+    void setSerializer(std::unique_ptr<Serializer> serializer);
+
+    /* ------------------- Policy mutators ------------------- */
+    /** Improves the policy by generating the given number of histories from
+     * root node (-1 => default)
+     * Histories are terminated upon reaching the maximum depth in the tree
+     * (-1 => default)
+     */
+    void improvePolicy(long numberOfHistories=-1, long maximumDepth=-1);
+    /** Improves the policy by generating the given number of histories from
+     * the given belief node.
+     */
+    void improvePolicy(BeliefNode *startNode, long numberOfHistories=-1,
+            long maximumDepth=-1);
+    /** Applies any model changes that have been marked within the state pool */
+    void applyChanges();
+    /** Replenishes the particle count in the child node, ensuring that it
+     * has at least the given number of particles
+     * (-1 => default == model.getMinParticleCount())
+     */
+    BeliefNode *replenishChild(BeliefNode *currNode, Action const &action,
+            Observation const &obs, long minParticleCount=-1);
+
+    /* ------------------ Display methods  ------------------- */
+    /** Shows a belief node in a nice, readable way. */
+    void printBelief(BeliefNode *belief, std::ostream &os);
+
+private:
+    /* ------------------ Initialization methods ------------------- */
+    /** Partial pre-initialization - helper for full initialization,
+     *    and for loading from a file.
+     */
+    void initialize();
+
+<<<<<<< HEAD
     /* Stuff temporarily made public - Josh */
         /** Improves the solution with the root at the given node. */
     void improveSolution(BeliefNode *startNode, long historiesPerStep,
@@ -103,14 +106,18 @@ class Solver {
     void printBelief(BeliefNode *belief, std::ostream &os);
 
   private:
+=======
+>>>>>>> master
     /* ------------------ Episode sampling methods ------------------- */
-    /** Searches from the root node for initial policy generation. */
-    void singleSearch(long maximumDepth);
+    /** Runs multiple searches from the given start node and start states. */
+    void multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
+            long maximumDepth=-1);
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-            long startDepth, long maximumDepth);
+            long maximumDepth=-1);
     /** Continues a pre-existing history sequence from its endpoint. */
-    void continueSearch(HistorySequence *sequence, long maximumDepth);
+    void continueSearch(HistorySequence *sequence,
+            long maximumDepth=-1);
 
     /* ------------------ Tree backup methods ------------------- */
     /** Calculates the discounted rewards from each entry to the end of
@@ -120,6 +127,7 @@ class Solver {
     /** Performs or negates a backup on the given sequence. */
     void backup(HistorySequence *sequence, bool backingUp);
 
+<<<<<<< HEAD
     /* ------------------ Simulation methods ------------------- */
     /** Simulates a single step. */
     //Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
@@ -144,6 +152,8 @@ class Solver {
     /** Shows a belief node in a nice, readable way. */
     //void printBelief(BeliefNode *belief, std::ostream &os);
 
+=======
+>>>>>>> master
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */
     RandomGenerator *randGen_;
@@ -167,7 +177,6 @@ class Solver {
 
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;
-
     /** The strategy to use when selecting nodes within the tree. */
     std::unique_ptr<SearchStrategy> selectionStrategy_;
     /** The strategy to use when rolling out. */

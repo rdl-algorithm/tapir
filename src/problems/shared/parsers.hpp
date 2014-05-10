@@ -82,10 +82,10 @@ class NnRolloutParser : public Parser<solver::SearchStrategy> {
             std::vector<std::string> args) override;
 };
 
-class RandomRolloutParser : public Parser<solver::SearchStrategy> {
+class DefaultRolloutParser : public Parser<solver::SearchStrategy> {
   public:
-    RandomRolloutParser() = default;
-    virtual ~RandomRolloutParser() = default;
+    DefaultRolloutParser() = default;
+    virtual ~DefaultRolloutParser() = default;
     virtual std::unique_ptr<solver::SearchStrategy> parse(
             solver::Solver *solver,
             ParserSet<solver::SearchStrategy> *allParser,

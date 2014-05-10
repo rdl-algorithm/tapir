@@ -69,6 +69,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     mapText_(), // push rows
     envMap_(), // push rows
     usingOnlyLegal_(vm["heuristics.useOnlyLegal"].as<bool>()),
+    usingPreferredInit_(vm["heuristics.usePreferredInit"].as<bool>()),
+    preferredQValue_(vm["heuristics.preferredQValue"].as<double>()),
+    preferredVisitCount_(vm["heuristics.preferredVisitCount"].as<long>()),
     usingExactMdp_(vm["heuristics.exactMdp"].as<bool>()),
     mdpSolver_(nullptr),
     nStVars_(), // depends on nRocks
@@ -102,6 +105,20 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         cout << "nRocks: " << nRocks_ << endl;
         cout << "Environment:" << endl;
         drawEnv(cout);
+        cout << endl;
+    }
+
+    // MDP solution.
+    if (heuristicEnabled() && usingExactMdp_) {
+        if (hasVerboseOutput()) {
+            cout << "Solving MDP...";
+            cout.flush();
+        }
+        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
+        mdpSolver_->solve();
+        if (hasVerboseOutput()) {
+            cout << "     Done." << endl << endl;
+        }
     }
 }
 
@@ -133,18 +150,6 @@ void RockSampleModel::initialize() {
     minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
     setAllActions(getAllActionsInOrder());
-
-    if (heuristicEnabled() && usingExactMdp_) {
-        if (hasVerboseOutput()) {
-            cout << "Solving MDP...";
-            cout.flush();
-        }
-        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
-        mdpSolver_->solve();
-        if (hasVerboseOutput()) {
-            cout << "     Done." << endl;
-        }
-    }
 }
 
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
@@ -190,7 +195,7 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
     GridPosition pos = rockSampleState.getPosition();
-    return envMap_[pos.i][pos.j] == GOAL;
+    return getCellType(pos) == GOAL;
 }
 
 double RockSampleModel::getHeuristicValue(solver::State const &state) {
@@ -247,7 +252,7 @@ std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
     if (actionType == ActionType::CHECK) {
         // Do nothing - the state remains the same.
     } else if (actionType == ActionType::SAMPLE) {
-        int rockNo = envMap_[pos.i][pos.j] - ROCK;
+        int rockNo = getCellType(pos) - ROCK;
         if (rockNo < 0 || rockNo >= nRocks_) {
             isValid = false;
         }
@@ -297,7 +302,7 @@ std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState
     std::vector<bool> rockStates(state.getRockStates());
     ActionType actionType = action.getActionType();
     if (actionType == ActionType::SAMPLE) {
-        int rockNo = envMap_[nextPos.i][nextPos.j] - ROCK;
+        int rockNo = getCellType(nextPos) - ROCK;
         rockStates[rockNo] = false;
     }
 
@@ -316,9 +321,8 @@ std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
     GridPosition pos(nextState.getPosition());
     std::vector<bool> rockStates(nextState.getRockStates());
     double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
-    double efficiency =
-        (1 + std::pow(2, -dist / halfEfficiencyDistance_)) * 0.5;
-    bool obsMatches = std::bernoulli_distribution(efficiency)(*getRandomGenerator());
+    bool obsMatches = std::bernoulli_distribution(
+            getSensorCorrectnessProbability(dist))(*getRandomGenerator());
     return std::make_unique<RockSampleObservation>(rockStates[rockNo] == obsMatches);
 }
 
@@ -336,7 +340,7 @@ double RockSampleModel::makeReward(RockSampleState const &state,
     ActionType actionType = action.getActionType();
     if (actionType == ActionType::SAMPLE) {
         GridPosition pos = state.getPosition();
-        int rockNo = envMap_[pos.i][pos.j] - ROCK;
+        int rockNo = getCellType(pos) - ROCK;
         if (0 <= rockNo && rockNo < nRocks_) {
             return state.getRockStates()[rockNo] ? goodRockReward_
                    : -badRockPenalty_;
@@ -408,6 +412,7 @@ solver::Model::StepResult RockSampleModel::generateStep(
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::BeliefNode */*previousBelief*/,
         solver::Action const &action, solver::Observation const &obs,
+        long nParticles,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
 
@@ -427,22 +432,19 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
                 static_cast<RockSampleState const *>(state);
             GridPosition pos(rockSampleState->getPosition());
             double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
-            double efficiency = ((1
-                                  + std::pow(2, -dist
-                                          / halfEfficiencyDistance_)) * 0.5);
             bool rockIsGood = rockSampleState->getRockStates()[rockNo];
-            double probability;
+
+
+            double probability = getSensorCorrectnessProbability(dist);
             RockSampleObservation const &observation = (
                     static_cast<RockSampleObservation const &>(obs));
-            if (rockIsGood == observation.isGood()) {
-                probability = efficiency;
-            } else {
-                probability = 1 - efficiency;
+            if (rockIsGood != observation.isGood()) {
+                probability = 1 - probability;
             }
             weights[*rockSampleState] += probability;
             weightTotal += probability;
         }
-        double scale = getNParticles() / weightTotal;
+        double scale = nParticles / weightTotal;
         for (WeightMap::value_type &it : weights) {
             double proportion = it.second * scale;
             long numToAdd = static_cast<long>(proportion);
@@ -472,9 +474,10 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
 
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::BeliefNode */*previousBelief*/,
-        solver::Action const &action, solver::Observation const &obs) {
+        solver::Action const &action, solver::Observation const &obs,
+        long nParticles) {
     std::vector<std::unique_ptr<solver::State>> particles;
-    while (particles.size() < getNParticles()) {
+    while ((long)particles.size() < nParticles) {
         std::unique_ptr<solver::State> state = sampleStateUniform();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {
@@ -482,14 +485,6 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         }
     }
     return particles;
-}
-
-std::vector<long> RockSampleModel::loadChanges(char const */*changeFilename*/) {
-    std::vector<long> result;
-    return result;
-}
-
-void RockSampleModel::update(long /*time*/, solver::StatePool */*pool*/) {
 }
 
 void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
@@ -520,7 +515,7 @@ void RockSampleModel::drawEnv(std::ostream &os) {
     }
 }
 
-void RockSampleModel::drawSimulationState(solver::BeliefNode *belief,
+void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state, std::ostream &os) {
     RockSampleState const &rockSampleState =
             static_cast<RockSampleState const &>(state);

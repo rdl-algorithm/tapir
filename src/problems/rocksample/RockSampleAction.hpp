@@ -24,9 +24,7 @@ class RockSampleAction : public solver::DiscretizedPoint {
   public:
     RockSampleAction(ActionType actionType, long rockNo = 0);
     RockSampleAction(long code);
-
     virtual ~RockSampleAction() = default;
-    _NO_COPY_OR_MOVE(RockSampleAction);
 
     std::unique_ptr<solver::Action> copy() const override;
     double distanceTo(solver::Action const &otherAction) const override;

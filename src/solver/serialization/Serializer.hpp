@@ -5,6 +5,7 @@
 #include <memory>                       // for unique_ptr
 
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/ModelChange.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"
 
 #include "solver/mappings/ActionPool.hpp"
@@ -29,23 +30,24 @@ class StatePool;
 
 class Serializer {
 public:
-    /** Constructs a serializer for the given solver. */
+    /** Constructs a serializer without an associated solver. */
     Serializer() :
-            solver_(nullptr),
-            model_(nullptr) {
+            solver_(nullptr) {
     }
-
+    /** Constructs a serializer for the given solver. */
     Serializer(Solver *solver) :
-            solver_(solver),
-            model_(solver_->model_.get()) {
+            solver_(solver) {
     }
 
     void setSolver(Solver *solver) {
         solver_ = solver;
     }
-
-    Solver *getSolver() {
+    Solver *getSolver() const {
         return solver_;
+    }
+
+    Model *getModel() const {
+        return solver_->getModel();
     }
 
     /** Default destructor. */
@@ -66,16 +68,27 @@ public:
     }
     /** Loads the state of the solver. */
     virtual void load(std::istream &is) {
+    	solver_->initialize();
+
         load(*(solver_->statePool_), is);
         load(*(solver_->histories_), is);
         solver_->actionPool_ = loadActionPool(is);
         solver_->observationPool_ = loadObservationPool(is);
         load(*(solver_->policy_), is);
-        solver_->initialize();
     }
 
-    /* --------------- Saving states & observations ----------------- */
+    /* ------------------ Saving change sequences -------------------- */
+    /** Saves a sequence of model changes. */
+    virtual void saveChangeSequence(ChangeSequence const &sequence, std::ostream &os) = 0;
+    /** Loads a sequence of model changes. */
+    virtual ChangeSequence loadChangeSequence(std::istream &is) = 0;
 
+    /** Saves a single ModelChange. */
+    virtual void saveModelChange(ModelChange const &change, std::ostream &os) = 0;
+    /** Loads a single ModelChange. */
+    virtual std::unique_ptr<ModelChange> loadModelChange(std::istream &is) = 0;
+
+    /* --------------- Saving states & observations ----------------- */
     // NOTE: null values need to be handled for saving of observations
     // and of actions
 
@@ -134,7 +147,6 @@ public:
     virtual std::unique_ptr<HistoricalData> loadHistoricalData(std::istream &is) = 0;
 
     /* --------------- Saving the state pool ----------------- */
-
     /** Saves a StateInfo. */
     virtual void save(StateInfo const &wrapper, std::ostream &os) = 0;
     /** Loads a StateInfo. */
@@ -146,7 +158,6 @@ public:
 
 
     /* --------------- Saving the history sequences ----------------- */
-
     /** Saves a HistoryEntry. */
     virtual void save(HistoryEntry const &entry, std::ostream &os) = 0;
     /** Loads a HistoryEntry. */
@@ -161,7 +172,6 @@ public:
     virtual void load(Histories &histories, std::istream &is) = 0;
 
     /* --------------- Saving the policy tree ----------------- */
-
     /** Saves an ActionNode. */
     virtual void save(ActionNode const &node, std::ostream &os) = 0;
     /** Loads an ActionNode. */
@@ -174,9 +184,8 @@ public:
     virtual void save(BeliefTree const &tree, std::ostream &os) = 0;
     /** Loads a BeliefTree. */
     virtual void load(BeliefTree &tree, std::istream &is) = 0;
-  protected:
+  private:
     Solver *solver_;
-    Model *model_;
 };
 } /* namespace solver */
 

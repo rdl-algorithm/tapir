@@ -28,18 +28,17 @@ class NnRolloutStrategy: public SearchStrategy {
     std::unordered_map<BeliefNode *, NnData> nnMap_;
 };
 
-class NnRolloutInstance: public AbstractSearchInstance {
+class NnRolloutInstance: public AbstractRolloutInstance {
   public:
-    NnRolloutInstance(NnRolloutStrategy *parent,
+    NnRolloutInstance(NnRolloutStrategy *strategy,
             Solver *solver, HistorySequence *sequence, long maximumDepth);
     virtual ~NnRolloutInstance() = default;
     _NO_COPY_OR_MOVE(NnRolloutInstance);
 
-    virtual SearchStatus initialize() override;
-    virtual std::pair<SearchStatus, std::unique_ptr<Action>>
-    getStatusAndNextAction() override;
+    virtual SearchStatus initializeCustom(BeliefNode *currentNode) override;
+    virtual SearchStep getSearchStep(HistoricalData *historicalData) override;
   private:
-    NnRolloutStrategy *parent_;
+    NnRolloutStrategy *strategy_;
     BeliefNode *rootNeighborNode_;
     BeliefNode *currentNeighborNode_;
     std::unique_ptr<Action> previousAction_;

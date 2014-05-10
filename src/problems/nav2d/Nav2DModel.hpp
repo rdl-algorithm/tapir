@@ -16,6 +16,8 @@
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
 #include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+#include "solver/abstract-problem/ModelChange.hpp"            // for ModelChange
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/abstract-problem/State.hpp"       // for State
 
@@ -23,7 +25,7 @@
 #include "solver/mappings/approximate_observations.hpp"
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
-#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+
 
 #include "Nav2DState.hpp"
 
@@ -135,8 +137,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
             solver::State const &state,
             solver::Action const &action) override;
 
-    virtual std::vector<long> loadChanges(char const *changeFilename) override;
-    virtual void update(long time, solver::StatePool *pool) override;
+    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
     /** Returns the tree with the given object type. */
     geometry::RTree *getTree(AreaType type);
@@ -154,7 +155,7 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     /** Displays an individual point on the map. */
     virtual void dispPoint(AreaType type, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
-    virtual void drawSimulationState(solver::BeliefNode *belief,
+    virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 
@@ -236,23 +237,21 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     geometry::RTree startAreaTree_;
     geometry::RTree observationAreaTree_;
 
-    /** Represents a change in the Tag model. */
-    struct Nav2DChange {
-        std::string operation = "";
-        AreaType type = AreaType::EMPTY;
-        int64_t id = 0;
-        geometry::Rectangle2D area{};
-    };
-
-    /** The changes (scheduled for simulation). */
-    std::map<long, std::vector<Nav2DChange>> changes_;
-
   public:
     double getTimeStepLength() const { return timeStepLength_; }
     double getMaxSpeed() const { return maxSpeed_; }
     double getCostPerUnitDistance() const { return costPerUnitDistance_; }
     double getMaxRotationalSpeed() const { return maxRotationalSpeed_; }
     double getCostPerRevolution() const { return costPerRevolution_; }
+};
+
+
+/** Represents a change in the Tag model. */
+struct Nav2DChange : public solver::ModelChange {
+    std::string operation = "";
+    Nav2DModel::AreaType type = Nav2DModel::AreaType::EMPTY;
+    int64_t id = 0;
+    geometry::Rectangle2D area{};
 };
 } /* namespace nav2d */
 

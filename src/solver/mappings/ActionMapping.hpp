@@ -15,7 +15,6 @@ class ActionMapping {
 public:
     ActionMapping() = default;
     virtual ~ActionMapping() = default;
-    _NO_COPY_OR_MOVE(ActionMapping);
 
     /* -------------- Association with a belief node ---------------- */
     /* Associates this mapping with the given belief node. */
@@ -39,50 +38,60 @@ public:
     virtual ActionNode *getActionNode(Action const &action) const = 0;
     /** Creates a new action node for the given action. */
     virtual ActionNode *createActionNode(Action const &action) = 0;
-
-    /* -------------- Retrieval of mapping entries. ---------------- */
     /** Returns the number of child nodes associated with this mapping. */
     virtual long getNChildren() const = 0;
-    /** Returns all the entries associated with children in this mapping (i.e.
-     * containing non-null action nodes).
+
+    /* -------------- Retrieval of mapping entries. ---------------- */
+    /** Returns the number of entries in this mapping with a nonzero visit
+     * count (some of these may not have an associated action node, so this
+     * is different to the number of child nodes).
      */
-    virtual std::vector<ActionMappingEntry const *> getChildEntries() const = 0;
-    /** Returns the mapping entry associated with the given action. */
+    virtual long getNumberOfVisitedEntries() const = 0;
+    /** Returns all of the visited entries in this mapping - some may have
+     * null action nodes if the visit counts were initialized to nonzero
+     * values.
+     */
+    virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const = 0;
+    /** Returns the mapping entry (if any) associated with the given action. */
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
-    /* -------------- Retrieval of general statistics. ---------------- */
-    /** Returns the total number of times children have been visited. */
-    virtual long getTotalVisitCount() const = 0;
-    /** Chooses the action with the highest q-value. */
-    virtual std::unique_ptr<Action> getBestAction() const = 0;
-    /** Returns the best q-value. */
-    virtual double getMaxQValue() const = 0;
+    /* ------------------- Action recommendations. --------------------- */
+    /** Returns the recommended action - defaults to using the empirical best
+     * action,  or a random action that has not been tried if there is not
+     * yet an empirical best.
+     */
+    virtual std::unique_ptr<Action> getRecommendedAction() const {
+        std::unique_ptr<Action> action = getEmpiricalBestAction();
+        if (action == nullptr) {
+            action = getRandomUnvisitedAction();
+        }
+        return action;
+    }
+    /** Returns the action with the highest estimated q-value. */
+    virtual std::unique_ptr<Action> getEmpiricalBestAction() const = 0;
     /** Returns the robust action (i.e. the action with the highest
      * visit count (optional).
      */
     virtual std::unique_ptr<Action> getRobustAction() const {
         return nullptr;
     }
+
+    /* -------------- Retrieval of general statistics. ---------------- */
+    /** Returns the total number of times children have been visited. */
+    virtual long getTotalVisitCount() const = 0;
+    /** Returns the best q-value. */
+    virtual double getMaxQValue() const = 0;
     /** Returns the robust q-value (optional) */
     virtual double getRobustQValue() const {
         return -std::numeric_limits<double>::infinity();
     }
 
     /* ------------ Methods for retrieving unvisited actions -------------- */
-    /** Returns true iff there is another action that has not been visited. */
     virtual bool hasUnvisitedActions() const = 0;
-    /** Returns the unvisited actions for this node. */
+    /** Returns the unvisited actions (that should be visited) for this node. */
     virtual std::vector<std::unique_ptr<Action>> getUnvisitedActions() const = 0;
     /** Returns a random unvisited action. */
     virtual std::unique_ptr<Action> getRandomUnvisitedAction() const = 0;
-
-    /* ------------ Easy getters for entry values. -------------- */
-    /** Returns the number of visits for the given action. */
-    virtual long getVisitCount(Action const &action) const = 0;
-    /** Returns the total q-value for the given action. */
-    virtual double getTotalQValue(Action const &action) const = 0;
-    /** Returns the mean q-value for the given action. */
-    virtual double getMeanQValue(Action const &action) const = 0;
 
     /* --------------- Methods for updating the values ----------------- */
     /** Updates the given action, by adding the given number of visits and the
@@ -97,7 +106,6 @@ class ActionMappingEntry {
 public:
     ActionMappingEntry() = default;
     virtual ~ActionMappingEntry() = default;
-    _NO_COPY_OR_MOVE(ActionMappingEntry);
 
     /** Returns the mapping this entry belongs to. */
     virtual ActionMapping *getMapping() const = 0;

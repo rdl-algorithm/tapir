@@ -23,26 +23,31 @@ class ActionNode;
 class HistoricalData;
 class HistoryEntry;
 class ObservationMappingEntry;
+class Solver;
 
 class BeliefNode {
   public:
+    friend class ActionNode;
+    friend class BeliefTree;
+    friend class HistoryEntry;
     friend class Solver;
     friend class TextSerializer;
 
-    /** Constructs a new belief node with no ID (-1). */
+    /** Constructs a new belief node with no ID, and no parent entry. */
     BeliefNode();
+    /** Constructs a new belief node with no ID (-1),
+     * and with the given mapping entry as its parent.
+     */
+    BeliefNode(ObservationMappingEntry *parentEntry);
+    /** Constructs a new belief node with the given ID,
+     * and with the given mapping entry as its parent.
+     */
+    BeliefNode(long id, ObservationMappingEntry *parentEntry);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefNode();
     _NO_COPY_OR_MOVE(BeliefNode);
 
-    /* -------------- Particle management / sampling ---------------- */
-    /** Adds the given history entry to this belief node. */
-    void addParticle(HistoryEntry *newHistEntry);
-    /** Removes the given history entry from this belief node. */
-    void removeParticle(HistoryEntry *histEntry);
-    /** Samples a particle from this node. */
-    HistoryEntry *sampleAParticle(RandomGenerator *randGen) const;
 
     /* ---------------- Useful calculations ------------------ */
     /** Calculates the distance between this belief node and another by
@@ -51,15 +56,13 @@ class BeliefNode {
      */
     double distL1Independent(BeliefNode *b) const;
 
-    /* -------------------- Simple setters ---------------------- */
-    /** Sets the id of this node. */
-    void setId(long id);
-
     /* -------------------- Simple getters ---------------------- */
     /** Returns the id of this node. */
     long getId() const;
-    /** Chooses the action with the best expected value. */
-    std::unique_ptr<Action> getBestAction() const;
+    /** Returns the depth of this node in the tree (0 = root). */
+    long getDepth() const;
+    /** Returns the recommended action to take from this node. */
+    std::unique_ptr<Action> getRecommendedAction() const;
     /** Returns the best q-value */
     double getQValue() const;
     /** Returns the number of particles in this node. */
@@ -71,13 +74,6 @@ class BeliefNode {
     /** Returns the time at which the last change occurred. */
     double getTimeOfLastChange() const;
 
-    /* -------------------- Tree-related setters  ---------------------- */
-    /** Sets the mapping for this node. */
-    void setMapping(std::unique_ptr<ActionMapping> mapping);
-    /** Sets the parent entry for this node. */
-    void setParentEntry(ObservationMappingEntry *entry);
-    /** Sets the history-derived information for this node. */
-    void setHistoricalData(std::unique_ptr<HistoricalData> data);
 
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
@@ -99,17 +95,34 @@ class BeliefNode {
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
 
+
+  private:
+    /* -------------- Particle management / sampling ---------------- */
+    /** Adds the given history entry to this belief node. */
+    void addParticle(HistoryEntry *newHistEntry);
+    /** Removes the given history entry from this belief node. */
+    void removeParticle(HistoryEntry *histEntry);
+
+    /* -------------------- Tree-related setters  ---------------------- */
+    /** Sets the mapping for this node. */
+    void setMapping(std::unique_ptr<ActionMapping> mapping);
+    /** Sets the history-derived information for this node. */
+    void setHistoricalData(std::unique_ptr<HistoricalData> data);
+
     /* -------------------- Tree-related methods  ---------------------- */
     /** Adds a child for the given action and observation;
      * returns the child node, and a boolean which is true iff a new node was
      * actually created.
      */
-    std::pair<BeliefNode *, bool> createOrGetChild(Action const &action,
-            Observation const &obs);
+    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver,
+            Action const &action, Observation const &obs);
 
 private:
     /** The ID of this node. */
     long id_;
+
+    /** The depth of this node in the tree. */
+    long depth_;
 
     /** The observation entry that is this node's parent / owner. */
     ObservationMappingEntry *parentEntry_;

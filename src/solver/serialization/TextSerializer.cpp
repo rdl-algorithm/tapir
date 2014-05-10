@@ -21,11 +21,11 @@
 #include "solver/StateInfo.hpp"                // for StateInfo, StateInfo::currId
 #include "solver/StatePool.hpp"                // for StatePool, StatePool::StateInfoSet
 
-
 #include "solver/mappings/ActionMapping.hpp"
 #include "solver/mappings/ObservationMapping.hpp"          // for ObservationMapping
 
-#include "solver/abstract-problem/Action.hpp"              // for Observation
+#include "solver/abstract-problem/Action.hpp"              // for Action
+#include "solver/abstract-problem/ModelChange.hpp"              // for ModelChange
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State, operator<<
 
@@ -34,15 +34,53 @@
 using std::endl;
 
 namespace solver {
-void TextSerializer::saveTransitionParameters(
-        TransitionParameters const */*tp*/, std::ostream &/*os*/) {
+/* ------------------ Saving change sequences -------------------- */
+void TextSerializer::saveChangeSequence(ChangeSequence const &sequence, std::ostream &os) {
+    for (auto &entry : sequence) {
+        os << "t " << entry.first << " : " << entry.second.size() << std::endl;
+        for (std::unique_ptr<ModelChange> const &change : entry.second) {
+            saveModelChange(*change, os);
+            os << std::endl;
+        }
+    }
+}
+ChangeSequence TextSerializer::loadChangeSequence(
+        std::istream &is){
+    std::map<long, std::vector<std::unique_ptr<ModelChange>>> changes;
+    std::string line;
+    while (std::getline(is, line)) {
+        std::string tmpStr;
+        long time;
+        long nChanges;
+        std::istringstream(line) >> tmpStr >> time >> tmpStr >> nChanges;
+
+        changes[time] = std::vector<std::unique_ptr<ModelChange>>();
+        for (int i = 0; i < nChanges; i++) {
+            std::getline(is, line);
+            std::istringstream sstr(line);
+            changes[time].push_back(loadModelChange(sstr));
+        }
+    }
+    return changes;
+}
+void TextSerializer::saveModelChange(ModelChange const &/*change*/, std::ostream &/*os*/) {
+    // Do nothing!
+}
+std::unique_ptr<ModelChange> TextSerializer::loadModelChange(std::istream &/*is*/) {
+    return nullptr;
 }
 
+/* ------------------ Saving transition parameters -------------------- */
+void TextSerializer::saveTransitionParameters(
+        TransitionParameters const */*tp*/, std::ostream &/*os*/) {
+    // Do nothing!
+}
 std::unique_ptr<TransitionParameters> TextSerializer::loadTransitionParameters(
         std::istream &/*is*/) {
     return nullptr;
 }
 
+/* ------------------ Saving historical data -------------------- */
 void TextSerializer::saveHistoricalData(HistoricalData const */*data*/,
         std::ostream &/*os*/) {
 }
@@ -75,8 +113,6 @@ void TextSerializer::save(StatePool const &pool, std::ostream &os) {
 }
 
 void TextSerializer::load(StatePool &pool, std::istream &is) {
-    pool.reset();
-
     std::string line;
     std::getline(is, line);
     while (line.find("STATESPOOL-BEGIN") == std::string::npos) {
@@ -159,12 +195,12 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     std::getline(is, tmpStr, ')');
     std::istringstream(tmpStr) >> entry.rewardFromHere_;
     entry.hasBeenBackedUp_ = true;
-    entry.registerState(solver_->statePool_->getInfoById(stateId));
+    entry.registerState(getSolver()->getStatePool()->getInfoById(stateId));
 }
 
 void TextSerializer::save(HistorySequence const &seq, std::ostream &os) {
-    os << "HistorySequence " << seq.id_ << " - length " << seq.entrySequence_.size()
-       << " at depth " << seq.startDepth_ << endl;
+    os << "HistorySequence " << seq.id_;
+    os << " - length " << seq.entrySequence_.size() << std::endl;
     for (std::unique_ptr<HistoryEntry> const &entry : seq.entrySequence_) {
         save(*entry, os);
         os << endl;
@@ -178,7 +214,6 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
     std::istringstream sstr(line);
     std::string tmpStr;
     sstr >> tmpStr >> seq.id_ >> tmpStr >> tmpStr >> seqLength;
-    sstr >> tmpStr >> tmpStr >> seq.startDepth_;
     for (int i = 0; i < seqLength; i++) {
         std::getline(is, line);
         std::unique_ptr<HistoryEntry> entry(std::make_unique<HistoryEntry>());
@@ -200,8 +235,6 @@ void TextSerializer::save(Histories const &histories, std::ostream &os) {
 }
 
 void TextSerializer::load(Histories &histories, std::istream &is) {
-    histories.reset();
-
     std::string line;
     std::getline(is, line);
     while (line.find("HISTORIES-BEGIN") == std::string::npos) {
@@ -238,6 +271,12 @@ void TextSerializer::save(ActionNode const &node, std::ostream &os) {
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
     node.setMapping(loadObservationMapping(is));
+    for (ObservationMappingEntry const *entry : node.getMapping()->getAllEntries()) {
+        BeliefNode *childNode = entry->getBeliefNode();
+        if (childNode != nullptr) {
+            getSolver()->getPolicy()->addNode(childNode);
+        }
+    }
 }
 
 void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
@@ -274,8 +313,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
     if (line != "No particles!") {
         long nParticles;
         std::string tmpStr;
-        std::istringstream countsStream(line);
-        countsStream >> nParticles;
+        std::istringstream(line) >> nParticles;
 
         std::getline(is, line);
         long numParticlesRead = 0;
@@ -284,7 +322,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
             for (int i = 0; i < NUM_PARTICLES_PER_LINE; i++) {
                 long seqId, entryId;
                 sstr >> tmpStr >> seqId >> entryId >> tmpStr;
-                HistorySequence *sequence = solver_->histories_->getSequence(
+                HistorySequence *sequence = getSolver()->histories_->getSequence(
                         seqId);
                 HistoryEntry *entry = sequence->getEntry(entryId);
                 entry->registerNode(&node);
@@ -326,8 +364,6 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
     long nNodes;
     std::string tmpStr;
     std::istringstream(line) >> tmpStr >> nNodes;
-
-    tree.setRoot(std::make_unique<BeliefNode>());
     tree.allNodes_.resize(nNodes);
 
     std::getline(is, line);

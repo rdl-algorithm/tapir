@@ -5,23 +5,19 @@
 
 #include "global.hpp"
 
+#include "solver/Solver.hpp"
+
 namespace solver {
 class HistorySequence;
 class Model;
-class Solver;
 
 class HistoryCorrector {
 public:
-    HistoryCorrector(Solver *solver, Model *model) :
-        solver_(solver),
-        model_(model) {
+    HistoryCorrector(Solver *solver) :
+        solver_(solver) {
     }
     virtual ~HistoryCorrector() = default;
     _NO_COPY_OR_MOVE(HistoryCorrector);
-
-    virtual void setSolver(Solver *solver) {
-        solver_ = solver;
-    }
 
     virtual void reviseHistories(
             std::unordered_set<HistorySequence *> &affectedSequences) {
@@ -31,9 +27,17 @@ public:
     }
     virtual void reviseSequence(HistorySequence *sequence) = 0;
 
-protected:
+    /** Returns the solver used with this corrector. */
+    virtual Solver *getSolver() const {
+        return solver_;
+    }
+    /** Returns the model used with this corrector. */
+    virtual Model *getModel() const {
+        return solver_->getModel();
+    }
+
+private:
     Solver *solver_;
-    Model *model_;
 };
 
 } /* namespace solver */

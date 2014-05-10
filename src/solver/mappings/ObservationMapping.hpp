@@ -16,7 +16,6 @@ class ObservationMapping {
   public:
     ObservationMapping() = default;
     virtual ~ObservationMapping() = default;
-    _NO_COPY_OR_MOVE(ObservationMapping);
 
     /* -------------- Association with an action node ---------------- */
     /* Associates this mapping with the given action node. */
@@ -35,6 +34,8 @@ class ObservationMapping {
     virtual long getNChildren() const = 0;
     /** Returns the mapping entry associated with the given observation. */
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const = 0;
+    /** Returns a vector of all of the entries in this mapping. */
+    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const = 0;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     /** Updates the visit count for the given observation. */
@@ -49,7 +50,6 @@ class ObservationMappingEntry {
 public:
     ObservationMappingEntry() = default;
     virtual ~ObservationMappingEntry() = default;
-    _NO_COPY_OR_MOVE(ObservationMappingEntry);
 
     /** Returns the mapping this entry belongs to. */
     virtual ObservationMapping *getMapping() const = 0;

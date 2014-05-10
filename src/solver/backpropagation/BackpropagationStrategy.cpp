@@ -17,4 +17,8 @@ void AbstractBackpropagationStrategy::propagate(HistorySequence *sequence, bool 
         entry->hasBeenBackedUp_ = !undo;
     }
 }
+
+Solver *AbstractBackpropagationStrategy::getSolver() const {
+    return solver_;
+}
 } /* namespace solver */

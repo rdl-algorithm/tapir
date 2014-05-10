@@ -26,6 +26,50 @@ TagTextSerializer::TagTextSerializer(solver::Solver *solver) :
     solver::Serializer(solver) {
 }
 
+/* ------------------ Saving change sequences -------------------- */
+void saveVector(std::vector<long> values, std::ostream &os) {
+    os << "(";
+    for (auto it = values.begin(); it != values.end(); it++) {
+        os << *it;
+        if ((it + 1) != values.end()) {
+            os << ", ";
+        }
+    }
+    os << ")";
+}
+void TagTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
+    TagChange const &tagChange = static_cast<TagChange const &>(change);
+    os << tagChange.changeType;
+    os << ": ";
+    saveVector(std::vector<long> {(long)tagChange.i0, (long)tagChange.j0}, os);
+    os << " ";
+    saveVector(std::vector<long> {(long)tagChange.i1, (long)tagChange.j1}, os);
+}
+std::vector<long> loadVector(std::istream &is) {
+    std::vector<long> values;
+    std::string tmpStr;
+    std::getline(is, tmpStr, '(');
+    std::getline(is, tmpStr, ')');
+    std::istringstream sstr(tmpStr);
+    while (std::getline(sstr, tmpStr, ',')) {
+        long value;
+        std::istringstream(tmpStr) >> value;
+        values.push_back(value);
+    }
+    return values;
+}
+std::unique_ptr<solver::ModelChange> TagTextSerializer::loadModelChange(std::istream &is) {
+    std::unique_ptr<TagChange> change = std::make_unique<TagChange>();
+    std::getline(is, change->changeType, ':');
+    std::vector<long> v0 = loadVector(is);
+    std::vector<long> v1 = loadVector(is);
+    change->i0 = v0[0];
+    change->j0 = v0[1];
+    change->i1 = v1[0];
+    change->j1 = v1[1];
+    return std::move(change);
+}
+
 void TagTextSerializer::saveState(solver::State const *state, std::ostream &os) {
     TagState const &tagState = static_cast<TagState const &>(*state);
     os << tagState.robotPos_.i << " " << tagState.robotPos_.j << " "

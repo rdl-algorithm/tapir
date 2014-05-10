@@ -20,7 +20,7 @@
 #include "solver/search/HistoricalData.hpp"
 #include "solver/search/SearchStrategy.hpp"
 #include "solver/search/UcbSelectionStrategy.hpp"
-#include "solver/search/RandomRolloutStrategy.hpp"
+#include "solver/search/DefaultRolloutStrategy.hpp"
 
 #include "Action.hpp"        // for Action
 #include "State.hpp"                    // for State
@@ -37,12 +37,13 @@ std::unique_ptr<TransitionParameters> Model::generateTransition(
 std::vector<std::unique_ptr<State>> Model::generateParticles(
         BeliefNode *previousBelief,
         Action const &action, Observation const &obs,
+        long nParticles,
         std::vector<State const *> const &previousParticles) {
     std::vector<std::unique_ptr<State>> particles;
     ObservationMapping *obsMap = previousBelief->getMapping()->getActionNode(
             action)->getMapping();
     BeliefNode *childNode = obsMap->getBelief(obs);
-    while (particles.size() < getNParticles()) {
+    while ((long)particles.size() < nParticles) {
         long index = std::uniform_int_distribution<long>(0,
                 previousParticles.size() - 1)(*getRandomGenerator());
         State const *state = previousParticles[index];
@@ -56,12 +57,13 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
 
 std::vector<std::unique_ptr<State>> Model::generateParticles(
         BeliefNode *previousBelief,
-        Action const &action, Observation const &obs) {
+        Action const &action, Observation const &obs,
+        long nParticles) {
     std::vector<std::unique_ptr<State>> particles;
     ObservationMapping *obsMap = previousBelief->getMapping()->getActionNode(
             action)->getMapping();
     BeliefNode *childNode = obsMap->getBelief(obs);
-    while (particles.size() < getNParticles()) {
+    while ((long)particles.size() < nParticles) {
         std::unique_ptr<State> state = sampleStateUniform();
         StepResult result = generateStep(*state, action);
         if (obsMap->getBelief(*result.observation) == childNode) {
@@ -72,12 +74,7 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
 }
 
 // Default = no changes.
-std::vector<long> Model::loadChanges(char const */*changeFilename*/) {
-    return std::vector<long>{};
-}
-
-// Default = do nothing.
-void Model::update(long /*time*/, StatePool */*pool*/) {
+void Model::applyChange(ModelChange const &/*change*/, StatePool */*pool*/) {
 }
 
 std::unique_ptr<StateIndex> Model::createStateIndex() {
@@ -85,7 +82,7 @@ std::unique_ptr<StateIndex> Model::createStateIndex() {
 }
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) {
-    return std::make_unique<DefaultHistoryCorrector>(solver, this);
+    return std::make_unique<DefaultHistoryCorrector>(solver);
 }
 
 std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
@@ -93,7 +90,7 @@ std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
 }
 
 std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
-    return std::make_unique<RandomRolloutStrategy>(solver, 1);
+    return std::make_unique<DefaultRolloutStrategy>(solver, 1);
 }
 
 std::unique_ptr<BackpropagationStrategy> Model::createBackpropagationStrategy(
@@ -101,7 +98,7 @@ std::unique_ptr<BackpropagationStrategy> Model::createBackpropagationStrategy(
     return std::make_unique<AveragePropagator>(solver);
 }
 
-std::unique_ptr<HistoricalData> Model::createRootInfo() {
+std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {
     return nullptr;
 }
 
@@ -109,7 +106,7 @@ std::unique_ptr<HistoricalData> Model::createRootInfo() {
 // Default = do nothing.
 void Model::drawEnv(std::ostream &/*os*/) {
 }
-void Model::drawSimulationState(BeliefNode */*belief*/, State const &/*state*/,
+void Model::drawSimulationState(BeliefNode const */*belief*/, State const &/*state*/,
         std::ostream &/*os*/) {
 }
 std::string Model::getName() {

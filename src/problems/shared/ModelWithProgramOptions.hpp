@@ -16,7 +16,7 @@ public:
     ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
                 randGen_(randGen),
                 discountFactor_(vm["problem.discountFactor"].as<double>()),
-                nParticles_(vm["ABT.nParticles"].as<unsigned long>()),
+                minParticleCount_(vm["simulation.minParticleCount"].as<unsigned long>()),
                 historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
                 maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
                 selectionParsers_(),
@@ -32,7 +32,7 @@ public:
         registerSelectionParser("exp3", std::make_unique<Exp3Parser>());
 
         registerRolloutParser("nn", std::make_unique<NnRolloutParser>());
-        registerRolloutParser("random", std::make_unique<RandomRolloutParser>());
+        registerRolloutParser("default", std::make_unique<DefaultRolloutParser>());
         registerRolloutParser("exp3", std::make_unique<Exp3Parser>());
 
         registerBackpropagationParser("mean", std::make_unique<AveragePropagatorParser>());
@@ -51,8 +51,8 @@ public:
     virtual double getDiscountFactor() override {
         return discountFactor_;
     }
-    virtual unsigned long getNParticles() override {
-        return nParticles_;
+    virtual unsigned long getMinParticleCount() override {
+        return minParticleCount_;
     }
     virtual long getNumberOfHistoriesPerStep() override {
         return historiesPerStep_;
@@ -101,7 +101,7 @@ private:
     double discountFactor_;
 
 // ABT parameters
-    unsigned long nParticles_;
+    unsigned long minParticleCount_;
     long historiesPerStep_;
     long maximumDepth_;
 

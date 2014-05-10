@@ -33,18 +33,6 @@ StateInfo::StateInfo(State const &state) :
 StateInfo::~StateInfo() {
 }
 
-/* ----------------- History entry registration  ----------------- */
-void StateInfo::addHistoryEntry(HistoryEntry *entry) {
-    usedInHistoryEntries_.insert(entry);
-}
-void StateInfo::removeHistoryEntry(HistoryEntry *entry) {
-    usedInHistoryEntries_.erase(entry);
-}
-
-/* ---------------------- Simple setters  ---------------------- */
-void StateInfo::setId(long id) {
-    id_ = id;
-}
 
 /* ---------------------- Simple getters  ---------------------- */
 long StateInfo::getId() const {
@@ -52,6 +40,18 @@ long StateInfo::getId() const {
 }
 State const *StateInfo::getState() const {
     return state_.get();
+}
+
+
+/* ============================ PRIVATE ============================ */
+
+
+/* ----------------- History entry registration  ----------------- */
+void StateInfo::addHistoryEntry(HistoryEntry *entry) {
+    usedInHistoryEntries_.insert(entry);
+}
+void StateInfo::removeHistoryEntry(HistoryEntry *entry) {
+    usedInHistoryEntries_.erase(entry);
 }
 
 /* ---------------------- Model change handling  ---------------------- */

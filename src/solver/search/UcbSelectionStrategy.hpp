@@ -16,15 +16,14 @@ class UcbSelectionStrategy: public SearchStrategy {
     double explorationCoefficient_;
 };
 
-class UcbSelectionInstance: public AbstractSearchInstance {
+class UcbSelectionInstance: public AbstractSelectionInstance {
   public:
     UcbSelectionInstance(double explorationCoefficient,
             Solver *solver, HistorySequence *sequence,
             long maximumDepth);
-
-    virtual std::pair<SearchStatus, std::unique_ptr<Action>>
-    getStatusAndNextAction() override;
+    virtual SearchStep getSearchStep(BeliefNode *currentNode) override;
   private:
+    bool choseUnvisitedAction_;
     double explorationCoefficient_;
 };
 

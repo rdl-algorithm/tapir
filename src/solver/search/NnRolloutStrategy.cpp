@@ -29,7 +29,7 @@ BeliefNode* NnRolloutStrategy::findNeighbor(BeliefNode *belief) {
     }
 
     long numTried = 0;
-    for (BeliefNode *otherBelief : solver_->getPolicy()->getNodes()) {
+    for (BeliefNode *otherBelief : getSolver()->getPolicy()->getNodes()) {
         if (belief == otherBelief) {
             continue;
         }
@@ -57,44 +57,38 @@ BeliefNode* NnRolloutStrategy::findNeighbor(BeliefNode *belief) {
 
 std::unique_ptr<SearchInstance> NnRolloutStrategy::createSearchInstance(
         HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<NnRolloutInstance>(this, solver_,
+    return std::make_unique<NnRolloutInstance>(this, getSolver(),
             sequence, maximumDepth);
 }
 
-NnRolloutInstance::NnRolloutInstance(NnRolloutStrategy *parent,
+NnRolloutInstance::NnRolloutInstance(NnRolloutStrategy *strategy,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
-        AbstractSearchInstance(solver, sequence, maximumDepth),
-        parent_(parent),
+        AbstractRolloutInstance(solver, sequence, maximumDepth),
+        strategy_(strategy),
         rootNeighborNode_(nullptr),
         currentNeighborNode_(nullptr),
         previousAction_(nullptr) {
 }
 
-SearchStatus NnRolloutInstance::initialize() {
-    rootNeighborNode_ = parent_->findNeighbor(currentNode_);
+SearchStatus NnRolloutInstance::initializeCustom(BeliefNode *currentNode) {
+    rootNeighborNode_ = strategy_->findNeighbor(currentNode);
     currentNeighborNode_ = rootNeighborNode_;
     if (rootNeighborNode_ != nullptr) {
-        status_ = SearchStatus::INITIAL;
+        return SearchStatus::INITIAL;
     }
-    return status_;
+    return SearchStatus::UNINITIALIZED;
 }
 
-std::pair<SearchStatus, std::unique_ptr<Action>>
-NnRolloutInstance::getStatusAndNextAction() {
-    // If this is our first action, it *must* be one of the previously
-    // unselected rollout actions.
-    if (previousAction_ == nullptr) {
-        previousAction_ = currentNode_->getMapping()->getRandomUnvisitedAction();
-        return std::make_pair(SearchStatus::ROLLING_OUT, previousAction_->copy());
-    }
-    HistoryEntry *previousEntry = sequence_->getEntry(sequence_->getLength() - 2);
+SearchStep NnRolloutInstance::getSearchStep(HistoricalData */*historicalData*/) {
+    HistorySequence *sequence = getSequence();
+    HistoryEntry *previousEntry = sequence->getEntry(sequence->getLength() - 2);
     currentNeighborNode_ = currentNeighborNode_->getChild(*previousAction_,
             *previousEntry->getObservation());
 
     if (currentNeighborNode_ == nullptr) {
-        return std::make_pair(SearchStatus::ROLLOUT_COMPLETE, nullptr);
+        return SearchStep {SearchStatus::ROLLOUT_COMPLETE, nullptr, false};
     }
-    return std::make_pair(SearchStatus::ROLLING_OUT, currentNeighborNode_->getBestAction());
+    return SearchStep {SearchStatus::ROLLING_OUT, currentNeighborNode_->getRecommendedAction(), false};
 }
 
 } /* namespace solver */

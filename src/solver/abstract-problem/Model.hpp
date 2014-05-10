@@ -18,6 +18,7 @@ class HistoricalData;
 class BeliefNode;
 class BackpropagationStrategy;
 class HistoryCorrector;
+class ModelChange;
 class ObservationPool;
 class SearchStrategy;
 class Solver;
@@ -51,7 +52,7 @@ class Model {
     /** Returns the preferred number of particles per belief - this number will
      * be regenerated if particle depletion is detected.
      */
-    virtual unsigned long getNParticles() = 0;
+    virtual unsigned long getMinParticleCount() = 0;
     /** Returns the maximum number of trials (i.e. simulated episodes) to run
      * in a single time step.
      */
@@ -129,6 +130,7 @@ class Model {
     virtual std::vector<std::unique_ptr<State>> generateParticles(
             BeliefNode *previousBelief,
             Action const &action, Observation const &obs,
+            long nParticles,
             std::vector<State const *> const &previousParticles);
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
@@ -138,15 +140,11 @@ class Model {
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
             BeliefNode *previousBelief,
-            Action const &action, Observation const &obs);
+            Action const &action, Observation const &obs,
+            long nParticles);
 
     /* -------------- Methods for handling model changes ---------------- */
-    /** Loads future model changes from the given file. */
-    virtual std::vector<long> loadChanges(char const *changeFilename);
-    /** Updates the model to reflect the changes at the given time,
-     * and marks the affected states within the state pool.
-     */
-    virtual void update(long time, StatePool *pool);
+    virtual void applyChange(ModelChange const &change, StatePool *pool);
 
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to
@@ -159,8 +157,7 @@ class Model {
     /** Creates a HistoryCorrector; defaults to a general one, but can
      * be made problem-specific.
      */
-    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(
-            Solver *solver);
+    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(Solver *solver);
     /** Creates an ActionPool, which manages actions and creates
      * ActionMappings
      */
@@ -181,7 +178,7 @@ class Model {
     virtual std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
             Solver *solver);
 
-    virtual std::unique_ptr<HistoricalData> createRootInfo();
+    virtual std::unique_ptr<HistoricalData> createRootHistoricalData();
 
     /* --------------- Pretty printing methods ----------------- */
      /** Draws the environment map onto the given output stream. */
@@ -189,7 +186,7 @@ class Model {
      /** Draws the current belief and/or the current state in the context of the
       * overall map onto the given output stream.
       */
-     virtual void drawSimulationState(BeliefNode *belief,
+     virtual void drawSimulationState(BeliefNode const *belief,
              State const &/*state*/, std::ostream &/*os*/);
     /** Returns the name of this model. */
     virtual std::string getName();

@@ -23,13 +23,22 @@ void AveragePropagator::updateEntry(HistoryEntry *entry, bool undo) {
     }
 
     // Derived values
+    BeliefNode *node = entry->getAssociatedBeliefNode();
+    // If there is no node for this entry, there is nothing to update.
+    if (node == nullptr) {
+        return;
+    }
+
     Action const &action = *entry->getAction();
-    ActionMapping *actionMap = entry->getAssociatedBeliefNode()->getMapping();
+    ActionMapping *actionMap = node->getMapping();
     long deltaNVisits = undo ? -1 : 1;
 
-    // Update the visit count for the observation.
-    actionMap->getActionNode(action)->getMapping()->updateVisitCount(
-            *entry->getObservation(), deltaNVisits);
+    ActionNode *actionNode = actionMap->getActionNode(action);
+    if (actionNode != nullptr) {
+        // Update the visit count for the observation.
+        actionNode->getMapping()->updateVisitCount(
+                *entry->getObservation(), deltaNVisits);
+    }
 
     // Calculate the q-value based on the cumulative reward for this sequence,
     // from this point onward.

@@ -23,6 +23,7 @@
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 
 #include "legal_actions.hpp"
+#include "preferred_actions.hpp"
 #include "RockSampleMdpSolver.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
@@ -42,7 +43,7 @@ class RockSampleState;
 class RockSampleObservation;
 
 class RockSampleModel : virtual public ModelWithProgramOptions,
-    virtual public LegalActionsModel,
+    virtual public PreferredActionsModel,
     virtual public solver::ModelWithEnumeratedObservations {
 friend class RockSampleMdpSolver;
   public:
@@ -64,18 +65,49 @@ friend class RockSampleMdpSolver;
     virtual std::string getName() override {
         return "RockSample";
     }
+    /** Returns the number of rocks used in this model. */
+    long getNumberOfRocks() {
+        return nRocks_;
+    }
     /** Returns true if only legal actions should be used. */
-    virtual bool usingOnlyLegal() {
+    bool usingOnlyLegal() {
         return usingOnlyLegal_;
     }
+    /** Returns true if nodes should be initialized with preferred values. */
+    bool usingPreferredInit() {
+        return usingPreferredInit_;
+    }
+    /** Returns the initial q-value for preferred actions. */
+    double getPreferredQValue() {
+        return preferredQValue_;
+    }
+    /** Returns the initial visit count for preferred actions. */
+    long getPreferredVisitCount() {
+        return preferredVisitCount_;
+    }
+
     /** Returns the MDP solver, if any is in use. */
-    virtual RockSampleMdpSolver *getMdpSolver() {
+    RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
     }
     /** Returns the starting position for this problem. */
-    virtual GridPosition getStartPosition() {
+    GridPosition getStartPosition() {
         return startPos_;
     }
+    /** Returns the cell type for the given position. */
+    RSCellType getCellType(GridPosition p) {
+        return envMap_[p.i][p.j];
+    }
+    /** Returns the grid position for the given rock. */
+    GridPosition getRockPosition(int rockNo) {
+        return rockPositions_[rockNo];
+    }
+    /** Calculates the probability that the sensor will be accurate, at the
+     * given distance. */
+    double getSensorCorrectnessProbability(double distance) {
+        return (1 + std::pow(2, -distance / halfEfficiencyDistance_)) * 0.5;
+    }
+
 
     /***** Start implementation of Model's methods *****/
     // Simple getters
@@ -123,20 +155,19 @@ friend class RockSampleMdpSolver;
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action, solver::Observation const &obs,
+            long nParticles,
             std::vector<solver::State const *> const &previousParticles) override;
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
-            solver::Observation const &obs) override;
-
-    virtual std::vector<long> loadChanges(char const *changeFilename) override;
-    virtual void update(long time, solver::StatePool *pool) override;
+            solver::Observation const &obs,
+            long nParticles) override;
 
     /** Displays an individual cell of the map. */
     virtual void dispCell(RSCellType cellType, std::ostream &os);
 
     virtual void drawEnv(std::ostream &os) override;
-    virtual void drawSimulationState(solver::BeliefNode *belief,
+    virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 
@@ -212,6 +243,14 @@ friend class RockSampleMdpSolver;
 
     /** True iff we're using only legal actions. */
     bool usingOnlyLegal_;
+
+    /** True iff we're initialising preferred actions with higher q-values. */
+    bool usingPreferredInit_;
+    /** The initial q-value for preferred actions. */
+    double preferredQValue_;
+    /** The initial visit count for preferred actions. */
+    long preferredVisitCount_;
+
     /** True iff we're using the exact MDP solution. */
     bool usingExactMdp_;
     /** The solver for the exact MDP, if used. */

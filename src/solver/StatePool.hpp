@@ -44,24 +44,24 @@ class StatePool {
     ~StatePool();
     _NO_COPY_OR_MOVE(StatePool);
 
-    /* ------------------ Mutators for the pool ------------------- */
-    void reset();
-    StateInfo *add(std::unique_ptr<StateInfo> stateInfo);
-    StateInfo *createOrGetInfo(State const &state);
-
-    /* ------------------ Pool getters ------------------- */
+    /* ------------------ Simple getters ------------------- */
     StateInfo *getInfo(State const &state) const;
     StateInfo *getInfoById(long stId) const;
-
-    /* ------------------ State index manipulation ------------------- */
     StateIndex *getStateIndex() const;
-    void addToStateIndex(StateInfo *stateInfo) const;
 
-    /* ------------------ Flagging of changes at states ------------------- */
+    /* ------------------ State lookup ------------------- */
+    StateInfo *createOrGetInfo(State const &state);
+
+    /* ---------------- Flagging of states with changes ----------------- */
     void resetChangeFlags(StateInfo *stateInfo);
     void setChangeFlags(StateInfo *stateInfo, ChangeFlags flags);
     void resetAffectedStates();
     std::unordered_set<StateInfo *> getAffectedStates() const;
+
+  private:
+    /* ------------------ Mutators for the pool ------------------- */
+    void reset();
+    StateInfo *add(std::unique_ptr<StateInfo> stateInfo);
 
   private:
     StateInfoMap stateInfoMap_;

@@ -34,13 +34,22 @@ class TextSerializer : virtual public Serializer {
     virtual ~TextSerializer() = default;
     _NO_COPY_OR_MOVE(TextSerializer);
 
+    /* ------------------ Saving change sequences -------------------- */
+    virtual void saveChangeSequence(ChangeSequence const &sequence, std::ostream &os) override;
+    virtual ChangeSequence loadChangeSequence(std::istream &is) override;
+    virtual void saveModelChange(ModelChange const &change, std::ostream &os) override;
+    virtual std::unique_ptr<ModelChange> loadModelChange(std::istream &is) override;
+
+    /* ------------------ Saving transition parameters -------------------- */
     virtual void saveTransitionParameters(TransitionParameters const *tp,
             std::ostream &os) override;
     virtual std::unique_ptr<TransitionParameters> loadTransitionParameters(
             std::istream &is) override;
 
+    /* ------------------ Saving historical data -------------------- */
     virtual void saveHistoricalData(HistoricalData const *data, std::ostream &os) override;
     virtual std::unique_ptr<HistoricalData> loadHistoricalData(std::istream &is) override;
+
 
     virtual void save(StateInfo const &wrapper, std::ostream &os) override;
     virtual void load(StateInfo &wrapper, std::istream &is) override;

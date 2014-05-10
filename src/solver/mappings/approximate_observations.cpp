@@ -22,15 +22,13 @@
 namespace solver {
 /* ------------------- ModelWithApproximateObservations ------------------- */
 std::unique_ptr<ObservationPool> ModelWithApproximateObservations::createObservationPool(
-        Solver *solver) {
-    return std::make_unique<ApproximateObservationPool>(solver,
+        Solver */*solver*/) {
+    return std::make_unique<ApproximateObservationPool>(
             getMaxObservationDistance());
 }
 
 /* --------------------- ApproximateObservationPool --------------------- */
-ApproximateObservationPool::ApproximateObservationPool(
-        Solver *solver, double maxDistance) :
-        ObservationPool(solver),
+ApproximateObservationPool::ApproximateObservationPool(double maxDistance) :
         maxDistance_(maxDistance) {
 }
 
@@ -42,7 +40,7 @@ std::unique_ptr<ObservationMapping> ApproximateObservationPool::createObservatio
 ApproximateObservationMap::ApproximateObservationMap(double maxDistance) :
         owningActionNode_(nullptr),
         maxDistance_(maxDistance),
-        children_(),
+        entries_(),
         totalVisitCount_(0) {
 }
 
@@ -62,19 +60,27 @@ BeliefNode* ApproximateObservationMap::getBelief(Observation const &obs) const {
 }
 BeliefNode* ApproximateObservationMap::createBelief(const Observation& obs) {
     std::unique_ptr<ApproximateObservationMapEntry> entry = (
-            std::make_unique<ApproximateObservationMapEntry>(
-                    this, obs, std::make_unique<BeliefNode>()));
+            std::make_unique<ApproximateObservationMapEntry>());
+    entry->map_ = this;
+    entry->observation_ = obs.copy();;
+    entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
     BeliefNode *node = entry->childNode_.get();
-    node->setParentEntry(entry.get());
-    children_.push_back(std::move(entry));
+    entries_.push_back(std::move(entry));
     return node;
 }
 
 long ApproximateObservationMap::getNChildren() const {
-    return children_.size();
+    return entries_.size();
 }
 ObservationMappingEntry const *ApproximateObservationMap::getEntry(Observation const &obs) const {
     return getApproxEntry(obs);
+}
+std::vector<ObservationMappingEntry const *> ApproximateObservationMap::getAllEntries() const {
+    std::vector<ObservationMappingEntry const *> returnEntries;
+    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
+        returnEntries.push_back(entry.get());
+    }
+    return returnEntries;
 }
 
 void ApproximateObservationMap::updateVisitCount(Observation const &obs,
@@ -93,7 +99,7 @@ ApproximateObservationMapEntry const *ApproximateObservationMap::getApproxEntry(
         Observation const &obs) const {
     double shortestDistance = maxDistance_;
     ApproximateObservationMapEntry const *bestEntry = nullptr;
-    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : children_) {
+    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
         double distance = entry->observation_->distanceTo(obs);
         if (distance <= shortestDistance) {
             shortestDistance = distance;
@@ -110,15 +116,6 @@ ApproximateObservationMapEntry *ApproximateObservationMap::getApproxEntry(
 }
 
 /* ----------------- ApproximateObservationMapEntry ----------------- */
-ApproximateObservationMapEntry::ApproximateObservationMapEntry(
-        ApproximateObservationMap *map,
-        Observation const &observation,
-        std::unique_ptr<BeliefNode> childNode) :
-                map_(map),
-                observation_(observation.copy()),
-                childNode_(std::move(childNode)),
-                visitCount_(0) {
-}
 ObservationMapping *ApproximateObservationMapEntry::getMapping() const {
     return map_;
 }
@@ -140,7 +137,7 @@ void ApproximateObservationTextSerializer::saveObservationPool(
 std::unique_ptr<ObservationPool> ApproximateObservationTextSerializer::loadObservationPool(
         std::istream &/*is*/) {
     // Here we just create a new one.
-    return solver_->getModel()->createObservationPool(solver_);
+    return getSolver()->getModel()->createObservationPool(getSolver());
 }
 
 void ApproximateObservationTextSerializer::saveObservationMapping(
@@ -150,7 +147,7 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
     os << approxMap.getNChildren() << " observation children; ";
     os << approxMap.getTotalVisitCount() << " visits {" << std::endl;
     std::vector<std::string> lines;
-    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : approxMap.children_) {
+    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : approxMap.entries_) {
         std::ostringstream sstr;
         sstr << "\t";
         saveObservation(entry->observation_.get(), sstr);
@@ -170,7 +167,7 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
 std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadObservationMapping(
         std::istream &is) {
     std::unique_ptr<ObservationMapping> map(
-            solver_->getObservationPool()->createObservationMapping());
+            getSolver()->getObservationPool()->createObservationMapping());
     ApproximateObservationMap &approxMap =
             (static_cast<ApproximateObservationMap &>(*map));
     std::string line;
@@ -193,21 +190,16 @@ std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadOb
         long visitCount;
         entryStream >> visitCount;
 
-        // Create the entry and set its values correctly.
+        // Create the entry with appropriate values.
         std::unique_ptr<ApproximateObservationMapEntry> entry = (
-                std::make_unique<ApproximateObservationMapEntry>(
-                        &approxMap, *obs, std::make_unique<BeliefNode>()));
+                std::make_unique<ApproximateObservationMapEntry>());
+        entry->map_ = &approxMap;
+        entry->observation_ = std::move(obs);
         entry->visitCount_ = visitCount;
+        entry->childNode_ = std::make_unique<BeliefNode>(childId, entry.get());
 
-        // Update the node's parent entry.
-        BeliefNode *node = entry->childNode_.get();
-        node->setParentEntry(entry.get());
-
-        // Add the node to the tree index.
-        solver_->getPolicy()->setNode(childId, node);
-
-        // Add the entry to the vector
-        approxMap.children_.push_back(std::move(entry));
+        // Add the entry to the vector.
+        approxMap.entries_.push_back(std::move(entry));
     }
     // Read the last line for the closing brace.
     std::getline(is, line);

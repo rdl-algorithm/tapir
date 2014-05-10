@@ -19,31 +19,16 @@ BeliefTree::BeliefTree(Solver *solver) :
     solver_(solver),
     root_(nullptr),
     allNodes_() {
+	reset();
 }
 
 // Do nothing!
 BeliefTree::~BeliefTree() {
 }
 
-/* -------------- Node setters and getters ---------------- */
-BeliefNode *BeliefTree::setRoot(std::unique_ptr<BeliefNode> root) {
-    allNodes_.clear();
-    root_ = std::move(root);
-    BeliefNode *rootPtr = root_.get();
-    allNodes_.push_back(nullptr);
-    setNode(0, rootPtr);
-    return rootPtr;
-}
+/* ------------------- Simple getters --------------------- */
 BeliefNode *BeliefTree::getRoot() const {
     return root_.get();
-}
-
-void BeliefTree::setNode(long id, BeliefNode *node) {
-    if (allNodes_[id] != nullptr) {
-        debug::show_message("ERROR: Node already exists - overwriting!!");
-    }
-    allNodes_[id] = node;
-    node->setId(id);
 }
 BeliefNode *BeliefTree::getNode(long id) const {
     BeliefNode *node = allNodes_[id];
@@ -55,28 +40,59 @@ BeliefNode *BeliefTree::getNode(long id) const {
     }
     return allNodes_[id];
 }
-
 long BeliefTree::getNumberOfNodes() const {
     return allNodes_.size();
 }
-std::vector<BeliefNode *> BeliefTree::getNodes() {
+std::vector<BeliefNode *> BeliefTree::getNodes() const {
     return allNodes_;
 }
 
+
+/* ============================ PRIVATE ============================ */
+
+
+/* ------------------- Node index modification ------------------- */
+void BeliefTree::addNode(BeliefNode *node) {
+    long id = node->id_;
+    if (id < 0) {
+        // Negative ID => allocate a new one.
+        id = allNodes_.size();
+        node->id_ = id;
+        allNodes_.push_back(nullptr);
+    }
+    if (allNodes_[id] != nullptr) {
+        debug::show_message("ERROR: Node already exists - overwriting!!");
+    }
+    allNodes_[id] = node;
+    BeliefNode *parent = node->getParentBelief();
+    if (parent == nullptr) {
+        node->depth_ = 0;
+    } else {
+        node->depth_ = parent->depth_ + 1;
+    }
+}
+
 /* ------------------- Tree modification ------------------- */
+BeliefNode *BeliefTree::reset() {
+    allNodes_.clear();
+    root_ = std::make_unique<BeliefNode>();
+    BeliefNode *rootPtr = root_.get();
+    addNode(rootPtr);
+    return rootPtr;
+}
 BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         Action const &action, Observation const &obs) {
     bool isNew;
     BeliefNode *childNode;
-    std::tie(childNode, isNew) = node->createOrGetChild(action, obs);
+    std::tie(childNode, isNew) = node->createOrGetChild(solver_, action, obs);
     if (isNew) {
+        addNode(childNode);
         HistoricalData *data = node->getHistoricalData();
         if (data != nullptr) {
-                childNode->setHistoricalData(data->createChild(action, obs));
+            childNode->setHistoricalData(data->createChild(action, obs));
         }
-        solver_->getActionPool()->createMappingFor(childNode);
-        allNodes_.push_back(nullptr);
-        setNode(allNodes_.size() - 1, childNode);
+        // Initialize the child node's action mapping.
+        childNode->getMapping()->initialize();
     }
     return childNode;
 }
