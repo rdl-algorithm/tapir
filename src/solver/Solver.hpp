@@ -93,21 +93,6 @@ private:
      */
     void initialize();
 
-<<<<<<< HEAD
-    /* Stuff temporarily made public - Josh */
-        /** Improves the solution with the root at the given node. */
-    void improveSolution(BeliefNode *startNode, long historiesPerStep,
-            long maximumDepth);
-        /** Handles particle depletion during the simulation. */
-    BeliefNode *addChild(BeliefNode *currNode, Action const &action,
-            Observation const &obs,
-            long timeStep);
-    Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
-    void printBelief(BeliefNode *belief, std::ostream &os);
-
-  private:
-=======
->>>>>>> master
     /* ------------------ Episode sampling methods ------------------- */
     /** Runs multiple searches from the given start node and start states. */
     void multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
@@ -127,33 +112,6 @@ private:
     /** Performs or negates a backup on the given sequence. */
     void backup(HistorySequence *sequence, bool backingUp);
 
-<<<<<<< HEAD
-    /* ------------------ Simulation methods ------------------- */
-    /** Simulates a single step. */
-    //Model::StepResult simAStep(BeliefNode *currentBelief, State const &currentState);
-    /** Improves the solution with the root at the given node. */
-    //void improveSolution(BeliefNode *startNode, long historiesPerStep,
-    //        long maximumDepth);
-    /** Handles particle depletion during the simulation. */
-    //BeliefNode *addChild(BeliefNode *currNode, Action const &action,
-    //        Observation const &obs,
-    //        long timeStep);
-
-
-    /* -------------- Methods for handling model changes --------------- */
-    /** Does all the work required for changing the model. */
-    void handleChanges(long timeStep,
-            State const &currentState,
-            std::vector<std::unique_ptr<State>> &stateHistory);
-    /** Applies the model changes that have been marked within the state pool */
-    void applyChanges();
-
-    /* ------------------ Display methods  ------------------- */
-    /** Shows a belief node in a nice, readable way. */
-    //void printBelief(BeliefNode *belief, std::ostream &os);
-
-=======
->>>>>>> master
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */
     RandomGenerator *randGen_;

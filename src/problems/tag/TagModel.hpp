@@ -66,6 +66,11 @@ class TagModel: virtual public ModelWithProgramOptions,
         WALL = -1
     };
 
+    // Added by Josh
+    inline const std::vector<std::vector<TagCellType>>& getEnvMap() {
+        return envMap_;
+    }
+
     std::string getName() override {
         return "Tag";
     }

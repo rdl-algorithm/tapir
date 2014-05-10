@@ -10,24 +10,41 @@ find_package(Boost 1.48.0 REQUIRED COMPONENTS program_options)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS 
-	roscpp roslib std_msgs pcl	pcl_ros sensor_msgs tf)
+	roscpp roslib std_msgs geometry_msgs pcl pcl_ros tf message_generation)
+
+add_service_files(
+  FILES
+  simRosCopyPasteObjects.srv
+  simRosGetObjectHandle.srv
+  simRosSetObjectPosition.srv
+  simRosStartSimulation.srv
+  simRosStopSimulation.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
 
 ## Declare a catkin package
 catkin_package(
-	INCLUDE_DIRS include
+	INCLUDE_DIRS src
 	LIBRARIES ${PROJECT_NAME}
-	CATKIN_DEPENDS roscpp roslib std_msgs pcl pcl_ros sensor_msgs tf)
+	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs pcl pcl_ros tf)
 
-include_directories(src include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(src ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_library(AbtSolver
 	src/global.cpp
 	src/solver/ActionNode.cpp
+	src/solver/Agent.cpp
 	src/solver/BeliefNode.cpp
 	src/solver/BeliefTree.cpp
 	src/solver/Histories.cpp
 	src/solver/HistoryEntry.cpp
 	src/solver/HistorySequence.cpp
+	src/solver/Simulator.cpp
 	src/solver/Solver.cpp
 	src/solver/StateInfo.cpp
 	src/solver/StatePool.cpp
@@ -43,14 +60,15 @@ add_library(AbtSolver
 	src/solver/indexing/FlaggingVisitor.cpp
 	src/solver/indexing/RTree.cpp
 	src/solver/indexing/SpatialIndexVisitor.cpp
-	src/solver/mappings/enumerated_observations.cpp
-	src/solver/mappings/enumerated_actions.cpp
-	src/solver/mappings/discretized_actions.cpp
-	src/solver/mappings/discrete_observations.cpp
 	src/solver/mappings/approximate_observations.cpp
+	src/solver/mappings/discrete_observations.cpp
+	src/solver/mappings/discretized_actions.cpp
+	src/solver/mappings/enumerated_actions.cpp
+	src/solver/mappings/enumerated_observations.cpp
+	src/solver/search/DefaultRolloutStrategy.cpp
 	src/solver/search/MultipleStrategiesExp3.cpp
 	src/solver/search/NnRolloutStrategy.cpp
-	src/solver/search/RandomRolloutStrategy.cpp
+	##src/solver/search/RandomRolloutStrategy.cpp
 	src/solver/search/SearchStrategy.cpp
 	src/solver/search/UcbSelectionStrategy.cpp
 	src/solver/serialization/TextSerializer.cpp
@@ -63,13 +81,13 @@ add_library(AbtSolver
 	src/problems/shared/geometry/Vector2D.cpp
 )
 
-add_library(AbtTracker
-	src/problems/tracker/TrackerAction.cpp
-	src/problems/tracker/TrackerModel.cpp
-	src/problems/tracker/TrackerObservation.cpp
-	src/problems/tracker/TrackerState.cpp
-	src/problems/tracker/TrackerTextSerializer.cpp
-)
+##add_library(AbtTracker
+##	src/problems/tracker/TrackerAction.cpp
+##	src/problems/tracker/TrackerModel.cpp
+##	src/problems/tracker/TrackerObservation.cpp
+##	src/problems/tracker/TrackerState.cpp
+##	src/problems/tracker/TrackerTextSerializer.cpp
+##)
 
 add_library(AbtTag
 	src/problems/tag/TagAction.cpp
@@ -81,14 +99,8 @@ add_library(AbtTag
 
 target_link_libraries(AbtSolver spatialindex ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable(abt_node src/abt_node.cpp)
-target_link_libraries(abt_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
+##add_executable(abt_node src/abt_node.cpp)
+##target_link_libraries(abt_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
 
-add_executable(tag_node src/problems/tag/tag_node.cpp)
+add_executable(tag_node src/problems/tag/TagNode.cpp)
 target_link_libraries(tag_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTag AbtSolver )
-
-add_executable(solve src/problems/tracker/solve.cpp)
-target_link_libraries(solve ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
-
-add_executable(simulate src/problems/tracker/simulate.cpp)
-target_link_libraries(simulate ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
