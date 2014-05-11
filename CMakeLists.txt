@@ -19,6 +19,7 @@ add_service_files(
   simRosSetObjectPosition.srv
   simRosStartSimulation.srv
   simRosStopSimulation.srv
+  simRosGetObjectPose.srv
 )
 
 generate_messages(
@@ -81,13 +82,13 @@ add_library(AbtSolver
 	src/problems/shared/geometry/Vector2D.cpp
 )
 
-##add_library(AbtTracker
-##	src/problems/tracker/TrackerAction.cpp
-##	src/problems/tracker/TrackerModel.cpp
-##	src/problems/tracker/TrackerObservation.cpp
-##	src/problems/tracker/TrackerState.cpp
-##	src/problems/tracker/TrackerTextSerializer.cpp
-##)
+add_library(AbtTracker
+	src/problems/tracker/TrackerAction.cpp
+	src/problems/tracker/TrackerModel.cpp
+	src/problems/tracker/TrackerObservation.cpp
+	src/problems/tracker/TrackerState.cpp
+	src/problems/tracker/TrackerTextSerializer.cpp
+)
 
 add_library(AbtTag
 	src/problems/tag/TagAction.cpp
@@ -99,8 +100,8 @@ add_library(AbtTag
 
 target_link_libraries(AbtSolver spatialindex ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-##add_executable(abt_node src/abt_node.cpp)
-##target_link_libraries(abt_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
+add_executable(tracker_node src/problems/tracker/TrackerNode.cpp)
+target_link_libraries(tracker_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
 
 add_executable(tag_node src/problems/tag/TagNode.cpp)
 target_link_libraries(tag_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTag AbtSolver )

@@ -15,6 +15,7 @@
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+#include "solver/abstract-problem/ModelChange.hpp"             // for ModelChange
 #include "solver/abstract-problem/TransitionParameters.hpp"
 #include "solver/abstract-problem/Action.hpp"            // for Action
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
@@ -32,17 +33,17 @@ class StatePool;
 } /* namespace solver */
 
 namespace tracker {
-
-/** The cells are either empty or walls; empty cells are numbered
- * starting at 0
- */
-enum TrackerCellType : int {
-    EMPTY = 0,
-    WALL = -1
-};
-
 class TrackerObervation;
 class TrackerState;
+
+/** Represents a change in the Tracker model. */
+struct TrackerChange : solver::ModelChange {
+    std::string changeType = "";
+    double i0 = 0;
+    double i1 = 0;
+    double j0 = 0;
+    double j1 = 0;
+};
 
 class TrackerModel: virtual public ModelWithProgramOptions,
         virtual public solver::ModelWithEnumeratedActions,
@@ -50,14 +51,25 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     friend class TrackerObservation;
 
   public:
-    TrackerModel(RandomGenerator *randGen, po::variables_map vm, std::vector<std::vector<TrackerCellType>> envMap = std::vector<std::vector<TrackerCellType>>());
+
+    TrackerModel(RandomGenerator *randGen, po::variables_map vm);
     ~TrackerModel() = default;
     TrackerModel(TrackerModel const &) = delete;
     TrackerModel(TrackerModel &&) = delete;
     TrackerModel &operator=(TrackerModel const &) = delete;
     TrackerModel &operator=(TrackerModel &&) = delete;
 
-    std::string getName() override {
+    /** The cells are either empty or walls; empty cells are numbered
+     * starting at 0
+     */
+    enum TrackerCellType : int {
+        EMPTY = 0,
+        WALL = -1
+    };
+
+    void setEnvMap(std::vector<std::vector<TrackerCellType>> envMap);
+
+	std::string getName() override {
         return "Tracker";
     }
 
@@ -110,28 +122,26 @@ class TrackerModel: virtual public ModelWithProgramOptions,
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
-            std::vector<solver::State const *>
-                const &previousParticles) override;
+            long nParticles,
+            std::vector<solver::State const *> const &previousParticles) override;
     std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
-            solver::Observation const &obs) override;
+            solver::Observation const &obs,
+            long nParticles) override;
 
-    std::vector<long> loadChanges(char const *changeFilename) override;
-    void update(long time, solver::StatePool *pool) override;
+    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
     /** Displays a single cell of the map. */
     void dispCell(TrackerCellType cellType, std::ostream &os);
     void drawEnv(std::ostream &os) override;
-    void drawSimulationState(solver::BeliefNode *belief,
+    void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
 
   private:
-    /** Initialises the required data structures and variables */
-    void initialize();
 
     /** Generates a random empty grid cell. */
     GridPosition randomEmptyCell();
@@ -147,7 +157,7 @@ class TrackerModel: virtual public ModelWithProgramOptions,
      */
     std::unique_ptr<solver::Observation> makeObservation(
             solver::Action const &action, TrackerState const &nextState);
-    /** Generates the distribution for the target's actions. */
+    /** Generates vector of possible target's actions. */
     std::vector<ActionType> makeTargetActions();
 
     /** Gets the expected coordinates after taking the given action;
@@ -157,15 +167,15 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     int getNewYaw(int yaw, ActionType action);
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
+    /** Returns true iff target is visible from robot */
+    bool isTargetVisible(GridPosition const &robotPos, int robotYaw, GridPosition const &targetPos);
 
     /** The penalty for each movement. */
     double moveCost_;
-    /** The reward for trackergint the target. */
-    double trackerReward_;
-    /** The penalty for failing a tracker attempt. */
-    double failedTrackerPenalty_;
-    /** The probability that the target will stay still. */
-    double targetStayProbability_;
+    /** The penalty for being in front of human */
+    double obstructCost_;
+    /** The reward for keeping the target in view. */
+    double visibleReward_;
 
     /** The number of rows in the map. */
     long nRows_;
@@ -177,18 +187,6 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     /** The environment map in vector form. */
     std::vector<std::vector<TrackerCellType>> envMap_;
 
-    /** Represents a change in the Tracker model. */
-    struct TrackerChange {
-        std::string changeType = "";
-        double i0 = 0;
-        double i1 = 0;
-        double j0 = 0;
-        double j1 = 0;
-    };
-
-    /** The changes (scheduled for simulation). */
-    std::map<long, std::vector<TrackerChange>> changes_;
-
     // General problem parameters
     long nActions_, nStVars_;
     double minVal_, maxVal_;
@@ -196,3 +194,5 @@ class TrackerModel: virtual public ModelWithProgramOptions,
 } /* namespace tracker */
 
 #endif /* TRACKERMODEL_HPP_ */
+
+

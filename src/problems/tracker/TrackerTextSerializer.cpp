@@ -31,7 +31,7 @@ void TrackerTextSerializer::saveState(solver::State const *state, std::ostream &
     os << trackerState.robotPos_.i << " " << trackerState.robotPos_.j << " "
         << trackerState.robotYaw_ << " " << trackerState.targetPos_.i << " "
         << trackerState.targetPos_.j << " " << trackerState.targetYaw_ << " "
-        << (trackerState.isVisible_ ? "T" : "_");
+        << (trackerState.seesTarget_ ? "T" : "_");
 }
 
 std::unique_ptr<solver::State> TrackerTextSerializer::loadState(std::istream &is) {
@@ -45,9 +45,9 @@ std::unique_ptr<solver::State> TrackerTextSerializer::loadState(std::istream &is
     is>> targetYaw;
     std::string trackergedString;
     is >> trackergedString;
-    bool isVisible = (trackergedString == "T");
+    bool seesTarget = (trackergedString == "T");
     return std::make_unique<TrackerState>(robotPos, robotYaw,
-        targetPos, targetYaw, isVisible);
+        targetPos, targetYaw, seesTarget);
 }
 
 

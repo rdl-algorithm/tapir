@@ -12,22 +12,22 @@
 
 namespace tracker {
 TrackerState::TrackerState(GridPosition robotPos, int robotYaw, 
-        GridPosition targetPos, int targetYaw, bool _isVisible) :
+        GridPosition targetPos, int targetYaw, bool seesTarget) :
     solver::Vector(),
     robotPos_(robotPos),
     robotYaw_(robotYaw),
     targetPos_(targetPos),
     targetYaw_(targetYaw),
-    isVisible_(_isVisible) {
+    seesTarget_(seesTarget) {
 }
 
 TrackerState::TrackerState(TrackerState const &other) :
         TrackerState(other.robotPos_, other.robotYaw_,
-            other.targetPos_, other.targetYaw_, other.isVisible_) {
+            other.targetPos_, other.targetYaw_, other.seesTarget_) {
 }
 
 std::unique_ptr<solver::Point> TrackerState::copy() const {
-    return std::make_unique<TrackerState>(robotPos_, robotYaw_, targetPos_, targetYaw_, isVisible_);
+    return std::make_unique<TrackerState>(robotPos_, robotYaw_, targetPos_, targetYaw_, seesTarget_);
 }
 
 double TrackerState::distanceTo(solver::State const &otherState) const {
@@ -41,7 +41,7 @@ bool TrackerState::equals(solver::State const &otherState) const {
     TrackerState const &otherTrackerState = static_cast<TrackerState const &>(otherState);
     return (robotPos_ == otherTrackerState.robotPos_
             && targetPos_ == otherTrackerState.targetPos_
-            && isVisible_ == otherTrackerState.isVisible_
+            && seesTarget_ == otherTrackerState.seesTarget_
             && robotYaw_ == otherTrackerState.robotYaw_
             && targetYaw_ == otherTrackerState.targetYaw_);
 }
@@ -54,7 +54,7 @@ std::size_t TrackerState::hash() const {
     abt::hash_combine(hashValue, targetPos_.i);
     abt::hash_combine(hashValue, targetPos_.j);
     abt::hash_combine(hashValue, targetYaw_);
-    abt::hash_combine(hashValue, isVisible_);
+    abt::hash_combine(hashValue, seesTarget_);
     return hashValue;
 }
 
@@ -66,15 +66,15 @@ std::vector<double> TrackerState::asVector() const {
     vec[3] = targetPos_.i;
     vec[4] = targetPos_.j;
     vec[5] = targetYaw_;
-    vec[6] = isVisible_ ? 1 : 0;
+    vec[6] = seesTarget_ ? 1 : 0;
     return vec;
 }
 
 void TrackerState::print(std::ostream &os) const {
     os << "ROBOT: " << robotPos_ << " TARGET: " << targetPos_ << 
     "ROBOT YAW: " << robotYaw_ << " TARGET YAW: " << targetYaw_;
-    if (isVisible_) {
-        os << " Visible!";
+    if (seesTarget_) {
+        os << " Sees target!";
     }
 }
 
@@ -95,7 +95,7 @@ int TrackerState::getTargetYaw() const {
     return targetYaw_;
 }
 
-bool TrackerState::isVisible() const {
-    return isVisible_;
+bool TrackerState::seesTarget() const {
+    return seesTarget_;
 }
 } /* namespace tracker */

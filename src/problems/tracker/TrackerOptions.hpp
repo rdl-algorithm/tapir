@@ -17,14 +17,10 @@ class TrackerOptions : public ProgramOptions {
         po::options_description problem("Settings specific to the Tracker POMDP");
         problem.add(ProgramOptions::getProblemOptions());
         problem.add_options()
-                ("problem.mapPath,m", po::value<std::string>(), "path to map file")
                 ("problem.moveCost", po::value<double>(), "movement cost")
-                ("problem.trackerReward", po::value<double>(),
-                        "reward for trackerging the target")
-                ("problem.failedTrackerPenalty", po::value<double>(),
-                        "penalty for attempting to tracker the target but failing")
-                ("problem.targetStayProbability", po::value<double>(),
-                        "probability that the target will stay in place");
+                ("problem.obstructCost", po::value<double>(), "obstructing human cost")
+                ("problem.visibleReward", po::value<double>(),
+                        "reward for keeping target visible");
         return problem;
     }
 

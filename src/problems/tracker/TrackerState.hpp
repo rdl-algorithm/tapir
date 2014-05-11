@@ -37,11 +37,11 @@ class TrackerState : public solver::VectorState {
     GridPosition getTargetPos() const;
     int getRobotYaw() const;
     int getTargetYaw() const;
-    bool isVisible() const;
+    bool seesTarget() const;
   private:
     GridPosition robotPos_, targetPos_;
     int robotYaw_, targetYaw_;
-    bool isVisible_;
+    bool seesTarget_;
 };
 } /* namespace tracker */
 
