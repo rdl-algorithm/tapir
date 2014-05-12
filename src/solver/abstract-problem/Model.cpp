@@ -49,7 +49,7 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
         State const *state = previousParticles[index];
         StepResult result = generateStep(*state, action);
         if (obsMap->getBelief(*result.observation) == childNode) {
-            particles.push_back(std::move(result.action));
+            particles.push_back(std::move(result.nextState));
         }
     }
     return particles;
@@ -67,7 +67,7 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
         std::unique_ptr<State> state = sampleStateUniform();
         StepResult result = generateStep(*state, action);
         if (obsMap->getBelief(*result.observation) == childNode) {
-            particles.push_back(std::move(result.action));
+            particles.push_back(std::move(result.nextState));
         }
     }
     return particles;
