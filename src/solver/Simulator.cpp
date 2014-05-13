@@ -194,7 +194,7 @@ bool Simulator::stepSimulation() {
     HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     currentEntry->action_ = std::move(result.action);
     currentEntry->observation_ = std::move(result.observation);
-    currentEntry->reward_ = result.reward;
+    currentEntry->immediateReward_ = result.reward;
     currentEntry->transitionParameters_ = std::move(result.transitionParameters);
     StateInfo *nextInfo = solver_->getStatePool()->createOrGetInfo(*result.nextState);
     currentEntry = actualHistory_->addEntry(nextInfo);

@@ -70,7 +70,7 @@ NnRolloutInstance::NnRolloutInstance(NnRolloutStrategy *strategy,
         previousAction_(nullptr) {
 }
 
-SearchStatus NnRolloutInstance::initializeCustom(BeliefNode *currentNode) {
+SearchStatus NnRolloutInstance::initialize(BeliefNode *currentNode) {
     rootNeighborNode_ = strategy_->findNeighbor(currentNode);
     currentNeighborNode_ = rootNeighborNode_;
     if (rootNeighborNode_ != nullptr) {

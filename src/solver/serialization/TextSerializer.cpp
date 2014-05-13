@@ -167,13 +167,9 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
             std::ios_base::left);
 
     os << " r:";
-    abt::print_double(entry.reward_, os, 6, 2,
+    abt::print_double(entry.immediateReward_, os, 6, 2,
             std::ios_base::fixed | std::ios_base::showpos
                     | std::ios_base::left);
-
-    os << " v:";
-    abt::print_double(entry.rewardFromHere_, os, 0, 1,
-                std::ios_base::fixed | std::ios_base::showpos);
 
     os << ");   S:";
     saveState(entry.stateInfo_->getState(), os);
@@ -190,11 +186,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     entry.transitionParameters_ = std::move(loadTransitionParameters(is));
     entry.observation_ = std::move(loadObservation(is));
     std::getline(is, tmpStr, ':');
-    is >> entry.reward_;
-    std::getline(is, tmpStr, ':');
-    std::getline(is, tmpStr, ')');
-    std::istringstream(tmpStr) >> entry.rewardFromHere_;
-    entry.hasBeenBackedUp_ = true;
+    is >> entry.immediateReward_;
     entry.registerState(getSolver()->getStatePool()->getInfoById(stateId));
 }
 

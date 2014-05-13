@@ -72,6 +72,9 @@ BeliefNode* ApproximateObservationMap::createBelief(const Observation& obs) {
 long ApproximateObservationMap::getNChildren() const {
     return entries_.size();
 }
+ObservationMappingEntry *ApproximateObservationMap::getEntry(Observation const &obs) {
+    return getApproxEntry(obs);
+}
 ObservationMappingEntry const *ApproximateObservationMap::getEntry(Observation const &obs) const {
     return getApproxEntry(obs);
 }
@@ -83,14 +86,6 @@ std::vector<ObservationMappingEntry const *> ApproximateObservationMap::getAllEn
     return returnEntries;
 }
 
-void ApproximateObservationMap::updateVisitCount(Observation const &obs,
-        long deltaNVisits) {
-    getApproxEntry(obs)->visitCount_ += deltaNVisits;
-    totalVisitCount_ += deltaNVisits;
-}
-long ApproximateObservationMap::getVisitCount(Observation const &obs) const {
-    return getApproxEntry(obs)->visitCount_;
-}
 long ApproximateObservationMap::getTotalVisitCount() const {
     return totalVisitCount_;
 }
@@ -127,6 +122,11 @@ BeliefNode *ApproximateObservationMapEntry::getBeliefNode() const {
 }
 long ApproximateObservationMapEntry::getVisitCount() const {
     return visitCount_;
+}
+
+void ApproximateObservationMapEntry::updateVisitCount(long deltaNVisits) {
+    visitCount_ += deltaNVisits;
+    map_->totalVisitCount_ += deltaNVisits;
 }
 
 /* ----------------- ApproximateObservationTextSerializer ----------------- */

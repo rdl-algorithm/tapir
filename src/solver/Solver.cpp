@@ -22,8 +22,6 @@
 #include "abstract-problem/Observation.hpp"              // for Observation
 #include "abstract-problem/State.hpp"                    // for State, operator<<
 
-#include "backpropagation/BackpropagationStrategy.hpp"
-
 #include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
 #include "changes/HistoryCorrector.hpp"
 
@@ -33,7 +31,7 @@
 #include "mappings/ObservationPool.hpp"
 
 #include "search/SearchStatus.hpp"
-#include "search/SearchStrategy.hpp"
+#include "search/search_interface.hpp"
 
 #include "serialization/Serializer.hpp"               // for Serializer
 
@@ -54,18 +52,18 @@ using std::endl;
 
 namespace solver {
 Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
-    randGen_(randGen),
-    serializer_(nullptr),
-    model_(std::move(model)),
-    statePool_(nullptr),
-    histories_(nullptr),
-    policy_(nullptr),
-    actionPool_(nullptr),
-    observationPool_(nullptr),
-    historyCorrector_(nullptr),
-    selectionStrategy_(nullptr),
-    rolloutStrategy_(nullptr),
-    backpropagationStrategy_(nullptr) {
+            randGen_(randGen),
+            serializer_(nullptr),
+            model_(std::move(model)),
+            statePool_(nullptr),
+            histories_(nullptr),
+            policy_(nullptr),
+            actionPool_(nullptr),
+            observationPool_(nullptr),
+            historyCorrector_(nullptr),
+            selectionStrategy_(nullptr),
+            rolloutStrategy_(nullptr),
+            nodesToBackup_() {
 }
 
 // Default destructor
@@ -124,14 +122,12 @@ void Solver::improvePolicy(long numberOfHistories, long maximumDepth) {
     // Generate the initial states.
     std::vector<StateInfo *> states;
     for (long i = 0; i < numberOfHistories; i++) {
-    	states.push_back(statePool_->createOrGetInfo(
-    			*model_->sampleAnInitState()));
+        states.push_back(statePool_->createOrGetInfo(*model_->sampleAnInitState()));
     }
     multipleSearches(policy_->getRoot(), states, maximumDepth);
 }
 
-void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories,
-        long maximumDepth) {
+void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long maximumDepth) {
     if (numberOfHistories < 0) {
         numberOfHistories = model_->getNumberOfHistoriesPerStep();
     }
@@ -157,8 +153,8 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories,
 
     std::vector<StateInfo *> samples;
     for (long i = 0; i < numberOfHistories; i++) {
-        long index = std::uniform_int_distribution<long>(
-                0, nonTerminalStates.size() - 1)(*randGen_);
+        long index = std::uniform_int_distribution<long>(0, nonTerminalStates.size() - 1)(
+                *randGen_);
         samples.push_back(nonTerminalStates[index]);
     }
 
@@ -174,15 +170,12 @@ void Solver::applyChanges() {
             sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
             if (changes::has_flag(entry->changeFlags_, ChangeFlags::DELETED)) {
                 if (entryId > 0) {
-                    sequence->setChangeFlags(entryId - 1,
-                            ChangeFlags::TRANSITION);
+                    sequence->setChangeFlags(entryId - 1, ChangeFlags::TRANSITION);
                 }
             }
-            if (changes::has_flag(entry->changeFlags_,
-                    ChangeFlags::OBSERVATION_BEFORE)) {
+            if (changes::has_flag(entry->changeFlags_, ChangeFlags::OBSERVATION_BEFORE)) {
                 if (entryId > 0) {
-                    sequence->setChangeFlags(entryId - 1,
-                            ChangeFlags::OBSERVATION);
+                    sequence->setChangeFlags(entryId - 1, ChangeFlags::OBSERVATION);
                 }
             }
             affectedSequences.insert(sequence);
@@ -197,15 +190,10 @@ void Solver::applyChanges() {
     std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
     while (it != affectedSequences.end()) {
         HistorySequence *sequence = *it;
-
-        // Undo backup and deregister.
-        backup(sequence, false);
-        sequence->registerWith(nullptr, nullptr);
-
-        if (changes::has_flag(sequence->getFirstEntry()->changeFlags_,
-                ChangeFlags::DELETED)) {
+        if (changes::has_flag(sequence->getFirstEntry()->changeFlags_, ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
             // Now remove the sequence entirely.
+            negateSequence(sequence);
             histories_->deleteSequence(sequence->id_);
         } else {
             it++;
@@ -215,24 +203,15 @@ void Solver::applyChanges() {
     // Revise all of the histories.
     historyCorrector_->reviseHistories(affectedSequences);
 
-    // Clear flags and fix up all the sequences.
+    // Clear the change flags for all of the affected sequences.
     for (HistorySequence *sequence : affectedSequences) {
         sequence->resetChangeFlags();
-        HistoryEntry *lastEntry = sequence->getLastEntry();
-        State const *lastState = lastEntry->getState();
-        // If it didn't end in a terminal state, we apply the heuristic.
-        if (!model_->isTerminal(*lastState)) {
-            lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
-        }
-
-        // Now we register and then backup.
-        sequence->registerWith(sequence->getFirstEntry()->associatedBeliefNode_,
-                    policy_.get());
-        backup(sequence, true);
     }
 
     // Reset the set of affected states in the pool.
     statePool_->resetAffectedStates();
+    // Backup all the changes simultaneously.
+    doBackup();
 }
 
 BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
@@ -263,8 +242,8 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
 
     // Attempt to generate particles for next state based on the current belief,
     // the observation, and the action.
-    std::vector<std::unique_ptr<State>> nextParticles = (
-            model_->generateParticles(currNode, action, obs, deficit, particles));
+    std::vector<std::unique_ptr<State>> nextParticles = (model_->generateParticles(currNode, action,
+            obs, deficit, particles));
     if (nextParticles.empty()) {
         debug::show_message("WARNING: Could not generate based on belief!");
         // If that fails, ignore the current belief.
@@ -281,14 +260,7 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
         // Create a new history sequence and entry for the new particle.
         HistorySequence *histSeq = histories_->createSequence();
         HistoryEntry *histEntry = histSeq->addEntry(stateInfo);
-        State const *state = stateInfo->getState();
-        if (!model_->isTerminal(*state)) {
-            // Use the heuristic value for non-terminal particles.
-            histEntry->rewardFromHere_ = model_->getHeuristicValue(*state);
-        }
-        // Register
-        histSeq->registerWith(nextNode, policy_.get());
-        backup(histSeq, true);
+        histEntry->registerNode(nextNode);
     }
     if (model_->hasVerboseOutput()) {
         cout << "Done" << std::endl;
@@ -308,8 +280,7 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
         actionValues.emplace(entry->getMeanQValue(), entry);
     }
     for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-        abt::print_double(it->first, os, 8, 2,
-                std::ios_base::fixed | std::ios_base::showpos);
+        abt::print_double(it->first, os, 8, 2, std::ios_base::fixed | std::ios_base::showpos);
         os << ": ";
         std::ostringstream sstr;
         sstr << *it->second->getAction();
@@ -320,7 +291,6 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
 }
 
 /* ============================ PRIVATE ============================ */
-
 
 /* ------------------ Initialization methods ------------------- */
 void Solver::initialize() {
@@ -337,28 +307,28 @@ void Solver::initialize() {
     historyCorrector_ = model_->createHistoryCorrector(this);
     selectionStrategy_ = model_->createSelectionStrategy(this);
     rolloutStrategy_ = model_->createRolloutStrategy(this);
-    backpropagationStrategy_ = model_->createBackpropagationStrategy(this);
 }
 
 /* ------------------ Episode sampling methods ------------------- */
-void Solver::multipleSearches(BeliefNode *startNode,
-        std::vector<StateInfo *> states, long maximumDepth) {
+void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> states,
+        long maximumDepth) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
-	for (StateInfo *stateInfo : states) {
-		singleSearch(startNode, stateInfo, maximumDepth);
-	}
+    for (StateInfo *stateInfo : states) {
+        singleSearch(startNode, stateInfo, maximumDepth);
+        // Backup after every search to keep an accurate idea of where to explore.
+        doBackup();
+    }
 }
 
-void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-		long maximumDepth) {
+void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
     HistorySequence *sequence = histories_->createSequence();
     sequence->addEntry(startStateInfo);
-    sequence->getFirstEntry()->associatedBeliefNode_ = startNode;
+    sequence->getFirstEntry()->registerNode(startNode);
     continueSearch(sequence, maximumDepth);
 }
 
@@ -371,24 +341,20 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
                 " from a terminal state.");
         return;
     }
-    SearchStatus status = SearchStatus::UNINITIALIZED;
-
-    std::unique_ptr<SearchInstance> searchInstance = nullptr;
-    searchInstance = selectionStrategy_->createSearchInstance(sequence,
-            maximumDepth);
-    status = searchInstance->initialize();
-    if (status != SearchStatus::INITIAL) {
+    std::unique_ptr<SearchInstance> searchInstance = selectionStrategy_->createSearchInstance(
+            sequence, maximumDepth);
+    searchInstance->extendSequence();
+    SearchStatus status = searchInstance->getStatus();
+    if (status == SearchStatus::UNINITIALIZED) {
         debug::show_message("WARNING: Search algorithm could not initialize!?");
     }
-    status = searchInstance->extendSequence();
     if (status == SearchStatus::REACHED_ROLLOUT_NODE) {
-        searchInstance = rolloutStrategy_->createSearchInstance(sequence,
-                maximumDepth);
-        status = searchInstance->initialize();
-        if (status != SearchStatus::INITIAL) {
-            debug::show_message("WARNING: Rollout algorithm could not initialize!?");
+        searchInstance = rolloutStrategy_->createSearchInstance(sequence, maximumDepth);
+        searchInstance->extendSequence();
+        status = searchInstance->getStatus();
+        if (status == SearchStatus::UNINITIALIZED) {
+            debug::show_message("WARNING: Search algorithm could not initialize!?");
         }
-        status = searchInstance->extendSequence();
     }
     if (status == SearchStatus::ROLLOUT_COMPLETE || status == SearchStatus::HIT_DEPTH_LIMIT) {
         HistoryEntry *lastEntry = sequence->getLastEntry();
@@ -397,40 +363,97 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
             debug::show_message("ERROR: Terminal state, but the search status"
                     " didn't reflect this!");
         }
-        // Use the heuristic estimate.
-        lastEntry->rewardFromHere_ = model_->getHeuristicValue(*lastState);
     } else if (status == SearchStatus::HIT_TERMINAL_STATE) {
         // Don't do anything for a terminal state.
     } else {
         debug::show_message("ERROR: Search failed!?");
         return;
     }
-    // Register and backup.
-    sequence->registerWith(sequence->getFirstEntry()->associatedBeliefNode_,
-            policy_.get());
-    backup(sequence, true);
 }
 
 /* ------------------ Tree backup methods ------------------- */
-void Solver::calculateRewards(HistorySequence *sequence) {
-    double discountFactor = model_->getDiscountFactor();
-    std::vector<std::unique_ptr<HistoryEntry>>::reverse_iterator itHist = (
-                sequence->entrySequence_.rbegin());
-    // Retrieve the value of the last entry.
-    double totalReward = (*itHist)->rewardFromHere_;
-    itHist++;
-    for (; itHist != sequence->entrySequence_.rend(); itHist++) {
-           HistoryEntry *entry = itHist->get();
-           // Apply the discount
-           totalReward *= discountFactor;
-           // Include the reward from this entry.
-           entry->rewardFromHere_ = totalReward = entry->reward_ + totalReward;
+void Solver::negateSequence(HistorySequence *sequence) {
+    auto it = sequence->entrySequence_.cbegin();
+    while (true) {
+        // Update the immediate reward and the visit counts.
+        updateImmediate((*it)->getAssociatedBeliefNode(), *(*it)->action_, *(*it)->observation_,
+                -(*it)->immediateReward_, -1);
+
+        it++; // Increment
+
+        // Update the estimate of the next node's value.
+        if ((*it)->action_ == nullptr) {
+            // Last entry - negate the heuristic estimate
+            updateEstimate((*it)->getAssociatedBeliefNode(), -(*it)->immediateReward_, 0);
+            break;
+        } else {
+            // Not the last entry - negate 1x continuation.
+            updateEstimate((*it)->getAssociatedBeliefNode(), 0, -1);
+        }
     }
 }
 
-void Solver::backup(HistorySequence *sequence, bool backingUp) {
-    sequence->testBackup(backingUp);
-    calculateRewards(sequence);
-    backpropagationStrategy_->propagate(sequence, !backingUp);
+bool Solver::isBackedUp() const {
+    return nodesToBackup_.empty();
 }
+
+/* ------------------ Value updating methods -------------------- */
+void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
+        double deltaTotalQ, long deltaNVisits) {
+
+    // all zero => no update required.
+    if (deltaTotalQ == 0 && deltaNVisits == 0) {
+        return;
+    }
+
+    ActionMapping *actionMap = node->getMapping();
+    actionMap->getActionNode(action)->getMapping()->updateVisitCount(observation, deltaNVisits);
+
+    if (actionMap->update(action, deltaNVisits, deltaTotalQ)) {
+        addNodeToBackup(node);
+    }
+}
+
+void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations) {
+    deltaTotalQ += deltaNContinuations * node->getQValue();
+
+    // Apply the discount factor.
+    deltaTotalQ *= model_->getDiscountFactor();
+
+    ActionMappingEntry *parentActionEntry = node->getParentActionNode()->getParentEntry();
+    if (parentActionEntry->update(0, deltaTotalQ)) {
+        addNodeToBackup(node);
+    }
+}
+
+void Solver::addNodeToBackup(BeliefNode *node) {
+    nodesToBackup_[node->getDepth()].insert(node);
+}
+
+void Solver::doBackup() {
+    while (!nodesToBackup_.empty()) {
+        auto firstEntry = nodesToBackup_.cbegin();
+        long depth = firstEntry->first;
+        for (BeliefNode *node : firstEntry->second) {
+            if (depth == 0) {
+                node->getMapping()->recalculate();
+            } else {
+                double oldQValue = node->getQValue();
+                node->getMapping()->recalculate();
+                double deltaQValue = node->getQValue() - oldQValue;
+                long nContinuations = node->getMapping()->getTotalVisitCount()
+                        - node->getNumberOfStartingSequences();
+                double deltaTotalQ = model_->getDiscountFactor() * nContinuations * deltaQValue;
+
+                ActionMappingEntry *parentActionEntry =
+                        node->getParentActionNode()->getParentEntry();
+                if (parentActionEntry->update(0, deltaTotalQ)) {
+                    addNodeToBackup(parentActionEntry->getMapping()->getOwner());
+                }
+            }
+        }
+        nodesToBackup_.erase(firstEntry);
+    }
+}
+
 } /* namespace solver */

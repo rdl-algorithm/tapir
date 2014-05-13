@@ -3,9 +3,7 @@
 
 #include <unordered_map>
 
-#include "solver/backpropagation/BackpropagationStrategy.hpp"
-
-#include "solver/search/SearchStrategy.hpp"
+#include "solver/search/search_interface.hpp"
 
 template <typename TargetType> class Parser;
 
@@ -99,36 +97,6 @@ class Exp3Parser : public Parser<solver::SearchStrategy> {
     virtual std::unique_ptr<solver::SearchStrategy> parse(
             solver::Solver *solver,
             ParserSet<solver::SearchStrategy> *allParser,
-            std::vector<std::string> args) override;
-};
-
-class AveragePropagatorParser : public Parser<solver::BackpropagationStrategy> {
-public:
-    AveragePropagatorParser() = default;
-    ~AveragePropagatorParser() = default;
-    virtual std::unique_ptr<solver::BackpropagationStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<solver::BackpropagationStrategy> *allParser,
-            std::vector<std::string> args) override;
-};
-
-class MaximumPropagatorParser : public Parser<solver::BackpropagationStrategy> {
-public:
-    MaximumPropagatorParser() = default;
-    ~MaximumPropagatorParser() = default;
-    virtual std::unique_ptr<solver::BackpropagationStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<solver::BackpropagationStrategy> *allParser,
-            std::vector<std::string> args) override;
-};
-
-class RobustPropagatorParser : public Parser<solver::BackpropagationStrategy> {
-public:
-    RobustPropagatorParser() = default;
-    ~RobustPropagatorParser() = default;
-    virtual std::unique_ptr<solver::BackpropagationStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<solver::BackpropagationStrategy> *allParser,
             std::vector<std::string> args) override;
 };
 #endif /* STRATEGY_PARSERS_HPP_ */

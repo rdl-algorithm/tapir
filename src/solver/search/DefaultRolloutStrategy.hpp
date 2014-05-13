@@ -2,7 +2,7 @@
 #define SOLVER_DEFAULTROLLOUTSTRATEGY_HPP_
 
 #include "SearchStatus.hpp"
-#include "SearchStrategy.hpp"
+#include "search_interface.hpp"
 
 namespace solver {
 class HistoricalData;

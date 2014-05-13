@@ -64,12 +64,11 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
 
     /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNChildren() const override;
+    virtual ObservationMappingEntry *getEntry(Observation const &obs) override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
     virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
 
     /* ------------- Methods for accessing visit counts. --------------- */
-    virtual void updateVisitCount(Observation const &obs, long deltaNVisits) override;
-    virtual long getVisitCount(Observation const &obs) const override;
     virtual long getTotalVisitCount() const override;
   private:
     ActionNode *owningActionNode_;
@@ -88,6 +87,8 @@ public:
     virtual std::unique_ptr<Observation> getObservation() const override;
     virtual BeliefNode *getBeliefNode() const override;
     virtual long getVisitCount() const override;
+
+    virtual void updateVisitCount(long deltaNVisits) override;
 private:
     EnumeratedObservationMap *map_ = nullptr;
     long index_ = 0;

@@ -67,20 +67,19 @@ public:
      * Histories are terminated upon reaching the maximum depth in the tree
      * (-1 => default)
      */
-    void improvePolicy(long numberOfHistories=-1, long maximumDepth=-1);
+    void improvePolicy(long numberOfHistories = -1, long maximumDepth = -1);
     /** Improves the policy by generating the given number of histories from
      * the given belief node.
      */
-    void improvePolicy(BeliefNode *startNode, long numberOfHistories=-1,
-            long maximumDepth=-1);
+    void improvePolicy(BeliefNode *startNode, long numberOfHistories = -1, long maximumDepth = -1);
     /** Applies any model changes that have been marked within the state pool */
     void applyChanges();
     /** Replenishes the particle count in the child node, ensuring that it
      * has at least the given number of particles
      * (-1 => default == model.getMinParticleCount())
      */
-    BeliefNode *replenishChild(BeliefNode *currNode, Action const &action,
-            Observation const &obs, long minParticleCount=-1);
+    BeliefNode *replenishChild(BeliefNode *currNode, Action const &action, Observation const &obs,
+            long minParticleCount = -1);
 
     /* ------------------ Display methods  ------------------- */
     /** Shows a belief node in a nice, readable way. */
@@ -96,21 +95,43 @@ private:
     /* ------------------ Episode sampling methods ------------------- */
     /** Runs multiple searches from the given start node and start states. */
     void multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
-            long maximumDepth=-1);
+            long maximumDepth = -1);
     /** Searches from the given start node with the given start state. */
-    void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo,
-            long maximumDepth=-1);
+    void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth = -1);
     /** Continues a pre-existing history sequence from its endpoint. */
-    void continueSearch(HistorySequence *sequence,
-            long maximumDepth=-1);
+    void continueSearch(HistorySequence *sequence, long maximumDepth = -1);
 
     /* ------------------ Tree backup methods ------------------- */
-    /** Calculates the discounted rewards from each entry to the end of
-     * the sequence.
+    /** Performs a negative backup for this entire sequence. */
+    void negateSequence(HistorySequence *sequence);
+
+    /** Returns true iff the tree has been properly backed up. */
+    bool isBackedUp() const;
+
+    /** Updates the values for taking the given action and receiving the given
+     * observation from the given belief node.
+     *
+     * deltaTotalQ - change in total reward due to immediate rewards
+     * deltaNVisits - number of new visits (usually +1, 0, or -1)
      */
-    void calculateRewards(HistorySequence *sequence);
-    /** Performs or negates a backup on the given sequence. */
-    void backup(HistorySequence *sequence, bool backingUp);
+    void updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
+            double deltaTotalQ, long deltaNVisits);
+
+    /** Updates the estimated q-value for the previous action based on the
+     * given belief.
+     *
+     * deltaTotalQ - change in heuristic value at this belief node.
+     * deltaNContinuations - change in number of visits to this node that
+     * continue onwards (and hence can be estimated using the q-value
+     * this node).
+     *
+     */
+    void updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations);
+
+    /** Adds a new node that requires backing up. */
+    void addNodeToBackup(BeliefNode *node);
+    /** Performs a backup on the entire tree. */
+    void doBackup();
 
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */
@@ -139,8 +160,9 @@ private:
     std::unique_ptr<SearchStrategy> selectionStrategy_;
     /** The strategy to use when rolling out. */
     std::unique_ptr<SearchStrategy> rolloutStrategy_;
-    /** The strategy to use for backpropagation. */
-    std::unique_ptr<BackpropagationStrategy> backpropagationStrategy_;
+
+    /** The nodes to be updated, sorted by depth (deepest first) */
+    std::map<int, std::set<BeliefNode *>, std::greater<int>> nodesToBackup_;
 };
 } /* namespace solver */
 

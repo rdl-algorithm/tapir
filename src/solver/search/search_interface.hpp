@@ -33,13 +33,25 @@ class SearchInstance {
   public:
     SearchInstance() = default;
     virtual ~SearchInstance() = default;
-    /** Initializes the search. */
-    virtual SearchStatus initialize() = 0;
+
+    /** Returns the current search status. */
+    virtual SearchStatus getStatus() const = 0;
     /** Extends the sequence. */
-    virtual SearchStatus extendSequence() = 0;
-    /** Finalizes the search. */
-    virtual SearchStatus finalize() = 0;
+    virtual void extendSequence() = 0;
 };
+
+/*
+class StagedSearchStrategy : SearchStrategy {
+    StagedSearchStrategy(Solver *solver, std::unique_ptr<SearchStrategy> searchStrategy,
+            std::unique_ptr<SearchStrategy> rolloutStrategy,
+            std::unique_ptr<ValueEstimator> estimator);
+    virtual ~StagedSearchStrategy() = default;
+
+    virtual std::unique_ptr<SearchInstance> createSearchInstance(
+               HistorySequence *sequence, long maximumDepth);
+};
+*/
+
 
 struct SearchStep {
     SearchStatus status;
@@ -62,18 +74,11 @@ class AbstractSearchInstance : public SearchInstance {
      */
     virtual SearchStep getSearchStep() = 0;
 
-    /** The default initialization method - cannot be overridden. */
-    virtual SearchStatus initialize() final override;
-    /** Initialization method, for overriding by subclasses. */
-    virtual SearchStatus initializeCustom(BeliefNode *currentNode);
-    /** A default implementation to handle extending sequences; this probably
-     * shouldn't need to be changed.
-     */
-    virtual SearchStatus extendSequence();
-    /** The default finalization method - cannot be overridden. */
-    virtual SearchStatus finalize() final override;
-    /** Finalization method, for overriding by subclasses. */
-    virtual SearchStatus finalizeCustom();
+    virtual SearchStatus initialize(BeliefNode *currentNode);
+    virtual SearchStatus finalize();
+
+    virtual SearchStatus getStatus() const override;
+    virtual void extendSequence() override;
 
     /** Returns the solver associated with this search instance. */
     virtual Solver *getSolver() const;

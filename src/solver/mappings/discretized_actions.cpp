@@ -120,6 +120,10 @@ std::vector<ActionMappingEntry const *> DiscretizedActionMap::getVisitedEntries(
     }
     return returnEntries;
 }
+ActionMappingEntry *DiscretizedActionMap::getEntry(Action const &action) {
+    long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
+    return &entries_[code];
+}
 ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
     return &entries_[code];
@@ -157,37 +161,6 @@ long DiscretizedActionMap::getTotalVisitCount() const {
     return totalVisitCount_;
 }
 
-
-void DiscretizedActionMap::update(Action const &action, long deltaNVisits,
-        double deltaQ) {
-    long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-    DiscretizedActionMapEntry &entry = entries_[code];
-
-    // Update the visit counts
-    if (entry.visitCount_ == 0 && deltaNVisits > 0) {
-        numberOfVisitedEntries_++;
-        deleteUnvisitedAction(code);
-    }
-    entry.visitCount_ += deltaNVisits;
-    totalVisitCount_ += deltaNVisits;
-    if (entry.visitCount_ == 0 && deltaNVisits < 0) {
-        numberOfVisitedEntries_--;
-        addUnvisitedAction(code);
-    }
-
-    // Update the total Q
-    entry.totalQValue_ += deltaQ;
-
-    // Update the mean Q
-    double changeInMeanQ = -entry.meanQValue_;
-    if (entry.visitCount_ <= 0) {
-        entry.meanQValue_ = -std::numeric_limits<double>::infinity();
-    } else {
-        entry.meanQValue_ = entry.totalQValue_ / entry.visitCount_;
-    }
-    changeInMeanQ += entry.meanQValue_;
-}
-
 /* ------------------- DiscretizedActionMapEntry ------------------- */
 /** Returns the mapping this entry belongs to. */
 ActionMapping *DiscretizedActionMapEntry::getMapping() const {
@@ -210,6 +183,36 @@ double DiscretizedActionMapEntry::getMeanQValue() const {
 }
 long DiscretizedActionMapEntry::getBinNumber() const {
     return binNumber_;
+}
+
+bool DiscretizedActionMapEntry::update(long deltaNVisits, double deltaTotalQ) {
+    if (deltaNVisits == 0 && deltaTotalQ == 0) {
+        return false;
+    }
+
+    // Update the visit counts
+    if (visitCount_ == 0 && deltaNVisits > 0) {
+        map_->numberOfVisitedEntries_++;
+        map_->deleteUnvisitedAction(binNumber_);
+    }
+    visitCount_ += deltaNVisits;
+    map_->totalVisitCount_ += deltaNVisits;
+    if (visitCount_ == 0 && deltaNVisits < 0) {
+        map_->numberOfVisitedEntries_--;
+        map_->addUnvisitedAction(binNumber_);
+    }
+
+    // Update the total Q
+    totalQValue_ += deltaTotalQ;
+
+    // Update the mean Q
+    double oldMeanQ = meanQValue_;
+    if (visitCount_ <= 0) {
+        meanQValue_ = -std::numeric_limits<double>::infinity();
+    } else {
+        meanQValue_ = totalQValue_ / visitCount_;
+    }
+    return meanQValue_ == oldMeanQ;
 }
 
 /* ------------------- DiscretizedActionTextSerializer ------------------- */

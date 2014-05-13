@@ -47,7 +47,8 @@ public:
     BeliefNode(long id, ObservationMappingEntry *parentEntry);
 
     // Default destructor; copying and moving disallowed!
-    ~BeliefNode();_NO_COPY_OR_MOVE(BeliefNode);
+    ~BeliefNode();
+    _NO_COPY_OR_MOVE(BeliefNode);
 
     /* ---------------- Useful calculations ------------------ */
     /** Calculates the distance between this belief node and another by

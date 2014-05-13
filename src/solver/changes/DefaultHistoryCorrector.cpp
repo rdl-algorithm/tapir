@@ -34,8 +34,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         if (hitTerminalState || entry->action_ == nullptr) {
             entry->action_ = nullptr;
             entry->observation_ = nullptr;
-            entry->reward_ = 0;
-            entry->rewardFromHere_ = 0;
+            entry->immediateReward_ = 0;
             historyIterator++;
             break;
         }
@@ -66,7 +65,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
             }
         }
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::REWARD)) {
-            entry->reward_ = getModel()->generateReward(*entry->getState(),
+            entry->immediateReward_ = getModel()->generateReward(*entry->getState(),
                     *entry->action_, entry->transitionParameters_.get(),
                     nextEntry->getState());
         }

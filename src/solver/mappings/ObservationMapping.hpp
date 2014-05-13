@@ -10,10 +10,28 @@
 namespace solver {
 class ActionNode;
 class BeliefNode;
-class ObservationMappingEntry;
+class ObservationMapping;
+
+class ObservationMappingEntry {
+public:
+    ObservationMappingEntry() = default;
+    virtual ~ObservationMappingEntry() = default;
+
+    /** Returns the mapping this entry belongs to. */
+    virtual ObservationMapping *getMapping() const = 0;
+    /** Returns the observation for this entry. */
+    virtual std::unique_ptr<Observation> getObservation() const = 0;
+    /** Returns the belief node for this entry. */
+    virtual BeliefNode *getBeliefNode() const = 0;
+    /** Returns the visit count for this entry. */
+    virtual long getVisitCount() const = 0;
+
+    /** Updates the visit count for this observation. */
+    virtual void updateVisitCount(long deltaNVisits) = 0;
+};
 
 class ObservationMapping {
-  public:
+public:
     ObservationMapping() = default;
     virtual ~ObservationMapping() = default;
 
@@ -33,32 +51,23 @@ class ObservationMapping {
     /** Returns the number of child nodes associated with this mapping. */
     virtual long getNChildren() const = 0;
     /** Returns the mapping entry associated with the given observation. */
+    virtual ObservationMappingEntry *getEntry(Observation const &obs) = 0;
+    /** Returns the mapping entry associated with the given observation. */
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const = 0;
     /** Returns a vector of all of the entries in this mapping. */
     virtual std::vector<ObservationMappingEntry const *> getAllEntries() const = 0;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     /** Updates the visit count for the given observation. */
-    virtual void updateVisitCount(Observation const &obs, long deltaNVisits) = 0;
+    virtual void updateVisitCount(Observation const &obs, long deltaNVisits) {
+        getEntry(obs)->updateVisitCount(deltaNVisits);
+    }
     /** Returns the visit count for the given observation. */
-    virtual long getVisitCount(Observation const &obs) const = 0;
+    virtual long getVisitCount(Observation const &obs) const {
+        return getEntry(obs)->getVisitCount();
+    }
     /** Returns the total visit count among all observations. */
     virtual long getTotalVisitCount() const = 0;
-};
-
-class ObservationMappingEntry {
-public:
-    ObservationMappingEntry() = default;
-    virtual ~ObservationMappingEntry() = default;
-
-    /** Returns the mapping this entry belongs to. */
-    virtual ObservationMapping *getMapping() const = 0;
-    /** Returns the observation for this entry. */
-    virtual std::unique_ptr<Observation> getObservation() const = 0;
-    /** Returns the belief node for this entry. */
-    virtual BeliefNode *getBeliefNode() const = 0;
-    /** Returns the visit count for this entry. */
-    virtual long getVisitCount() const = 0;
 };
 } /* namespace solver */
 

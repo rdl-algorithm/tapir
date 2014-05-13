@@ -1,4 +1,4 @@
-#include "SearchStrategy.hpp"
+#include "search_interface.hpp"
 
 #include "solver/BeliefNode.hpp"
 #include "solver/BeliefTree.hpp"
@@ -32,19 +32,20 @@ AbstractSearchInstance::AbstractSearchInstance(Solver *solver,
                 status_(SearchStatus::UNINITIALIZED) {
 }
 
-SearchStatus AbstractSearchInstance::initialize() {
-    status_ = initializeCustom(currentNode_);
+SearchStatus AbstractSearchInstance::initialize(BeliefNode */*currentNode*/) {
+    status_ = SearchStatus::INITIAL;
     return status_;
 }
 
-SearchStatus AbstractSearchInstance::initializeCustom(BeliefNode */*currentNode*/) {
-    return SearchStatus::INITIAL;
+SearchStatus AbstractSearchInstance::getStatus() const {
+    return status_;
 }
 
-SearchStatus AbstractSearchInstance::extendSequence() {
+void AbstractSearchInstance::extendSequence() {
+    status_ = initialize(currentNode_);
     if (status_ != SearchStatus::INITIAL) {
         debug::show_message("WARNING: Attempted to search without initializing.");
-        return status_;
+        return;
     }
     HistoryEntry *currentEntry = sequence_->getLastEntry();
     status_ = SearchStatus::INITIAL;
@@ -52,8 +53,9 @@ SearchStatus AbstractSearchInstance::extendSequence() {
         debug::show_message("WARNING: Attempted to continue sequence from"
                 " a terminal state.");
         status_ = SearchStatus::HIT_TERMINAL_STATE;
-        return status_;
+        return;
     }
+
     for (long currentDepth = currentNode_->getDepth();; currentDepth++) {
         if (currentDepth == maximumDepth_) {
             // We have hit the depth limit.
@@ -65,9 +67,10 @@ SearchStatus AbstractSearchInstance::extendSequence() {
         if (step.action == nullptr) {
             break;
         }
+
         Model::StepResult result = model_->generateStep(
                 *currentEntry->getState(), *step.action);
-        currentEntry->reward_ = result.reward;
+        currentEntry->immediateReward_ = result.reward;
         currentEntry->action_ = result.action->copy();
         currentEntry->transitionParameters_ = std::move(
                 result.transitionParameters);
@@ -83,7 +86,10 @@ SearchStatus AbstractSearchInstance::extendSequence() {
             currentNode_ = solver_->getPolicy()->createOrGetChild(
                     currentNode_, *result.action, *result.observation);
             currentHistoricalData_ = nullptr;
-            currentEntry->associatedBeliefNode_ = currentNode_;
+            currentEntry->registerNode(currentNode_);
+
+
+
         } else {
             HistoricalData *oldData;
             if (currentNode_ == nullptr) {
@@ -104,15 +110,10 @@ SearchStatus AbstractSearchInstance::extendSequence() {
             break;
         }
     }
-    return status_;
+    status_ = finalize();
 }
 
 SearchStatus AbstractSearchInstance::finalize() {
-    status_ = finalize();
-    return status_;
-}
-
-SearchStatus AbstractSearchInstance::finalizeCustom() {
     return status_;
 }
 

@@ -11,14 +11,11 @@
 #include "solver/indexing/StateIndex.hpp"
 #include "solver/indexing/RTree.hpp"
 
-#include "solver/backpropagation/BackpropagationStrategy.hpp"
-#include "solver/backpropagation/AveragePropagator.hpp"
-
 #include "solver/changes/DefaultHistoryCorrector.hpp"
 #include "solver/changes/HistoryCorrector.hpp"
 
 #include "solver/search/HistoricalData.hpp"
-#include "solver/search/SearchStrategy.hpp"
+#include "solver/search/search_interface.hpp"
 #include "solver/search/UcbSelectionStrategy.hpp"
 #include "solver/search/DefaultRolloutStrategy.hpp"
 
@@ -91,11 +88,6 @@ std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
 
 std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
     return std::make_unique<DefaultRolloutStrategy>(solver, 1);
-}
-
-std::unique_ptr<BackpropagationStrategy> Model::createBackpropagationStrategy(
-            Solver *solver) {
-    return std::make_unique<AveragePropagator>(solver);
 }
 
 std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {

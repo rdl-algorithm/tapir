@@ -72,6 +72,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     /* -------------- Retrieval of mapping entries. ---------------- */
     virtual long getNumberOfVisitedEntries() const override;
     virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const override;
+    virtual ActionMappingEntry *getEntry(Action const &action) override;
     virtual ActionMappingEntry const *getEntry(Action const &action) const override;
 
     /* ----------------- Methods for unvisited actions ------------------- */
@@ -86,9 +87,6 @@ class DiscretizedActionMap: public solver::ActionMapping {
 
     /* -------------- Retrieval of general statistics. ---------------- */
     virtual long getTotalVisitCount() const override;
-
-    /* --------------- Methods for updating the values ----------------- */
-    virtual void update(Action const &action, long deltaNVisits, double deltaQ) override;
 
   protected:
     BeliefNode *owningBeliefNode_;
@@ -123,6 +121,9 @@ class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
     virtual double getMeanQValue() const override;
 
     virtual long getBinNumber() const;
+
+    virtual bool update(long deltaNVisits, double deltaTotalQ) override;
+
   protected:
     long binNumber_ = -1;
     DiscretizedActionMap *map_ = nullptr;

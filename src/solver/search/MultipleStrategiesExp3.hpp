@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "SearchStatus.hpp"
-#include "SearchStrategy.hpp"
+#include "search_interface.hpp"
 
 namespace solver {
 struct StrategyInfo {
@@ -50,20 +50,15 @@ class MultipleStrategiesExp3Instance: public SearchInstance {
     virtual ~MultipleStrategiesExp3Instance() = default;
     _NO_COPY_OR_MOVE(MultipleStrategiesExp3Instance);
 
-    virtual SearchStatus initialize() override;
-    virtual SearchStatus extendSequence() override;
-    virtual SearchStatus finalize() override;
+    virtual SearchStatus getStatus() const override;
+    virtual void extendSequence() override;
   private:
     MultipleStrategiesExp3 *parent_;
     Solver *solver_;
     HistorySequence *sequence_;
     long maximumDepth_;
 
-    std::unordered_set<long> failedStrategies_;
-    long currentStrategyNo_;
-    std::unique_ptr<SearchInstance> currentInstance_;
-    double currentInstanceStartTime_;
-    double initialRootQValue_;
+    SearchStatus status_;
 };
 
 } /* namespace solver */

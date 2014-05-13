@@ -4,11 +4,7 @@
 
 #include "global.hpp"
 
-#include "solver/backpropagation/AveragePropagator.hpp"
-#include "solver/backpropagation/MaximumPropagator.hpp"
-#include "solver/backpropagation/RobustPropagator.hpp"
-
-#include "solver/search/SearchStrategy.hpp"
+#include "solver/search/search_interface.hpp"
 #include "solver/search/MultipleStrategiesExp3.hpp"
 #include "solver/search/NnRolloutStrategy.hpp"
 #include "solver/search/DefaultRolloutStrategy.hpp"
@@ -101,25 +97,4 @@ std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(
     }
     return std::make_unique<solver::MultipleStrategiesExp3>(solver,
             strategyExplorationCoefficient, std::move(strategies));
-}
-
-std::unique_ptr<solver::BackpropagationStrategy> AveragePropagatorParser::parse(
-        solver::Solver *solver,
-        ParserSet<solver::BackpropagationStrategy> */*allParser*/,
-        std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::AveragePropagator>(solver);
-}
-
-std::unique_ptr<solver::BackpropagationStrategy> MaximumPropagatorParser::parse(
-        solver::Solver *solver,
-        ParserSet<solver::BackpropagationStrategy> */*allParser*/,
-        std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::MaximumPropagator>(solver);
-}
-
-std::unique_ptr<solver::BackpropagationStrategy> RobustPropagatorParser::parse(
-        solver::Solver *solver,
-        ParserSet<solver::BackpropagationStrategy> */*allParser*/,
-        std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::RobustPropagator>(solver);
 }

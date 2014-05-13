@@ -16,7 +16,6 @@ namespace solver {
 class ActionPool;
 class HistoricalData;
 class BeliefNode;
-class BackpropagationStrategy;
 class HistoryCorrector;
 class ModelChange;
 class ObservationPool;
@@ -26,7 +25,7 @@ class StateIndex;
 class StatePool;
 
 class Model {
-  public:
+public:
     Model() = default;
     virtual ~Model() = default;
     _NO_COPY_OR_MOVE(Model);
@@ -46,7 +45,6 @@ class Model {
     virtual double getMaxVal() = 0;
     /** Returns the default q-value */
     virtual double getDefaultVal() = 0;
-
 
     // ABT algorithm parameters
     /** Returns the preferred number of particles per belief - this number will
@@ -91,14 +89,12 @@ class Model {
      * used - the default implementation simply returns nullptr.
      */
     virtual std::unique_ptr<TransitionParameters> generateTransition(
-            State const &state,
-            Action const &action);
+            State const &state, Action const &action);
 
     /** Generates the next state, based on the state and action, and,
      * if used, the transition parameters.
      */
-    virtual std::unique_ptr<State> generateNextState(
-            State const &state,
+    virtual std::unique_ptr<State> generateNextState(State const &state,
             Action const &action,
             TransitionParameters const *transitionParameters // optional
             ) = 0;
@@ -117,9 +113,7 @@ class Model {
      * includes transition parameters and the next state - if they aren't
      * being used it is OK to use nullptr for those inputs.
      */
-    virtual double generateReward(
-            State const &state,
-            Action const &action,
+    virtual double generateReward(State const &state, Action const &action,
             TransitionParameters const *transitionParameters, // optional
             State const *nextState) = 0; // optional
 
@@ -128,9 +122,8 @@ class Model {
      * previous node, as well as on the action and observation.
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
-            BeliefNode *previousBelief,
-            Action const &action, Observation const &obs,
-            long nParticles,
+            BeliefNode *previousBelief, Action const &action,
+            Observation const &obs, long nParticles,
             std::vector<State const *> const &previousParticles);
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
@@ -139,9 +132,8 @@ class Model {
      * incompatible with the current observation.
      */
     virtual std::vector<std::unique_ptr<State>> generateParticles(
-            BeliefNode *previousBelief,
-            Action const &action, Observation const &obs,
-            long nParticles);
+            BeliefNode *previousBelief, Action const &action,
+            Observation const &obs, long nParticles);
 
     /* -------------- Methods for handling model changes ---------------- */
     virtual void applyChange(ModelChange const &change, StatePool *pool);
@@ -149,7 +141,6 @@ class Model {
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to
     // be managed in a customizable way.
-
     /** Creates a StateIndex, which manages searching for states that
      * have been used in a StatePool.
      */
@@ -157,7 +148,8 @@ class Model {
     /** Creates a HistoryCorrector; defaults to a general one, but can
      * be made problem-specific.
      */
-    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(Solver *solver);
+    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(
+            Solver *solver);
     /** Creates an ActionPool, which manages actions and creates
      * ActionMappings
      */
@@ -165,29 +157,29 @@ class Model {
     /** Creates an ObservationPool, which manages observations and creates
      * ObservationMappings.
      */
-    virtual std::unique_ptr<ObservationPool> createObservationPool(Solver *solver) = 0;
+    virtual std::unique_ptr<ObservationPool> createObservationPool(
+            Solver *solver) = 0;
 
     /** Creates a selection strategy for use by the given solver. Multiple
      * strategies should be combined into one, as is done, for example, in
      * MultipleStrategiesExp3.
      */
-    virtual std::unique_ptr<SearchStrategy> createSelectionStrategy(Solver *solver);
+    virtual std::unique_ptr<SearchStrategy> createSelectionStrategy(
+            Solver *solver);
     /** Creates a rollout strategy for use by the given solver. */
-    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(Solver *solver);
-    /** Creates a backpropagation strategy for use by the given solver. */
-    virtual std::unique_ptr<BackpropagationStrategy> createBackpropagationStrategy(
+    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(
             Solver *solver);
 
     virtual std::unique_ptr<HistoricalData> createRootHistoricalData();
 
     /* --------------- Pretty printing methods ----------------- */
-     /** Draws the environment map onto the given output stream. */
-     virtual void drawEnv(std::ostream &/*os*/);
-     /** Draws the current belief and/or the current state in the context of the
-      * overall map onto the given output stream.
-      */
-     virtual void drawSimulationState(BeliefNode const *belief,
-             State const &/*state*/, std::ostream &/*os*/);
+    /** Draws the environment map onto the given output stream. */
+    virtual void drawEnv(std::ostream &/*os*/);
+    /** Draws the current belief and/or the current state in the context of the
+     * overall map onto the given output stream.
+     */
+    virtual void drawSimulationState(BeliefNode const *belief,
+            State const &/*state*/, std::ostream &/*os*/);
     /** Returns the name of this model. */
     virtual std::string getName();
     /** Returns whether color output is available. */

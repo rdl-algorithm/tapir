@@ -11,7 +11,7 @@ namespace solver {
 MultipleStrategiesExp3::MultipleStrategiesExp3(Solver *solver,
         double strategyExplorationCoefficient,
         std::vector<std::unique_ptr<SearchStrategy>> strategies) :
-                SearchStrategy(solver),
+            SearchStrategy(solver),
             strategyExplorationCoefficient_(strategyExplorationCoefficient),
             strategies_(),
             model_(getSolver()->getModel()) {
@@ -26,9 +26,9 @@ MultipleStrategiesExp3::MultipleStrategiesExp3(Solver *solver,
 }
 
 std::unique_ptr<SearchInstance> MultipleStrategiesExp3::createSearchInstance(
-       HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<MultipleStrategiesExp3Instance>(this,
-            getSolver(), sequence, maximumDepth);
+        HistorySequence *sequence, long maximumDepth) {
+    return std::make_unique<MultipleStrategiesExp3Instance>(this, getSolver(), sequence,
+            maximumDepth);
 }
 
 StrategyInfo *MultipleStrategiesExp3::sampleAStrategy(
@@ -47,16 +47,17 @@ StrategyInfo *MultipleStrategiesExp3::sampleAStrategy(
     return &strategies_[strategyNo];
 }
 
-void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo,
-        double timeUsed, double deltaQ) {
+void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo, double timeUsed,
+        double deltaQ) {
     StrategyInfo &strategyInfo = strategies_[strategyNo];
     if (deltaQ < 0.0) {
         deltaQ = 0.0;
     }
     strategyInfo.timeSpent += timeUsed;
     strategyInfo.numberOfTimesUsed++;
-    strategyInfo.weight *= std::exp(strategyExplorationCoefficient_
-            * (deltaQ / model_->getMaxVal()) / (2 * strategyInfo.probability));
+    strategyInfo.weight *= std::exp(
+            strategyExplorationCoefficient_ * (deltaQ / model_->getMaxVal())
+                    / (2 * strategyInfo.probability));
 
     double weightTotal = 0.0;
     for (StrategyInfo &info : strategies_) {
@@ -64,8 +65,8 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo,
     }
     double probabilityTotal = 0.0;
     for (StrategyInfo &info : strategies_) {
-        info.probability = ((1 - strategyExplorationCoefficient_) * info.weight
-                / weightTotal + strategyExplorationCoefficient_ / 2);
+        info.probability = ((1 - strategyExplorationCoefficient_) * info.weight / weightTotal
+                + strategyExplorationCoefficient_ / 2);
         info.probability *= (info.numberOfTimesUsed + 1) / (info.timeSpent + 1);
         probabilityTotal += info.probability;
     }
@@ -74,53 +75,51 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo,
     }
 }
 
-MultipleStrategiesExp3Instance::MultipleStrategiesExp3Instance(
-        MultipleStrategiesExp3 *parent,
+MultipleStrategiesExp3Instance::MultipleStrategiesExp3Instance(MultipleStrategiesExp3 *parent,
         Solver *solver, HistorySequence *sequence, long maximumDepth) :
-                parent_(parent),
-                solver_(solver),
-                sequence_(sequence),
-                maximumDepth_(maximumDepth),
-                failedStrategies_(),
-                currentStrategyNo_(0),
-                currentInstance_(nullptr),
-                currentInstanceStartTime_(0),
-                initialRootQValue_(0) {
+            parent_(parent),
+            solver_(solver),
+            sequence_(sequence),
+            maximumDepth_(maximumDepth),
+            status_(SearchStatus::UNINITIALIZED) {
 }
 
-SearchStatus MultipleStrategiesExp3Instance::initialize() {
-    initialRootQValue_ = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
+SearchStatus MultipleStrategiesExp3Instance::getStatus() const {
+    return status_;
+}
+
+void MultipleStrategiesExp3Instance::extendSequence() {
+    double initialRootQValue = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
+
+    long currentStrategyNo;
+    double timeUsed;
+    std::unordered_set<long> failedStrategies;
     while (true) {
-        StrategyInfo *info = parent_->sampleAStrategy(failedStrategies_);
+        StrategyInfo *info = parent_->sampleAStrategy(failedStrategies);
         if (info == nullptr) {
-            // We are out of strategies, so we give up.
-            return  SearchStatus::UNINITIALIZED;;
+            return; // We are out of strategies, so we give up.
         }
-        currentStrategyNo_ = info->strategyNo;
-        currentInstance_ = info->strategy->createSearchInstance(
+        currentStrategyNo = info->strategyNo;
+        std::unique_ptr<SearchInstance> currentInstance = info->strategy->createSearchInstance(
                 sequence_, maximumDepth_);
-        currentInstanceStartTime_ = abt::clock_ms();
-        if (currentInstance_->initialize() == SearchStatus::INITIAL) {
-            // This strategy seems OK, so we'll try it.
-            return SearchStatus::INITIAL;
+
+        double startTime = abt::clock_ms();
+        currentInstance->extendSequence();
+        status_ = currentInstance->getStatus();
+        timeUsed = abt::clock_ms() - startTime;
+
+        // If it was successful, break out of the loop.
+        if (status_ != SearchStatus::UNINITIALIZED) {
+            break;
         }
         // The strategy failed to initialize; we should record the failed attempt.
-        failedStrategies_.insert(currentStrategyNo_);
-        double timeTaken = abt::clock_ms() - currentInstanceStartTime_;
-        parent_->updateStrategyWeights(currentStrategyNo_, timeTaken, 0.0);
+        failedStrategies.insert(currentStrategyNo);
+        parent_->updateStrategyWeights(currentStrategyNo, timeUsed, 0.0);
     }
-    return SearchStatus::UNINITIALIZED;
-}
 
-SearchStatus MultipleStrategiesExp3Instance::extendSequence() {
-    return currentInstance_->extendSequence();
-}
-
-SearchStatus MultipleStrategiesExp3Instance::finalize() {
-    double timeUsed = abt::clock_ms() - currentInstanceStartTime_;
+    // The strategy was successful, so we update.
     double newRootQValue = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
-    double deltaQ = newRootQValue - initialRootQValue_;
-    parent_->updateStrategyWeights(currentStrategyNo_, timeUsed, deltaQ);
-    return currentInstance_->finalize();
+    double deltaQ = newRootQValue - initialRootQValue;
+    parent_->updateStrategyWeights(currentStrategyNo, timeUsed, deltaQ);
 }
 } /* namespace solver */

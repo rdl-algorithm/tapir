@@ -63,33 +63,11 @@ std::vector<State const *> HistorySequence::getStates() const {
 /* ============================ PRIVATE ============================ */
 
 
-bool HistorySequence::testBackup(bool backingUp) {
-    HistoryEntry *lastEntry = getLastEntry();
-    if (lastEntry->getAction() != nullptr) {
-        debug::show_message("ERROR: End of sequence has an action!?");
-        return false;
-    }
-
-    for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
-        if (!backingUp && !entry->hasBeenBackedUp_) {
-            debug::show_message("ERROR: Undoing backup, but it's already undone!");
-            return false;
-        } else if (backingUp && entry->hasBeenBackedUp_) {
-            debug::show_message("ERROR: Doing backup, but it's already done!");
-            return false;
-        }
-    }
-    return true;
-}
-
 /* ----------- Methods to add or remove history entries ------------- */
 void HistorySequence::reset() {
     for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
+        entry->registerNode(nullptr);
         entry->registerState(nullptr);
-        if (entry->isRegisteredAsParticle()) {
-            debug::show_message("ERROR: sequence should be fully deregistered"
-                    " before deletion.");
-        }
     }
     entrySequence_.clear();
 }
@@ -100,40 +78,6 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
     HistoryEntry *newEntryReturn = newEntry.get();
     entrySequence_.push_back(std::move(newEntry));
     return newEntryReturn;
-}
-
-/* -------------- Registration methods ---------------- */
-void HistorySequence::registerWith(BeliefNode *startNode, BeliefTree *policy) {
-    bool registering = (startNode != nullptr);
-    std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator = entrySequence_.begin();
-    if (registering && (*historyIterator)->isRegisteredAsParticle()) {
-        debug::show_message("WARNING: Already registered this sequence!");
-        registerWith(nullptr, policy);
-        registerWith(startNode, policy);
-    }
-    BeliefNode *currentNode = startNode;
-    for (; historyIterator != entrySequence_.end(); historyIterator++) {
-        HistoryEntry *entry = historyIterator->get();
-        if (registering) {
-            entry->registerNode(currentNode);
-            if (currentNode != nullptr && entry->action_ != nullptr) {
-                // If a child already exists, we will use it.
-                BeliefNode *nextNode = currentNode->getChild(
-                        *entry->action_, *entry->observation_);
-                if (nextNode == nullptr) {
-                    // If no child exists, we check if one is desired.
-                    HistoryEntry *nextEntry = (historyIterator+1)->get();
-                    if (nextEntry->associatedBeliefNode_ != nullptr) {
-                        nextNode = policy->createOrGetChild(currentNode,
-                                    *entry->action_, *entry->observation_);
-                    }
-                }
-                currentNode = nextNode;
-            }
-        } else {
-            entry->registerNode(nullptr);
-        }
-    }
 }
 
 /* -------------- Change flagging methods ---------------- */

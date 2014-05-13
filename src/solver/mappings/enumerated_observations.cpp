@@ -87,7 +87,11 @@ BeliefNode* EnumeratedObservationMap::createBelief(
 long EnumeratedObservationMap::getNChildren() const {
     return nChildren_;
 }
-ObservationMappingEntry const *EnumeratedObservationMap::getEntry(Observation const &obs) const {
+ObservationMappingEntry *EnumeratedObservationMap::getEntry(Observation const &obs) {
+    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
+    return children_[code].get();
+}
+ObservationMappingEntry const*EnumeratedObservationMap::getEntry(Observation const &obs) const {
     long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
     return children_[code].get();
 }
@@ -101,17 +105,6 @@ std::vector<ObservationMappingEntry const *> EnumeratedObservationMap::getAllEnt
     return returnEntries;
 }
 
-void EnumeratedObservationMap::updateVisitCount(Observation const &obs,
-        long deltaNVisits) {
-    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
-    children_[code]->visitCount_ += deltaNVisits;
-    totalVisitCount_ += deltaNVisits;
-}
-long EnumeratedObservationMap::getVisitCount(Observation const &obs) const {
-    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
-    return children_[code]->visitCount_;
-
-}
 long EnumeratedObservationMap::getTotalVisitCount() const {
     return totalVisitCount_;
 }
@@ -130,6 +123,12 @@ BeliefNode *EnumeratedObservationMapEntry::getBeliefNode() const {
 long EnumeratedObservationMapEntry::getVisitCount() const {
     return visitCount_;
 }
+
+void EnumeratedObservationMapEntry::updateVisitCount(long deltaNVisits) {
+    visitCount_ += deltaNVisits;
+    map_->totalVisitCount_ += deltaNVisits;
+}
+
 
 /* ------------------ EnumeratedObservationTextSerializer ------------------ */
 void EnumeratedObservationTextSerializer::saveObservationPool(

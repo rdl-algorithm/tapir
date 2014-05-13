@@ -139,7 +139,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             os << "S: " << *entry->getState() << endl;
             os << "A: " << *entry->getAction() << endl;
             os << "O: " << *entry->getObservation() << endl;
-            os << "R: " << entry->getReward() << endl;
+            os << "R: " << entry->getImmediateReward() << endl;
         }
         os << "Final State: " << *sequence->getLastEntry()->getState();
         os << endl;

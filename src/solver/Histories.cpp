@@ -36,6 +36,7 @@ HistorySequence *Histories::createSequence() {
 }
 void Histories::deleteSequence(long seqId) {
     HistorySequence *sequence = getSequence(seqId);
+    // Deregister and clear the sequence.
     sequence->reset();
     if (seqId < static_cast<long>(sequencesById_.size()) - 1) {
         sequencesById_[seqId] = std::move(sequencesById_[sequencesById_.size()-1]);

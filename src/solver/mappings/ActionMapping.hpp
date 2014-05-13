@@ -7,9 +7,35 @@
 #include "global.hpp"
 
 namespace solver {
-class ActionMappingEntry;
+class ActionMapping;
 class ActionNode;
 class BeliefNode;
+
+class ActionMappingEntry {
+public:
+    ActionMappingEntry() = default;
+    virtual ~ActionMappingEntry() = default;
+
+    /** Returns the mapping this entry belongs to. */
+    virtual ActionMapping *getMapping() const = 0;
+    /** Returns the action for this entry. */
+    virtual std::unique_ptr<Action> getAction() const = 0;
+    /** Returns the action node for this entry. */
+    virtual ActionNode *getActionNode() const = 0;
+    /** Returns the visit count for this entry. */
+    virtual long getVisitCount() const = 0;
+    /** Returns the total Q-value for this entry. */
+    virtual double getTotalQValue() const = 0;
+    /** Returns the mean Q-value for this entry. */
+    virtual double getMeanQValue() const = 0;
+
+    /** Updates this action, by adding the given number of visits and the
+     * given change in the total q-value.
+     *
+     * Returns true if and only if the q value of the action changed.
+     */
+    virtual bool update(long deltaNVisits, double deltaTotalQ) = 0;
+};
 
 class ActionMapping {
 public:
@@ -31,7 +57,8 @@ public:
      * called when a belief node is deserialized, as the relevant parameters
      * can simply be stored for serialization.
      */
-    virtual void initialize() {}
+    virtual void initialize() {
+    }
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     /** Retrieves the action node (if any) corresponding to this action. */
@@ -52,6 +79,9 @@ public:
      * values.
      */
     virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const = 0;
+
+    /** Returns the mapping entry (if any) associated with the given action. */
+    virtual ActionMappingEntry *getEntry(Action const &action) = 0;
     /** Returns the mapping entry (if any) associated with the given action. */
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
@@ -70,27 +100,12 @@ public:
     /* --------------- Methods for updating the values ----------------- */
     /** Updates the given action, by adding the given number of visits and the
      * given change in the total q-value.
-    */
-    virtual void update(Action const &action, long deltaNVisits, double deltaQ) = 0;
-};
-
-class ActionMappingEntry {
-public:
-    ActionMappingEntry() = default;
-    virtual ~ActionMappingEntry() = default;
-
-    /** Returns the mapping this entry belongs to. */
-    virtual ActionMapping *getMapping() const = 0;
-    /** Returns the action for this entry. */
-    virtual std::unique_ptr<Action> getAction() const = 0;
-    /** Returns the action node for this entry. */
-    virtual ActionNode *getActionNode() const = 0;
-    /** Returns the visit count for this entry. */
-    virtual long getVisitCount() const = 0;
-    /** Returns the total Q-value for this entry. */
-    virtual double getTotalQValue() const = 0;
-    /** Returns the mean Q-value for this entry. */
-    virtual double getMeanQValue() const = 0;
+     *
+     * Returns true if and only if the q value of the action changed.
+     */
+    virtual bool update(Action const &action, long deltaNVisits, double deltaTotalQ) {
+        return getEntry(action)->update(deltaNVisits, deltaTotalQ);
+    }
 };
 } /* namespace solver */
 

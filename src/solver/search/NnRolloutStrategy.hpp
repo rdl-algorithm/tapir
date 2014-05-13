@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "SearchStatus.hpp"
-#include "SearchStrategy.hpp"
+#include "search_interface.hpp"
 
 namespace solver {
 struct NnData {
@@ -35,7 +35,7 @@ class NnRolloutInstance: public AbstractRolloutInstance {
     virtual ~NnRolloutInstance() = default;
     _NO_COPY_OR_MOVE(NnRolloutInstance);
 
-    virtual SearchStatus initializeCustom(BeliefNode *currentNode) override;
+    virtual SearchStatus initialize(BeliefNode *currentNode) override;
     virtual SearchStep getSearchStep(HistoricalData *historicalData) override;
   private:
     NnRolloutStrategy *strategy_;

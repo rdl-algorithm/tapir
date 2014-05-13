@@ -21,7 +21,6 @@ public:
                 maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
                 selectionParsers_(),
                 rolloutParsers_(),
-                backpropParsers_(),
                 selectionStrategyString_(vm["ABT.selectionStrategy"].as<std::string>()),
                 rolloutStrategyString_(vm["ABT.rolloutStrategy"].as<std::string>()),
                 backpropagationStrategyString_(vm["ABT.backpropagationStrategy"].as<std::string>()),
@@ -34,10 +33,6 @@ public:
         registerRolloutParser("nn", std::make_unique<NnRolloutParser>());
         registerRolloutParser("default", std::make_unique<DefaultRolloutParser>());
         registerRolloutParser("exp3", std::make_unique<Exp3Parser>());
-
-        registerBackpropagationParser("mean", std::make_unique<AveragePropagatorParser>());
-        registerBackpropagationParser("max", std::make_unique<MaximumPropagatorParser>());
-        registerBackpropagationParser("robust", std::make_unique<RobustPropagatorParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -77,10 +72,6 @@ public:
             std::unique_ptr<Parser<solver::SearchStrategy>> parser) {
         rolloutParsers_.addParser(name, std::move(parser));
     }
-    virtual void registerBackpropagationParser(std::string name,
-            std::unique_ptr<Parser<solver::BackpropagationStrategy>> parser) {
-        backpropParsers_.addParser(name, std::move(parser));
-    }
     virtual std::unique_ptr<solver::SearchStrategy> createSelectionStrategy(
             solver::Solver *solver) override {
         return selectionParsers_.parse(solver, selectionStrategyString_);
@@ -88,10 +79,6 @@ public:
     virtual std::unique_ptr<solver::SearchStrategy> createRolloutStrategy(
             solver::Solver *solver) override {
         return rolloutParsers_.parse(solver, rolloutStrategyString_);
-    }
-    virtual std::unique_ptr<solver::BackpropagationStrategy> createBackpropagationStrategy(
-            solver::Solver *solver) override {
-        return backpropParsers_.parse(solver, backpropagationStrategyString_);
     }
 
 private:
@@ -107,7 +94,6 @@ private:
 
     ParserSet<solver::SearchStrategy> selectionParsers_;
     ParserSet<solver::SearchStrategy> rolloutParsers_;
-    ParserSet<solver::BackpropagationStrategy> backpropParsers_;
 
     std::string selectionStrategyString_;
     std::string rolloutStrategyString_;

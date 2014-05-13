@@ -69,6 +69,9 @@ BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
 long DiscreteObservationMap::getNChildren() const {
     return childMap_.size();
 }
+ObservationMappingEntry *DiscreteObservationMap::getEntry(Observation const &obs) {
+    return childMap_.at(obs.copy()).get();
+}
 ObservationMappingEntry const *DiscreteObservationMap::getEntry(Observation const &obs) const {
     return childMap_.at(obs.copy()).get();
 }
@@ -80,14 +83,6 @@ std::vector<ObservationMappingEntry const *> DiscreteObservationMap::getAllEntri
     return returnEntries;
 }
 
-void DiscreteObservationMap::updateVisitCount(Observation const &obs,
-        long deltaNVisits) {
-    childMap_[obs.copy()]->visitCount_ += deltaNVisits;
-    totalVisitCount_ += deltaNVisits;
-}
-long DiscreteObservationMap::getVisitCount(Observation const &obs) const {
-    return childMap_.at(obs.copy())->visitCount_;
-}
 long DiscreteObservationMap::getTotalVisitCount() const {
     return totalVisitCount_;
 }
@@ -104,6 +99,11 @@ BeliefNode *DiscreteObservationMapEntry::getBeliefNode() const {
 }
 long DiscreteObservationMapEntry::getVisitCount() const {
     return visitCount_;
+}
+
+void DiscreteObservationMapEntry::updateVisitCount(long deltaNVisits) {
+    visitCount_ += deltaNVisits;
+    map_->totalVisitCount_ += deltaNVisits;
 }
 
 /* ------------------ DiscreteObservationTextSerializer ------------------ */
