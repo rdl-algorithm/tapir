@@ -172,6 +172,8 @@ class TrackerModel: virtual public ModelWithProgramOptions,
 
     /** The penalty for each movement. */
     double moveCost_;
+    /** The penalty for staying still (less tham moving) */
+    double waitCost_;
     /** The penalty for being in front of human */
     double obstructCost_;
     /** The reward for keeping the target in view. */

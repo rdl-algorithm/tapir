@@ -213,12 +213,10 @@ int main(int argc, char **argv)
 
 		// Apply action
 		std::unique_ptr<solver::Action> action = agent.getPreferredAction();
-
 		
         tracker::TrackerAction const &trackerAction =
             static_cast<tracker::TrackerAction const &>(*action);
         tracker::ActionType actionType = trackerAction.getActionType();
-
 
         int currYaw = getCurrYaw45();
         int newYaw = currYaw;
@@ -270,7 +268,7 @@ int main(int argc, char **argv)
         ros::Duration(0.5).sleep();
         turnTo(newYaw * M_PI/180);
 
-		// Get observations and update agent
+		// Action complete, get resulting observations
 		pos = getCurrPos();
 		currCell = getGridPos(pos.x, pos.y);
 		currYaw = getCurrYaw45();
@@ -281,6 +279,11 @@ int main(int argc, char **argv)
             " yaw: " << observation.getRobotYaw() << 
             " see target: " << observation.seesTarget() << endl;
 
+
+        // Replenish particles
+        solver.replenishChild(agent.getCurrentBelief(), *action, observation);
+
+        // Update agent's current belief
 		agent.updateBelief(*action, observation);
 		
 		stepNumber++;

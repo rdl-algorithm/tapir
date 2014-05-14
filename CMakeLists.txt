@@ -100,8 +100,8 @@ add_library(AbtTag
 
 target_link_libraries(AbtSolver spatialindex ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable(tracker_node src/problems/tracker/TrackerNode.cpp)
+add_executable(tracker_node src/problems/tracker/TrackerRos.cpp)
 target_link_libraries(tracker_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
 
-add_executable(tag_node src/problems/tag/TagNode.cpp)
+add_executable(tag_node src/problems/tag/TagRos.cpp)
 target_link_libraries(tag_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTag AbtSolver )

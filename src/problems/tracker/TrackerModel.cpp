@@ -49,6 +49,7 @@ namespace tracker {
 TrackerModel::TrackerModel(RandomGenerator *randGen, po::variables_map vm) :
 	ModelWithProgramOptions(randGen, vm),
 	moveCost_(vm["problem.moveCost"].as<double>()),
+    waitCost_(vm["problem.waitCost"].as<double>()),
     obstructCost_(vm["problem.obstructCost"].as<double>()),
 	visibleReward_(vm["problem.visibleReward"].as<double>()),
 	nRows_(0), // to be updated
@@ -292,7 +293,12 @@ double TrackerModel::generateReward(
         reward -= obstructCost_;
     if (tState.seesTarget())
         reward += visibleReward_;
-    reward -= moveCost_;
+
+    ActionType actionType = (static_cast<TrackerAction const &>(action).getActionType());
+    if (actionType == ActionType::WAIT)
+        reward -= waitCost_;
+    else
+        reward -= moveCost_;
     return reward;
 }
 
