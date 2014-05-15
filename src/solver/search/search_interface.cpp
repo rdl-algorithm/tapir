@@ -82,14 +82,22 @@ void AbstractSearchInstance::extendSequence() {
                 *result.nextState);
         // Step forward in the history, and update the belief node.
         currentEntry = sequence_->addEntry(nextStateInfo);
-        if (currentNode_ != nullptr && step.createNode) {
-            currentNode_ = solver_->getPolicy()->createOrGetChild(
-                    currentNode_, *result.action, *result.observation);
-            currentHistoricalData_ = nullptr;
-            currentEntry->registerNode(currentNode_);
 
+        if (currentNode_ != nullptr) {
+            solver_->updateEstimate(currentNode_, 0, +1);
+            if (step.createNode) {
+                BeliefNode *newNode = solver_->getPolicy()->createOrGetChild(
+                        currentNode_, *result.action, *result.observation);
 
+                // Propagate the rewards in the tree.
+                solver_->updateImmediate(currentNode_, *result.action, *result.observation,
+                        result.reward, +1);
 
+                currentNode_ = newNode;
+                currentHistoricalData_ = nullptr;
+                // Register the new history entry.
+                currentEntry->registerNode(currentNode_);
+            }
         } else {
             HistoricalData *oldData;
             if (currentNode_ == nullptr) {
@@ -110,6 +118,8 @@ void AbstractSearchInstance::extendSequence() {
             break;
         }
     }
+#pragma GCC warning "The heuristic estimate should be calculated here!"
+    solver_->updateEstimate(currentNode_, 0, 0);
     status_ = finalize();
 }
 

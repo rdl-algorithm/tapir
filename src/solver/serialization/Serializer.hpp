@@ -8,8 +8,8 @@
 #include "solver/abstract-problem/ModelChange.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"
 
-#include "solver/mappings/ActionPool.hpp"
-#include "solver/mappings/ObservationPool.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
 
 #include "solver/Solver.hpp"                   // for Solver
 

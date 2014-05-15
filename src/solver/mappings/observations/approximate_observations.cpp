@@ -12,8 +12,6 @@
 #include "solver/abstract-problem/Model.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 
-#include "ActionMapping.hpp"
-#include "ActionPool.hpp"
 #include "ObservationPool.hpp"
 #include "ObservationMapping.hpp"
 

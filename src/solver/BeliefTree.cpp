@@ -8,8 +8,8 @@
 
 #include "abstract-problem/Observation.hpp"
 
-#include "mappings/ActionMapping.hpp"
-#include "mappings/ActionPool.hpp"
+#include "mappings/actions/ActionMapping.hpp"
+#include "mappings/actions/ActionPool.hpp"
 
 #include "BeliefNode.hpp"               // for BeliefNode
 #include "Solver.hpp"
@@ -80,6 +80,13 @@ BeliefNode *BeliefTree::reset() {
     addNode(rootPtr);
     return rootPtr;
 }
+void BeliefTree::initializeRoot() {
+    root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
+    root_->setMapping(solver_->getActionPool()->createActionMapping());
+    root_->setEstimator(solver_->getBeliefEstimationStrategy()->createEstimator(root_->actionMap_.get()));
+    root_->getMapping()->initialize();
+}
+
 BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         Action const &action, Observation const &obs) {
     bool isNew;

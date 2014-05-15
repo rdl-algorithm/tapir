@@ -1,8 +1,8 @@
 #ifndef ROCKSAMPLE_PREFERREDACTIONS_HPP_
 #define ROCKSAMPLE_PREFERREDACTIONS_HPP_
 
-#include "solver/mappings/discretized_actions.hpp"
-#include "solver/mappings/enumerated_actions.hpp"
+#include "solver/mappings/actions/discretized_actions.hpp"
+#include "solver/mappings/actions/enumerated_actions.hpp"
 
 #include "solver/search/HistoricalData.hpp"
 

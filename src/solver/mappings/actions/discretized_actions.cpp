@@ -17,9 +17,8 @@
 #include "solver/abstract-problem/DiscretizedPoint.hpp"
 
 #include "ActionMapping.hpp"
+#include "ActionMappingEntry.hpp"
 #include "ActionPool.hpp"
-#include "ObservationMapping.hpp"
-#include "ObservationPool.hpp"
 
 namespace solver {
 /* ------------------- ModelWithDiscretizedActions ------------------- */

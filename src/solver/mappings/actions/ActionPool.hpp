@@ -1,12 +1,17 @@
-#ifndef SOLVER_ACTIONPOOL_HPP_
-#define SOLVER_ACTIONPOOL_HPP_
+#ifndef SOLVER_ACTION_MAPPING_INTERFACE_HPP_
+#define SOLVER_ACTION_MAPPING_INTERFACE_HPP_
+
+#include <memory>                       // for unique_ptr
 
 #include "global.hpp"
 
-#include "ActionMapping.hpp"
+#include "solver/abstract-problem/Action.hpp"              // for Action
 #include "solver/BeliefNode.hpp"
 
 namespace solver {
+class ActionMapping;
+class ActionNode;
+class BeliefNode;
 class HistoricalData;
 class ObservationPool;
 class Solver;
@@ -25,7 +30,6 @@ public:
         return nullptr;
     }
 };
-
 } /* namespace solver */
 
-#endif /* SOLVER_ACTIONPOOL_HPP_ */
+#endif /* SOLVER_ACTION_MAPPING_INTERFACE_HPP_ */

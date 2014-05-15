@@ -3,10 +3,12 @@
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
 
-#include "solver/mappings/ActionMapping.hpp"
-#include "solver/mappings/ActionPool.hpp"
-#include "solver/mappings/ObservationMapping.hpp"
-#include "solver/mappings/ObservationPool.hpp"
+#include "solver/belief-q-estimators/average_q_max_rec.hpp"
+
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
 
 #include "solver/indexing/StateIndex.hpp"
 #include "solver/indexing/RTree.hpp"
@@ -88,6 +90,11 @@ std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
 
 std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
     return std::make_unique<DefaultRolloutStrategy>(solver, 1);
+}
+
+/** Creates a strategy for estimating the value of belief nodes, and for recommending actions. */
+std::unique_ptr<BeliefEstimationStrategy> Model::createBeliefEstimationStrategy(Solver */*solver*/) {
+    return std::make_unique<AverageQMaxChildStrategy>();
 }
 
 std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {

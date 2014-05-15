@@ -49,6 +49,8 @@ private:
     /* ------------------- Tree modification ------------------- */
     /** Resets the tree, creating a new root node and returning it. */
     BeliefNode *reset();
+    /** Initializes the root node - for creating a new tree from scratch. */
+    void initializeRoot();
     /**
      * Adds a child belief node to the given belief node; this node will be
      * added to the flattened node list if and only if it is actually new.

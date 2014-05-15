@@ -34,8 +34,8 @@
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 
-#include "solver/mappings/discretized_actions.hpp"
-#include "solver/mappings/approximate_observations.hpp"
+#include "solver/mappings/actions/discretized_actions.hpp"
+#include "solver/mappings/observations/approximate_observations.hpp"
 
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/FlaggingVisitor.hpp"

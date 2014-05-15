@@ -1,41 +1,14 @@
 #ifndef SOLVER_ACTIONMAPPING_HPP_
 #define SOLVER_ACTIONMAPPING_HPP_
 
-#include <memory>                       // for unique_ptr
+#include "solver/abstract-problem/Action.hpp"
 
-#include "solver/abstract-problem/Action.hpp"              // for Action
-#include "global.hpp"
+#include "ActionMappingEntry.hpp"
 
 namespace solver {
-class ActionMapping;
+class ActionMappingEntry;
 class ActionNode;
 class BeliefNode;
-
-class ActionMappingEntry {
-public:
-    ActionMappingEntry() = default;
-    virtual ~ActionMappingEntry() = default;
-
-    /** Returns the mapping this entry belongs to. */
-    virtual ActionMapping *getMapping() const = 0;
-    /** Returns the action for this entry. */
-    virtual std::unique_ptr<Action> getAction() const = 0;
-    /** Returns the action node for this entry. */
-    virtual ActionNode *getActionNode() const = 0;
-    /** Returns the visit count for this entry. */
-    virtual long getVisitCount() const = 0;
-    /** Returns the total Q-value for this entry. */
-    virtual double getTotalQValue() const = 0;
-    /** Returns the mean Q-value for this entry. */
-    virtual double getMeanQValue() const = 0;
-
-    /** Updates this action, by adding the given number of visits and the
-     * given change in the total q-value.
-     *
-     * Returns true if and only if the q value of the action changed.
-     */
-    virtual bool update(long deltaNVisits, double deltaTotalQ) = 0;
-};
 
 class ActionMapping {
 public:
@@ -92,7 +65,6 @@ public:
     /** Returns a random unvisited action. */
     virtual std::unique_ptr<Action> getRandomUnvisitedAction() const = 0;
 
-
     /* -------------- Retrieval of general statistics. ---------------- */
     /** Returns the total number of times children have been visited. */
     virtual long getTotalVisitCount() const = 0;
@@ -107,6 +79,7 @@ public:
         return getEntry(action)->update(deltaNVisits, deltaTotalQ);
     }
 };
+
 } /* namespace solver */
 
 #endif /* SOLVER_ACTIONMAPPING_HPP_ */

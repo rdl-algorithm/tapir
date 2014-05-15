@@ -9,8 +9,8 @@
 #include "solver/abstract-problem/Observation.hpp"
 #include "solver/abstract-problem/TransitionParameters.hpp"
 
-#include "solver/mappings/discretized_actions.hpp"
-#include "solver/mappings/approximate_observations.hpp"
+#include "solver/mappings/actions/discretized_actions.hpp"
+#include "solver/mappings/observations/approximate_observations.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 

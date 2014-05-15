@@ -15,6 +15,7 @@
 namespace solver {
 class ActionPool;
 class HistoricalData;
+class BeliefEstimationStrategy;
 class BeliefNode;
 class HistoryCorrector;
 class ModelChange;
@@ -28,7 +29,8 @@ class Model {
 public:
     Model() = default;
     virtual ~Model() = default;
-    _NO_COPY_OR_MOVE(Model);
+    _NO_COPY_OR_MOVE(Model)
+    ;
 
     virtual RandomGenerator *getRandomGenerator() = 0;
 
@@ -82,20 +84,18 @@ public:
         bool isTerminal = false;
     };
     /** Generates the next state, an observation, and the reward. */
-    virtual StepResult generateStep(State const &state,
-            Action const &action) = 0;
+    virtual StepResult generateStep(State const &state, Action const &action) = 0;
 
     /** Generates the parameters for a next-state transition, if any are being
      * used - the default implementation simply returns nullptr.
      */
-    virtual std::unique_ptr<TransitionParameters> generateTransition(
-            State const &state, Action const &action);
+    virtual std::unique_ptr<TransitionParameters> generateTransition(State const &state,
+            Action const &action);
 
     /** Generates the next state, based on the state and action, and,
      * if used, the transition parameters.
      */
-    virtual std::unique_ptr<State> generateNextState(State const &state,
-            Action const &action,
+    virtual std::unique_ptr<State> generateNextState(State const &state, Action const &action,
             TransitionParameters const *transitionParameters // optional
             ) = 0;
 
@@ -103,10 +103,8 @@ public:
      * optionally, the previous state and the transition parameters can also be
      * used.
      */
-    virtual std::unique_ptr<Observation> generateObservation(
-            State const *state, // optional
-            Action const &action,
-            TransitionParameters const *transitionParameters, // optional
+    virtual std::unique_ptr<Observation> generateObservation(State const *state, // optional
+            Action const &action, TransitionParameters const *transitionParameters, // optional
             State const &nextState) = 0;
 
     /** Returns the reward for the given state, action; optionally this also
@@ -121,9 +119,8 @@ public:
     /** Generates new state particles based on the state particles of the
      * previous node, as well as on the action and observation.
      */
-    virtual std::vector<std::unique_ptr<State>> generateParticles(
-            BeliefNode *previousBelief, Action const &action,
-            Observation const &obs, long nParticles,
+    virtual std::vector<std::unique_ptr<State>> generateParticles(BeliefNode *previousBelief,
+            Action const &action, Observation const &obs, long nParticles,
             std::vector<State const *> const &previousParticles);
     /** Generates new state particles based only on the previous action and
      * observation, assuming a poorly-informed prior over previous states.
@@ -131,9 +128,8 @@ public:
      * This should only be used if the previous belief turns out to be
      * incompatible with the current observation.
      */
-    virtual std::vector<std::unique_ptr<State>> generateParticles(
-            BeliefNode *previousBelief, Action const &action,
-            Observation const &obs, long nParticles);
+    virtual std::vector<std::unique_ptr<State>> generateParticles(BeliefNode *previousBelief,
+            Action const &action, Observation const &obs, long nParticles);
 
     /* -------------- Methods for handling model changes ---------------- */
     virtual void applyChange(ModelChange const &change, StatePool *pool);
@@ -148,8 +144,7 @@ public:
     /** Creates a HistoryCorrector; defaults to a general one, but can
      * be made problem-specific.
      */
-    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(
-            Solver *solver);
+    virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(Solver *solver);
     /** Creates an ActionPool, which manages actions and creates
      * ActionMappings
      */
@@ -157,19 +152,21 @@ public:
     /** Creates an ObservationPool, which manages observations and creates
      * ObservationMappings.
      */
-    virtual std::unique_ptr<ObservationPool> createObservationPool(
-            Solver *solver) = 0;
+    virtual std::unique_ptr<ObservationPool> createObservationPool(Solver *solver) = 0;
 
     /** Creates a selection strategy for use by the given solver. Multiple
      * strategies should be combined into one, as is done, for example, in
      * MultipleStrategiesExp3.
      */
-    virtual std::unique_ptr<SearchStrategy> createSelectionStrategy(
-            Solver *solver);
+    virtual std::unique_ptr<SearchStrategy> createSelectionStrategy(Solver *solver);
     /** Creates a rollout strategy for use by the given solver. */
-    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(
+    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(Solver *solver);
+
+    /** Creates a strategy for estimating the value of belief nodes, and for recommending actions. */
+    virtual std::unique_ptr<BeliefEstimationStrategy> createBeliefEstimationStrategy(
             Solver *solver);
 
+    /** Creates the historical data for the root node. */
     virtual std::unique_ptr<HistoricalData> createRootHistoricalData();
 
     /* --------------- Pretty printing methods ----------------- */
@@ -178,8 +175,8 @@ public:
     /** Draws the current belief and/or the current state in the context of the
      * overall map onto the given output stream.
      */
-    virtual void drawSimulationState(BeliefNode const *belief,
-            State const &/*state*/, std::ostream &/*os*/);
+    virtual void drawSimulationState(BeliefNode const *belief, State const &/*state*/,
+            std::ostream &/*os*/);
     /** Returns the name of this model. */
     virtual std::string getName();
     /** Returns whether color output is available. */

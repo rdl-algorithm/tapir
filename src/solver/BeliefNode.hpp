@@ -13,9 +13,9 @@
 #include "abstract-problem/State.hpp"
 #include "abstract-problem/Observation.hpp"              // for Observation
 
-#include "belief-q-estimators/BeliefQValueEstimator.hpp"
+#include "belief-q-estimators/estimation.hpp"
 
-#include "mappings/ActionMapping.hpp"
+#include "mappings/actions/ActionMapping.hpp"
 
 #include "search/HistoricalData.hpp"
 
@@ -62,10 +62,6 @@ public:
     long getId() const;
     /** Returns the depth of this node in the tree (0 = root). */
     long getDepth() const;
-    /** Returns the recommended action to take from this node. */
-    std::unique_ptr<Action> getRecommendedAction() const;
-    /** Returns the best q-value */
-    double getQValue() const;
     /** Returns the number of particles in this node. */
     long getNumberOfParticles() const;
     /** Returns the number of sequences starting from this node. */
@@ -94,6 +90,14 @@ public:
      * observation
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
+
+    /* -------------------- Tree-related getters  ---------------------- */
+    /** Returns the recommended action to take from this node. */
+    std::unique_ptr<Action> getRecommendedAction() const;
+    /** Returns the best q-value */
+    double getQValue() const;
+    /** Recalculates the q-value for this belief node. */
+    void recalculate();
 
 private:
     /* -------------- Particle management / sampling ---------------- */

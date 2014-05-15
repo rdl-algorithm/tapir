@@ -5,8 +5,8 @@
 
 #include "solver/abstract-problem/Model.hpp"
 
-#include "solver/mappings/ActionPool.hpp"
-#include "solver/mappings/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
 
 namespace solver {
 

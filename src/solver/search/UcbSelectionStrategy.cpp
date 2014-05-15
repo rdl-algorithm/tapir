@@ -1,6 +1,6 @@
 #include "UcbSelectionStrategy.hpp"
 
-#include "solver/mappings/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
 
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"

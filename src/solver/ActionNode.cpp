@@ -12,8 +12,10 @@
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Observation.hpp"              // for Observation
 
-#include "mappings/ActionPool.hpp"       // for ActionPool
-#include "mappings/ObservationMapping.hpp"       // for ObservationMapping
+#include "belief-q-estimators/estimation.hpp"
+
+#include "mappings/actions/ActionPool.hpp"       // for ActionPool
+#include "mappings/observations/ObservationMapping.hpp"       // for ObservationMapping
 
 namespace solver {
 ActionNode::ActionNode() :
@@ -62,6 +64,7 @@ std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver *solver,
     if (childNode == nullptr) {
         childNode = observationMap_->createBelief(obs);
         childNode->setMapping(solver->getActionPool()->createActionMapping());
+        childNode->setEstimator(solver->getBeliefEstimationStrategy()->createEstimator(childNode->actionMap_.get()));
         added = true;
     }
     return std::make_pair(childNode, added);

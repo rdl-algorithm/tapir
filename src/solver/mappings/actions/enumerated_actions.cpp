@@ -17,7 +17,6 @@
 
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"
-#include "ObservationPool.hpp"
 
 namespace solver {
 /* ------------------- ModelWithEnumeratedActions ------------------- */

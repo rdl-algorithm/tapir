@@ -11,8 +11,8 @@
 
 #include "solver/abstract-problem/Action.hpp"
 
-#include "solver/mappings/ActionMapping.hpp"
-#include "solver/mappings/ObservationMapping.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace rocksample {
 /* ---------------------- PositionData --------------------- */

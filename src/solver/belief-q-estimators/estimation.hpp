@@ -1,15 +1,26 @@
-#ifndef SOLVER_BELIEFQVALUEESTIMATOR_HPP_
-#define SOLVER_BELIEFQVALUEESTIMATOR_HPP_
+#ifndef SOLVER_ESTIMATION_HPP_
+#define SOLVER_ESTIMATION_HPP_
 
 #include <memory>                       // for unique_ptr
 
 #include "global.hpp"
 
+#include "solver/mappings/actions/ActionMapping.hpp"
+
 namespace solver {
+class BeliefQValueEstimator;
+
+class BeliefEstimationStrategy {
+public:
+    BeliefEstimationStrategy() = default;
+    virtual ~BeliefEstimationStrategy() = default;
+
+    virtual std::unique_ptr<BeliefQValueEstimator> createEstimator(ActionMapping *mapping) = 0;
+};
 
 class BeliefQValueEstimator {
 public:
-    BeliefQValueEstimator(ActionMapping *mapping) = default;
+    BeliefQValueEstimator() = default;
     virtual ~BeliefQValueEstimator() = default;
 
     /** Makes an update happen.
@@ -30,4 +41,4 @@ public:
 };
 } /* namespace solver */
 
-#endif /* SOLVER_BELIEFQVALUEESTIMATOR_HPP_ */
+#endif /* SOLVER_ESTIMATION_HPP_ */

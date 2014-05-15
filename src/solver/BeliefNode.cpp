@@ -18,9 +18,9 @@
 #include "abstract-problem/Observation.hpp"              // for Observation
 #include "abstract-problem/State.hpp"                    // for State
 
-#include "mappings/ActionMapping.hpp"
-#include "mappings/ObservationMapping.hpp"
-#include "mappings/ObservationPool.hpp"
+#include "mappings/actions/ActionMapping.hpp"
+#include "mappings/observations/ObservationMapping.hpp"
+#include "mappings/observations/ObservationPool.hpp"
 
 #include "search/HistoricalData.hpp"
 
@@ -39,7 +39,8 @@ BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             particles_(),
             nStartingSequences_(0),
             tLastChange_(-1),
-            actionMap_(nullptr) {
+            actionMap_(nullptr),
+            estimator_(nullptr) {
 }
 
 // Do-nothing destructor
@@ -69,12 +70,6 @@ long BeliefNode::getId() const {
 }
 long BeliefNode::getDepth() const {
     return depth_;
-}
-std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
-    return estimator_->getRecommendedAction();
-}
-double BeliefNode::getQValue() const {
-    return estimator_->getBeliefQValue();
 }
 long BeliefNode::getNumberOfParticles() const {
     return particles_.size();
@@ -135,6 +130,17 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
     return node->getChild(obs);
 }
 
+/* -------------- Wrappers for estimator methods ---------------- */
+std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
+    return estimator_->getRecommendedAction();
+}
+double BeliefNode::getQValue() const {
+    return estimator_->getBeliefQValue();
+}
+void BeliefNode::recalculate() {
+    estimator_->recalculate();
+}
+
 /* ============================ PRIVATE ============================ */
 
 /* -------------- Particle management / sampling ---------------- */
@@ -158,6 +164,9 @@ void BeliefNode::removeParticle(HistoryEntry *histEntry) {
 void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
     actionMap_ = std::move(mapping);
     actionMap_->setOwner(this);
+}
+void BeliefNode::setEstimator(std::unique_ptr<BeliefQValueEstimator> estimator) {
+    estimator_ = std::move(estimator);
 }
 void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
     data_ = std::move(data);

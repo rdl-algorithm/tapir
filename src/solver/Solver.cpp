@@ -25,10 +25,10 @@
 #include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
 #include "changes/HistoryCorrector.hpp"
 
-#include "mappings/ActionMapping.hpp"
-#include "mappings/ActionPool.hpp"
-#include "mappings/ObservationMapping.hpp"
-#include "mappings/ObservationPool.hpp"
+#include "mappings/actions/ActionMapping.hpp"
+#include "mappings/actions/ActionPool.hpp"
+#include "mappings/observations/ObservationMapping.hpp"
+#include "mappings/observations/ObservationPool.hpp"
 
 #include "search/SearchStatus.hpp"
 #include "search/search_interface.hpp"
@@ -63,6 +63,7 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
             historyCorrector_(nullptr),
             selectionStrategy_(nullptr),
             rolloutStrategy_(nullptr),
+            beliefEstimationStrategy_(nullptr),
             nodesToBackup_() {
 }
 
@@ -86,6 +87,9 @@ ActionPool *Solver::getActionPool() const {
 ObservationPool *Solver::getObservationPool() const {
     return observationPool_.get();
 }
+BeliefEstimationStrategy *Solver::getBeliefEstimationStrategy() const {
+    return beliefEstimationStrategy_.get();
+}
 
 /* ------------------ Initialization methods ------------------- */
 void Solver::initializeEmpty() {
@@ -97,10 +101,7 @@ void Solver::initializeEmpty() {
     observationPool_ = model_->createObservationPool(this);
 
     // Initialize the root node properly.
-    BeliefNode *rootPtr = policy_->getRoot();
-    rootPtr->setHistoricalData(model_->createRootHistoricalData());
-    rootPtr->setMapping(actionPool_->createActionMapping());
-    rootPtr->getMapping()->initialize();
+    policy_->initializeRoot();
 }
 
 Serializer *Solver::getSerializer() {
@@ -307,6 +308,7 @@ void Solver::initialize() {
     historyCorrector_ = model_->createHistoryCorrector(this);
     selectionStrategy_ = model_->createSelectionStrategy(this);
     rolloutStrategy_ = model_->createRolloutStrategy(this);
+    beliefEstimationStrategy_ = model_->createBeliefEstimationStrategy(this);
 }
 
 /* ------------------ Episode sampling methods ------------------- */
@@ -415,6 +417,10 @@ void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation
 }
 
 void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations) {
+    if (node->getParentEntry() == nullptr) {
+        return;
+    }
+
     deltaTotalQ += deltaNContinuations * node->getQValue();
 
     // Apply the discount factor.
@@ -436,10 +442,10 @@ void Solver::doBackup() {
         long depth = firstEntry->first;
         for (BeliefNode *node : firstEntry->second) {
             if (depth == 0) {
-                node->getMapping()->recalculate();
+                node->recalculate();
             } else {
                 double oldQValue = node->getQValue();
-                node->getMapping()->recalculate();
+                node->recalculate();
                 double deltaQValue = node->getQValue() - oldQValue;
                 long nContinuations = node->getMapping()->getTotalVisitCount()
                         - node->getNumberOfStartingSequences();

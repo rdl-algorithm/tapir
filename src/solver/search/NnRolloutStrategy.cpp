@@ -6,7 +6,7 @@
 #include "solver/HistorySequence.hpp"
 #include "solver/Solver.hpp"
 
-#include "solver/mappings/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
 
 namespace solver {
 

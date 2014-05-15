@@ -33,6 +33,7 @@ class StatePool;
 
 class Solver {
 public:
+    friend class AbstractSearchInstance;
     friend class Serializer;
     friend class TextSerializer;
 
@@ -52,6 +53,8 @@ public:
     ActionPool *getActionPool() const;
     /** Returns the observation pool. */
     ObservationPool *getObservationPool() const;
+    /** Returns the strategy for estimating belief values & choosing actions. */
+    BeliefEstimationStrategy *getBeliefEstimationStrategy() const;
 
     /* ------------------ Initialization methods ------------------- */
     /** Full initialization - resets all data structures. */
@@ -160,6 +163,8 @@ private:
     std::unique_ptr<SearchStrategy> selectionStrategy_;
     /** The strategy to use when rolling out. */
     std::unique_ptr<SearchStrategy> rolloutStrategy_;
+    /** The strategy to use in estimating the values of beliefs. */
+    std::unique_ptr<BeliefEstimationStrategy> beliefEstimationStrategy_;
 
     /** The nodes to be updated, sorted by depth (deepest first) */
     std::map<int, std::set<BeliefNode *>, std::greater<int>> nodesToBackup_;

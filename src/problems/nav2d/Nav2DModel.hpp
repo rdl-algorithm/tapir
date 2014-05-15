@@ -21,8 +21,8 @@
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/abstract-problem/State.hpp"       // for State
 
-#include "solver/mappings/discretized_actions.hpp"
-#include "solver/mappings/approximate_observations.hpp"
+#include "solver/mappings/actions/discretized_actions.hpp"
+#include "solver/mappings/observations/approximate_observations.hpp"
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 

@@ -21,13 +21,15 @@
 #include "solver/StateInfo.hpp"                // for StateInfo, StateInfo::currId
 #include "solver/StatePool.hpp"                // for StatePool, StatePool::StateInfoSet
 
-#include "solver/mappings/ActionMapping.hpp"
-#include "solver/mappings/ObservationMapping.hpp"          // for ObservationMapping
-
 #include "solver/abstract-problem/Action.hpp"              // for Action
 #include "solver/abstract-problem/ModelChange.hpp"              // for ModelChange
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State, operator<<
+
+#include "solver/belief-q-estimators/estimation.hpp"
+
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"          // for ObservationMapping
 
 #include "Serializer.hpp"               // for Serializer
 
@@ -328,6 +330,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
     }
     node.setHistoricalData(loadHistoricalData(is));
     node.setMapping(loadActionMapping(is));
+    node.setEstimator(getSolver()->getBeliefEstimationStrategy()->createEstimator(node.actionMap_.get()));
 }
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
@@ -364,7 +367,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         std::istringstream(line) >> tmpStr >> nodeId;
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
-        node->getMapping()->recalculate();
+        node->recalculate();
         // Ignore an empty line after each belief node.
         std::getline(is, line);
         std::getline(is, line);
