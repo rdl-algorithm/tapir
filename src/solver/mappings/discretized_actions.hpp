@@ -74,16 +74,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const override;
     virtual ActionMappingEntry const *getEntry(Action const &action) const override;
 
-    /* ------------------- Action recommendations. --------------------- */
-    virtual std::unique_ptr<Action> getEmpiricalBestAction() const override;
-    virtual std::unique_ptr<Action> getRobustAction() const override;
-
-    /* -------------- Retrieval of general statistics. ---------------- */
-    virtual long getTotalVisitCount() const override;
-    virtual double getMaxQValue() const override;
-    virtual double getRobustQValue() const override;
-
-    /* ------------ Methods for retrieving unvisited actions -------------- */
+    /* ----------------- Methods for unvisited actions ------------------- */
     /** Returns true iff there is another action that has not been visited,
      * but should be visited. */
     virtual bool hasUnvisitedActions() const override;
@@ -93,9 +84,11 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual void deleteUnvisitedAction(long binNumber);
     virtual void addUnvisitedAction(long binNumber);
 
+    /* -------------- Retrieval of general statistics. ---------------- */
+    virtual long getTotalVisitCount() const override;
+
     /* --------------- Methods for updating the values ----------------- */
     virtual void update(Action const &action, long deltaNVisits, double deltaQ) override;
-    virtual void recalculate() override;
 
   protected:
     BeliefNode *owningBeliefNode_;

@@ -55,51 +55,23 @@ public:
     /** Returns the mapping entry (if any) associated with the given action. */
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
-    /* ------------------- Action recommendations. --------------------- */
-    /** Returns the recommended action - defaults to using the empirical best
-     * action,  or a random action that has not been tried if there is not
-     * yet an empirical best.
-     */
-    virtual std::unique_ptr<Action> getRecommendedAction() const {
-        std::unique_ptr<Action> action = getEmpiricalBestAction();
-        if (action == nullptr) {
-            action = getRandomUnvisitedAction();
-        }
-        return action;
-    }
-    /** Returns the action with the highest estimated q-value. */
-    virtual std::unique_ptr<Action> getEmpiricalBestAction() const = 0;
-    /** Returns the robust action (i.e. the action with the highest
-     * visit count (optional).
-     */
-    virtual std::unique_ptr<Action> getRobustAction() const {
-        return nullptr;
-    }
-
-    /* -------------- Retrieval of general statistics. ---------------- */
-    /** Returns the total number of times children have been visited. */
-    virtual long getTotalVisitCount() const = 0;
-    /** Returns the best q-value. */
-    virtual double getMaxQValue() const = 0;
-    /** Returns the robust q-value (optional) */
-    virtual double getRobustQValue() const {
-        return -std::numeric_limits<double>::infinity();
-    }
-
-    /* ------------ Methods for retrieving unvisited actions -------------- */
+    /* ------------------ Methods for unvisited actions ------------------- */
     virtual bool hasUnvisitedActions() const = 0;
     /** Returns the unvisited actions (that should be visited) for this node. */
     virtual std::vector<std::unique_ptr<Action>> getUnvisitedActions() const = 0;
     /** Returns a random unvisited action. */
     virtual std::unique_ptr<Action> getRandomUnvisitedAction() const = 0;
 
+
+    /* -------------- Retrieval of general statistics. ---------------- */
+    /** Returns the total number of times children have been visited. */
+    virtual long getTotalVisitCount() const = 0;
+
     /* --------------- Methods for updating the values ----------------- */
     /** Updates the given action, by adding the given number of visits and the
      * given change in the total q-value.
     */
     virtual void update(Action const &action, long deltaNVisits, double deltaQ) = 0;
-    /** Recalculates the q-values. */
-    virtual void recalculate() = 0;
 };
 
 class ActionMappingEntry {

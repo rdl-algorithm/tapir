@@ -24,23 +24,22 @@
 
 #include "search/HistoricalData.hpp"
 
-
 namespace solver {
 BeliefNode::BeliefNode() :
-    BeliefNode(-1, nullptr) {
+            BeliefNode(-1, nullptr) {
 }
 BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry) :
-    BeliefNode(-1, parentEntry) {
+            BeliefNode(-1, parentEntry) {
 }
 BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
-        id_(id),
-        depth_(-1),
-        parentEntry_(parentEntry),
-        data_(nullptr),
-        particles_(),
-        nStartingSequences_(0),
-        tLastChange_(-1),
-        actionMap_(nullptr) {
+            id_(id),
+            depth_(-1),
+            parentEntry_(parentEntry),
+            data_(nullptr),
+            particles_(),
+            nStartingSequences_(0),
+            tLastChange_(-1),
+            actionMap_(nullptr) {
 }
 
 // Do-nothing destructor
@@ -72,10 +71,10 @@ long BeliefNode::getDepth() const {
     return depth_;
 }
 std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
-    return actionMap_->getRecommendedAction();
+    return estimator_->getRecommendedAction();
 }
 double BeliefNode::getQValue() const {
-    return actionMap_->getMaxQValue();
+    return estimator_->getBeliefQValue();
 }
 long BeliefNode::getNumberOfParticles() const {
     return particles_.size();
@@ -98,7 +97,7 @@ double BeliefNode::getTimeOfLastChange() const {
 ActionMapping *BeliefNode::getMapping() const {
     return actionMap_.get();
 }
-ObservationMappingEntry *BeliefNode::getParentEntry() const{
+ObservationMappingEntry *BeliefNode::getParentEntry() const {
     return parentEntry_;
 }
 ActionNode *BeliefNode::getParentActionNode() const {
@@ -136,9 +135,7 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
     return node->getChild(obs);
 }
 
-
 /* ============================ PRIVATE ============================ */
-
 
 /* -------------- Particle management / sampling ---------------- */
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
@@ -167,8 +164,8 @@ void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
 }
 
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver,
-        Action const &action, Observation const &obs) {
+std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver, Action const &action,
+        Observation const &obs) {
     ActionNode *actionNode = actionMap_->getActionNode(action);
     if (actionNode == nullptr) {
         actionNode = actionMap_->createActionNode(action);

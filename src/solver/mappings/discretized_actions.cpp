@@ -126,30 +126,6 @@ ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) c
 }
 
 
-std::unique_ptr<Action> DiscretizedActionMap::getEmpiricalBestAction() const {
-    if (bestBinNumber_ == -1) {
-        return nullptr;
-    }
-    return model_->sampleAnAction(bestBinNumber_);
-}
-std::unique_ptr<Action> DiscretizedActionMap::getRobustAction() const {
-    if (robustBinNumber_ == -1) {
-        return nullptr;
-    }
-    return model_->sampleAnAction(robustBinNumber_);
-}
-
-
-long DiscretizedActionMap::getTotalVisitCount() const {
-    return totalVisitCount_;
-}
-double DiscretizedActionMap::getMaxQValue() const {
-    return highestQValue_;
-}
-double DiscretizedActionMap::getRobustQValue() const {
-    return robustQValue_;
-}
-
 bool DiscretizedActionMap::hasUnvisitedActions() const {
     return binsToTry_.size() > 0;
 }
@@ -175,6 +151,12 @@ void DiscretizedActionMap::deleteUnvisitedAction(long binNumber) {
 void DiscretizedActionMap::addUnvisitedAction(long binNumber) {
     binsToTry_.add(binNumber);
 }
+
+
+long DiscretizedActionMap::getTotalVisitCount() const {
+    return totalVisitCount_;
+}
+
 
 void DiscretizedActionMap::update(Action const &action, long deltaNVisits,
         double deltaQ) {
@@ -204,37 +186,6 @@ void DiscretizedActionMap::update(Action const &action, long deltaNVisits,
         entry.meanQValue_ = entry.totalQValue_ / entry.visitCount_;
     }
     changeInMeanQ += entry.meanQValue_;
-
-    // Simply recalculate to find the best action.
-    recalculate();
-}
-
-void DiscretizedActionMap::recalculate() {
-    bestBinNumber_ = -1;
-    highestQValue_ = -std::numeric_limits<double>::infinity();
-
-    robustBinNumber_ = -1;
-    highestVisitCount_ = -1;
-    robustQValue_ = -std::numeric_limits<double>::infinity();
-
-    for (DiscretizedActionMapEntry const &entry : entries_) {
-        if (entry.childNode_ == nullptr) {
-            continue;
-        }
-        if (entry.visitCount_ <= 0) {
-            continue;
-        }
-        double meanQValue = entry.meanQValue_;
-        if (meanQValue > highestQValue_) {
-            highestQValue_ = meanQValue;
-            bestBinNumber_ = entry.binNumber_;
-        }
-        if (entry.visitCount_ > highestVisitCount_ || (entry.visitCount_ == highestVisitCount_ && meanQValue > robustQValue_)) {
-            highestVisitCount_ = entry.visitCount_;
-            robustQValue_ = meanQValue;
-            robustBinNumber_ = entry.binNumber_;
-        }
-    }
 }
 
 /* ------------------- DiscretizedActionMapEntry ------------------- */

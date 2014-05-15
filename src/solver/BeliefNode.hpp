@@ -13,6 +13,8 @@
 #include "abstract-problem/State.hpp"
 #include "abstract-problem/Observation.hpp"              // for Observation
 
+#include "belief-q-estimators/BeliefQValueEstimator.hpp"
+
 #include "mappings/ActionMapping.hpp"
 
 #include "search/HistoricalData.hpp"
@@ -26,7 +28,7 @@ class ObservationMappingEntry;
 class Solver;
 
 class BeliefNode {
-  public:
+public:
     friend class ActionNode;
     friend class BeliefTree;
     friend class HistoryEntry;
@@ -45,9 +47,7 @@ class BeliefNode {
     BeliefNode(long id, ObservationMappingEntry *parentEntry);
 
     // Default destructor; copying and moving disallowed!
-    ~BeliefNode();
-    _NO_COPY_OR_MOVE(BeliefNode);
-
+    ~BeliefNode();_NO_COPY_OR_MOVE(BeliefNode);
 
     /* ---------------- Useful calculations ------------------ */
     /** Calculates the distance between this belief node and another by
@@ -74,7 +74,6 @@ class BeliefNode {
     /** Returns the time at which the last change occurred. */
     double getTimeOfLastChange() const;
 
-
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
     ActionMapping *getMapping() const;
@@ -95,8 +94,7 @@ class BeliefNode {
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
 
-
-  private:
+private:
     /* -------------- Particle management / sampling ---------------- */
     /** Adds the given history entry to this belief node. */
     void addParticle(HistoryEntry *newHistEntry);
@@ -106,6 +104,8 @@ class BeliefNode {
     /* -------------------- Tree-related setters  ---------------------- */
     /** Sets the mapping for this node. */
     void setMapping(std::unique_ptr<ActionMapping> mapping);
+    /** Sets the estimator for this node. */
+    void setEstimator(std::unique_ptr<BeliefQValueEstimator> estimator);
     /** Sets the history-derived information for this node. */
     void setHistoricalData(std::unique_ptr<HistoricalData> data);
 
@@ -114,8 +114,8 @@ class BeliefNode {
      * returns the child node, and a boolean which is true iff a new node was
      * actually created.
      */
-    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver,
-            Action const &action, Observation const &obs);
+    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver, Action const &action,
+            Observation const &obs);
 
 private:
     /** The ID of this node. */
@@ -138,6 +138,8 @@ private:
 
     /** A mapping of actions to action children for this node. */
     std::unique_ptr<ActionMapping> actionMap_;
+    /** The estimator - determines the q-value and best action for this node. */
+    std::unique_ptr<BeliefQValueEstimator> estimator_;
 };
 } /* namespace solver */
 
