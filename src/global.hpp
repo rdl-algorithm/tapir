@@ -20,6 +20,8 @@
 
 typedef std::default_random_engine RandomGenerator;
 
+
+#if __cplusplus <= 201103L
 namespace std {
     template<class T> struct _Unique_if {
         typedef unique_ptr<T> _Single_object;
@@ -50,6 +52,7 @@ namespace std {
         typename _Unique_if<T>::_Known_bound
         make_unique(Args&&...) = delete;
 }
+#endif
 
 namespace abt {
 // trim from start

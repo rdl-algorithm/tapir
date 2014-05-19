@@ -34,7 +34,7 @@ class MultipleStrategiesExp3: public SearchStrategy {
            HistorySequence *sequence, long maximumDepth) override;
 
     virtual StrategyInfo *sampleAStrategy(
-            std::unordered_set<long> strategiesToExclude = {});
+            std::unordered_set<long> strategiesToExclude = std::unordered_set<long> {});
     virtual void updateStrategyWeights(long strategyNo, double timeUsed,
             double deltaRootQValue);
   private:

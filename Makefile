@@ -42,10 +42,15 @@ override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
 ifeq ($(CXX),clang++)
   WARN               += -Weverything -Wno-c++98-compat
 endif
-ifeq ($(CXX),g++)
+ifneq (,$(findstring g++,$(CXX)))
   WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
   WARN               += -Wswitch-default -Wfatal-errors
   override CXXFLAGS  += -frounding-math
+  GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
+  ifeq ($(GCC_VERSION), 4.9)
+	CXXFLAGS_BASE := -std=c++1y
+	override CXXFLAGS += -fdiagnostics-color=auto
+  endif
 endif
 
 # Configuration-specific flags
