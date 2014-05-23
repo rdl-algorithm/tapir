@@ -141,7 +141,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             os << "O: " << *entry->getObservation() << endl;
             os << "R: " << entry->getReward() << endl;
         }
-        os << "Final State: " << sequence->getLastEntry()->getState();
+        os << "Final State: " << *sequence->getLastEntry()->getState();
         os << endl;
 
         cout << "Total discounted reward: " << reward << endl;
