@@ -130,12 +130,21 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
     return node->getChild(obs);
 }
 
-/* -------------- Wrappers for estimator methods ---------------- */
+
+/* -------------------- Simple setters  ---------------------- */
+void BeliefNode::updateTimeOfLastChange() {
+    tLastChange_ = abt::clock_ms();
+}
+
+/* --------------   ---------------- */
+std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
+
+}
 std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
     return estimator_->getRecommendedAction();
 }
 double BeliefNode::getQValue() const {
-    return estimator_->getBeliefQValue();
+    (*qValue)
 }
 void BeliefNode::recalculate() {
     estimator_->recalculate();
@@ -145,7 +154,7 @@ void BeliefNode::recalculate() {
 
 /* -------------- Particle management / sampling ---------------- */
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
-    tLastChange_ = abt::clock_ms();
+    updateTimeOfLastChange();
     particles_.add(newHistEntry);
     if (newHistEntry->getId() == 0) {
         nStartingSequences_++;
@@ -153,7 +162,7 @@ void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
 }
 
 void BeliefNode::removeParticle(HistoryEntry *histEntry) {
-    tLastChange_ = abt::clock_ms();
+    updateTimeOfLastChange();
     particles_.remove(histEntry);
     if (histEntry->getId() == 0) {
         nStartingSequences_--;

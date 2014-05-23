@@ -20,6 +20,8 @@
 #include "search/HistoricalData.hpp"
 
 namespace solver {
+class cached_value;
+
 class ActionMapping;
 class ActionNode;
 class HistoricalData;
@@ -91,7 +93,11 @@ public:
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
 
-    /* -------------------- Tree-related getters  ---------------------- */
+    /* -------------------- Simple setters  ---------------------- */
+    /** Returns the time at which the last change occurred. */
+    void updateTimeOfLastChange() const;
+
+    /* --------------------   ---------------------- */
     /** Returns the recommended action to take from this node. */
     std::unique_ptr<Action> getRecommendedAction() const;
     /** Returns the best q-value */
