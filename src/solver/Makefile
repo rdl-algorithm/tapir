@@ -2,7 +2,7 @@ MODULE_NAME = solver
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS = indexing mappings serialization abstract-problem changes search belief-q-estimators
+CHILD_FOLDERS = indexing mappings serialization abstract-problem changes search belief-q-estimators action-choosers
 include .make/template.mk
 
 # Elements that make up the library

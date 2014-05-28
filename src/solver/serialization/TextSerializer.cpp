@@ -26,8 +26,6 @@
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State, operator<<
 
-#include "solver/belief-q-estimators/estimation.hpp"
-
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/observations/ObservationMapping.hpp"          // for ObservationMapping
 
@@ -330,7 +328,8 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
     }
     node.setHistoricalData(loadHistoricalData(is));
     node.setMapping(loadActionMapping(is));
-    node.setEstimator(getSolver()->getBeliefEstimationStrategy()->createEstimator(node.actionMap_.get()));
+    getModel()->setQEstimator(getSolver(), &node);
+    getModel()->setActionChooser(getSolver(), &node);
 }
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
@@ -367,7 +366,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         std::istringstream(line) >> tmpStr >> nodeId;
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
-        node->recalculate();
+        node->recalculateQValue();
         // Ignore an empty line after each belief node.
         std::getline(is, line);
         std::getline(is, line);

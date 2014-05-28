@@ -60,7 +60,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     randGen.discard(10);
 
     std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen, vm);
-    solver::Solver solver(&randGen, std::move(newModel));
+    solver::Solver solver(std::move(newModel));
     std::unique_ptr<solver::Serializer> serializer(std::make_unique<SerializerType>(&solver));
     solver.setSerializer(std::move(serializer));
     solver.initializeEmpty();

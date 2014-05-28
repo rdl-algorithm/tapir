@@ -1,9 +1,21 @@
 #include "Model.hpp"
 
+#include <functional>
+
+#include "solver/belief_values.hpp"
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
 
-#include "solver/belief-q-estimators/average_q_max_rec.hpp"
+
+#include "solver/abstract-problem/Action.hpp"        // for Action
+#include "solver/abstract-problem/HistoricalData.hpp"
+#include "solver/abstract-problem/State.hpp"                    // for State
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/TransitionParameters.hpp"
+
+#include "solver/action-choosers/choosers.hpp"
+
+#include "solver/belief-q-estimators/estimators.hpp"
 
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/actions/ActionPool.hpp"
@@ -16,23 +28,40 @@
 #include "solver/changes/DefaultHistoryCorrector.hpp"
 #include "solver/changes/HistoryCorrector.hpp"
 
-#include "solver/search/HistoricalData.hpp"
 #include "solver/search/search_interface.hpp"
 #include "solver/search/UcbSelectionStrategy.hpp"
 #include "solver/search/DefaultRolloutStrategy.hpp"
 
-#include "Action.hpp"        // for Action
-#include "State.hpp"                    // for State
-#include "Observation.hpp"              // for Observation
-#include "TransitionParameters.hpp"
-
 namespace solver {
+/* ----------------------- Basic getters  ----------------------- */
+std::string Model::getName() {
+    return "Default Model";
+}
+
+/* ---------- Virtual getters for ABT / model parameters  ---------- */
+bool Model::hasColorOutput() {
+    return false;
+}
+bool Model::hasVerboseOutput() {
+    return false;
+}
+
+/* -------------------- Black box dynamics ---------------------- */
+// Transition parameters are optional
 std::unique_ptr<TransitionParameters> Model::generateTransition(
         State const &/*state*/,
         Action const &/*action*/) {
     return nullptr;
 }
 
+
+/* -------------- Methods for handling model changes ---------------- */
+// Default = no changes.
+void Model::applyChange(ModelChange const &/*change*/, StatePool */*pool*/) {
+}
+
+
+/* ------------ Methods for handling particle depletion -------------- */
 std::vector<std::unique_ptr<State>> Model::generateParticles(
         BeliefNode *previousBelief,
         Action const &action, Observation const &obs,
@@ -72,10 +101,17 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
     return particles;
 }
 
-// Default = no changes.
-void Model::applyChange(ModelChange const &/*change*/, StatePool */*pool*/) {
+
+/* --------------- Pretty printing methods ----------------- */
+// Default = do nothing.
+void Model::drawEnv(std::ostream &/*os*/) {
+}
+void Model::drawSimulationState(BeliefNode const */*belief*/, State const &/*state*/,
+        std::ostream &/*os*/) {
 }
 
+
+/* ------- Customization of more complex solver functionality  --------- */
 std::unique_ptr<StateIndex> Model::createStateIndex() {
     return std::make_unique<RTree>(getNumberOfStateVariables());
 }
@@ -92,29 +128,19 @@ std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
     return std::make_unique<DefaultRolloutStrategy>(solver, 1);
 }
 
-/** Creates a strategy for estimating the value of belief nodes, and for recommending actions. */
-std::unique_ptr<BeliefEstimationStrategy> Model::createBeliefEstimationStrategy(Solver */*solver*/) {
-    return std::make_unique<AverageQMaxChildStrategy>();
+void Model::setQEstimator(Solver */*solver*/, BeliefNode *node) {
+    std::unique_ptr<CachedValue<double>> cachedValue = std::make_unique<CachedValue<double>>(
+            node, estimators::average_q_value);
+    node->setQEstimator(cachedValue.get());
+    node->addCachedValue(std::move(cachedValue));
+}
+void Model::setActionChooser(Solver */*solver*/, BeliefNode *node) {
+    node->setActionChooser(ActionFunction(choosers::max_action));
 }
 
 std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {
     return nullptr;
 }
 
-/* --------------- Pretty printing methods ----------------- */
-// Default = do nothing.
-void Model::drawEnv(std::ostream &/*os*/) {
-}
-void Model::drawSimulationState(BeliefNode const */*belief*/, State const &/*state*/,
-        std::ostream &/*os*/) {
-}
-std::string Model::getName() {
-    return "Default Model";
-}
-bool Model::hasColorOutput() {
-    return false;
-}
-bool Model::hasVerboseOutput() {
-    return false;
-}
+
 } /* namespace solver */

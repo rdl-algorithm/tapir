@@ -7,10 +7,10 @@
 
 #include "global.hpp"
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
 
-#include "mappings/observations/ObservationMapping.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace solver {
 class ActionMappingEntry;

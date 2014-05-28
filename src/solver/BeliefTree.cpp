@@ -83,7 +83,8 @@ BeliefNode *BeliefTree::reset() {
 void BeliefTree::initializeRoot() {
     root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
     root_->setMapping(solver_->getActionPool()->createActionMapping());
-    root_->setEstimator(solver_->getBeliefEstimationStrategy()->createEstimator(root_->actionMap_.get()));
+    solver_->getModel()->setQEstimator(solver_, root_.get());
+    solver_->getModel()->setActionChooser(solver_, root_.get());
     root_->getMapping()->initialize();
 }
 

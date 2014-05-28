@@ -1,6 +1,11 @@
 #ifndef SOLVER_HISTORICALDATA_HPP_
 #define SOLVER_HISTORICALDATA_HPP_
 
+#include <memory>
+
+#include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/Observation.hpp"
+
 namespace solver {
 
 class HistoricalData {

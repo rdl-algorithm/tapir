@@ -1,4 +1,4 @@
-#include "ActionNode.hpp"
+#include "solver/ActionNode.hpp"
 
 #include <memory>                       // for unique_ptr
 #include <utility>                      // for make_pair, move, pair
@@ -6,16 +6,14 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "BeliefNode.hpp"
-#include "Solver.hpp"
+#include "solver/BeliefNode.hpp"
+#include "solver/Solver.hpp"
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
 
-#include "belief-q-estimators/estimation.hpp"
-
-#include "mappings/actions/ActionPool.hpp"       // for ActionPool
-#include "mappings/observations/ObservationMapping.hpp"       // for ObservationMapping
+#include "solver/mappings/actions/ActionPool.hpp"       // for ActionPool
+#include "solver/mappings/observations/ObservationMapping.hpp"       // for ObservationMapping
 
 namespace solver {
 ActionNode::ActionNode() :
@@ -64,7 +62,8 @@ std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver *solver,
     if (childNode == nullptr) {
         childNode = observationMap_->createBelief(obs);
         childNode->setMapping(solver->getActionPool()->createActionMapping());
-        childNode->setEstimator(solver->getBeliefEstimationStrategy()->createEstimator(childNode->actionMap_.get()));
+        solver->getModel()->setQEstimator(solver, childNode);
+        solver->getModel()->setActionChooser(solver, childNode);
         added = true;
     }
     return std::make_pair(childNode, added);

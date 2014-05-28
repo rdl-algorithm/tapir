@@ -184,7 +184,7 @@ long DiscretizedActionMapEntry::getBinNumber() const {
     return binNumber_;
 }
 
-bool DiscretizedActionMapEntry::update(long deltaNVisits, double deltaTotalQ) {
+bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotalQ) {
     if (deltaNVisits == 0 && deltaTotalQ == 0) {
         return false;
     }

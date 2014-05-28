@@ -122,7 +122,7 @@ class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
 
     virtual long getBinNumber() const;
 
-    virtual bool update(long deltaNVisits, double deltaTotalQ) override;
+    virtual bool updateValue(long deltaNVisits, double deltaTotalQ) override;
 
   protected:
     long binNumber_ = -1;

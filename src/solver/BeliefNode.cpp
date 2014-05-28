@@ -1,4 +1,4 @@
-#include "BeliefNode.hpp"
+#include "solver/BeliefNode.hpp"
 
 #include <map>                          // for _Rb_tree_iterator, map<>::iterator, map
 #include <memory>                       // for unique_ptr
@@ -10,19 +10,20 @@
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "RandomAccessSet.hpp"
 
-#include "ActionNode.hpp"               // for ActionNode
-#include "HistoryEntry.hpp"             // for HistoryEntry
-#include "Solver.hpp"                   // for Solver
+#include "solver/belief_values.hpp"
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
-#include "abstract-problem/State.hpp"                    // for State
+#include "solver/ActionNode.hpp"               // for ActionNode
+#include "solver/HistoryEntry.hpp"             // for HistoryEntry
+#include "solver/Solver.hpp"                   // for Solver
 
-#include "mappings/actions/ActionMapping.hpp"
-#include "mappings/observations/ObservationMapping.hpp"
-#include "mappings/observations/ObservationPool.hpp"
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/HistoricalData.hpp"
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/State.hpp"                    // for State
 
-#include "search/HistoricalData.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
 
 namespace solver {
 BeliefNode::BeliefNode() :
@@ -40,7 +41,10 @@ BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             nStartingSequences_(0),
             tLastChange_(-1),
             actionMap_(nullptr),
-            estimator_(nullptr) {
+            cachedValues_(),
+            qEstimator_(nullptr),
+            actionChooser_(nullptr)
+            {
 }
 
 // Do-nothing destructor
@@ -136,18 +140,33 @@ void BeliefNode::updateTimeOfLastChange() {
     tLastChange_ = abt::clock_ms();
 }
 
-/* --------------   ---------------- */
-std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
-
+/* ----------------- Management of cached values ------------------- */
+BaseCachedValue *BeliefNode::addCachedValue(std::unique_ptr<BaseCachedValue> value) {
+    BaseCachedValue *rawPtr = value.get();
+    cachedValues_[rawPtr] = std::move(value);
+    return rawPtr;
 }
+void BeliefNode::removeCachedValue(BaseCachedValue *value) {
+    cachedValues_.erase(value);
+}
+
+/* ------------ Q-value calculation and action selection -------------- */
+void BeliefNode::setQEstimator(CachedValue<double> *qEstimator) {
+    qEstimator_ = qEstimator;
+}
+void BeliefNode::setActionChooser(ActionFunction actionChooser) {
+    actionChooser_ = actionChooser;
+}
+
+/* ------------ Q-value calculation and action selection -------------- */
 std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
-    return estimator_->getRecommendedAction();
+    return actionChooser_(this);
 }
 double BeliefNode::getQValue() const {
-    (*qValue)
+    return qEstimator_->getCache();
 }
-void BeliefNode::recalculate() {
-    estimator_->recalculate();
+void BeliefNode::recalculateQValue() {
+    qEstimator_->updateCache();
 }
 
 /* ============================ PRIVATE ============================ */
@@ -173,9 +192,6 @@ void BeliefNode::removeParticle(HistoryEntry *histEntry) {
 void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
     actionMap_ = std::move(mapping);
     actionMap_->setOwner(this);
-}
-void BeliefNode::setEstimator(std::unique_ptr<BeliefQValueEstimator> estimator) {
-    estimator_ = std::move(estimator);
 }
 void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
     data_ = std::move(data);

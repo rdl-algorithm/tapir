@@ -105,7 +105,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         }
 
         std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&randGen, vm);
-        solver::Solver solver(&randGen, std::move(solverModel));
+        solver::Solver solver(std::move(solverModel));
         std::unique_ptr<solver::Serializer> newSerializer(std::make_unique<SerializerType>(&solver));
         solver.setSerializer(std::move(newSerializer));
         solver.getSerializer()->load(inFile);

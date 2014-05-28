@@ -51,8 +51,8 @@ using std::cout;
 using std::endl;
 
 namespace solver {
-Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
-            randGen_(randGen),
+Solver::Solver(std::unique_ptr<Model> model) :
+            randGen_(model->getRandomGenerator()),
             serializer_(nullptr),
             model_(std::move(model)),
             statePool_(nullptr),
@@ -63,7 +63,6 @@ Solver::Solver(RandomGenerator *randGen, std::unique_ptr<Model> model) :
             historyCorrector_(nullptr),
             selectionStrategy_(nullptr),
             rolloutStrategy_(nullptr),
-            beliefEstimationStrategy_(nullptr),
             nodesToBackup_() {
 }
 
@@ -86,9 +85,6 @@ ActionPool *Solver::getActionPool() const {
 }
 ObservationPool *Solver::getObservationPool() const {
     return observationPool_.get();
-}
-BeliefEstimationStrategy *Solver::getBeliefEstimationStrategy() const {
-    return beliefEstimationStrategy_.get();
 }
 
 /* ------------------ Initialization methods ------------------- */
@@ -308,7 +304,6 @@ void Solver::initialize() {
     historyCorrector_ = model_->createHistoryCorrector(this);
     selectionStrategy_ = model_->createSelectionStrategy(this);
     rolloutStrategy_ = model_->createRolloutStrategy(this);
-    beliefEstimationStrategy_ = model_->createBeliefEstimationStrategy(this);
 }
 
 /* ------------------ Episode sampling methods ------------------- */
@@ -442,10 +437,10 @@ void Solver::doBackup() {
         long depth = firstEntry->first;
         for (BeliefNode *node : firstEntry->second) {
             if (depth == 0) {
-                node->recalculate();
+                node->recalculateQValue();
             } else {
                 double oldQValue = node->getQValue();
-                node->recalculate();
+                node->recalculateQValue();
                 double deltaQValue = node->getQValue() - oldQValue;
                 long nContinuations = node->getMapping()->getTotalVisitCount()
                         - node->getNumberOfStartingSequences();

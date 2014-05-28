@@ -56,6 +56,8 @@ void AbstractSearchInstance::extendSequence() {
         return;
     }
 
+    bool isFirst = true;
+
     for (long currentDepth = currentNode_->getDepth();; currentDepth++) {
         if (currentDepth == maximumDepth_) {
             // We have hit the depth limit.
@@ -84,7 +86,11 @@ void AbstractSearchInstance::extendSequence() {
         currentEntry = sequence_->addEntry(nextStateInfo);
 
         if (currentNode_ != nullptr) {
-            solver_->updateEstimate(currentNode_, 0, +1);
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                solver_->updateEstimate(currentNode_, 0, +1);
+            }
             if (step.createNode) {
                 BeliefNode *newNode = solver_->getPolicy()->createOrGetChild(
                         currentNode_, *result.action, *result.observation);
@@ -119,7 +125,9 @@ void AbstractSearchInstance::extendSequence() {
         }
     }
 #pragma GCC warning "The heuristic estimate should be calculated here!"
-    solver_->updateEstimate(currentNode_, 0, 0);
+    if (!isFirst) {
+        solver_->updateEstimate(currentNode_, 0, 0);
+    }
     status_ = finalize();
 }
 

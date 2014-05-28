@@ -1,10 +1,10 @@
 #ifndef ROCKSAMPLE_LEGALACTIONS_HPP_
 #define ROCKSAMPLE_LEGALACTIONS_HPP_
 
+#include "solver/abstract-problem/HistoricalData.hpp"
+
 #include "solver/mappings/actions/discretized_actions.hpp"
 #include "solver/mappings/actions/enumerated_actions.hpp"
-
-#include "solver/search/HistoricalData.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"
 

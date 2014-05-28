@@ -1,6 +1,7 @@
 #ifndef SOLVER_BELIEFNODE_HPP_
 #define SOLVER_BELIEFNODE_HPP_
 
+#include <functional>
 #include <map>                          // for map, map<>::value_compare
 #include <memory>                       // for unique_ptr
 #include <set>
@@ -9,18 +10,17 @@
 #include "global.hpp"                     // for RandomGenerator
 #include "RandomAccessSet.hpp"
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/State.hpp"
-#include "abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/HistoricalData.hpp"
+#include "solver/abstract-problem/State.hpp"
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
 
-#include "belief-q-estimators/estimation.hpp"
-
-#include "mappings/actions/ActionMapping.hpp"
-
-#include "search/HistoricalData.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
 
 namespace solver {
-class cached_value;
+class BaseCachedValue;
+template <typename T> class CachedValue;
+typedef std::function<std::unique_ptr<Action>(BeliefNode const *)> ActionFunction;
 
 class ActionMapping;
 class ActionNode;
@@ -94,16 +94,28 @@ public:
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
 
     /* -------------------- Simple setters  ---------------------- */
-    /** Returns the time at which the last change occurred. */
-    void updateTimeOfLastChange() const;
+    /** Sets the time of the last change to the current time. */
+    void updateTimeOfLastChange();
 
-    /* --------------------   ---------------------- */
+    /* ----------------- Management of cached values ------------------- */
+    /** Adds a value to be cached by this belief node. */
+    BaseCachedValue *addCachedValue(std::unique_ptr<BaseCachedValue> value);
+    /** Removes a value cached by this belief node. */
+    void removeCachedValue(BaseCachedValue *value);
+
+    /* ------------ Control of Q-value calculation and action selection -------------- */
+    /** Sets the way in which the q-value for this belief node will be calculated. */
+    void setQEstimator(CachedValue<double> *qEstimator);
+    /** Sets the way in which the recommended action for this belief node will be chosen. */
+    void setActionChooser(ActionFunction actionChooser);
+
+    /* ------------ Q-value calculation and action selection -------------- */
     /** Returns the recommended action to take from this node. */
     std::unique_ptr<Action> getRecommendedAction() const;
     /** Returns the best q-value */
     double getQValue() const;
     /** Recalculates the q-value for this belief node. */
-    void recalculate();
+    void recalculateQValue();
 
 private:
     /* -------------- Particle management / sampling ---------------- */
@@ -115,8 +127,6 @@ private:
     /* -------------------- Tree-related setters  ---------------------- */
     /** Sets the mapping for this node. */
     void setMapping(std::unique_ptr<ActionMapping> mapping);
-    /** Sets the estimator for this node. */
-    void setEstimator(std::unique_ptr<BeliefQValueEstimator> estimator);
     /** Sets the history-derived information for this node. */
     void setHistoricalData(std::unique_ptr<HistoricalData> data);
 
@@ -149,8 +159,15 @@ private:
 
     /** A mapping of actions to action children for this node. */
     std::unique_ptr<ActionMapping> actionMap_;
-    /** The estimator - determines the q-value and best action for this node. */
-    std::unique_ptr<BeliefQValueEstimator> estimator_;
+
+    /** The cached values for this belief node. */
+    std::unordered_map<BaseCachedValue const *, std::unique_ptr<BaseCachedValue>> cachedValues_;
+
+    /** Determines the q-value for this node. */
+    CachedValue<double> *qEstimator_;
+
+    /** Determines the best action for this node. */
+    ActionFunction actionChooser_;
 };
 } /* namespace solver */
 

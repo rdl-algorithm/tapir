@@ -1,5 +1,7 @@
 #include "UcbSelectionStrategy.hpp"
 
+#include "solver/action-choosers/choosers.hpp"
+
 #include "solver/mappings/actions/ActionMapping.hpp"
 
 #include "solver/ActionNode.hpp"
@@ -39,19 +41,7 @@ SearchStep UcbSelectionInstance::getSearchStep(BeliefNode *currentNode) {
         return SearchStep {SearchStatus::INSIDE_TREE, mapping->getRandomUnvisitedAction(), true};
     }
 
-    double bestValue = -std::numeric_limits<double>::infinity();
-    std::unique_ptr<Action> bestAction = nullptr;
-    for (ActionMappingEntry const *entry : mapping->getVisitedEntries()) {
-        double tmpValue = entry->getMeanQValue() + explorationCoefficient_ * std::sqrt(
-                        std::log(mapping->getTotalVisitCount()) / entry->getVisitCount());
-        if (!std::isfinite(tmpValue)) {
-            debug::show_message("ERROR: Infinite/NaN value!?");
-        }
-        if (bestValue < tmpValue) {
-            bestValue = tmpValue;
-            bestAction = entry->getAction();
-        }
-    }
+    std::unique_ptr<Action> bestAction = choosers::ucb_action(currentNode, explorationCoefficient_);
     if (bestAction == nullptr) {
         debug::show_message("ERROR: node has no actions!?");
         return SearchStep {SearchStatus::ERROR, nullptr, false};

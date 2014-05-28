@@ -7,18 +7,17 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "Action.hpp"        // for Action
-#include "State.hpp"                    // for State
-#include "Observation.hpp"              // for Observation
-#include "TransitionParameters.hpp"
+#include "solver/abstract-problem/Action.hpp"        // for Action
+#include "solver/abstract-problem/ModelChange.hpp"                    // for State
+#include "solver/abstract-problem/State.hpp"                    // for State
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/TransitionParameters.hpp"
 
 namespace solver {
 class ActionPool;
-class HistoricalData;
-class BeliefEstimationStrategy;
 class BeliefNode;
+class HistoricalData;
 class HistoryCorrector;
-class ModelChange;
 class ObservationPool;
 class SearchStrategy;
 class Solver;
@@ -29,12 +28,16 @@ class Model {
 public:
     Model() = default;
     virtual ~Model() = default;
-    _NO_COPY_OR_MOVE(Model)
-    ;
+    _NO_COPY_OR_MOVE(Model);
 
+    /* ----------------------- Basic getters  ------------------- */
+    /** Returns the name of this model. */
+    virtual std::string getName();
+    /** Returns the random number generator used by this model. */
     virtual RandomGenerator *getRandomGenerator() = 0;
 
-    /* ---------- Virtual getters for important model parameters  ---------- */
+
+    /* ---------- Virtual getters for ABT / model parameters  ---------- */
     // POMDP parameters
     /** Returns the POMDP discount factor. */
     virtual double getDiscountFactor() = 0;
@@ -61,6 +64,12 @@ public:
     /** Returns the maximum depth allowed in the tree. */
     virtual long getMaximumDepth() = 0;
 
+    /** Returns whether color output is available. */
+    virtual bool hasColorOutput();
+    /** Returns whether verbose output should be used. */
+    virtual bool hasVerboseOutput();
+
+
     /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the belief vector. */
     virtual std::unique_ptr<State> sampleAnInitState() = 0;
@@ -70,6 +79,7 @@ public:
     virtual bool isTerminal(State const &state) = 0;
     /** Approximates the q-value of a state */
     virtual double getHeuristicValue(State const &state) = 0;
+
 
     /* -------------------- Black box dynamics ---------------------- */
     /** Represents the results of a complete step in the model,
@@ -115,6 +125,11 @@ public:
             TransitionParameters const *transitionParameters, // optional
             State const *nextState) = 0; // optional
 
+
+    /* -------------- Methods for handling model changes ---------------- */
+    virtual void applyChange(ModelChange const &change, StatePool *pool);
+
+
     /* ------------ Methods for handling particle depletion -------------- */
     /** Generates new state particles based on the state particles of the
      * previous node, as well as on the action and observation.
@@ -131,8 +146,16 @@ public:
     virtual std::vector<std::unique_ptr<State>> generateParticles(BeliefNode *previousBelief,
             Action const &action, Observation const &obs, long nParticles);
 
-    /* -------------- Methods for handling model changes ---------------- */
-    virtual void applyChange(ModelChange const &change, StatePool *pool);
+
+    /* --------------- Pretty printing methods ----------------- */
+    /** Draws the environment map onto the given output stream. */
+    virtual void drawEnv(std::ostream &/*os*/);
+    /** Draws the current belief and/or the current state in the context of the
+     * overall map onto the given output stream.
+     */
+    virtual void drawSimulationState(BeliefNode const *belief, State const &/*state*/,
+            std::ostream &/*os*/);
+
 
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to
@@ -162,27 +185,13 @@ public:
     /** Creates a rollout strategy for use by the given solver. */
     virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(Solver *solver);
 
-    /** Creates a strategy for estimating the value of belief nodes, and for recommending actions. */
-    virtual std::unique_ptr<BeliefEstimationStrategy> createBeliefEstimationStrategy(
-            Solver *solver);
+    /** Sets the q-value estimator for this belief node. */
+    virtual void setQEstimator(Solver *solver, BeliefNode *node);
+    /** Sets the action chooser for this belief node. */
+    virtual void setActionChooser(Solver *solver, BeliefNode *node);
 
     /** Creates the historical data for the root node. */
     virtual std::unique_ptr<HistoricalData> createRootHistoricalData();
-
-    /* --------------- Pretty printing methods ----------------- */
-    /** Draws the environment map onto the given output stream. */
-    virtual void drawEnv(std::ostream &/*os*/);
-    /** Draws the current belief and/or the current state in the context of the
-     * overall map onto the given output stream.
-     */
-    virtual void drawSimulationState(BeliefNode const *belief, State const &/*state*/,
-            std::ostream &/*os*/);
-    /** Returns the name of this model. */
-    virtual std::string getName();
-    /** Returns whether color output is available. */
-    virtual bool hasColorOutput();
-    /** Returns whether verbose output should be used. */
-    virtual bool hasVerboseOutput();
 };
 } /* namespace solver */
 

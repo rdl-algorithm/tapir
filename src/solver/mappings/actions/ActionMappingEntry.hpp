@@ -28,9 +28,20 @@ public:
     /** Updates this action, by adding the given number of visits and the
      * given change in the total q-value.
      *
+     * This version of the method also updates the last change time of the
+     * belief node, so that cached values will be updated for this
+     * belief next time they are needed.
+     *
      * Returns true if and only if the q value of the action changed.
      */
-    virtual bool update(long deltaNVisits, double deltaTotalQ) = 0;
+    virtual bool update(long deltaNVisits, double deltaTotalQ);
+
+    /** Updates this action, by adding the given number of visits and the
+     * given change in the total q-value.
+     *
+     * Returns true if and only if the q value of the action changed.
+     */
+    virtual bool updateValue(long deltaNVisits, double deltaTotalQ) = 0;
 };
 } /* namespace solver */
 
