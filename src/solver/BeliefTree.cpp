@@ -6,13 +6,16 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "abstract-problem/Observation.hpp"
+#include "solver/BeliefNode.hpp"               // for BeliefNode
+#include "solver/Solver.hpp"
 
-#include "mappings/actions/ActionMapping.hpp"
-#include "mappings/actions/ActionPool.hpp"
+#include "solver/abstract-problem/Observation.hpp"
 
-#include "BeliefNode.hpp"               // for BeliefNode
-#include "Solver.hpp"
+#include "solver/action-choosers/choosers.hpp"
+#include "solver/belief-q-estimators/estimators.hpp"
+
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
 
 namespace solver {
 BeliefTree::BeliefTree(Solver *solver) :
@@ -83,8 +86,8 @@ BeliefNode *BeliefTree::reset() {
 void BeliefTree::initializeRoot() {
     root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
     root_->setMapping(solver_->getActionPool()->createActionMapping());
-    solver_->getModel()->setQEstimator(solver_, root_.get());
-    solver_->getModel()->setActionChooser(solver_, root_.get());
+    solver_->getEstimationStrategy()->setQEstimator(solver_, root_.get());
+    solver_->getActionChoosingStrategy()->setActionChooser(solver_, root_.get());
     root_->getMapping()->initialize();
 }
 

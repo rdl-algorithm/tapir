@@ -31,7 +31,7 @@ UcbSelectionInstance::UcbSelectionInstance(double explorationCoefficient,
 SearchStep UcbSelectionInstance::getSearchStep(BeliefNode *currentNode) {
     if (choseUnvisitedAction_) {
         // We've reached the new leaf - this (UCB) search is over.
-        return SearchStep {SearchStatus::REACHED_ROLLOUT_NODE, nullptr, false};
+        return SearchStep {SearchStatus::REACHED_LEAF, nullptr, false};
     }
 
     ActionMapping *mapping = currentNode->getMapping();

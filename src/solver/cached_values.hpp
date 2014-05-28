@@ -1,5 +1,5 @@
-#ifndef SOLVER_CACHEDVALUE_HPP_
-#define SOLVER_CACHEDVALUE_HPP_
+#ifndef SOLVER_CACHED_VALUES_HPP_
+#define SOLVER_CACHED_VALUES_HPP_
 
 #include "global.hpp"
 
@@ -51,4 +51,4 @@ inline std::unique_ptr<solver::Point> CachedValue<std::unique_ptr<solver::Point>
 }
 } /* namespace solver */
 
-#endif /* SOLVER_CACHEDVALUE_HPP_ */
+#endif /* SOLVER_CACHED_VALUES_HPP_ */

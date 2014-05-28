@@ -1,5 +1,6 @@
 #include "solver/belief-q-estimators/estimators.hpp"
 
+#include "solver/cached_values.hpp"
 #include "solver/BeliefNode.hpp"
 
 #include "solver/mappings/actions/ActionMapping.hpp"
@@ -48,4 +49,15 @@ double robust_q_value(BeliefNode const *node) {
     return robustQValue;
 }
 } /* namespace estimators */
+
+EstimationFunction::EstimationFunction(std::function<double(BeliefNode const *)> function) :
+        function_(function) {
+}
+
+void EstimationFunction::setQEstimator(Solver */*solver*/, BeliefNode *node) {
+    std::unique_ptr<CachedValue<double>> cachedValue = std::make_unique<CachedValue<double>>(
+            node, function_);
+    node->setQEstimator(cachedValue.get());
+    node->addCachedValue(std::move(cachedValue));
+}
 } /* namespace solver */

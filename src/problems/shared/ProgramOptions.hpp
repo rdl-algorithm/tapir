@@ -15,8 +15,11 @@ void load_overrides(po::variables_map &vm) {
     if (!vm["rol"].empty()) {
         vm.at("ABT.rolloutStrategy") = vm["rol"];
     }
-    if (!vm["bp"].empty()) {
-        vm.at("ABT.backpropagationStrategy") = vm["bp"];
+    if (!vm["est"].empty()) {
+        vm.at("ABT.estimator") = vm["est"];
+    }
+    if (!vm["cho"].empty()) {
+        vm.at("ABT.estimator") = vm["cho"];
     }
 }
 
@@ -74,8 +77,10 @@ class ProgramOptions {
                         "overriding alias for ABT.selectionStrategy")
                 ("rol", po::value<std::string>(),
                         "overriding alias for ABT.rolloutStrategy")
-                ("bp", po::value<std::string>(),
-                        "overriding alias for ABT.backpropagationStrategy")
+                ("est", po::value<std::string>(),
+                        "overriding alias for ABT.estimator")
+                ("cho", po::value<std::string>(),
+                        "overriding alias for ABT.chooser")
                 ("ABT.historiesPerStep,i", po::value<long>(),
                         "the number of episodes to sample for each step.")
                 ("ABT.maximumDepth", po::value<double>(),
@@ -84,8 +89,10 @@ class ProgramOptions {
                         "the search strategy to use")
                 ("ABT.rolloutStrategy", po::value<std::string>(),
                         "the rollout strategy to use")
-                ("ABT.backpropagationStrategy", po::value<std::string>(),
-                        "the backpropagation strategy to use")
+                ("ABT.estimator", po::value<std::string>(),
+                        "the function that estimates the q-value of a belief.")
+                ("ABT.chooser", po::value<std::string>(),
+                        "the function that chooses the action to take.")
                 ("ABT.maxObservationDistance", po::value<double>(),
                         "Maximum distance between observations to group them"
                         " together - only applicable if approximate"

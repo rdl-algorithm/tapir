@@ -54,6 +54,11 @@ public:
     /** Returns the observation pool. */
     ObservationPool *getObservationPool() const;
 
+    /** Returns the estimation strategy. */
+    EstimationStrategy *getEstimationStrategy() const;
+    /** Returns the action selection strategy. */
+    ActionChoosingStrategy *getActionChoosingStrategy() const;
+
     /* ------------------ Initialization methods ------------------- */
     /** Full initialization - resets all data structures. */
     void initializeEmpty();
@@ -157,10 +162,13 @@ private:
 
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;
-    /** The strategy to use when selecting nodes within the tree. */
-    std::unique_ptr<SearchStrategy> selectionStrategy_;
-    /** The strategy to use when rolling out. */
-    std::unique_ptr<SearchStrategy> rolloutStrategy_;
+    /** The strategy to use when searching the tree. */
+    std::unique_ptr<SearchStrategy> searchStrategy_;
+
+    /** The strategy for estimating the value of a belief node based on actions from it. */
+    std::unique_ptr<EstimationStrategy> estimationStrategy_;
+    /** The strategy for choosing which action to take at a given belief node. */
+    std::unique_ptr<ActionChoosingStrategy> actionChoosingStrategy_;
 
     /** The nodes to be updated, sorted by depth (deepest first) */
     std::map<int, std::set<BeliefNode *>, std::greater<int>> nodesToBackup_;

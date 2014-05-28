@@ -9,6 +9,25 @@
 
 namespace solver {
 class BeliefNode;
+class Solver;
+
+class ActionChoosingStrategy {
+public:
+    ActionChoosingStrategy() = default;
+    virtual ~ActionChoosingStrategy() = default;
+    /** Sets the action chooser for the given belief node. */
+    virtual void setActionChooser(Solver *solver, BeliefNode *node) = 0;
+};
+
+class ActionChoosingFunction : public ActionChoosingStrategy {
+public:
+    ActionChoosingFunction(std::function<std::unique_ptr<Action>(BeliefNode const *)> function);
+
+    virtual void setActionChooser(Solver *solver, BeliefNode *node);
+private:
+    std::function<std::unique_ptr<Action>(BeliefNode const *)> function_;
+};
+
 
 namespace choosers {
 std::unique_ptr<Action> max_action(BeliefNode const *node);

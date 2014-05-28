@@ -4,6 +4,12 @@
 
 #include "global.hpp"
 
+#include "solver/BeliefNode.hpp"
+
+#include "solver/action-choosers/choosers.hpp"
+
+#include "solver/belief-q-estimators/estimators.hpp"
+
 #include "solver/search/search_interface.hpp"
 #include "solver/search/MultipleStrategiesExp3.hpp"
 #include "solver/search/NnRolloutStrategy.hpp"
@@ -54,7 +60,7 @@ std::pair<std::string, std::vector<std::string>> split_function(
 
 std::unique_ptr<solver::SearchStrategy> UcbSearchParser::parse(
         solver::Solver *solver,
-        ParserSet<solver::SearchStrategy> */*allParser*/,
+        ParserSet<std::unique_ptr<solver::SearchStrategy>> */*allParser*/,
         std::vector<std::string> args) {
     double explorationCoefficient;
     std::istringstream(args[0]) >> explorationCoefficient;
@@ -64,7 +70,7 @@ std::unique_ptr<solver::SearchStrategy> UcbSearchParser::parse(
 
 std::unique_ptr<solver::SearchStrategy> NnRolloutParser::parse(
         solver::Solver *solver,
-        ParserSet<solver::SearchStrategy> */*allParser*/,
+        ParserSet<std::unique_ptr<solver::SearchStrategy>> */*allParser*/,
         std::vector<std::string> args) {
     long maxNnComparisons;
     double maxNnDistance;
@@ -76,7 +82,7 @@ std::unique_ptr<solver::SearchStrategy> NnRolloutParser::parse(
 
 std::unique_ptr<solver::SearchStrategy> DefaultRolloutParser::parse(
         solver::Solver *solver,
-        ParserSet<solver::SearchStrategy> */*allParser*/,
+        ParserSet<std::unique_ptr<solver::SearchStrategy>> */*allParser*/,
         std::vector<std::string> args) {
     long maxNSteps;
     std::istringstream(args[0]) >> maxNSteps;
@@ -85,7 +91,7 @@ std::unique_ptr<solver::SearchStrategy> DefaultRolloutParser::parse(
 
 std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(
         solver::Solver *solver,
-        ParserSet<solver::SearchStrategy> *allParser,
+        ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParser,
         std::vector<std::string> args) {
     std::vector<std::unique_ptr<solver::SearchStrategy>> strategies;
     std::vector<std::string>::iterator it = args.begin();
@@ -97,4 +103,44 @@ std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(
     }
     return std::make_unique<solver::MultipleStrategiesExp3>(solver,
             strategyExplorationCoefficient, std::move(strategies));
+}
+
+std::unique_ptr<solver::EstimationStrategy> AverageEstimateParser::parse(solver::Solver */*solver*/,
+        ParserSet<std::unique_ptr<solver::EstimationStrategy>> */*allParser*/,
+        std::vector<std::string> /*args*/) {
+    return std::make_unique<solver::EstimationFunction>(
+            std::function<double(solver::BeliefNode const *)>(solver::estimators::average_q_value));
+}
+std::unique_ptr<solver::EstimationStrategy> MaxEstimateParser::parse(solver::Solver */*solver*/,
+        ParserSet<std::unique_ptr<solver::EstimationStrategy>> */*allParser*/,
+        std::vector<std::string> /*args*/) {
+    return std::make_unique<solver::EstimationFunction>(solver::estimators::max_q_value);
+}
+std::unique_ptr<solver::EstimationStrategy> RobustEstimateParser::parse(solver::Solver */*solver*/,
+        ParserSet<std::unique_ptr<solver::EstimationStrategy>> */*allParser*/,
+        std::vector<std::string> /*args*/) {
+    return std::make_unique<solver::EstimationFunction>(solver::estimators::robust_q_value);
+}
+
+
+std::unique_ptr<solver::ActionChoosingStrategy> MaxChooserParser::parse(solver::Solver */*solver*/,
+        ParserSet<std::unique_ptr<solver::ActionChoosingStrategy>> */*allParser*/,
+        std::vector<std::string> /*args*/) {
+    return std::make_unique<solver::ActionChoosingFunction>(solver::choosers::max_action);
+}
+
+std::unique_ptr<solver::ActionChoosingStrategy>  RobustChooserParser::parse(solver::Solver */*solver*/,
+        ParserSet<std::unique_ptr<solver::ActionChoosingStrategy> > */*allParser*/,
+        std::vector<std::string> /*args*/) {
+    return std::make_unique<solver::ActionChoosingFunction>(solver::choosers::robust_action);
+
+}
+std::unique_ptr<solver::ActionChoosingStrategy>  UcbChooserParser::parse(solver::Solver */*solver*/,
+        ParserSet<std::unique_ptr<solver::ActionChoosingStrategy> > */*allParser*/,
+        std::vector<std::string> args) {
+    using namespace std::placeholders;
+    double explorationCoefficient;
+    std::stringstream(args[0]) >> explorationCoefficient;
+    return std::make_unique<solver::ActionChoosingFunction>(
+            std::bind(solver::choosers::ucb_action, _1, explorationCoefficient));
 }

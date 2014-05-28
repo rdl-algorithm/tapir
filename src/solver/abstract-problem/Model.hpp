@@ -16,6 +16,8 @@
 namespace solver {
 class ActionPool;
 class BeliefNode;
+class ActionChoosingStrategy;
+class EstimationStrategy;
 class HistoricalData;
 class HistoryCorrector;
 class ObservationPool;
@@ -177,18 +179,13 @@ public:
      */
     virtual std::unique_ptr<ObservationPool> createObservationPool(Solver *solver) = 0;
 
-    /** Creates a selection strategy for use by the given solver. Multiple
-     * strategies should be combined into one, as is done, for example, in
-     * MultipleStrategiesExp3.
-     */
-    virtual std::unique_ptr<SearchStrategy> createSelectionStrategy(Solver *solver);
-    /** Creates a rollout strategy for use by the given solver. */
-    virtual std::unique_ptr<SearchStrategy> createRolloutStrategy(Solver *solver);
+    /** Creates a search strategy for use by the given solver. */
+    virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver);
 
-    /** Sets the q-value estimator for this belief node. */
-    virtual void setQEstimator(Solver *solver, BeliefNode *node);
-    /** Sets the action chooser for this belief node. */
-    virtual void setActionChooser(Solver *solver, BeliefNode *node);
+    /** Creates a strategy for estimating the value of belief nodes, for backprop. */
+    virtual std::unique_ptr<EstimationStrategy> createEstimationStrategy(Solver *solver);
+    /** Creates a strategy for action selection. */
+    virtual std::unique_ptr<ActionChoosingStrategy> createActionChoosingStrategy(Solver *solver);
 
     /** Creates the historical data for the root node. */
     virtual std::unique_ptr<HistoricalData> createRootHistoricalData();

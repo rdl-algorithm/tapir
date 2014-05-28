@@ -16,36 +16,39 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Model.hpp"                    // for Model::StepResult, Model
-#include "abstract-problem/ModelChange.hpp"                    // for Model::StepResult, Model
-#include "abstract-problem/Observation.hpp"              // for Observation
-#include "abstract-problem/State.hpp"                    // for State, operator<<
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Model.hpp"                    // for Model::StepResult, Model
+#include "solver/abstract-problem/ModelChange.hpp"                    // for Model::StepResult, Model
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/State.hpp"                    // for State, operator<<
 
-#include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
-#include "changes/HistoryCorrector.hpp"
+#include "solver/action-choosers/choosers.hpp"
+#include "solver/belief-q-estimators/estimators.hpp"
 
-#include "mappings/actions/ActionMapping.hpp"
-#include "mappings/actions/ActionPool.hpp"
-#include "mappings/observations/ObservationMapping.hpp"
-#include "mappings/observations/ObservationPool.hpp"
+#include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
+#include "solver/changes/HistoryCorrector.hpp"
 
-#include "search/SearchStatus.hpp"
-#include "search/search_interface.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
 
-#include "serialization/Serializer.hpp"               // for Serializer
+#include "solver/search/SearchStatus.hpp"
+#include "solver/search/search_interface.hpp"
 
-#include "indexing/RTree.hpp"
-#include "indexing/SpatialIndexVisitor.hpp"
+#include "solver/serialization/Serializer.hpp"               // for Serializer
 
-#include "ActionNode.hpp"               // for BeliefNode, BeliefNode::startTime
-#include "BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
-#include "BeliefTree.hpp"               // for BeliefTree
-#include "Histories.hpp"                // for Histories
-#include "HistoryEntry.hpp"             // for HistoryEntry
-#include "HistorySequence.hpp"          // for HistorySequence
-#include "StateInfo.hpp"                // for StateInfo
-#include "StatePool.hpp"                // for StatePool
+#include "solver/indexing/RTree.hpp"
+#include "solver/indexing/SpatialIndexVisitor.hpp"
+
+#include "solver/ActionNode.hpp"               // for BeliefNode, BeliefNode::startTime
+#include "solver/BeliefNode.hpp"               // for BeliefNode, BeliefNode::startTime
+#include "solver/BeliefTree.hpp"               // for BeliefTree
+#include "solver/Histories.hpp"                // for Histories
+#include "solver/HistoryEntry.hpp"             // for HistoryEntry
+#include "solver/HistorySequence.hpp"          // for HistorySequence
+#include "solver/StateInfo.hpp"                // for StateInfo
+#include "solver/StatePool.hpp"                // for StatePool
 
 using std::cout;
 using std::endl;
@@ -61,8 +64,9 @@ Solver::Solver(std::unique_ptr<Model> model) :
             actionPool_(nullptr),
             observationPool_(nullptr),
             historyCorrector_(nullptr),
-            selectionStrategy_(nullptr),
-            rolloutStrategy_(nullptr),
+            searchStrategy_(nullptr),
+            estimationStrategy_(nullptr),
+            actionChoosingStrategy_(nullptr),
             nodesToBackup_() {
 }
 
@@ -85,6 +89,14 @@ ActionPool *Solver::getActionPool() const {
 }
 ObservationPool *Solver::getObservationPool() const {
     return observationPool_.get();
+}
+
+EstimationStrategy *Solver::getEstimationStrategy() const {
+    return estimationStrategy_.get();
+}
+
+ActionChoosingStrategy *Solver::getActionChoosingStrategy() const {
+    return actionChoosingStrategy_.get();
 }
 
 /* ------------------ Initialization methods ------------------- */
@@ -302,8 +314,9 @@ void Solver::initialize() {
 
     // Possible model-specific customizations
     historyCorrector_ = model_->createHistoryCorrector(this);
-    selectionStrategy_ = model_->createSelectionStrategy(this);
-    rolloutStrategy_ = model_->createRolloutStrategy(this);
+    searchStrategy_ = model_->createSearchStrategy(this);
+    estimationStrategy_ = model_->createEstimationStrategy(this);
+    actionChoosingStrategy_ = model_->createActionChoosingStrategy(this);
 }
 
 /* ------------------ Episode sampling methods ------------------- */
@@ -338,20 +351,12 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
                 " from a terminal state.");
         return;
     }
-    std::unique_ptr<SearchInstance> searchInstance = selectionStrategy_->createSearchInstance(
+    std::unique_ptr<SearchInstance> searchInstance = searchStrategy_->createSearchInstance(
             sequence, maximumDepth);
     searchInstance->extendSequence();
     SearchStatus status = searchInstance->getStatus();
     if (status == SearchStatus::UNINITIALIZED) {
         debug::show_message("WARNING: Search algorithm could not initialize!?");
-    }
-    if (status == SearchStatus::REACHED_ROLLOUT_NODE) {
-        searchInstance = rolloutStrategy_->createSearchInstance(sequence, maximumDepth);
-        searchInstance->extendSequence();
-        status = searchInstance->getStatus();
-        if (status == SearchStatus::UNINITIALIZED) {
-            debug::show_message("WARNING: Search algorithm could not initialize!?");
-        }
     }
     if (status == SearchStatus::ROLLOUT_COMPLETE || status == SearchStatus::HIT_DEPTH_LIMIT) {
         HistoryEntry *lastEntry = sequence->getLastEntry();

@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "solver/belief_values.hpp"
+#include "solver/cached_values.hpp"
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
 
@@ -120,22 +120,18 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) 
     return std::make_unique<DefaultHistoryCorrector>(solver);
 }
 
-std::unique_ptr<SearchStrategy> Model::createSelectionStrategy(Solver *solver) {
-    return std::make_unique<UcbSelectionStrategy>(solver, 1.0);
+std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver */*solver*/) {
+    #pragma GCC warning "No search strategy yet"
+    return nullptr;
 }
 
-std::unique_ptr<SearchStrategy> Model::createRolloutStrategy(Solver *solver) {
-    return std::make_unique<DefaultRolloutStrategy>(solver, 1);
+
+std::unique_ptr<EstimationStrategy> Model::createEstimationStrategy(Solver */*solver*/) {
+    return std::make_unique<EstimationFunction>(estimators::average_q_value);
 }
 
-void Model::setQEstimator(Solver */*solver*/, BeliefNode *node) {
-    std::unique_ptr<CachedValue<double>> cachedValue = std::make_unique<CachedValue<double>>(
-            node, estimators::average_q_value);
-    node->setQEstimator(cachedValue.get());
-    node->addCachedValue(std::move(cachedValue));
-}
-void Model::setActionChooser(Solver */*solver*/, BeliefNode *node) {
-    node->setActionChooser(ActionFunction(choosers::max_action));
+std::unique_ptr<ActionChoosingStrategy> Model::createActionChoosingStrategy(Solver */*solver*/) {
+    return std::make_unique<ActionChoosingFunction>(choosers::max_action);
 }
 
 std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {

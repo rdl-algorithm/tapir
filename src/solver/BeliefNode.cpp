@@ -10,7 +10,7 @@
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "RandomAccessSet.hpp"
 
-#include "solver/belief_values.hpp"
+#include "solver/cached_values.hpp"
 
 #include "solver/ActionNode.hpp"               // for ActionNode
 #include "solver/HistoryEntry.hpp"             // for HistoryEntry
