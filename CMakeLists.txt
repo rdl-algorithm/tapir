@@ -12,6 +12,12 @@ find_package(Boost 1.48.0 REQUIRED COMPONENTS program_options)
 find_package(catkin REQUIRED COMPONENTS 
 	roscpp roslib std_msgs geometry_msgs pcl pcl_ros tf message_generation)
 
+## Find OctoMap package
+find_package(octomap REQUIRED)
+include_directories(${OCTOMAP_INCLUDE_DIRS} )
+link_libraries(${OCTOMAP_LIBRARIES})
+link_directories(${OCTOMAP_LIBRARY_DIRS})
+
 add_service_files(
   FILES
   simRosCopyPasteObjects.srv
@@ -38,6 +44,7 @@ include_directories(src ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_library(AbtSolver
 	src/global.cpp
+	src/VrepHelper.cpp
 	src/solver/ActionNode.cpp
 	src/solver/Agent.cpp
 	src/solver/BeliefNode.cpp

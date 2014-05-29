@@ -43,6 +43,12 @@ struct TrackerChange : solver::ModelChange {
     double i1 = 0;
     double j0 = 0;
     double j1 = 0;
+
+    TrackerChange(std::string argType, double argi0, double argi1,
+        double argj0, double argj1) : 
+        changeType(argType), i0(argi0), i1(argi1), j0(argj0), j1(argj1)
+    {
+    }
 };
 
 class TrackerModel: virtual public ModelWithProgramOptions,
@@ -135,9 +141,18 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     /** Displays a single cell of the map. */
     void dispCell(TrackerCellType cellType, std::ostream &os);
     void drawEnv(std::ostream &os) override;
+    void drawEnvAndPos(std::ostream &os, GridPosition pos);
+
+    /* TODO */
     void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
+
+    /**
+     * Returns proportion of belief particles about the target's
+     * position for each grid position in the map
+     */
+    std::vector<std::vector<float>> getTargetPosBelief(solver::BeliefNode const *belief);
 
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
 
@@ -192,6 +207,9 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     // General problem parameters
     long nActions_, nStVars_;
     double minVal_, maxVal_;
+
+    // Properties for target visibility check
+    
 };
 } /* namespace tracker */
 

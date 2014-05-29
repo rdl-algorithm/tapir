@@ -1,5 +1,8 @@
 #include "TrackerModel.hpp"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <cmath>                        // for floor, pow
 #include <cstddef>                      // for size_t
 #include <cstdlib>                      // for exit
@@ -39,6 +42,7 @@
 #include "TrackerAction.hpp"
 #include "TrackerObservation.hpp"
 #include "TrackerState.hpp"
+#include "TrackerRos.hpp"   // getCurrYaw45(), getCurrCell()
 
 using std::cout;
 using std::endl;
@@ -114,14 +118,13 @@ std::unique_ptr<solver::State> TrackerModel::sampleAnInitState() {
 
 std::unique_ptr<solver::State> TrackerModel::sampleStateUniform() {
 
-    // Random positions
-    GridPosition robotPos = randomEmptyCell();
-    GridPosition targetPos = randomEmptyCell();
+    // Known robot position
+    int robotYaw = getCurrYaw45();
+    GridPosition robotPos = getCurrCell();
 
-    // Random yaw (discretised by 45 degrees)
-    int i = rand() % 9 - 4; // Random int from -4 to 4
-    int robotYaw = i * 45;
-    i = rand() % 9 - 4;
+    // Random target position and yaw
+    GridPosition targetPos = randomEmptyCell();
+    int i = rand() % 8 - 3; // Random int from -3 to 4
     int targetYaw = i * 45;
 
     bool seesTarget = isTargetVisible(robotPos, robotYaw, targetPos);
@@ -246,10 +249,10 @@ int TrackerModel::getNewYaw(int yaw, ActionType action) {
     else if (action == ActionType::TURN_LEFT)
         yaw += 45;
 
-    // Ensure -180 <= yaw <= 180
+    // Ensure -180 < yaw <= 180
     while (yaw > 180)
         yaw -= 360;
-    while (yaw < -180)
+    while (yaw <= -180)
         yaw += 360;
     return yaw;
 }
@@ -262,11 +265,68 @@ bool TrackerModel::isValid(GridPosition const &position) {
 bool TrackerModel::isTargetVisible(GridPosition const &robotPos, int robotYaw,
     GridPosition const &targetPos) {
 
-    GridPosition forwardPos = getNewPos(robotPos, robotYaw, ActionType::FORWARD);
-    GridPosition forwardPos2 = getNewPos(forwardPos, robotYaw, ActionType::FORWARD);
-    if (targetPos == forwardPos || targetPos == forwardPos2)
-        return true;
-    return false;
+    // TODO clean this up
+
+    double rangeSquared = 8  * 8;   // cells squared
+    double viewCone = 35 * M_PI/180;    // radians
+
+    // Max distance check
+    double di = targetPos.i - robotPos.i;
+    double dj = targetPos.j - robotPos.j;
+    if (di * di + dj * dj > rangeSquared)
+        return false;
+
+    // Angle check 
+    double angle = atan2(-di, dj);
+    if (abs(angle - (robotYaw * M_PI/180)) > viewCone)
+        return false;
+
+    // TODO a proper test on this...
+    // Obstacles check using Bresenham's line algorithm
+    float x1 = robotPos.j;
+    float y1 = robotPos.i;
+    float x2 = targetPos.j;
+    float y2 = targetPos.i;
+
+    const bool steep = (fabs(y2 - y1) > fabs(x2 - x1));
+    if(steep) {
+        std::swap(x1, y1);
+        std::swap(x2, y2);
+    }
+ 
+    if(x1 > x2) {
+        std::swap(x1, x2);
+        std::swap(y1, y2);
+    }
+ 
+    const float dx = x2 - x1;
+    const float dy = fabs(y2 - y1);
+ 
+    float error = dx / 2.0f;
+    const int ystep = (y1 < y2) ? 1 : -1;
+    int y = (int)y1;
+ 
+    const int maxX = (int)x2;
+ 
+    for(int x=(int)x1; x<maxX; x++) {
+        if(steep) {
+            if (envMap_[y][x] != TrackerCellType::EMPTY)
+                return false;
+        }
+        else {
+            if (envMap_[x][y] != TrackerCellType::EMPTY)
+                return false;
+        }
+        error -= dy;
+        if(error < 0)
+        {
+            y += ystep;
+            error += dx;
+        }
+    }
+
+    // All checks passed
+    return true;
 }
 
 std::unique_ptr<solver::Observation> TrackerModel::makeObservation(
@@ -356,7 +416,7 @@ std::vector<std::unique_ptr<solver::State>> TrackerModel::generateParticles(
         // If we saw the target, we must be in the same place.
         newParticles.push_back(
                 std::make_unique<TrackerState>(newRobotPos, newRobotPos,
-                        actionType == ActionType::TAG));
+                        actionType == ActionType::TRACKER));
     } else {*/
         // We didn't see the target, so we must be in different places.
         for (solver::State const *state : previousParticles) {
@@ -433,12 +493,96 @@ std::vector<std::unique_ptr<solver::State>> TrackerModel::generateParticles(
 
 void TrackerModel::applyChange(solver::ModelChange const &change,
         solver::StatePool *pool) {
+
+    TrackerChange const &trackerChange = static_cast<TrackerChange const &>(change);
+    if (hasVerboseOutput()) {
+        cout << trackerChange.changeType << " " << trackerChange.i0 << " "
+                << trackerChange.j0;
+        cout << " " << trackerChange.i1 << " " << trackerChange.j1 << endl;
+    }
+    if (trackerChange.changeType == "Add Obstacles") {
+        for (long i = static_cast<long>(trackerChange.i0); i <= trackerChange.i1; i++) {
+            for (long j = static_cast<long>(trackerChange.j0); j <= trackerChange.j1;
+                    j++) {
+                envMap_[i][j] = TrackerCellType::WALL;
+            }
+        }
+        if (pool == nullptr) {
+            return;
+        }
+        solver::RTree *tree =
+                static_cast<solver::RTree *>(pool->getStateIndex());
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+        tree->boxQuery(visitor, std::vector<double> { trackerChange.i0,
+                trackerChange.j0, 0, 0, 0 }, std::vector<double> { trackerChange.i1,
+                trackerChange.j1, nRows_ - 1.0, nCols_ - 1.0, 1 });
+        tree->boxQuery(visitor, std::vector<double> { 0, 0, trackerChange.i0,
+                trackerChange.j0, 0 },
+                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, trackerChange.i1,
+                        trackerChange.j1, 1 });
+    } else if (trackerChange.changeType == "Remove Obstacles") {
+        for (long i = static_cast<long>(trackerChange.i0); i <= trackerChange.i1; i++) {
+            for (long j = static_cast<long>(trackerChange.j0); j <= trackerChange.j1;
+                    j++) {
+                envMap_[i][j] = TrackerCellType::EMPTY;
+            }
+        }
+        if (pool == nullptr) {
+            return;
+        }
+        solver::RTree *tree =
+                static_cast<solver::RTree *>(pool->getStateIndex());
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
+        tree->boxQuery(visitor,
+                std::vector<double> { trackerChange.i0 - 1, trackerChange.j0 - 1, 0, 0,
+                        0 },
+                std::vector<double> { trackerChange.i1 + 1, trackerChange.j1 + 1, nRows_
+                        - 1.0, nCols_ - 1.0, 1 });
+        tree->boxQuery(visitor,
+                std::vector<double> { 0, 0, trackerChange.i0 - 1, trackerChange.j0 - 1,
+                        0 },
+                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, trackerChange.i1
+                        + 1, trackerChange.j1 + 1, 1 });
+    }
 }
 
 void TrackerModel::dispCell(TrackerCellType cellType, std::ostream &os) {
+    if (cellType >= EMPTY) {
+        os << std::setw(2);
+        os << cellType;
+        return;
+    }
+    switch (cellType) {
+    case WALL:
+        os << "XX";
+        break;
+    default:
+        os << "ERROR-" << cellType;
+        break;
+    }
 }
 
 void TrackerModel::drawEnv(std::ostream &os) {
+    for (std::vector<TrackerCellType> &row : envMap_) {
+        for (TrackerCellType cellType : row) {
+            dispCell(cellType, os);
+            os << " ";
+        }
+        os << endl;
+    }
+}
+
+void TrackerModel::drawEnvAndPos(std::ostream &os, GridPosition pos) {
+    for (int i = 0; i < envMap_.size(); i++) {
+        for (int j = 0; j < envMap_[0].size(); j++) {
+            if (pos == GridPosition(i, j))
+                os << "RR";
+            else
+                dispCell(envMap_[i][j], os);
+            os << " ";
+        }
+        os << endl;
+    }
 }
 
 void TrackerModel::drawSimulationState(solver::BeliefNode const *belief,
@@ -451,6 +595,24 @@ std::vector<std::unique_ptr<solver::DiscretizedPoint>> TrackerModel::getAllActio
         allActions.push_back(std::make_unique<TrackerAction>(code));
     }
     return allActions;
+}
+
+std::vector<std::vector<float>> TrackerModel::getTargetPosBelief(solver::BeliefNode const *belief) {
+    std::vector<solver::State const *> particles = belief->getStates();
+    std::vector<std::vector<long>> particleCounts(nRows_,  std::vector<long>(nCols_));
+    for (solver::State const *particle : particles) {
+        GridPosition targetPos = static_cast<TrackerState const &>(*particle).getTargetPos();
+        particleCounts[targetPos.i][targetPos.j] += 1;
+    }
+
+    std::vector<std::vector<float>> result;
+    for (std::size_t i = 0; i < envMap_.size(); i++) {
+        result.push_back(std::vector<float>());
+        for (std::size_t j = 0; j < envMap_[0].size(); j++) {
+            result[i].push_back((float) particleCounts[i][j]/particles.size());
+        }
+    }
+    return result;
 }
 
 } /* namespace tracker */

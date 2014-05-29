@@ -2,16 +2,25 @@
 #include <math.h>
 
 #include <string>
+#include <sstream>
 
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <ros/package.h>  // For finding package path
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/String.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <octomap/octomap.h>
+#include <octomap_msgs/Octomap.h>
+#include <octomap_msgs/conversions.h>
 //#include <tf/transform_listener.h>
 #include "abt/simRosGetObjectHandle.h"
 #include "abt/simRosGetObjectPose.h"
+#include "abt/simRosCopyPasteObjects.h"
+#include "abt/simRosSetObjectPosition.h"
+#include "abt/simRosStartSimulation.h"
+#include "abt/simRosStopSimulation.h"
 
 #include "solver/Agent.hpp"
 
@@ -25,10 +34,14 @@
 #include "TrackerState.hpp"
 #include "TrackerTextSerializer.hpp"
 #include "TrackerModel.hpp"
+#include "TrackerRos.hpp"
 
+using namespace tracker;
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
+
+namespace tracker {
 
 struct Point {
     double x;
@@ -51,20 +64,6 @@ struct Point {
     }
 };
 
-// ROS variables
-ros::Publisher leftWheelsPub;
-ros::Publisher rightWheelsPub; 
-//tf::StampedTransform robotTf;
-ros::ServiceClient vrepHandleClient;
-ros::ServiceClient vrepPoseClient;
-bool seesTarget;
-long robotHandle;
-
-// For grid
-double cellSize = 2;  // metres
-double gridShift = 10;    // In metres, to avoid negative rows and columns
-// number of rows/cols = 2 * gridShift / cellSize
-
 /************** Function prototypes ****************/
 
 // Discretises xy to GridPosition
@@ -80,7 +79,7 @@ Point getCurrPos();
 double getCurrYaw();
 
 // Returns current yaw in degrees discretised by 45 degree steps
-double getCurrYaw45();
+//int getCurrYaw45();   // In header file
 
 // Send motor commands to move towards goal position (in metres) 
 // until goal is reached or timeLimit (seconds) reached
@@ -100,9 +99,47 @@ long getVrepHandle(std::string name);
 // Get the pose of an object in VREP simulation
 geometry_msgs::PoseStamped getVrepPose(long handle);
 
+// Move an object in VREP simulation to a new position
+// Returns true if success
+bool moveVrepObject(std::string name, float x, float y, float z);
+
+// Move an object by handle in VREP simulation to
+// a new position. Returns true if success
+bool moveVrepObject(long handle, float x, float y, float z);
+
 // Callback when ROS message from VREP is received
 // with information on whether target is visible or not
 void visibleCallback(const std_msgs::Int32::ConstPtr& msg);
+
+void octomapCallback(const octomap_msgs::Octomap::ConstPtr& msg);
+
+} /* namespace tracker */
+
+// ROS variables
+ros::Publisher leftWheelsPub;
+ros::Publisher rightWheelsPub; 
+//tf::StampedTransform robotTf;
+ros::ServiceClient vrepHandleClient;
+ros::ServiceClient vrepPoseClient;
+ros::ServiceClient vrepCopyClient;
+ros::ServiceClient vrepMoveClient;
+abt::simRosCopyPasteObjects markerCopySrv;
+
+bool seesTarget;
+long robotHandle;
+octomap::OcTree* octomapTree;
+geometry_msgs::PoseStamped robotPose;
+
+// For grid
+double cellSize = 1;  // metres
+double gridShift = 10;    // In metres, to avoid negative rows and columns
+// number of rows/cols = 2 * gridShift / cellSize
+
+// 2D array of handles to belief markers in VREP
+// (squares that indicate belief on target position by different colour)
+std::vector<std::vector<long>> beliefMarkers;
+
+
 
 /********************* Main ************************/
 
@@ -114,19 +151,32 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "tracker_node");
 	ros::NodeHandle node;
 	ros::Rate loopRate(10);
-    leftWheelsPub = node.advertise<std_msgs::Float64>("left_wheels_speed", 1);
-    rightWheelsPub = node.advertise<std_msgs::Float64>("right_wheels_speed", 1);
+    leftWheelsPub = node.advertise<std_msgs::Float64>("/left_wheels_speed", 1);
+    rightWheelsPub = node.advertise<std_msgs::Float64>("/right_wheels_speed", 1);
+    ros::Publisher beliefPub = node.advertise<std_msgs::String>("/target_pos_belief", 1);
     ros::Subscriber visibleSub = node.subscribe("/human_visible", 1, visibleCallback);
+    ros::Subscriber octomapSub = node.subscribe("/octomap_full", 1, octomapCallback);
     //tf::TransformListener tfListener;
     vrepHandleClient = node.serviceClient<abt::simRosGetObjectHandle>("vrep/simRosGetObjectHandle");
     vrepPoseClient = node.serviceClient<abt::simRosGetObjectPose>("vrep/simRosGetObjectPose");
+    vrepCopyClient = node.serviceClient<abt::simRosCopyPasteObjects>("vrep/simRosCopyPasteObjects");
+    vrepMoveClient = node.serviceClient<abt::simRosSetObjectPosition>("vrep/simRosSetObjectPosition");
 
-    // Get handle of robot object in VREP
+    /**************** VREP init **********************/
+
+    // Get handle of objects in VREP
     robotHandle = getVrepHandle("robot");
+    long markerHandle = getVrepHandle("BeliefMarker");
+    std::vector<int> markerHandleVec;
+    markerHandleVec.push_back(markerHandle);
+    markerCopySrv.request.objectHandles = markerHandleVec;
+
+    // Update knowledge of current pose
+    robotPose = getVrepPose(robotHandle);
 
 	/**************** ABT init ***********************/
 
-	tracker::TrackerOptions tracker_options;
+	TrackerOptions tracker_options;
 	ProgramOptions *options = &tracker_options;
 
 	po::options_description visibleOptions;
@@ -160,23 +210,23 @@ int main(int argc, char **argv)
     randGen.discard(10);
     
     // Prepare environment map and initialise tracker model
-    std::vector<std::vector<tracker::TrackerModel::TrackerCellType>> envMap;
+    std::vector<std::vector<TrackerModel::TrackerCellType>> envMap;
     int nRows = 2 * gridShift / cellSize;
     int nCols = nRows;
     envMap.resize(nRows);
     for (int i = 0; i < nRows; i++) {
         envMap[i].resize(nCols);
         for (int j = 0; j < nCols; j++) {
-            envMap[i][j] = tracker::TrackerModel::TrackerCellType::EMPTY;
+            envMap[i][j] = TrackerModel::TrackerCellType::EMPTY;
         }
     }
-    std::unique_ptr<tracker::TrackerModel> newModel = std::make_unique<tracker::TrackerModel>(&randGen, vm);
+    std::unique_ptr<TrackerModel> newModel = std::make_unique<TrackerModel>(&randGen, vm);
     newModel->setEnvMap(envMap);
-    tracker::TrackerModel *model = newModel.get();
+    TrackerModel *model = newModel.get();
 
     // Initialise Solver
     solver::Solver solver(&randGen, std::move(newModel));
-    std::unique_ptr<solver::Serializer> serializer(std::make_unique<tracker::TrackerTextSerializer>(&solver));
+    std::unique_ptr<solver::Serializer> serializer(std::make_unique<TrackerTextSerializer>(&solver));
     solver.setSerializer(std::move(serializer));
     solver.initializeEmpty();
 
@@ -190,6 +240,9 @@ int main(int argc, char **argv)
 
     // Initialise Agent
     solver::Agent agent(&solver);
+
+    // Spin once to get octomap
+	ros::spinOnce();
 
 	/******************* Main loop *******************/
 
@@ -207,25 +260,107 @@ int main(int argc, char **argv)
     	}
     	*/
 
+    	// Get current position of robot
+        robotPose = getVrepPose(robotHandle);
+    	Point pos = getCurrPos();
+        GridPosition currCell = getGridPos(pos.x, pos.y); 
+
+    	// Get changes to octomap
+        if (!octomapTree) {
+	    	cout << "Null octomap" << endl;
+	    }
+    	else {
+
+    		// Octomap server is set to a leaf node resolution of 0.125m (set in octomap server settings)
+    		// We want to search at depth that has resolution same size of cell (1m)
+    		// Note that in octomap, each child's volume is 1/8 of parent,
+    		// i.e. resolution doubles each depth layer
+    		int searchDepth = octomapTree->getTreeDepth() - 3;
+    		cout << "Octomap search resolution: " << octomapTree->getNodeSize(searchDepth) << "m" << endl;
+    		octomapTree->updateInnerOccupancy();	// Update occupancy of inner(branch) nodes
+    		solver::StatePool *statePool = solver.getStatePool();
+    		for (int i = 0; i < envMap.size(); i++) {
+    			for (int j = 0; j < envMap[0].size(); j++) {
+    				GridPosition cell(i, j);
+    				Point point = getPoint(cell);
+
+    				octomap::OcTreeNode* node = octomapTree->search(point.x, point.y, 0, searchDepth);
+    				bool occupied = false;
+    				if (node && currCell != cell) {
+	    			   	double occupancy = node->getOccupancy();
+	    			   	if (occupancy > 0.5) {
+	    			   		occupied = true;
+	    			   	}
+	    			}
+
+	    			// Add obstacle change
+	    			if (occupied && envMap[i][j] != TrackerModel::TrackerCellType::WALL) {
+	    				TrackerChange change("Add Obstacles", i, i, j, j);
+	    				model->applyChange(change, statePool);
+	    				envMap[i][j] = TrackerModel::TrackerCellType::WALL;
+	    			}
+
+	    			// Remove obstacle change
+	    			if (!occupied && envMap[i][j] != TrackerModel::TrackerCellType::EMPTY) {
+	    				TrackerChange change("Add Obstacles", i, i, j, j);
+	    				model->applyChange(change, statePool);
+	    				envMap[i][j] = TrackerModel::TrackerCellType::EMPTY;
+	    			}
+	    		}
+	    	}
+		    solver.applyChanges();
+	    }
+
+	    // Draw envMap
+	    model->drawEnvAndPos(cout, currCell);
+
 		// Improve the policy
+		cout << "Impoving policy" << endl;
 		solver::BeliefNode *currentBelief = agent.getCurrentBelief();
 		solver.improvePolicy(currentBelief);
 
+        // Publish belief on target's position. This will be visualised in VREP
+        std::vector<std::vector<float>> targetPosBelief = model->getTargetPosBelief(currentBelief);
+
+        // Find maximum value to normalise proportion
+        float maxProportion = 0;
+        for (std::size_t i = 0; i < targetPosBelief.size(); i++) {
+            for (std::size_t j = 0; j <targetPosBelief[i].size(); j++) {
+                if (targetPosBelief[i][j] > maxProportion) {
+                    maxProportion = targetPosBelief[i][j];
+                }
+            }
+        }
+
+        // Send message. Format is x,y,normalised proportion
+        std::stringstream ss;
+        for (std::size_t i = 0; i < targetPosBelief.size(); i++) {
+            for (std::size_t j = 0; j <targetPosBelief[i].size(); j++) {
+                if (targetPosBelief[i][j] == 0)
+                    continue;
+                Point p = getPoint(GridPosition(i, j));
+                ss << (float) p.x << ",";
+                ss << (float) p.y << ",";
+                ss << targetPosBelief[i][j]/maxProportion << " ";
+            }
+        }
+        std_msgs::String stringMsg;
+        stringMsg.data = ss.str();
+        beliefPub.publish(stringMsg);
+        
+
 		// Apply action
-		std::unique_ptr<solver::Action> action = agent.getPreferredAction();
-		
-        tracker::TrackerAction const &trackerAction =
-            static_cast<tracker::TrackerAction const &>(*action);
-        tracker::ActionType actionType = trackerAction.getActionType();
+		std::unique_ptr<solver::Action> action = agent.getPreferredAction()
+;		
+        TrackerAction const &trackerAction =
+            static_cast<TrackerAction const &>(*action);
+        ActionType actionType = trackerAction.getActionType();
 
         int currYaw = getCurrYaw45();
         int newYaw = currYaw;
-        
-        Point pos = getCurrPos();
-        GridPosition currCell = getGridPos(pos.x, pos.y); 
         GridPosition newCell = currCell;
         switch (actionType) {
-            case tracker::ActionType::FORWARD:
+            case ActionType::FORWARD:
             	cout << "FORWARD" << endl;// DEBUG
                 // Precondition: -180 <= currYaw <= 180
                 if (std::abs(currYaw) < 90)
@@ -237,15 +372,15 @@ int main(int argc, char **argv)
                 else if (currYaw < 0 && currYaw > -180)
                     newCell.i += 1;
                 break;
-            case tracker::ActionType::TURN_RIGHT:
+            case ActionType::TURN_RIGHT:
             	cout << "TURN_RIGHT" << endl;// DEBUG
                 newYaw -= 45;
                 break;
-            case tracker::ActionType::TURN_LEFT:
+            case ActionType::TURN_LEFT:
             	cout << "TURN_LEFT" << endl;// DEBUG
                 newYaw += 45;
                 break;
-            case tracker::ActionType::REVERSE:
+            case ActionType::REVERSE:
             	cout << "REVERSE" << endl;// DEBUG
                 if (std::abs(currYaw) < 90)
                     newCell.j -= 1;
@@ -256,7 +391,7 @@ int main(int argc, char **argv)
                 else if (currYaw < 0 && currYaw > -180)
                     newCell.i -= 1;
                 break;
-            case tracker::ActionType::WAIT:
+            case ActionType::WAIT:
             	cout << "WAIT" << endl;	// DEBUG
                 break;
             default:
@@ -268,17 +403,20 @@ int main(int argc, char **argv)
         ros::Duration(0.5).sleep();
         turnTo(newYaw * M_PI/180);
 
+        if (!ros::ok())
+        	break;
+
 		// Action complete, get resulting observations
+        robotPose = getVrepPose(robotHandle);
 		pos = getCurrPos();
 		currCell = getGridPos(pos.x, pos.y);
 		currYaw = getCurrYaw45();
-        tracker::TrackerObservation observation(currCell, currYaw, seesTarget);
+        TrackerObservation observation(currCell, currYaw, seesTarget);
 
         cout << "i: " << observation.getRobotPos().i << 
             " j: " << observation.getRobotPos().j << 
             " yaw: " << observation.getRobotYaw() << 
             " see target: " << observation.seesTarget() << endl;
-
 
         // Replenish particles
         solver.replenishChild(agent.getCurrentBelief(), *action, observation);
@@ -295,6 +433,8 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+
+namespace tracker {
 
 // Discretises xy to GridPosition
 GridPosition getGridPos(double x, double y) {
@@ -314,10 +454,15 @@ Point getPoint(const GridPosition &g) {
 Point getCurrPos() {
     //float x = robotTf.getOrigin().x();
     //float y = robotTf.getOrigin().y();
-    geometry_msgs::PoseStamped robotPose = getVrepPose(robotHandle);
+    //geometry_msgs::PoseStamped robotPose = getVrepPose(robotHandle);
     float x = robotPose.pose.position.x;
     float y = robotPose.pose.position.y;
     return Point(x, y);
+}
+
+GridPosition getCurrCell() {
+    Point p = getCurrPos();
+    return getGridPos(p.x, p.y);
 }
 
 // Returns current yaw of robot in radians
@@ -329,7 +474,6 @@ double getCurrYaw() {
     double z = q.z();
     double w = q.w();
     */
-    geometry_msgs::PoseStamped robotPose = getVrepPose(robotHandle);
     double x = robotPose.pose.orientation.x;
     double y = robotPose.pose.orientation.y;
     double z = robotPose.pose.orientation.z;
@@ -338,10 +482,13 @@ double getCurrYaw() {
 }
 
 // Returns current yaw in degrees discretised by 45 degree steps
-double getCurrYaw45() {
+int getCurrYaw45() {
 	double degrees = getCurrYaw() * 180/M_PI;
 	int i = round(degrees/45.0);
-	return i * 45;
+	int yaw = i * 45;
+	if (yaw == -180)
+		return 180;
+	return yaw;
 }
 
 // Send motor commands to move towards goal position (in metres) 
@@ -350,6 +497,8 @@ void moveTo(double goalX, double goalY, double timeLimit) {
     ros::Time startTime = ros::Time::now();
     ros::Rate loopRate(10);
     while (ros::ok()) {
+
+        robotPose = getVrepPose(robotHandle);
 
         // Check time limit. Break if passed
         if (ros::Time::now() - startTime > ros::Duration(timeLimit))
@@ -430,6 +579,7 @@ void turnTo(double goalYaw, double timeLimit) {
     ros::Rate loopRate(10);
     while (ros::ok()) {
 
+        robotPose = getVrepPose(robotHandle);
 
         // Check time limit. Break if passed
         if (ros::Time::now() - startTime > ros::Duration(timeLimit))
@@ -500,8 +650,53 @@ geometry_msgs::PoseStamped getVrepPose(long handle) {
     return poseSrv.response.pose;
 }
 
+// Move an object in VREP simulation to a new position
+// Returns true if success
+bool moveVrepObject(std::string name, float x, float y, float z) {
+    long handle = getVrepHandle(name);
+    return moveVrepObject(handle, x, y, z);
+}
+
+// Move an object by handle in VREP simulation to
+// a new position. Returns true if success
+bool moveVrepObject(long handle, float x, float y, float z) {
+    geometry_msgs::Point msg;
+    msg.x = x;
+    msg.y = y;
+    msg.z = z;
+    abt::simRosSetObjectPosition moveSrv;
+    moveSrv.request.handle = handle;
+    moveSrv.request.relativeToObjectHandle = -1;
+    moveSrv.request.position = msg;
+    vrepMoveClient.call(moveSrv);
+    return moveSrv.response.result != -1;
+}
+
+// Uses ROS services to create belief marker in VREP simulation
+// Returns handle to new marker
+/*
+long createVrepMarker(int row, int col) {
+    vrepCopyClient.call(markerCopySrv);
+    abt::simRosSetObjectPosition moveSrv;
+    geometry_msgs::Point msg;
+    GridPosition g;
+    g.i = row;
+    g.j = col;
+    Point p = getPoint(g);
+    long handle = markerCopySrv.response.newObjectHandles[0];
+    moveVrepObject(handle, p.x, p.y, 0.005);
+    return handle;
+}*/
+
 // Callback when ROS message from VREP is received
 // with information on whether target is visible or not
 void visibleCallback(const std_msgs::Int32::ConstPtr& msg) {
     seesTarget = (msg->data == 1); 
 }
+
+void octomapCallback(const octomap_msgs::Octomap::ConstPtr& msg) {
+	octomap::AbstractOcTree* tree = octomap_msgs::fullMsgToMap(*msg);
+	octomapTree = dynamic_cast<octomap::OcTree*>(tree);
+}
+
+} /* namespace tracker */
