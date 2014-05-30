@@ -346,30 +346,49 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
-    if (model_->isTerminal(*sequence->getLastEntry()->getState())) {
+    HistoryEntry *currentEntry = sequence->getLastEntry();
+
+    if (model_->isTerminal(*currentEntry->getState())) {
         debug::show_message("WARNING: Attempted to continue sequence"
                 " from a terminal state.");
         return;
-    }
-    std::unique_ptr<SearchInstance> searchInstance = searchStrategy_->createSearchInstance(
-            sequence, maximumDepth);
-    searchInstance->extendSequence();
-    SearchStatus status = searchInstance->getStatus();
-    if (status == SearchStatus::UNINITIALIZED) {
-        debug::show_message("WARNING: Search algorithm could not initialize!?");
-    }
-    if (status == SearchStatus::ROLLOUT_COMPLETE || status == SearchStatus::HIT_DEPTH_LIMIT) {
-        HistoryEntry *lastEntry = sequence->getLastEntry();
-        State const *lastState = lastEntry->getState();
-        if (model_->isTerminal(*lastState)) {
-            debug::show_message("ERROR: Terminal state, but the search status"
-                    " didn't reflect this!");
-        }
-    } else if (status == SearchStatus::HIT_TERMINAL_STATE) {
-        // Don't do anything for a terminal state.
-    } else {
-        debug::show_message("ERROR: Search failed!?");
+    } else if (currentEntry->getAction() != nullptr) {
+        debug::show_message("ERROR: The last in the sequence already has an action!?");
         return;
+    }
+
+    BeliefNode *currentNode = currentEntry->getAssociatedBeliefNode();
+    SearchStatus status = SearchStatus::UNINITIALIZED;
+    std::unique_ptr<SearchInstance> searchInstance = searchStrategy_->createSearchInstance(sequence,
+            status);
+    while (status == SearchStatus::SEARCHING) {
+        // Step the search forward.
+        Model::StepResult result = searchInstance->getStep();
+        currentEntry->immediateReward_ = result.reward;
+        currentEntry->action_ = result.action->copy();
+        currentEntry->transitionParameters_ = std::move(result.transitionParameters);
+        currentEntry->observation_ = result.observation->copy();
+
+        // Now we make a new history entry!
+        // Add the next state to the pool
+        StateInfo *nextStateInfo = statePool_->createOrGetInfo(*result.nextState);
+        // Step forward in the history, and update the belief node.
+        currentEntry = sequence->addEntry(nextStateInfo);
+
+        BeliefNode *nextNode =  policy_->createOrGetChild(currentNode, *result.action,
+                *result.observation);
+    }
+
+    // If we require a heuristic estimate, calculate it.
+    if (status == SearchStatus::NEED_HEURISTIC) {
+        currentEntry->immediateReward_ = searchInstance->getHeuristicValue();
+        status = SearchStatus::FINISHED;
+    } else if (status == SearchStatus::UNINITIALIZED) {
+        debug::show_message("ERROR: Search algorithm could not initialize!?");
+    } else if (status == SearchStatus::ERROR) {
+        debug::show_message("ERROR: Error in search algorithm!");
+    } else if (status != SearchStatus::FINISHED) {
+        debug::show_message("ERROR: Search failed to complete!");
     }
 }
 
@@ -381,7 +400,7 @@ void Solver::negateSequence(HistorySequence *sequence) {
         updateImmediate((*it)->getAssociatedBeliefNode(), *(*it)->action_, *(*it)->observation_,
                 -(*it)->immediateReward_, -1);
 
-        it++; // Increment
+        it++;            // Increment
 
         // Update the estimate of the next node's value.
         if ((*it)->action_ == nullptr) {
@@ -403,7 +422,7 @@ bool Solver::isBackedUp() const {
 void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
         double deltaTotalQ, long deltaNVisits) {
 
-    // all zero => no update required.
+// all zero => no update required.
     if (deltaTotalQ == 0 && deltaNVisits == 0) {
         return;
     }
@@ -423,7 +442,7 @@ void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNCon
 
     deltaTotalQ += deltaNContinuations * node->getQValue();
 
-    // Apply the discount factor.
+// Apply the discount factor.
     deltaTotalQ *= model_->getDiscountFactor();
 
     ActionMappingEntry *parentActionEntry = node->getParentActionNode()->getParentEntry();
