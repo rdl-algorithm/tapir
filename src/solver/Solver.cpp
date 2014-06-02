@@ -346,50 +346,10 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
-    HistoryEntry *currentEntry = sequence->getLastEntry();
-
-    if (model_->isTerminal(*currentEntry->getState())) {
-        debug::show_message("WARNING: Attempted to continue sequence"
-                " from a terminal state.");
-        return;
-    } else if (currentEntry->getAction() != nullptr) {
-        debug::show_message("ERROR: The last in the sequence already has an action!?");
-        return;
-    }
-
-    BeliefNode *currentNode = currentEntry->getAssociatedBeliefNode();
     SearchStatus status = SearchStatus::UNINITIALIZED;
-    std::unique_ptr<SearchInstance> searchInstance = searchStrategy_->createSearchInstance(sequence,
-            status);
-    while (status == SearchStatus::SEARCHING) {
-        // Step the search forward.
-        Model::StepResult result = searchInstance->getStep();
-        currentEntry->immediateReward_ = result.reward;
-        currentEntry->action_ = result.action->copy();
-        currentEntry->transitionParameters_ = std::move(result.transitionParameters);
-        currentEntry->observation_ = result.observation->copy();
-
-        // Now we make a new history entry!
-        // Add the next state to the pool
-        StateInfo *nextStateInfo = statePool_->createOrGetInfo(*result.nextState);
-        // Step forward in the history, and update the belief node.
-        currentEntry = sequence->addEntry(nextStateInfo);
-
-        BeliefNode *nextNode =  policy_->createOrGetChild(currentNode, *result.action,
-                *result.observation);
-    }
-
-    // If we require a heuristic estimate, calculate it.
-    if (status == SearchStatus::NEED_HEURISTIC) {
-        currentEntry->immediateReward_ = searchInstance->getHeuristicValue();
-        status = SearchStatus::FINISHED;
-    } else if (status == SearchStatus::UNINITIALIZED) {
-        debug::show_message("ERROR: Search algorithm could not initialize!?");
-    } else if (status == SearchStatus::ERROR) {
-        debug::show_message("ERROR: Error in search algorithm!");
-    } else if (status != SearchStatus::FINISHED) {
-        debug::show_message("ERROR: Search failed to complete!");
-    }
+    std::unique_ptr<SearchInstance> searchInstance = searchStrategy_->createSearchInstance(status,
+            sequence, maximumDepth);
+    searchInstance->extendSequence();
 }
 
 /* ------------------ Tree backup methods ------------------- */

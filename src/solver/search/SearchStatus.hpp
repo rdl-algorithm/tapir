@@ -5,6 +5,7 @@ namespace solver {
 
 enum class SearchStatus : long {
     UNINITIALIZED,
+    INITIAL,
     SEARCHING,
     NEED_HEURISTIC,
     FINISHED,

@@ -4,45 +4,68 @@
 #include <memory>
 
 #include "solver/abstract-problem/Action.hpp"
+#include "solver/abstract-problem/Model.hpp"
 
 #include "SearchStatus.hpp"
 
 namespace solver {
 class BeliefNode;
 class HistoricalData;
+class HistoryEntry;
 class HistorySequence;
-class Model;
 class SearchInstance;
 class Solver;
 
 class SearchStrategy {
-  public:
+public:
     SearchStrategy(Solver *solver);
     virtual ~SearchStrategy() = default;
     _NO_COPY_OR_MOVE(SearchStrategy);
 
-    virtual std::unique_ptr<SearchInstance> createSearchInstance(
-            HistorySequence *sequence, SearchStatus &status) = 0;
+    virtual std::unique_ptr<SearchInstance> createSearchInstance(SearchStatus &status,
+            HistorySequence *sequence, long maximumDepth) = 0;
 
     virtual Solver *getSolver() const;
-  private:
+private:
     Solver *solver_;
 };
 
 class SearchInstance {
 public:
-    SearchInstance(SearchStatus &status) = default;
+    SearchInstance(SearchStatus &status);
     virtual ~SearchInstance() = default;
+    _NO_COPY_OR_MOVE(SearchInstance);
 
-    /**
-     * Returns the result of an additional step in the simulation.
-     */
-    virtual Model::StepResult getStep() = 0;
-
-    /** Returns the heuristic value for the current state. */
-    virtual double getHeuristicValue() = 0;
+    virtual void extendSequence() = 0;
 protected:
     SearchStatus &status_;
+};
+
+class StepGenerator {
+public:
+    StepGenerator() = default;
+    virtual ~StepGenerator() = default;
+
+    /** Returns the result of an additional step in the simulation. */
+    virtual Model::StepResult getStep() = 0;
+};
+
+class BasicSearchInstance: public SearchInstance {
+public:
+    BasicSearchInstance(SearchStatus &status, HistorySequence *sequence, long maximumDepth,
+            Solver *solver, std::unique_ptr<StepGenerator> stepGenerator,
+            std::function<double(HistoryEntry const *)> heuristic);
+    virtual ~BasicSearchInstance() = default;
+    _NO_COPY_OR_MOVE(BasicSearchInstance);
+
+    virtual void extendSequence() override;
+private:
+    HistorySequence *sequence_;
+    long maximumDepth_;
+    Solver *solver_;
+    Model *model_;
+    std::unique_ptr<StepGenerator> stepGenerator_;
+    std::function<double(HistoryEntry const *)> heuristic_;
 };
 } /* namespace solver */
 

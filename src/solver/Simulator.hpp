@@ -18,7 +18,7 @@ class Solver;
 class Simulator {
 public:
     Simulator(std::unique_ptr<Model> model, Solver *solver);
-    virtual ~Simulator() = default;
+    ~Simulator() = default;
     _NO_COPY_OR_MOVE(Simulator);
 
     Model *getModel() const;

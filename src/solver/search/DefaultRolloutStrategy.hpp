@@ -9,26 +9,30 @@ class HistoricalData;
 class HistorySequence;
 class Solver;
 
+class DefaultRolloutGenerator : public StepGenerator {
+public:
+    DefaultRolloutGenerator(HistorySequence *sequence, Solver *solver, long maxNSteps);
+    virtual ~DefaultRolloutGenerator() = default;
+
+    virtual Model::StepResult getStep() override;
+
+    private:
+    HistorySequence *sequence_;
+    Solver *solver_;
+    long maxNSteps_;
+    long currentNSteps_;
+
+};
+
 class DefaultRolloutStrategy: public SearchStrategy {
   public:
     DefaultRolloutStrategy(Solver *solver, long maxNSteps);
     virtual ~DefaultRolloutStrategy() = default;
 
-    virtual std::unique_ptr<SearchInstance> createSearchInstance(
+    virtual std::unique_ptr<SearchInstance> createSearchInstance(SearchStatus &status,
             HistorySequence *sequence, long maximumDepth) override;
   private:
     long maxNSteps_;
-};
-
-class DefaultRolloutInstance: public AbstractRolloutInstance {
-  public:
-    DefaultRolloutInstance(long maxNSteps,
-            Solver *solver, HistorySequence *sequence, long maximumDepth);
-
-    virtual SearchStep getSearchStep(HistoricalData *currentData) override;
-  private:
-    long maxNSteps_;
-    long currentNSteps_;
 };
 
 } /* namespace solver */

@@ -15,7 +15,7 @@ class Solver;
 class Agent {
 public:
     Agent(Solver *solver);
-    virtual ~Agent() = default;
+    ~Agent() = default;
     _NO_COPY_OR_MOVE(Agent);
 
     Solver *getSolver() const;

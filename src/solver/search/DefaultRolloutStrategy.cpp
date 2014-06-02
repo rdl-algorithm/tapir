@@ -10,31 +10,40 @@
 
 namespace solver {
 
-DefaultRolloutStrategy::DefaultRolloutStrategy(Solver *solver, long maxNSteps) :
-        SearchStrategy(solver),
-        maxNSteps_(maxNSteps) {
+DefaultRolloutGenerator::DefaultRolloutGenerator(HistorySequence *sequence, Solver *solver,
+        long maxNSteps) :
+            sequence_(sequence),
+            solver_(solver),
+            maxNSteps_(maxNSteps),
+            currentNSteps_(0){
 }
 
-std::unique_ptr<SearchInstance> DefaultRolloutStrategy::createSearchInstance(
-        HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<DefaultRolloutInstance>(
-            maxNSteps_, getSolver(), sequence, maximumDepth);
-}
-
-DefaultRolloutInstance::DefaultRolloutInstance(long maxNSteps, Solver *solver,
-        HistorySequence *sequence, long maximumDepth) :
-        AbstractRolloutInstance(solver, sequence, maximumDepth),
-                maxNSteps_(maxNSteps),
-                currentNSteps_(0) {
-}
-
-SearchStep DefaultRolloutInstance::getSearchStep(HistoricalData *currentData) {
+Model::StepResult DefaultRolloutGenerator::getStep() {
+    Model::StepResult result;
     if (currentNSteps_ >= maxNSteps_) {
-        return SearchStep {SearchStatus::ROLLOUT_COMPLETE, nullptr, false};
+        // No action!
+        return result;
     }
     currentNSteps_++;
-    std::unique_ptr<Action> action = getSolver()->getActionPool()->getDefaultRolloutAction(currentData);
-    return SearchStep {SearchStatus::ROLLING_OUT, std::move(action), false};
+    HistoricalData *currentData = sequence_->getLastEntry()->getAssociatedBeliefNode()->getHistoricalData();
+    result.action = solver_->getActionPool()->getDefaultRolloutAction(currentData);
+    return result.action;
+}
+
+DefaultRolloutStrategy::DefaultRolloutStrategy(Solver *solver, long maxNSteps) :
+            SearchStrategy(solver),
+            maxNSteps_(maxNSteps) {
+}
+
+std::function<
+
+std::unique_ptr<SearchInstance> DefaultRolloutStrategy::createSearchInstance(SearchStatus &status,
+                    HistorySequence *sequence, long maximumDepth) {
+    std::unique_ptr<DefaultRolloutGenerator> generator = std::make_unique<DefaultRolloutGenerator>(
+            sequence, getSolver(), maxNSteps_);
+    return std::make_unique<BasicSearchInstance>(status, sequence, maximumDepth, getSolver(),
+            std::move(generator), )
+
 }
 
 } /* namespace solver */
