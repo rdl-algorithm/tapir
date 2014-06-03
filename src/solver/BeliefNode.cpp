@@ -154,7 +154,7 @@ void BeliefNode::removeCachedValue(BaseCachedValue *value) {
 void BeliefNode::setQEstimator(CachedValue<double> *qEstimator) {
     qEstimator_ = qEstimator;
 }
-void BeliefNode::setActionChooser(ActionFunction actionChooser) {
+void BeliefNode::setActionChooser(std::function<std::unique_ptr<Action>(BeliefNode const *)> actionChooser) {
     actionChooser_ = actionChooser;
 }
 

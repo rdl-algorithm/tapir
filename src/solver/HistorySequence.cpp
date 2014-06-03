@@ -46,10 +46,10 @@ HistoryEntry *HistorySequence::getEntry(long entryId) const {
     return entrySequence_[entryId].get();
 }
 HistoryEntry *HistorySequence::getFirstEntry() const {
-    return entrySequence_.begin()->get();
+    return entrySequence_.front().get();
 }
 HistoryEntry *HistorySequence::getLastEntry() const {
-    return entrySequence_.rbegin()->get();
+    return entrySequence_.back().get();
 }
 std::vector<State const *> HistorySequence::getStates() const {
     std::vector<State const *> states;

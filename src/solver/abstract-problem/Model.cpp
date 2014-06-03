@@ -29,8 +29,8 @@
 #include "solver/changes/HistoryCorrector.hpp"
 
 #include "solver/search/search_interface.hpp"
-#include "solver/search/UcbSelectionStrategy.hpp"
-#include "solver/search/DefaultRolloutStrategy.hpp"
+#include "solver/search/ucb_search.hpp"
+#include "solver/search/default_rollout.hpp"
 
 namespace solver {
 /* ----------------------- Basic getters  ----------------------- */

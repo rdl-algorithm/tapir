@@ -49,7 +49,9 @@ std::unique_ptr<Action> ucb_action(BeliefNode const *node, double explorationCoe
 
     ActionMapping *mapping = node->getMapping();
     for (ActionMappingEntry const *entry : mapping->getVisitedEntries()) {
-        double tmpValue = entry->getMeanQValue() + explorationCoefficient * std::sqrt(
+        double tmpValue = entry->getMeanQValue()
+                + explorationCoefficient
+                        * std::sqrt(
                                 std::log(mapping->getTotalVisitCount()) / entry->getVisitCount());
         if (!std::isfinite(tmpValue)) {
             debug::show_message("ERROR: Infinite/NaN value!?");
@@ -65,7 +67,7 @@ std::unique_ptr<Action> ucb_action(BeliefNode const *node, double explorationCoe
 
 ActionChoosingFunction::ActionChoosingFunction(
         std::function<std::unique_ptr<Action>(BeliefNode const *)> function) :
-        function_(function) {
+            function_(function) {
 }
 
 void ActionChoosingFunction::setActionChooser(Solver */*solver*/, BeliefNode *node) {

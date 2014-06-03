@@ -1,4 +1,4 @@
-#include "MultipleStrategiesExp3.hpp"
+#include "exp3.hpp"
 
 #include "solver/abstract-problem/Model.hpp"
 
@@ -11,10 +11,10 @@ namespace solver {
 MultipleStrategiesExp3::MultipleStrategiesExp3(Solver *solver,
         double strategyExplorationCoefficient,
         std::vector<std::unique_ptr<SearchStrategy>> strategies) :
-            SearchStrategy(solver),
+            solver_(solver),
+            model_(solver_->getModel()),
             strategyExplorationCoefficient_(strategyExplorationCoefficient),
-            strategies_(),
-            model_(getSolver()->getModel()) {
+            strategies_() {
     for (unsigned long index = 0; index < strategies.size(); index++) {
         StrategyInfo info;
         info.strategyNo = index;
@@ -25,10 +25,10 @@ MultipleStrategiesExp3::MultipleStrategiesExp3(Solver *solver,
     }
 }
 
-std::unique_ptr<SearchInstance> MultipleStrategiesExp3::createSearchInstance(
+std::unique_ptr<SearchInstance> MultipleStrategiesExp3::createSearchInstance(SearchStatus &status,
         HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<MultipleStrategiesExp3Instance>(this, getSolver(), sequence,
-            maximumDepth);
+    return std::make_unique<MultipleStrategiesExp3Instance>(status, sequence, maximumDepth, solver_,
+            this);
 }
 
 StrategyInfo *MultipleStrategiesExp3::sampleAStrategy(
@@ -75,17 +75,14 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo, double timeU
     }
 }
 
-MultipleStrategiesExp3Instance::MultipleStrategiesExp3Instance(MultipleStrategiesExp3 *parent,
-        Solver *solver, HistorySequence *sequence, long maximumDepth) :
-            parent_(parent),
-            solver_(solver),
+MultipleStrategiesExp3Instance::MultipleStrategiesExp3Instance(SearchStatus &status,
+        HistorySequence *sequence, long maximumDepth, Solver *solver,
+        MultipleStrategiesExp3 *parent) :
+            SearchInstance(status),
             sequence_(sequence),
             maximumDepth_(maximumDepth),
-            status_(SearchStatus::UNINITIALIZED) {
-}
-
-SearchStatus MultipleStrategiesExp3Instance::getStatus() const {
-    return status_;
+            solver_(solver),
+            parent_(parent) {
 }
 
 void MultipleStrategiesExp3Instance::extendSequence() {

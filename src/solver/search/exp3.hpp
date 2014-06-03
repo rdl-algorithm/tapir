@@ -23,42 +23,39 @@ struct StrategyInfo {
 
 class MultipleStrategiesExp3: public SearchStrategy {
     friend class MultipleStrategiesExp3Instance;
-  public:
-    MultipleStrategiesExp3(Solver *solver,
-            double strategyExplorationCoefficient,
+public:
+    MultipleStrategiesExp3(Solver *solver, double strategyExplorationCoefficient,
             std::vector<std::unique_ptr<SearchStrategy>> strategies);
     virtual ~MultipleStrategiesExp3() = default;
     _NO_COPY_OR_MOVE(MultipleStrategiesExp3);
 
-    virtual std::unique_ptr<SearchInstance> createSearchInstance(
-           HistorySequence *sequence, long maximumDepth) override;
+    virtual std::unique_ptr<SearchInstance> createSearchInstance(SearchStatus &status,
+            HistorySequence *sequence, long maximumDepth) override;
 
-    virtual StrategyInfo *sampleAStrategy(
-            std::unordered_set<long> strategiesToExclude = std::unordered_set<long> {});
-    virtual void updateStrategyWeights(long strategyNo, double timeUsed,
-            double deltaRootQValue);
-  private:
+    virtual StrategyInfo *sampleAStrategy(std::unordered_set<long> strategiesToExclude =
+            std::unordered_set<long> { });
+    virtual void updateStrategyWeights(long strategyNo, double timeUsed, double deltaRootQValue);
+private:
+    Solver *solver_;
+    Model *model_;
     double strategyExplorationCoefficient_;
     std::vector<StrategyInfo> strategies_;
-    Model *model_;
 };
 
 class MultipleStrategiesExp3Instance: public SearchInstance {
-  public:
-    MultipleStrategiesExp3Instance(MultipleStrategiesExp3 *parent,
-            Solver *solver, HistorySequence *sequence, long maximumDepth);
+public:
+    MultipleStrategiesExp3Instance(SearchStatus &status, HistorySequence *sequence,
+            long maximumDepth, Solver *solver, MultipleStrategiesExp3 *parent);
     virtual ~MultipleStrategiesExp3Instance() = default;
     _NO_COPY_OR_MOVE(MultipleStrategiesExp3Instance);
 
-    virtual SearchStatus getStatus() const override;
     virtual void extendSequence() override;
-  private:
-    MultipleStrategiesExp3 *parent_;
-    Solver *solver_;
+private:
     HistorySequence *sequence_;
     long maximumDepth_;
 
-    SearchStatus status_;
+    Solver *solver_;
+    MultipleStrategiesExp3 *parent_;
 };
 
 } /* namespace solver */

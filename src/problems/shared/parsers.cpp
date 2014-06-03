@@ -11,10 +11,10 @@
 #include "solver/belief-q-estimators/estimators.hpp"
 
 #include "solver/search/search_interface.hpp"
-#include "solver/search/MultipleStrategiesExp3.hpp"
-#include "solver/search/NnRolloutStrategy.hpp"
-#include "solver/search/DefaultRolloutStrategy.hpp"
-#include "solver/search/UcbSelectionStrategy.hpp"
+#include "solver/search/ucb_search.hpp"
+#include "solver/search/default_rollout.hpp"
+#include "solver/search/nn_rollout.hpp"
+#include "solver/search/exp3.hpp"
 
 std::pair<std::string, std::vector<std::string>> split_function(
         std::string text) {
@@ -64,8 +64,9 @@ std::unique_ptr<solver::SearchStrategy> UcbSearchParser::parse(
         std::vector<std::string> args) {
     double explorationCoefficient;
     std::istringstream(args[0]) >> explorationCoefficient;
-    return std::make_unique<solver::UcbSelectionStrategy>(solver,
-            explorationCoefficient);
+    return nullptr;
+//    return std::make_unique<solver::UcbSelectionStrategy>(solver,
+//            explorationCoefficient);
 }
 
 std::unique_ptr<solver::SearchStrategy> NnRolloutParser::parse(
@@ -76,8 +77,9 @@ std::unique_ptr<solver::SearchStrategy> NnRolloutParser::parse(
     double maxNnDistance;
     std::istringstream(args[0]) >> maxNnComparisons;
     std::istringstream(args[1]) >> maxNnDistance;
-    return std::make_unique<solver::NnRolloutStrategy>(solver, maxNnComparisons,
-            maxNnDistance);
+    return nullptr;
+//    return std::make_unique<solver::NnRolloutStrategy>(solver, maxNnComparisons,
+//            maxNnDistance);
 }
 
 std::unique_ptr<solver::SearchStrategy> DefaultRolloutParser::parse(
@@ -86,7 +88,8 @@ std::unique_ptr<solver::SearchStrategy> DefaultRolloutParser::parse(
         std::vector<std::string> args) {
     long maxNSteps;
     std::istringstream(args[0]) >> maxNSteps;
-    return std::make_unique<solver::DefaultRolloutStrategy>(solver, maxNSteps);
+    return nullptr;
+//    return std::make_unique<solver::DefaultRolloutStrategy>(solver, maxNSteps);
 }
 
 std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(
@@ -101,8 +104,9 @@ std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(
     for (; it != args.end(); it++) {
         strategies.push_back(allParser->parse(solver, *it));
     }
-    return std::make_unique<solver::MultipleStrategiesExp3>(solver,
-            strategyExplorationCoefficient, std::move(strategies));
+    return nullptr;
+//    return std::make_unique<solver::MultipleStrategiesExp3>(solver,
+//            strategyExplorationCoefficient, std::move(strategies));
 }
 
 std::unique_ptr<solver::EstimationStrategy> AverageEstimateParser::parse(solver::Solver */*solver*/,

@@ -1,5 +1,7 @@
 #include "search_interface.hpp"
 
+#include <memory>
+
 #include "solver/BeliefNode.hpp"
 #include "solver/BeliefTree.hpp"
 #include "solver/HistoryEntry.hpp"
@@ -10,35 +12,55 @@
 #include "SearchStatus.hpp"
 
 namespace solver {
-/* ----------------------- SearchStrategy ------------------------- */
-SearchStrategy::SearchStrategy(Solver *solver) :
-            solver_(solver) {
-}
-
-Solver *SearchStrategy::getSolver() const {
-    return solver_;
-}
-
-/* ----------------------- SearchInstance ------------------------- */
+/* ------------------- SearchInstance --------------------- */
 SearchInstance::SearchInstance(SearchStatus &status) :
-            status_(status) {
+    status_(status) {
 }
 
-/* ------------------- BasicSearchInstance --------------------- */
-BasicSearchInstance::BasicSearchInstance(SearchStatus &status, HistorySequence *sequence,
-        long maximumDepth, Solver *solver, std::unique_ptr<StepGenerator> stepGenerator,
+/* ------------------- StepGenerator --------------------- */
+StepGenerator::StepGenerator(SearchStatus &status) :
+    status_(status) {
+}
+
+/* ------------------- StagedSearchStrategy --------------------- */
+StagedSearchStrategy::StagedSearchStrategy(Solver *solver,
+        std::vector<std::unique_ptr<StepGeneratorFactory>> generatorFactories,
         std::function<double(HistoryEntry const *)> heuristic) :
-            SearchInstance(status),
+            solver_(solver),
+            generatorFactories_(generatorFactories),
+            heuristic_(heuristic) {
+}
+
+std::unique_ptr<SearchInstance> StagedSearchStrategy::createSearchInstance(SearchStatus &status,
+        HistorySequence *sequence, long maximumDepth) {
+    return std::make_unique<StagedSearchInstance>(status, sequence, maximumDepth, solver_,
+            generatorFactories_, heuristic_);
+}
+
+/* ------------------- StagedSearchInstance --------------------- */
+StagedSearchInstance::StagedSearchInstance(SearchStatus &status,
+        HistorySequence *sequence, long maximumDepth, Solver *solver,
+        std::vector<std::unique_ptr<StepGeneratorFactory>> const &generators,
+        std::function<double(HistoryEntry const *)> heuristic) :
+                SearchInstance(status),
             sequence_(sequence),
             maximumDepth_(maximumDepth),
             solver_(solver),
             model_(solver_->getModel()),
-            stepGenerator_(stepGenerator),
+            generators_(generators),
+            iterator_(generators.cbegin()),
+            generator_(nullptr),
             heuristic_(heuristic) {
-    status_ = SearchStatus::INITIAL;
+    generator_ = (*iterator_)->createGenerator(status_, sequence_);
+    iterator_++;
 }
 
-void BasicSearchInstance::extendSequence() {
+void StagedSearchInstance::extendSequence() {
+    if (status_ == SearchStatus::UNINITIALIZED) {
+        debug::show_message("ERROR: Search failed to initialize!?");
+        return;
+    }
+
     HistoryEntry *currentEntry = sequence_->getLastEntry();
     if (model_->isTerminal(*currentEntry->getState())) {
         debug::show_message("WARNING: Attempted to continue sequence"
@@ -51,8 +73,9 @@ void BasicSearchInstance::extendSequence() {
 
     BeliefNode *currentNode = currentEntry->getAssociatedBeliefNode();
 
+    std::vector<std::unique_ptr<StepGenerator>> generators;
+
     bool isFirst = true;
-    status_ = SearchStatus::SEARCHING;
     while (true) {
         if (currentNode->getDepth() >= maximumDepth_) {
             status_ = SearchStatus::NEED_HEURISTIC;
@@ -60,11 +83,22 @@ void BasicSearchInstance::extendSequence() {
         }
 
         // Step the search forward.
-        Model::StepResult result = stepGenerator_->getStep();
-
+        Model::StepResult result = generator_->getStep();
+        // Null action => continue to the next generator.
         if (result.action == nullptr) {
-            status_ = SearchStatus::NEED_HEURISTIC;
-            break;
+            // Not searching => done.
+            if (status_ != SearchStatus::SEARCHING) {
+                break;
+            }
+            // No more generators left => done.
+            if (iterator_ == generators_.cend()) {
+                status_ = SearchStatus::NEED_HEURISTIC;
+                break;
+            }
+            // Get a new generator and keep searching.
+            generator_ = (*iterator_)->createGenerator(status_, sequence_);
+            iterator_++;
+            continue;
         }
 
         if (isFirst) {

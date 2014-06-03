@@ -52,8 +52,7 @@ public:
     }
 
     virtual ~ModelWithProgramOptions() = default;
-    _NO_COPY_OR_MOVE(ModelWithProgramOptions)
-    ;
+    _NO_COPY_OR_MOVE(ModelWithProgramOptions);
 
 // Simple getters
     virtual RandomGenerator *getRandomGenerator() override {
@@ -90,11 +89,11 @@ public:
             std::unique_ptr<Parser<std::unique_ptr<solver::EstimationStrategy>> > parser) {
         estimationParsers_.addParser(name, std::move(parser));
     }
-
     virtual void registerActionChoosingParser(std::string name,
             std::unique_ptr<Parser<std::unique_ptr<solver::ActionChoosingStrategy>> > parser) {
         actionChoosingParsers_.addParser(name, std::move(parser));
     }
+
     virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(solver::Solver *solver)
             override {
         return searchParsers_.parse(solver, selectionStrategyString_);
