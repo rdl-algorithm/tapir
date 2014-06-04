@@ -18,6 +18,11 @@ include_directories(${OCTOMAP_INCLUDE_DIRS} )
 link_libraries(${OCTOMAP_LIBRARIES})
 link_directories(${OCTOMAP_LIBRARY_DIRS})
 
+add_message_files(
+  FILES
+  VrepInfo.msg
+)
+
 add_service_files(
   FILES
   simRosCopyPasteObjects.srv
@@ -38,7 +43,7 @@ generate_messages(
 catkin_package(
 	INCLUDE_DIRS src
 	LIBRARIES ${PROJECT_NAME}
-	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs pcl pcl_ros tf)
+	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs pcl pcl_ros tf message_runtime)
 
 include_directories(src ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
@@ -110,5 +115,5 @@ target_link_libraries(AbtSolver spatialindex ${Boost_LIBRARIES} ${catkin_LIBRARI
 add_executable(tracker_node src/problems/tracker/TrackerRos.cpp)
 target_link_libraries(tracker_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTracker AbtSolver )
 
-add_executable(tag_node src/problems/tag/TagRos.cpp)
+add_executable(tag_node src/problems/tag/TagVrep.cpp)
 target_link_libraries(tag_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTag AbtSolver )

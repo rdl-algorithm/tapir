@@ -1,12 +1,16 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <string>
+#include <string>                   // For string, stof
+#include <sstream>
+#include <vector>
+#include <memory>                   // For unique_ptr
 
 #include <ros/ros.h>
 #include <ros/time.h>
-#include <ros/package.h>  // For finding package path
+#include <ros/package.h>            // For finding package path
 #include <std_msgs/Float64.h>
+#include <std_msgs/String.h>
 #include <geometry_msgs/Point.h>
 
 #include "VrepHelper.hpp"
@@ -26,13 +30,20 @@ using std::cout;
 using std::endl;
 namespace po = boost::program_options;
 
+using namespace tag;
+
 // ROS variables
 ros::Publisher robotPub;
 ros::Publisher humanPub;
+ros::Publisher envMapPub;
+ros::Publisher beliefPub;
 
 VrepHelper vrepHelper;
+std::vector<std::unique_ptr<solver::ModelChange>> changes;
 
-long obstacleHandle;
+double cellSize = 1;  // metres
+
+namespace tag {
 
 struct Point {
     double x;
@@ -55,10 +66,15 @@ struct Point {
     }
 };
 
+} /* namespace tag */
+
 /************** Function prototypes ****************/
 
 // Get xy from GridPosition
-Point gridToPoint(GridPosition g);
+Point gridToPoint(const GridPosition& g);
+
+// Get GridPosition from xy
+GridPosition pointToGrid(const Point& p);
 
 // Publish desired robot goal position on ROS topic
 void publishRobotGoal(double goalX, double goalY);
@@ -66,9 +82,14 @@ void publishRobotGoal(double goalX, double goalY);
 // Publish desired human goal position on ROS topic
 void publishHumanGoal(double goalX, double goalY);
 
-// Uses ROS services to create obstacle in VREP simulation
-void createVrepObstacle(int row, int col);
+// Publish environment map as string
+void publishEnvMap(std::vector<std::vector<TagModel::TagCellType>> const &envMap);
 
+// Publish belief about target position on VREP
+void publishBelief(std::vector<std::vector<float>> proportions);
+
+// For receiving info on which cells in VREP are selected
+void selectCallback(const std_msgs::String::ConstPtr& msg);
 
 /********************* Main ************************/
 
@@ -82,10 +103,13 @@ int main(int argc, char **argv)
 	ros::Rate loopRate(1);	// Hz
     robotPub = node.advertise<geometry_msgs::Point>("robot_goal", 1);
     humanPub = node.advertise<geometry_msgs::Point>("human_goal", 1);
+    envMapPub = node.advertise<std_msgs::String>("map", 1);
+    beliefPub = node.advertise<std_msgs::String>("target_pos_belief", 1);
+    ros::Subscriber selectSub = node.subscribe("selected_cells", 1, selectCallback);
 
 	/**************** ABT init ***********************/
 
-	tag::TagOptions tag_options;
+	TagOptions tag_options;
 	ProgramOptions *options = &tag_options;
 
 	po::options_description visibleOptions;
@@ -126,12 +150,12 @@ int main(int argc, char **argv)
     randGen.discard(10);
 
     // Initialise TagModel
-    std::unique_ptr<tag::TagModel> newModel = std::make_unique<tag::TagModel>(&randGen, vm);
-    tag::TagModel *model = newModel.get();
+    std::unique_ptr<TagModel> newModel = std::make_unique<TagModel>(&randGen, vm);
+    TagModel *model = newModel.get();
 
     // Initialise Solver
     solver::Solver solver(&randGen, std::move(newModel));
-    std::unique_ptr<solver::Serializer> serializer(std::make_unique<tag::TagTextSerializer>(&solver));
+    std::unique_ptr<solver::Serializer> serializer(std::make_unique<TagTextSerializer>(&solver));
     solver.setSerializer(std::move(serializer));
     solver.initializeEmpty();
 
@@ -143,8 +167,8 @@ int main(int argc, char **argv)
     totT = abt::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 
-    // Initialise ABT Simulator (not VREP!!)
-    std::unique_ptr<tag::TagModel> simulatorModel = std::make_unique<tag::TagModel>(&randGen, vm);
+    // Initialise ABT's Simulator (not VREP!!)
+    std::unique_ptr<TagModel> simulatorModel = std::make_unique<TagModel>(&randGen, vm);
     solver::Simulator simulator(std::move(simulatorModel), &solver);
     //if (hasChanges) {
     //    simulator.loadChangeSequence(changesPath);
@@ -156,26 +180,11 @@ int main(int argc, char **argv)
 
     vrepHelper.setRosNode(&node);
 
-    // Generate VREP obstacles through ROS service
-    // First stop then start VREP simulation to reset obstacles
-    while (!vrepHelper.stop() && ros::ok()) {
-    	cout << "Waiting for VREP to be ready..." << endl;
-    	loopRate.sleep();
-    }
-
-    obstacleHandle = vrepHelper.getHandle("Obstacle");
-    while (obstacleHandle == -1 && ros::ok()) {
-        cout << "Failed to get handle, is VREP scenario tag.ttt loaded?" << endl;
-        obstacleHandle = vrepHelper.getHandle("Obstacle");
-        ros::Duration(1).sleep();
-    }
-    ros::Duration(1.5).sleep();
-    vrepHelper.start();
-    ros::Duration(1.5).sleep();
+    // TODO AUTO LOAD, check for sim status before and during run
 
     // Move robot and human to starting positions in VREP
     solver::State const &startState =  *(simulator.getCurrentState());
-    tag::TagState const &startTagState = static_cast<tag::TagState const &>(startState);
+    TagState const &startTagState = static_cast<TagState const &>(startState);
     Point startRobotPos = gridToPoint(startTagState.getRobotPosition());
     Point startHumanPos = gridToPoint(startTagState.getOpponentPosition());
     vrepHelper.moveObject("Bill", startHumanPos.x, startHumanPos.y, 0);
@@ -183,38 +192,34 @@ int main(int argc, char **argv)
     vrepHelper.moveObject("Robot", startRobotPos.x, startRobotPos.y, 0.25);
     vrepHelper.moveObject("Robot_goalDummy", startRobotPos.x, startRobotPos.y, 0);
 
-    cout <<  "Creating VREP obstacles..." << endl;
-    
-    // Generate walls from envMap
-    std::vector<std::vector<tag::TagModel::TagCellType>> envMap = model->getEnvMap();
-    int numRows = envMap.size();
-    int numCols = envMap[0].size();
-    for (int row = 0; row < numRows; row++) {
-        for (int col = 0; col < numCols; col++) {
-            if (envMap[row][col] != tag::TagModel::TagCellType::WALL) 
-                continue;
-            createVrepObstacle(row, col);
-        }
-    }
-
-    // Generate walls around map
-    for (int row = -1; row < numRows + 1; row++) {
-        for (int col = -1; col < numCols + 1; col++) {
-            if (row == -1 || row == envMap.size() || 
-                col == -1 || col == envMap[row].size()) {
-                createVrepObstacle(row, col);
-            }
-        }
-    }
-
 	/******************* Main loop *******************/
 
 	long stepNumber = 0;
-	while (ros::ok())
-	{
+    bool wasPaused = false;
+	while (ros::ok()) {
+
+        // Don't loop if VREP is paused
+        if (!vrepHelper.isRunning()) {
+            if (!wasPaused) {
+                ROS_WARN_STREAM("VREP tag scenario is not running");
+                wasPaused = true;
+            }
+            continue;
+        } else {
+            wasPaused = false;
+        }
+
+        // Process any changes (i.e. cell type changing between WALL and EMPTY)
+        // based on user input
+        simulator.handleChanges(changes);
+        changes.clear();
+
+		// Step simulation
         bool finished = !simulator.stepSimulation();
+
+        // Publish new robot and human positions
         solver::State const &state =  *(simulator.getCurrentState());
-      	tag::TagState const &tagState = static_cast<tag::TagState const &>(state);
+      	TagState const &tagState = static_cast<TagState const &>(state);
         Point robotPos = gridToPoint(tagState.getRobotPosition());
         Point humanPos = gridToPoint(tagState.getOpponentPosition());
         publishRobotGoal(robotPos.x, robotPos.y);
@@ -225,6 +230,13 @@ int main(int argc, char **argv)
             break;
         }
 		
+        // Publish environment map as string
+        publishEnvMap(model->getEnvMap());
+
+        // Publish belief about target position on VREP
+        solver::BeliefNode *currentBelief = simulator.getAgent()->getCurrentBelief();
+        publishBelief(model->getBeliefProportions(currentBelief));
+
 		stepNumber++;
 		ros::spinOnce();
 		loopRate.sleep();
@@ -234,11 +246,17 @@ int main(int argc, char **argv)
 }
 
 // Get xy from GridPosition
-Point gridToPoint(GridPosition g) {
-	double cellSize = 1;  // metres
+Point gridToPoint(const GridPosition&g) {
 	double x = g.j * cellSize;
 	double y = -g.i * cellSize;
 	return Point(x, y);
+}
+
+// Get GridPosition from xy
+GridPosition pointToGrid(const Point& p) {
+    int j = p.x / cellSize;
+    int i = -p.y / cellSize;
+    return GridPosition(i, j);
 }
 
 // Publish desired human goal position on ROS topic
@@ -259,9 +277,87 @@ void publishHumanGoal(double goalX, double goalY) {
 	humanPub.publish(msg);
 }
 
-// Uses ROS services to create obstacle in VREP simulation
-void createVrepObstacle(int row, int col) {
-    long newHandle = vrepHelper.copyObject(obstacleHandle);
-    Point p = gridToPoint(GridPosition(row, col));
-    vrepHelper.moveObject(newHandle, p.x, p.y, 0.5);
+// Publish environment map as string
+void publishEnvMap(std::vector<std::vector<TagModel::TagCellType>> const &envMap) {
+
+    // Publish environment map as string: x, y, WALL (0) or EMPTY (1)
+    std::stringstream ss;
+    for (std::size_t i = 0; i < envMap.size(); i++) {
+        for (std::size_t j = 0; j < envMap[i].size(); j++) {
+            Point p = gridToPoint(GridPosition(i, j));
+            ss << (float) p.x << ",";
+            ss << (float) p.y << ",";
+            ss << envMap[i][j] << " ";
+        }
+    }
+    std_msgs::String stringMsg;
+    stringMsg.data = ss.str();
+    envMapPub.publish(stringMsg);
+}
+
+// For receiving info on which cells in VREP are selected
+void selectCallback(const std_msgs::String::ConstPtr& msg) {
+
+    // String message format is x,y,selected cell type
+    std::stringstream ss(msg->data);
+    std::string line;
+    changes.clear();
+    while (std::getline(ss, line, '\n')) {
+
+        // Extract info from string message
+        std::stringstream ss2(line);
+        std::string strX, strY, strType;
+        std::getline(ss2, strX, ',');
+        std::getline(ss2, strY, ',');
+        std::getline(ss2, strType, ',');
+        float x = std::stof(strX);
+        float y = std::stof(strY);
+
+        std::cout << "STRYTPE" << strType << endl;
+
+        // Define TagChange (see TagModel.hpp)
+        GridPosition g = pointToGrid(Point(x, y));
+        std::unique_ptr<TagChange> change = std::make_unique<TagChange>();
+        change->i0 = g.i;
+        change->i1 = g.i;
+        change->j0 = g.j;
+        change->j1 = g.j;
+        if (strType == "-1") {
+            change->changeType = "Remove Obstacles";
+        } else {
+            change->changeType = "Add Obstacles";
+        }
+        changes.push_back(std::move(change));
+    }
+}
+
+// Publish belief about target position on VREP
+void publishBelief(std::vector<std::vector<float>> proportions) {
+
+    // Find maximum value to normalise proportion
+    float maxProportion = 0;
+    for (std::size_t i = 0; i < proportions.size(); i++) {
+        for (std::size_t j = 0; j <proportions[i].size(); j++) {
+            if (proportions[i][j] > maxProportion) {
+                maxProportion = proportions[i][j];
+            }
+        }
+    }
+
+    // Send message. Format is x,y,normalised proportion
+    std::stringstream ss;
+    for (std::size_t i = 0; i < proportions.size(); i++) {
+        for (std::size_t j = 0; j <proportions[i].size(); j++) {
+            if (proportions[i][j] == 0) {
+                continue;
+            }
+            Point p = gridToPoint(GridPosition(i, j));
+            ss << (float) p.x << ",";
+            ss << (float) p.y << ",";
+            ss << proportions[i][j]/maxProportion << " ";
+        }
+    }
+    std_msgs::String stringMsg;
+    stringMsg.data = ss.str();
+    beliefPub.publish(stringMsg);
 }

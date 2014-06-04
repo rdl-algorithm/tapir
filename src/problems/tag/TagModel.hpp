@@ -66,10 +66,19 @@ class TagModel: virtual public ModelWithProgramOptions,
         WALL = -1
     };
 
-    // Added by Josh
+    /******************** Added by Josh **************************/
+
+    /** Get 2D vector representing the current environment map */
     inline const std::vector<std::vector<TagCellType>>& getEnvMap() {
         return envMap_;
     }
+
+    /**
+     * Returns proportion of belief particles about the target's
+     * position for each grid position in the map
+     */
+    std::vector<std::vector<float>> getBeliefProportions(solver::BeliefNode const *belief);
+    
 
     std::string getName() override {
         return "Tag";

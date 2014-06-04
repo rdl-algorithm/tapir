@@ -547,4 +547,23 @@ std::vector<std::unique_ptr<solver::DiscretizedPoint>> TagModel::getAllActionsIn
     }
     return allActions;
 }
+
+std::vector<std::vector<float>> TagModel::getBeliefProportions(solver::BeliefNode const *belief) {
+    std::vector<solver::State const *> particles = belief->getStates();
+    std::vector<std::vector<long>> particleCounts(nRows_,  std::vector<long>(nCols_));
+    for (solver::State const *particle : particles) {
+        GridPosition targetPos = static_cast<TagState const &>(*particle).getOpponentPosition();
+        particleCounts[targetPos.i][targetPos.j] += 1;
+    }
+
+    std::vector<std::vector<float>> result;
+    for (std::size_t i = 0; i < envMap_.size(); i++) {
+        result.push_back(std::vector<float>());
+        for (std::size_t j = 0; j < envMap_[0].size(); j++) {
+            result[i].push_back((float) particleCounts[i][j]/particles.size());
+        }
+    }
+    return result;
+}
+
 } /* namespace tag */

@@ -15,17 +15,15 @@
 #include "abt/simRosStartSimulation.h"
 #include "abt/simRosStopSimulation.h"
 
-VrepHelper::VrepHelper() {
+VrepHelper::VrepHelper():
+    running_(false)
+{
 }
 
 VrepHelper::VrepHelper(ros::NodeHandle *node):
-    node_(node)
+    running_(false)
 {
-    startClient_ = node_->serviceClient<abt::simRosStartSimulation>("vrep/simRosStartSimulation");
-    stopClient_ = node_->serviceClient<abt::simRosStopSimulation>("vrep/simRosStopSimulation");
-    copyClient_ = node_->serviceClient<abt::simRosCopyPasteObjects>("vrep/simRosCopyPasteObjects");
-    handleClient_ = node_->serviceClient<abt::simRosGetObjectHandle>("vrep/simRosGetObjectHandle");
-    moveClient_ = node_->serviceClient<abt::simRosSetObjectPosition>("vrep/simRosSetObjectPosition");
+    setRosNode(node);
 }
 
 void VrepHelper::setRosNode(ros::NodeHandle *node) {
@@ -35,6 +33,7 @@ void VrepHelper::setRosNode(ros::NodeHandle *node) {
     copyClient_ = node_->serviceClient<abt::simRosCopyPasteObjects>("vrep/simRosCopyPasteObjects");
     handleClient_ = node_->serviceClient<abt::simRosGetObjectHandle>("vrep/simRosGetObjectHandle");
     moveClient_ = node_->serviceClient<abt::simRosSetObjectPosition>("vrep/simRosSetObjectPosition");
+    infoSub_ = node_->subscribe("/vrep/info", 1, &VrepHelper::infoCallback, this);
 }
 
 /**
@@ -100,3 +99,20 @@ long VrepHelper::copyObject(long handle) {
     copyClient_.call(copySrv);
     return copySrv.response.newObjectHandles[0];
 }
+
+/** Returns true iff VREP simulation is not stopped */
+bool VrepHelper::isRunning() {
+    ros::spinOnce();
+    return running_;
+}
+
+/** Callback for /vrep/info topic */
+void VrepHelper::infoCallback(const abt::VrepInfo::ConstPtr& msg) {
+
+    // Set running_ true iff simulation is not stopped/paused
+    // bit0 set: simulation not stopped
+    // bit1 set: simulation paused
+    int status = msg->simulatorState.data;
+    running_ = status & 0b1 == 1 && status & 0b10 == 2;
+}
+

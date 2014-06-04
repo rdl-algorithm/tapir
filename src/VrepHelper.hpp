@@ -2,8 +2,9 @@
 #define VREPHELPER_HPP_
 
 #include <string>
-
 #include <ros/ros.h>
+
+#include "abt/VrepInfo.h"
 
 class VrepHelper {
 
@@ -43,6 +44,9 @@ public:
 	/** Copy an object in VREP simulation. Returns handle of copied object. */
 	long copyObject(long handle);
 
+	/** Returns true iff VREP simulation is not stopped */
+	bool isRunning();
+
 private:
 
 	ros::NodeHandle *node_;
@@ -51,6 +55,13 @@ private:
 	ros::ServiceClient handleClient_;
 	ros::ServiceClient copyClient_;
 	ros::ServiceClient moveClient_;
+	ros::Subscriber infoSub_;
+
+	bool running_;
+
+	/** Callback for /vrep/info topic */
+	void infoCallback(const abt::VrepInfo::ConstPtr& msg);
+
 };
 
 #endif /* VREPHELPER_HPP_ */
