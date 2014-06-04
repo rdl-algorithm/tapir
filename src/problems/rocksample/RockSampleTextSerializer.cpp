@@ -25,20 +25,13 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-RockSampleTextSerializer::RockSampleTextSerializer(solver::Solver *solver) :
-    solver::Serializer(solver) {
-}
-
-void RockSampleTextSerializer::saveState(solver::State const *state,
-        std::ostream &os) {
+void RockSampleTextSerializer::saveState(solver::State const *state, std::ostream &os) {
     if (state == nullptr) {
         os << "NULL";
         return;
     }
-    RockSampleState const &rockSampleState =
-        static_cast<RockSampleState const &>(*state);
-    os << rockSampleState.position_.i << " " << rockSampleState.position_.j
-       << " ";
+    RockSampleState const &rockSampleState = static_cast<RockSampleState const &>(*state);
+    os << rockSampleState.position_.i << " " << rockSampleState.position_.j << " ";
     for (bool isGood : rockSampleState.getRockStates()) {
         if (isGood) {
             os << 'G';
@@ -48,8 +41,7 @@ void RockSampleTextSerializer::saveState(solver::State const *state,
     }
 }
 
-std::unique_ptr<solver::State> RockSampleTextSerializer::loadState(
-        std::istream &is) {
+std::unique_ptr<solver::State> RockSampleTextSerializer::loadState(std::istream &is) {
     std::string text;
     is >> text;
     if (text == "NULL") {
@@ -75,14 +67,12 @@ std::unique_ptr<solver::State> RockSampleTextSerializer::loadState(
     return std::make_unique<RockSampleState>(GridPosition(i, j), rockStates);
 }
 
-void RockSampleTextSerializer::saveObservation(solver::Observation const *obs,
-        std::ostream &os) {
+void RockSampleTextSerializer::saveObservation(solver::Observation const *obs, std::ostream &os) {
     if (obs == nullptr) {
         os << "NULL";
         return;
     }
-    RockSampleObservation const &observation =
-            static_cast<RockSampleObservation const &>(*obs);
+    RockSampleObservation const &observation = static_cast<RockSampleObservation const &>(*obs);
     if (observation.isEmpty()) {
         os << "NONE";
     } else if (observation.isGood_) {
@@ -92,8 +82,7 @@ void RockSampleTextSerializer::saveObservation(solver::Observation const *obs,
     }
 }
 
-std::unique_ptr<solver::Observation> RockSampleTextSerializer::loadObservation(
-        std::istream &is) {
+std::unique_ptr<solver::Observation> RockSampleTextSerializer::loadObservation(std::istream &is) {
     std::string text;
     is >> text;
     if (text == "NULL") {
@@ -110,15 +99,12 @@ std::unique_ptr<solver::Observation> RockSampleTextSerializer::loadObservation(
     }
 }
 
-
-void RockSampleTextSerializer::saveAction(solver::Action const *action,
-        std::ostream &os) {
+void RockSampleTextSerializer::saveAction(solver::Action const *action, std::ostream &os) {
     if (action == nullptr) {
         os << "NULL";
         return;
     }
-    RockSampleAction const &a =
-            static_cast<RockSampleAction const &>(*action);
+    RockSampleAction const &a = static_cast<RockSampleAction const &>(*action);
     ActionType code = a.getActionType();
     if (code == ActionType::CHECK) {
         os << "CHECK-" << a.getRockNo();
@@ -146,8 +132,7 @@ void RockSampleTextSerializer::saveAction(solver::Action const *action,
     }
 }
 
-std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(
-        std::istream &is) {
+std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(std::istream &is) {
     std::string text;
     is >> text;
     if (text == "NULL") {
@@ -178,13 +163,11 @@ std::unique_ptr<solver::Action> RockSampleTextSerializer::loadAction(
         std::ostringstream message;
         message << "ERROR: Invalid action; code " << code;
         debug::show_message(message.str());
-        return std::make_unique<RockSampleAction>(
-                static_cast<ActionType>(code));
+        return std::make_unique<RockSampleAction>(static_cast<ActionType>(code));
     }
 }
 
-
-int RockSampleTextSerializer::getActionColumnWidth(){
+int RockSampleTextSerializer::getActionColumnWidth() {
     return 7;
 }
 int RockSampleTextSerializer::getTPColumnWidth() {
@@ -192,5 +175,17 @@ int RockSampleTextSerializer::getTPColumnWidth() {
 }
 int RockSampleTextSerializer::getObservationColumnWidth() {
     return 4;
+}
+
+RockSampleDiscretizedActionTextSerializer::RockSampleDiscretizedActionTextSerializer(
+        solver::Solver *solver) :
+            Serializer(solver) {
+}
+RockSampleLegalActionsTextSerializer::RockSampleLegalActionsTextSerializer(solver::Solver *solver) :
+            Serializer(solver) {
+}
+RockSamplePreferredActionsTextSerializer::RockSamplePreferredActionsTextSerializer(
+        solver::Solver *solver) :
+            Serializer(solver) {
 }
 } /* namespace rocksample */

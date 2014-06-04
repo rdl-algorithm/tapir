@@ -82,41 +82,39 @@ MultipleStrategiesExp3Instance::MultipleStrategiesExp3Instance(SearchStatus &sta
             sequence_(sequence),
             maximumDepth_(maximumDepth),
             solver_(solver),
-            parent_(parent) {
-}
-
-void MultipleStrategiesExp3Instance::extendSequence() {
-    double initialRootQValue = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
-
-    long currentStrategyNo;
-    double timeUsed;
+            parent_(parent),
+            strategyNo_(-1),
+            currentInstance_(nullptr),
+            timeUsed_(0) {
     std::unordered_set<long> failedStrategies;
     while (true) {
         StrategyInfo *info = parent_->sampleAStrategy(failedStrategies);
         if (info == nullptr) {
             return; // We are out of strategies, so we give up.
         }
-        currentStrategyNo = info->strategyNo;
-        std::unique_ptr<SearchInstance> currentInstance = info->strategy->createSearchInstance(
-                sequence_, maximumDepth_);
-
+        strategyNo_ = info->strategyNo;
         double startTime = abt::clock_ms();
-        currentInstance->extendSequence();
-        status_ = currentInstance->getStatus();
-        timeUsed = abt::clock_ms() - startTime;
-
-        // If it was successful, break out of the loop.
-        if (status_ != SearchStatus::UNINITIALIZED) {
+        currentInstance_ = info->strategy->createSearchInstance(status_, sequence_, maximumDepth_);
+        timeUsed_ = abt::clock_ms() - startTime;
+        // If initialization was successful, break out of the loop.
+        if (status_ == SearchStatus::INITIAL) {
             break;
         }
-        // The strategy failed to initialize; we should record the failed attempt.
-        failedStrategies.insert(currentStrategyNo);
-        parent_->updateStrategyWeights(currentStrategyNo, timeUsed, 0.0);
-    }
 
-    // The strategy was successful, so we update.
+        // The strategy failed to initialize; we should record the failed attempt.
+        failedStrategies.insert(strategyNo_);
+        parent_->updateStrategyWeights(strategyNo_, timeUsed_, 0.0);
+    }
+}
+
+void MultipleStrategiesExp3Instance::extendSequence() {
+    double initialRootQValue = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
+    double startTime = abt::clock_ms();
+    currentInstance_->extendSequence();
+    timeUsed_ += (abt::clock_ms() - startTime);
+    solver_->doBackup(); // Do a backup so the root Q value gets updated.
     double newRootQValue = sequence_->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
     double deltaQ = newRootQValue - initialRootQValue;
-    parent_->updateStrategyWeights(currentStrategyNo, timeUsed, deltaQ);
+    parent_->updateStrategyWeights(strategyNo_, timeUsed_, deltaQ);
 }
 } /* namespace solver */

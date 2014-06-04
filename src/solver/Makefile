@@ -2,20 +2,14 @@ MODULE_NAME = solver
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS = indexing mappings serialization abstract-problem changes search belief-q-estimators action-choosers
+CHILD_FOLDERS := indexing mappings serialization abstract-problem changes
+CHILD_FOLDERS += search belief-q-estimators action-choosers
 include .make/template.mk
 
 # Elements that make up the library
 LIB_solver               := $(BUILDDIR_solver)/libabt.a
 OUTPUTS_TO_CLEAN_solver  += $(LIB_solver)
-MEMBERS_solver            = $(OBJS_solver)
-MEMBERS_solver           += $(OBJS_global)
-
-define child_loop_template
-MEMBERS_solver          += $$(OBJS_$(1))
-clean-solver: clean-$(1)
-endef
-$(foreach folder,$(CHILD_FOLDERS),$(eval $(call child_loop_template,$(folder))))
+MEMBERS_solver            = $(ALL_OBJS_solver) $(OBJS_global)
 
 # Include a configuration for building just the object files
 build-solver: $(LIB_solver)

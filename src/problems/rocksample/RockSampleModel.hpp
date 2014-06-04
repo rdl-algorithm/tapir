@@ -86,10 +86,6 @@ friend class RockSampleMdpSolver;
         return preferredVisitCount_;
     }
 
-    /** Returns the MDP solver, if any is in use. */
-    RockSampleMdpSolver *getMdpSolver() {
-        return mdpSolver_.get();
-    }
     /** Returns the starting position for this problem. */
     GridPosition getStartPosition() {
         return startPos_;
@@ -119,9 +115,6 @@ friend class RockSampleMdpSolver;
     }
     virtual double getMaxVal() override {
         return maxVal_;
-    }
-    virtual double getDefaultVal() override {
-        return 0;
     }
 
     // Other methods
@@ -174,6 +167,8 @@ friend class RockSampleMdpSolver;
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>>
     getAllObservationsInOrder() override;
+
+    virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
     /* ----------- Non-virtual methods for RockSampleModel ------------- */
     /** Generates the next position for the given position and action. */
@@ -250,11 +245,6 @@ friend class RockSampleMdpSolver;
     double preferredQValue_;
     /** The initial visit count for preferred actions. */
     long preferredVisitCount_;
-
-    /** True iff we're using the exact MDP solution. */
-    bool usingExactMdp_;
-    /** The solver for the exact MDP, if used. */
-    std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 
     // Generic problem parameters
     long nStVars_;

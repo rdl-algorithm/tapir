@@ -33,14 +33,15 @@ class StatePool;
 
 class Solver {
 public:
-    friend class AbstractSearchInstance;
+    friend class BasicSearchInstance;
     friend class Serializer;
     friend class TextSerializer;
 
     Solver(std::unique_ptr<Model> model);
     ~Solver();
 
-    _NO_COPY_OR_MOVE(Solver);
+    _NO_COPY_OR_MOVE(Solver)
+    ;
 
     /* ------------------ Simple getters. ------------------- */
     /** Returns the policy. */
@@ -59,13 +60,12 @@ public:
     /** Returns the action selection strategy. */
     ActionChoosingStrategy *getActionChoosingStrategy() const;
 
+    /** Returns the serializer for this solver. */
+    Serializer *getSerializer() const;
+
     /* ------------------ Initialization methods ------------------- */
     /** Full initialization - resets all data structures. */
     void initializeEmpty();
-    /** Returns the serializer for this solver. */
-    Serializer *getSerializer();
-    /** Sets the serializer to be used by this solver. */
-    void setSerializer(std::unique_ptr<Serializer> serializer);
 
     /* ------------------- Policy mutators ------------------- */
     /** Improves the policy by generating the given number of histories from
@@ -91,6 +91,12 @@ public:
     /** Shows a belief node in a nice, readable way. */
     void printBelief(BeliefNode *belief, std::ostream &os);
 
+    /* ------------------ Tree backup methods ------------------- */
+    /** Returns true iff the tree has been properly backed up. */
+    bool isBackedUp() const;
+    /** Performs a backup on the entire tree. */
+    void doBackup();
+
 private:
     /* ------------------ Initialization methods ------------------- */
     /** Partial pre-initialization - helper for full initialization,
@@ -110,9 +116,6 @@ private:
     /* ------------------ Tree backup methods ------------------- */
     /** Performs a negative backup for this entire sequence. */
     void negateSequence(HistorySequence *sequence);
-
-    /** Returns true iff the tree has been properly backed up. */
-    bool isBackedUp() const;
 
     /** Updates the values for taking the given action and receiving the given
      * observation from the given belief node.
@@ -136,17 +139,16 @@ private:
 
     /** Adds a new node that requires backing up. */
     void addNodeToBackup(BeliefNode *node);
-    /** Performs a backup on the entire tree. */
-    void doBackup();
 
     /* ------------------ Private data fields ------------------- */
     /** The random number generator used. */
     RandomGenerator *randGen_;
-    /** The serializer to be used with this solver. */
-    std::unique_ptr<Serializer> serializer_;
 
     /** The POMDP model */
     std::unique_ptr<Model> model_;
+
+    /** The serializer to be used with this solver. */
+    std::unique_ptr<Serializer> serializer_;
 
     /** The pool of states. */
     std::unique_ptr<StatePool> statePool_;

@@ -11,12 +11,12 @@
 
 namespace solver {
 class ActionMapping;
-class AbstractSearchInstance;
+class BasicSearchInstance;
 class BeliefNode;
 class Solver;
 
 class BeliefTree {
-    friend class AbstractSearchInstance;
+    friend class BasicSearchInstance;
     friend class Agent;
     friend class HistorySequence;
     friend class Solver;

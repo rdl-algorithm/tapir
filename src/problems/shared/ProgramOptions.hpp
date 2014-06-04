@@ -9,11 +9,8 @@
 namespace po = boost::program_options;
 
 void load_overrides(po::variables_map &vm) {
-    if (!vm["sel"].empty()) {
-        vm.at("ABT.selectionStrategy") = vm["sel"];
-    }
-    if (!vm["rol"].empty()) {
-        vm.at("ABT.rolloutStrategy") = vm["rol"];
+    if (!vm["ss"].empty()) {
+        vm.at("ABT.searchStrategy") = vm["ss"];
     }
     if (!vm["est"].empty()) {
         vm.at("ABT.estimator") = vm["est"];
@@ -73,10 +70,8 @@ class ProgramOptions {
     virtual po::options_description getABTOptions() {
         po::options_description abt("ABT settings");
         abt.add_options()
-                ("sel", po::value<std::string>(),
-                        "overriding alias for ABT.selectionStrategy")
-                ("rol", po::value<std::string>(),
-                        "overriding alias for ABT.rolloutStrategy")
+                ("ss", po::value<std::string>(),
+                        "overriding alias for ABT.searchStrategy")
                 ("est", po::value<std::string>(),
                         "overriding alias for ABT.estimator")
                 ("cho", po::value<std::string>(),
@@ -85,10 +80,8 @@ class ProgramOptions {
                         "the number of episodes to sample for each step.")
                 ("ABT.maximumDepth", po::value<double>(),
                         "maximum Depth allowed before search stops.")
-                ("ABT.selectionStrategy", po::value<std::string>(),
+                ("ABT.searchStrategy", po::value<std::string>(),
                         "the search strategy to use")
-                ("ABT.rolloutStrategy", po::value<std::string>(),
-                        "the rollout strategy to use")
                 ("ABT.estimator", po::value<std::string>(),
                         "the function that estimates the q-value of a belief.")
                 ("ABT.chooser", po::value<std::string>(),
@@ -109,15 +102,9 @@ class ProgramOptions {
         return problem;
     }
 
-    /** Returns configuration options for the specific heuristic used for the
-     * problem
-     */
+    /** Returns configuration options for problem heuristics. */
     virtual po::options_description getHeuristicOptions() {
         po::options_description heuristics("Heuristic settings");
-        heuristics.add_options()
-                ("heuristics.enabled,h", po::value<bool>()->default_value(true)->implicit_value(true),
-                        "whether any heuristic should be used - no heuristic"
-                        " means a default value will always be returned.");
         return heuristics;
     }
 };

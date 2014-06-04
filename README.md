@@ -14,10 +14,8 @@ Code structure and examples
 ---------------------------
 The core solver code is located in src/solver, while several example problems
 are given in src/problems:
-- **Tag** (problems/tag) - seems to work correctly
-- **RockSample** (problems/rocksample) - runs but seems to have a bug at the moment
-- **Underwater Navigation** (problems/uwnav) - not yet updated to suit the latest
-    version of the ABT code.
+- **Tag** (problems/tag)
+- **RockSample** (problems/rocksample)
 
 System Requirements
 -------------------

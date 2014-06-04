@@ -3,22 +3,21 @@
 
 #include <unordered_map>
 
+#include "solver/cached_values.hpp"
 #include "solver/action-choosers/choosers.hpp"
-
 #include "solver/belief-q-estimators/estimators.hpp"
-
 #include "solver/search/search_interface.hpp"
 
-#include "solver/cached_values.hpp"
-
-template <typename TargetType> class Parser;
+template<typename TargetType> class Parser;
 
 std::pair<std::string, std::vector<std::string>> split_function(std::string text);
 
-template <typename TargetType>
+template<typename TargetType>
 class ParserSet {
-  public:
-    ParserSet() : parsers_() {}
+public:
+    ParserSet() :
+                parsers_() {
+    }
     virtual ~ParserSet() = default;
 
     /**  Adds the given parser. */
@@ -34,9 +33,9 @@ class ParserSet {
         std::string targetType;
         std::vector<std::string> argsVector;
         std::tie(targetType, argsVector) = split_function(targetString);
-        debug::show_message(targetString);
+        // debug::show_message(targetString);
         try {
-            return getParser(targetType)->parse(solver, this, argsVector);
+            return getParser(targetType)->parse(solver, argsVector);
         } catch (std::out_of_range const &error) {
             std::ostringstream message;
             message << "ERROR: Invalid target type \"" << targetType;
@@ -46,120 +45,142 @@ class ParserSet {
         return nullptr;
     }
 
-  private:
-    std::unordered_map<std::string, std::unique_ptr<Parser<TargetType>>> parsers_;
+private:
+    std::unordered_map<std::string, std::unique_ptr<Parser<TargetType>>>parsers_;
 };
 
-template <typename TargetType>
+template<typename TargetType>
 class Parser {
-  public:
+public:
     Parser() = default;
     virtual ~Parser() = default;
 
     /** Creates a new strategy from a vector of strings representing its
      * arguments.
      */
-    virtual TargetType parse(solver::Solver *solver, ParserSet<TargetType> *allParser,
-            std::vector<std::string> args) = 0;
+    virtual TargetType parse(solver::Solver *solver, std::vector<std::string> args) = 0;
 };
 
-class UcbSearchParser : public Parser<std::unique_ptr<solver::SearchStrategy>> {
-  public:
-    UcbSearchParser() = default;
-    virtual ~UcbSearchParser() = default;
-    virtual std::unique_ptr<solver::SearchStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParser,
+class UcbParser: public Parser<std::unique_ptr<solver::StepGeneratorFactory>> {
+public:
+    UcbParser() = default;
+    virtual ~UcbParser() = default;
+    virtual std::unique_ptr<solver::StepGeneratorFactory> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
-
-class NnRolloutParser : public Parser<std::unique_ptr<solver::SearchStrategy>> {
-  public:
+class NnRolloutParser: public Parser<std::unique_ptr<solver::StepGeneratorFactory>> {
+public:
     NnRolloutParser() = default;
     virtual ~NnRolloutParser() = default;
-    virtual std::unique_ptr<solver::SearchStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParser,
+    virtual std::unique_ptr<solver::StepGeneratorFactory> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
-
-class DefaultRolloutParser : public Parser<std::unique_ptr<solver::SearchStrategy>> {
-  public:
+class DefaultRolloutParser: public Parser<std::unique_ptr<solver::StepGeneratorFactory>> {
+public:
     DefaultRolloutParser() = default;
     virtual ~DefaultRolloutParser() = default;
-    virtual std::unique_ptr<solver::SearchStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParser,
+    virtual std::unique_ptr<solver::StepGeneratorFactory> parse(solver::Solver *solver,
+            std::vector<std::string> args) override;
+};
+class StagedParser: public Parser<std::unique_ptr<solver::StepGeneratorFactory>> {
+public:
+    StagedParser(ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *allParsers);
+    virtual ~StagedParser() = default;
+    _NO_COPY_OR_MOVE(StagedParser);
+
+    virtual std::unique_ptr<solver::StepGeneratorFactory> parse(solver::Solver *solver,
+            std::vector<std::string> args) override;
+private:
+    ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *allParsers_;
+};
+
+class DefaultHeuristicParser: public Parser<std::unique_ptr<solver::Heuristic>> {
+public:
+    DefaultHeuristicParser() = default;
+    virtual ~DefaultHeuristicParser() = default;
+    virtual std::unique_ptr<solver::Heuristic> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
-class Exp3Parser : public Parser<std::unique_ptr<solver::SearchStrategy>> {
-  public:
-    Exp3Parser() = default;
+class ZeroHeuristicParser: public Parser<std::unique_ptr<solver::Heuristic>> {
+public:
+    ZeroHeuristicParser() = default;
+    virtual ~ZeroHeuristicParser() = default;
+    virtual std::unique_ptr<solver::Heuristic> parse(solver::Solver *solver,
+            std::vector<std::string> args) override;
+};
+
+class BasicSearchParser: public Parser<std::unique_ptr<solver::SearchStrategy>> {
+public:
+    BasicSearchParser(ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
+            ParserSet<std::unique_ptr<solver::Heuristic>> *heuristicParsers);
+    virtual ~BasicSearchParser() = default;
+    _NO_COPY_OR_MOVE(BasicSearchParser);
+
+    virtual std::unique_ptr<solver::SearchStrategy> parse(solver::Solver *solver,
+            std::vector<std::string> args) override;
+private:
+    ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers_;
+    ParserSet<std::unique_ptr<solver::Heuristic>> *heuristicParsers_;
+};
+
+class Exp3Parser: public Parser<std::unique_ptr<solver::SearchStrategy>> {
+public:
+    Exp3Parser(ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParsers);
     virtual ~Exp3Parser() = default;
-    virtual std::unique_ptr<solver::SearchStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParser,
+    _NO_COPY_OR_MOVE(Exp3Parser);
+
+    virtual std::unique_ptr<solver::SearchStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
+private:
+    ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParsers_;
 };
 
-class AverageEstimateParser : public Parser<std::unique_ptr<solver::EstimationStrategy>> {
+class AverageEstimateParser: public Parser<std::unique_ptr<solver::EstimationStrategy>> {
 public:
     AverageEstimateParser() = default;
     virtual ~AverageEstimateParser() = default;
-    virtual std::unique_ptr<solver::EstimationStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::EstimationStrategy>> *allParser,
+    virtual std::unique_ptr<solver::EstimationStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
-class MaxEstimateParser : public Parser<std::unique_ptr<solver::EstimationStrategy>> {
+class MaxEstimateParser: public Parser<std::unique_ptr<solver::EstimationStrategy>> {
 public:
     MaxEstimateParser() = default;
     virtual ~MaxEstimateParser() = default;
-    virtual std::unique_ptr<solver::EstimationStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::EstimationStrategy>> *allParser,
+    virtual std::unique_ptr<solver::EstimationStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
-class RobustEstimateParser : public Parser<std::unique_ptr<solver::EstimationStrategy>> {
+class RobustEstimateParser: public Parser<std::unique_ptr<solver::EstimationStrategy>> {
 public:
     RobustEstimateParser() = default;
     virtual ~RobustEstimateParser() = default;
-    virtual std::unique_ptr<solver::EstimationStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::EstimationStrategy>> *allParser,
+    virtual std::unique_ptr<solver::EstimationStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
-class MaxChooserParser : public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
+class MaxChooserParser: public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
 public:
     MaxChooserParser() = default;
     virtual ~MaxChooserParser() = default;
-    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::ActionChoosingStrategy>> *allParser,
+    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
-class RobustChooserParser : public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
+class RobustChooserParser: public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
 public:
     RobustChooserParser() = default;
     virtual ~RobustChooserParser() = default;
-    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::ActionChoosingStrategy>> *allParser,
+    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
-class UcbChooserParser : public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
+class UcbChooserParser: public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
 public:
     UcbChooserParser() = default;
     virtual ~UcbChooserParser() = default;
-    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(
-            solver::Solver *solver,
-            ParserSet<std::unique_ptr<solver::ActionChoosingStrategy>> *allParser,
+    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 #endif /* STRATEGY_PARSERS_HPP_ */

@@ -56,8 +56,8 @@ using std::endl;
 namespace solver {
 Solver::Solver(std::unique_ptr<Model> model) :
             randGen_(model->getRandomGenerator()),
-            serializer_(nullptr),
             model_(std::move(model)),
+            serializer_(model_->createSerializer(this)),
             statePool_(nullptr),
             histories_(nullptr),
             policy_(nullptr),
@@ -99,6 +99,10 @@ ActionChoosingStrategy *Solver::getActionChoosingStrategy() const {
     return actionChoosingStrategy_.get();
 }
 
+Serializer *Solver::getSerializer() const {
+    return serializer_.get();
+}
+
 /* ------------------ Initialization methods ------------------- */
 void Solver::initializeEmpty() {
     // Basic initialization.
@@ -110,13 +114,6 @@ void Solver::initializeEmpty() {
 
     // Initialize the root node properly.
     policy_->initializeRoot();
-}
-
-Serializer *Solver::getSerializer() {
-    return serializer_.get();
-}
-void Solver::setSerializer(std::unique_ptr<Serializer> serializer) {
-    serializer_ = std::move(serializer);
 }
 
 /* ------------------- Policy mutators ------------------- */
@@ -299,6 +296,39 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     }
 }
 
+
+/* ------------------ Tree backup methods ------------------- */
+bool Solver::isBackedUp() const {
+    return nodesToBackup_.empty();
+}
+
+void Solver::doBackup() {
+    while (!nodesToBackup_.empty()) {
+        auto firstEntry = nodesToBackup_.cbegin();
+        long depth = firstEntry->first;
+        for (BeliefNode *node : firstEntry->second) {
+            if (depth == 0) {
+                node->recalculateQValue();
+            } else {
+                double oldQValue = node->getQValue();
+                node->recalculateQValue();
+                double deltaQValue = node->getQValue() - oldQValue;
+                long nContinuations = node->getMapping()->getTotalVisitCount()
+                        - node->getNumberOfStartingSequences();
+                double deltaTotalQ = model_->getDiscountFactor() * nContinuations * deltaQValue;
+
+                ActionMappingEntry *parentActionEntry =
+                        node->getParentActionNode()->getParentEntry();
+                if (parentActionEntry->update(0, deltaTotalQ)) {
+                    addNodeToBackup(parentActionEntry->getMapping()->getOwner());
+                }
+            }
+        }
+        nodesToBackup_.erase(firstEntry);
+    }
+}
+
+
 /* ============================ PRIVATE ============================ */
 
 /* ------------------ Initialization methods ------------------- */
@@ -327,8 +357,6 @@ void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> st
     }
     for (StateInfo *stateInfo : states) {
         singleSearch(startNode, stateInfo, maximumDepth);
-        // Backup after every search to keep an accurate idea of where to explore.
-        doBackup();
     }
 }
 
@@ -350,6 +378,8 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     std::unique_ptr<SearchInstance> searchInstance = searchStrategy_->createSearchInstance(status,
             sequence, maximumDepth);
     searchInstance->extendSequence();
+    // Backup after every search.
+    doBackup();
 }
 
 /* ------------------ Tree backup methods ------------------- */
@@ -372,10 +402,6 @@ void Solver::negateSequence(HistorySequence *sequence) {
             updateEstimate((*it)->getAssociatedBeliefNode(), 0, -1);
         }
     }
-}
-
-bool Solver::isBackedUp() const {
-    return nodesToBackup_.empty();
 }
 
 /* ------------------ Value updating methods -------------------- */
@@ -414,31 +440,4 @@ void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNCon
 void Solver::addNodeToBackup(BeliefNode *node) {
     nodesToBackup_[node->getDepth()].insert(node);
 }
-
-void Solver::doBackup() {
-    while (!nodesToBackup_.empty()) {
-        auto firstEntry = nodesToBackup_.cbegin();
-        long depth = firstEntry->first;
-        for (BeliefNode *node : firstEntry->second) {
-            if (depth == 0) {
-                node->recalculateQValue();
-            } else {
-                double oldQValue = node->getQValue();
-                node->recalculateQValue();
-                double deltaQValue = node->getQValue() - oldQValue;
-                long nContinuations = node->getMapping()->getTotalVisitCount()
-                        - node->getNumberOfStartingSequences();
-                double deltaTotalQ = model_->getDiscountFactor() * nContinuations * deltaQValue;
-
-                ActionMappingEntry *parentActionEntry =
-                        node->getParentActionNode()->getParentEntry();
-                if (parentActionEntry->update(0, deltaTotalQ)) {
-                    addNodeToBackup(parentActionEntry->getMapping()->getOwner());
-                }
-            }
-        }
-        nodesToBackup_.erase(firstEntry);
-    }
-}
-
 } /* namespace solver */

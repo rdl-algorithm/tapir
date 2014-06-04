@@ -31,7 +31,7 @@ using std::cout;
 using std::endl;
 namespace po = boost::program_options;
 
-template<typename ModelType, typename SerializerType>
+template<typename ModelType>
 int simulate(int argc, char const *argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
@@ -106,8 +106,6 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
         std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&randGen, vm);
         solver::Solver solver(std::move(solverModel));
-        std::unique_ptr<solver::Serializer> newSerializer(std::make_unique<SerializerType>(&solver));
-        solver.setSerializer(std::move(newSerializer));
         solver.getSerializer()->load(inFile);
         inFile.close();
 

@@ -47,6 +47,7 @@
 #include "Nav2DAction.hpp"         // for Nav2DAction
 #include "Nav2DObservation.hpp"    // for Nav2DObservation
 #include "Nav2DState.hpp"          // for Nav2DState
+#include "Nav2DTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
@@ -292,10 +293,6 @@ bool Nav2DModel::isTerminal(solver::State const &state) {
 }
 
 double Nav2DModel::getHeuristicValue(solver::State const &state) {
-    if (!heuristicEnabled()) {
-        return getDefaultVal();
-    }
-
     Nav2DState const &navState = static_cast<Nav2DState const &>(state);
     Point2D closestPoint = getClosestPointOfType(navState.getPosition(),
             AreaType::GOAL);
@@ -739,5 +736,9 @@ std::unique_ptr<solver::Action> Nav2DModel::sampleAnAction(long binNumber) {
 
 double Nav2DModel::getMaxObservationDistance() {
     return maxObservationDistance_;
+}
+
+std::unique_ptr<solver::Serializer> Nav2DModel::createSerializer(solver::Solver *solver) {
+    return std::make_unique<Nav2DTextSerializer>(solver);
 }
 } /* namespace nav2d */

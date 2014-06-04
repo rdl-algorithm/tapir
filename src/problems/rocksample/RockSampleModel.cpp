@@ -39,12 +39,13 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/StatePool.hpp"
 
+#include "legal_actions.hpp"
+
 #include "RockSampleAction.hpp"         // for RockSampleAction
+#include "RockSampleMdpSolver.hpp"
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
 #include "RockSampleState.hpp"          // for RockSampleState
-
-#include "legal_actions.hpp"
-#include "RockSampleMdpSolver.hpp"
+#include "RockSampleTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
@@ -72,12 +73,11 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     usingPreferredInit_(vm["heuristics.usePreferredInit"].as<bool>()),
     preferredQValue_(vm["heuristics.preferredQValue"].as<double>()),
     preferredVisitCount_(vm["heuristics.preferredVisitCount"].as<long>()),
-    usingExactMdp_(vm["heuristics.exactMdp"].as<bool>()),
-    mdpSolver_(nullptr),
     nStVars_(), // depends on nRocks
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
     maxVal_(0) // depends on nRocks
          {
+    registerHeuristicParser("exact", std::make_unique<RockSampleMdpParser>(this));
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -106,19 +106,6 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         cout << "Environment:" << endl;
         drawEnv(cout);
         cout << endl;
-    }
-
-    // MDP solution.
-    if (heuristicEnabled() && usingExactMdp_) {
-        if (hasVerboseOutput()) {
-            cout << "Solving MDP...";
-            cout.flush();
-        }
-        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
-        mdpSolver_->solve();
-        if (hasVerboseOutput()) {
-            cout << "     Done." << endl << endl;
-        }
     }
 }
 
@@ -199,17 +186,8 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
 }
 
 double RockSampleModel::getHeuristicValue(solver::State const &state) {
-    if (!heuristicEnabled()) {
-        return getDefaultVal();
-    }
-
     RockSampleState const &rockSampleState =
         static_cast<RockSampleState const &>(state);
-
-    if (usingExactMdp_) {
-        return mdpSolver_->getQValue(rockSampleState);
-    }
-
     double qVal = 0;
     double currentDiscount = 1;
     GridPosition currentPos(rockSampleState.getPosition());
@@ -585,5 +563,9 @@ RockSampleModel::getAllObservationsInOrder() {
                 std::make_unique<RockSampleObservation>(code));
     }
     return allObservations_;
+}
+
+std::unique_ptr<solver::Serializer> RockSampleModel::createSerializer(solver::Solver *solver) {
+    return std::make_unique<RockSamplePreferredActionsTextSerializer>(solver);
 }
 } /* namespace rocksample */

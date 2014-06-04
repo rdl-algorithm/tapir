@@ -22,29 +22,50 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-class RockSampleTextSerializer : virtual public PreferredActionsTextSerializer,
-    virtual public solver::EnumeratedObservationTextSerializer {
-  public:
-    RockSampleTextSerializer(solver::Solver *solver);
+class RockSampleTextSerializer: virtual public solver::TextSerializer {
+public:
+    RockSampleTextSerializer() = default;
     virtual ~RockSampleTextSerializer() = default;
     _NO_COPY_OR_MOVE(RockSampleTextSerializer);
 
     void saveState(solver::State const *state, std::ostream &os) override;
     std::unique_ptr<solver::State> loadState(std::istream &is) override;
 
-    void saveObservation(solver::Observation const *obs,
-            std::ostream &os) override;
-    std::unique_ptr<solver::Observation> loadObservation(
-            std::istream &is) override;
+    void saveObservation(solver::Observation const *obs, std::ostream &os) override;
+    std::unique_ptr<solver::Observation> loadObservation(std::istream &is) override;
 
     void saveAction(solver::Action const *action, std::ostream &os) override;
     std::unique_ptr<solver::Action> loadAction(std::istream &is) override;
-
 
     virtual int getActionColumnWidth() override;
     virtual int getTPColumnWidth() override;
     virtual int getObservationColumnWidth() override;
 };
+
+class RockSampleDiscretizedActionTextSerializer: public RockSampleTextSerializer,
+        public solver::DiscretizedActionTextSerializer,
+        public solver::EnumeratedObservationTextSerializer {
+public:
+    RockSampleDiscretizedActionTextSerializer(solver::Solver *solver);
+    virtual ~RockSampleDiscretizedActionTextSerializer() = default;
+};
+
+class RockSampleLegalActionsTextSerializer: public RockSampleTextSerializer,
+        public LegalActionsTextSerializer,
+        public solver::EnumeratedObservationTextSerializer {
+public:
+    RockSampleLegalActionsTextSerializer(solver::Solver *solver);
+    virtual ~RockSampleLegalActionsTextSerializer() = default;
+};
+
+class RockSamplePreferredActionsTextSerializer: public RockSampleTextSerializer,
+        public PreferredActionsTextSerializer,
+        public solver::EnumeratedObservationTextSerializer {
+public:
+    RockSamplePreferredActionsTextSerializer(solver::Solver *solver);
+    virtual ~RockSamplePreferredActionsTextSerializer() = default;
+};
+
 } /* namespace rocksample */
 
 #endif /* ROCKSAMPLE_TEXTSERIALIZER_HPP_ */

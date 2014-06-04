@@ -81,9 +81,6 @@ class TagModel: virtual public ModelWithProgramOptions,
     double getMaxVal() override {
         return maxVal_;
     }
-    double getDefaultVal() override {
-        return 0;
-    }
 
     // Other virtual methods
     std::unique_ptr<solver::State> sampleAnInitState() override;
@@ -98,30 +95,26 @@ class TagModel: virtual public ModelWithProgramOptions,
             solver::State const &state,
             solver::Action const &action,
             solver::TransitionParameters const */*tp*/) override;
-
     virtual std::unique_ptr<solver::Observation> generateObservation(
             solver::State const */*state*/,
             solver::Action const &action,
             solver::TransitionParameters const */*tp*/,
             solver::State const &nextState) override;
-
     virtual double generateReward(
                 solver::State const &state,
                 solver::Action const &action,
                 solver::TransitionParameters const */*tp*/,
                 solver::State const */*nextState*/) override;
-
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
 
-
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
             long nParticles,
             std::vector<solver::State const *> const &previousParticles) override;
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
@@ -130,13 +123,14 @@ class TagModel: virtual public ModelWithProgramOptions,
     virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
     /** Displays a single cell of the map. */
-    void dispCell(TagCellType cellType, std::ostream &os);
-    void drawEnv(std::ostream &os) override;
-    void drawSimulationState(solver::BeliefNode const *belief,
+    virtual void dispCell(TagCellType cellType, std::ostream &os);
+    virtual void drawEnv(std::ostream &os) override;
+    virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
+    virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
   private:
     /** Initialises the required data structures and variables */

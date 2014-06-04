@@ -27,8 +27,7 @@ class Nav2DTextSerializer: virtual public solver::TextSerializer,
 public:
     Nav2DTextSerializer(solver::Solver *solver);
     virtual ~Nav2DTextSerializer() = default;
-    _NO_COPY_OR_MOVE(Nav2DTextSerializer)
-    ;
+    _NO_COPY_OR_MOVE(Nav2DTextSerializer);
 
     /* ------------------ Saving change sequences -------------------- */
     virtual void saveModelChange(solver::ModelChange const &change,

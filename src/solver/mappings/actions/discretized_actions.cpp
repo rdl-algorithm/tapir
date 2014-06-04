@@ -189,6 +189,10 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
         return false;
     }
 
+    if (!std::isfinite(deltaTotalQ)) {
+        debug::show_message("ERROR: Non-finite delta value!");
+    }
+
     // Update the visit counts
     if (visitCount_ == 0 && deltaNVisits > 0) {
         map_->numberOfVisitedEntries_++;

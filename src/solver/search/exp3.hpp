@@ -56,6 +56,10 @@ private:
 
     Solver *solver_;
     MultipleStrategiesExp3 *parent_;
+
+    long strategyNo_;
+    std::unique_ptr<SearchInstance> currentInstance_;
+    double timeUsed_;
 };
 
 } /* namespace solver */

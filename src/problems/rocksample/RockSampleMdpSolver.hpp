@@ -6,9 +6,12 @@
 #include <unordered_set>
 #include <utility>
 
-#include "problems/shared/GridPosition.hpp"
-
 #include "global.hpp"
+
+#include "problems/shared/GridPosition.hpp"
+#include "problems/shared/parsers.hpp"
+
+#include "solver/search/heuristics/heuristics.hpp"
 
 namespace rocksample {
 class RockSampleModel;
@@ -17,7 +20,7 @@ class RockSampleState;
 /** Solves an MDP version of RockSample, in which it is known which rocks
  * are good and which ones are bad.
  */
-class RockSampleMdpSolver {
+class RockSampleMdpSolver : public solver::Heuristic {
 public:
     RockSampleMdpSolver(RockSampleModel *model);
     virtual ~RockSampleMdpSolver() = default;
@@ -25,6 +28,9 @@ public:
 
     /** Solves the MDP. */
     void solve();
+
+    double getHeuristicValue(solver::HistoryEntry const *entry) override;
+
     /** Calculates the exact value for the given state. */
     double getQValue(RockSampleState const &state) const;
 
@@ -47,6 +53,16 @@ private:
     std::map<std::pair<int, int>, double> valueMap_;
 };
 
+class RockSampleMdpParser : public Parser<std::unique_ptr<solver::Heuristic>> {
+public:
+    RockSampleMdpParser(RockSampleModel *model);
+    virtual ~RockSampleMdpParser() = default;
+    _NO_COPY_OR_MOVE(RockSampleMdpParser);
+
+    virtual std::unique_ptr<solver::Heuristic> parse(solver::Solver *solver, std::vector<std::string> args);
+private:
+    RockSampleModel *model_;
+};
 } /* namespace rocksample */
 
 #endif /* ROCKSAMPLE_MDPSOLVER_HPP_ */

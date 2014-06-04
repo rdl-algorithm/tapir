@@ -98,9 +98,6 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual double getMaxVal() override {
         return maxVal_;
     }
-    virtual double getDefaultVal() override {
-        return 0;
-    }
 
     // Other methods
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;
@@ -163,6 +160,8 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     virtual std::unique_ptr<solver::Action> sampleAnAction(long binNumber) override;
 
     virtual double getMaxObservationDistance() override;
+
+    virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
   private:
     /** Extrapolates the position, based on a current position, speed,

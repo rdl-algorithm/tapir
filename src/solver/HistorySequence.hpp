@@ -21,7 +21,7 @@ class StateInfo;
 class HistorySequence {
   public:
     friend class AbstractBackpropagationStrategy;
-    friend class AbstractSearchInstance;
+    friend class BasicSearchInstance;
     friend class DefaultHistoryCorrector;
     friend class Histories;
     friend class Simulator;

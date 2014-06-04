@@ -1,7 +1,7 @@
 # Root project folder
 ROOT := .
 
-HAS_ROOT_MAKEFILE = true
+HAS_ROOT_MAKEFILE := true
 
 # Build configurations
 DEFAULT_CFG := release
@@ -13,7 +13,7 @@ endif
 $(info Configuration: $(CFG))
 $(info )
 
-BUILDDIR = $(ROOT)/builds/$(CFG)
+BUILDDIR := $(ROOT)/builds/$(CFG)
 
 # ----------------------------------------------------------------------
 # Compiler & linker
@@ -79,8 +79,8 @@ override LDFLAGS += $(LIBDIRS)
 # ----------------------------------------------------------------------
 # General-purpose recipes
 # ----------------------------------------------------------------------
-COMPILE_CMD = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c -o $@
-LINK_CMD    = $(CXX) $(LDFLAGS) -o $@
+COMPILE_CMD  = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c -o $@
+LINK_CMD     = $(CXX) $(LDFLAGS) -o $@
 MKDIR_RECIPE = @mkdir -p $@
 
 # ----------------------------------------------------------------------

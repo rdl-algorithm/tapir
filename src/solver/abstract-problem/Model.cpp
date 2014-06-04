@@ -29,8 +29,10 @@
 #include "solver/changes/HistoryCorrector.hpp"
 
 #include "solver/search/search_interface.hpp"
-#include "solver/search/ucb_search.hpp"
-#include "solver/search/default_rollout.hpp"
+#include "solver/search/steppers/ucb_search.hpp"
+#include "solver/search/heuristics/heuristics.hpp"
+
+#include "solver/serialization/Serializer.hpp"
 
 namespace solver {
 /* ----------------------- Basic getters  ----------------------- */
@@ -120,9 +122,11 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) 
     return std::make_unique<DefaultHistoryCorrector>(solver);
 }
 
-std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver */*solver*/) {
-    #pragma GCC warning "No search strategy yet"
-    return nullptr;
+std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
+    using namespace std::placeholders;
+    return std::make_unique<BasicSearchStrategy>(solver,
+            std::make_unique<UcbStepGeneratorFactory>(solver, 1.0),
+            std::make_unique<DefaultHeuristic>(this));
 }
 
 
@@ -138,5 +142,7 @@ std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {
     return nullptr;
 }
 
-
+std::unique_ptr<Serializer> Model::createSerializer(Solver */*solver*/) {
+    return nullptr;
+}
 } /* namespace solver */

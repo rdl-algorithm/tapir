@@ -22,6 +22,7 @@ class HistoricalData;
 class HistoryCorrector;
 class ObservationPool;
 class SearchStrategy;
+class Serializer;
 class Solver;
 class StateIndex;
 class StatePool;
@@ -38,7 +39,6 @@ public:
     /** Returns the random number generator used by this model. */
     virtual RandomGenerator *getRandomGenerator() = 0;
 
-
     /* ---------- Virtual getters for ABT / model parameters  ---------- */
     // POMDP parameters
     /** Returns the POMDP discount factor. */
@@ -50,8 +50,6 @@ public:
     virtual double getMinVal() = 0;
     /** Returns an upper bound on the q-value. */
     virtual double getMaxVal() = 0;
-    /** Returns the default q-value */
-    virtual double getDefaultVal() = 0;
 
     // ABT algorithm parameters
     /** Returns the preferred number of particles per belief - this number will
@@ -62,7 +60,6 @@ public:
      * in a single time step.
      */
     virtual long getNumberOfHistoriesPerStep() = 0;
-
     /** Returns the maximum depth allowed in the tree. */
     virtual long getMaximumDepth() = 0;
 
@@ -189,6 +186,9 @@ public:
 
     /** Creates the historical data for the root node. */
     virtual std::unique_ptr<HistoricalData> createRootHistoricalData();
+
+    /** Creates a serializer for the given solver. */
+    virtual std::unique_ptr<Serializer> createSerializer(Solver *solver);
 };
 } /* namespace solver */
 

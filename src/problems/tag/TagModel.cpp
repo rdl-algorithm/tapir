@@ -39,6 +39,7 @@
 #include "TagAction.hpp"
 #include "TagObservation.hpp"
 #include "TagState.hpp"                 // for TagState
+#include "TagTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
@@ -138,10 +139,6 @@ bool TagModel::isTerminal(solver::State const &state) {
 }
 
 double TagModel::getHeuristicValue(solver::State const &state) {
-    if (!heuristicEnabled()) {
-        return getDefaultVal();
-    }
-
     TagState const &tagState = static_cast<TagState const &>(state);
     if (tagState.isTagged()) {
         return 0;
@@ -546,5 +543,9 @@ std::vector<std::unique_ptr<solver::DiscretizedPoint>> TagModel::getAllActionsIn
         allActions.push_back(std::make_unique<TagAction>(code));
     }
     return allActions;
+}
+
+std::unique_ptr<solver::Serializer> TagModel::createSerializer(solver::Solver *solver) {
+    return std::make_unique<TagTextSerializer>(solver);
 }
 } /* namespace tag */

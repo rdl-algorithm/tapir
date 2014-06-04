@@ -1,5 +1,6 @@
-#include "search_interface.hpp"
+#include "solver/search/search_interface.hpp"
 
+#include <functional>
 #include <memory>
 
 #include "solver/BeliefNode.hpp"
@@ -9,53 +10,87 @@
 #include "solver/Solver.hpp"
 #include "solver/StatePool.hpp"
 
-#include "SearchStatus.hpp"
+#include "solver/search/SearchStatus.hpp"
+
+#include "solver/search/heuristics/heuristics.hpp"
 
 namespace solver {
 /* ------------------- SearchInstance --------------------- */
 SearchInstance::SearchInstance(SearchStatus &status) :
-    status_(status) {
+            status_(status) {
 }
 
 /* ------------------- StepGenerator --------------------- */
 StepGenerator::StepGenerator(SearchStatus &status) :
-    status_(status) {
+            status_(status) {
+    status_ = SearchStatus::INITIAL;
 }
 
-/* ------------------- StagedSearchStrategy --------------------- */
-StagedSearchStrategy::StagedSearchStrategy(Solver *solver,
-        std::vector<std::unique_ptr<StepGeneratorFactory>> generatorFactories,
-        std::function<double(HistoryEntry const *)> heuristic) :
-            solver_(solver),
-            generatorFactories_(generatorFactories),
-            heuristic_(heuristic) {
-}
-
-std::unique_ptr<SearchInstance> StagedSearchStrategy::createSearchInstance(SearchStatus &status,
-        HistorySequence *sequence, long maximumDepth) {
-    return std::make_unique<StagedSearchInstance>(status, sequence, maximumDepth, solver_,
-            generatorFactories_, heuristic_);
-}
-
-/* ------------------- StagedSearchInstance --------------------- */
-StagedSearchInstance::StagedSearchInstance(SearchStatus &status,
-        HistorySequence *sequence, long maximumDepth, Solver *solver,
-        std::vector<std::unique_ptr<StepGeneratorFactory>> const &generators,
-        std::function<double(HistoryEntry const *)> heuristic) :
-                SearchInstance(status),
+/* ------------------- StagedStepGenerator --------------------- */
+StagedStepGenerator::StagedStepGenerator(SearchStatus &status, HistorySequence *sequence,
+        std::vector<std::unique_ptr<StepGeneratorFactory>> const &generatorSequence) :
+            StepGenerator(status),
             sequence_(sequence),
-            maximumDepth_(maximumDepth),
-            solver_(solver),
-            model_(solver_->getModel()),
-            generators_(generators),
-            iterator_(generators.cbegin()),
-            generator_(nullptr),
-            heuristic_(heuristic) {
+            generatorSequence_(generatorSequence),
+            iterator_(generatorSequence_.cbegin()),
+            generator_(nullptr) {
     generator_ = (*iterator_)->createGenerator(status_, sequence_);
     iterator_++;
 }
 
-void StagedSearchInstance::extendSequence() {
+Model::StepResult StagedStepGenerator::getStep() {
+    Model::StepResult result = generator_->getStep();
+    while (status_ == SearchStatus::STAGE_COMPLETE && result.action == nullptr) {
+        if (iterator_ == generatorSequence_.cend()) {
+            break;
+        }
+        generator_ = (*iterator_)->createGenerator(status_, sequence_);
+        iterator_++;
+        result = generator_->getStep();
+    }
+    return result;
+}
+
+/* ------------------- StagedStepGeneratorFactory --------------------- */
+StagedStepGeneratorFactory::StagedStepGeneratorFactory(
+        std::vector<std::unique_ptr<StepGeneratorFactory>> generatorSequence) :
+            generatorSequence_(std::move(generatorSequence)) {
+}
+
+std::unique_ptr<StepGenerator> StagedStepGeneratorFactory::createGenerator(SearchStatus &status,
+        HistorySequence *sequence) {
+    return std::make_unique<StagedStepGenerator>(status, sequence, generatorSequence_);
+}
+
+/* ------------------- AbstractSearchStrategy --------------------- */
+BasicSearchStrategy::BasicSearchStrategy(Solver *solver,
+        std::unique_ptr<StepGeneratorFactory> generatorFactory,
+        std::unique_ptr<Heuristic> heuristic) :
+            solver_(solver),
+            generatorFactory_(std::move(generatorFactory)),
+            heuristic_(std::move(heuristic)) {
+}
+
+std::unique_ptr<SearchInstance> BasicSearchStrategy::createSearchInstance(SearchStatus &status,
+        HistorySequence *sequence, long maximumDepth) {
+    return std::make_unique<BasicSearchInstance>(status, sequence, maximumDepth, solver_,
+            generatorFactory_->createGenerator(status, sequence), heuristic_.get());
+}
+
+/* ------------------- AbstractSearchInstance --------------------- */
+BasicSearchInstance::BasicSearchInstance(SearchStatus &status, HistorySequence *sequence,
+        long maximumDepth, Solver *solver, std::unique_ptr<StepGenerator> generator,
+        Heuristic *heuristic) :
+            SearchInstance(status),
+            sequence_(sequence),
+            maximumDepth_(maximumDepth),
+            solver_(solver),
+            model_(solver_->getModel()),
+            generator_(std::move(generator)),
+            heuristic_(heuristic) {
+}
+
+void BasicSearchInstance::extendSequence() {
     if (status_ == SearchStatus::UNINITIALIZED) {
         debug::show_message("ERROR: Search failed to initialize!?");
         return;
@@ -72,33 +107,18 @@ void StagedSearchInstance::extendSequence() {
     }
 
     BeliefNode *currentNode = currentEntry->getAssociatedBeliefNode();
-
-    std::vector<std::unique_ptr<StepGenerator>> generators;
-
     bool isFirst = true;
     while (true) {
         if (currentNode->getDepth() >= maximumDepth_) {
-            status_ = SearchStatus::NEED_HEURISTIC;
+            status_ = SearchStatus::STAGE_COMPLETE;
             break;
         }
 
         // Step the search forward.
         Model::StepResult result = generator_->getStep();
-        // Null action => continue to the next generator.
+        // Null action => stop the search.
         if (result.action == nullptr) {
-            // Not searching => done.
-            if (status_ != SearchStatus::SEARCHING) {
-                break;
-            }
-            // No more generators left => done.
-            if (iterator_ == generators_.cend()) {
-                status_ = SearchStatus::NEED_HEURISTIC;
-                break;
-            }
-            // Get a new generator and keep searching.
-            generator_ = (*iterator_)->createGenerator(status_, sequence_);
-            iterator_++;
-            continue;
+            break;
         }
 
         if (isFirst) {
@@ -112,18 +132,17 @@ void StagedSearchInstance::extendSequence() {
         currentEntry->transitionParameters_ = std::move(result.transitionParameters);
         currentEntry->observation_ = result.observation->copy();
 
-        // Update with the immediate reward.
+        // Create the child belief node and do an update.
+        BeliefNode *nextNode = solver_->getPolicy()->createOrGetChild(currentNode, *result.action,
+                        *result.observation);
         solver_->updateImmediate(currentNode, *result.action, *result.observation, result.reward,
                 +1);
-
-        // Now we make a new history entry!
-        // Add the next state to the pool
-        StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(*result.nextState);
-        // Step forward in the history, and update the belief node.
-        currentEntry = sequence_->addEntry(nextStateInfo);
-        BeliefNode *nextNode = solver_->getPolicy()->createOrGetChild(currentNode, *result.action,
-                *result.observation);
         currentNode = nextNode;
+
+        // Now we create a new history entry and step the history forward.
+        StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(*result.nextState);
+        currentEntry = sequence_->addEntry(nextStateInfo);
+        currentEntry->registerNode(currentNode);
 
         if (result.isTerminal) {
             status_ = SearchStatus::FINISHED;
@@ -132,17 +151,21 @@ void StagedSearchInstance::extendSequence() {
     }
 
     // If we require a heuristic estimate, calculate it.
-    if (status_ == SearchStatus::NEED_HEURISTIC) {
-        currentEntry->immediateReward_ = heuristic_(currentEntry);
+    if (status_ == SearchStatus::STAGE_COMPLETE) {
+        currentEntry->immediateReward_ = heuristic_->getHeuristicValue(currentEntry);
         // Use the heuristic value to update the estimate of the parent belief node.
         solver_->updateEstimate(currentNode, currentEntry->immediateReward_, 0);
         status_ = SearchStatus::FINISHED;
+    } else if (status_ == SearchStatus::FINISHED) {
+        // Finished normally; no problems.
     } else if (status_ == SearchStatus::UNINITIALIZED) {
-        debug::show_message("ERROR: Search algorithm could not initialize!?");
+        debug::show_message("ERROR: Search algorithm could not initialize.");
+    } else if (status_ == SearchStatus::INITIAL) {
+        debug::show_message("ERROR: Search algorithm initialized but did not run.");
     } else if (status_ == SearchStatus::ERROR) {
         debug::show_message("ERROR: Error in search algorithm!");
-    } else if (status_ != SearchStatus::FINISHED) {
-        debug::show_message("ERROR: Search failed to complete!");
+    } else {
+        debug::show_message("ERROR: Invalid search status.");
     }
 }
 } /* namespace solver */
