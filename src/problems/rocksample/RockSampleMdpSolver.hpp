@@ -29,7 +29,8 @@ public:
     /** Solves the MDP. */
     void solve();
 
-    double getHeuristicValue(solver::HistoryEntry const *entry) override;
+    double getHeuristicValue(solver::HistoryEntry const *entry,
+            solver::State const *state, solver::HistoricalData const *data) override;
 
     /** Calculates the exact value for the given state. */
     double getQValue(RockSampleState const &state) const;

@@ -54,8 +54,9 @@ void RockSampleMdpSolver::solve() {
     }
 }
 
-double RockSampleMdpSolver::getHeuristicValue(solver::HistoryEntry const *entry) {
-    return getQValue(static_cast<RockSampleState const &>(*entry->getState()));
+double RockSampleMdpSolver::getHeuristicValue(solver::HistoryEntry const */*entry*/,
+        solver::State const *state, solver::HistoricalData const */*data*/) {
+    return getQValue(static_cast<RockSampleState const &>(*state));
 }
 
 double RockSampleMdpSolver::getQValue(RockSampleState const &state) const {

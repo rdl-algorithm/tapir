@@ -36,7 +36,8 @@ public:
     virtual ~NnRolloutGenerator() = default;
     _NO_COPY_OR_MOVE(NnRolloutGenerator);
 
-    virtual Model::StepResult getStep() override;
+    virtual Model::StepResult getStep(HistoryEntry const *entry,
+            State const *state, HistoricalData const *data) override;
 private:
     HistorySequence *sequence_;
     Solver *solver_;

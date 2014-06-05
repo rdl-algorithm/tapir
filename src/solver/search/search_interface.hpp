@@ -42,58 +42,45 @@ protected:
 
 class StepGenerator {
 public:
-    StepGenerator(SearchStatus &status);
+    StepGenerator();
     virtual ~StepGenerator() = default;
     _NO_COPY_OR_MOVE(StepGenerator);
 
+    virtual void initialise(SearchStatus &status,
+            HistoryEntry const *entry,
+            State const *state,
+            HistoricalData const *data);
+
     /** Returns the result of an additional step in the simulation;
      * a null action ends the simulation. */
-    virtual Model::StepResult getStep() = 0;
+    virtual Model::StepResult getStep(HistoryEntry const *entry,
+            State const *state, HistoricalData const *data) = 0;
 protected:
-    SearchStatus &status_;
-};
-
-class StepGeneratorFactory {
-public:
-    StepGeneratorFactory() = default;
-    virtual ~StepGeneratorFactory() = default;
-
-    /** Makes a new step generator for the given sequence. */
-    virtual std::unique_ptr<StepGenerator> createGenerator(SearchStatus &status,
-            HistorySequence *sequence) = 0;
+    SearchStatus *status_;
 };
 
 class StagedStepGenerator: public StepGenerator {
 public:
-    StagedStepGenerator(SearchStatus &status, HistorySequence *sequence,
-            std::vector<std::unique_ptr<StepGeneratorFactory>> const &generatorSequence);
+    StagedStepGenerator(std::vector<std::unique_ptr<StepGenerator>> const &generators);
     virtual ~StagedStepGenerator() = default;
     _NO_COPY_OR_MOVE(StagedStepGenerator);
 
-    virtual Model::StepResult getStep() override;
-private:
-    HistorySequence *sequence_;
-    std::vector<std::unique_ptr<StepGeneratorFactory>> const &generatorSequence_;
-    std::vector<std::unique_ptr<StepGeneratorFactory>>::const_iterator iterator_;
-    std::unique_ptr<StepGenerator> generator_;
-};
+    virtual void initialise(SearchStatus &status, HistoryEntry const *entry,
+            State const *state,
+            HistoricalData const *data);
 
-class StagedStepGeneratorFactory : public StepGeneratorFactory {
-public:
-    StagedStepGeneratorFactory(
-            std::vector<std::unique_ptr<StepGeneratorFactory>> generatorSequence);
-    virtual ~StagedStepGeneratorFactory() = default;
-
-    virtual std::unique_ptr<StepGenerator> createGenerator(SearchStatus &status,
-                HistorySequence *sequence) override;
+    virtual Model::StepResult getStep(HistoryEntry const *entry,
+            State const *state, HistoricalData const *data) override;
 private:
-    std::vector<std::unique_ptr<StepGeneratorFactory>> generatorSequence_;
+    std::vector<std::unique_ptr<StepGenerator>> const &generators;
+    std::vector<std::unique_ptr<StepGenerator>>::const_iterator iterator_;
+    StepGenerator *generator_;
 };
 
 class BasicSearchStrategy: public SearchStrategy {
 public:
     BasicSearchStrategy(Solver *solver,
-            std::unique_ptr<StepGeneratorFactory> generatorFactory,
+            std::unique_ptr<StepGenerator> generators,
             std::unique_ptr<Heuristic> heuristic);
     virtual ~BasicSearchStrategy() = default;
     _NO_COPY_OR_MOVE(BasicSearchStrategy);
@@ -102,7 +89,7 @@ public:
             HistorySequence *sequence, long maximumDepth) override;
 private:
     Solver *solver_;
-    std::unique_ptr<StepGeneratorFactory> generatorFactory_;
+    std::unique_ptr<StepGenerator> generators_;
     std::unique_ptr<Heuristic> heuristic_;
 };
 
@@ -110,7 +97,7 @@ class BasicSearchInstance: public SearchInstance {
 public:
     BasicSearchInstance(SearchStatus &status, HistorySequence *sequence, long maximumDepth,
             Solver *solver,
-            std::unique_ptr<StepGenerator> generator,
+            std::unique_ptr<StepGenerator> const &generators,
             Heuristic *heuristic);
     virtual ~BasicSearchInstance() = default;
     _NO_COPY_OR_MOVE(BasicSearchInstance);
@@ -121,7 +108,7 @@ private:
     long maximumDepth_;
     Solver *solver_;
     Model *model_;
-    std::unique_ptr<StepGenerator> generator_;
+    StepGenerator *generator_;
     Heuristic *heuristic_;
 };
 } /* namespace solver */

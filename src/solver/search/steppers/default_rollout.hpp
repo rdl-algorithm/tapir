@@ -29,7 +29,8 @@ public:
     virtual ~DefaultRolloutGenerator() = default;
     _NO_COPY_OR_MOVE(DefaultRolloutGenerator);
 
-    virtual Model::StepResult getStep() override;
+    virtual Model::StepResult getStep(HistoryEntry const *entry,
+            State const *state, HistoricalData const *data) override;
 
 private:
     HistorySequence *sequence_;

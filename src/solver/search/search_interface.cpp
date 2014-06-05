@@ -152,7 +152,8 @@ void BasicSearchInstance::extendSequence() {
 
     // If we require a heuristic estimate, calculate it.
     if (status_ == SearchStatus::STAGE_COMPLETE) {
-        currentEntry->immediateReward_ = heuristic_->getHeuristicValue(currentEntry);
+        currentEntry->immediateReward_ = heuristic_->getHeuristicValue(currentEntry,
+                currentEntry->getState(), currentNode->getHistoricalData());
         // Use the heuristic value to update the estimate of the parent belief node.
         solver_->updateEstimate(currentNode, currentEntry->immediateReward_, 0);
         status_ = SearchStatus::FINISHED;
