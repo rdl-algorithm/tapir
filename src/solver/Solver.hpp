@@ -91,6 +91,9 @@ public:
     /** Shows a belief node in a nice, readable way. */
     void printBelief(BeliefNode *belief, std::ostream &os);
 
+    /** Prints a compact representation of the entire tree. */
+    void printTree(std::ostream &os);
+
     /* ------------------ Tree backup methods ------------------- */
     /** Returns true iff the tree has been properly backed up. */
     bool isBackedUp() const;

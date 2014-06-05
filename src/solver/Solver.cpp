@@ -296,6 +296,9 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     }
 }
 
+void Solver::printTree(std::ostream &os) {
+}
+
 
 /* ------------------ Tree backup methods ------------------- */
 bool Solver::isBackedUp() const {
