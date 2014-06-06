@@ -6,7 +6,7 @@
 #include "solver/HistorySequence.hpp"
 #include "solver/Solver.hpp"
 
-#include "solver/action-choosers/choosers.hpp"
+#include "solver/search/action-choosers/choosers.hpp"
 
 #include "solver/mappings/actions/ActionMapping.hpp"
 

@@ -16,7 +16,6 @@
 namespace solver {
 class ActionPool;
 class BeliefNode;
-class ActionChoosingStrategy;
 class EstimationStrategy;
 class HistoricalData;
 class HistoryCorrector;
@@ -76,8 +75,6 @@ public:
     virtual std::unique_ptr<State> sampleStateUniform() = 0;
     /** Returns true iff the given state is terminal. */
     virtual bool isTerminal(State const &state) = 0;
-    /** Approximates the q-value of a state */
-    virtual double getHeuristicValue(State const &state) = 0;
 
 
     /* -------------------- Black box dynamics ---------------------- */
@@ -155,7 +152,6 @@ public:
     virtual void drawSimulationState(BeliefNode const *belief, State const &/*state*/,
             std::ostream &/*os*/);
 
-
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to
     // be managed in a customizable way.
@@ -177,12 +173,10 @@ public:
     virtual std::unique_ptr<ObservationPool> createObservationPool(Solver *solver) = 0;
 
     /** Creates a search strategy for use by the given solver. */
-    virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver);
+    virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver) = 0;
 
     /** Creates a strategy for estimating the value of belief nodes, for backprop. */
     virtual std::unique_ptr<EstimationStrategy> createEstimationStrategy(Solver *solver);
-    /** Creates a strategy for action selection. */
-    virtual std::unique_ptr<ActionChoosingStrategy> createActionChoosingStrategy(Solver *solver);
 
     /** Creates the historical data for the root node. */
     virtual std::unique_ptr<HistoricalData> createRootHistoricalData();

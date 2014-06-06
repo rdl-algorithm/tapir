@@ -105,8 +105,6 @@ public:
     /* ------------ Control of Q-value calculation and action selection -------------- */
     /** Sets the way in which the q-value for this belief node will be calculated. */
     void setQEstimator(CachedValue<double> *qEstimator);
-    /** Sets the way in which the recommended action for this belief node will be chosen. */
-    void setActionChooser(std::function<std::unique_ptr<Action>(BeliefNode const *)> actionChooser);
 
     /* ------------ Q-value calculation and action selection -------------- */
     /** Returns the recommended action to take from this node. */
@@ -164,9 +162,6 @@ private:
 
     /** Determines the q-value for this node. */
     CachedValue<double> *qEstimator_;
-
-    /** Determines the best action for this node. */
-    std::function<std::unique_ptr<Action>(BeliefNode const *)> actionChooser_;
 };
 } /* namespace solver */
 

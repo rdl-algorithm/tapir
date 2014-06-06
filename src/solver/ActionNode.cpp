@@ -9,8 +9,7 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/Solver.hpp"
 
-#include "solver/action-choosers/choosers.hpp"
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/abstract-problem/Action.hpp"                   // for Action
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
@@ -66,7 +65,6 @@ std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver *solver,
         childNode = observationMap_->createBelief(obs);
         childNode->setMapping(solver->getActionPool()->createActionMapping());
         solver->getEstimationStrategy()->setQEstimator(solver, childNode);
-        solver->getActionChoosingStrategy()->setActionChooser(solver, childNode);
         added = true;
     }
     return std::make_pair(childNode, added);

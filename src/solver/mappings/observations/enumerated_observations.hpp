@@ -20,18 +20,6 @@ class ActionPool;
 class DiscretizedPoint;
 class EnumeratedObservationMapEntry;
 
-class ModelWithEnumeratedObservations : virtual public solver::Model {
-public:
-    ModelWithEnumeratedObservations() = default;
-    virtual ~ModelWithEnumeratedObservations() = default;
-    _NO_COPY_OR_MOVE(ModelWithEnumeratedObservations);
-
-    virtual std::unique_ptr<ObservationPool> createObservationPool(
-            Solver *solver) override;
-    virtual std::vector<std::unique_ptr<DiscretizedPoint>>
-    getAllObservationsInOrder() = 0;
-};
-
 class EnumeratedObservationPool: public solver::ObservationPool {
   public:
     EnumeratedObservationPool(std::vector<std::unique_ptr<DiscretizedPoint>> observations);

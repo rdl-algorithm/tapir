@@ -4,8 +4,7 @@
 #include <unordered_map>
 
 #include "solver/cached_values.hpp"
-#include "solver/action-choosers/choosers.hpp"
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
 
 template<typename TargetType> class Parser;
@@ -157,30 +156,6 @@ public:
     RobustEstimateParser() = default;
     virtual ~RobustEstimateParser() = default;
     virtual std::unique_ptr<solver::EstimationStrategy> parse(solver::Solver *solver,
-            std::vector<std::string> args) override;
-};
-
-class MaxChooserParser: public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
-public:
-    MaxChooserParser() = default;
-    virtual ~MaxChooserParser() = default;
-    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(solver::Solver *solver,
-            std::vector<std::string> args) override;
-};
-
-class RobustChooserParser: public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
-public:
-    RobustChooserParser() = default;
-    virtual ~RobustChooserParser() = default;
-    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(solver::Solver *solver,
-            std::vector<std::string> args) override;
-};
-
-class UcbChooserParser: public Parser<std::unique_ptr<solver::ActionChoosingStrategy>> {
-public:
-    UcbChooserParser() = default;
-    virtual ~UcbChooserParser() = default;
-    virtual std::unique_ptr<solver::ActionChoosingStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 #endif /* STRATEGY_PARSERS_HPP_ */

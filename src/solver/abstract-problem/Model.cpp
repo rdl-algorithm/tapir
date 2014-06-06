@@ -12,10 +12,9 @@
 #include "solver/abstract-problem/State.hpp"                    // for State
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/TransitionParameters.hpp"
+#include "solver/abstract-problem/heuristics/heuristics.hpp"
 
-#include "solver/action-choosers/choosers.hpp"
-
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/actions/ActionPool.hpp"
@@ -30,7 +29,6 @@
 
 #include "solver/search/search_interface.hpp"
 #include "solver/search/steppers/ucb_search.hpp"
-#include "solver/search/heuristics/heuristics.hpp"
 
 #include "solver/serialization/Serializer.hpp"
 
@@ -122,20 +120,8 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) 
     return std::make_unique<DefaultHistoryCorrector>(solver);
 }
 
-std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
-    using namespace std::placeholders;
-    return std::make_unique<BasicSearchStrategy>(solver,
-            std::make_unique<UcbStepGeneratorFactory>(solver, 1.0),
-            std::make_unique<DefaultHeuristic>(this));
-}
-
-
 std::unique_ptr<EstimationStrategy> Model::createEstimationStrategy(Solver */*solver*/) {
     return std::make_unique<EstimationFunction>(estimators::average_q_value);
-}
-
-std::unique_ptr<ActionChoosingStrategy> Model::createActionChoosingStrategy(Solver */*solver*/) {
-    return std::make_unique<ActionChoosingFunction>(choosers::max_action);
 }
 
 std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {

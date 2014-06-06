@@ -1,4 +1,4 @@
-#include "solver/action-choosers/choosers.hpp"
+#include "solver/search/action-choosers/choosers.hpp"
 
 #include "solver/BeliefNode.hpp"
 
@@ -64,13 +64,4 @@ std::unique_ptr<Action> ucb_action(BeliefNode const *node, double explorationCoe
     return std::move(ucbAction);
 }
 } /* namespace choosers */
-
-ActionChoosingFunction::ActionChoosingFunction(
-        std::function<std::unique_ptr<Action>(BeliefNode const *)> function) :
-            function_(function) {
-}
-
-void ActionChoosingFunction::setActionChooser(Solver */*solver*/, BeliefNode *node) {
-    node->setActionChooser(function_);
-}
 } /* namespace solver */

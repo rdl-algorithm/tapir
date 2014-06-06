@@ -9,8 +9,7 @@
 #include "global.hpp"                     // for RandomGenerator
 
 #include "solver/abstract-problem/Model.hpp"             // for Model
-#include "solver/action-choosers/choosers.hpp"
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
 
 #include "problems/shared/parsers.hpp"
@@ -29,10 +28,8 @@ public:
                 heuristicParsers_(),
                 searchParsers_(),
                 estimationParsers_(),
-                actionChoosingParsers_(),
                 searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
                 estimatorString_(vm["ABT.estimator"].as<std::string>()),
-                chooserString_(vm["ABT.chooser"].as<std::string>()),
                 hasColorOutput_(vm["color"].as<bool>()),
                 hasVerboseOutput_(vm["verbose"].as<bool>()) {
 
@@ -51,15 +48,10 @@ public:
         registerEstimationParser("mean", std::make_unique<AverageEstimateParser>());
         registerEstimationParser("max", std::make_unique<MaxEstimateParser>());
         registerEstimationParser("robust", std::make_unique<RobustEstimateParser>());
-
-        registerActionChoosingParser("max", std::make_unique<MaxChooserParser>());
-        registerActionChoosingParser("robust", std::make_unique<RobustChooserParser>());
-        registerActionChoosingParser("ucb", std::make_unique<UcbChooserParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
-    _NO_COPY_OR_MOVE(ModelWithProgramOptions)
-    ;
+    _NO_COPY_OR_MOVE(ModelWithProgramOptions);
 
 // Simple getters
     virtual RandomGenerator *getRandomGenerator() override {
@@ -101,10 +93,6 @@ public:
             std::unique_ptr<Parser<std::unique_ptr<solver::EstimationStrategy>> > parser) {
         estimationParsers_.addParser(name, std::move(parser));
     }
-    virtual void registerActionChoosingParser(std::string name,
-            std::unique_ptr<Parser<std::unique_ptr<solver::ActionChoosingStrategy>> > parser) {
-        actionChoosingParsers_.addParser(name, std::move(parser));
-    }
 
     virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(solver::Solver *solver)
             override {
@@ -113,10 +101,6 @@ public:
     virtual std::unique_ptr<solver::EstimationStrategy> createEstimationStrategy(
             solver::Solver *solver) override {
         return estimationParsers_.parse(solver, estimatorString_);
-    }
-    virtual std::unique_ptr<solver::ActionChoosingStrategy> createActionChoosingStrategy(
-            solver::Solver *solver) override {
-        return actionChoosingParsers_.parse(solver, chooserString_);
     }
 
 private:
@@ -134,11 +118,9 @@ private:
     ParserSet<std::unique_ptr<solver::Heuristic>> heuristicParsers_;
     ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
     ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
-    ParserSet<std::unique_ptr<solver::ActionChoosingStrategy>> actionChoosingParsers_;
 
     std::string searchStrategyString_;
     std::string estimatorString_;
-    std::string chooserString_;
 
     bool hasColorOutput_;
     bool hasVerboseOutput_;

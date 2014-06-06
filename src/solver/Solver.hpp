@@ -57,8 +57,6 @@ public:
 
     /** Returns the estimation strategy. */
     EstimationStrategy *getEstimationStrategy() const;
-    /** Returns the action selection strategy. */
-    ActionChoosingStrategy *getActionChoosingStrategy() const;
 
     /** Returns the serializer for this solver. */
     Serializer *getSerializer() const;
@@ -172,8 +170,6 @@ private:
 
     /** The strategy for estimating the value of a belief node based on actions from it. */
     std::unique_ptr<EstimationStrategy> estimationStrategy_;
-    /** The strategy for choosing which action to take at a given belief node. */
-    std::unique_ptr<ActionChoosingStrategy> actionChoosingStrategy_;
 
     /** The nodes to be updated, sorted by depth (deepest first) */
     std::map<int, std::set<BeliefNode *>, std::greater<int>> nodesToBackup_;

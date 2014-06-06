@@ -20,16 +20,6 @@ class ActionPool;
 class DiscreteObservationMapEntry;
 class DiscretePoint;
 
-class ModelWithDiscreteObservations : virtual public solver::Model {
-public:
-    ModelWithDiscreteObservations() = default;
-    virtual ~ModelWithDiscreteObservations() = default;
-    _NO_COPY_OR_MOVE(ModelWithDiscreteObservations);
-
-    virtual std::unique_ptr<ObservationPool> createObservationPool(
-            Solver *solver) override;
-};
-
 class DiscreteObservationPool: public solver::ObservationPool {
   public:
     DiscreteObservationPool() = default;

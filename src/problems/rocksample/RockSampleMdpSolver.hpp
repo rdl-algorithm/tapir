@@ -11,7 +11,7 @@
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/parsers.hpp"
 
-#include "solver/search/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/heuristics.hpp"
 
 namespace rocksample {
 class RockSampleModel;

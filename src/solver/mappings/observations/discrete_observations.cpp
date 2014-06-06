@@ -19,12 +19,6 @@
 #include "global.hpp"
 
 namespace solver {
-/* ------------------- ModelWithDiscreteObservations ------------------- */
-std::unique_ptr<ObservationPool> ModelWithDiscreteObservations::createObservationPool(
-        Solver */*solver*/) {
-    return std::make_unique<DiscreteObservationPool>();
-}
-
 /* --------------------- DiscreteObservationPool --------------------- */
 std::unique_ptr<ObservationMapping> DiscreteObservationPool::createObservationMapping() {
     return std::make_unique<DiscreteObservationMap>();

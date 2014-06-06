@@ -43,7 +43,6 @@ BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             actionMap_(nullptr),
             cachedValues_(),
             qEstimator_(nullptr),
-            actionChooser_(nullptr)
             {
 }
 
@@ -154,13 +153,10 @@ void BeliefNode::removeCachedValue(BaseCachedValue *value) {
 void BeliefNode::setQEstimator(CachedValue<double> *qEstimator) {
     qEstimator_ = qEstimator;
 }
-void BeliefNode::setActionChooser(std::function<std::unique_ptr<Action>(BeliefNode const *)> actionChooser) {
-    actionChooser_ = actionChooser;
-}
 
 /* ------------ Q-value calculation and action selection -------------- */
 std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
-    return actionChooser_(this);
+    return choosers::max_action(this);
 }
 double BeliefNode::getQValue() const {
     return qEstimator_->getCache();

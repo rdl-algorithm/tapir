@@ -2,7 +2,7 @@ MODULE_NAME = search
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS := heuristics steppers
+CHILD_FOLDERS := steppers action-choosers
 
 include .make/template.mk
 include .make/build.mk   

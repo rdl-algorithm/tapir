@@ -17,17 +17,6 @@ namespace solver {
 class ActionPool;
 class BeliefNode;
 
-class ModelWithApproximateObservations : virtual public solver::Model {
-public:
-    ModelWithApproximateObservations() = default;
-    virtual ~ModelWithApproximateObservations() = default;
-    _NO_COPY_OR_MOVE(ModelWithApproximateObservations);
-
-    virtual std::unique_ptr<ObservationPool> createObservationPool(
-            Solver *solver) override;
-    virtual double getMaxObservationDistance() = 0;
-};
-
 class ApproximateObservationPool: public solver::ObservationPool {
   public:
     ApproximateObservationPool(double maxDistance);

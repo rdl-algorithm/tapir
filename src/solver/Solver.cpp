@@ -22,8 +22,7 @@
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State, operator<<
 
-#include "solver/action-choosers/choosers.hpp"
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED, ChangeFlags::ADDOBSERVATION, ChangeFlags::ADDOBSTACLE, ChangeFlags::ADDSTATE, ChangeFlags::DELSTATE, ChangeFlags::REWARD, ChangeFlags::TRANSITION
 #include "solver/changes/HistoryCorrector.hpp"
@@ -66,7 +65,6 @@ Solver::Solver(std::unique_ptr<Model> model) :
             historyCorrector_(nullptr),
             searchStrategy_(nullptr),
             estimationStrategy_(nullptr),
-            actionChoosingStrategy_(nullptr),
             nodesToBackup_() {
 }
 
@@ -93,10 +91,6 @@ ObservationPool *Solver::getObservationPool() const {
 
 EstimationStrategy *Solver::getEstimationStrategy() const {
     return estimationStrategy_.get();
-}
-
-ActionChoosingStrategy *Solver::getActionChoosingStrategy() const {
-    return actionChoosingStrategy_.get();
 }
 
 Serializer *Solver::getSerializer() const {
@@ -349,7 +343,6 @@ void Solver::initialize() {
     historyCorrector_ = model_->createHistoryCorrector(this);
     searchStrategy_ = model_->createSearchStrategy(this);
     estimationStrategy_ = model_->createEstimationStrategy(this);
-    actionChoosingStrategy_ = model_->createActionChoosingStrategy(this);
 }
 
 /* ------------------ Episode sampling methods ------------------- */

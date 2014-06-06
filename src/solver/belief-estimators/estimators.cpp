@@ -1,4 +1,4 @@
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/cached_values.hpp"
 #include "solver/BeliefNode.hpp"

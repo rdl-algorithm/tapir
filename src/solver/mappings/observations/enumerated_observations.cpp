@@ -22,12 +22,6 @@
 #include "global.hpp"
 
 namespace solver {
-/* ------------------- ModelWithEnumeratedObservations ------------------- */
-std::unique_ptr<ObservationPool>
-    ModelWithEnumeratedObservations::createObservationPool(Solver */*solver*/) {
-    return std::make_unique<EnumeratedObservationPool>(getAllObservationsInOrder());
-}
-
 /* --------------------- EnumeratedObservationPool --------------------- */
 EnumeratedObservationPool::EnumeratedObservationPool(
         std::vector<std::unique_ptr<DiscretizedPoint>> observations) :

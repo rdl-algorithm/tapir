@@ -18,13 +18,6 @@
 #include "global.hpp"
 
 namespace solver {
-/* ------------------- ModelWithApproximateObservations ------------------- */
-std::unique_ptr<ObservationPool> ModelWithApproximateObservations::createObservationPool(
-        Solver */*solver*/) {
-    return std::make_unique<ApproximateObservationPool>(
-            getMaxObservationDistance());
-}
-
 /* --------------------- ApproximateObservationPool --------------------- */
 ApproximateObservationPool::ApproximateObservationPool(double maxDistance) :
         maxDistance_(maxDistance) {

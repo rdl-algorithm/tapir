@@ -11,8 +11,7 @@
 
 #include "solver/abstract-problem/Observation.hpp"
 
-#include "solver/action-choosers/choosers.hpp"
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/actions/ActionPool.hpp"
@@ -87,7 +86,6 @@ void BeliefTree::initializeRoot() {
     root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
     root_->setMapping(solver_->getActionPool()->createActionMapping());
     solver_->getEstimationStrategy()->setQEstimator(solver_, root_.get());
-    solver_->getActionChoosingStrategy()->setActionChooser(solver_, root_.get());
     root_->getMapping()->initialize();
 }
 

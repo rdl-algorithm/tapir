@@ -7,16 +7,15 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/Solver.hpp"
 
-#include "solver/action-choosers/choosers.hpp"
+#include "solver/abstract-problem/heuristics/heuristics.hpp"
 
-#include "solver/belief-q-estimators/estimators.hpp"
+#include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/search/search_interface.hpp"
 #include "solver/search/exp3.hpp"
 #include "solver/search/steppers/ucb_search.hpp"
 #include "solver/search/steppers/default_rollout.hpp"
 #include "solver/search/steppers/nn_rollout.hpp"
-#include "solver/search/heuristics/heuristics.hpp"
 
 std::pair<std::string, std::vector<std::string>> split_function(std::string text) {
     std::size_t i0 = text.find('(');
@@ -143,22 +142,4 @@ std::unique_ptr<solver::EstimationStrategy> MaxEstimateParser::parse(solver::Sol
 std::unique_ptr<solver::EstimationStrategy> RobustEstimateParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
     return std::make_unique<solver::EstimationFunction>(solver::estimators::robust_q_value);
-}
-
-std::unique_ptr<solver::ActionChoosingStrategy> MaxChooserParser::parse(solver::Solver */*solver*/,
-        std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::ActionChoosingFunction>(solver::choosers::max_action);
-}
-std::unique_ptr<solver::ActionChoosingStrategy> RobustChooserParser::parse(
-        solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::ActionChoosingFunction>(solver::choosers::robust_action);
-
-}
-std::unique_ptr<solver::ActionChoosingStrategy> UcbChooserParser::parse(solver::Solver */*solver*/,
-        std::vector<std::string> args) {
-    using namespace std::placeholders;
-    double explorationCoefficient;
-    std::stringstream(args[0]) >> explorationCoefficient;
-    return std::make_unique<solver::ActionChoosingFunction>(
-            std::bind(solver::choosers::ucb_action, _1, explorationCoefficient));
 }
