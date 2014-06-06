@@ -44,10 +44,10 @@ Model::StepResult UcbStepGenerator::getStep() {
 
     State const &currentState = *currentEntry->getState();
     std::unique_ptr<Action> action;
-    if (mapping->hasUnvisitedActions()) {
+    if (mapping->hasActionsToTry()) {
         // If there are unvisited actions, we take one, and we're finished with UCB.
         choseUnvisitedAction_ = true;
-        action = mapping->getRandomUnvisitedAction();
+        action = mapping->getNextActionToTry();
     } else {
         // Use UCB to get the best action.
         action = choosers::ucb_action(currentNode, explorationCoefficient_);

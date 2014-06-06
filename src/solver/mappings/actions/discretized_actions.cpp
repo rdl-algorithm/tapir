@@ -21,34 +21,15 @@
 #include "ActionPool.hpp"
 
 namespace solver {
-/* ------------------- ModelWithDiscretizedActions ------------------- */
-std::unique_ptr<ActionPool>
-    ModelWithDiscretizedActions::createActionPool(Solver */*solver*/) {
-    return std::make_unique<DiscretizedActionPool>(this, getNumberOfBins());
-}
-
-/* --------------------- DiscretizedActionPool --------------------- */
-DiscretizedActionPool::DiscretizedActionPool(
-        ModelWithDiscretizedActions *model, long numberOfBins) :
-                model_(model),
-                numberOfBins_(numberOfBins) {
-}
-
 std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping() {
-    return std::make_unique<DiscretizedActionMap>(model_, numberOfBins_);
-}
-
-std::unique_ptr<Action> DiscretizedActionPool::getDefaultRolloutAction(HistoricalData */*data*/) const {
-    long binNumber = std::uniform_int_distribution<long>(0, numberOfBins_ - 1)(
-            (*model_->getRandomGenerator()));
-    return model_->sampleAnAction(binNumber);
+    return std::make_unique<DiscretizedActionMap>(this, numberOfBins_);
 }
 
 /* ---------------------- DiscretizedActionMap ---------------------- */
-DiscretizedActionMap::DiscretizedActionMap(ModelWithDiscretizedActions *model,
+DiscretizedActionMap::DiscretizedActionMap(DiscretizedActionPool *pool,
         long numberOfBins) :
                 owningBeliefNode_(nullptr),
-                model_(model),
+                pool_(pool),
                 numberOfBins_(numberOfBins),
                 entries_(numberOfBins_),
                 nChildren_(0),
@@ -135,7 +116,7 @@ bool DiscretizedActionMap::hasUnvisitedActions() const {
 std::vector<std::unique_ptr<Action>> DiscretizedActionMap::getUnvisitedActions() const {
     std::vector<std::unique_ptr<Action>> actions;
     for (long binNumber : binsToTry_) {
-        actions.push_back(std::move(model_->sampleAnAction(binNumber)));
+        actions.push_back(std::move(pool_->sampleAnAction(binNumber)));
     }
     return actions;
 }
@@ -166,7 +147,7 @@ ActionMapping *DiscretizedActionMapEntry::getMapping() const {
     return map_;
 }
 std::unique_ptr<Action> DiscretizedActionMapEntry::getAction() const {
-    return map_->model_->sampleAnAction(binNumber_);
+    return map_->pool_->sampleAnAction(binNumber_);
 }
 ActionNode *DiscretizedActionMapEntry::getActionNode() const {
     return childNode_.get();

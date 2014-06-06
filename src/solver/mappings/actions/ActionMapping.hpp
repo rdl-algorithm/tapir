@@ -59,11 +59,10 @@ public:
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
     /* ------------------ Methods for unvisited actions ------------------- */
-    virtual bool hasUnvisitedActions() const = 0;
-    /** Returns the unvisited actions (that should be visited) for this node. */
-    virtual std::vector<std::unique_ptr<Action>> getUnvisitedActions() const = 0;
-    /** Returns a random unvisited action. */
-    virtual std::unique_ptr<Action> getRandomUnvisitedAction() const = 0;
+    /** Returns true iff this mapping still has actions that remain to be tried. */
+    virtual bool hasActionsToTry() const = 0;
+    /** Returns the next action to be tried for this node. */
+    virtual std::unique_ptr<Action> getNextActionToTry() const = 0;
 
     /* -------------- Retrieval of general statistics. ---------------- */
     /** Returns the total number of times children have been visited. */

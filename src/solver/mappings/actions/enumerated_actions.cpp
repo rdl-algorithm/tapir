@@ -20,9 +20,9 @@
 
 namespace solver {
 /* ------------------- ModelWithEnumeratedActions ------------------- */
-ModelWithEnumeratedActions::ModelWithEnumeratedActions() :
-        ModelWithDiscretizedActions(),
-        allActions_() {
+EnumeratedActionPool::EnumeratedActionPool(
+        std::vector<std::unique_ptr<DiscretizedPoint>> allActions) :
+        allActions_(allActions) {
 }
 
 long ModelWithEnumeratedActions::getNumberOfBins() {
@@ -32,11 +32,6 @@ long ModelWithEnumeratedActions::getNumberOfBins() {
 std::unique_ptr<Action> ModelWithEnumeratedActions::sampleAnAction(
         long binNumber) {
     return allActions_[binNumber]->copy();
-}
-
-void ModelWithEnumeratedActions::setAllActions(
-        std::vector<std::unique_ptr<DiscretizedPoint>> allActions) {
-    allActions_ = std::move(allActions);
 }
 } /* namespace solver */
 

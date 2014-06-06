@@ -22,13 +22,6 @@ public:
     virtual ~ActionPool() = default;
     /** Creates a default action mapping. */
     virtual std::unique_ptr<ActionMapping> createActionMapping() = 0;
-
-    /** Returns an action based on a default history-based rollout strategy;
-     * an implementation is required if you want to use
-     * DefaultRolloutStrategy. */
-    virtual std::unique_ptr<Action> getDefaultRolloutAction(HistoricalData */*data*/) const {
-        return nullptr;
-    }
 };
 } /* namespace solver */
 

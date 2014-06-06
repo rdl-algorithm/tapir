@@ -3,7 +3,8 @@
 
 #include "global.hpp"
 
-#include "solver/search/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/heuristics.hpp"
+
 #include "solver/search/search_interface.hpp"
 
 namespace solver {

@@ -1,8 +1,17 @@
 #include "solver/abstract-problem/BasicModel.hpp"
 
 namespace solver {
+double BasicModel::getHeuristicValue(HistoricalData const */*data*/,
+        State const */*state*/) {
+    return 0;
+}
+
+/** Allows for a basic rollout strategy based on */
+virtual std::unique_ptr<Action> getRolloutAction(HistoricalData const *data,
+        State const *state);
+
 virtual std::unique_ptr<ActionPool> BasicModel::createActionPool(Solver *solver) {
-    return std::make_unique<
+    return std::make_unique<EnumeratedActionPool
 
 }
 

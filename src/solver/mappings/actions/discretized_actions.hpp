@@ -21,28 +21,16 @@ class ActionPool;
 class DiscretizedPoint;
 class DiscretizedActionMapEntry;
 
-class ModelWithDiscretizedActions : virtual public solver::Model {
-public:
-    ModelWithDiscretizedActions() = default;
-    virtual ~ModelWithDiscretizedActions() = default;
-    _NO_COPY_OR_MOVE(ModelWithDiscretizedActions);
-
-    virtual std::unique_ptr<ActionPool> createActionPool(Solver *solver) override;
-    virtual long getNumberOfBins() = 0;
-    virtual std::unique_ptr<Action> sampleAnAction(long binNumber) = 0;
-};
-
 class DiscretizedActionPool: public solver::ActionPool {
   public:
-    DiscretizedActionPool(ModelWithDiscretizedActions *model, long numberOfBins);
+    DiscretizedActionPool() = default;
     virtual ~DiscretizedActionPool() = default;
     _NO_COPY_OR_MOVE(DiscretizedActionPool);
 
+    virtual long getNumberOfBins() = 0;
+    virtual std::unique_ptr<Action> sampleAnAction(long binNumber) = 0;
+
     virtual std::unique_ptr<ActionMapping> createActionMapping() override;
-    virtual std::unique_ptr<Action> getDefaultRolloutAction(HistoricalData *data) const override;
-  private:
-    ModelWithDiscretizedActions *model_;
-    long numberOfBins_;
 };
 
 class DiscretizedActionMap: public solver::ActionMapping {
@@ -50,7 +38,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     friend class DiscretizedActionTextSerializer;
     friend class DiscretizedActionMapEntry;
 
-    DiscretizedActionMap(ModelWithDiscretizedActions *model, long numberOfBins);
+    DiscretizedActionMap(Model *model, DiscretizedActionPool *pool, long numberOfBins);
 
     /* -------------- Association with a belief node ---------------- */
     virtual void setOwner(BeliefNode *owner) override;
@@ -90,7 +78,8 @@ class DiscretizedActionMap: public solver::ActionMapping {
 
   protected:
     BeliefNode *owningBeliefNode_;
-    ModelWithDiscretizedActions *model_;
+    Model *model_;
+    DiscretizedActionPool *pool_;
     long numberOfBins_;
 
     std::vector<DiscretizedActionMapEntry> entries_;

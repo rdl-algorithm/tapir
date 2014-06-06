@@ -20,16 +20,15 @@
 namespace solver {
 class ActionPool;
 
-class ModelWithEnumeratedActions : virtual public solver::ModelWithDiscretizedActions {
+class EnumeratedActionPool : virtual public solver::DiscretizedActionPool {
   public:
-    ModelWithEnumeratedActions();
-    virtual ~ModelWithEnumeratedActions() = default;
-    _NO_COPY_OR_MOVE(ModelWithEnumeratedActions);
+    EnumeratedActionPool(std::vector<std::unique_ptr<DiscretizedPoint>> allActions);
+    virtual ~EnumeratedActionPool() = default;
+    _NO_COPY_OR_MOVE(EnumeratedActionPool);
 
     virtual long getNumberOfBins() override;
     virtual std::unique_ptr<Action> sampleAnAction(long binNumber) override;
 
-    virtual void setAllActions(std::vector<std::unique_ptr<DiscretizedPoint>> allActions);
   private:
     std::vector<std::unique_ptr<DiscretizedPoint>> allActions_;
 };
