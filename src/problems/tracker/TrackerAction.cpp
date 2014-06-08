@@ -39,11 +39,11 @@ void TrackerAction::print(std::ostream &os) const {
     case ActionType::TURN_LEFT:
         os << "TURN_LEFT";
         break;
-    case ActionType::REVERSE:
-        os << "REVERSE";
-        break;
     case ActionType::WAIT:
         os << "WAIT";
+        break;
+    case ActionType::REVERSE:
+        os << "REVERSE";
         break;
     default:
         os << "ERROR-" << static_cast<long>(actionType_);

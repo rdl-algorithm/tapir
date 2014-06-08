@@ -156,6 +156,15 @@ class TrackerModel: virtual public ModelWithProgramOptions,
 
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
 
+    /** Gets the expected coordinates after taking the given action;
+     *  this may result in invalid coordinates.
+     */
+    GridPosition getNewPos(GridPosition const &position, int yaw, ActionType action);
+    int getNewYaw(int yaw, ActionType action);
+
+    /** Returns true iff the given GridPosition form a valid position. */
+    bool isValid(GridPosition const &pos);
+
   private:
 
     /** Generates a random empty grid cell. */
@@ -175,13 +184,6 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     /** Generates vector of possible target's actions. */
     std::vector<ActionType> makeTargetActions();
 
-    /** Gets the expected coordinates after taking the given action;
-     *  this may result in invalid coordinates.
-     */
-    GridPosition getNewPos(GridPosition const &position, int yaw, ActionType action);
-    int getNewYaw(int yaw, ActionType action);
-    /** Returns true iff the given GridPosition form a valid position. */
-    bool isValid(GridPosition const &pos);
     /** Returns true iff target is visible from robot */
     bool isTargetVisible(GridPosition const &robotPos, int robotYaw, GridPosition const &targetPos);
 
@@ -191,6 +193,8 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     double waitCost_;
     /** The penalty for being in front of human */
     double obstructCost_;
+    /** The penalty for colliding with obstacle */
+    double collideCost_;
     /** The reward for keeping the target in view. */
     double visibleReward_;
 

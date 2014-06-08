@@ -42,7 +42,7 @@
 #include "TrackerAction.hpp"
 #include "TrackerObservation.hpp"
 #include "TrackerState.hpp"
-#include "TrackerRos.hpp"   // getCurrYaw45(), getCurrCell()
+#include "TrackerRos.hpp"   // getCurrYaw45(), getCurrCell(), isRayBlocked
 
 using std::cout;
 using std::endl;
@@ -55,12 +55,13 @@ TrackerModel::TrackerModel(RandomGenerator *randGen, po::variables_map vm) :
 	moveCost_(vm["problem.moveCost"].as<double>()),
     waitCost_(vm["problem.waitCost"].as<double>()),
     obstructCost_(vm["problem.obstructCost"].as<double>()),
+    collideCost_(vm["problem.collideCost"].as<double>()),
 	visibleReward_(vm["problem.visibleReward"].as<double>()),
 	nRows_(0), // to be updated
 	nCols_(0), // to be updated
     mapText_(), // will be pushed to
     envMap_(),  // will be pushed to
-    nActions_(5),
+    nActions_(4),   // set to 5 to allow reverse
     nStVars_(5),
     minVal_(0),
     maxVal_(visibleReward_)
@@ -265,64 +266,29 @@ bool TrackerModel::isValid(GridPosition const &position) {
 bool TrackerModel::isTargetVisible(GridPosition const &robotPos, int robotYaw,
     GridPosition const &targetPos) {
 
-    // TODO clean this up
+    double rangeSquared = 6  * 6;   // cells squared
+    double viewCone = 22.5 * M_PI/180;    // radians
 
-    double rangeSquared = 8  * 8;   // cells squared
-    double viewCone = 35 * M_PI/180;    // radians
+    if (robotPos == targetPos) {
+        return true;
+    }
 
     // Max distance check
     double di = targetPos.i - robotPos.i;
     double dj = targetPos.j - robotPos.j;
-    if (di * di + dj * dj > rangeSquared)
+    if (di * di + dj * dj > rangeSquared) {
         return false;
+    }
 
     // Angle check 
     double angle = atan2(-di, dj);
-    if (abs(angle - (robotYaw * M_PI/180)) > viewCone)
+    if (abs(angle - (robotYaw * M_PI/180)) > viewCone) {
         return false;
-
-    // TODO a proper test on this...
-    // Obstacles check using Bresenham's line algorithm
-    float x1 = robotPos.j;
-    float y1 = robotPos.i;
-    float x2 = targetPos.j;
-    float y2 = targetPos.i;
-
-    const bool steep = (fabs(y2 - y1) > fabs(x2 - x1));
-    if(steep) {
-        std::swap(x1, y1);
-        std::swap(x2, y2);
     }
- 
-    if(x1 > x2) {
-        std::swap(x1, x2);
-        std::swap(y1, y2);
-    }
- 
-    const float dx = x2 - x1;
-    const float dy = fabs(y2 - y1);
- 
-    float error = dx / 2.0f;
-    const int ystep = (y1 < y2) ? 1 : -1;
-    int y = (int)y1;
- 
-    const int maxX = (int)x2;
- 
-    for(int x=(int)x1; x<maxX; x++) {
-        if(steep) {
-            if (envMap_[y][x] != TrackerCellType::EMPTY)
-                return false;
-        }
-        else {
-            if (envMap_[x][y] != TrackerCellType::EMPTY)
-                return false;
-        }
-        error -= dy;
-        if(error < 0)
-        {
-            y += ystep;
-            error += dx;
-        }
+
+    // Obstruction check
+    if (isRayBlocked(robotPos, targetPos)) {
+        return false;
     }
 
     // All checks passed
@@ -347,18 +313,36 @@ double TrackerModel::generateReward(
     TrackerState tState = static_cast<TrackerState const &>(state);
     GridPosition robotPos(tState.getRobotPos());
     GridPosition targetPos(tState.getTargetPos());
+    int robotYaw = tState.getRobotYaw();
     int targetYaw = tState.getTargetYaw();
-    if (robotPos == targetPos || 
-        robotPos == getNewPos(targetPos, targetYaw, ActionType::FORWARD))
-        reward -= obstructCost_;
-    if (tState.seesTarget())
-        reward += visibleReward_;
 
+    // Cost for obstructing target
+    if (robotPos == targetPos || 
+        robotPos == getNewPos(targetPos, targetYaw, ActionType::FORWARD)) {
+        reward -= obstructCost_;
+    }
+
+    // Reward for seeing target
+    if (tState.seesTarget()) {
+        reward += visibleReward_;
+    }
+
+    // Cost for moving/waiting
     ActionType actionType = (static_cast<TrackerAction const &>(action).getActionType());
-    if (actionType == ActionType::WAIT)
+    if (actionType == ActionType::WAIT) {
         reward -= waitCost_;
-    else
+    } else {
         reward -= moveCost_;
+    }
+
+    // Cost for collision with wall
+    if (actionType == ActionType::FORWARD) {
+        GridPosition newPos = getNewPos(robotPos, robotYaw, actionType);
+        if (!isValid(newPos)) {
+            reward -= collideCost_;
+        }
+    }
+
     return reward;
 }
 

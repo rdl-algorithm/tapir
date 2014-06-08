@@ -14,6 +14,7 @@
 #include "abt/simRosSetObjectPosition.h"
 #include "abt/simRosStartSimulation.h"
 #include "abt/simRosStopSimulation.h"
+#include "abt/simRosGetObjectPose.h"
 
 VrepHelper::VrepHelper():
     running_(false)
@@ -33,6 +34,7 @@ void VrepHelper::setRosNode(ros::NodeHandle *node) {
     copyClient_ = node_->serviceClient<abt::simRosCopyPasteObjects>("vrep/simRosCopyPasteObjects");
     handleClient_ = node_->serviceClient<abt::simRosGetObjectHandle>("vrep/simRosGetObjectHandle");
     moveClient_ = node_->serviceClient<abt::simRosSetObjectPosition>("vrep/simRosSetObjectPosition");
+    poseClient_ = node_->serviceClient<abt::simRosGetObjectPose>("vrep/simRosGetObjectPose");
     infoSub_ = node_->subscribe("/vrep/info", 1, &VrepHelper::infoCallback, this);
 }
 
@@ -104,6 +106,15 @@ long VrepHelper::copyObject(long handle) {
 bool VrepHelper::isRunning() {
     ros::spinOnce();
     return running_;
+}
+
+// Get the pose of an object in VREP simulation
+geometry_msgs::PoseStamped VrepHelper::getPose(long handle) {
+    abt::simRosGetObjectPose poseSrv;
+    poseSrv.request.handle = handle;
+    poseSrv.request.relativeToObjectHandle = -1;
+    poseClient_.call(poseSrv);
+    return poseSrv.response.pose;
 }
 
 /** Callback for /vrep/info topic */

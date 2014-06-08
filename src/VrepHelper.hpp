@@ -3,6 +3,7 @@
 
 #include <string>
 #include <ros/ros.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include "abt/VrepInfo.h"
 
@@ -44,6 +45,9 @@ public:
 	/** Copy an object in VREP simulation. Returns handle of copied object. */
 	long copyObject(long handle);
 
+	// Get the pose of an object in VREP simulation
+	geometry_msgs::PoseStamped getPose(long handle);
+
 	/** Returns true iff VREP simulation is not stopped */
 	bool isRunning();
 
@@ -55,6 +59,7 @@ private:
 	ros::ServiceClient handleClient_;
 	ros::ServiceClient copyClient_;
 	ros::ServiceClient moveClient_;
+	ros::ServiceClient poseClient_;
 	ros::Subscriber infoSub_;
 
 	bool running_;

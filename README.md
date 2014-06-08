@@ -18,7 +18,7 @@ Note: You can change the location of the boost source to use by editing the CMak
 **Other System Requirements:**  
 - **GNU C++ compiler** (>= 4.8) or equivalent - "g++" or "g++-4.8"
 - **libspatialindex** (>= 1.7.0) - "libspatialindex-dev"
-
+- **Octomap** - ros-groovy-octomap, ros-groovy-octomap-ros, ros-groovy-octomap-rviz-plugins
 
 **Make a ROS Catkin workspace**  
 

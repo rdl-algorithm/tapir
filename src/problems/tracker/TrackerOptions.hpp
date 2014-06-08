@@ -20,6 +20,7 @@ class TrackerOptions : public ProgramOptions {
                 ("problem.moveCost", po::value<double>(), "movement cost")
                 ("problem.waitCost", po::value<double>(), "cost for staying still")
                 ("problem.obstructCost", po::value<double>(), "obstructing human cost")
+                ("problem.collideCost", po::value<double>(), "obstacle collision cost")
                 ("problem.visibleReward", po::value<double>(),
                         "reward for keeping target visible");
         return problem;

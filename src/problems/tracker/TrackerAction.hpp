@@ -14,8 +14,8 @@ enum class ActionType : long {
     FORWARD = 0,
     TURN_RIGHT = 1,
     TURN_LEFT = 2,
-    REVERSE = 3,
-    WAIT = 4,
+    WAIT = 3,
+    REVERSE = 4,
 };
 
 class TrackerAction : public solver::DiscretizedPoint {
