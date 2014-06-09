@@ -17,37 +17,33 @@ UcbStepGeneratorFactory::UcbStepGeneratorFactory(Solver *solver, double explorat
 }
 
 std::unique_ptr<StepGenerator> UcbStepGeneratorFactory::createGenerator(SearchStatus &status,
-        HistorySequence *sequence) {
-    return std::make_unique<UcbStepGenerator>(status, sequence, solver_, explorationCoefficient_);
+        HistoryEntry const */*entry*/, State const */*state*/, HistoricalData const */*data*/) {
+    return std::make_unique<UcbStepGenerator>(status, solver_, explorationCoefficient_);
 }
 
-UcbStepGenerator::UcbStepGenerator(SearchStatus &status, HistorySequence *sequence, Solver *solver,
+UcbStepGenerator::UcbStepGenerator(SearchStatus &status, Solver *solver,
         double explorationCoefficient) :
             StepGenerator(status),
-            sequence_(sequence),
-            solver_(solver),
-            model_(solver_->getModel()),
+            model_(solver->getModel()),
             explorationCoefficient_(explorationCoefficient),
             choseUnvisitedAction_(false) {
+    status_ = SearchStatus::INITIAL;
 }
 
-Model::StepResult UcbStepGenerator::getStep() {
+Model::StepResult UcbStepGenerator::getStep(HistoryEntry const *entry, State const *state,
+        HistoricalData const */*data*/) {
     if (choseUnvisitedAction_) {
         // We've reached the new leaf node - this search is over.
-        status_ = SearchStatus::STAGE_COMPLETE;
+        status_ = SearchStatus::OUT_OF_STEPS;
         return Model::StepResult { };
     }
-    HistoryEntry *currentEntry = sequence_->getLastEntry();
-    BeliefNode *currentNode = sequence_->getLastEntry()->getAssociatedBeliefNode();
-
+    BeliefNode *currentNode = entry->getAssociatedBeliefNode();
     ActionMapping *mapping = currentNode->getMapping();
 
-    State const &currentState = *currentEntry->getState();
-    std::unique_ptr<Action> action;
-    if (mapping->hasActionsToTry()) {
-        // If there are unvisited actions, we take one, and we're finished with UCB.
+    std::unique_ptr<Action> action = mapping->getNextActionToTry();
+    if (action != nullptr) {
+        // If there are unvisited actions, we take one, and we're finished with UCB search.
         choseUnvisitedAction_ = true;
-        action = mapping->getNextActionToTry();
     } else {
         // Use UCB to get the best action.
         action = choosers::ucb_action(currentNode, explorationCoefficient_);
@@ -60,6 +56,6 @@ Model::StepResult UcbStepGenerator::getStep() {
         return Model::StepResult { };
     }
 
-    return model_->generateStep(currentState, *action);
+    return model_->generateStep(*state, *action);
 }
 } /* namespace solver */

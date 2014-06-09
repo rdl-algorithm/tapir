@@ -13,7 +13,6 @@
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
-#include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 #include "solver/abstract-problem/ModelChange.hpp"             // for ModelChange
 #include "solver/abstract-problem/TransitionParameters.hpp"
@@ -45,9 +44,7 @@ struct TagChange : solver::ModelChange {
     double j1 = 0;
 };
 
-class TagModel: virtual public ModelWithProgramOptions,
-        virtual public solver::ModelWithEnumeratedActions,
-        virtual public solver::ModelWithDiscreteObservations {
+class TagModel: public ModelWithProgramOptions {
     friend class TagObservation;
 
   public:
@@ -66,11 +63,12 @@ class TagModel: virtual public ModelWithProgramOptions,
         WALL = -1
     };
 
+    /* ----------------------- Basic getters  ------------------- */
     std::string getName() override {
         return "Tag";
     }
 
-    /***** Start implementation of Model's virtual methods *****/
+    /* ---------- Virtual getters for ABT / model parameters  ---------- */
     // Simple getters
     long getNumberOfStateVariables() override {
         return nStVars_;
@@ -82,15 +80,14 @@ class TagModel: virtual public ModelWithProgramOptions,
         return maxVal_;
     }
 
+    /* --------------- The model interface proper ----------------- */
     // Other virtual methods
     std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates an untagged state uniformly at random. */
     std::unique_ptr<solver::State> sampleStateUniform() override;
-
     bool isTerminal(solver::State const &state) override;
-    double getHeuristicValue(solver::State const &state) override;
 
-    /* --------------- Black box dynamics ----------------- */
+    /* -------------------- Black box dynamics ---------------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
             solver::State const &state,
             solver::Action const &action,
@@ -108,6 +105,12 @@ class TagModel: virtual public ModelWithProgramOptions,
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
 
+
+    /* -------------- Methods for handling model changes ---------------- */
+    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
+
+
+    /* ------------ Methods for handling particle depletion -------------- */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
@@ -120,8 +123,8 @@ class TagModel: virtual public ModelWithProgramOptions,
             solver::Observation const &obs,
             long nParticles) override;
 
-    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
+    /* --------------- Pretty printing methods ----------------- */
     /** Displays a single cell of the map. */
     virtual void dispCell(TagCellType cellType, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
@@ -129,7 +132,16 @@ class TagModel: virtual public ModelWithProgramOptions,
             solver::State const &state,
             std::ostream &os) override;
 
+
+    /* ---------------------- Basic customizations  ---------------------- */
+    virtual double getHeuristicValue(solver::HistoricalData const *data,
+            solver::State const *state) override;
+
+
+    /* ------- Customization of more complex solver functionality  --------- */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
+    virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver) override;
+
     virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
   private:

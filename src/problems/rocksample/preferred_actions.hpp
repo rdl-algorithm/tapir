@@ -23,7 +23,7 @@ struct RockData {
 
 class PositionAndRockData : public solver::HistoricalData {
     friend class PreferredActionsMap;
-    friend class PreferredActionsTextSerializer;
+    friend class PositionAndRockDataTextSerializer;
 public:
     PositionAndRockData(RockSampleModel *model, GridPosition position);
     virtual ~PositionAndRockData() = default;
@@ -36,8 +36,9 @@ public:
 
     std::unique_ptr<solver::HistoricalData> createChild(
             solver::Action const &action,
-            solver::Observation const &observation) override;
+            solver::Observation const &observation) const override;
 
+    std::vector<long> generateLegalActions() const;
     std::vector<long> generatePreferredActions() const;
 
     void print(std::ostream &os) const override;
@@ -48,45 +49,21 @@ private:
     std::vector<RockData> allRockData_;
 };
 
-class PreferredActionsModel : virtual public solver::ModelWithEnumeratedActions {
-public:
-    PreferredActionsModel() = default;
-    virtual ~PreferredActionsModel() = default;
-    _NO_COPY_OR_MOVE(PreferredActionsModel);
-
-    virtual std::unique_ptr<solver::ActionPool> createActionPool(
-            solver::Solver *solver) override;
-    virtual std::unique_ptr<solver::HistoricalData> createRootHistoricalData() override;
-};
-
-class PreferredActionsPool: public solver::ActionPool {
+class PreferredActionsPool: public solver::EnumeratedActionPool {
   public:
-    PreferredActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins);
+    PreferredActionsPool(RockSampleModel *model);
     virtual ~PreferredActionsPool() = default;
     _NO_COPY_OR_MOVE(PreferredActionsPool);
 
-    /** Creates a preferred-only action mapping. */
-    virtual std::unique_ptr<solver::ActionMapping> createActionMapping() override;
+    virtual std::vector<long> createBinSequence(solver::HistoricalData const *data) override;
 
-    /** Selects a random preferred action for the rollout. */
-    virtual std::unique_ptr<solver::Action> getDefaultRolloutAction(solver::HistoricalData *data) const override;
+    virtual std::unique_ptr<solver::ActionMapping> createActionMapping(solver::BeliefNode *node)
+            override;
   private:
-      solver::ModelWithDiscretizedActions *model_;
-      long numberOfBins_;
+    RockSampleModel *model_;
 };
 
-class PreferredActionsMap : public solver::DiscretizedActionMap {
-    friend class PreferredActionsTextSerializer;
-public:
-    PreferredActionsMap(solver::ModelWithDiscretizedActions *model,
-            long numberOfBins);
-    virtual ~PreferredActionsMap() = default;
-    _NO_COPY_OR_MOVE(PreferredActionsMap);
-
-    void initialize() override;
-};
-
-class PreferredActionsTextSerializer : virtual public solver::TextSerializer,
+class PositionAndRockDataTextSerializer : virtual public solver::TextSerializer,
 virtual public solver::DiscretizedActionTextSerializer {
 public:
     void saveHistoricalData(solver::HistoricalData const *data, std::ostream &os) override;

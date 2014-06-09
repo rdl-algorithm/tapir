@@ -84,9 +84,8 @@ BeliefNode *BeliefTree::reset() {
 }
 void BeliefTree::initializeRoot() {
     root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
-    root_->setMapping(solver_->getActionPool()->createActionMapping());
+    root_->setMapping(solver_->getActionPool()->createActionMapping(root_.get()));
     solver_->getEstimationStrategy()->setQEstimator(solver_, root_.get());
-    root_->getMapping()->initialize();
 }
 
 BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
@@ -100,8 +99,8 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
         if (data != nullptr) {
             childNode->setHistoricalData(data->createChild(action, obs));
         }
-        // Initialize the child node's action mapping.
-        childNode->getMapping()->initialize();
+        childNode->setMapping(solver_->getActionPool()->createActionMapping(childNode));
+        solver_->getEstimationStrategy()->setQEstimator(solver_, childNode);
     }
     return childNode;
 }

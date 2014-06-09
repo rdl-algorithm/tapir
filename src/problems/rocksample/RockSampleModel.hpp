@@ -42,14 +42,28 @@ class RockSampleMdpSolver;
 class RockSampleState;
 class RockSampleObservation;
 
-class RockSampleModel : virtual public ModelWithProgramOptions,
-    virtual public PreferredActionsModel,
-    virtual public solver::ModelWithEnumeratedObservations {
+class RockSampleModel : public ModelWithProgramOptions {
 friend class RockSampleMdpSolver;
   public:
     RockSampleModel(RandomGenerator *randGen, po::variables_map vm);
     ~RockSampleModel() = default;
     _NO_COPY_OR_MOVE(RockSampleModel);
+
+    enum RSActionCategory : int {
+        ALL = 0,
+        LEGAL = 1,
+        PREFERRED = 2
+    };
+
+    RSActionCategory parseCategory(std::string categoryString) {
+        if (categoryString == "legal") {
+            return RSActionCategory::LEGAL;
+        } else if (categoryString == "preferred") {
+            return RSActionCategory::PREFERRED;
+        } else {
+            return RSActionCategory::ALL;
+        }
+    }
 
     /**
      * Rocks are enumerated 0, 1, 2, ... ;
@@ -61,6 +75,8 @@ friend class RockSampleMdpSolver;
         GOAL = -2,
     };
 
+
+    /* ----------------------- Basic getters  ------------------- */
     /** Returns the name of this problem. */
     virtual std::string getName() override {
         return "RockSample";
@@ -69,9 +85,9 @@ friend class RockSampleMdpSolver;
     long getNumberOfRocks() {
         return nRocks_;
     }
-    /** Returns true if only legal actions should be used. */
-    bool usingOnlyLegal() {
-        return usingOnlyLegal_;
+    /** Returns the category of actions to cover in searches. */
+    RSActionCategory getSearchActionCategory() {
+        return searchCategory_;
     }
     /** Returns true if nodes should be initialized with preferred values. */
     bool usingPreferredInit() {
@@ -105,8 +121,7 @@ friend class RockSampleMdpSolver;
     }
 
 
-    /***** Start implementation of Model's methods *****/
-    // Simple getters
+    /* ---------- Virtual getters for ABT / model parameters  ---------- */
     virtual long getNumberOfStateVariables() override {
         return nStVars_;
     }
@@ -117,16 +132,15 @@ friend class RockSampleMdpSolver;
         return maxVal_;
     }
 
-    // Other methods
+
+    /* --------------- The model interface proper ----------------- */
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates a state uniformly at random. */
     virtual std::unique_ptr<solver::State> sampleStateUniform() override;
-
     virtual bool isTerminal(solver::State const &state) override;
-    virtual double getHeuristicValue(solver::State const &state) override;
 
 
-    /* --------------- Black box dynamics ----------------- */
+    /* -------------------- Black box dynamics ---------------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
             solver::State const &state,
             solver::Action const &action,
@@ -145,6 +159,10 @@ friend class RockSampleMdpSolver;
             solver::Action const &action) override;
 
 
+    /* -------------- Methods for handling model changes ---------------- */
+
+
+    /* ------------ Methods for handling particle depletion -------------- */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action, solver::Observation const &obs,
@@ -156,19 +174,34 @@ friend class RockSampleMdpSolver;
             solver::Observation const &obs,
             long nParticles) override;
 
+
+    /* ------------------- Pretty printing methods --------------------- */
     /** Displays an individual cell of the map. */
     virtual void dispCell(RSCellType cellType, std::ostream &os);
-
     virtual void drawEnv(std::ostream &os) override;
     virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
 
+
+    /* ---------------------- Basic customizations  ---------------------- */
+    virtual double getHeuristicValue(solver::HistoricalData const *data,
+            solver::State const *state);
+
+    virtual std::unique_ptr<solver::Action> getRolloutAction(solver::HistoricalData const *data,
+            solver::State const *state);
+
+
+    /* ------- Customization of more complex solver functionality  --------- */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
-    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>>
-    getAllObservationsInOrder() override;
+    virtual std::unique_ptr<solver::HistoricalData> createRootHistoricalData() override;
+    virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver) override;
+
+    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllObservationsInOrder();
+    virtual std::unique_ptr<solver::ObservationPool> createObservationPool(solver::Solver *solver) override;
 
     virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
+
 
     /* ----------- Non-virtual methods for RockSampleModel ------------- */
     /** Generates the next position for the given position and action. */
@@ -199,6 +232,12 @@ friend class RockSampleMdpSolver;
      * data structures and variables.
      */
     void initialize();
+
+    /** Returns a random action */
+    std::unique_ptr<RockSampleAction> getRandomAction();
+
+    /** Returns a random action from one of the given bins. */
+    std::unique_ptr<RockSampleAction> getRandomAction(std::vector<long> binNumbers);
 
     /** Generates a random position within the problem space. */
     GridPosition samplePosition();
@@ -236,8 +275,13 @@ friend class RockSampleMdpSolver;
     /** The environment map in vector form. */
     std::vector<std::vector<RSCellType>> envMap_;
 
-    /** True iff we're using only legal actions. */
-    bool usingOnlyLegal_;
+
+    /** The type of heuristic to use. (none / legal / preferred) */
+    RSActionCategory heuristicType_;
+    /** The category for search actions. */
+    RSActionCategory searchCategory_;
+    /** The category for rollout actions. */
+    RSActionCategory rolloutCategory_;
 
     /** True iff we're initialising preferred actions with higher q-values. */
     bool usingPreferredInit_;

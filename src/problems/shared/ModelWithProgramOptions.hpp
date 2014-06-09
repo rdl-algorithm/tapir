@@ -82,7 +82,7 @@ public:
         generatorParsers_.addParser(name, std::move(parser));
     }
     virtual void registerHeuristicParser(std::string name,
-            std::unique_ptr<Parser<std::unique_ptr<solver::Heuristic>> > parser) {
+            std::unique_ptr<Parser<solver::Heuristic> > parser) {
         heuristicParsers_.addParser(name, std::move(parser));
     }
     virtual void registerSearchParser(std::string name,
@@ -115,7 +115,7 @@ private:
     long maximumDepth_;
 
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> generatorParsers_;
-    ParserSet<std::unique_ptr<solver::Heuristic>> heuristicParsers_;
+    ParserSet<solver::Heuristic> heuristicParsers_;
     ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
     ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
 

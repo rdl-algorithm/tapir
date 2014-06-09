@@ -1,37 +1,27 @@
-#include "enumerated_actions.hpp"
-
-#include <algorithm>
-#include <cmath>
-
-#include <iostream>
-#include <limits>
-#include <memory>
-#include <vector>
-
-#include "solver/ActionNode.hpp"
-#include "solver/BeliefNode.hpp"
-#include "solver/abstract-problem/Model.hpp"
-
-#include "solver/abstract-problem/Action.hpp"
-#include "solver/abstract-problem/DiscretizedPoint.hpp"
-
-#include "ActionPool.hpp"
-#include "ActionMapping.hpp"
+#include "solver/mappings/actions/enumerated_actions.hpp"
 
 namespace solver {
-/* ------------------- ModelWithEnumeratedActions ------------------- */
-EnumeratedActionPool::EnumeratedActionPool(
+/* ------------------- EnumeratedActionPool ------------------- */
+EnumeratedActionPool::EnumeratedActionPool(Model *model,
         std::vector<std::unique_ptr<DiscretizedPoint>> allActions) :
-        allActions_(allActions) {
+        model_(model),
+        allActions_(std::move(allActions)) {
 }
-
-long ModelWithEnumeratedActions::getNumberOfBins() {
+long EnumeratedActionPool::getNumberOfBins() {
     return allActions_.size();
 }
-
-std::unique_ptr<Action> ModelWithEnumeratedActions::sampleAnAction(
+std::unique_ptr<Action> EnumeratedActionPool::sampleAnAction(
         long binNumber) {
     return allActions_[binNumber]->copy();
+}
+
+std::vector<long> EnumeratedActionPool::createBinSequence(HistoricalData const */*data*/) {
+    std::vector<long> bins;
+    for (int i = 0; i < getNumberOfBins(); i++) {
+        bins.push_back(i);
+    }
+    std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
+    return std::move(bins);
 }
 } /* namespace solver */
 

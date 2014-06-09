@@ -143,7 +143,7 @@ public:
             Action const &action, Observation const &obs, long nParticles);
 
 
-    /* --------------- Pretty printing methods ----------------- */
+    /* ------------------- Pretty printing methods --------------------- */
     /** Draws the environment map onto the given output stream. */
     virtual void drawEnv(std::ostream &/*os*/);
     /** Draws the current belief and/or the current state in the context of the
@@ -152,28 +152,39 @@ public:
     virtual void drawSimulationState(BeliefNode const *belief, State const &/*state*/,
             std::ostream &/*os*/);
 
+
+    /* ---------------------- Basic customizations  ---------------------- */
+    /** Approximates the value of a history entry based on the history and/or
+     * an estimate using a single state. */
+    virtual double getHeuristicValue(HistoricalData const *data, State const *state);
+
+    /** Allows for a basic rollout strategy based on the history and/or the specific state. */
+    virtual std::unique_ptr<Action> getRolloutAction(HistoricalData const *data,
+            State const *state);
+
+
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used to
     // be managed in a customizable way.
+
     /** Creates a StateIndex, which manages searching for states that
      * have been used in a StatePool.
      */
     virtual std::unique_ptr<StateIndex> createStateIndex();
+
     /** Creates a HistoryCorrector; defaults to a general one, but can
      * be made problem-specific.
      */
     virtual std::unique_ptr<HistoryCorrector> createHistoryCorrector(Solver *solver);
-    /** Creates an ActionPool, which manages actions and creates
-     * ActionMappings
-     */
+
+    /** Creates an ActionPool, which manages actions and creates ActionMappings */
     virtual std::unique_ptr<ActionPool> createActionPool(Solver *solver) = 0;
-    /** Creates an ObservationPool, which manages observations and creates
-     * ObservationMappings.
-     */
-    virtual std::unique_ptr<ObservationPool> createObservationPool(Solver *solver) = 0;
+
+    /** Creates an ObservationPool, which manages observations and creates ObservationMappings. */
+    virtual std::unique_ptr<ObservationPool> createObservationPool(Solver *solver);
 
     /** Creates a search strategy for use by the given solver. */
-    virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver) = 0;
+    virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver);
 
     /** Creates a strategy for estimating the value of belief nodes, for backprop. */
     virtual std::unique_ptr<EstimationStrategy> createEstimationStrategy(Solver *solver);

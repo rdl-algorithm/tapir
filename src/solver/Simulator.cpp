@@ -110,7 +110,8 @@ bool Simulator::stepSimulation() {
     if (model_->hasVerboseOutput()) {
         cout << endl << endl << "t-" << stepCount_ << endl;
         cout << "State: " << *currentState << endl;
-        cout << "Heuristic Value: " << model_->getHeuristicValue(*currentState) << endl;
+        cout << "Heuristic Value: " << model_->getHeuristicValue(currentBelief->getHistoricalData(),
+                currentState) << endl;
         cout << "Belief #" << currentBelief->getId() << endl;
 
         solver::HistoricalData *data = currentBelief->getHistoricalData();

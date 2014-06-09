@@ -3,6 +3,7 @@
 
 #include "global.hpp"
 
+#include "solver/abstract-problem/Model.hpp"
 #include "solver/abstract-problem/State.hpp"
 #include "solver/abstract-problem/HistoricalData.hpp"
 
@@ -11,32 +12,15 @@ class HistoryEntry;
 class Model;
 class Solver;
 
-class Heuristic {
-public:
-    Heuristic() = default;
-    virtual ~Heuristic() = default;
+typedef std::function<double(HistoryEntry const *, State const *, HistoricalData const *)> Heuristic;
 
-    virtual double getHeuristicValue(HistoryEntry const *entry,
-            State const *state, HistoricalData const *data) = 0;
-};
+namespace heuristics {
+double default_(HistoryEntry const *entry, State const *state, HistoricalData const *data, Model *model);
 
-class ZeroHeuristic : public Heuristic {
-public:
-    virtual double getHeuristicValue(HistoryEntry const *entry,
-            State const *state, HistoricalData const *data) override;
-};
+Heuristic get_default_heuristic(Model *model);
 
-class DefaultHeuristic : public Heuristic {
-public:
-    DefaultHeuristic(Model *model);
-    virtual ~DefaultHeuristic() = default;
-    _NO_COPY_OR_MOVE(DefaultHeuristic);
-
-    virtual double getHeuristicValue(HistoryEntry const *entry,
-            State const *state, HistoricalData const *data) override;
-private:
-    Model *model_;
-};
+double zero(HistoryEntry const *entry, State const *state, HistoricalData const *data);
+} /* namespace heuristics */
 } /* namespace solver */
 
 #endif /* SOLVER_HEURISTICS_HPP_ */

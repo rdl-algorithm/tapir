@@ -93,26 +93,26 @@ private:
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *allParsers_;
 };
 
-class DefaultHeuristicParser: public Parser<std::unique_ptr<solver::Heuristic>> {
+class DefaultHeuristicParser: public Parser<solver::Heuristic> {
 public:
     DefaultHeuristicParser() = default;
     virtual ~DefaultHeuristicParser() = default;
-    virtual std::unique_ptr<solver::Heuristic> parse(solver::Solver *solver,
+    virtual solver::Heuristic parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
-class ZeroHeuristicParser: public Parser<std::unique_ptr<solver::Heuristic>> {
+class ZeroHeuristicParser: public Parser<solver::Heuristic> {
 public:
     ZeroHeuristicParser() = default;
     virtual ~ZeroHeuristicParser() = default;
-    virtual std::unique_ptr<solver::Heuristic> parse(solver::Solver *solver,
+    virtual solver::Heuristic parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
 class BasicSearchParser: public Parser<std::unique_ptr<solver::SearchStrategy>> {
 public:
     BasicSearchParser(ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
-            ParserSet<std::unique_ptr<solver::Heuristic>> *heuristicParsers);
+            ParserSet<solver::Heuristic> *heuristicParsers);
     virtual ~BasicSearchParser() = default;
     _NO_COPY_OR_MOVE(BasicSearchParser);
 
@@ -120,7 +120,7 @@ public:
             std::vector<std::string> args) override;
 private:
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers_;
-    ParserSet<std::unique_ptr<solver::Heuristic>> *heuristicParsers_;
+    ParserSet<solver::Heuristic> *heuristicParsers_;
 };
 
 class Exp3Parser: public Parser<std::unique_ptr<solver::SearchStrategy>> {

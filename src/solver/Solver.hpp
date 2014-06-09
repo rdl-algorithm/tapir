@@ -33,7 +33,7 @@ class StatePool;
 
 class Solver {
 public:
-    friend class BasicSearchInstance;
+    friend class BasicSearchStrategy;
     friend class Serializer;
     friend class TextSerializer;
 

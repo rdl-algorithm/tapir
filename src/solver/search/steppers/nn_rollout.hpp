@@ -21,7 +21,7 @@ public:
     virtual BeliefNode* findNeighbor(BeliefNode *beliefNode);
 
     virtual std::unique_ptr<StepGenerator> createGenerator(SearchStatus &status,
-            HistorySequence *sequence) override;
+            HistoryEntry const *entry, State const *state, HistoricalData const *data) override;
 private:
     Solver *solver_;
     long maxNnComparisons_;
@@ -31,22 +31,17 @@ private:
 
 class NnRolloutGenerator: public StepGenerator {
 public:
-    NnRolloutGenerator(SearchStatus &status, HistorySequence *sequence, Solver *solver,
-            NnRolloutFactory *factory_);
+    NnRolloutGenerator(SearchStatus &status, Solver *solver, NnRolloutFactory *factory_,
+            HistoryEntry const *entry);
     virtual ~NnRolloutGenerator() = default;
     _NO_COPY_OR_MOVE(NnRolloutGenerator);
 
     virtual Model::StepResult getStep(HistoryEntry const *entry,
             State const *state, HistoricalData const *data) override;
 private:
-    HistorySequence *sequence_;
-    Solver *solver_;
     Model *model_;
     NnRolloutFactory *factory_;
-
-    BeliefNode *rootNeighborNode_;
     BeliefNode *currentNeighborNode_;
-    std::unique_ptr<Action> previousAction_;
 };
 
 } /* namespace solver */

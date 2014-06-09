@@ -20,16 +20,18 @@
 namespace solver {
 class ActionPool;
 
-class EnumeratedActionPool : virtual public solver::DiscretizedActionPool {
+class EnumeratedActionPool : public solver::DiscretizedActionPool {
   public:
-    EnumeratedActionPool(std::vector<std::unique_ptr<DiscretizedPoint>> allActions);
+    EnumeratedActionPool(Model *model, std::vector<std::unique_ptr<DiscretizedPoint>> allActions);
     virtual ~EnumeratedActionPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedActionPool);
 
     virtual long getNumberOfBins() override;
     virtual std::unique_ptr<Action> sampleAnAction(long binNumber) override;
+    virtual std::vector<long> createBinSequence(HistoricalData const *data) override;
 
   private:
+    Model *model_;
     std::vector<std::unique_ptr<DiscretizedPoint>> allActions_;
 };
 } /* namespace solver */

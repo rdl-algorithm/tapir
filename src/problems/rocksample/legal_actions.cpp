@@ -24,13 +24,13 @@ PositionData::PositionData(RockSampleModel *model,
 
 std::unique_ptr<solver::HistoricalData> PositionData::createChild(
         solver::Action const &action,
-        solver::Observation const &/*observation*/) {
+        solver::Observation const &/*observation*/) const {
     RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(action);
 
     bool isLegal;
     GridPosition nextPosition;
     std::tie(nextPosition, isLegal) = model_->makeNextPosition(position_, rsAction);
-    if (!isLegal && model_->usingOnlyLegal()) {
+    if (!isLegal) {
         debug::show_message("ERROR: An illegal action was taken!?");
     }
     return std::make_unique<PositionData>(model_, nextPosition);
@@ -44,7 +44,7 @@ std::vector<long> PositionData::generateLegalActions() const {
         GridPosition nextPosition;
         bool isLegal;
         std::tie(nextPosition, isLegal) = model_->makeNextPosition(position_, rsAction);
-        if (isLegal || !model_->usingOnlyLegal()) {
+        if (isLegal) {
             legalActions.push_back(rsAction.getBinNumber());
         }
     }
@@ -55,55 +55,25 @@ void PositionData::print(std::ostream &os) const {
     os << "Position: " << position_ << std::endl;
 }
 
-/* ------------------------ LegalActionsModel ----------------------- */
-std::unique_ptr<solver::ActionPool> LegalActionsModel::createActionPool(
-        solver::Solver */*solver*/) {
-    return std::make_unique<LegalActionsPool>(this, getNumberOfBins());
-}
-
-std::unique_ptr<solver::HistoricalData> LegalActionsModel::createRootHistoricalData() {
-    RockSampleModel *model = dynamic_cast<RockSampleModel *>(this);
-    return std::make_unique<PositionData>(
-            model, model->getStartPosition());
-}
-
 /* ------------------------ LegalActionsPool ----------------------- */
-LegalActionsPool::LegalActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                model_(model),
-                numberOfBins_(numberOfBins) {
-}
-std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping() {
-    return std::make_unique<LegalActionsMap>(model_, numberOfBins_);
-}
-std::unique_ptr<solver::Action> LegalActionsPool::getDefaultRolloutAction(solver::HistoricalData *data) const {
-    PositionData const &positionData = static_cast<PositionData const &>(*data);
-    std::vector<long> legalActions = positionData.generateLegalActions();
-    long index = std::uniform_int_distribution<long>(0, legalActions.size() - 1)(
-            (*model_->getRandomGenerator()));
-    return model_->sampleAnAction(legalActions[index]);
+LegalActionsPool::LegalActionsPool(RockSampleModel *model) :
+        EnumeratedActionPool(model, model->getAllActionsInOrder()),
+        model_(model) {
 }
 
-/* ------------------------- LegalActionsMap ------------------------ */
-LegalActionsMap::LegalActionsMap(solver::ModelWithDiscretizedActions *model,
-        long numberOfBins) :
-                    solver::DiscretizedActionMap(model, numberOfBins) {
-}
-void LegalActionsMap::initialize() {
-    RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
-    if (!model.usingOnlyLegal()) {
-        DiscretizedActionMap::initialize();
-        return;
-    }
-
-    PositionData const &data = static_cast<PositionData const &>(
-                    *owningBeliefNode_->getHistoricalData());
-    for (long binNumber : data.generateLegalActions()) {
-        addUnvisitedAction(binNumber);
+std::vector<long> LegalActionsPool::createBinSequence(solver::HistoricalData const *data) {
+    RockSampleModel::RSActionCategory category = model_->getSearchActionCategory();
+    if (category == RockSampleModel::RSActionCategory::LEGAL) {
+        std::vector<long> bins = static_cast<PositionData const *>(data)->generateLegalActions();
+        std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
+        return std::move(bins);
+    } else {
+        return EnumeratedActionPool::createBinSequence(data);
     }
 }
 
 /* --------------------- LegalActionsTextSerializer -------------------- */
-void LegalActionsTextSerializer::saveHistoricalData(solver::HistoricalData const *data,
+void PositionDataTextSerializer::saveHistoricalData(solver::HistoricalData const *data,
         std::ostream &os) {
     os << std::endl;
     os << "CUSTOM DATA:" << std::endl;
@@ -112,7 +82,7 @@ void LegalActionsTextSerializer::saveHistoricalData(solver::HistoricalData const
     os << "Position: " << legalData.position_ << std::endl;
     os << std::endl;
 }
-std::unique_ptr<solver::HistoricalData> LegalActionsTextSerializer::loadHistoricalData(
+std::unique_ptr<solver::HistoricalData> PositionDataTextSerializer::loadHistoricalData(
         std::istream &is) {
 
     std::string line;

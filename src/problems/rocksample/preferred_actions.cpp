@@ -17,8 +17,7 @@
 
 namespace rocksample {
 /* ---------------------- PositionAndRockData --------------------- */
-PositionAndRockData::PositionAndRockData(RockSampleModel *model,
-        GridPosition position) :
+PositionAndRockData::PositionAndRockData(RockSampleModel *model, GridPosition position) :
         model_(model),
         position_(position),
         allRockData_(model_->getNumberOfRocks()) {
@@ -31,16 +30,14 @@ PositionAndRockData::PositionAndRockData(PositionAndRockData const &other) :
 }
 
 std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
-        solver::Action const &action,
-        solver::Observation const &observation) {
+        solver::Action const &action, solver::Observation const &observation) const {
     RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(action);
 
-    std::unique_ptr<PositionAndRockData> nextData = (
-            std::make_unique<PositionAndRockData>(*this));
+    std::unique_ptr<PositionAndRockData> nextData = (std::make_unique<PositionAndRockData>(*this));
 
     bool isLegal;
     std::tie(nextData->position_, isLegal) = model_->makeNextPosition(position_, rsAction);
-    if (!isLegal && model_->usingOnlyLegal()) {
+    if (!isLegal) {
         debug::show_message("ERROR: An illegal action was taken!?");
         return std::move(nextData);
     }
@@ -55,12 +52,11 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
 
         GridPosition rockPos = model_->getRockPosition(rockNo);
         double distance = position_.euclideanDistanceTo(rockPos);
-        double probabilityCorrect = (
-                model_->getSensorCorrectnessProbability(distance));
+        double probabilityCorrect = (model_->getSensorCorrectnessProbability(distance));
         double probabilityIncorrect = 1 - probabilityCorrect;
 
-        RockSampleObservation const &rsObs = (
-                static_cast<RockSampleObservation const &>(observation));
+        RockSampleObservation const &rsObs =
+                (static_cast<RockSampleObservation const &>(observation));
 
         RockData &rockData = nextData->allRockData_[rockNo];
         rockData.checkCount++;
@@ -78,6 +74,20 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
         rockData.chanceGood = likelihoodGood / (likelihoodGood + likelihoodBad);
     }
     return std::move(nextData);
+}
+
+std::vector<long> PositionAndRockData::generateLegalActions() const {
+    std::vector<long> legalActions;
+    for (std::unique_ptr<solver::DiscretizedPoint> const &action : model_->getAllActionsInOrder()) {
+        RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(*action);
+        GridPosition nextPosition;
+        bool isLegal;
+        std::tie(nextPosition, isLegal) = model_->makeNextPosition(position_, rsAction);
+        if (isLegal) {
+            legalActions.push_back(rsAction.getBinNumber());
+        }
+    }
+    return legalActions;
 }
 
 std::vector<long> PositionAndRockData::generatePreferredActions() const {
@@ -144,8 +154,8 @@ std::vector<long> PositionAndRockData::generatePreferredActions() const {
     // See which rocks we might want to check
     for (int i = 0; i < nRocks; i++) {
         RockData const &rockData = allRockData_[i];
-        if (rockData.chanceGood != 0.0 && rockData.chanceGood != 1.0 &&
-                std::abs(rockData.goodnessCount) < 2) {
+        if (rockData.chanceGood != 0.0 && rockData.chanceGood != 1.0
+                && std::abs(rockData.goodnessCount) < 2) {
             preferredActions.push_back(static_cast<long>(ActionType::CHECK) + i);
         }
     }
@@ -162,71 +172,52 @@ void PositionAndRockData::print(std::ostream &os) const {
     os << std::endl;
 }
 
-/* ------------------------ PreferredActionsModel ----------------------- */
-std::unique_ptr<solver::ActionPool> PreferredActionsModel::createActionPool(
-        solver::Solver */*solver*/) {
-    return std::make_unique<PreferredActionsPool>(this, getNumberOfBins());
-}
-
-std::unique_ptr<solver::HistoricalData> PreferredActionsModel::createRootHistoricalData() {
-    RockSampleModel *model = dynamic_cast<RockSampleModel *>(this);
-    return std::make_unique<PositionAndRockData>(
-            model, model->getStartPosition());
-}
-
 /* ------------------------ PreferredActionsPool ----------------------- */
-PreferredActionsPool::PreferredActionsPool(solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                model_(model),
-                numberOfBins_(numberOfBins) {
-}
-std::unique_ptr<solver::ActionMapping> PreferredActionsPool::createActionMapping() {
-    return std::make_unique<PreferredActionsMap>(model_, numberOfBins_);
-}
-std::unique_ptr<solver::Action> PreferredActionsPool::getDefaultRolloutAction(solver::HistoricalData *data) const {
-    PositionAndRockData const &prData = static_cast<PositionAndRockData const &>(*data);
-    std::vector<long> preferredActions = prData.generatePreferredActions();
-    long index = std::uniform_int_distribution<long>(0, preferredActions.size() - 1)(
-            (*model_->getRandomGenerator()));
-    return model_->sampleAnAction(preferredActions[index]);
+PreferredActionsPool::PreferredActionsPool(RockSampleModel *model) :
+        EnumeratedActionPool(model, model->getAllActionsInOrder()),
+        model_(model) {
 }
 
-/* ------------------------- PreferredActionsMap ------------------------ */
-PreferredActionsMap::PreferredActionsMap(
-        solver::ModelWithDiscretizedActions *model, long numberOfBins) :
-                    solver::DiscretizedActionMap(model, numberOfBins) {
-}
-
-void PreferredActionsMap::initialize() {
-    RockSampleModel &model = dynamic_cast<RockSampleModel &>(*model_);
-    PositionAndRockData const &data = static_cast<PositionAndRockData const &>(
-                    *owningBeliefNode_->getHistoricalData());
-
-    for (std::unique_ptr<solver::DiscretizedPoint> const &action : model.getAllActionsInOrder()) {
-        RockSampleAction const &rsAction =
-                static_cast<RockSampleAction const &>(*action);
-        GridPosition nextPosition;
-        bool isLegal;
-        std::tie(nextPosition, isLegal) = model.makeNextPosition(data.position_, rsAction);
-        if (isLegal || !model.usingOnlyLegal()) {
-            addUnvisitedAction(rsAction.getBinNumber());
-        }
+std::vector<long> PreferredActionsPool::createBinSequence(solver::HistoricalData const *data) {
+    RockSampleModel::RSActionCategory category = model_->getSearchActionCategory();
+    if (category == RockSampleModel::RSActionCategory::LEGAL) {
+        std::vector<long> bins = static_cast<PositionAndRockData const *>(data)->generateLegalActions();
+        std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
+        return std::move(bins);
+    } else if (category == RockSampleModel::RSActionCategory::PREFERRED) {
+        std::vector<long> bins = static_cast<PositionAndRockData const *>(data)->generatePreferredActions();
+        std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
+        return std::move(bins);
+    } else {
+        return EnumeratedActionPool::createBinSequence(data);
     }
+}
 
-    if (model.usingPreferredInit()) {
+std::unique_ptr<solver::ActionMapping> PreferredActionsPool::createActionMapping(
+        solver::BeliefNode *node) {
+    std::unique_ptr<solver::DiscretizedActionMap> discMap = (
+            std::make_unique<solver::DiscretizedActionMap>(this,
+                    createBinSequence(node->getHistoricalData())));
+
+    PositionAndRockData const &data =
+            static_cast<PositionAndRockData const &>(*node->getHistoricalData());
+
+    if (model_->usingPreferredInit()) {
         for (RockSampleAction const &action : data.generatePreferredActions()) {
-            long visitCount = model.getPreferredVisitCount();
-            update(action, visitCount, visitCount * model.getPreferredQValue());
+            long visitCount = model_->getPreferredVisitCount();
+            discMap->update(action, visitCount, visitCount * model_->getPreferredQValue());
         }
     }
+
+    return std::move(discMap);
 }
 
 /* --------------------- PreferredActionsTextSerializer -------------------- */
-void PreferredActionsTextSerializer::saveHistoricalData(
-        solver::HistoricalData const *data, std::ostream &os) {
+void PositionAndRockDataTextSerializer::saveHistoricalData(solver::HistoricalData const *data,
+        std::ostream &os) {
     os << std::endl;
     os << "CUSTOM DATA:" << std::endl;
-    PositionAndRockData const &prData = (
-                static_cast<PositionAndRockData const &>(*data));
+    PositionAndRockData const &prData = (static_cast<PositionAndRockData const &>(*data));
     os << "Position: " << prData.position_ << std::endl;
     for (RockData const &rockData : prData.allRockData_) {
         os << "p = ";
@@ -237,7 +228,7 @@ void PreferredActionsTextSerializer::saveHistoricalData(
     }
     os << std::endl;
 }
-std::unique_ptr<solver::HistoricalData> PreferredActionsTextSerializer::loadHistoricalData(
+std::unique_ptr<solver::HistoricalData> PositionAndRockDataTextSerializer::loadHistoricalData(
         std::istream &is) {
 
     std::string line;
@@ -250,8 +241,8 @@ std::unique_ptr<solver::HistoricalData> PreferredActionsTextSerializer::loadHist
     std::istringstream(line) >> tmpStr >> position;
 
     RockSampleModel *model = dynamic_cast<RockSampleModel *>(getModel());
-    std::unique_ptr<PositionAndRockData> data = (
-            std::make_unique<PositionAndRockData>(model, position));
+    std::unique_ptr<PositionAndRockData> data = (std::make_unique<PositionAndRockData>(model,
+            position));
 
     for (RockData &rockData : data->allRockData_) {
         std::getline(is, line);

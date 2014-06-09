@@ -16,7 +16,7 @@ public:
     _NO_COPY_OR_MOVE(DefaultRolloutFactory);
 
     virtual std::unique_ptr<StepGenerator> createGenerator(SearchStatus &status,
-            HistorySequence *sequence) override;
+            HistoryEntry const *entry, State const *state, HistoricalData const *data) override;
 private:
     Solver *solver_;
     long maxNSteps_;
@@ -24,8 +24,7 @@ private:
 
 class DefaultRolloutGenerator: public StepGenerator {
 public:
-    DefaultRolloutGenerator(SearchStatus &status, HistorySequence *sequence,
-            Solver *solver, long maxNSteps);
+    DefaultRolloutGenerator(SearchStatus &status, Solver *solver, long maxNSteps);
     virtual ~DefaultRolloutGenerator() = default;
     _NO_COPY_OR_MOVE(DefaultRolloutGenerator);
 
@@ -33,8 +32,6 @@ public:
             State const *state, HistoricalData const *data) override;
 
 private:
-    HistorySequence *sequence_;
-    Solver *solver_;
     Model *model_;
     long maxNSteps_;
     long currentNSteps_;

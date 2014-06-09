@@ -109,20 +109,24 @@ double RockSampleMdpSolver::calculateQValue(GridPosition pos, long rockStateCode
 
 
 RockSampleMdpParser::RockSampleMdpParser(RockSampleModel *model) :
-        model_(model) {
+        model_(model),
+        mdpSolver_(nullptr) {
 }
 
-std::unique_ptr<solver::Heuristic> RockSampleMdpParser::parse(solver::Solver */*solver*/,
+solver::Heuristic RockSampleMdpParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
-    if (model_->hasVerboseOutput()) {
-        std::cout << "Solving MDP...";
-        std::cout.flush();
+    if (mdpSolver_ == nullptr) {
+        if (model_->hasVerboseOutput()) {
+            std::cout << "Solving MDP...";
+            std::cout.flush();
+        }
+        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(model_);
+        mdpSolver_->solve();
+        if (model_->hasVerboseOutput()) {
+            std::cout << "     Done." << std::endl << std::endl;
+        }
     }
-    std::unique_ptr<RockSampleMdpSolver> mdpSolver = std::make_unique<RockSampleMdpSolver>(model_);
-    mdpSolver->solve();
-    if (model_->hasVerboseOutput()) {
-        std::cout << "     Done." << std::endl << std::endl;
-    }
-    return std::move(mdpSolver);
+    using namespace std::placeholders;
+    return std::bind(&RockSampleMdpSolver::getHeuristicValue, mdpSolver_.get(), _1, _2, _3);
 }
 } /* namespace rocksample */

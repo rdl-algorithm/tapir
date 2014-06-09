@@ -21,7 +21,7 @@ double average_q_value(BeliefNode const *node) {
 
     double averageQValue = totalQValue / mapping->getTotalVisitCount();
     if (!std::isfinite(averageQValue)) {
-        debug::show_message("Non-finite Q!", true, false);
+        debug::show_message("Non-finite Q!");
     }
     return averageQValue;
 }

@@ -37,8 +37,12 @@ class RockSampleOptions : public ProgramOptions {
         po::options_description heuristics("RockSample heuristic configuration");
         heuristics.add(ProgramOptions::getHeuristicOptions());
         heuristics.add_options()
-            ("heuristics.useOnlyLegal", po::value<bool>()->default_value(false)->implicit_value(true),
-                "whether to only use legal actions")
+            ("heuristics.type", po::value<std::string>()->default_value("legal"),
+                        "type of history-based heuristic to use: none/legal/preferred")
+            ("heuristics.search", po::value<std::string>()->default_value("legal"),
+                        "Restricted search space: all/legal/preferred")
+            ("heuristics.rollout", po::value<std::string>()->default_value("legal"),
+                        "Restricted rollouts: randomly select from all/legal/preferred")
             ("heuristics.usePreferredInit", po::value<bool>()->default_value(false)->implicit_value(true),
                 "whether to only use legal actions")
             ("heuristics.preferredQValue", po::value<double>()->default_value(25.0),

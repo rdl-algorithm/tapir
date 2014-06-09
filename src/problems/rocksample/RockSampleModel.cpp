@@ -40,7 +40,7 @@
 #include "solver/StatePool.hpp"
 
 #include "legal_actions.hpp"
-
+#include "preferred_actions.hpp"
 #include "RockSampleAction.hpp"         // for RockSampleAction
 #include "RockSampleMdpSolver.hpp"
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
@@ -69,7 +69,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     rockPositions_(), // push rocks
     mapText_(), // push rows
     envMap_(), // push rows
-    usingOnlyLegal_(vm["heuristics.useOnlyLegal"].as<bool>()),
+    heuristicType_(parseCategory(vm["heuristics.type"].as<std::string>())),
+    searchCategory_(parseCategory(vm["heuristics.search"].as<std::string>())),
+    rolloutCategory_(parseCategory(vm["heuristics.rollout"].as<std::string>())),
     usingPreferredInit_(vm["heuristics.usePreferredInit"].as<bool>()),
     preferredQValue_(vm["heuristics.preferredQValue"].as<double>()),
     preferredVisitCount_(vm["heuristics.preferredVisitCount"].as<long>()),
@@ -77,6 +79,13 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
     minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
     maxVal_(0) // depends on nRocks
          {
+    if (searchCategory_ > heuristicType_) {
+        searchCategory_ = heuristicType_;
+    }
+    if (rolloutCategory_ > heuristicType_) {
+        rolloutCategory_ = heuristicType_;
+    }
+
     registerHeuristicParser("exact", std::make_unique<RockSampleMdpParser>(this));
     // Read the map from the file.
     std::ifstream inFile;
@@ -136,9 +145,10 @@ void RockSampleModel::initialize() {
     nStVars_ = 2 + nRocks_;
     minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
-    setAllActions(getAllActionsInOrder());
 }
 
+
+/* --------------- The model interface proper ----------------- */
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
     return std::make_unique<RockSampleState>(startPos_, sampleRocks());
 }
@@ -183,43 +193,6 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
         static_cast<RockSampleState const &>(state);
     GridPosition pos = rockSampleState.getPosition();
     return getCellType(pos) == GOAL;
-}
-
-double RockSampleModel::getHeuristicValue(solver::State const &state) {
-    RockSampleState const &rockSampleState =
-        static_cast<RockSampleState const &>(state);
-    double qVal = 0;
-    double currentDiscount = 1;
-    GridPosition currentPos(rockSampleState.getPosition());
-    std::vector<bool> rockStates(rockSampleState.getRockStates());
-
-    std::set<int> goodRocks;
-    for (int i = 0; i < nRocks_; i++) {
-        if (rockStates[i]) {
-            goodRocks.insert(i);
-        }
-    }
-    while (!goodRocks.empty()) {
-        std::set<int>::iterator it = goodRocks.begin();
-        int bestRock = *it;
-        long lowestDist =
-            rockPositions_[bestRock].manhattanDistanceTo(currentPos);
-        ++it;
-        for (; it != goodRocks.end(); ++it) {
-            long dist = rockPositions_[*it].manhattanDistanceTo(currentPos);
-            if (dist < lowestDist) {
-                bestRock = *it;
-                lowestDist = dist;
-            }
-        }
-        currentDiscount *= std::pow(getDiscountFactor(), lowestDist);
-        qVal += currentDiscount * goodRockReward_;
-        goodRocks.erase(bestRock);
-        currentPos = rockPositions_[bestRock];
-    }
-    currentDiscount *= std::pow(getDiscountFactor(), nCols_ - currentPos.j);
-    qVal += currentDiscount * exitReward_;
-    return qVal;
 }
 
 std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
@@ -267,6 +240,8 @@ std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
     return std::make_pair(pos, isValid);
 }
 
+
+/* -------------------- Black box dynamics ---------------------- */
 std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState(
         RockSampleState const &state, RockSampleAction const &action) {
 
@@ -387,6 +362,8 @@ solver::Model::StepResult RockSampleModel::generateStep(
     return result;
 }
 
+
+/* ------------ Methods for handling particle depletion -------------- */
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::BeliefNode */*previousBelief*/,
         solver::Action const &action, solver::Observation const &obs,
@@ -465,6 +442,8 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     return particles;
 }
 
+
+/* ------------------- Pretty printing methods --------------------- */
 void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
     if (cellType >= ROCK) {
         os << std::hex << cellType - ROCK;
@@ -546,8 +525,78 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 }
 
-std::vector<std::unique_ptr<solver::DiscretizedPoint>>
-RockSampleModel::getAllActionsInOrder() {
+
+/* ---------------------- Basic customizations  ---------------------- */
+double RockSampleModel::getHeuristicValue(solver::HistoricalData const */*data*/,
+        solver::State const *state) {
+    RockSampleState const &rockSampleState =
+        static_cast<RockSampleState const &>(*state);
+    double qVal = 0;
+    double currentDiscount = 1;
+    GridPosition currentPos(rockSampleState.getPosition());
+    std::vector<bool> rockStates(rockSampleState.getRockStates());
+
+    std::set<int> goodRocks;
+    for (int i = 0; i < nRocks_; i++) {
+        if (rockStates[i]) {
+            goodRocks.insert(i);
+        }
+    }
+    while (!goodRocks.empty()) {
+        std::set<int>::iterator it = goodRocks.begin();
+        int bestRock = *it;
+        long lowestDist =
+            rockPositions_[bestRock].manhattanDistanceTo(currentPos);
+        ++it;
+        for (; it != goodRocks.end(); ++it) {
+            long dist = rockPositions_[*it].manhattanDistanceTo(currentPos);
+            if (dist < lowestDist) {
+                bestRock = *it;
+                lowestDist = dist;
+            }
+        }
+        currentDiscount *= std::pow(getDiscountFactor(), lowestDist);
+        qVal += currentDiscount * goodRockReward_;
+        goodRocks.erase(bestRock);
+        currentPos = rockPositions_[bestRock];
+    }
+    currentDiscount *= std::pow(getDiscountFactor(), nCols_ - currentPos.j);
+    qVal += currentDiscount * exitReward_;
+    return qVal;
+}
+
+
+std::unique_ptr<RockSampleAction> RockSampleModel::getRandomAction() {
+    long binNumber = std::uniform_int_distribution<int>(0, 4 + nRocks_)(*getRandomGenerator());
+    return std::make_unique<RockSampleAction>(binNumber);
+}
+std::unique_ptr<RockSampleAction> RockSampleModel::getRandomAction(std::vector<long> binNumbers) {
+    if (binNumbers.empty()) {
+        return nullptr;
+    }
+    long index = std::uniform_int_distribution<int>(0, binNumbers.size() - 1)(*getRandomGenerator());
+    return std::make_unique<RockSampleAction>(binNumbers[index]);
+}
+
+std::unique_ptr<solver::Action> RockSampleModel::getRolloutAction(solver::HistoricalData const *data,
+            solver::State const */*state*/) {
+    if (rolloutCategory_ == RSActionCategory::ALL) {
+        return getRandomAction();
+    } else if (rolloutCategory_ == RSActionCategory::LEGAL) {
+        if (heuristicType_ == RSActionCategory::LEGAL) {
+            return getRandomAction(static_cast<PositionData const &>(*data).generateLegalActions());
+        } else if (heuristicType_ == RSActionCategory::PREFERRED) {
+            return getRandomAction(static_cast<PositionAndRockData const &>(*data).generateLegalActions());
+        }
+    } else {
+        return getRandomAction(static_cast<PositionAndRockData const &>(*data).generatePreferredActions());
+    }
+    return nullptr;
+}
+
+
+/* ------- Customization of more complex solver functionality  --------- */
+std::vector<std::unique_ptr<solver::DiscretizedPoint>> RockSampleModel::getAllActionsInOrder() {
     std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
     for (long code = 0; code < 5 + nRocks_; code++) {
         allActions.push_back(std::make_unique<RockSampleAction>(code));
@@ -555,8 +604,29 @@ RockSampleModel::getAllActionsInOrder() {
     return allActions;
 }
 
-std::vector<std::unique_ptr<solver::DiscretizedPoint>>
-RockSampleModel::getAllObservationsInOrder() {
+std::unique_ptr<solver::ActionPool> RockSampleModel::createActionPool(solver::Solver */*solver*/) {
+    switch(heuristicType_) {
+    case RSActionCategory::LEGAL:
+        return std::make_unique<LegalActionsPool>(this);
+    case RSActionCategory::PREFERRED:
+        return std::make_unique<PreferredActionsPool>(this);
+    default:
+        return std::make_unique<solver::EnumeratedActionPool>(this, getAllActionsInOrder());
+    }
+}
+std::unique_ptr<solver::HistoricalData> RockSampleModel::createRootHistoricalData() {
+    switch(heuristicType_) {
+    case RSActionCategory::LEGAL:
+        return std::make_unique<PositionData>(this, getStartPosition());
+    case RSActionCategory::PREFERRED:
+        return std::make_unique<PositionAndRockData>(this, getStartPosition());
+    default:
+        return nullptr;
+    }
+}
+
+
+std::vector<std::unique_ptr<solver::DiscretizedPoint>> RockSampleModel::getAllObservationsInOrder() {
     std::vector<std::unique_ptr<solver::DiscretizedPoint>> allObservations_;
     for (long code = 0; code < 3; code++) {
         allObservations_.push_back(
@@ -564,8 +634,19 @@ RockSampleModel::getAllObservationsInOrder() {
     }
     return allObservations_;
 }
+std::unique_ptr<solver::ObservationPool> RockSampleModel::createObservationPool(
+        solver::Solver */*solver*/) {
+    return std::make_unique<solver::EnumeratedObservationPool>(getAllObservationsInOrder());
+}
 
 std::unique_ptr<solver::Serializer> RockSampleModel::createSerializer(solver::Solver *solver) {
-    return std::make_unique<RockSamplePreferredActionsTextSerializer>(solver);
+    switch (heuristicType_) {
+    case RSActionCategory::LEGAL:
+        return std::make_unique<RockSampleLegalActionsTextSerializer>(solver);
+    case RSActionCategory::PREFERRED:
+        return std::make_unique<RockSamplePreferredActionsTextSerializer>(solver);
+    default:
+        return std::make_unique<RockSampleAllActionsTextSerializer>(solver);
+    }
 }
 } /* namespace rocksample */

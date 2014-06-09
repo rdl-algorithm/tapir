@@ -20,7 +20,7 @@ class RockSampleState;
 /** Solves an MDP version of RockSample, in which it is known which rocks
  * are good and which ones are bad.
  */
-class RockSampleMdpSolver : public solver::Heuristic {
+class RockSampleMdpSolver {
 public:
     RockSampleMdpSolver(RockSampleModel *model);
     virtual ~RockSampleMdpSolver() = default;
@@ -30,7 +30,7 @@ public:
     void solve();
 
     double getHeuristicValue(solver::HistoryEntry const *entry,
-            solver::State const *state, solver::HistoricalData const *data) override;
+            solver::State const *state, solver::HistoricalData const *data);
 
     /** Calculates the exact value for the given state. */
     double getQValue(RockSampleState const &state) const;
@@ -54,15 +54,16 @@ private:
     std::map<std::pair<int, int>, double> valueMap_;
 };
 
-class RockSampleMdpParser : public Parser<std::unique_ptr<solver::Heuristic>> {
+class RockSampleMdpParser : public Parser<solver::Heuristic> {
 public:
     RockSampleMdpParser(RockSampleModel *model);
     virtual ~RockSampleMdpParser() = default;
     _NO_COPY_OR_MOVE(RockSampleMdpParser);
 
-    virtual std::unique_ptr<solver::Heuristic> parse(solver::Solver *solver, std::vector<std::string> args);
+    virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
 private:
     RockSampleModel *model_;
+    std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 };
 } /* namespace rocksample */
 

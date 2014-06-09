@@ -91,18 +91,18 @@ std::unique_ptr<solver::StepGeneratorFactory> StagedParser::parse(solver::Solver
     return std::make_unique<solver::StagedStepGeneratorFactory>(std::move(factories));
 }
 
-std::unique_ptr<solver::Heuristic> DefaultHeuristicParser::parse(
+solver::Heuristic DefaultHeuristicParser::parse(
         solver::Solver *solver, std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::DefaultHeuristic>(solver->getModel());
+    return solver::heuristics::get_default_heuristic(solver->getModel());
 }
-std::unique_ptr<solver::Heuristic> ZeroHeuristicParser::parse(
+solver::Heuristic ZeroHeuristicParser::parse(
         solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::ZeroHeuristic>();
+    return solver::heuristics::zero;
 }
 
 BasicSearchParser::BasicSearchParser(
         ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
-        ParserSet<std::unique_ptr<solver::Heuristic>> *heuristicParsers) :
+        ParserSet<solver::Heuristic> *heuristicParsers) :
             generatorParsers_(generatorParsers),
             heuristicParsers_(heuristicParsers) {
 }

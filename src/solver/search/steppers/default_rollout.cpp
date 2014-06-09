@@ -18,34 +18,32 @@ DefaultRolloutFactory::DefaultRolloutFactory(Solver *solver, long maxNSteps) :
 }
 
 std::unique_ptr<StepGenerator> DefaultRolloutFactory::createGenerator(SearchStatus &status,
-        HistorySequence *sequence) {
-    return std::make_unique<DefaultRolloutGenerator>(status, sequence, solver_, maxNSteps_);
+        HistoryEntry const */*entry*/, State const */*state*/, HistoricalData const */*data*/) {
+    return std::make_unique<DefaultRolloutGenerator>(status, solver_, maxNSteps_);
 }
 
 /* ------------------------- DefaultRolloutGenerator ------------------------- */
-DefaultRolloutGenerator::DefaultRolloutGenerator(SearchStatus &status, HistorySequence *sequence,
+DefaultRolloutGenerator::DefaultRolloutGenerator(SearchStatus &status,
         Solver *solver, long maxNSteps) :
             StepGenerator(status),
-            sequence_(sequence),
-            solver_(solver),
-            model_(solver_->getModel()),
+            model_(solver->getModel()),
             maxNSteps_(maxNSteps),
             currentNSteps_(0) {
+    status_ = SearchStatus::INITIAL;
 }
 
-Model::StepResult DefaultRolloutGenerator::getStep() {
+Model::StepResult DefaultRolloutGenerator::getStep(HistoryEntry const */*entry*/, State const *state,
+        HistoricalData const *data) {
     if (currentNSteps_ >= maxNSteps_) {
         // This stage is over.
-        status_ = SearchStatus::STAGE_COMPLETE;
+        status_ = SearchStatus::OUT_OF_STEPS;
         return Model::StepResult { };
     }
 
     currentNSteps_++;
-    HistoryEntry *lastEntry = sequence_->getLastEntry();
-    HistoricalData *currentData = lastEntry->getAssociatedBeliefNode()->getHistoricalData();
-    std::unique_ptr<Action> action = solver_->getActionPool()->getDefaultRolloutAction(currentData);
+    std::unique_ptr<Action> action = model_->getRolloutAction(data, state);
 
     // Generate the step and return it.
-    return model_->generateStep(*lastEntry->getState(), *action);
+    return model_->generateStep(*state, *action);
 }
 } /* namespace solver */

@@ -6,7 +6,7 @@ namespace solver {
 enum class SearchStatus : long {
     UNINITIALIZED,
     INITIAL,
-    STAGE_COMPLETE,
+    OUT_OF_STEPS,
     FINISHED,
     ERROR
 };

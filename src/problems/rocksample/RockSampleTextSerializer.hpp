@@ -42,16 +42,16 @@ public:
     virtual int getObservationColumnWidth() override;
 };
 
-class RockSampleDiscretizedActionTextSerializer: public RockSampleTextSerializer,
+class RockSampleAllActionsTextSerializer: public RockSampleTextSerializer,
         public solver::DiscretizedActionTextSerializer,
         public solver::EnumeratedObservationTextSerializer {
 public:
-    RockSampleDiscretizedActionTextSerializer(solver::Solver *solver);
-    virtual ~RockSampleDiscretizedActionTextSerializer() = default;
+    RockSampleAllActionsTextSerializer(solver::Solver *solver);
+    virtual ~RockSampleAllActionsTextSerializer() = default;
 };
 
 class RockSampleLegalActionsTextSerializer: public RockSampleTextSerializer,
-        public LegalActionsTextSerializer,
+        public PositionDataTextSerializer,
         public solver::EnumeratedObservationTextSerializer {
 public:
     RockSampleLegalActionsTextSerializer(solver::Solver *solver);
@@ -59,8 +59,8 @@ public:
 };
 
 class RockSamplePreferredActionsTextSerializer: public RockSampleTextSerializer,
-        public PreferredActionsTextSerializer,
-        public solver::EnumeratedObservationTextSerializer {
+        public PositionAndRockDataTextSerializer,
+        public solver::EnumeratedObservationTextSerializer{
 public:
     RockSamplePreferredActionsTextSerializer(solver::Solver *solver);
     virtual ~RockSamplePreferredActionsTextSerializer() = default;

@@ -29,8 +29,9 @@ class DiscretizedActionPool: public solver::ActionPool {
 
     virtual long getNumberOfBins() = 0;
     virtual std::unique_ptr<Action> sampleAnAction(long binNumber) = 0;
+    virtual std::vector<long> createBinSequence(HistoricalData const *data) = 0;
 
-    virtual std::unique_ptr<ActionMapping> createActionMapping() override;
+    virtual std::unique_ptr<ActionMapping> createActionMapping(BeliefNode *node) override;
 };
 
 class DiscretizedActionMap: public solver::ActionMapping {
@@ -38,15 +39,11 @@ class DiscretizedActionMap: public solver::ActionMapping {
     friend class DiscretizedActionTextSerializer;
     friend class DiscretizedActionMapEntry;
 
-    DiscretizedActionMap(Model *model, DiscretizedActionPool *pool, long numberOfBins);
+    DiscretizedActionMap(DiscretizedActionPool *pool, std::vector<long> binSequence);
 
     /* -------------- Association with a belief node ---------------- */
     virtual void setOwner(BeliefNode *owner) override;
     virtual BeliefNode *getOwner() const override;
-    /** Initializes this mapping by adding all of the actions as actions
-     * to be tried.
-     */
-    void initialize() override;
 
     // Default destructor; copying and moving disallowed!
     virtual ~DiscretizedActionMap();
@@ -64,21 +61,14 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual ActionMappingEntry const *getEntry(Action const &action) const override;
 
     /* ----------------- Methods for unvisited actions ------------------- */
-    /** Returns true iff there is another action that has not been visited,
-     * but should be visited. */
-    virtual bool hasUnvisitedActions() const override;
-    virtual std::vector<std::unique_ptr<Action>> getUnvisitedActions() const override;
-    virtual std::unique_ptr<Action> getRandomUnvisitedAction() const override;
-
-    virtual void deleteUnvisitedAction(long binNumber);
-    virtual void addUnvisitedAction(long binNumber);
+    /** Returns the next action to be tried for this node, or nullptr if there are no more. */
+    virtual std::unique_ptr<Action> getNextActionToTry() override;
 
     /* -------------- Retrieval of general statistics. ---------------- */
     virtual long getTotalVisitCount() const override;
 
   protected:
     BeliefNode *owningBeliefNode_;
-    Model *model_;
     DiscretizedActionPool *pool_;
     long numberOfBins_;
 
@@ -86,14 +76,8 @@ class DiscretizedActionMap: public solver::ActionMapping {
     long nChildren_;
     long numberOfVisitedEntries_;
 
-    abt::RandomAccessSet<long> binsToTry_;
-
-    long bestBinNumber_;
-    double highestQValue_;
-
-    long robustBinNumber_;
-    long highestVisitCount_;
-    double robustQValue_;
+    std::vector<long> binSequence_;
+    std::vector<long>::const_iterator binIterator_;
 
     long totalVisitCount_;
 };

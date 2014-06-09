@@ -55,40 +55,36 @@ BeliefNode* NnRolloutFactory::findNeighbor(BeliefNode *belief) {
 }
 
 std::unique_ptr<StepGenerator> NnRolloutFactory::createGenerator(SearchStatus &status,
-        HistorySequence *sequence) {
-    return std::make_unique<NnRolloutGenerator>(status, sequence, solver_, this);
+        HistoryEntry const *entry, State const */*state*/, HistoricalData const */*data*/) {
+    return std::make_unique<NnRolloutGenerator>(status, solver_, this, entry);
 }
 
-NnRolloutGenerator::NnRolloutGenerator(SearchStatus &status, HistorySequence *sequence,
-        Solver *solver, NnRolloutFactory *factory) :
+NnRolloutGenerator::NnRolloutGenerator(SearchStatus &status, Solver *solver,
+        NnRolloutFactory *factory, HistoryEntry const *entry) :
             StepGenerator(status),
-            sequence_(sequence),
-            solver_(solver),
-            model_(solver_->getModel()),
+            model_(solver->getModel()),
             factory_(factory),
-            rootNeighborNode_(nullptr),
-            currentNeighborNode_(nullptr),
-            previousAction_(nullptr) {
-    BeliefNode *currentNode = sequence_->getLastEntry()->getAssociatedBeliefNode();
-    rootNeighborNode_ = factory_->findNeighbor(currentNode);
-    currentNeighborNode_ = rootNeighborNode_;
-    if (rootNeighborNode_ == nullptr) {
-        status_ = SearchStatus::ERROR;
+            currentNeighborNode_(nullptr) {
+    BeliefNode *currentNode = entry->getAssociatedBeliefNode();
+    currentNeighborNode_ = factory_->findNeighbor(currentNode);
+    if (currentNeighborNode_ == nullptr) {
+        status_ = SearchStatus::UNINITIALIZED;
+    } else{
+        status_ = SearchStatus::INITIAL;
     }
 }
 
-Model::StepResult NnRolloutGenerator::getStep() {
+Model::StepResult NnRolloutGenerator::getStep(HistoryEntry const */*entry*/, State const *state,
+        HistoricalData const */*data*/) {
     if (currentNeighborNode_ == nullptr) {
         // NN rollout is done.
-        status_ = SearchStatus::STAGE_COMPLETE;
+        status_ = SearchStatus::OUT_OF_STEPS;
         return Model::StepResult { };
     }
 
-    HistoryEntry *lastEntry = sequence_->getLastEntry();
     std::unique_ptr<Action> action = currentNeighborNode_->getRecommendedAction();
-    Model::StepResult result = model_->generateStep(*lastEntry->getState(), *action);
+    Model::StepResult result = model_->generateStep(*state, *action);
     currentNeighborNode_ = currentNeighborNode_->getChild(*action, *result.observation);
-
     return std::move(result);
 }
 

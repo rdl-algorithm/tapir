@@ -14,7 +14,7 @@ public:
     virtual ~HistoricalData() = default;
 
     virtual std::unique_ptr<HistoricalData> createChild(Action const &action,
-            Observation const &observation) = 0;
+            Observation const &observation) const = 0;
     virtual void print(std::ostream &/*os*/) const {};
 };
 

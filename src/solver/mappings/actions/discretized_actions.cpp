@@ -21,25 +21,22 @@
 #include "ActionPool.hpp"
 
 namespace solver {
-std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping() {
-    return std::make_unique<DiscretizedActionMap>(this, numberOfBins_);
+std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping(BeliefNode *node) {
+    return std::make_unique<DiscretizedActionMap>(this,
+            createBinSequence(node->getHistoricalData()));
 }
 
 /* ---------------------- DiscretizedActionMap ---------------------- */
 DiscretizedActionMap::DiscretizedActionMap(DiscretizedActionPool *pool,
-        long numberOfBins) :
+        std::vector<long> binSequence) :
                 owningBeliefNode_(nullptr),
                 pool_(pool),
-                numberOfBins_(numberOfBins),
+                numberOfBins_(pool_->getNumberOfBins()),
                 entries_(numberOfBins_),
                 nChildren_(0),
                 numberOfVisitedEntries_(0),
-                binsToTry_(),
-                bestBinNumber_(-1),
-                highestQValue_(-std::numeric_limits<double>::infinity()),
-                robustBinNumber_(-1),
-                highestVisitCount_(-1),
-                robustQValue_(-std::numeric_limits<double>::infinity()),
+                binSequence_(std::move(binSequence)),
+                binIterator_(binSequence_.cbegin()),
                 totalVisitCount_(0) {
     for (int i = 0; i < numberOfBins_; i++) {
         DiscretizedActionMapEntry &entry = entries_[i];
@@ -58,14 +55,6 @@ void DiscretizedActionMap::setOwner(BeliefNode *owner) {
 BeliefNode *DiscretizedActionMap::getOwner() const {
     return owningBeliefNode_;
 }
-/** Initializes this mapping by adding all of the actions as actions
- * to be tried.
- */
-void DiscretizedActionMap::initialize() {
-    for (long i = 0; i < numberOfBins_; i++) {
-        addUnvisitedAction(i);
-    }
-}
 
 ActionNode* DiscretizedActionMap::getActionNode(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
@@ -73,6 +62,9 @@ ActionNode* DiscretizedActionMap::getActionNode(Action const &action) const {
 }
 ActionNode* DiscretizedActionMap::createActionNode(Action const &action) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
+    if (code != *binIterator_) {
+        debug::show_message("Error: Trying actions out of order!?");
+    }
 
     DiscretizedActionMapEntry &entry = entries_[code];
 
@@ -109,33 +101,17 @@ ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) c
     return &entries_[code];
 }
 
-
-bool DiscretizedActionMap::hasUnvisitedActions() const {
-    return binsToTry_.size() > 0;
-}
-std::vector<std::unique_ptr<Action>> DiscretizedActionMap::getUnvisitedActions() const {
-    std::vector<std::unique_ptr<Action>> actions;
-    for (long binNumber : binsToTry_) {
-        actions.push_back(std::move(pool_->sampleAnAction(binNumber)));
+std::unique_ptr<Action> DiscretizedActionMap::getNextActionToTry() {
+    while (binIterator_ != binSequence_.cend()) {
+        long binNumber = *binIterator_;
+        if (entries_[binNumber].visitCount_ <= 0) {
+            return pool_->sampleAnAction(binNumber);
+        }
+        ++binIterator_;
     }
-    return actions;
+    // No more actions to try!
+    return nullptr;
 }
-std::unique_ptr<Action> DiscretizedActionMap::getRandomUnvisitedAction() const {
-    if (binsToTry_.size() == 0) {
-        debug::show_message("Attempted rollout but no actions!?");
-        return nullptr;
-    }
-    int randomIndex = std::uniform_int_distribution<int>(0, binsToTry_.size()-1)(*model_->getRandomGenerator());
-    return model_->sampleAnAction(binsToTry_.get(randomIndex));
-}
-
-void DiscretizedActionMap::deleteUnvisitedAction(long binNumber) {
-    binsToTry_.remove(binNumber);
-}
-void DiscretizedActionMap::addUnvisitedAction(long binNumber) {
-    binsToTry_.add(binNumber);
-}
-
 
 long DiscretizedActionMap::getTotalVisitCount() const {
     return totalVisitCount_;
@@ -177,13 +153,11 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
     // Update the visit counts
     if (visitCount_ == 0 && deltaNVisits > 0) {
         map_->numberOfVisitedEntries_++;
-        map_->deleteUnvisitedAction(binNumber_);
     }
     visitCount_ += deltaNVisits;
     map_->totalVisitCount_ += deltaNVisits;
     if (visitCount_ == 0 && deltaNVisits < 0) {
         map_->numberOfVisitedEntries_--;
-        map_->addUnvisitedAction(binNumber_);
     }
 
     // Update the total Q
@@ -219,10 +193,10 @@ void DiscretizedActionTextSerializer::saveActionMapping(
     os << discMap.getTotalVisitCount() << " visits" << std::endl;
 
     os << "Untried (";
-    for (std::vector<long>::const_iterator it = discMap.binsToTry_.begin();
-            it != discMap.binsToTry_.end(); it++) {
+    for (std::vector<long>::const_iterator it = discMap.binIterator_;
+            it != discMap.binSequence_.cend(); it++) {
         os << *it;
-        if (std::next(it) != discMap.binsToTry_.end()) {
+        if (std::next(it) != discMap.binSequence_.cend()) {
             os << ", ";
         }
     }
@@ -259,9 +233,9 @@ void DiscretizedActionTextSerializer::saveActionMapping(
 
 std::unique_ptr<ActionMapping>
 DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
-    std::unique_ptr<ActionMapping> map(
-            getSolver()->getActionPool()->createActionMapping());
-    DiscretizedActionMap &discMap = static_cast<DiscretizedActionMap &>(*map);
+    std::unique_ptr<DiscretizedActionMap> discMap = std::make_unique<DiscretizedActionMap>(
+            static_cast<DiscretizedActionPool *>(getSolver()->getActionPool()),
+            std::vector<long> { });
 
     std::string line;
     std::getline(is, line);
@@ -270,8 +244,8 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
 
     long nVisitedEntries;
     sstr4 >> nVisitedEntries >> tmpStr >> tmpStr >> tmpStr;
-    sstr4 >>discMap.nChildren_ >> tmpStr;
-    sstr4 >> discMap.totalVisitCount_;
+    sstr4 >> discMap->nChildren_ >> tmpStr;
+    sstr4 >> discMap->totalVisitCount_;
 
     std::getline(is, line);
     std::istringstream sstr(line);
@@ -284,9 +258,10 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
             std::getline(sstr2, actionString, ',');
             long code;
             std::istringstream(actionString) >> code;
-            discMap.binsToTry_.add(code);
+            discMap->binSequence_.push_back(code);
         }
     }
+    discMap->binIterator_ = discMap->binSequence_.cbegin();
 
     for (long i = 0; i < nVisitedEntries; i++) {
         // The first line contains info from the mapping.
@@ -311,9 +286,9 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
         }
 
         // Create an entry to hold the action node.
-        DiscretizedActionMapEntry &entry = discMap.entries_[binNumber];
+        DiscretizedActionMapEntry &entry = discMap->entries_[binNumber];
         entry.binNumber_ = binNumber;
-        entry.map_ = &discMap;
+        entry.map_ = discMap.get();
         entry.meanQValue_ = meanQValue;
         entry.visitCount_ = visitCount;
         entry.totalQValue_ = totalQValue;
@@ -325,7 +300,7 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
             load(*node, is);
         }
     }
-    return std::move(map);
+    return std::move(discMap);
 }
 
 } /* namespace solver */

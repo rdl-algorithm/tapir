@@ -12,7 +12,7 @@ public:
     _NO_COPY_OR_MOVE(UcbStepGeneratorFactory);
 
     virtual std::unique_ptr<StepGenerator> createGenerator(SearchStatus &status,
-            HistorySequence *sequence) override;
+            HistoryEntry const *entry, State const *state, HistoricalData const *data) override;
 private:
     Solver *solver_;
     double explorationCoefficient_;
@@ -20,16 +20,13 @@ private:
 
 class UcbStepGenerator : public StepGenerator {
 public:
-    UcbStepGenerator(SearchStatus &status, HistorySequence *sequence,
-            Solver *solver, double explorationCoefficient);
+    UcbStepGenerator(SearchStatus &status, Solver *solver, double explorationCoefficient);
     ~UcbStepGenerator() = default;
     _NO_COPY_OR_MOVE(UcbStepGenerator);
 
     virtual Model::StepResult getStep(HistoryEntry const *entry,
             State const *state, HistoricalData const *data) override;
 private:
-    HistorySequence *sequence_;
-    Solver *solver_;
     Model *model_;
     double explorationCoefficient_;
 

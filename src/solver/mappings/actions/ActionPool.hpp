@@ -20,8 +20,8 @@ class ActionPool {
 public:
     ActionPool() = default;
     virtual ~ActionPool() = default;
-    /** Creates a default action mapping. */
-    virtual std::unique_ptr<ActionMapping> createActionMapping() = 0;
+    /** Creates an action mapping for the given belief node. */
+    virtual std::unique_ptr<ActionMapping> createActionMapping(BeliefNode *node) = 0;
 };
 } /* namespace solver */
 

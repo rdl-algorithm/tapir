@@ -18,6 +18,7 @@
 
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/actions/ActionPool.hpp"
+#include "solver/mappings/observations/discrete_observations.hpp"
 #include "solver/mappings/observations/ObservationMapping.hpp"
 #include "solver/mappings/observations/ObservationPool.hpp"
 
@@ -110,6 +111,15 @@ void Model::drawSimulationState(BeliefNode const */*belief*/, State const &/*sta
         std::ostream &/*os*/) {
 }
 
+/* ---------------------- Basic customizations  ---------------------- */
+double Model::getHeuristicValue(HistoricalData const */*data*/, State const */*state*/) {
+    return 0;
+}
+
+std::unique_ptr<Action> Model::getRolloutAction(HistoricalData const */*data*/,
+        State const */*state*/) {
+    return nullptr;
+}
 
 /* ------- Customization of more complex solver functionality  --------- */
 std::unique_ptr<StateIndex> Model::createStateIndex() {
@@ -118,6 +128,16 @@ std::unique_ptr<StateIndex> Model::createStateIndex() {
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) {
     return std::make_unique<DefaultHistoryCorrector>(solver);
+}
+
+std::unique_ptr<ObservationPool> Model::createObservationPool(Solver */*solver*/) {
+    return std::make_unique<DiscreteObservationPool>();
+}
+
+std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
+    return std::make_unique<BasicSearchStrategy>(solver,
+            std::make_unique<UcbStepGeneratorFactory>(solver, 1.0),
+            heuristics::get_default_heuristic(this));
 }
 
 std::unique_ptr<EstimationStrategy> Model::createEstimationStrategy(Solver */*solver*/) {

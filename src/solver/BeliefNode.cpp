@@ -21,6 +21,8 @@
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State
 
+#include "solver/search/action-choosers/choosers.hpp"
+
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/observations/ObservationMapping.hpp"
 #include "solver/mappings/observations/ObservationPool.hpp"
@@ -32,6 +34,7 @@ BeliefNode::BeliefNode() :
 BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry) :
             BeliefNode(-1, parentEntry) {
 }
+
 BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             id_(id),
             depth_(-1),
@@ -42,8 +45,7 @@ BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             tLastChange_(-1),
             actionMap_(nullptr),
             cachedValues_(),
-            qEstimator_(nullptr),
-            {
+            qEstimator_(nullptr) {
 }
 
 // Do-nothing destructor

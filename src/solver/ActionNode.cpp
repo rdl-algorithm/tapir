@@ -57,14 +57,12 @@ void ActionNode::setMapping(std::unique_ptr<ObservationMapping> mapping) {
 }
 
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver *solver,
+std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver */*solver*/,
         Observation const &obs) {
     BeliefNode *childNode = getChild(obs);
     bool added = false;
     if (childNode == nullptr) {
         childNode = observationMap_->createBelief(obs);
-        childNode->setMapping(solver->getActionPool()->createActionMapping());
-        solver->getEstimationStrategy()->setQEstimator(solver, childNode);
         added = true;
     }
     return std::make_pair(childNode, added);

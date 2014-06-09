@@ -177,15 +177,14 @@ int RockSampleTextSerializer::getObservationColumnWidth() {
     return 4;
 }
 
-RockSampleDiscretizedActionTextSerializer::RockSampleDiscretizedActionTextSerializer(
-        solver::Solver *solver) :
-            Serializer(solver) {
+RockSampleAllActionsTextSerializer::RockSampleAllActionsTextSerializer(solver::Solver *solver) :
+        Serializer(solver) {
 }
 RockSampleLegalActionsTextSerializer::RockSampleLegalActionsTextSerializer(solver::Solver *solver) :
-            Serializer(solver) {
+        Serializer(solver) {
 }
 RockSamplePreferredActionsTextSerializer::RockSamplePreferredActionsTextSerializer(
         solver::Solver *solver) :
-            Serializer(solver) {
+        Serializer(solver) {
 }
 } /* namespace rocksample */

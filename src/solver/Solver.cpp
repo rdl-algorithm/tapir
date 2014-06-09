@@ -290,7 +290,7 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     }
 }
 
-void Solver::printTree(std::ostream &os) {
+void Solver::printTree(std::ostream &/*os*/) {
 }
 
 
@@ -370,16 +370,16 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
-    SearchStatus status = SearchStatus::UNINITIALIZED;
-    std::unique_ptr<SearchInstance> searchInstance = searchStrategy_->createSearchInstance(status,
-            sequence, maximumDepth);
-    searchInstance->extendSequence();
-    // Backup after every search.
+    searchStrategy_->extendSequence(sequence, maximumDepth);
     doBackup();
 }
 
 /* ------------------ Tree backup methods ------------------- */
 void Solver::negateSequence(HistorySequence *sequence) {
+    if (sequence->getLength() <= 1) {
+        return;
+    }
+
     auto it = sequence->entrySequence_.cbegin();
     while (true) {
         // Update the immediate reward and the visit counts.

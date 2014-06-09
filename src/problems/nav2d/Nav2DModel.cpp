@@ -45,6 +45,7 @@
 #include "solver/StatePool.hpp"
 
 #include "Nav2DAction.hpp"         // for Nav2DAction
+#include "Nav2DActionPool.hpp"         // for Nav2DActionPool
 #include "Nav2DObservation.hpp"    // for Nav2DObservation
 #include "Nav2DState.hpp"          // for Nav2DState
 #include "Nav2DTextSerializer.hpp"
@@ -290,39 +291,6 @@ std::unique_ptr<solver::State> Nav2DModel::sampleStateUniform() {
 bool Nav2DModel::isTerminal(solver::State const &state) {
     return isInside(static_cast<Nav2DState const &>(state).getPosition(),
             AreaType::GOAL);
-}
-
-double Nav2DModel::getHeuristicValue(solver::State const &state) {
-    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
-    Point2D closestPoint = getClosestPointOfType(navState.getPosition(),
-            AreaType::GOAL);
-    Vector2D displacement = closestPoint - navState.getPosition();
-    double distance = displacement.getMagnitude();
-    double turnAmount = std::abs(geometry::normalizeTurn(
-            displacement.getDirection() - navState.getDirection()));
-    long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
-    numSteps += std::floor(turnAmount / (maxRotationalSpeed_
-            * timeStepLength_));
-    if (numSteps <= 0) {
-        numSteps = 1;
-    }
-    double costPerStep = costPerUnitDistance_ * distance / numSteps;
-    costPerStep += costPerRevolution_ * turnAmount / numSteps;
-    costPerStep += costPerUnitTime_ * timeStepLength_;
-
-    double discountFactor = getDiscountFactor();
-    double reward = 0;
-    if (discountFactor < 1.0) {
-        double finalDiscount = std::pow(discountFactor, numSteps);
-        reward = finalDiscount * goalReward_;
-        reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
-    } else {
-        reward = goalReward_ - costPerStep * numSteps;
-    }
-    if (!std::isfinite(reward)) {
-        debug::show_message("Bad reward!");
-    }
-    return reward;
 }
 
 std::unique_ptr<Nav2DState> Nav2DModel::extrapolateState(
@@ -726,18 +694,53 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 }
 
-long Nav2DModel::getNumberOfBins() {
-    return Nav2DAction::getNumberOfBins();
+
+
+
+double Nav2DModel::getHeuristicValue(solver::HistoricalData const */*data*/,
+        solver::State const *state) {
+    Nav2DState const &navState = static_cast<Nav2DState const &>(*state);
+    Point2D closestPoint = getClosestPointOfType(navState.getPosition(),
+            AreaType::GOAL);
+    Vector2D displacement = closestPoint - navState.getPosition();
+    double distance = displacement.getMagnitude();
+    double turnAmount = std::abs(geometry::normalizeTurn(
+            displacement.getDirection() - navState.getDirection()));
+    long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
+    numSteps += std::floor(turnAmount / (maxRotationalSpeed_
+            * timeStepLength_));
+    if (numSteps <= 0) {
+        numSteps = 1;
+    }
+    double costPerStep = costPerUnitDistance_ * distance / numSteps;
+    costPerStep += costPerRevolution_ * turnAmount / numSteps;
+    costPerStep += costPerUnitTime_ * timeStepLength_;
+
+    double discountFactor = getDiscountFactor();
+    double reward = 0;
+    if (discountFactor < 1.0) {
+        double finalDiscount = std::pow(discountFactor, numSteps);
+        reward = finalDiscount * goalReward_;
+        reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
+    } else {
+        reward = goalReward_ - costPerStep * numSteps;
+    }
+    if (!std::isfinite(reward)) {
+        debug::show_message("Bad reward!");
+    }
+    return reward;
 }
 
-std::unique_ptr<solver::Action> Nav2DModel::sampleAnAction(long binNumber) {
-    return std::make_unique<Nav2DAction>(binNumber, this);
-}
 
-double Nav2DModel::getMaxObservationDistance() {
-    return maxObservationDistance_;
-}
 
+
+std::unique_ptr<solver::ActionPool> Nav2DModel::createActionPool(solver::Solver */*solver*/) {
+    return std::make_unique<Nav2DActionPool>(this);
+}
+std::unique_ptr<solver::ObservationPool> Nav2DModel::createObservationPool(
+        solver::Solver */*solver*/) {
+    return std::make_unique<solver::ApproximateObservationPool>(maxObservationDistance_);
+}
 std::unique_ptr<solver::Serializer> Nav2DModel::createSerializer(solver::Solver *solver) {
     return std::make_unique<Nav2DTextSerializer>(solver);
 }

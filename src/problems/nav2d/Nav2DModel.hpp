@@ -54,9 +54,7 @@ struct Nav2DTransition : public solver::TransitionParameters {
     void print(std::ostream &os) const override;
 };
 
-class Nav2DModel : virtual public ModelWithProgramOptions,
-    virtual public solver::ModelWithDiscretizedActions,
-    virtual public solver::ModelWithApproximateObservations {
+class Nav2DModel : virtual public ModelWithProgramOptions {
 
     friend class Nav2DAction;
     friend class Nav2DTextSerializer;
@@ -83,11 +81,13 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
         WORLD = 6
     };
 
+    /* ----------------------- Basic getters  ------------------- */
     virtual std::string getName() override {
         return "Nav2D";
     }
 
-    /***** Start implementation of Model's methods *****/
+
+    /* ---------- Virtual getters for ABT / model parameters  ---------- */
     // Simple getters
     virtual long getNumberOfStateVariables() override {
         return nStVars_;
@@ -99,16 +99,15 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
         return maxVal_;
     }
 
-    // Other methods
+
+    /* --------------- The model interface proper ----------------- */
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates a state uniformly at random. */
     virtual std::unique_ptr<solver::State> sampleStateUniform() override;
-
     virtual bool isTerminal(solver::State const &state) override;
-    virtual double getHeuristicValue(solver::State const &state) override;
 
 
-    /* --------------- Black box dynamics ----------------- */
+    /* -------------------- Black box dynamics ---------------------- */
     virtual std::unique_ptr<solver::TransitionParameters> generateTransition(
                 solver::State const &state,
                 solver::Action const &action);
@@ -134,6 +133,8 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
             solver::State const &state,
             solver::Action const &action) override;
 
+
+    /* -------------- Methods for handling model changes ---------------- */
     virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
     /** Returns the tree with the given object type. */
@@ -149,6 +150,9 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
     bool isInside(geometry::Point2D point, AreaType type);
     /** Returns the contents of a given point on the map. */
     AreaType getAreaType(geometry::Point2D point);
+
+
+    /* ------------------- Pretty printing methods --------------------- */
     /** Displays an individual point on the map. */
     virtual void dispPoint(AreaType type, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
@@ -156,11 +160,16 @@ class Nav2DModel : virtual public ModelWithProgramOptions,
             solver::State const &state,
             std::ostream &os) override;
 
-    virtual long getNumberOfBins() override;
-    virtual std::unique_ptr<solver::Action> sampleAnAction(long binNumber) override;
+    /* ---------------------- Basic customizations  ---------------------- */
+    virtual double getHeuristicValue(solver::HistoricalData const *data,
+            solver::State const *state);
 
-    virtual double getMaxObservationDistance() override;
 
+    /* ------- Customization of more complex solver functionality  --------- */
+    virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver)
+                override;
+    virtual std::unique_ptr<solver::ObservationPool> createObservationPool(solver::Solver *solver)
+            override;
     virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
   private:
@@ -251,6 +260,10 @@ struct Nav2DChange : public solver::ModelChange {
     Nav2DModel::AreaType type = Nav2DModel::AreaType::EMPTY;
     int64_t id = 0;
     geometry::Rectangle2D area{};
+};
+
+class Nav2DActionsPool : public solver::DiscretizedActionPool {
+
 };
 } /* namespace nav2d */
 

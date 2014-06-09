@@ -20,18 +20,6 @@ public:
     virtual void setOwner(BeliefNode *owner) = 0;
     /** Returns the belief node that owns this mapping. */
     virtual BeliefNode *getOwner() const = 0;
-    /** Initializes this mapping (with respect to the belief node that owns it)
-     *
-     * This is optional; it can allow initialization of mappings based on
-     * parameters of the given node, including the history of actions and
-     * observations.
-     *
-     * This method is called when creating a new belief node, but is not
-     * called when a belief node is deserialized, as the relevant parameters
-     * can simply be stored for serialization.
-     */
-    virtual void initialize() {
-    }
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     /** Retrieves the action node (if any) corresponding to this action. */
@@ -59,10 +47,8 @@ public:
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
     /* ------------------ Methods for unvisited actions ------------------- */
-    /** Returns true iff this mapping still has actions that remain to be tried. */
-    virtual bool hasActionsToTry() const = 0;
-    /** Returns the next action to be tried for this node. */
-    virtual std::unique_ptr<Action> getNextActionToTry() const = 0;
+    /** Returns the next action to be tried for this node, or nullptr if there are no more. */
+    virtual std::unique_ptr<Action> getNextActionToTry() = 0;
 
     /* -------------- Retrieval of general statistics. ---------------- */
     /** Returns the total number of times children have been visited. */
