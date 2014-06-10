@@ -20,22 +20,15 @@
 
 namespace solver {
 /* --------------------- DiscreteObservationPool --------------------- */
-std::unique_ptr<ObservationMapping> DiscreteObservationPool::createObservationMapping() {
-    return std::make_unique<DiscreteObservationMap>();
+std::unique_ptr<ObservationMapping> DiscreteObservationPool::createObservationMapping(ActionNode *owner) {
+    return std::make_unique<DiscreteObservationMap>(owner);
 }
 
 /* ---------------------- DiscreteObservationMap ---------------------- */
-DiscreteObservationMap::DiscreteObservationMap() :
-        owningActionNode_(nullptr),
+DiscreteObservationMap::DiscreteObservationMap(ActionNode *owner) :
+        ObservationMapping(owner),
         childMap_(),
         totalVisitCount_(0) {
-}
-
-void DiscreteObservationMap::setOwner(ActionNode *owner) {
-    owningActionNode_ = owner;
-}
-ActionNode *DiscreteObservationMap::getOwner() const {
-    return owningActionNode_;
 }
 
 BeliefNode* DiscreteObservationMap::getBelief(Observation const &obs) const {
@@ -134,9 +127,9 @@ void DiscreteObservationTextSerializer::saveObservationMapping(
 }
 
 std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObservationMapping(
-        std::istream &is) {
+        ActionNode *owner, std::istream &is) {
     std::unique_ptr<ObservationMapping> map(
-            getSolver()->getObservationPool()->createObservationMapping());
+            getSolver()->getObservationPool()->createObservationMapping(owner));
     DiscreteObservationMap &discMap =
                     (static_cast<DiscreteObservationMap &>(*map));
     std::string line;

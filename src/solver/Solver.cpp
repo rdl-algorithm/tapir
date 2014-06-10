@@ -49,6 +49,8 @@
 #include "solver/StateInfo.hpp"                // for StateInfo
 #include "solver/StatePool.hpp"                // for StatePool
 
+#include "problems/rocksample/RockSampleAction.hpp"
+
 using std::cout;
 using std::endl;
 
@@ -360,16 +362,27 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
+
     HistorySequence *sequence = histories_->createSequence();
+
     sequence->addEntry(startStateInfo);
     sequence->getFirstEntry()->registerNode(startNode);
+
     continueSearch(sequence, maximumDepth);
+
+//    rocksample::RockSampleAction const &rsAction = static_cast<rocksample::RockSampleAction const &>(
+//            *sequence->getFirstEntry()->getAction());
+//    if (rsAction.getActionType() == rocksample::ActionType::SOUTH) {
+//        cout << "SOUTH: " << startNode->getMapping()->getEntry(rsAction)->getTotalQValue();
+//        printBelief(startNode, cout);
+//    }
 }
 
 void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
+
     searchStrategy_->extendSequence(sequence, maximumDepth);
     doBackup();
 }
@@ -404,7 +417,7 @@ void Solver::negateSequence(HistorySequence *sequence) {
 void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
         double deltaTotalQ, long deltaNVisits) {
 
-// all zero => no update required.
+    // all zero => no update required.
     if (deltaTotalQ == 0 && deltaNVisits == 0) {
         return;
     }
@@ -424,12 +437,12 @@ void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNCon
 
     deltaTotalQ += deltaNContinuations * node->getQValue();
 
-// Apply the discount factor.
+    // Apply the discount factor.
     deltaTotalQ *= model_->getDiscountFactor();
 
     ActionMappingEntry *parentActionEntry = node->getParentActionNode()->getParentEntry();
     if (parentActionEntry->update(0, deltaTotalQ)) {
-        addNodeToBackup(node);
+        addNodeToBackup(parentActionEntry->getMapping()->getOwner());
     }
 }
 

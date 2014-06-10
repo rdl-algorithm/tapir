@@ -23,23 +23,17 @@ ApproximateObservationPool::ApproximateObservationPool(double maxDistance) :
         maxDistance_(maxDistance) {
 }
 
-std::unique_ptr<ObservationMapping> ApproximateObservationPool::createObservationMapping() {
-    return std::make_unique<ApproximateObservationMap>(maxDistance_);
+std::unique_ptr<ObservationMapping> ApproximateObservationPool::createObservationMapping(
+        ActionNode *owner) {
+    return std::make_unique<ApproximateObservationMap>(owner, maxDistance_);
 }
 
 /* ---------------------- ApproximateObservationMap ---------------------- */
-ApproximateObservationMap::ApproximateObservationMap(double maxDistance) :
-        owningActionNode_(nullptr),
+ApproximateObservationMap::ApproximateObservationMap(ActionNode *owner, double maxDistance) :
+        ObservationMapping(owner),
         maxDistance_(maxDistance),
         entries_(),
         totalVisitCount_(0) {
-}
-
-void ApproximateObservationMap::setOwner(ActionNode *owner) {
-    owningActionNode_ = owner;
-}
-ActionNode *ApproximateObservationMap::getOwner() const {
-    return owningActionNode_;
 }
 
 BeliefNode* ApproximateObservationMap::getBelief(Observation const &obs) const {
@@ -156,9 +150,9 @@ void ApproximateObservationTextSerializer::saveObservationMapping(
 }
 
 std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadObservationMapping(
-        std::istream &is) {
+        ActionNode *owner, std::istream &is) {
     std::unique_ptr<ObservationMapping> map(
-            getSolver()->getObservationPool()->createObservationMapping());
+            getSolver()->getObservationPool()->createObservationMapping(owner));
     ApproximateObservationMap &approxMap =
             (static_cast<ApproximateObservationMap &>(*map));
     std::string line;

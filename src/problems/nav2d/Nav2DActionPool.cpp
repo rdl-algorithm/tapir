@@ -5,6 +5,7 @@
 
 namespace nav2d {
 Nav2DActionPool::Nav2DActionPool(Nav2DModel *model) :
+        DiscretizedActionPool(model),
         model_(model) {
 }
 

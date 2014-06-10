@@ -21,23 +21,34 @@
 #include "ActionPool.hpp"
 
 namespace solver {
+/* ---------------------- DiscretizedActionPool ---------------------- */
+DiscretizedActionPool::DiscretizedActionPool(Model *model) :
+        model_(model) {
+}
 std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping(BeliefNode *node) {
-    return std::make_unique<DiscretizedActionMap>(this,
+    return std::make_unique<DiscretizedActionMap>(node, this,
             createBinSequence(node->getHistoricalData()));
 }
 
 /* ---------------------- DiscretizedActionMap ---------------------- */
-DiscretizedActionMap::DiscretizedActionMap(DiscretizedActionPool *pool,
+DiscretizedActionMap::DiscretizedActionMap(BeliefNode *owner, DiscretizedActionPool *pool,
         std::vector<long> binSequence) :
-                owningBeliefNode_(nullptr),
+        ActionMapping(owner),
+                model_(pool->model_),
                 pool_(pool),
                 numberOfBins_(pool_->getNumberOfBins()),
                 entries_(numberOfBins_),
                 nChildren_(0),
                 numberOfVisitedEntries_(0),
-                binSequence_(std::move(binSequence)),
-                binIterator_(binSequence_.cbegin()),
+//                binSequence_(std::move(binSequence)),
+//                binIterator_(binSequence_.cbegin()),
+                actionsToTry_(),
                 totalVisitCount_(0) {
+
+    for (long code : binSequence) {
+        actionsToTry_.add(code);
+    }
+
     for (int i = 0; i < numberOfBins_; i++) {
         DiscretizedActionMapEntry &entry = entries_[i];
         entry.binNumber_ = i;
@@ -49,22 +60,17 @@ DiscretizedActionMap::DiscretizedActionMap(DiscretizedActionPool *pool,
 DiscretizedActionMap::~DiscretizedActionMap() {
 }
 
-void DiscretizedActionMap::setOwner(BeliefNode *owner) {
-    owningBeliefNode_ = owner;
-}
-BeliefNode *DiscretizedActionMap::getOwner() const {
-    return owningBeliefNode_;
-}
-
 ActionNode* DiscretizedActionMap::getActionNode(Action const &action) const {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
     return entries_[code].getActionNode();
 }
 ActionNode* DiscretizedActionMap::createActionNode(Action const &action) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
+    /*
     if (code != *binIterator_) {
         debug::show_message("Error: Trying actions out of order!?");
     }
+    */
 
     DiscretizedActionMapEntry &entry = entries_[code];
 
@@ -102,6 +108,15 @@ ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) c
 }
 
 std::unique_ptr<Action> DiscretizedActionMap::getNextActionToTry() {
+    long size = actionsToTry_.size();
+    if (size == 0) {
+        return nullptr;
+    }
+
+    long index = std::uniform_int_distribution<long>(0, size - 1)(*model_->getRandomGenerator());
+    long binNumber = actionsToTry_.get(index);
+    return pool_->sampleAnAction(binNumber);
+    /*
     while (binIterator_ != binSequence_.cend()) {
         long binNumber = *binIterator_;
         if (entries_[binNumber].visitCount_ <= 0) {
@@ -111,6 +126,7 @@ std::unique_ptr<Action> DiscretizedActionMap::getNextActionToTry() {
     }
     // No more actions to try!
     return nullptr;
+    */
 }
 
 long DiscretizedActionMap::getTotalVisitCount() const {
@@ -153,6 +169,7 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
     // Update the visit counts
     if (visitCount_ == 0 && deltaNVisits > 0) {
         map_->numberOfVisitedEntries_++;
+        map_->actionsToTry_.remove(binNumber_);
     }
     visitCount_ += deltaNVisits;
     map_->totalVisitCount_ += deltaNVisits;
@@ -170,7 +187,7 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
     } else {
         meanQValue_ = totalQValue_ / visitCount_;
     }
-    return meanQValue_ == oldMeanQ;
+    return meanQValue_ != oldMeanQ;
 }
 
 /* ------------------- DiscretizedActionTextSerializer ------------------- */
@@ -193,10 +210,10 @@ void DiscretizedActionTextSerializer::saveActionMapping(
     os << discMap.getTotalVisitCount() << " visits" << std::endl;
 
     os << "Untried (";
-    for (std::vector<long>::const_iterator it = discMap.binIterator_;
-            it != discMap.binSequence_.cend(); it++) {
+    for (std::vector<long>::const_iterator it = discMap.actionsToTry_.begin();
+            it != discMap.actionsToTry_.end(); it++) {
         os << *it;
-        if (std::next(it) != discMap.binSequence_.cend()) {
+        if (std::next(it) != discMap.actionsToTry_.end()) {
             os << ", ";
         }
     }
@@ -232,8 +249,9 @@ void DiscretizedActionTextSerializer::saveActionMapping(
 }
 
 std::unique_ptr<ActionMapping>
-DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
+DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istream &is) {
     std::unique_ptr<DiscretizedActionMap> discMap = std::make_unique<DiscretizedActionMap>(
+            owner,
             static_cast<DiscretizedActionPool *>(getSolver()->getActionPool()),
             std::vector<long> { });
 
@@ -242,8 +260,7 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
     std::string tmpStr;
     std::istringstream sstr4(line);
 
-    long nVisitedEntries;
-    sstr4 >> nVisitedEntries >> tmpStr >> tmpStr >> tmpStr;
+    sstr4 >> discMap->numberOfVisitedEntries_ >> tmpStr >> tmpStr >> tmpStr;
     sstr4 >> discMap->nChildren_ >> tmpStr;
     sstr4 >> discMap->totalVisitCount_;
 
@@ -258,12 +275,13 @@ DiscretizedActionTextSerializer::loadActionMapping(std::istream &is) {
             std::getline(sstr2, actionString, ',');
             long code;
             std::istringstream(actionString) >> code;
-            discMap->binSequence_.push_back(code);
+//            discMap->binSequence_.push_back(code);
+            discMap->actionsToTry_.add(code);
         }
     }
-    discMap->binIterator_ = discMap->binSequence_.cbegin();
+//    discMap->binIterator_ = discMap->binSequence_.cbegin();
 
-    for (long i = 0; i < nVisitedEntries; i++) {
+    for (long i = 0; i < discMap->numberOfVisitedEntries_ ; i++) {
         // The first line contains info from the mapping.
         std::getline(is, line);
         std::istringstream sstr2(line);

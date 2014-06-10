@@ -13,7 +13,7 @@ public:
     ObservationPool() = default;
     virtual ~ObservationPool() = default;
     /** Creates a default observation mapping. */
-    virtual std::unique_ptr<ObservationMapping> createObservationMapping() = 0;
+    virtual std::unique_ptr<ObservationMapping> createObservationMapping(ActionNode *owner) = 0;
 };
 
 } /* namespace solver */

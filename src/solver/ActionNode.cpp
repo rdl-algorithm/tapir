@@ -53,7 +53,6 @@ BeliefNode *ActionNode::getChild(Observation const &obs) const {
 /* -------------------- Tree-related setters  ---------------------- */
 void ActionNode::setMapping(std::unique_ptr<ObservationMapping> mapping) {
     observationMap_ = std::move(mapping);
-    observationMap_->setOwner(this);
 }
 
 /* -------------------- Tree-related methods  ---------------------- */

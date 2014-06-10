@@ -15,14 +15,17 @@ class BeliefNode;
 
 class ObservationMapping {
 public:
-    ObservationMapping() = default;
+    ObservationMapping(ActionNode *owner) :
+        owner_(owner) {
+    }
     virtual ~ObservationMapping() = default;
+    _NO_COPY_OR_MOVE(ObservationMapping);
 
     /* -------------- Association with an action node ---------------- */
-    /* Associates this mapping with the given action node. */
-    virtual void setOwner(ActionNode *owner) = 0;
     /** Returns the action node that owns this mapping. */
-    virtual ActionNode *getOwner() const = 0;
+    ActionNode *getOwner() const {
+        return owner_;
+    }
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     /** Retrieves the belief node (if any) corresponding to this observation */
@@ -51,6 +54,8 @@ public:
     }
     /** Returns the total visit count among all observations. */
     virtual long getTotalVisitCount() const = 0;
+private:
+    ActionNode *owner_;
 };
 } /* namespace solver */
 

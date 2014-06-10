@@ -1,9 +1,11 @@
 #ifndef SOLVER_ACTIONMAPPING_HPP_
 #define SOLVER_ACTIONMAPPING_HPP_
 
+#include "global.hpp"
+
 #include "solver/abstract-problem/Action.hpp"
 
-#include "ActionMappingEntry.hpp"
+#include "solver/mappings/actions/ActionMappingEntry.hpp"
 
 namespace solver {
 class ActionMappingEntry;
@@ -12,14 +14,17 @@ class BeliefNode;
 
 class ActionMapping {
 public:
-    ActionMapping() = default;
+    ActionMapping(BeliefNode *owner) :
+        owner_(owner) {
+    }
     virtual ~ActionMapping() = default;
+    _NO_COPY_OR_MOVE(ActionMapping);
 
     /* -------------- Association with a belief node ---------------- */
-    /* Associates this mapping with the given belief node. */
-    virtual void setOwner(BeliefNode *owner) = 0;
     /** Returns the belief node that owns this mapping. */
-    virtual BeliefNode *getOwner() const = 0;
+    BeliefNode *getOwner() const {
+        return owner_;
+    }
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     /** Retrieves the action node (if any) corresponding to this action. */
@@ -63,6 +68,8 @@ public:
     virtual bool update(Action const &action, long deltaNVisits, double deltaTotalQ) {
         return getEntry(action)->update(deltaNVisits, deltaTotalQ);
     }
+private:
+    BeliefNode *owner_;
 };
 
 } /* namespace solver */

@@ -22,8 +22,9 @@ class DiscretizedPoint;
 class DiscretizedActionMapEntry;
 
 class DiscretizedActionPool: public solver::ActionPool {
+    friend class DiscretizedActionMap;
   public:
-    DiscretizedActionPool() = default;
+    DiscretizedActionPool(Model *model);
     virtual ~DiscretizedActionPool() = default;
     _NO_COPY_OR_MOVE(DiscretizedActionPool);
 
@@ -32,6 +33,8 @@ class DiscretizedActionPool: public solver::ActionPool {
     virtual std::vector<long> createBinSequence(HistoricalData const *data) = 0;
 
     virtual std::unique_ptr<ActionMapping> createActionMapping(BeliefNode *node) override;
+  private:
+    Model *model_;
 };
 
 class DiscretizedActionMap: public solver::ActionMapping {
@@ -39,11 +42,8 @@ class DiscretizedActionMap: public solver::ActionMapping {
     friend class DiscretizedActionTextSerializer;
     friend class DiscretizedActionMapEntry;
 
-    DiscretizedActionMap(DiscretizedActionPool *pool, std::vector<long> binSequence);
-
-    /* -------------- Association with a belief node ---------------- */
-    virtual void setOwner(BeliefNode *owner) override;
-    virtual BeliefNode *getOwner() const override;
+    DiscretizedActionMap(BeliefNode *owner, DiscretizedActionPool *pool,
+            std::vector<long> binSequence);
 
     // Default destructor; copying and moving disallowed!
     virtual ~DiscretizedActionMap();
@@ -68,7 +68,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual long getTotalVisitCount() const override;
 
   protected:
-    BeliefNode *owningBeliefNode_;
+    Model *model_;
     DiscretizedActionPool *pool_;
     long numberOfBins_;
 
@@ -76,8 +76,9 @@ class DiscretizedActionMap: public solver::ActionMapping {
     long nChildren_;
     long numberOfVisitedEntries_;
 
-    std::vector<long> binSequence_;
-    std::vector<long>::const_iterator binIterator_;
+    // std::vector<long> binSequence_;
+    // std::vector<long>::const_iterator binIterator_;
+    abt::RandomAccessSet<long> actionsToTry_;
 
     long totalVisitCount_;
 };
@@ -118,7 +119,7 @@ class DiscretizedActionTextSerializer: virtual public solver::Serializer {
             std::istream &is) override;
     virtual void saveActionMapping(ActionMapping const &map,
             std::ostream &os) override;
-    virtual std::unique_ptr<ActionMapping> loadActionMapping(
+    virtual std::unique_ptr<ActionMapping> loadActionMapping(BeliefNode *node,
             std::istream &is) override;
 };
 } /* namespace solver */

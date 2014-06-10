@@ -29,26 +29,19 @@ EnumeratedObservationPool::EnumeratedObservationPool(
 }
 
 std::unique_ptr<ObservationMapping>
-    EnumeratedObservationPool::createObservationMapping() {
-    return std::make_unique<EnumeratedObservationMap>(observations_);
+    EnumeratedObservationPool::createObservationMapping(ActionNode *owner) {
+    return std::make_unique<EnumeratedObservationMap>(owner, observations_);
 }
 
 
 /* ---------------------- EnumeratedObservationMap ---------------------- */
-EnumeratedObservationMap::EnumeratedObservationMap(
+EnumeratedObservationMap::EnumeratedObservationMap(ActionNode *owner,
         std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations) :
-                owningActionNode_(nullptr),
+                ObservationMapping(owner),
                 allObservations_(allObservations),
                 children_(allObservations_.size()),
                 nChildren_(0),
                 totalVisitCount_(0) {
-}
-
-void EnumeratedObservationMap::setOwner(ActionNode *owner) {
-    owningActionNode_ = owner;
-}
-ActionNode *EnumeratedObservationMap::getOwner() const {
-    return owningActionNode_;
 }
 
 
@@ -154,9 +147,10 @@ void EnumeratedObservationTextSerializer::saveObservationMapping(
 }
 
 std::unique_ptr<ObservationMapping>
-EnumeratedObservationTextSerializer::loadObservationMapping(
+EnumeratedObservationTextSerializer::loadObservationMapping(ActionNode *owner,
         std::istream &is) {
-    std::unique_ptr<ObservationMapping> map(getSolver()->getObservationPool()->createObservationMapping());
+    std::unique_ptr<ObservationMapping> map(
+            getSolver()->getObservationPool()->createObservationMapping(owner));
     EnumeratedObservationMap &enumMap = (
                 static_cast<EnumeratedObservationMap &>(*map));
     std::string line;

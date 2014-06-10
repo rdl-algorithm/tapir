@@ -26,7 +26,7 @@ class EnumeratedObservationPool: public solver::ObservationPool {
     virtual ~EnumeratedObservationPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationPool);
 
-    virtual std::unique_ptr<ObservationMapping> createObservationMapping() override;
+    virtual std::unique_ptr<ObservationMapping> createObservationMapping(ActionNode *owner) override;
 private:
   std::vector<std::unique_ptr<DiscretizedPoint>> observations_;
 };
@@ -35,16 +35,12 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
   public:
     friend class EnumeratedObservationMapEntry;
     friend class EnumeratedObservationTextSerializer;
-    EnumeratedObservationMap(
+    EnumeratedObservationMap(ActionNode *owner,
             std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations);
 
     // Default destructor; copying and moving disallowed!
     virtual ~EnumeratedObservationMap() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationMap);
-
-    /* -------------- Association with an action node ---------------- */
-    virtual void setOwner(ActionNode *owner) override;
-    virtual ActionNode *getOwner() const override;
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
@@ -59,7 +55,6 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     /* ------------- Methods for accessing visit counts. --------------- */
     virtual long getTotalVisitCount() const override;
   private:
-    ActionNode *owningActionNode_;
     std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations_;
     std::vector<std::unique_ptr<EnumeratedObservationMapEntry>> children_;
 
@@ -96,7 +91,7 @@ class EnumeratedObservationTextSerializer: virtual public solver::Serializer {
             std::istream &is) override;
     virtual void saveObservationMapping(ObservationMapping const &map,
             std::ostream &os) override;
-    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
+    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(ActionNode *owner,
             std::istream &is) override;
 };
 } /* namespace solver */

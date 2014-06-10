@@ -26,23 +26,18 @@ class DiscreteObservationPool: public solver::ObservationPool {
     virtual ~DiscreteObservationPool() = default;
     _NO_COPY_OR_MOVE(DiscreteObservationPool);
 
-    virtual std::unique_ptr<ObservationMapping>
-    createObservationMapping() override;
+    virtual std::unique_ptr<ObservationMapping> createObservationMapping(ActionNode *owner) override;
 };
 
 class DiscreteObservationMap: public solver::ObservationMapping {
   public:
     friend class DiscreteObservationMapEntry;
     friend class DiscreteObservationTextSerializer;
-    DiscreteObservationMap();
 
+    DiscreteObservationMap(ActionNode *owner);
     // Default destructor; copying and moving disallowed!
     virtual ~DiscreteObservationMap() = default;
     _NO_COPY_OR_MOVE(DiscreteObservationMap);
-
-    /* -------------- Association with an action node ---------------- */
-    virtual void setOwner(ActionNode *owner) override;
-    virtual ActionNode *getOwner() const override;
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
@@ -57,7 +52,6 @@ class DiscreteObservationMap: public solver::ObservationMapping {
     /* ------------- Methods for accessing visit counts. --------------- */
     virtual long getTotalVisitCount() const override;
   private:
-    ActionNode *owningActionNode_;
 
     struct HashContents {
         std::size_t operator()(std::unique_ptr<Observation> const &obs) const {
@@ -108,7 +102,7 @@ class DiscreteObservationTextSerializer: virtual public solver::Serializer {
             std::istream &is) override;
     virtual void saveObservationMapping(ObservationMapping const &map,
             std::ostream &os) override;
-    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
+    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(ActionNode *owner,
             std::istream &is) override;
 };
 } /* namespace solver */

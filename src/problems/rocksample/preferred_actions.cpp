@@ -194,13 +194,13 @@ std::vector<long> PreferredActionsPool::createBinSequence(solver::HistoricalData
 }
 
 std::unique_ptr<solver::ActionMapping> PreferredActionsPool::createActionMapping(
-        solver::BeliefNode *node) {
+        solver::BeliefNode *owner) {
     std::unique_ptr<solver::DiscretizedActionMap> discMap = (
-            std::make_unique<solver::DiscretizedActionMap>(this,
-                    createBinSequence(node->getHistoricalData())));
+            std::make_unique<solver::DiscretizedActionMap>(owner, this,
+                    createBinSequence(owner->getHistoricalData())));
 
     PositionAndRockData const &data =
-            static_cast<PositionAndRockData const &>(*node->getHistoricalData());
+            static_cast<PositionAndRockData const &>(*owner->getHistoricalData());
 
     if (model_->usingPreferredInit()) {
         for (RockSampleAction const &action : data.generatePreferredActions()) {

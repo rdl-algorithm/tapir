@@ -4,6 +4,7 @@ namespace solver {
 /* ------------------- EnumeratedActionPool ------------------- */
 EnumeratedActionPool::EnumeratedActionPool(Model *model,
         std::vector<std::unique_ptr<DiscretizedPoint>> allActions) :
+        DiscretizedActionPool(model),
         model_(model),
         allActions_(std::move(allActions)) {
 }

@@ -264,7 +264,7 @@ void TextSerializer::save(ActionNode const &node, std::ostream &os) {
 }
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
-    node.setMapping(loadObservationMapping(is));
+    node.setMapping(loadObservationMapping(&node, is));
     for (ObservationMappingEntry const *entry : node.getMapping()->getAllEntries()) {
         BeliefNode *childNode = entry->getBeliefNode();
         if (childNode != nullptr) {
@@ -329,7 +329,7 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
         }
     }
     node.setHistoricalData(loadHistoricalData(is));
-    node.setMapping(loadActionMapping(is));
+    node.setMapping(loadActionMapping(&node, is));
     getSolver()->getEstimationStrategy()->setQEstimator(getSolver(), &node);
 }
 

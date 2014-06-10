@@ -46,6 +46,11 @@ BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             actionMap_(nullptr),
             cachedValues_(),
             qEstimator_(nullptr) {
+    if (parentEntry_ == nullptr) {
+        depth_ = 0;
+    } else {
+        depth_ = getParentBelief()->getDepth() + 1;
+    }
 }
 
 // Do-nothing destructor
@@ -189,7 +194,6 @@ void BeliefNode::removeParticle(HistoryEntry *histEntry) {
 /* -------------------- Tree-related setters  ---------------------- */
 void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
     actionMap_ = std::move(mapping);
-    actionMap_->setOwner(this);
 }
 void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
     data_ = std::move(data);
@@ -201,7 +205,7 @@ std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver, Actio
     ActionNode *actionNode = actionMap_->getActionNode(action);
     if (actionNode == nullptr) {
         actionNode = actionMap_->createActionNode(action);
-        actionNode->setMapping(solver->getObservationPool()->createObservationMapping());
+        actionNode->setMapping(solver->getObservationPool()->createObservationMapping(actionNode));
     }
     return actionNode->createOrGetChild(solver, obs);
 }

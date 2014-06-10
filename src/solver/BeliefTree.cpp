@@ -66,12 +66,6 @@ void BeliefTree::addNode(BeliefNode *node) {
         debug::show_message("ERROR: Node already exists - overwriting!!");
     }
     allNodes_[id] = node;
-    BeliefNode *parent = node->getParentBelief();
-    if (parent == nullptr) {
-        node->depth_ = 0;
-    } else {
-        node->depth_ = parent->depth_ + 1;
-    }
 }
 
 /* ------------------- Tree modification ------------------- */

@@ -23,8 +23,7 @@ class ApproximateObservationPool: public solver::ObservationPool {
     virtual ~ApproximateObservationPool() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationPool);
 
-    virtual std::unique_ptr<ObservationMapping>
-    createObservationMapping() override;
+    virtual std::unique_ptr<ObservationMapping> createObservationMapping(ActionNode *owner) override;
   private:
     double maxDistance_;
 };
@@ -35,15 +34,11 @@ class ApproximateObservationMap: public solver::ObservationMapping {
   public:
     friend class ApproximateObservationMapEntry;
     friend class ApproximateObservationTextSerializer;
-    ApproximateObservationMap(double maxDistance);
+    ApproximateObservationMap(ActionNode *owner, double maxDistance);
 
     // Default destructor; copying and moving disallowed!
     virtual ~ApproximateObservationMap() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationMap);
-
-    /* -------------- Association with an action node ---------------- */
-    virtual void setOwner(ActionNode *owner) override;
-    virtual ActionNode *getOwner() const override;
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
@@ -62,8 +57,6 @@ class ApproximateObservationMap: public solver::ObservationMapping {
     virtual ApproximateObservationMapEntry const *getApproxEntry(Observation const &obs) const;
     virtual ApproximateObservationMapEntry *getApproxEntry(Observation const &obs);
 
-
-    ActionNode *owningActionNode_;
     double maxDistance_;
     std::vector<std::unique_ptr<ApproximateObservationMapEntry>> entries_;
 
@@ -99,7 +92,7 @@ class ApproximateObservationTextSerializer: virtual public solver::Serializer {
             std::istream &is) override;
     virtual void saveObservationMapping(ObservationMapping const &map,
             std::ostream &os) override;
-    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
+    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(ActionNode *owner,
             std::istream &is) override;
 };
 } /* namespace solver */
