@@ -1,13 +1,10 @@
-#ifndef ROCKSAMPLE_LEGAL_ACTIONS_HPP_
-#define ROCKSAMPLE_LEGAL_ACTIONS_HPP_
+#ifndef ROCKSAMPLE_POSITION_HISTORY_HPP_
+#define ROCKSAMPLE_POSITION_HISTORY_HPP_
 
 #include <memory>
 #include <vector>
 
 #include "solver/abstract-problem/HistoricalData.hpp"
-
-#include "solver/mappings/actions/discretized_actions.hpp"
-#include "solver/mappings/actions/enumerated_actions.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"
 
@@ -36,23 +33,11 @@ private:
     GridPosition position_;
 };
 
-class LegalActionsPool: public solver::EnumeratedActionPool {
-  public:
-    LegalActionsPool(RockSampleModel *model);
-    virtual ~LegalActionsPool() = default;
-    _NO_COPY_OR_MOVE(LegalActionsPool);
-
-    virtual std::vector<long> createBinSequence(solver::HistoricalData const *data) override;
-  private:
-    RockSampleModel *model_;
-};
-
-class PositionDataTextSerializer : virtual public solver::TextSerializer,
-virtual public solver::DiscretizedActionTextSerializer {
+class PositionDataTextSerializer : virtual public solver::TextSerializer {
 public:
     void saveHistoricalData(solver::HistoricalData const *data, std::ostream &os) override;
     std::unique_ptr<solver::HistoricalData> loadHistoricalData(std::istream &is) override;
 };
 } /* namespace rocksample */
 
-#endif /* ROCKSAMPLE_LEGAL_ACTIONS_HPP_ */
+#endif /* ROCKSAMPLE_POSITION_HISTORY_HPP_ */

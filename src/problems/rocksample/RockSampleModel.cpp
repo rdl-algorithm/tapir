@@ -39,8 +39,10 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/StatePool.hpp"
 
-#include "legal_actions.hpp"
-#include "preferred_actions.hpp"
+#include "position_history.hpp"
+#include "smart_history.hpp"
+#include "LegalActionsPool.hpp"
+#include "PreferredActionsPool.hpp"
 #include "RockSampleAction.hpp"         // for RockSampleAction
 #include "RockSampleMdpSolver.hpp"
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
@@ -670,7 +672,7 @@ std::unique_ptr<solver::Serializer> RockSampleModel::createSerializer(solver::So
     case RSActionCategory::PREFERRED:
         return std::make_unique<RockSamplePreferredActionsTextSerializer>(solver);
     default:
-        return std::make_unique<RockSampleAllActionsTextSerializer>(solver);
+        return std::make_unique<RockSampleTextSerializer>(solver);
     }
 }
 } /* namespace rocksample */

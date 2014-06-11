@@ -1,10 +1,7 @@
-#ifndef ROCKSAMPLE_PREFERREDACTIONS_HPP_
-#define ROCKSAMPLE_PREFERREDACTIONS_HPP_
+#ifndef ROCKSAMPLE_SMART_HISTORY_HPP_
+#define ROCKSAMPLE_SMART_HISTORY_HPP_
 
 #include "solver/abstract-problem/HistoricalData.hpp"
-
-#include "solver/mappings/actions/discretized_actions.hpp"
-#include "solver/mappings/actions/enumerated_actions.hpp"
 
 #include "solver/serialization/TextSerializer.hpp"
 
@@ -49,26 +46,11 @@ private:
     std::vector<RockData> allRockData_;
 };
 
-class PreferredActionsPool: public solver::EnumeratedActionPool {
-  public:
-    PreferredActionsPool(RockSampleModel *model);
-    virtual ~PreferredActionsPool() = default;
-    _NO_COPY_OR_MOVE(PreferredActionsPool);
-
-    virtual std::vector<long> createBinSequence(solver::HistoricalData const *data) override;
-
-    virtual std::unique_ptr<solver::ActionMapping> createActionMapping(solver::BeliefNode *node)
-            override;
-  private:
-    RockSampleModel *model_;
-};
-
-class PositionAndRockDataTextSerializer : virtual public solver::TextSerializer,
-virtual public solver::DiscretizedActionTextSerializer {
+class PositionAndRockDataTextSerializer : virtual public solver::TextSerializer {
 public:
     void saveHistoricalData(solver::HistoricalData const *data, std::ostream &os) override;
     std::unique_ptr<solver::HistoricalData> loadHistoricalData(std::istream &is) override;
 };
 } /* namespace rocksample */
 
-#endif /* ROCKSAMPLE_PREFERREDACTIONS_HPP_ */
+#endif /* ROCKSAMPLE_SMART_HISTORY_HPP_ */

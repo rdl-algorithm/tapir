@@ -54,7 +54,7 @@ struct Nav2DTransition : public solver::TransitionParameters {
     void print(std::ostream &os) const override;
 };
 
-class Nav2DModel : virtual public ModelWithProgramOptions {
+class Nav2DModel : public ModelWithProgramOptions {
 
     friend class Nav2DAction;
     friend class Nav2DTextSerializer;

@@ -17,7 +17,7 @@
 
 namespace po = boost::program_options;
 
-class ModelWithProgramOptions: public virtual solver::Model {
+class ModelWithProgramOptions: public solver::Model {
 public:
     ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
                 randGen_(randGen),

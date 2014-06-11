@@ -13,8 +13,8 @@
 
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
-#include "legal_actions.hpp"
-#include "preferred_actions.hpp"
+#include "position_history.hpp"
+#include "smart_history.hpp"
 #include "global.hpp"
 
 namespace solver {
@@ -22,9 +22,12 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-class RockSampleTextSerializer: virtual public solver::TextSerializer {
+class RockSampleTextSerializer: virtual public solver::TextSerializer,
+    virtual public solver::DiscretizedActionTextSerializer,
+    virtual public solver::EnumeratedObservationTextSerializer {
 public:
     RockSampleTextSerializer() = default;
+    RockSampleTextSerializer(solver::Solver *solver);
     virtual ~RockSampleTextSerializer() = default;
     _NO_COPY_OR_MOVE(RockSampleTextSerializer);
 
@@ -42,25 +45,15 @@ public:
     virtual int getObservationColumnWidth() override;
 };
 
-class RockSampleAllActionsTextSerializer: public RockSampleTextSerializer,
-        public solver::DiscretizedActionTextSerializer,
-        public solver::EnumeratedObservationTextSerializer {
-public:
-    RockSampleAllActionsTextSerializer(solver::Solver *solver);
-    virtual ~RockSampleAllActionsTextSerializer() = default;
-};
-
 class RockSampleLegalActionsTextSerializer: public RockSampleTextSerializer,
-        public PositionDataTextSerializer,
-        public solver::EnumeratedObservationTextSerializer {
+        public PositionDataTextSerializer {
 public:
     RockSampleLegalActionsTextSerializer(solver::Solver *solver);
     virtual ~RockSampleLegalActionsTextSerializer() = default;
 };
 
 class RockSamplePreferredActionsTextSerializer: public RockSampleTextSerializer,
-        public PositionAndRockDataTextSerializer,
-        public solver::EnumeratedObservationTextSerializer{
+        public PositionAndRockDataTextSerializer {
 public:
     RockSamplePreferredActionsTextSerializer(solver::Solver *solver);
     virtual ~RockSamplePreferredActionsTextSerializer() = default;

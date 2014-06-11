@@ -1,4 +1,4 @@
-#include "legal_actions.hpp"
+#include "position_history.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -10,9 +10,6 @@
 #include "solver/BeliefNode.hpp"
 
 #include "solver/abstract-problem/Action.hpp"
-
-#include "solver/mappings/actions/ActionMapping.hpp"
-#include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace rocksample {
 /* ---------------------- PositionData --------------------- */
@@ -55,24 +52,7 @@ void PositionData::print(std::ostream &os) const {
     os << "Position: " << position_ << std::endl;
 }
 
-/* ------------------------ LegalActionsPool ----------------------- */
-LegalActionsPool::LegalActionsPool(RockSampleModel *model) :
-        EnumeratedActionPool(model, model->getAllActionsInOrder()),
-        model_(model) {
-}
-
-std::vector<long> LegalActionsPool::createBinSequence(solver::HistoricalData const *data) {
-    RockSampleModel::RSActionCategory category = model_->getSearchActionCategory();
-    if (category == RockSampleModel::RSActionCategory::LEGAL) {
-        std::vector<long> bins = static_cast<PositionData const *>(data)->generateLegalActions();
-        std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
-        return std::move(bins);
-    } else {
-        return EnumeratedActionPool::createBinSequence(data);
-    }
-}
-
-/* --------------------- LegalActionsTextSerializer -------------------- */
+/* --------------------- PositionDataTextSerializer -------------------- */
 void PositionDataTextSerializer::saveHistoricalData(solver::HistoricalData const *data,
         std::ostream &os) {
     os << std::endl;

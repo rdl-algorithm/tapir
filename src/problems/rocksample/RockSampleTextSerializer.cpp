@@ -25,6 +25,10 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
+RockSampleTextSerializer::RockSampleTextSerializer(solver::Solver *solver) :
+        Serializer(solver) {
+}
+
 void RockSampleTextSerializer::saveState(solver::State const *state, std::ostream &os) {
     if (state == nullptr) {
         os << "NULL";
@@ -177,9 +181,6 @@ int RockSampleTextSerializer::getObservationColumnWidth() {
     return 4;
 }
 
-RockSampleAllActionsTextSerializer::RockSampleAllActionsTextSerializer(solver::Solver *solver) :
-        Serializer(solver) {
-}
 RockSampleLegalActionsTextSerializer::RockSampleLegalActionsTextSerializer(solver::Solver *solver) :
         Serializer(solver) {
 }

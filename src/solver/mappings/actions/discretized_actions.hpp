@@ -82,7 +82,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     long totalVisitCount_;
 };
 
-class DiscretizedActionMapEntry : virtual public solver::ActionMappingEntry {
+class DiscretizedActionMapEntry : public solver::ActionMappingEntry {
     friend class DiscretizedActionMap;
     friend class DiscretizedActionTextSerializer;
   public:
