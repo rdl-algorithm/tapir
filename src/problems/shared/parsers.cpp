@@ -17,18 +17,19 @@
 #include "solver/search/steppers/default_rollout.hpp"
 #include "solver/search/steppers/nn_rollout.hpp"
 
-std::pair<std::string, std::vector<std::string>> split_function(std::string text) {
+std::vector<std::string> split_function(std::string text) {
     std::size_t i0 = text.find('(');
     std::size_t i1 = text.rfind(')');
     if (i0 == std::string::npos || i1 == std::string::npos || i1 <= i0) {
-        return std::make_pair("", std::vector<std::string>());
+        return std::vector<std::string>( { text });
     }
 
     std::string function = text.substr(0, i0);
     abt::trim(function);
-    std::string argsString = text.substr(i0 + 1, i1 - i0 - 1);
     std::vector<std::string> argsVector;
+    argsVector.push_back(function);
 
+    std::string argsString = text.substr(i0 + 1, i1 - i0 - 1);
     std::string::iterator prevIter = argsString.begin();
     int parenCount = 0;
     for (std::string::iterator charIter = argsString.begin(); charIter != argsString.end();
@@ -55,27 +56,27 @@ std::pair<std::string, std::vector<std::string>> split_function(std::string text
         abt::trim(s);
         argsVector.push_back(s);
     }
-    return std::make_pair(function, argsVector);
+    return argsVector;
 }
 
 std::unique_ptr<solver::StepGeneratorFactory> UcbParser::parse(solver::Solver *solver,
         std::vector<std::string> args) {
     double explorationCoefficient;
-    std::istringstream(args[0]) >> explorationCoefficient;
+    std::istringstream(args[1]) >> explorationCoefficient;
     return std::make_unique<solver::UcbStepGeneratorFactory>(solver, explorationCoefficient);
 }
 std::unique_ptr<solver::StepGeneratorFactory> NnRolloutParser::parse(solver::Solver *solver,
         std::vector<std::string> args) {
     long maxNnComparisons;
     double maxNnDistance;
-    std::istringstream(args[0]) >> maxNnComparisons;
-    std::istringstream(args[1]) >> maxNnDistance;
+    std::istringstream(args[1]) >> maxNnComparisons;
+    std::istringstream(args[2]) >> maxNnDistance;
     return std::make_unique<solver::NnRolloutFactory>(solver, maxNnComparisons, maxNnDistance);
 }
 std::unique_ptr<solver::StepGeneratorFactory> DefaultRolloutParser::parse(solver::Solver *solver,
         std::vector<std::string> args) {
     long maxNSteps;
-    std::istringstream(args[0]) >> maxNSteps;
+    std::istringstream(args[1]) >> maxNSteps;
     return std::make_unique<solver::DefaultRolloutFactory>(solver, maxNSteps);
 }
 
@@ -85,8 +86,8 @@ StagedParser::StagedParser(ParserSet<std::unique_ptr<solver::StepGeneratorFactor
 std::unique_ptr<solver::StepGeneratorFactory> StagedParser::parse(solver::Solver *solver,
         std::vector<std::string> args) {
     std::vector<std::unique_ptr<solver::StepGeneratorFactory>> factories;
-    for (std::string const &arg : args) {
-        factories.push_back(allParsers_->parse(solver, arg));
+    for (auto it = args.begin() + 1; it != args.end(); it++) {
+        factories.push_back(allParsers_->parse(solver, *it));
     }
     return std::make_unique<solver::StagedStepGeneratorFactory>(std::move(factories));
 }
@@ -102,15 +103,27 @@ solver::Heuristic ZeroHeuristicParser::parse(
 
 BasicSearchParser::BasicSearchParser(
         ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
-        ParserSet<solver::Heuristic> *heuristicParsers) :
+        ParserSet<solver::Heuristic> *heuristicParsers, std::string heuristicString) :
             generatorParsers_(generatorParsers),
-            heuristicParsers_(heuristicParsers) {
+            heuristicParsers_(heuristicParsers),
+            heuristicString_(heuristicString) {
 }
 
 std::unique_ptr<solver::SearchStrategy> BasicSearchParser::parse(solver::Solver *solver,
         std::vector<std::string> args) {
-    return std::make_unique<solver::BasicSearchStrategy>(solver,
-            generatorParsers_->parse(solver, args[0]), heuristicParsers_->parse(solver, args[1]));
+    std::unique_ptr<solver::StepGeneratorFactory> factory = nullptr;
+    std::string heuristicString = heuristicString_;
+    if (args[0] != "basic") {
+        factory = generatorParsers_->parse(solver, args);
+    } else {
+        factory = generatorParsers_->parse(solver, args[1]);
+        if (args.size() > 2) {
+            heuristicString = args[2];
+        }
+    }
+
+    return std::make_unique<solver::BasicSearchStrategy>(solver, std::move(factory),
+            heuristicParsers_->parse(solver, heuristicString));
 }
 
 Exp3Parser::Exp3Parser(ParserSet<std::unique_ptr<solver::SearchStrategy>> *allParsers) :
@@ -119,7 +132,7 @@ Exp3Parser::Exp3Parser(ParserSet<std::unique_ptr<solver::SearchStrategy>> *allPa
 std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(solver::Solver *solver,
         std::vector<std::string> args) {
     std::vector<std::unique_ptr<solver::SearchStrategy>> strategies;
-    std::vector<std::string>::iterator it = args.begin();
+    std::vector<std::string>::iterator it = args.begin() + 1;
     double strategyExplorationCoefficient;
     std::istringstream(*it) >> strategyExplorationCoefficient;
     it++;

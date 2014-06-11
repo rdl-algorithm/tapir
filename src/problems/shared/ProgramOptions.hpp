@@ -80,6 +80,8 @@ class ProgramOptions {
                         "the number of episodes to sample for each step.")
                 ("ABT.maximumDepth", po::value<double>(),
                         "maximum Depth allowed before search stops.")
+                ("ABT.searchHeuristic", po::value<std::string>(),
+                        "the heuristic to use in searches")
                 ("ABT.searchStrategy", po::value<std::string>(),
                         "the search strategy to use")
                 ("ABT.estimator", po::value<std::string>(),

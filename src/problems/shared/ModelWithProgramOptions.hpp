@@ -11,6 +11,7 @@
 #include "solver/abstract-problem/Model.hpp"             // for Model
 #include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
+#include "solver/changes/DefaultHistoryCorrector.hpp"
 
 #include "problems/shared/parsers.hpp"
 
@@ -28,6 +29,7 @@ public:
                 heuristicParsers_(),
                 searchParsers_(),
                 estimationParsers_(),
+                heuristicString_(vm["ABT.searchHeuristic"].as<std::string>()),
                 searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
                 estimatorString_(vm["ABT.estimator"].as<std::string>()),
                 hasColorOutput_(vm["color"].as<bool>()),
@@ -41,8 +43,9 @@ public:
         registerHeuristicParser("default", std::make_unique<DefaultHeuristicParser>());
         registerHeuristicParser("zero", std::make_unique<ZeroHeuristicParser>());
 
-        registerSearchParser("basic",
-                std::make_unique<BasicSearchParser>(&generatorParsers_, &heuristicParsers_));
+
+        searchParsers_.setDefaultParser(std::make_unique<BasicSearchParser>(
+                &generatorParsers_, &heuristicParsers_, heuristicString_));
         registerSearchParser("exp3", std::make_unique<Exp3Parser>(&searchParsers_));
 
         registerEstimationParser("mean", std::make_unique<AverageEstimateParser>());
@@ -102,6 +105,11 @@ public:
             solver::Solver *solver) override {
         return estimationParsers_.parse(solver, estimatorString_);
     }
+    virtual std::unique_ptr<solver::HistoryCorrector> createHistoryCorrector(
+            solver::Solver *solver) override {
+        return std::make_unique<solver::DefaultHistoryCorrector>(solver,
+                heuristicParsers_.parse(solver, heuristicString_));
+    }
 
 private:
     RandomGenerator *randGen_;
@@ -119,6 +127,7 @@ private:
     ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
     ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
 
+    std::string heuristicString_;
     std::string searchStrategyString_;
     std::string estimatorString_;
 

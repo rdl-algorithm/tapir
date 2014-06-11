@@ -9,13 +9,14 @@
 
 template<typename TargetType> class Parser;
 
-std::pair<std::string, std::vector<std::string>> split_function(std::string text);
+std::vector<std::string> split_function(std::string text);
 
 template<typename TargetType>
 class ParserSet {
 public:
     ParserSet() :
-                parsers_() {
+                parsers_(),
+                defaultParser_(nullptr) {
     }
     virtual ~ParserSet() = default;
 
@@ -23,29 +24,41 @@ public:
     void addParser(std::string name, std::unique_ptr<Parser<TargetType>> parser) {
         parsers_.emplace(name, std::move(parser));
     }
+
+    void setDefaultParser(std::unique_ptr<Parser<TargetType>> parser) {
+        defaultParser_ = std::move(parser);
+    }
+
     /** Returns the parser associated with the strategy of the given name. */
     Parser<TargetType> *getParser(std::string name) {
         return parsers_.at(name).get();
     }
-    /** Returns a new target object parsed from the given string. */
-    TargetType parse(solver::Solver *solver, std::string targetString) {
-        std::string targetType;
-        std::vector<std::string> argsVector;
-        std::tie(targetType, argsVector) = split_function(targetString);
-        // debug::show_message(targetString);
+
+    TargetType parse(solver::Solver *solver, std::vector<std::string> argsVector) {
+        std::string targetType = argsVector[0];
         try {
             return getParser(targetType)->parse(solver, argsVector);
         } catch (std::out_of_range const &error) {
-            std::ostringstream message;
-            message << "ERROR: Invalid target type \"" << targetType;
-            message << "\"" << std::endl;
-            debug::show_message(message.str());
+            if (defaultParser_ == nullptr) {
+                std::ostringstream message;
+                message << "ERROR: Invalid target type \"" << targetType;
+                message << "\"" << std::endl;
+                debug::show_message(message.str());
+            } else {
+                return defaultParser_->parse(solver, argsVector);
+            }
         }
         return nullptr;
     }
 
+    /** Returns a new target object parsed from the given string. */
+    TargetType parse(solver::Solver *solver, std::string targetString) {
+        return parse(solver, split_function(targetString));
+    }
+
 private:
-    std::unordered_map<std::string, std::unique_ptr<Parser<TargetType>>>parsers_;
+    std::unordered_map<std::string, std::unique_ptr<Parser<TargetType>>> parsers_;
+    std::unique_ptr<Parser<TargetType>> defaultParser_;
 };
 
 template<typename TargetType>
@@ -112,7 +125,7 @@ public:
 class BasicSearchParser: public Parser<std::unique_ptr<solver::SearchStrategy>> {
 public:
     BasicSearchParser(ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
-            ParserSet<solver::Heuristic> *heuristicParsers);
+            ParserSet<solver::Heuristic> *heuristicParsers, std::string heuristicString);
     virtual ~BasicSearchParser() = default;
     _NO_COPY_OR_MOVE(BasicSearchParser);
 
@@ -121,6 +134,7 @@ public:
 private:
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers_;
     ParserSet<solver::Heuristic> *heuristicParsers_;
+    std::string heuristicString_;
 };
 
 class Exp3Parser: public Parser<std::unique_ptr<solver::SearchStrategy>> {
