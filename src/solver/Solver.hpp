@@ -5,6 +5,7 @@
 #include <memory>        // for unique_ptr
 #include <set>                          // for set
 #include <unordered_set>
+#include <unordered_map>
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
@@ -74,8 +75,12 @@ public:
      * the given belief node.
      */
     void improvePolicy(BeliefNode *startNode, long numberOfHistories = -1, long maximumDepth = -1);
-    /** Applies any model changes that have been marked within the state pool */
-    void applyChanges();
+    /** Applies any model changes that have been marked within the state pool.
+     *
+     * Changes are only applied at belief nodes that are descendants of the given node, or at
+     * all belief nodes if the given node is nullptr
+     */
+    void applyChanges(BeliefNode *changeRoot = nullptr);
     /** Replenishes the particle count in the child node, ensuring that it
      * has at least the given number of particles
      * (-1 => default == model.getMinParticleCount())
@@ -96,7 +101,7 @@ public:
     /** Completes any deferred backup operations. */
     void doBackup();
 
-    /* ------------------ Methods to update the q-values in the tree. ------------------- */
+    /* -------------- Methods to update the q-values in the tree. --------------- */
     /** Updates the approximate q-values of actions in the belief tree based on this history
      * sequence.
      *  - Use sgn=-1 to do a negative backup
@@ -150,6 +155,14 @@ private:
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth = -1);
     /** Continues a pre-existing history sequence from its endpoint. */
     void continueSearch(HistorySequence *sequence, long maximumDepth = -1);
+
+    /* ------------------- Policy mutator helper methods ------------------- */
+    /** Returns true iff the given node is affected by the current change, which is expressed
+     * via the change root, and a map storing info as to whether or not nodes have been
+     * affected.
+     */
+    bool isAffected(BeliefNode const *node, BeliefNode const *changeRoot,
+            std::unordered_map<BeliefNode const *, bool> *isAffectedMap);
 
     /* ------------------ Private deferred backup methods. ------------------- */
     /** Adds a new node that requires backing up. */

@@ -68,6 +68,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
     std::string polPath = vm["policy"].as<std::string>();
     bool hasChanges = vm["changes.hasChanges"].as<bool>();
+    bool hasDynamicChanges = vm["changes.areDynamic"].as<bool>();
     std::string changesPath;
     if (hasChanges) {
         changesPath = vm["changes.changesPath"].as<std::string>();
@@ -119,7 +120,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         inFile.close();
 
         std::unique_ptr<ModelType> simulatorModel = std::make_unique<ModelType>(&randGen, vm);
-        solver::Simulator simulator(std::move(simulatorModel), &solver);
+        solver::Simulator simulator(std::move(simulatorModel), &solver, hasDynamicChanges);
         if (hasChanges) {
             simulator.loadChangeSequence(changesPath);
         }
@@ -179,6 +180,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     cout << "Mean reward: " << totalReward / nRuns << endl;
     cout << "Mean number of steps: " << totalNSteps / nRuns << endl;
     cout << "Mean time taken: " << totalTime / nRuns << "ms" << endl;
+    cout << "Mean time per step: " << totalTime / totalNSteps << "ms" << endl;
     return 0;
 }
 

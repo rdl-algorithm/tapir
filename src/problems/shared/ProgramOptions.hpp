@@ -49,6 +49,9 @@ class ProgramOptions {
                         "file to log changes to")
                 ("changes.hasChanges,u", po::value<bool>()->default_value(false)->implicit_value(true),
                         "whether the PODMP model will change at runtime.")
+                ("changes.areDynamic,d", po::value<bool>()->default_value(false)->implicit_value(true),
+                        "true if the changes should only apply to history entries that are in "
+                        "the future, not in the past (or in alternate futures).")
                 ("changes.changesPath,g", po::value<std::string>(),
                         "path to the file with runtime changes to the POMDP model")
                 ("simulation.nSteps,n", po::value<long>(),

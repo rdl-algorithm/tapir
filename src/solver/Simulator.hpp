@@ -17,7 +17,7 @@ class Solver;
 
 class Simulator {
 public:
-    Simulator(std::unique_ptr<Model> model, Solver *solver);
+    Simulator(std::unique_ptr<Model> model, Solver *solver, bool hasDynamicChanges);
     ~Simulator() = default;
     _NO_COPY_OR_MOVE(Simulator);
 
@@ -40,9 +40,8 @@ public:
 
     double runSimulation();
     bool stepSimulation();
-    bool handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes);
-
-
+    bool handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
+            bool areDynamic = true);
 
 private:
     std::unique_ptr<Model> model_;
@@ -50,7 +49,9 @@ private:
     Model *solverModel_;
     std::unique_ptr<Agent> agent_;
 
+    bool hasDynamicChanges_;
     ChangeSequence changeSequence_;
+
     long stepCount_;
     long maxStepCount_;
     double currentDiscount_;

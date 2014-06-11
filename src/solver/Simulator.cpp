@@ -21,11 +21,12 @@ using std::cout;
 using std::endl;
 
 namespace solver {
-Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver) :
+Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver, bool hasDynamicChanges) :
         model_(std::move(model)),
         solver_(solver),
         solverModel_(solver_->getModel()),
         agent_(std::make_unique<Agent>(solver_)),
+        hasDynamicChanges_(hasDynamicChanges),
         changeSequence_(),
         stepCount_(0),
         maxStepCount_(100),
@@ -133,7 +134,7 @@ bool Simulator::stepSimulation() {
         }
         double changingTimeStart = abt::clock_ms();
         // Apply all the changes!
-        bool noError = handleChanges(iter->second);
+        bool noError = handleChanges(iter->second, hasDynamicChanges_);
         if (!noError) {
             return false;
         }
@@ -214,31 +215,41 @@ bool Simulator::stepSimulation() {
     return !result.isTerminal;
 }
 
-bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes) {
+bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
+        bool areDynamic) {
     StatePool *statePool = solver_->getStatePool();
     for (std::unique_ptr<ModelChange> const &change : changes) {
         model_->applyChange(*change, nullptr);
         solverModel_->applyChange(*change, statePool);
     }
 
-    // Check if the model changes have invalidated our history...
+    // If the current state is deleted, the simulation is broken!
     StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();
     if (changes::has_flag(lastInfo->changeFlags_, ChangeFlags::DELETED)) {
         debug::show_message("ERROR: Current simulation state deleted!");
         return false;
     }
-    for (long i = 0; i < actualHistory_->getLength() - 1; i++) {
-        StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
-        if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
-            std::ostringstream message;
-            message << "ERROR: Impossible simulation history! Includes ";
-            message << *info->getState();
-            debug::show_message(message.str());
-            return false;
+
+    // If the changes are not dynamic and a past state is deleted, the simulation is broken.
+    if (!areDynamic) {
+        for (long i = 0; i < actualHistory_->getLength() - 1; i++) {
+            StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
+            if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
+                std::ostringstream message;
+                message << "ERROR: Impossible simulation history! Includes ";
+                message << *info->getState();
+                debug::show_message(message.str());
+                return false;
+            }
         }
     }
 
-    solver_->applyChanges();
+    // Dynamic changes => apply changes
+    if (areDynamic) {
+        solver_->applyChanges(agent_->getCurrentBelief());
+    } else {
+        solver_->applyChanges(nullptr);
+    }
     return true;
 }
 

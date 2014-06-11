@@ -163,7 +163,12 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
     multipleSearches(startNode, samples, maximumDepth);
 }
 
-void Solver::applyChanges() {
+void Solver::applyChanges(BeliefNode *changeRoot) {
+    std::unique_ptr<std::unordered_map<BeliefNode const *, bool>> isAffectedMap = nullptr;
+    if (changeRoot != nullptr && changeRoot->getDepth() > 0) {
+        isAffectedMap = std::make_unique<std::unordered_map<BeliefNode const *, bool>>();
+    }
+
     std::unordered_set<HistorySequence *> affectedSequences;
     for (StateInfo *stateInfo : statePool_->getAffectedStates()) {
         if (changes::has_flag(stateInfo->changeFlags_, ChangeFlags::DELETED)) {
@@ -172,26 +177,47 @@ void Solver::applyChanges() {
         }
 
         for (HistoryEntry *entry : stateInfo->usedInHistoryEntries_) {
+            BeliefNode *node = entry->getAssociatedBeliefNode();
+
+            // If this node isn't affected,
+            if (isAffectedMap != nullptr && !isAffected(node, changeRoot, isAffectedMap.get())) {
+                continue;
+            }
+
             HistorySequence *sequence = entry->owningSequence_;
             long entryId = entry->entryId_;
 
-            // Some change flags need special handling!
+            // True iff any changes have been applied to this sequence.
+            bool hasChanged = false;
             ChangeFlags allFlags = stateInfo->changeFlags_;
 
-            // Transition of the previous entry is affected.
-            if (changes::has_flag(allFlags, ChangeFlags::TRANSITION_BEFORE)) {
+            if (node == changeRoot) {
+                // Any flags applying to previous states must be ignored.
                 allFlags &= ~ChangeFlags::TRANSITION_BEFORE;
-                if (entryId > 0) {
-                    sequence->setChangeFlags(entryId - 1, ChangeFlags::TRANSITION);
-                } else {
+                allFlags &= ~ChangeFlags::OBSERVATION_BEFORE;
+                allFlags &= ~ChangeFlags::HEURISTIC;
+
+                // If a state at the change root is deleted, just delete the whole sequence.
+                if (changes::has_flag(allFlags, ChangeFlags::DELETED)) {
+                    hasChanged = true;
                     sequence->setChangeFlags(0, ChangeFlags::DELETED);
                 }
             }
 
-            // The observation for the previous entry is affected.
+            // TRANSITION_BEFORE => TRANSITION for previous entry.
+            if (changes::has_flag(allFlags, ChangeFlags::TRANSITION_BEFORE)) {
+                allFlags &= ~ChangeFlags::TRANSITION_BEFORE;
+                if (entryId > 0) {
+                    hasChanged = true;
+                    sequence->setChangeFlags(entryId - 1, ChangeFlags::TRANSITION);
+                }
+            }
+
+            // OBSERVATION_BEFORE => OBSERVATION for previous entry.
             if (changes::has_flag(allFlags, ChangeFlags::OBSERVATION_BEFORE)) {
                 allFlags &= ~ChangeFlags::OBSERVATION_BEFORE;
                 if (entryId > 0) {
+                    hasChanged = true;
                     sequence->setChangeFlags(entryId - 1, ChangeFlags::OBSERVATION);
                 }
             }
@@ -200,12 +226,20 @@ void Solver::applyChanges() {
             if(changes::has_flag(allFlags, ChangeFlags::HEURISTIC)) {
                 allFlags &= ~ChangeFlags::HEURISTIC;
                 if (entry->action_ == nullptr) {
+                    hasChanged = true;
                     sequence->setChangeFlags(entryId, ChangeFlags::HEURISTIC);
                 }
             }
 
-            sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
-            affectedSequences.insert(sequence);
+            // Apply any remaining flags, if any.
+            if (allFlags != ChangeFlags::UNCHANGED) {
+                hasChanged = true;
+                sequence->setChangeFlags(entryId, allFlags);
+            }
+            if (hasChanged) {
+                // The sequence is only affected if one of the changes went through.
+                affectedSequences.insert(sequence);
+            }
         }
     }
     if (model_->hasVerboseOutput()) {
@@ -484,6 +518,58 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     }
 
     searchStrategy_->extendSequence(sequence, maximumDepth);
+}
+
+/* ------------------- Policy mutator helper methods ------------------- */
+bool Solver::isAffected(BeliefNode const *node, BeliefNode const *changeRoot,
+        std::unordered_map<BeliefNode const *, bool> *isAffectedMap) {
+    if (node == changeRoot) {
+        // Same node => must be affected.
+        return true;
+    }
+
+    long rootDepth = changeRoot->getDepth();
+    if (node->getDepth() <= rootDepth) {
+        // Not below the root and not the root => can't be affected.
+        return false;
+    }
+
+    // If it's deeper, look it up in the mapping.
+    std::unordered_map<BeliefNode const *, bool>::iterator it = isAffectedMap->find(node);
+    if (it != isAffectedMap->end()) {
+        return it->second;
+    }
+
+    // We have to traverse the tree to see if it's a descendant.
+    std::vector<BeliefNode const *> ancestors;
+    bool isDescendedFromChangeRoot = false;
+    while (true) {
+        ancestors.push_back(node);
+        node = node->getParentBelief();
+        // If we hit the root, we must be descended from it.
+        if (node == changeRoot) {
+            isDescendedFromChangeRoot = true;
+            break;
+        }
+        // If we reach the same depth without hitting the root, we aren't descended from it.
+        if (node->getDepth() == rootDepth) {
+            break;
+        }
+
+        it = isAffectedMap->find(node);
+        // If we hit a node for which we know whether it's descended, we copy its state.
+        if (it != isAffectedMap->end()) {
+            isDescendedFromChangeRoot = it->second;
+            break;
+        }
+    }
+
+    // Add ancestors to the mapping for efficient lookup later on.
+    for (BeliefNode const *ancestor : ancestors) {
+        (*isAffectedMap)[ancestor] = isDescendedFromChangeRoot;
+    }
+
+    return isDescendedFromChangeRoot;
 }
 
 /* ------------------ Private deferred backup methods. ------------------- */
