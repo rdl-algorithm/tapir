@@ -194,8 +194,8 @@ void Solver::applyChanges() {
         HistorySequence *sequence = *it;
         if (changes::has_flag(sequence->getFirstEntry()->changeFlags_, ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
-            // Now remove the sequence entirely.
-            negateSequence(sequence);
+            // Now we undo the sequence, and delete it entirely.
+            backupSequence(sequence, -1);
             histories_->deleteSequence(sequence->id_);
         } else {
             it++;
@@ -295,7 +295,6 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
 void Solver::printTree(std::ostream &/*os*/) {
 }
 
-
 /* ------------------ Tree backup methods ------------------- */
 bool Solver::isBackedUp() const {
     return nodesToBackup_.empty();
@@ -326,7 +325,6 @@ void Solver::doBackup() {
         nodesToBackup_.erase(firstEntry);
     }
 }
-
 
 /* ============================ PRIVATE ============================ */
 
@@ -384,32 +382,39 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     }
 
     searchStrategy_->extendSequence(sequence, maximumDepth);
-    doBackup();
 }
 
 /* ------------------ Tree backup methods ------------------- */
-void Solver::negateSequence(HistorySequence *sequence) {
-    if (sequence->getLength() <= 1) {
-        return;
-    }
+void Solver::backupSequence(HistorySequence *sequence, int sgn) {
+    double discountFactor = model_->getDiscountFactor();
 
-    auto it = sequence->entrySequence_.cbegin();
+    // Traverse the sequence in reverse.
+    auto it = sequence->entrySequence_.crbegin();
+
+    // The last entry is used only for the heuristic estimate.
+    double deltaTotalQ = (*it)->immediateReward_;
+    it++;
     while (true) {
-        // Update the immediate reward and the visit counts.
-        updateImmediate((*it)->getAssociatedBeliefNode(), *(*it)->action_, *(*it)->observation_,
-                -(*it)->immediateReward_, -1);
+        deltaTotalQ = (deltaTotalQ * discountFactor) + (*it)->immediateReward_;
+        BeliefNode *node = (*it)->getAssociatedBeliefNode();
+        ActionMapping *mapping = node->getMapping();
+        ActionMappingEntry *entry = mapping->getEntry(*(*it)->getAction());
+        // Update the action value and visit count.
+        entry->update(sgn, sgn * deltaTotalQ);
+        // Update the observation visit count.
+        entry->getActionNode()->getMapping()->updateVisitCount(*(*it)->getObservation(), sgn);
 
-        it++;            // Increment
-
-        // Update the estimate of the next node's value.
-        if ((*it)->action_ == nullptr) {
-            // Last entry - negate the heuristic estimate
-            updateEstimate((*it)->getAssociatedBeliefNode(), -(*it)->immediateReward_, 0);
+        it++;
+        if (it == sequence->entrySequence_.crend()) {
             break;
-        } else {
-            // Not the last entry - negate 1x continuation.
-            updateEstimate((*it)->getAssociatedBeliefNode(), 0, -1);
         }
+
+        // Backpropagate the change in the q-value of the node.
+        double oldQ = node->getQValue();
+        node->recalculateQValue();
+        double newQ = node->getQValue();
+        long nContinuations = mapping->getTotalVisitCount() - node->getNumberOfStartingSequences();
+        deltaTotalQ = oldQ + (newQ - oldQ) * nContinuations;
     }
 }
 

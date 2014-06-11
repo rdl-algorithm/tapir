@@ -115,8 +115,8 @@ private:
     void continueSearch(HistorySequence *sequence, long maximumDepth = -1);
 
     /* ------------------ Tree backup methods ------------------- */
-    /** Performs a negative backup for this entire sequence. */
-    void negateSequence(HistorySequence *sequence);
+    /** Performs a backup for this entire sequence; sgn = -1 to negate */
+    void backupSequence(HistorySequence *sequence, int sgn=+1);
 
     /** Updates the values for taking the given action and receiving the given
      * observation from the given belief node.

@@ -89,7 +89,6 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
         return SearchStatus::ERROR;
     }
 
-    bool isFirst = true;
     while (true) {
         if (currentNode->getDepth() >= maximumDepth) {
             status = SearchStatus::OUT_OF_STEPS;
@@ -104,12 +103,6 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
             break;
         }
 
-        if (isFirst) {
-            isFirst = false;
-        } else {
-            // We're continuing, so we must add a continuation.
-            solver_->updateEstimate(currentNode, 0, +1);
-        }
         currentEntry->immediateReward_ = result.reward;
         currentEntry->action_ = result.action->copy();
         currentEntry->transitionParameters_ = std::move(result.transitionParameters);
@@ -118,10 +111,6 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
         // Create the child belief node and do an update.
         BeliefNode *nextNode = solver_->getPolicy()->createOrGetChild(currentNode, *result.action,
                 *result.observation);
-
-        solver_->updateImmediate(currentNode, *result.action, *result.observation, result.reward,
-                +1);
-
         currentNode = nextNode;
 
         // Now we create a new history entry and step the history forward.
@@ -131,28 +120,34 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
 
         if (result.isTerminal) {
             status = SearchStatus::FINISHED;
-            return status;
+            break;
         }
     }
 
-    // If we require a heuristic estimate, calculate it.
+
     if (status == SearchStatus::OUT_OF_STEPS) {
+        // If we require a heuristic estimate, calculate it.
         currentEntry->immediateReward_ = heuristic_(currentEntry, currentEntry->getState(),
                 currentNode->getHistoricalData());
-        // Use the heuristic value to update the estimate of the parent belief node.
-        solver_->updateEstimate(currentNode, currentEntry->immediateReward_, 0);
         status = SearchStatus::FINISHED;
     } else if (status == SearchStatus::FINISHED) {
         // Finished normally; no problems.
     } else if (status == SearchStatus::UNINITIALIZED) {
         debug::show_message("ERROR: Search algorithm could not initialize.");
+        return status;
     } else if (status == SearchStatus::INITIAL) {
         debug::show_message("ERROR: Search algorithm initialized but did not run.");
+        return status;
     } else if (status == SearchStatus::ERROR) {
         debug::show_message("ERROR: Error in search algorithm!");
+        return status;
     } else {
         debug::show_message("ERROR: Invalid search status.");
+        return status;
     }
+
+    // Finally, we make sure to backup the sequence.
+    solver_->backupSequence(sequence);
     return status;
 }
 } /* namespace solver */

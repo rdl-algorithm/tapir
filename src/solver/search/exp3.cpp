@@ -86,7 +86,6 @@ SearchStatus MultipleStrategiesExp3::extendSequence(HistorySequence *sequence, l
 
         // If the strategy initialized, we backup, update weights, and we're done.
         if (status != SearchStatus::UNINITIALIZED) {
-            solver_->doBackup();
             double newRootQValue = sequence->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
             updateStrategyWeights(info->strategyNo, timeUsed, newRootQValue - initialRootQValue);
             return status;
