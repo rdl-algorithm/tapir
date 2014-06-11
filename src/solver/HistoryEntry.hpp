@@ -32,14 +32,9 @@ public:
      * owning sequence, and entry ID.
      */
     HistoryEntry(HistorySequence *owningSequence, long entryId);
-    /** Constructs a new history entry with the given state info,
-     *  cumulative discount, owning sequence, and entry ID.
-     */
-    HistoryEntry(StateInfo *stateInfo, HistorySequence *owningSequence,
-            long entryId);
     /** Destroys this HistoryEntry. */
-    ~HistoryEntry();_NO_COPY_OR_MOVE(HistoryEntry)
-    ;
+    ~HistoryEntry();
+    _NO_COPY_OR_MOVE(HistoryEntry);
 
     /* ----------------- Simple getters ------------------- */
     /** Returns the id of this entry (0 = first entry in the sequence). */

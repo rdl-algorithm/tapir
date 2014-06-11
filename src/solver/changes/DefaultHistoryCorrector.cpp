@@ -121,7 +121,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
                         entry->immediateReward_ - oldValue, 0);
             }
         }
-        entry-> resetChangeFlags(); // Ensure the change flags for the last entry are reset.
+        entry->resetChangeFlags(); // Ensure the change flags for the last entry are reset.
     } else {
         // The changes did not reach the end of the sequence.
 
@@ -153,13 +153,10 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         entry = historyIterator->get();
         BeliefNode *currentNode = entry->getAssociatedBeliefNode();
         // Update the node pointers for the rest of the sequence.
-        while (true) {
+        while (entry->getAction() != nullptr) {
             currentNode = getSolver()->getPolicy()->createOrGetChild(currentNode,
                     *entry->getAction(), *entry->getObservation());
             historyIterator++;
-            if (historyIterator == sequence->entrySequence_.end()) {
-                break;
-            }
             entry = historyIterator->get();
             entry->registerNode(currentNode);
         }

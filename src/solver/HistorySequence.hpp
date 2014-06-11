@@ -59,8 +59,8 @@ class HistorySequence {
     /* ----------- Methods to add or remove history entries ------------- */
     /** Erases all of the entries in this sequence, starting from firstEntryId. */
     void erase(long firstEntryId = 0);
-    /** Adds a new entry with the given state info. */
-    HistoryEntry *addEntry(StateInfo *stateInfo);
+    /** Adds a new entry to this sequence. */
+    HistoryEntry *addEntry();
 
     /* -------------- Registration methods ---------------- */
     /** Registers the sequence with the given starting belief node. */

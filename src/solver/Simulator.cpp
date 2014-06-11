@@ -37,7 +37,8 @@ Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver) :
         totalImprovementTime_(0.0) {
     std::unique_ptr<State> initialState = model_->sampleAnInitState();
     StateInfo *initInfo = solver_->getStatePool()->createOrGetInfo(*initialState);
-    actualHistory_->addEntry(initInfo);
+    HistoryEntry *newEntry = actualHistory_->addEntry();
+    newEntry->stateInfo_ = initInfo;
 }
 Model *Simulator::getModel() const {
     return model_.get();
@@ -198,7 +199,8 @@ bool Simulator::stepSimulation() {
     currentEntry->immediateReward_ = result.reward;
     currentEntry->transitionParameters_ = std::move(result.transitionParameters);
     StateInfo *nextInfo = solver_->getStatePool()->createOrGetInfo(*result.nextState);
-    currentEntry = actualHistory_->addEntry(nextInfo);
+    currentEntry = actualHistory_->addEntry();
+    currentEntry->stateInfo_ = nextInfo;
 
     totalDiscountedReward_ += currentDiscount_ * result.reward;
     currentDiscount_ *= model_->getDiscountFactor();

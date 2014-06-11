@@ -65,16 +65,17 @@ std::vector<State const *> HistorySequence::getStates() const {
 
 /* ----------- Methods to add or remove history entries ------------- */
 void HistorySequence::erase(long firstEntryId) {
-    for (auto it = entrySequence_.crbegin(); (*it)->entryId_ >= firstEntryId; it++) {
+    for (auto it = entrySequence_.crbegin();
+            it != entrySequence_.crend() && (*it)->entryId_ >= firstEntryId; it++) {
         (*it)->registerNode(nullptr);
         (*it)->registerState(nullptr);
     }
     entrySequence_.erase(entrySequence_.begin() + firstEntryId, entrySequence_.end());
 }
 
-HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
+HistoryEntry *HistorySequence::addEntry() {
     std::unique_ptr<HistoryEntry> newEntry = std::make_unique<HistoryEntry>(
-                stateInfo, this, entrySequence_.size());
+            this, entrySequence_.size());
     HistoryEntry *newEntryReturn = newEntry.get();
     entrySequence_.push_back(std::move(newEntry));
     return newEntryReturn;

@@ -115,7 +115,8 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
 
         // Now we create a new history entry and step the history forward.
         StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(*result.nextState);
-        currentEntry = sequence->addEntry(nextStateInfo);
+        currentEntry = sequence->addEntry();
+        currentEntry->registerState(nextStateInfo);
         currentEntry->registerNode(currentNode);
 
         if (result.isTerminal) {

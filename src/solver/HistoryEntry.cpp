@@ -25,12 +25,6 @@ HistoryEntry::HistoryEntry(HistorySequence* owningSequence, long entryId) :
     changeFlags_(ChangeFlags::UNCHANGED) {
 }
 
-HistoryEntry::HistoryEntry(StateInfo *stateInfo,
-        HistorySequence* owningSequence, long entryId) :
-                HistoryEntry(owningSequence, entryId) {
-    registerState(stateInfo);
-}
-
 HistoryEntry::~HistoryEntry() {
 }
 

@@ -61,7 +61,7 @@ ActionNode* DiscretizedActionMap::getActionNode(Action const &action) const {
 ActionNode* DiscretizedActionMap::createActionNode(Action const &action) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
     if (code != *binIterator_) {
-        debug::show_message("WARNING: Trying actions out of order!?");
+        // debug::show_message("WARNING: Trying actions out of order!?");
     }
 
     DiscretizedActionMapEntry &entry = entries_[code];

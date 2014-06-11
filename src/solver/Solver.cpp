@@ -281,7 +281,8 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
 
         // Create a new history sequence and entry for the new particle.
         HistorySequence *histSeq = histories_->createSequence();
-        HistoryEntry *histEntry = histSeq->addEntry(stateInfo);
+        HistoryEntry *histEntry = histSeq->addEntry();
+        histEntry->registerState(stateInfo);
         histEntry->registerNode(nextNode);
     }
     if (model_->hasVerboseOutput()) {
@@ -470,8 +471,9 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long
 
     HistorySequence *sequence = histories_->createSequence();
 
-    sequence->addEntry(startStateInfo);
-    sequence->getFirstEntry()->registerNode(startNode);
+    HistoryEntry *firstEntry = sequence->addEntry();
+    firstEntry->registerState(startStateInfo);
+    firstEntry->registerNode(startNode);
 
     continueSearch(sequence, maximumDepth);
 }
