@@ -234,6 +234,7 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
             message << "ERROR: Impossible simulation history! Includes ";
             message << *info->getState();
             debug::show_message(message.str());
+            return false;
         }
     }
 

@@ -47,17 +47,19 @@ namespace po = boost::program_options;
 
 namespace tag {
 TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
-        ModelWithProgramOptions(randGen, vm), moveCost_(
-                vm["problem.moveCost"].as<double>()), tagReward_(
-                vm["problem.tagReward"].as<double>()), failedTagPenalty_(
-                vm["problem.failedTagPenalty"].as<double>()), opponentStayProbability_(
-                vm["problem.opponentStayProbability"].as<double>()), nRows_(0), // to be updated
-        nCols_(0), // to be updated
-        mapText_(), // will be pushed to
-        envMap_(), // will be pushed to
-        nActions_(5), nStVars_(5), minVal_(
-                -failedTagPenalty_ / (1 - getDiscountFactor())), maxVal_(
-                tagReward_) {
+            ModelWithProgramOptions(randGen, vm),
+            moveCost_(vm["problem.moveCost"].as<double>()),
+            tagReward_(vm["problem.tagReward"].as<double>()),
+            failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
+            opponentStayProbability_(vm["problem.opponentStayProbability"].as<double>()),
+            nRows_(0), // to be updated
+            nCols_(0), // to be updated
+            mapText_(), // will be pushed to
+            envMap_(), // will be pushed to
+            nActions_(5),
+            nStVars_(5),
+            minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
+            maxVal_(tagReward_) {
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
