@@ -7,12 +7,13 @@ namespace solver {
 
 enum class ChangeFlags : int {
     UNCHANGED = 0x00,
-    DELETED = 0x01,
-    REWARD = 0x02,
-    TRANSITION = 0x04,
-    OBSERVATION = 0x08,
-    OBSERVATION_BEFORE = 0x10,
-    HEURISTIC = 0x20
+    REWARD = 0x01,
+    TRANSITION = 0x02,
+    TRANSITION_BEFORE = 0x04,
+    DELETED = 0x08, // NOTE: DELETED necessarily implies TRANSITION_BEFORE
+    OBSERVATION = 0x10,
+    OBSERVATION_BEFORE = 0x20,
+    HEURISTIC = 0x40
 };
 
 inline ChangeFlags &operator|=(ChangeFlags &lhs, const ChangeFlags &rhs) {

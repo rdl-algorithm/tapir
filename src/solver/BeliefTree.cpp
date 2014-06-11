@@ -49,6 +49,23 @@ std::vector<BeliefNode *> BeliefTree::getNodes() const {
     return allNodes_;
 }
 
+/* ------------------- Creation of new nodes in the tree ------------------- */
+BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
+        Action const &action, Observation const &obs) {
+    bool isNew;
+    BeliefNode *childNode;
+    std::tie(childNode, isNew) = node->createOrGetChild(solver_, action, obs);
+    if (isNew) {
+        addNode(childNode);
+        HistoricalData *data = node->getHistoricalData();
+        if (data != nullptr) {
+            childNode->setHistoricalData(data->createChild(action, obs));
+        }
+        childNode->setMapping(solver_->getActionPool()->createActionMapping(childNode));
+        solver_->getEstimationStrategy()->setQEstimator(solver_, childNode);
+    }
+    return childNode;
+}
 
 /* ============================ PRIVATE ============================ */
 
@@ -80,22 +97,5 @@ void BeliefTree::initializeRoot() {
     root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
     root_->setMapping(solver_->getActionPool()->createActionMapping(root_.get()));
     solver_->getEstimationStrategy()->setQEstimator(solver_, root_.get());
-}
-
-BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
-        Action const &action, Observation const &obs) {
-    bool isNew;
-    BeliefNode *childNode;
-    std::tie(childNode, isNew) = node->createOrGetChild(solver_, action, obs);
-    if (isNew) {
-        addNode(childNode);
-        HistoricalData *data = node->getHistoricalData();
-        if (data != nullptr) {
-            childNode->setHistoricalData(data->createChild(action, obs));
-        }
-        childNode->setMapping(solver_->getActionPool()->createActionMapping(childNode));
-        solver_->getEstimationStrategy()->setQEstimator(solver_, childNode);
-    }
-    return childNode;
 }
 } /* namespace solver */

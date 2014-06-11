@@ -16,7 +16,6 @@ class BeliefNode;
 class Solver;
 
 class BeliefTree {
-    friend class BasicSearchStrategy;
     friend class Agent;
     friend class HistorySequence;
     friend class Solver;
@@ -40,6 +39,14 @@ public:
     /** Retrieves a vector of all belief nodes within the policy. */
     std::vector<BeliefNode *> getNodes() const;
 
+    /* ------------------- Creation of new nodes in the tree ------------------- */
+    // Use with care!!!
+    /**
+     * Adds a child belief node to the given belief node; this node will be
+     * added to the flattened node list if and only if it is actually new.
+     */
+    BeliefNode *createOrGetChild(BeliefNode *node, Action const &action,
+            Observation const &obs);
 
 private:
     /* ------------------- Node index modification ------------------- */
@@ -51,12 +58,7 @@ private:
     BeliefNode *reset();
     /** Initializes the root node - for creating a new tree from scratch. */
     void initializeRoot();
-    /**
-     * Adds a child belief node to the given belief node; this node will be
-     * added to the flattened node list if and only if it is actually new.
-     */
-    BeliefNode *createOrGetChild(BeliefNode *node, Action const &action,
-            Observation const &obs);
+
 
 private:
     Solver *solver_;

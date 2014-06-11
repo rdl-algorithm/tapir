@@ -20,7 +20,6 @@ class StateInfo;
 
 class HistorySequence {
   public:
-    friend class AbstractBackpropagationStrategy;
     friend class BasicSearchStrategy;
     friend class DefaultHistoryCorrector;
     friend class Histories;
@@ -58,8 +57,8 @@ class HistorySequence {
     bool testBackup(bool backingUp);
 
     /* ----------- Methods to add or remove history entries ------------- */
-    /** Clears all the entries in the sequence. */
-    void reset();
+    /** Erases all of the entries in this sequence, starting from firstEntryId. */
+    void erase(long firstEntryId = 0);
     /** Adds a new entry with the given state info. */
     HistoryEntry *addEntry(StateInfo *stateInfo);
 
@@ -88,7 +87,7 @@ class HistorySequence {
 
     /** The start and end of where this sequence is affected by changes. */
     long startAffectedIdx_, endAffectedIdx_;
-    /** The type of change that affects this sequence. */
+    /** The types of changes that have affected this sequence. */
     ChangeFlags changeFlags_;
 };
 } /* namespace solver */

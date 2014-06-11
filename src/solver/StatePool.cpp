@@ -38,6 +38,9 @@ StateInfo *StatePool::getInfoById(long id) const {
 StateIndex *StatePool::getStateIndex() const {
     return stateIndex_.get();
 }
+long StatePool::getNumberOfStates() const {
+    return statesByIndex_.size();
+}
 
 /* ------------------ State lookup ------------------- */
 StateInfo *StatePool::createOrGetInfo(State const &state) {

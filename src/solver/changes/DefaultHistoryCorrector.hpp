@@ -3,16 +3,20 @@
 
 #include "HistoryCorrector.hpp"
 
+#include "solver/abstract-problem/heuristics/heuristics.hpp"
+
 namespace solver {
 class HistorySequence;
 
 class DefaultHistoryCorrector: public solver::HistoryCorrector {
 public:
-    DefaultHistoryCorrector(Solver *solver);
+    DefaultHistoryCorrector(Solver *solver, Heuristic heuristic);
     virtual ~DefaultHistoryCorrector() = default;
     _NO_COPY_OR_MOVE(DefaultHistoryCorrector);
 
     void reviseSequence(HistorySequence *sequence);
+private:
+    Heuristic heuristic_;
 };
 
 } /* namespace solver */

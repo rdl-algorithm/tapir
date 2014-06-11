@@ -33,15 +33,13 @@ class StatePool;
 
 class Solver {
 public:
-    friend class BasicSearchStrategy;
     friend class Serializer;
     friend class TextSerializer;
 
     Solver(std::unique_ptr<Model> model);
     ~Solver();
 
-    _NO_COPY_OR_MOVE(Solver)
-    ;
+    _NO_COPY_OR_MOVE(Solver);
 
     /* ------------------ Simple getters. ------------------- */
     /** Returns the policy. */
@@ -92,11 +90,50 @@ public:
     /** Prints a compact representation of the entire tree. */
     void printTree(std::ostream &os);
 
-    /* ------------------ Tree backup methods ------------------- */
-    /** Returns true iff the tree has been properly backed up. */
+    /* -------------- Management of deferred backpropagation. --------------- */
+    /** Returns true iff there are any incomplete deferred backup operations. */
     bool isBackedUp() const;
-    /** Performs a backup on the entire tree. */
+    /** Completes any deferred backup operations. */
     void doBackup();
+
+    /* ------------------ Methods to update the q-values in the tree. ------------------- */
+    /** Updates the approximate q-values of actions in the belief tree based on this history
+     * sequence.
+     *  - Use sgn=-1 to do a negative backup
+     *  - Use firstEntryId > 0 to backup only part of the seqeunce instead of all of it.
+     *  - Use propagateQChanges = false to defer backpropagation and only use the immediate values
+     *   when updating.
+     *   This is useful for batched backups as it saves on the cost of recalculating the estimate
+     *   of the value of the belief.
+     */
+    void updateSequence(HistorySequence *sequence, int sgn = +1, long firstEntryId = 0,
+            bool propagateQChanges = true);
+
+
+    /** Performs a deferred update on the q-value for the parent belief and action of the
+     * given belief.
+     *
+     * deltaTotalQ - change in heuristic value at this belief node.
+     *
+     * deltaNContinuations - change in number of visits to this node that
+     * continue onwards (and hence can be estimated using the q-value
+     * this node).
+     */
+    void updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations);
+
+
+    /**
+     * Updates the values for taking the given action and receiving the given
+     * observation from the given belief node.
+     *
+     * Q(b, a) will change, but the updating of the estimated value of the belief will be
+     * deferred.
+     *
+     * deltaTotalQ - change in total reward due to immediate rewards
+     * deltaNVisits - number of new visits (usually +1, 0, or -1)
+     */
+    void updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
+            double deltaTotalQ, long deltaNVisits);
 
 private:
     /* ------------------ Initialization methods ------------------- */
@@ -114,30 +151,7 @@ private:
     /** Continues a pre-existing history sequence from its endpoint. */
     void continueSearch(HistorySequence *sequence, long maximumDepth = -1);
 
-    /* ------------------ Tree backup methods ------------------- */
-    /** Performs a backup for this entire sequence; sgn = -1 to negate */
-    void backupSequence(HistorySequence *sequence, int sgn=+1);
-
-    /** Updates the values for taking the given action and receiving the given
-     * observation from the given belief node.
-     *
-     * deltaTotalQ - change in total reward due to immediate rewards
-     * deltaNVisits - number of new visits (usually +1, 0, or -1)
-     */
-    void updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
-            double deltaTotalQ, long deltaNVisits);
-
-    /** Updates the estimated q-value for the previous action based on the
-     * given belief.
-     *
-     * deltaTotalQ - change in heuristic value at this belief node.
-     * deltaNContinuations - change in number of visits to this node that
-     * continue onwards (and hence can be estimated using the q-value
-     * this node).
-     *
-     */
-    void updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations);
-
+    /* ------------------ Private deferred backup methods. ------------------- */
     /** Adds a new node that requires backing up. */
     void addNodeToBackup(BeliefNode *node);
 

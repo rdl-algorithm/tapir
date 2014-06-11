@@ -127,7 +127,8 @@ std::unique_ptr<StateIndex> Model::createStateIndex() {
 }
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) {
-    return std::make_unique<DefaultHistoryCorrector>(solver);
+    return std::make_unique<DefaultHistoryCorrector>(solver,
+            heuristics::get_default_heuristic(this));
 }
 
 std::unique_ptr<ObservationPool> Model::createObservationPool(Solver */*solver*/) {

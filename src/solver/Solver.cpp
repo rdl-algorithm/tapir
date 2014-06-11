@@ -166,20 +166,45 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
 void Solver::applyChanges() {
     std::unordered_set<HistorySequence *> affectedSequences;
     for (StateInfo *stateInfo : statePool_->getAffectedStates()) {
+        if (changes::has_flag(stateInfo->changeFlags_, ChangeFlags::DELETED)) {
+            // Deletion implies the prior transition must be invalid.
+            stateInfo->changeFlags_ |= ChangeFlags::TRANSITION_BEFORE;
+        }
+
         for (HistoryEntry *entry : stateInfo->usedInHistoryEntries_) {
             HistorySequence *sequence = entry->owningSequence_;
             long entryId = entry->entryId_;
-            sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
-            if (changes::has_flag(entry->changeFlags_, ChangeFlags::DELETED)) {
+
+            // Some change flags need special handling!
+            ChangeFlags allFlags = stateInfo->changeFlags_;
+
+            // Transition of the previous entry is affected.
+            if (changes::has_flag(allFlags, ChangeFlags::TRANSITION_BEFORE)) {
+                allFlags &= ~ChangeFlags::TRANSITION_BEFORE;
                 if (entryId > 0) {
                     sequence->setChangeFlags(entryId - 1, ChangeFlags::TRANSITION);
+                } else {
+                    sequence->setChangeFlags(0, ChangeFlags::DELETED);
                 }
             }
-            if (changes::has_flag(entry->changeFlags_, ChangeFlags::OBSERVATION_BEFORE)) {
+
+            // The observation for the previous entry is affected.
+            if (changes::has_flag(allFlags, ChangeFlags::OBSERVATION_BEFORE)) {
+                allFlags &= ~ChangeFlags::OBSERVATION_BEFORE;
                 if (entryId > 0) {
                     sequence->setChangeFlags(entryId - 1, ChangeFlags::OBSERVATION);
                 }
             }
+
+            // Heuristic changes only apply if it's the last entry in the sequence.
+            if(changes::has_flag(allFlags, ChangeFlags::HEURISTIC)) {
+                allFlags &= ~ChangeFlags::HEURISTIC;
+                if (entry->action_ == nullptr) {
+                    sequence->setChangeFlags(entryId, ChangeFlags::HEURISTIC);
+                }
+            }
+
+            sequence->setChangeFlags(entryId, stateInfo->changeFlags_);
             affectedSequences.insert(sequence);
         }
     }
@@ -195,7 +220,7 @@ void Solver::applyChanges() {
         if (changes::has_flag(sequence->getFirstEntry()->changeFlags_, ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
             // Now we undo the sequence, and delete it entirely.
-            backupSequence(sequence, -1);
+            updateSequence(sequence, -1);
             histories_->deleteSequence(sequence->id_);
         } else {
             it++;
@@ -204,11 +229,6 @@ void Solver::applyChanges() {
 
     // Revise all of the histories.
     historyCorrector_->reviseHistories(affectedSequences);
-
-    // Clear the change flags for all of the affected sequences.
-    for (HistorySequence *sequence : affectedSequences) {
-        sequence->resetChangeFlags();
-    }
 
     // Reset the set of affected states in the pool.
     statePool_->resetAffectedStates();
@@ -295,7 +315,7 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
 void Solver::printTree(std::ostream &/*os*/) {
 }
 
-/* ------------------ Tree backup methods ------------------- */
+/* -------------- Management of deferred backpropagation. --------------- */
 bool Solver::isBackedUp() const {
     return nodesToBackup_.empty();
 }
@@ -325,6 +345,93 @@ void Solver::doBackup() {
         nodesToBackup_.erase(firstEntry);
     }
 }
+
+
+/* ------------------ Methods to update the q-values in the tree. ------------------- */
+void Solver::updateSequence(HistorySequence *sequence, int sgn, long firstEntryId,
+        bool propagateQChanges) {
+    // Cannot update sequences of length <= 1.
+    if (sequence->getLength() <= 1) {
+        return;
+    }
+
+    double discountFactor = model_->getDiscountFactor();
+
+
+    // Traverse the sequence in reverse.
+    auto it = sequence->entrySequence_.crbegin();
+
+    // The last entry is used only for the heuristic estimate.
+    double deltaTotalQ = (*it)->immediateReward_;
+    it++;
+    BeliefNode *node;
+    while (true) {
+        deltaTotalQ += (*it)->immediateReward_;
+        node = (*it)->getAssociatedBeliefNode();
+        ActionMapping *mapping = node->getMapping();
+        ActionMappingEntry *entry = mapping->getEntry(*(*it)->getAction());
+        // Update the action value and visit count.
+        entry->update(sgn, sgn * deltaTotalQ);
+        // Update the observation visit count.
+        entry->getActionNode()->getMapping()->updateVisitCount(*(*it)->getObservation(), sgn);
+
+
+        // If we've gone past the source node, we don't need to update further.
+        // Backpropagation may need to go further, but we can simply defer it.
+        it++;
+        if (it == sequence->entrySequence_.crend() || (*it)->entryId_ < firstEntryId) {
+            addNodeToBackup(node);
+            break;
+        }
+
+        double oldQ = node->getQValue();
+        deltaTotalQ = oldQ;
+        if (propagateQChanges) {
+            // Backpropagate the change in the q-value of the node.
+            node->recalculateQValue();
+            double newQ = node->getQValue();
+            long nContinuations = mapping->getTotalVisitCount() - node->getNumberOfStartingSequences();
+            deltaTotalQ += (newQ - oldQ) * nContinuations;
+        } else {
+            // If we haven't backpropagated the change, we need to do it later.
+            addNodeToBackup(node);
+        }
+        deltaTotalQ *= discountFactor;
+    }
+}
+
+void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations) {
+    if (node->getParentEntry() == nullptr) {
+        return;
+    }
+
+    deltaTotalQ += deltaNContinuations * node->getQValue();
+
+    // Apply the discount factor.
+    deltaTotalQ *= model_->getDiscountFactor();
+
+    ActionMappingEntry *parentActionEntry = node->getParentActionNode()->getParentEntry();
+    if (parentActionEntry->update(0, deltaTotalQ)) {
+        addNodeToBackup(parentActionEntry->getMapping()->getOwner());
+    }
+}
+
+void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
+        double deltaTotalQ, long deltaNVisits) {
+
+    // all zero => no update required.
+    if (deltaTotalQ == 0 && deltaNVisits == 0) {
+        return;
+    }
+
+    ActionMapping *actionMap = node->getMapping();
+    actionMap->getActionNode(action)->getMapping()->updateVisitCount(observation, deltaNVisits);
+
+    if (actionMap->update(action, deltaNVisits, deltaTotalQ)) {
+        addNodeToBackup(node);
+    }
+}
+
 
 /* ============================ PRIVATE ============================ */
 
@@ -367,13 +474,6 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long
     sequence->getFirstEntry()->registerNode(startNode);
 
     continueSearch(sequence, maximumDepth);
-
-//    rocksample::RockSampleAction const &rsAction = static_cast<rocksample::RockSampleAction const &>(
-//            *sequence->getFirstEntry()->getAction());
-//    if (rsAction.getActionType() == rocksample::ActionType::SOUTH) {
-//        cout << "SOUTH: " << startNode->getMapping()->getEntry(rsAction)->getTotalQValue();
-//        printBelief(startNode, cout);
-//    }
 }
 
 void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
@@ -384,73 +484,7 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     searchStrategy_->extendSequence(sequence, maximumDepth);
 }
 
-/* ------------------ Tree backup methods ------------------- */
-void Solver::backupSequence(HistorySequence *sequence, int sgn) {
-    double discountFactor = model_->getDiscountFactor();
-
-    // Traverse the sequence in reverse.
-    auto it = sequence->entrySequence_.crbegin();
-
-    // The last entry is used only for the heuristic estimate.
-    double deltaTotalQ = (*it)->immediateReward_;
-    it++;
-    while (true) {
-        deltaTotalQ = (deltaTotalQ * discountFactor) + (*it)->immediateReward_;
-        BeliefNode *node = (*it)->getAssociatedBeliefNode();
-        ActionMapping *mapping = node->getMapping();
-        ActionMappingEntry *entry = mapping->getEntry(*(*it)->getAction());
-        // Update the action value and visit count.
-        entry->update(sgn, sgn * deltaTotalQ);
-        // Update the observation visit count.
-        entry->getActionNode()->getMapping()->updateVisitCount(*(*it)->getObservation(), sgn);
-
-        it++;
-        if (it == sequence->entrySequence_.crend()) {
-            break;
-        }
-
-        // Backpropagate the change in the q-value of the node.
-        double oldQ = node->getQValue();
-        node->recalculateQValue();
-        double newQ = node->getQValue();
-        long nContinuations = mapping->getTotalVisitCount() - node->getNumberOfStartingSequences();
-        deltaTotalQ = oldQ + (newQ - oldQ) * nContinuations;
-    }
-}
-
-/* ------------------ Value updating methods -------------------- */
-void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation const &observation,
-        double deltaTotalQ, long deltaNVisits) {
-
-    // all zero => no update required.
-    if (deltaTotalQ == 0 && deltaNVisits == 0) {
-        return;
-    }
-
-    ActionMapping *actionMap = node->getMapping();
-    actionMap->getActionNode(action)->getMapping()->updateVisitCount(observation, deltaNVisits);
-
-    if (actionMap->update(action, deltaNVisits, deltaTotalQ)) {
-        addNodeToBackup(node);
-    }
-}
-
-void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations) {
-    if (node->getParentEntry() == nullptr) {
-        return;
-    }
-
-    deltaTotalQ += deltaNContinuations * node->getQValue();
-
-    // Apply the discount factor.
-    deltaTotalQ *= model_->getDiscountFactor();
-
-    ActionMappingEntry *parentActionEntry = node->getParentActionNode()->getParentEntry();
-    if (parentActionEntry->update(0, deltaTotalQ)) {
-        addNodeToBackup(parentActionEntry->getMapping()->getOwner());
-    }
-}
-
+/* ------------------ Private deferred backup methods. ------------------- */
 void Solver::addNodeToBackup(BeliefNode *node) {
     nodesToBackup_[node->getDepth()].insert(node);
 }

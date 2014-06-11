@@ -147,7 +147,7 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
     }
 
     // Finally, we make sure to backup the sequence.
-    solver_->backupSequence(sequence);
+    solver_->updateSequence(sequence);
     return status;
 }
 } /* namespace solver */

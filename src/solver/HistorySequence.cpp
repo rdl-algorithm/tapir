@@ -64,12 +64,12 @@ std::vector<State const *> HistorySequence::getStates() const {
 
 
 /* ----------- Methods to add or remove history entries ------------- */
-void HistorySequence::reset() {
-    for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
-        entry->registerNode(nullptr);
-        entry->registerState(nullptr);
+void HistorySequence::erase(long firstEntryId) {
+    for (auto it = entrySequence_.crbegin(); (*it)->entryId_ >= firstEntryId; it++) {
+        (*it)->registerNode(nullptr);
+        (*it)->registerState(nullptr);
     }
-    entrySequence_.clear();
+    entrySequence_.erase(entrySequence_.begin() + firstEntryId, entrySequence_.end());
 }
 
 HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
@@ -83,9 +83,6 @@ HistoryEntry *HistorySequence::addEntry(StateInfo *stateInfo) {
 /* -------------- Change flagging methods ---------------- */
 void HistorySequence::resetChangeFlags() {
     changeFlags_ = ChangeFlags::UNCHANGED;
-    for (std::unique_ptr<HistoryEntry> &entry : entrySequence_) {
-        entry->resetChangeFlags();
-    }
     resetAffectedIndices();
 }
 
