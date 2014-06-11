@@ -65,7 +65,7 @@ std::vector<long> LegalActionsPool::createBinSequence(solver::HistoricalData con
     RockSampleModel::RSActionCategory category = model_->getSearchActionCategory();
     if (category == RockSampleModel::RSActionCategory::LEGAL) {
         std::vector<long> bins = static_cast<PositionData const *>(data)->generateLegalActions();
-        // std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
+        std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
         return std::move(bins);
     } else {
         return EnumeratedActionPool::createBinSequence(data);

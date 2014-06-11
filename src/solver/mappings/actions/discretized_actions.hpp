@@ -76,9 +76,8 @@ class DiscretizedActionMap: public solver::ActionMapping {
     long nChildren_;
     long numberOfVisitedEntries_;
 
-    // std::vector<long> binSequence_;
-    // std::vector<long>::const_iterator binIterator_;
-    abt::RandomAccessSet<long> actionsToTry_;
+    std::vector<long> binSequence_;
+    std::vector<long>::const_iterator binIterator_;
 
     long totalVisitCount_;
 };
