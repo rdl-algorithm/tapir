@@ -73,6 +73,7 @@ friend class RockSampleMdpSolver;
         ROCK = 0,
         EMPTY = -1,
         GOAL = -2,
+        OBSTACLE = -3,
     };
 
 

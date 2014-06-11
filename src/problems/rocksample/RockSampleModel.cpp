@@ -135,6 +135,8 @@ void RockSampleModel::initialize() {
             } else if (c == 'S') {
                 startPos_ = p;
                 cellType = EMPTY;
+            } else if (c == 'X') {
+                cellType = OBSTACLE;
             } else {
                 cellType = EMPTY;
             }
@@ -154,7 +156,14 @@ std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
 }
 
 std::unique_ptr<solver::State> RockSampleModel::sampleStateUniform() {
-    return std::make_unique<RockSampleState>(samplePosition(), sampleRocks());
+    while (true) {
+        GridPosition position = samplePosition();
+        // States that are on top of an obstacle are completely invalid.
+        if (getCellType(position) != OBSTACLE) {
+            return std::make_unique<RockSampleState>(position, sampleRocks());
+        }
+    }
+    return nullptr;
 }
 
 GridPosition RockSampleModel::samplePosition() {
@@ -196,38 +205,41 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
 }
 
 std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
-        GridPosition pos,
+        GridPosition position,
         RockSampleAction const &action) {
+
+    GridPosition oldPosition = position;
+
     ActionType actionType = action.getActionType();
     bool isValid = true;
     if (actionType == ActionType::CHECK) {
         // Do nothing - the state remains the same.
     } else if (actionType == ActionType::SAMPLE) {
-        int rockNo = getCellType(pos) - ROCK;
+        int rockNo = getCellType(position) - ROCK;
         if (rockNo < 0 || rockNo >= nRocks_) {
             isValid = false;
         }
     } else if (actionType == ActionType::NORTH) {
-        if (pos.i > 0) {
-            pos.i -= 1;
+        if (position.i > 0) {
+            position.i -= 1;
         } else {
             isValid = false;
         }
     } else if (actionType == ActionType::EAST) {
-        if (pos.j < nCols_ - 1) {
-            pos.j += 1;
+        if (position.j < nCols_ - 1) {
+            position.j += 1;
         } else {
             isValid = false;
         }
     } else if (actionType == ActionType::SOUTH) {
-        if (pos.i < nRows_ - 1) {
-            pos.i += 1;
+        if (position.i < nRows_ - 1) {
+            position.i += 1;
         } else {
             isValid = false;
         }
     } else if (actionType == ActionType::WEST) {
-        if (pos.j > 0) {
-            pos.j -= 1;
+        if (position.j > 0) {
+            position.j -= 1;
         } else {
             isValid = false;
         }
@@ -237,7 +249,16 @@ std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
         debug::show_message(message.str());
         isValid = false;
     }
-    return std::make_pair(pos, isValid);
+
+    if (isValid) {
+        // Moving into obstacles is invalid!
+        if (getCellType(position) == OBSTACLE) {
+            isValid = false;
+            position = oldPosition;
+        }
+
+    }
+    return std::make_pair(position, isValid);
 }
 
 
@@ -457,6 +478,9 @@ void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
     case GOAL:
         os << 'G';
         break;
+    case OBSTACLE:
+        os << 'X';
+        break;
     default:
         os << "ERROR-" << cellType;
         break;
@@ -513,7 +537,7 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
                 os << "\033[38;5;" << color << "m";
             }
             if ((long) i == pos.i && (long) j == pos.j) {
-                os << "x";
+                os << "r";
             } else {
                 dispCell(envMap_[i][j], os);
             }
