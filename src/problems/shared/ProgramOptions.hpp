@@ -32,6 +32,8 @@ class ProgramOptions {
                         "policy file path (output)")
                 ("seed,s", po::value<unsigned long>()->default_value(0),
                         "RNG seed; use a value of 0 to seed using the current time")
+                ("state,t", po::value<unsigned long>(),
+                        "RNG state")
                 ("color,c", po::value<bool>()->default_value(false)->implicit_value(true),
                         "whether to use color output")
                 ("verbose,v", po::value<bool>()->default_value(false)->implicit_value(true),

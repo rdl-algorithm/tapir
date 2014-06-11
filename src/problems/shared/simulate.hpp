@@ -81,18 +81,27 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     if (seed == 0) {
         seed = std::time(nullptr);
     }
-    cout << "Seed: " << seed << endl << endl;
+    cout << "Global seed: " << seed << endl << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
     randGen.discard(10);
 
     std::ofstream os(logPath);
 
+    if (!vm["state"].empty()) {
+        std::stringstream sstr;
+        unsigned long state = vm["state"].as<unsigned long>();
+        sstr << state;
+        sstr >> randGen;
+        cout << "Loaded PRNG state " << state << endl;
+    }
+
     double totalReward = 0;
     double totalTime = 0;
     double totalNSteps = 0;
     for (long runNumber = 0; runNumber < nRuns; runNumber++) {
         cout << "Run #" << runNumber+1 << endl;
+        cout << "PRNG engine state: " << randGen << endl;
         cout << "Loading policy... " << endl;
 
         std::ifstream inFile;
