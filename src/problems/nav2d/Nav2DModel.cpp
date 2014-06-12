@@ -695,17 +695,15 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
 }
 
 
-
-
-double Nav2DModel::getHeuristicValue(solver::HistoricalData const */*data*/,
-        solver::State const *state) {
-    Nav2DState const &navState = static_cast<Nav2DState const &>(*state);
-    Point2D closestPoint = getClosestPointOfType(navState.getPosition(),
+double Nav2DModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+        solver::State const *state, solver::HistoricalData const */*data*/) {
+    Nav2DState const &nav2DState = static_cast<Nav2DState const &>(*state);
+    Point2D closestPoint = getClosestPointOfType(nav2DState.getPosition(),
             AreaType::GOAL);
-    Vector2D displacement = closestPoint - navState.getPosition();
+    Vector2D displacement = closestPoint - nav2DState.getPosition();
     double distance = displacement.getMagnitude();
     double turnAmount = std::abs(geometry::normalizeTurn(
-            displacement.getDirection() - navState.getDirection()));
+            displacement.getDirection() - nav2DState.getDirection()));
     long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
     numSteps += std::floor(turnAmount / (maxRotationalSpeed_
             * timeStepLength_));
@@ -730,8 +728,6 @@ double Nav2DModel::getHeuristicValue(solver::HistoricalData const */*data*/,
     }
     return reward;
 }
-
-
 
 
 std::unique_ptr<solver::ActionPool> Nav2DModel::createActionPool(solver::Solver */*solver*/) {

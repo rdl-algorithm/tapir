@@ -4,6 +4,7 @@
 
 #include "solver/HistoryEntry.hpp"
 
+#include "solver/abstract-problem/HistoricalData.hpp"
 #include "solver/abstract-problem/Model.hpp"
 
 #include "solver/search/SearchStatus.hpp"

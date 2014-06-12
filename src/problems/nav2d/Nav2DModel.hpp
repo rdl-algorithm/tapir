@@ -161,9 +161,8 @@ class Nav2DModel : public ModelWithProgramOptions {
             std::ostream &os) override;
 
     /* ---------------------- Basic customizations  ---------------------- */
-    virtual double getHeuristicValue(solver::HistoricalData const *data,
-            solver::State const *state);
-
+    virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
+            solver::State const *state, solver::HistoricalData const *data) override;
 
     /* ------- Customization of more complex solver functionality  --------- */
     virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver)

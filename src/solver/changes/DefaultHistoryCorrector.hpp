@@ -3,7 +3,7 @@
 
 #include "HistoryCorrector.hpp"
 
-#include "solver/abstract-problem/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 
 namespace solver {
 class HistorySequence;

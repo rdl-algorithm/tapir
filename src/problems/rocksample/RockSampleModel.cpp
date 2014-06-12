@@ -54,33 +54,30 @@ using std::endl;
 namespace po = boost::program_options;
 
 namespace rocksample {
-RockSampleModel::RockSampleModel(RandomGenerator *randGen,
-        po::variables_map vm) :
-    ModelWithProgramOptions(randGen, vm),
-    goodRockReward_(vm["problem.goodRockReward"].as<double>()),
-    badRockPenalty_(vm["problem.badRockPenalty"].as<double>()),
-    exitReward_(vm["problem.exitReward"].as<double>()),
-    illegalMovePenalty_(
-            vm["problem.illegalMovePenalty"].as<double>()),
-    halfEfficiencyDistance_(
-            vm["problem.halfEfficiencyDistance"].as<double>()),
-    nRows_(0), // update
-    nCols_(0), // update
-    nRocks_(0), // update
-    startPos_(), // update
-    rockPositions_(), // push rocks
-    mapText_(), // push rows
-    envMap_(), // push rows
-    heuristicType_(parseCategory(vm["heuristics.type"].as<std::string>())),
-    searchCategory_(parseCategory(vm["heuristics.search"].as<std::string>())),
-    rolloutCategory_(parseCategory(vm["heuristics.rollout"].as<std::string>())),
-    usingPreferredInit_(vm["heuristics.usePreferredInit"].as<bool>()),
-    preferredQValue_(vm["heuristics.preferredQValue"].as<double>()),
-    preferredVisitCount_(vm["heuristics.preferredVisitCount"].as<long>()),
-    nStVars_(), // depends on nRocks
-    minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
-    maxVal_(0) // depends on nRocks
-         {
+RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm) :
+            ModelWithProgramOptions(randGen, vm),
+            goodRockReward_(vm["problem.goodRockReward"].as<double>()),
+            badRockPenalty_(vm["problem.badRockPenalty"].as<double>()),
+            exitReward_(vm["problem.exitReward"].as<double>()),
+            illegalMovePenalty_(vm["problem.illegalMovePenalty"].as<double>()),
+            halfEfficiencyDistance_(vm["problem.halfEfficiencyDistance"].as<double>()),
+            nRows_(0), // update
+            nCols_(0), // update
+            nRocks_(0), // update
+            startPos_(), // update
+            rockPositions_(), // push rocks
+            mapText_(), // push rows
+            envMap_(), // push rows
+            heuristicType_(parseCategory(vm["heuristics.type"].as<std::string>())),
+            searchCategory_(parseCategory(vm["heuristics.search"].as<std::string>())),
+            rolloutCategory_(parseCategory(vm["heuristics.rollout"].as<std::string>())),
+            usingPreferredInit_(vm["heuristics.usePreferredInit"].as<bool>()),
+            preferredQValue_(vm["heuristics.preferredQValue"].as<double>()),
+            preferredVisitCount_(vm["heuristics.preferredVisitCount"].as<long>()),
+            nStVars_(), // depends on nRocks
+            minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
+            maxVal_(0), // depends on nRocks
+            mdpSolver_(nullptr) {
     if (searchCategory_ > heuristicType_) {
         searchCategory_ = heuristicType_;
     }
@@ -118,6 +115,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen,
         drawEnv(cout);
         cout << endl;
     }
+
+    mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
+    mdpSolver_->solve();
 }
 
 void RockSampleModel::initialize() {
@@ -130,7 +130,7 @@ void RockSampleModel::initialize() {
             RSCellType cellType;
             if (c == 'o') {
                 rockPositions_.push_back(p);
-                cellType = (RSCellType)(ROCK + nRocks_);
+                cellType = (RSCellType) (ROCK + nRocks_);
                 nRocks_++;
             } else if (c == 'G') {
                 cellType = GOAL;
@@ -151,7 +151,6 @@ void RockSampleModel::initialize() {
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
 }
 
-
 /* --------------- The model interface proper ----------------- */
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
     return std::make_unique<RockSampleState>(startPos_, sampleRocks());
@@ -169,22 +168,20 @@ std::unique_ptr<solver::State> RockSampleModel::sampleStateUniform() {
 }
 
 GridPosition RockSampleModel::samplePosition() {
-    long i = std::uniform_int_distribution<long>(
-                0, nRows_ - 1)(*getRandomGenerator());
-    long j = std::uniform_int_distribution<long>(
-                0, nCols_ - 1)(*getRandomGenerator());
+    long i = std::uniform_int_distribution<long>(0, nRows_ - 1)(*getRandomGenerator());
+    long j = std::uniform_int_distribution<long>(0, nCols_ - 1)(*getRandomGenerator());
     return GridPosition(i, j);
 }
 
 std::vector<bool> RockSampleModel::sampleRocks() {
-    return decodeRocks(std::uniform_int_distribution<long>
-                (0, (1 << nRocks_) - 1)(*getRandomGenerator()));
+    return decodeRocks(
+            std::uniform_int_distribution<long>(0, (1 << nRocks_) - 1)(*getRandomGenerator()));
 }
 
 std::vector<bool> RockSampleModel::decodeRocks(long val) {
     std::vector<bool> rockStates;
     for (int j = 0; j < nRocks_; j++) {
-        rockStates.push_back(val &  (1 << j));
+        rockStates.push_back(val & (1 << j));
     }
     return rockStates;
 }
@@ -200,14 +197,12 @@ long RockSampleModel::encodeRocks(std::vector<bool> rockStates) {
 }
 
 bool RockSampleModel::isTerminal(solver::State const &state) {
-    RockSampleState const &rockSampleState =
-        static_cast<RockSampleState const &>(state);
+    RockSampleState const &rockSampleState = static_cast<RockSampleState const &>(state);
     GridPosition pos = rockSampleState.getPosition();
     return getCellType(pos) == GOAL;
 }
 
-std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
-        GridPosition position,
+std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(GridPosition position,
         RockSampleAction const &action) {
 
     GridPosition oldPosition = position;
@@ -263,7 +258,6 @@ std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(
     return std::make_pair(position, isValid);
 }
 
-
 /* -------------------- Black box dynamics ---------------------- */
 std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState(
         RockSampleState const &state, RockSampleAction const &action) {
@@ -282,13 +276,11 @@ std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState
         rockStates[rockNo] = false;
     }
 
-    return std::make_pair(std::make_unique<RockSampleState>(nextPos, rockStates),
-            true);
+    return std::make_pair(std::make_unique<RockSampleState>(nextPos, rockStates), true);
 }
 
 std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
-        RockSampleAction const &action,
-        RockSampleState const &nextState) {
+        RockSampleAction const &action, RockSampleState const &nextState) {
     ActionType actionType = action.getActionType();
     if (actionType < ActionType::CHECK) {
         return std::make_unique<RockSampleObservation>();
@@ -297,15 +289,13 @@ std::unique_ptr<RockSampleObservation> RockSampleModel::makeObservation(
     GridPosition pos(nextState.getPosition());
     std::vector<bool> rockStates(nextState.getRockStates());
     double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
-    bool obsMatches = std::bernoulli_distribution(
-            getSensorCorrectnessProbability(dist))(*getRandomGenerator());
+    bool obsMatches = std::bernoulli_distribution(getSensorCorrectnessProbability(dist))(
+            *getRandomGenerator());
     return std::make_unique<RockSampleObservation>(rockStates[rockNo] == obsMatches);
 }
 
-double RockSampleModel::makeReward(RockSampleState const &state,
-        RockSampleAction const &action,
-        RockSampleState const &nextState,
-        bool isLegal) {
+double RockSampleModel::makeReward(RockSampleState const &state, RockSampleAction const &action,
+        RockSampleState const &nextState, bool isLegal) {
     if (!isLegal) {
         return -illegalMovePenalty_;
     }
@@ -318,8 +308,7 @@ double RockSampleModel::makeReward(RockSampleState const &state,
         GridPosition pos = state.getPosition();
         int rockNo = getCellType(pos) - ROCK;
         if (0 <= rockNo && rockNo < nRocks_) {
-            return state.getRockStates()[rockNo] ? goodRockReward_
-                   : -badRockPenalty_;
+            return state.getRockStates()[rockNo] ? goodRockReward_ : -badRockPenalty_;
         } else {
             debug::show_message("Invalid sample action!?!");
             return -illegalMovePenalty_;
@@ -328,69 +317,50 @@ double RockSampleModel::makeReward(RockSampleState const &state,
     return 0;
 }
 
-std::unique_ptr<solver::State> RockSampleModel::generateNextState(
-           solver::State const &state,
-           solver::Action const &action,
-           solver::TransitionParameters const */*tp*/) {
+std::unique_ptr<solver::State> RockSampleModel::generateNextState(solver::State const &state,
+        solver::Action const &action, solver::TransitionParameters const */*tp*/) {
     return makeNextState(static_cast<RockSampleState const &>(state),
             static_cast<RockSampleAction const &>(action)).first;
 }
 
 std::unique_ptr<solver::Observation> RockSampleModel::generateObservation(
-        solver::State const */*state*/,
-        solver::Action const &action,
-        solver::TransitionParameters const */*tp*/,
-        solver::State const &nextState) {
-    return makeObservation(
-            static_cast<RockSampleAction const &>(action),
+        solver::State const */*state*/, solver::Action const &action,
+        solver::TransitionParameters const */*tp*/, solver::State const &nextState) {
+    return makeObservation(static_cast<RockSampleAction const &>(action),
             static_cast<RockSampleState const &>(nextState));
 }
 
-double RockSampleModel::generateReward(
-        solver::State const &state,
-        solver::Action const &action,
-        solver::TransitionParameters const */*tp*/,
-        solver::State const */*nextState*/) {
-    RockSampleState const &rockSampleState = (
-            static_cast<RockSampleState const &>(state));
-    RockSampleAction const &rockSampleAction = (
-            static_cast<RockSampleAction const &>(action));
+double RockSampleModel::generateReward(solver::State const &state, solver::Action const &action,
+        solver::TransitionParameters const */*tp*/, solver::State const */*nextState*/) {
+    RockSampleState const &rockSampleState = (static_cast<RockSampleState const &>(state));
+    RockSampleAction const &rockSampleAction = (static_cast<RockSampleAction const &>(action));
     std::unique_ptr<RockSampleState> nextState;
     bool isLegal;
-    std::tie(nextState, isLegal) = makeNextState(rockSampleState,
-            rockSampleAction);
-    return makeReward(rockSampleState, rockSampleAction,
-            *nextState, isLegal);
+    std::tie(nextState, isLegal) = makeNextState(rockSampleState, rockSampleAction);
+    return makeReward(rockSampleState, rockSampleAction, *nextState, isLegal);
 }
 
-solver::Model::StepResult RockSampleModel::generateStep(
-        solver::State const &state,
+solver::Model::StepResult RockSampleModel::generateStep(solver::State const &state,
         solver::Action const &action) {
-    RockSampleState const &rockSampleState =
-        static_cast<RockSampleState const &>(state);
-    RockSampleAction const &rockSampleAction = (
-                static_cast<RockSampleAction const &>(action));
+    RockSampleState const &rockSampleState = static_cast<RockSampleState const &>(state);
+    RockSampleAction const &rockSampleAction = (static_cast<RockSampleAction const &>(action));
     solver::Model::StepResult result;
     result.action = action.copy();
 
     bool isLegal;
     std::unique_ptr<RockSampleState> nextState;
-    std::tie(nextState, isLegal) = makeNextState(rockSampleState,
-            rockSampleAction);
+    std::tie(nextState, isLegal) = makeNextState(rockSampleState, rockSampleAction);
     result.observation = makeObservation(rockSampleAction, *nextState);
-    result.reward = makeReward(rockSampleState, rockSampleAction,
-            *nextState, isLegal);
+    result.reward = makeReward(rockSampleState, rockSampleAction, *nextState, isLegal);
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);
     return result;
 }
 
-
 /* ------------ Methods for handling particle depletion -------------- */
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
-        solver::BeliefNode */*previousBelief*/,
-        solver::Action const &action, solver::Observation const &obs,
-        long nParticles,
+        solver::BeliefNode */*previousBelief*/, solver::Action const &action,
+        solver::Observation const &obs, long nParticles,
         std::vector<solver::State const *> const &previousParticles) {
     std::vector<std::unique_ptr<solver::State>> newParticles;
 
@@ -406,16 +376,14 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         WeightMap weights;
         double weightTotal = 0;
         for (solver::State const *state : previousParticles) {
-            RockSampleState const *rockSampleState =
-                static_cast<RockSampleState const *>(state);
+            RockSampleState const *rockSampleState = static_cast<RockSampleState const *>(state);
             GridPosition pos(rockSampleState->getPosition());
             double dist = pos.euclideanDistanceTo(rockPositions_[rockNo]);
             bool rockIsGood = rockSampleState->getRockStates()[rockNo];
 
-
             double probability = getSensorCorrectnessProbability(dist);
-            RockSampleObservation const &observation = (
-                    static_cast<RockSampleObservation const &>(obs));
+            RockSampleObservation const &observation =
+                    (static_cast<RockSampleObservation const &>(obs));
             if (rockIsGood != observation.isGood()) {
                 probability = 1 - probability;
             }
@@ -426,36 +394,31 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         for (WeightMap::value_type &it : weights) {
             double proportion = it.second * scale;
             long numToAdd = static_cast<long>(proportion);
-            if (std::bernoulli_distribution(proportion - numToAdd)(
-                    *getRandomGenerator())) {
+            if (std::bernoulli_distribution(proportion - numToAdd)(*getRandomGenerator())) {
                 numToAdd += 1;
             }
             for (int i = 0; i < numToAdd; i++) {
-                newParticles.push_back(std::make_unique<RockSampleState>(it.
-                                first));
+                newParticles.push_back(std::make_unique<RockSampleState>(it.first));
             }
         }
 
     } else {
         // It's not a CHECK action, so we just add each resultant state.
         for (solver::State const *state : previousParticles) {
-            RockSampleState const *rockSampleState = (
-                    static_cast<RockSampleState const *>(state));
-            RockSampleAction const &rockSampleAction = (
-                    static_cast<RockSampleAction const &>(action));
-            newParticles.push_back(makeNextState(*rockSampleState,
-                    rockSampleAction).first);
+            RockSampleState const *rockSampleState = (static_cast<RockSampleState const *>(state));
+            RockSampleAction const &rockSampleAction =
+                    (static_cast<RockSampleAction const &>(action));
+            newParticles.push_back(makeNextState(*rockSampleState, rockSampleAction).first);
         }
     }
     return newParticles;
 }
 
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
-        solver::BeliefNode */*previousBelief*/,
-        solver::Action const &action, solver::Observation const &obs,
-        long nParticles) {
+        solver::BeliefNode */*previousBelief*/, solver::Action const &action,
+        solver::Observation const &obs, long nParticles) {
     std::vector<std::unique_ptr<solver::State>> particles;
-    while ((long)particles.size() < nParticles) {
+    while ((long) particles.size() < nParticles) {
         std::unique_ptr<solver::State> state = sampleStateUniform();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {
@@ -464,7 +427,6 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     }
     return particles;
 }
-
 
 /* ------------------- Pretty printing methods --------------------- */
 void RockSampleModel::dispCell(RSCellType cellType, std::ostream &os) {
@@ -500,14 +462,12 @@ void RockSampleModel::drawEnv(std::ostream &os) {
 
 void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state, std::ostream &os) {
-    RockSampleState const &rockSampleState =
-            static_cast<RockSampleState const &>(state);
+    RockSampleState const &rockSampleState = static_cast<RockSampleState const &>(state);
     std::vector<solver::State const *> particles = belief->getStates();
     GridPosition pos(rockSampleState.getPosition());
     std::vector<double> goodProportions(nRocks_);
     for (solver::State const *particle : particles) {
-        RockSampleState const &rss =
-                static_cast<RockSampleState const &>(*particle);
+        RockSampleState const &rss = static_cast<RockSampleState const &>(*particle);
         for (long i = 0; i < nRocks_; i++) {
             if (rss.getRockStates()[i]) {
                 goodProportions[i] += 1;
@@ -518,9 +478,7 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
         goodProportions[i] /= particles.size();
     }
 
-    std::vector<int> colors {196,
-        161, 126, 91, 56, 21,
-        26, 31, 36, 41, 46};
+    std::vector<int> colors { 196, 161, 126, 91, 56, 21, 26, 31, 36, 41, 46 };
     if (hasColorOutput()) {
         os << "Color map: ";
         for (int color : colors) {
@@ -534,8 +492,7 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
             long rockNo = envMap_[i][j] - ROCK;
             if (rockNo >= 0 && hasColorOutput()) {
-                int color =
-                        colors[goodProportions[rockNo] * (colors.size() - 1)];
+                int color = colors[goodProportions[rockNo] * (colors.size() - 1)];
                 os << "\033[38;5;" << color << "m";
             }
             if ((long) i == pos.i && (long) j == pos.j) {
@@ -551,12 +508,10 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 }
 
-
 /* ---------------------- Basic customizations  ---------------------- */
-double RockSampleModel::getHeuristicValue(solver::HistoricalData const */*data*/,
-        solver::State const *state) {
-    RockSampleState const &rockSampleState =
-        static_cast<RockSampleState const &>(*state);
+double RockSampleModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+        solver::State const *state, solver::HistoricalData const */*data*/) {
+    RockSampleState const &rockSampleState = static_cast<RockSampleState const &>(*state);
     double qVal = 0;
     double currentDiscount = 1;
     GridPosition currentPos(rockSampleState.getPosition());
@@ -571,8 +526,7 @@ double RockSampleModel::getHeuristicValue(solver::HistoricalData const */*data*/
     while (!goodRocks.empty()) {
         std::set<int>::iterator it = goodRocks.begin();
         int bestRock = *it;
-        long lowestDist =
-            rockPositions_[bestRock].manhattanDistanceTo(currentPos);
+        long lowestDist = rockPositions_[bestRock].manhattanDistanceTo(currentPos);
         ++it;
         for (; it != goodRocks.end(); ++it) {
             long dist = rockPositions_[*it].manhattanDistanceTo(currentPos);
@@ -591,7 +545,6 @@ double RockSampleModel::getHeuristicValue(solver::HistoricalData const */*data*/
     return qVal;
 }
 
-
 std::unique_ptr<RockSampleAction> RockSampleModel::getRandomAction() {
     long binNumber = std::uniform_int_distribution<int>(0, 4 + nRocks_)(*getRandomGenerator());
     return std::make_unique<RockSampleAction>(binNumber);
@@ -600,26 +553,28 @@ std::unique_ptr<RockSampleAction> RockSampleModel::getRandomAction(std::vector<l
     if (binNumbers.empty()) {
         return nullptr;
     }
-    long index = std::uniform_int_distribution<int>(0, binNumbers.size() - 1)(*getRandomGenerator());
+    long index = std::uniform_int_distribution<int>(0, binNumbers.size() - 1)(
+            *getRandomGenerator());
     return std::make_unique<RockSampleAction>(binNumbers[index]);
 }
 
-std::unique_ptr<solver::Action> RockSampleModel::getRolloutAction(solver::HistoricalData const *data,
-            solver::State const */*state*/) {
+std::unique_ptr<solver::Action> RockSampleModel::getRolloutAction(
+        solver::HistoricalData const *data, solver::State const */*state*/) {
     if (rolloutCategory_ == RSActionCategory::ALL) {
         return getRandomAction();
     } else if (rolloutCategory_ == RSActionCategory::LEGAL) {
         if (heuristicType_ == RSActionCategory::LEGAL) {
             return getRandomAction(static_cast<PositionData const &>(*data).generateLegalActions());
         } else if (heuristicType_ == RSActionCategory::PREFERRED) {
-            return getRandomAction(static_cast<PositionAndRockData const &>(*data).generateLegalActions());
+            return getRandomAction(
+                    static_cast<PositionAndRockData const &>(*data).generateLegalActions());
         }
     } else {
-        return getRandomAction(static_cast<PositionAndRockData const &>(*data).generatePreferredActions());
+        return getRandomAction(
+                static_cast<PositionAndRockData const &>(*data).generatePreferredActions());
     }
     return nullptr;
 }
-
 
 /* ------- Customization of more complex solver functionality  --------- */
 std::vector<std::unique_ptr<solver::DiscretizedPoint>> RockSampleModel::getAllActionsInOrder() {
@@ -631,7 +586,7 @@ std::vector<std::unique_ptr<solver::DiscretizedPoint>> RockSampleModel::getAllAc
 }
 
 std::unique_ptr<solver::ActionPool> RockSampleModel::createActionPool(solver::Solver */*solver*/) {
-    switch(heuristicType_) {
+    switch (heuristicType_) {
     case RSActionCategory::LEGAL:
         return std::make_unique<LegalActionsPool>(this);
     case RSActionCategory::PREFERRED:
@@ -641,7 +596,7 @@ std::unique_ptr<solver::ActionPool> RockSampleModel::createActionPool(solver::So
     }
 }
 std::unique_ptr<solver::HistoricalData> RockSampleModel::createRootHistoricalData() {
-    switch(heuristicType_) {
+    switch (heuristicType_) {
     case RSActionCategory::LEGAL:
         return std::make_unique<PositionData>(this, getStartPosition());
     case RSActionCategory::PREFERRED:
@@ -651,12 +606,10 @@ std::unique_ptr<solver::HistoricalData> RockSampleModel::createRootHistoricalDat
     }
 }
 
-
 std::vector<std::unique_ptr<solver::DiscretizedPoint>> RockSampleModel::getAllObservationsInOrder() {
     std::vector<std::unique_ptr<solver::DiscretizedPoint>> allObservations_;
     for (long code = 0; code < 3; code++) {
-        allObservations_.push_back(
-                std::make_unique<RockSampleObservation>(code));
+        allObservations_.push_back(std::make_unique<RockSampleObservation>(code));
     }
     return allObservations_;
 }

@@ -8,7 +8,7 @@
 #include "solver/abstract-problem/Action.hpp"
 #include "solver/abstract-problem/Model.hpp"
 
-#include "solver/abstract-problem/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 
 #include "solver/search/SearchStatus.hpp"
 

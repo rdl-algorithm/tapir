@@ -9,6 +9,7 @@
 #include "global.hpp"                     // for RandomGenerator
 
 #include "solver/abstract-problem/Model.hpp"             // for Model
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 #include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
 #include "solver/changes/DefaultHistoryCorrector.hpp"
@@ -40,9 +41,8 @@ public:
         registerGeneratorParser("nn", std::make_unique<NnRolloutParser>());
         registerGeneratorParser("staged", std::make_unique<StagedParser>(&generatorParsers_));
 
-        registerHeuristicParser("default", std::make_unique<DefaultHeuristicParser>());
+        registerHeuristicParser("default", std::make_unique<DefaultHeuristicParser>(this));
         registerHeuristicParser("zero", std::make_unique<ZeroHeuristicParser>());
-
 
         searchParsers_.setDefaultParser(std::make_unique<BasicSearchParser>(
                 &generatorParsers_, &heuristicParsers_, heuristicString_));
@@ -109,6 +109,13 @@ public:
             solver::Solver *solver) override {
         return std::make_unique<solver::DefaultHistoryCorrector>(solver,
                 heuristicParsers_.parse(solver, heuristicString_));
+    }
+    virtual solver::Heuristic getHeuristicFunction() final override {
+        return heuristicParsers_.parse(nullptr, heuristicString_);
+    }
+    virtual double getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+            solver::State const */*state*/, solver::HistoricalData const */*data*/) {
+        return 0;
     }
 
 private:

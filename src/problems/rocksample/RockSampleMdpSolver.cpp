@@ -16,6 +16,10 @@ RockSampleMdpSolver::RockSampleMdpSolver(RockSampleModel *model) :
 }
 
 void RockSampleMdpSolver::solve() {
+    if (model_->hasVerboseOutput()) {
+        std::cout << "Solving MDP...";
+        std::cout.flush();
+    }
     std::set<std::pair<int, int>> entries;
     std::set<std::pair<int, int>> newEntries;
     for (int i = 0; i < model_->nRocks_; i++) {
@@ -52,11 +56,9 @@ void RockSampleMdpSolver::solve() {
             }
         }
     }
-}
-
-double RockSampleMdpSolver::getHeuristicValue(solver::HistoryEntry const */*entry*/,
-        solver::State const *state, solver::HistoricalData const */*data*/) {
-    return getQValue(static_cast<RockSampleState const &>(*state));
+    if (model_->hasVerboseOutput()) {
+        std::cout << "                   Done." << std::endl << std::endl;
+    }
 }
 
 double RockSampleMdpSolver::getQValue(RockSampleState const &state) const {
@@ -109,24 +111,15 @@ double RockSampleMdpSolver::calculateQValue(GridPosition pos, long rockStateCode
 
 
 RockSampleMdpParser::RockSampleMdpParser(RockSampleModel *model) :
-        model_(model),
-        mdpSolver_(nullptr) {
+        model_(model) {
 }
 
 solver::Heuristic RockSampleMdpParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
-    if (mdpSolver_ == nullptr) {
-        if (model_->hasVerboseOutput()) {
-            std::cout << "Solving MDP...";
-            std::cout.flush();
-        }
-        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(model_);
-        mdpSolver_->solve();
-        if (model_->hasVerboseOutput()) {
-            std::cout << "     Done." << std::endl << std::endl;
-        }
-    }
-    using namespace std::placeholders;
-    return std::bind(&RockSampleMdpSolver::getHeuristicValue, mdpSolver_.get(), _1, _2, _3);
+    return [this] (solver::HistoryEntry const *, solver::State const *state,
+            solver::HistoricalData const *) {
+        return this->model_->getMdpSolver()->getQValue(
+                static_cast<RockSampleState const &>(*state));
+    };
 }
 } /* namespace rocksample */

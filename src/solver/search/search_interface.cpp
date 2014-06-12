@@ -10,7 +10,7 @@
 #include "solver/Solver.hpp"
 #include "solver/StatePool.hpp"
 
-#include "solver/abstract-problem/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 
 #include "solver/search/SearchStatus.hpp"
 

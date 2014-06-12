@@ -7,7 +7,7 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/Solver.hpp"
 
-#include "solver/abstract-problem/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 
 #include "solver/belief-estimators/estimators.hpp"
 
@@ -16,6 +16,8 @@
 #include "solver/search/steppers/ucb_search.hpp"
 #include "solver/search/steppers/default_rollout.hpp"
 #include "solver/search/steppers/nn_rollout.hpp"
+
+#include "problems/shared/ModelWithProgramOptions.hpp"
 
 std::vector<std::string> split_function(std::string text) {
     std::size_t i0 = text.find('(');
@@ -92,13 +94,23 @@ std::unique_ptr<solver::StepGeneratorFactory> StagedParser::parse(solver::Solver
     return std::make_unique<solver::StagedStepGeneratorFactory>(std::move(factories));
 }
 
+DefaultHeuristicParser::DefaultHeuristicParser(ModelWithProgramOptions *model) :
+        heuristic_() {
+    heuristic_ = [model] (solver::HistoryEntry const *entry,
+            solver::State const *state, solver::HistoricalData const *data) {
+        return model->getDefaultHeuristicValue(entry, state, data);
+    };
+}
 solver::Heuristic DefaultHeuristicParser::parse(
-        solver::Solver *solver, std::vector<std::string> /*args*/) {
-    return solver::heuristics::get_default_heuristic(solver->getModel());
+        solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
+    return heuristic_;
 }
 solver::Heuristic ZeroHeuristicParser::parse(
         solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
-    return solver::heuristics::zero;
+    return [] (solver::HistoryEntry const *, solver::State const *,
+            solver::HistoricalData const *) {
+        return 0;
+    };
 }
 
 BasicSearchParser::BasicSearchParser(

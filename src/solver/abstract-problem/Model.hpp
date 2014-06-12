@@ -13,6 +13,8 @@
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/TransitionParameters.hpp"
 
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+
 namespace solver {
 class ActionPool;
 class BeliefNode;
@@ -154,9 +156,9 @@ public:
 
 
     /* ---------------------- Basic customizations  ---------------------- */
-    /** Approximates the value of a history entry based on the history and/or
-     * an estimate using a single state. */
-    virtual double getHeuristicValue(HistoricalData const *data, State const *state);
+    /** Returns the function that approximates the value of a history entry based on the history
+     * and/or an estimate using a single state. */
+    virtual Heuristic getHeuristicFunction();
 
     /** Allows for a basic rollout strategy based on the history and/or the specific state. */
     virtual std::unique_ptr<Action> getRolloutAction(HistoricalData const *data,

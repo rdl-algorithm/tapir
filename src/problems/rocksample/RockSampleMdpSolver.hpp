@@ -11,7 +11,7 @@
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/parsers.hpp"
 
-#include "solver/abstract-problem/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 
 namespace rocksample {
 class RockSampleModel;
@@ -28,9 +28,6 @@ public:
 
     /** Solves the MDP. */
     void solve();
-
-    double getHeuristicValue(solver::HistoryEntry const *entry,
-            solver::State const *state, solver::HistoricalData const *data);
 
     /** Calculates the exact value for the given state. */
     double getQValue(RockSampleState const &state) const;
@@ -63,7 +60,6 @@ public:
     virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
 private:
     RockSampleModel *model_;
-    std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 };
 } /* namespace rocksample */
 

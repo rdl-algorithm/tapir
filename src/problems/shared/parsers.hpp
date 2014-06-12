@@ -8,6 +8,7 @@
 #include "solver/search/search_interface.hpp"
 
 template<typename TargetType> class Parser;
+class ModelWithProgramOptions;
 
 std::vector<std::string> split_function(std::string text);
 
@@ -108,10 +109,13 @@ private:
 
 class DefaultHeuristicParser: public Parser<solver::Heuristic> {
 public:
-    DefaultHeuristicParser() = default;
+    DefaultHeuristicParser(ModelWithProgramOptions *model);
     virtual ~DefaultHeuristicParser() = default;
-    virtual solver::Heuristic parse(solver::Solver *solver,
+    virtual solver::Heuristic parse(solver::Solver */*solver*/,
             std::vector<std::string> args) override;
+
+private:
+    solver::Heuristic heuristic_;
 };
 
 class ZeroHeuristicParser: public Parser<solver::Heuristic> {

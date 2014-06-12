@@ -103,6 +103,11 @@ friend class RockSampleMdpSolver;
         return preferredVisitCount_;
     }
 
+    /** Returns the MDP solver for this model. */
+    RockSampleMdpSolver *getMdpSolver() {
+        return mdpSolver_.get();
+    }
+
     /** Returns the starting position for this problem. */
     GridPosition getStartPosition() {
         return startPos_;
@@ -186,11 +191,11 @@ friend class RockSampleMdpSolver;
 
 
     /* ---------------------- Basic customizations  ---------------------- */
-    virtual double getHeuristicValue(solver::HistoricalData const *data,
-            solver::State const *state);
+    virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
+            solver::State const *state, solver::HistoricalData const *data) override;
 
     virtual std::unique_ptr<solver::Action> getRolloutAction(solver::HistoricalData const *data,
-            solver::State const *state);
+            solver::State const *state) override;
 
 
     /* ------- Customization of more complex solver functionality  --------- */
@@ -294,6 +299,8 @@ friend class RockSampleMdpSolver;
     // Generic problem parameters
     long nStVars_;
     double minVal_, maxVal_;
+
+    std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 };
 } /* namespace rocksample */
 

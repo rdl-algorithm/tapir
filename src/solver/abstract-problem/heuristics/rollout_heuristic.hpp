@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "solver/abstract-problem/heuristics/heuristics.hpp"
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 
 #include "solver/search/search_interface.hpp"
 

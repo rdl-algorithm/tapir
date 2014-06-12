@@ -535,8 +535,8 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
 
 
 /* ---------------------- Basic customizations  ---------------------- */
-double TagModel::getHeuristicValue(solver::HistoricalData const */*data*/,
-        solver::State const *state) {
+double TagModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+            solver::State const *state, solver::HistoricalData const */*data*/) {
     TagState const &tagState = static_cast<TagState const &>(*state);
     if (tagState.isTagged()) {
         return 0;

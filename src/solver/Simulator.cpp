@@ -107,13 +107,14 @@ bool Simulator::stepSimulation() {
     }
 
     std::stringstream prevStream;
+    HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     State const *currentState = getCurrentState();
     BeliefNode *currentBelief = agent_->getCurrentBelief();
     if (model_->hasVerboseOutput()) {
         cout << endl << endl << "t-" << stepCount_ << endl;
         cout << "State: " << *currentState << endl;
-        cout << "Heuristic Value: " << model_->getHeuristicValue(currentBelief->getHistoricalData(),
-                currentState) << endl;
+        cout << "Heuristic Value: " << model_->getHeuristicFunction()(currentEntry,
+                currentState, currentBelief->getHistoricalData()) << endl;
         cout << "Belief #" << currentBelief->getId() << endl;
 
         solver::HistoricalData *data = currentBelief->getHistoricalData();
@@ -194,7 +195,6 @@ bool Simulator::stepSimulation() {
     agent_->updateBelief(*result.action, *result.observation);
     currentBelief = agent_->getCurrentBelief();
 
-    HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     currentEntry->action_ = std::move(result.action);
     currentEntry->observation_ = std::move(result.observation);
     currentEntry->immediateReward_ = result.reward;

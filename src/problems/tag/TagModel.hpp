@@ -134,9 +134,8 @@ class TagModel: public ModelWithProgramOptions {
 
 
     /* ---------------------- Basic customizations  ---------------------- */
-    virtual double getHeuristicValue(solver::HistoricalData const *data,
-            solver::State const *state) override;
-
+    virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
+                solver::State const *state, solver::HistoricalData const *data) override;
 
     /* ------- Customization of more complex solver functionality  --------- */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
