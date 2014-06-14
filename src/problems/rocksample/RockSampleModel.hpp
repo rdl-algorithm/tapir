@@ -25,6 +25,7 @@
 #include "position_history.hpp"
 #include "smart_history.hpp"
 #include "RockSampleMdpSolver.hpp"
+#include "RockSampleAction.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
 
@@ -37,7 +38,6 @@ class DiscretizedPoint;
 } /* namespace solver */
 
 namespace rocksample {
-class RockSampleAction;
 class RockSampleMdpSolver;
 class RockSampleState;
 class RockSampleObservation;
@@ -107,10 +107,22 @@ friend class RockSampleMdpSolver;
     RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
     }
-
     /** Returns the starting position for this problem. */
     GridPosition getStartPosition() {
         return startPos_;
+    }
+    /** Returns the distance from the given grid position to the given rock (or -1 for the goal).
+     *
+     * A return value of -1 means the given rock / goal cannot be reached.
+     */
+    int getDistance(GridPosition p, int rockNo) {
+        std::vector<std::vector<int>> *grid = nullptr;
+        if (rockNo == -1) {
+            grid = &goalDistances_;
+        } else {
+            grid = &rockDistances_[rockNo];
+        }
+        return (*grid)[p.i][p.j];
     }
     /** Returns the cell type for the given position. */
     RSCellType getCellType(GridPosition p) {
@@ -185,6 +197,7 @@ friend class RockSampleMdpSolver;
     /** Displays an individual cell of the map. */
     virtual void dispCell(RSCellType cellType, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
+    virtual void drawDistances(std::vector<std::vector<int>> &grid, std::ostream &os);
     virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
@@ -211,8 +224,7 @@ friend class RockSampleMdpSolver;
 
     /* ----------- Non-virtual methods for RockSampleModel ------------- */
     /** Generates the next position for the given position and action. */
-    std::pair<GridPosition, bool> makeNextPosition(GridPosition pos,
-            RockSampleAction const &action);
+    std::pair<GridPosition, bool> makeNextPosition(GridPosition pos, ActionType actionType);
     /**
      * Generates a next state for the given state and action;
      * returns true if the action was legal, and false if it was illegal.
@@ -238,6 +250,15 @@ friend class RockSampleMdpSolver;
      * data structures and variables.
      */
     void initialize();
+
+    /** For each cell, calculates the distance to the nearest goal and the */
+    void recalculateAllDistances();
+
+    /** For each cell, calculates the distance to the nearest target. If no target can be
+     * reached, the distance will be -1.
+     */
+    void recalculateDistances(std::vector<std::vector<int>> &grid,
+            std::vector<GridPosition> targets);
 
     /** Returns a random action */
     std::unique_ptr<RockSampleAction> getRandomAction();
@@ -275,12 +296,19 @@ friend class RockSampleMdpSolver;
     GridPosition startPos_;
     /** The coordinates of the rocks. */
     std::vector<GridPosition> rockPositions_;
+    /** The coordinates of the goal squares. */
+    std::vector<GridPosition> goalPositions_;
 
     /** The environment map in text form. */
     std::vector<std::string> mapText_;
     /** The environment map in vector form. */
     std::vector<std::vector<RSCellType>> envMap_;
 
+
+    /** The distance from each cell to the nearest goal square. */
+    std::vector<std::vector<int>> goalDistances_;
+    /** The distance from each cell to each rock. */
+    std::vector<std::vector<std::vector<int>>> rockDistances_;
 
     /** The type of heuristic to use. (none / legal / preferred) */
     RSActionCategory heuristicType_;

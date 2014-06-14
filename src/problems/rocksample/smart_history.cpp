@@ -33,7 +33,8 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
     std::unique_ptr<PositionAndRockData> nextData = (std::make_unique<PositionAndRockData>(*this));
 
     bool isLegal;
-    std::tie(nextData->position_, isLegal) = model_->makeNextPosition(position_, rsAction);
+    std::tie(nextData->position_, isLegal) = model_->makeNextPosition(position_,
+            rsAction.getActionType());
     if (!isLegal) {
         debug::show_message("ERROR: An illegal action was taken!?");
         return std::move(nextData);
@@ -79,7 +80,8 @@ std::vector<long> PositionAndRockData::generateLegalActions() const {
         RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(*action);
         GridPosition nextPosition;
         bool isLegal;
-        std::tie(nextPosition, isLegal) = model_->makeNextPosition(position_, rsAction);
+        std::tie(nextPosition, isLegal) = model_->makeNextPosition(position_,
+                rsAction.getActionType());
         if (isLegal) {
             legalActions.push_back(rsAction.getBinNumber());
         }

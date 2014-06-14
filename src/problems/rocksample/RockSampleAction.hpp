@@ -19,6 +19,33 @@ enum class ActionType : long {
     CHECK = 5
 };
 
+inline std::ostream &operator<<(std::ostream &os, ActionType const actionType) {
+    switch (actionType) {
+    case ActionType::CHECK:
+        os << "CHECK-";
+        break;
+    case ActionType::NORTH:
+        os << "NORTH";
+        break;
+    case ActionType::EAST:
+        os << "EAST";
+        break;
+    case ActionType::SOUTH:
+        os << "SOUTH";
+        break;
+    case ActionType::WEST:
+        os << "WEST";
+        break;
+    case ActionType::SAMPLE:
+        os << "SAMPLE";
+        break;
+    default:
+        os << "ERROR-" << static_cast<long>(actionType);
+        break;
+    }
+    return os;
+}
+
 class RockSampleAction : public solver::DiscretizedPoint {
     friend class RockSampleTextSerializer;
   public:

@@ -31,29 +31,9 @@ double RockSampleAction::distanceTo(solver::Action const &/*otherAction*/) const
 }
 
 void RockSampleAction::print(std::ostream &os) const {
+    os << actionType_;
     if (actionType_ == ActionType::CHECK) {
-        os << "CHECK-" << rockNo_;
-        return;
-    }
-    switch (actionType_) {
-    case ActionType::NORTH:
-        os << "NORTH";
-        break;
-    case ActionType::EAST:
-        os << "EAST";
-        break;
-    case ActionType::SOUTH:
-        os << "SOUTH";
-        break;
-    case ActionType::WEST:
-        os << "WEST";
-        break;
-    case ActionType::SAMPLE:
-        os << "SAMPLE";
-        break;
-    default:
-        os << "ERROR-" << static_cast<long>(actionType_);
-        break;
+        os << rockNo_;
     }
 }
 

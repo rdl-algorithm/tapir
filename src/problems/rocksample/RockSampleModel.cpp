@@ -7,6 +7,7 @@
 #include <fstream>                      // for operator<<, basic_ostream, endl, basic_ostream<>::__ostream_type, ifstream, basic_ostream::operator<<, basic_istream, basic_istream<>::__istream_type
 #include <initializer_list>
 #include <iostream>                     // for cout
+#include <queue>
 #include <map>
 #include <memory>                       // for unique_ptr, default_delete
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
@@ -66,8 +67,11 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
             nRocks_(0), // update
             startPos_(), // update
             rockPositions_(), // push rocks
+            goalPositions_(), // push goals
             mapText_(), // push rows
             envMap_(), // push rows
+            goalDistances_(), // calculate distances
+            rockDistances_(), // calculate distances
             heuristicType_(parseCategory(vm["heuristics.type"].as<std::string>())),
             searchCategory_(parseCategory(vm["heuristics.search"].as<std::string>())),
             rolloutCategory_(parseCategory(vm["heuristics.rollout"].as<std::string>())),
@@ -111,8 +115,17 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
         cout << "Discount: " << getDiscountFactor() << endl;
         cout << "Size: " << nRows_ << " by " << nCols_ << endl;
         cout << "nRocks: " << nRocks_ << endl;
+
         cout << "Environment:" << endl;
         drawEnv(cout);
+        cout << endl;
+
+        cout << "Distances to the goal:" << endl;
+        drawDistances(goalDistances_, std::cout);
+        cout << endl;
+
+        cout << "Distances to rock #2:" << endl;
+        drawDistances(rockDistances_[2], std::cout);
         cout << endl;
     }
 
@@ -134,6 +147,7 @@ void RockSampleModel::initialize() {
                 nRocks_++;
             } else if (c == 'G') {
                 cellType = GOAL;
+                goalPositions_.push_back(p);
             } else if (c == 'S') {
                 startPos_ = p;
                 cellType = EMPTY;
@@ -149,11 +163,78 @@ void RockSampleModel::initialize() {
     nStVars_ = 2 + nRocks_;
     minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
     maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
+
+    goalDistances_.resize(nRows_);
+    for (std::vector<int> &row : goalDistances_) {
+        row.resize(nCols_);
+    }
+
+    rockDistances_.resize(nRocks_);
+    for (auto &distances : rockDistances_) {
+        distances.resize(nRows_);
+        for (auto &row : distances) {
+            row.resize(nCols_);
+        }
+    }
+
+    recalculateAllDistances();
+
+    if (getDistance(startPos_, -1) == -1){
+        cout << "ERROR: Unreachable goal!";
+        std::exit(10);
+    }
 }
+
+void RockSampleModel::recalculateAllDistances() {
+    recalculateDistances(goalDistances_, goalPositions_);
+    for (int rockNo = 0; rockNo < nRocks_; rockNo++) {
+        recalculateDistances(rockDistances_[rockNo],
+                std::vector<GridPosition> {rockPositions_[rockNo]});
+    }
+}
+
+void RockSampleModel::recalculateDistances(std::vector<std::vector<int>> &grid,
+        std::vector<GridPosition> targets) {
+    // Preinitialize to -1 for all cells.
+    for (auto &row : grid) {
+        for (auto &cell : row) {
+            cell = -1;
+        }
+    }
+    std::queue<GridPosition> queue;
+    for (GridPosition &pos : targets) {
+        grid[pos.i][pos.j] = 0;
+        queue.push(pos);
+    }
+
+    while (!queue.empty()) {
+        GridPosition pos = queue.front();
+        queue.pop();
+        int distance = grid[pos.i][pos.j] + 1;
+        for (ActionType direction : {ActionType::NORTH, ActionType::SOUTH, ActionType::WEST,
+            ActionType::EAST}) {
+            GridPosition nextPos;
+            bool isLegal;
+            std::tie(nextPos, isLegal) = makeNextPosition(pos, direction);
+            // The distance matters only if the move is legal, and doesn't move into a goal.
+            if (isLegal && getCellType(nextPos) != GOAL) {
+                int &nextPosDistance = grid[nextPos.i][nextPos.j];
+                if (nextPosDistance == -1 || nextPosDistance > distance) {
+                    nextPosDistance = distance;
+                    queue.push(nextPos);
+                }
+            }
+        }
+    }
+}
+
 
 /* --------------- The model interface proper ----------------- */
 std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
     return std::make_unique<RockSampleState>(startPos_, sampleRocks());
+//    return std::make_unique<RockSampleState>(startPos_, std::vector<bool> {
+//        true, false, true, false, false, false, false, false
+//    });
 }
 
 std::unique_ptr<solver::State> RockSampleModel::sampleStateUniform() {
@@ -203,59 +284,58 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
 }
 
 std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(GridPosition position,
-        RockSampleAction const &action) {
+        ActionType actionType) {
 
     GridPosition oldPosition = position;
 
-    ActionType actionType = action.getActionType();
-    bool isValid = true;
+    bool isLegal = true;
     if (actionType == ActionType::CHECK) {
         // Do nothing - the state remains the same.
     } else if (actionType == ActionType::SAMPLE) {
         int rockNo = getCellType(position) - ROCK;
         if (rockNo < 0 || rockNo >= nRocks_) {
-            isValid = false;
+            isLegal = false;
         }
     } else if (actionType == ActionType::NORTH) {
         if (position.i > 0) {
             position.i -= 1;
         } else {
-            isValid = false;
+            isLegal = false;
         }
     } else if (actionType == ActionType::EAST) {
         if (position.j < nCols_ - 1) {
             position.j += 1;
         } else {
-            isValid = false;
+            isLegal = false;
         }
     } else if (actionType == ActionType::SOUTH) {
         if (position.i < nRows_ - 1) {
             position.i += 1;
         } else {
-            isValid = false;
+            isLegal = false;
         }
     } else if (actionType == ActionType::WEST) {
         if (position.j > 0) {
             position.j -= 1;
         } else {
-            isValid = false;
+            isLegal = false;
         }
     } else {
         std::ostringstream message;
-        message << "Invalid action: " << action;
+        message << "Invalid action: " << actionType;
         debug::show_message(message.str());
-        isValid = false;
+        isLegal = false;
     }
 
-    if (isValid) {
+    if (isLegal) {
         // Moving into obstacles is invalid!
         if (getCellType(position) == OBSTACLE) {
-            isValid = false;
+            isLegal = false;
             position = oldPosition;
         }
 
     }
-    return std::make_pair(position, isValid);
+    return std::make_pair(position, isLegal);
 }
 
 /* -------------------- Black box dynamics ---------------------- */
@@ -263,9 +343,9 @@ std::pair<std::unique_ptr<RockSampleState>, bool> RockSampleModel::makeNextState
         RockSampleState const &state, RockSampleAction const &action) {
 
     GridPosition nextPos;
-    bool isValid;
-    std::tie(nextPos, isValid) = makeNextPosition(state.getPosition(), action);
-    if (!isValid) {
+    bool isLegal;
+    std::tie(nextPos, isLegal) = makeNextPosition(state.getPosition(), action.getActionType());
+    if (!isLegal) {
         return std::make_pair(std::make_unique<RockSampleState>(state), false);
     }
 
@@ -460,6 +540,19 @@ void RockSampleModel::drawEnv(std::ostream &os) {
     }
 }
 
+void RockSampleModel::drawDistances(std::vector<std::vector<int>> &grid, std::ostream &os) {
+    for (auto &row : grid) {
+        for (int cellValue : row) {
+            if (cellValue == -1) {
+                os << ".";
+            } else {
+                os << std::hex << cellValue;
+            }
+        }
+        os << endl;
+    }
+}
+
 void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state, std::ostream &os) {
     RockSampleState const &rockSampleState = static_cast<RockSampleState const &>(state);
@@ -519,17 +612,20 @@ double RockSampleModel::getDefaultHeuristicValue(solver::HistoryEntry const */*e
 
     std::set<int> goodRocks;
     for (int i = 0; i < nRocks_; i++) {
-        if (rockStates[i]) {
+        // Only bother with reachable rocks.
+        if (rockStates[i] && getDistance(currentPos, i) != -1) {
             goodRocks.insert(i);
         }
     }
+
+    // Visit the rocks in a greedy order.
     while (!goodRocks.empty()) {
         std::set<int>::iterator it = goodRocks.begin();
         int bestRock = *it;
-        long lowestDist = rockPositions_[bestRock].manhattanDistanceTo(currentPos);
+        long lowestDist = getDistance(currentPos, bestRock);
         ++it;
         for (; it != goodRocks.end(); ++it) {
-            long dist = rockPositions_[*it].manhattanDistanceTo(currentPos);
+            long dist = getDistance(currentPos, *it);
             if (dist < lowestDist) {
                 bestRock = *it;
                 lowestDist = dist;
@@ -540,7 +636,9 @@ double RockSampleModel::getDefaultHeuristicValue(solver::HistoryEntry const */*e
         goodRocks.erase(bestRock);
         currentPos = rockPositions_[bestRock];
     }
-    currentDiscount *= std::pow(getDiscountFactor(), nCols_ - currentPos.j);
+
+    // Now move to a goal square.
+    currentDiscount *= std::pow(getDiscountFactor(), getDistance(currentPos, -1));
     qVal += currentDiscount * exitReward_;
     return qVal;
 }
@@ -582,7 +680,7 @@ std::vector<std::unique_ptr<solver::DiscretizedPoint>> RockSampleModel::getAllAc
     for (long code = 0; code < 5 + nRocks_; code++) {
         allActions.push_back(std::make_unique<RockSampleAction>(code));
     }
-    return allActions;
+    return std::move(allActions);
 }
 
 std::unique_ptr<solver::ActionPool> RockSampleModel::createActionPool(solver::Solver */*solver*/) {
