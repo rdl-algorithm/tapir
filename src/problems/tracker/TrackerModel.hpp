@@ -45,9 +45,36 @@ struct TrackerChange : solver::ModelChange {
     double j1 = 0;
 
     TrackerChange(std::string argType, double argi0, double argi1,
-        double argj0, double argj1) : 
-        changeType(argType), i0(argi0), i1(argi1), j0(argj0), j1(argj1)
+    double argj0, double argj1) : 
+        changeType(argType),
+        i0(argi0),
+        i1(argi1),
+        j0(argj0),
+        j1(argj1)
     {
+    }
+};
+
+struct TargetState {
+    GridPosition pos;
+    int yaw;
+    double probability;
+
+    TargetState(GridPosition argPos, int argYaw, double argProb = 0) :
+        pos(argPos),
+        yaw(argYaw),
+        probability(argProb)
+    {
+    }
+
+    bool operator==(const TargetState &other) const {
+        return pos == other.pos && yaw == other.yaw;
+    }
+};
+
+struct TargetStateHash {
+    inline std::size_t operator()(const TargetState &t) const {
+        return t.pos.i * 111 + t.pos.j + t.yaw;
     }
 };
 
@@ -74,6 +101,7 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     };
 
     void setEnvMap(std::vector<std::vector<TrackerCellType>> envMap);
+    void setPolicyZones(std::vector<GridPosition> zones, int currZone, double moveProbability);
 
 	std::string getName() override {
         return "Tracker";
@@ -165,6 +193,12 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
 
+    /** Returns true iff target is visible from robot */
+    bool isTargetVisible(GridPosition const &robotPos, int robotYaw, GridPosition const &targetPos);
+
+    /** Generates one new target state */
+    TargetState getNextTargetState(GridPosition prevPos, int prevYaw);
+
   private:
 
     /** Generates a random empty grid cell. */
@@ -181,11 +215,16 @@ class TrackerModel: virtual public ModelWithProgramOptions,
      */
     std::unique_ptr<solver::Observation> makeObservation(
             solver::Action const &action, TrackerState const &nextState);
-    /** Generates vector of possible target's actions. */
-    std::vector<ActionType> makeTargetActions();
 
-    /** Returns true iff target is visible from robot */
-    bool isTargetVisible(GridPosition const &robotPos, int robotYaw, GridPosition const &targetPos);
+    /** Returns distribution of possible target states next turn, 
+     *  given the target's current position and yaw
+     */
+    std::unordered_set<TargetState, TargetStateHash> getNextTargetDist(GridPosition const &prevPos, int prevYaw); 
+    /** Recursive function for getting target states for policy 0 */
+    void getTargetStatesP0(std::unordered_set<TargetState, TargetStateHash> &states,
+        GridPosition const &pos, int yaw, int numMoves);
+    /** For zones policy mode. Return the current goal zone index */
+    int getGoalZone(GridPosition const &pos);
 
     /** The penalty for each movement. */
     double moveCost_;
@@ -212,7 +251,12 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     long nActions_, nStVars_;
     double minVal_, maxVal_;
 
-    // Properties for target visibility check
+    /** The target policy. 0 for wall bouncing, 1 for zone waypoints */
+    int targetPolicy_;
+
+    /** Vars for policy 1 (zones mode) */
+    std::vector<GridPosition> zones_;
+    double targetP1MoveProbability_;
     
 };
 } /* namespace tracker */

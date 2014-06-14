@@ -132,12 +132,16 @@ int main(int argc, char **argv)
     ros::Subscriber octomapSub = node.subscribe("octomap_full", 1, octomapCallback);
     //tf::TransformListener tfListener;
 
+    int targetPolicy = 0;
+    node.getParam("target_policy", targetPolicy);
+
     /**************** VREP init **********************/
 
     vrepHelper.setRosNode(&node);
 
     // Get handle of objects in VREP
     robotHandle = vrepHelper.getHandle("robot");
+    long targetHandle = vrepHelper.getHandle("Bill_goalDummy");
 
     // Update knowledge of current pose (used by ABT)
     robotPose = vrepHelper.getPose(robotHandle);
@@ -190,6 +194,19 @@ int main(int argc, char **argv)
     }
     std::unique_ptr<TrackerModel> newModel = std::make_unique<TrackerModel>(&randGen, vm);
     newModel->setEnvMap(envMap);
+    
+    // Zones mode
+    if (targetPolicy == 1) {
+    	std::vector<GridPosition> zones;
+    	int startZone = 0;
+    	zones.push_back(xyToGrid(7.5, 7.5));
+    	zones.push_back(xyToGrid(7.5, -7.5));
+    	zones.push_back(xyToGrid(-7.5, -7.5));
+    	zones.push_back(xyToGrid(-7.5, 7.5));
+    	newModel->setPolicyZones(zones, startZone, 0.3);
+    	vrepHelper.moveObject("Bill", 7.5, 7.5, 0);
+    	vrepHelper.moveObject("Bill_goalDummy", 7.5, 7.5, 0);
+    }
     TrackerModel *model = newModel.get();
 
     // Initialise Solver
@@ -289,11 +306,12 @@ int main(int argc, char **argv)
 	    model->drawEnvAndPos(cout, currCell);
 
 		// Improve the policy
-		cout << "Impoving policy" << endl;
+		cout << "Improving policy" << endl;
 		solver::BeliefNode *currentBelief = agent.getCurrentBelief();
 		solver.improvePolicy(currentBelief);
 
         // Publish belief on target's position. This will be visualised in VREP
+        cout << "Publishing belief to ROS" << endl;
         std::vector<std::vector<float>> targetPosBelief = model->getTargetPosBelief(currentBelief);
 
         // Find maximum value to normalise proportion
@@ -305,7 +323,6 @@ int main(int argc, char **argv)
                 }
             }
         }
-
         // Send message. Format is x,y,normalised proportion
         std::stringstream ss;
         for (std::size_t i = 0; i < targetPosBelief.size(); i++) {
@@ -384,6 +401,21 @@ int main(int argc, char **argv)
 
         if (!ros::ok())
         	break;
+
+        // For zones mode, target position  is controlled by TrackerModel
+		if (targetPolicy == 1) {
+			
+			geometry_msgs::PoseStamped targetPose = vrepHelper.getPose(targetHandle);
+			float x = targetPose.pose.position.x;
+    		float y = targetPose.pose.position.y;
+			GridPosition targetPos = xyToGrid(x, y);
+			TargetState newTargetState = model->getNextTargetState(targetPos, 0);
+			Point newTargetP = gridToPoint(newTargetState.pos);
+			vrepHelper.moveObject(targetHandle, newTargetP.x, newTargetP.y, 0);
+
+			// Debug: override target visibility
+			seesTarget = model->isTargetVisible(newCell, newYaw, targetPos);
+		}
 
 		// Action complete, get resulting observations
         robotPose = vrepHelper.getPose(robotHandle);
@@ -474,7 +506,7 @@ int getCurrYaw45() {
 // until goal is reached or timeLimit (seconds) reached
 void moveTo(double goalX, double goalY, double timeLimit) {
     ros::Time startTime = ros::Time::now();
-    ros::Rate loopRate(10);
+    ros::Rate loopRate(20);
     while (ros::ok()) {
 
         robotPose = vrepHelper.getPose(robotHandle);
@@ -507,7 +539,7 @@ void moveTo(double goalX, double goalY, double timeLimit) {
         relBearing *= 180/M_PI;
 
         double rightSpeed, leftSpeed;
-        double maxSpeed = 3;
+        double maxSpeed = 5;
 
         // Smooth right turn / straight ahead
         if (relBearing >= 0 && relBearing <= 45) {
@@ -555,7 +587,7 @@ void moveTo(double goalX, double goalY, double timeLimit) {
 // is reached or timeLimit (seconds) reached
 void turnTo(double goalYaw, double timeLimit) {
     ros::Time startTime = ros::Time::now();
-    ros::Rate loopRate(10);
+    ros::Rate loopRate(20);
     while (ros::ok()) {
 
         robotPose = vrepHelper.getPose(robotHandle);
@@ -579,7 +611,7 @@ void turnTo(double goalYaw, double timeLimit) {
 
         double rightSpeed, leftSpeed;
 
-        double maxSpeed = 0.1 + std::abs(relBearing);
+        double maxSpeed = 0.5 + 1.2 * std::abs(relBearing);
 
         if (relBearing > 0) { 
             rightSpeed = -maxSpeed;

@@ -13,6 +13,7 @@
 #include <iostream>                     // for cout
 #include <random>                       // for uniform_int_distribution, bernoulli_distribution
 #include <unordered_map>                // for _Node_iterator, operator!=, unordered_map<>::iterator, _Node_iterator_base, unordered_map
+#include <unordered_set>
 #include <utility>                      // for make_pair, move, pair
 
 #include <boost/program_options.hpp>    // for variables_map, variable_value
@@ -64,7 +65,8 @@ TrackerModel::TrackerModel(RandomGenerator *randGen, po::variables_map vm) :
     nActions_(4),   // set to 5 to allow reverse
     nStVars_(5),
     minVal_(0),
-    maxVal_(visibleReward_)
+    maxVal_(visibleReward_),
+    targetPolicy_(0)
 {
 	setAllActions(getAllActionsInOrder());
 
@@ -113,6 +115,12 @@ void TrackerModel::setEnvMap(std::vector<std::vector<TrackerCellType>> envMap) {
     }
 }
 
+void TrackerModel::setPolicyZones(std::vector<GridPosition> zones, int currZone, double moveProbability) {
+	targetPolicy_ = 1;
+	zones_ = zones;
+	targetP1MoveProbability_ = moveProbability;
+}
+
 std::unique_ptr<solver::State> TrackerModel::sampleAnInitState() {
     return sampleStateUniform();
 }
@@ -123,10 +131,21 @@ std::unique_ptr<solver::State> TrackerModel::sampleStateUniform() {
     int robotYaw = getCurrYaw45();
     GridPosition robotPos = getCurrCell();
 
-    // Random target position and yaw
-    GridPosition targetPos = randomEmptyCell();
-    int i = rand() % 8 - 3; // Random int from -3 to 4
-    int targetYaw = i * 45;
+    GridPosition targetPos;
+
+    // Random target yaw
+	int i = rand() % 8 - 3; // Random int from -3 to 4
+	int targetYaw = i * 45;
+
+	if (targetPolicy_ == 0) {
+	    
+	    // Random target position if policy mode 0
+	    targetPos = randomEmptyCell();
+	} else if (targetPolicy_ == 1) {
+
+		// Start at random zone for zones mode
+		targetPos = zones_[rand() % zones_.size()];
+	}
 
     bool seesTarget = isTargetVisible(robotPos, robotYaw, targetPos);
 
@@ -173,35 +192,141 @@ std::pair<std::unique_ptr<TrackerState>, bool> TrackerModel::makeNextState(
         trackerAction.getActionType());
     int newRobotYaw = getNewYaw(robotYaw, trackerAction.getActionType());
 
-    // Sample target's action and get next position and yaw
-    std::vector<ActionType> targetActions(makeTargetActions());
-    ActionType targetAction = targetActions[std::uniform_int_distribution<long>(
-        0, targetActions.size() - 1)(*getRandomGenerator())];
-    GridPosition newTargetPos = getNewPos(targetPos, targetYaw, targetAction);
-    if (!isValid(newTargetPos))
-        newTargetPos = targetPos;
-    int newTargetYaw = getNewYaw(targetYaw, targetAction);
+    // Sample target's next position and yaw.
+    TargetState newTargetState = getNextTargetState(targetPos, targetYaw);
 
     if (!isValid(newRobotPos)) {
-        bool seesTarget = isTargetVisible(robotPos, robotYaw, newTargetPos);
+        bool seesTarget = isTargetVisible(robotPos, robotYaw, newTargetState.pos);
         return std::make_pair(
                 std::make_unique<TrackerState>(robotPos, robotYaw,
-                    newTargetPos, newTargetYaw, seesTarget),
-                false);
+                    newTargetState.pos, newTargetState.yaw, seesTarget), false);
     }
-    bool seesTarget = isTargetVisible(newRobotPos, newRobotYaw, newTargetPos);
+    bool seesTarget = isTargetVisible(newRobotPos, newRobotYaw, newTargetState.pos);
     return std::make_pair(std::make_unique<TrackerState>(
-                    newRobotPos, newRobotYaw, newTargetPos,
-                    newTargetYaw, seesTarget), true);
+                    newRobotPos, newRobotYaw, newTargetState.pos,
+                    newTargetState.yaw, seesTarget), true);
 }
 
-std::vector<ActionType> TrackerModel::makeTargetActions() {
-    std::vector<ActionType> actions;
-    //actions.push_back(ActionType::FORWARD);
-    //actions.push_back(ActionType::TURN_RIGHT);
-    //actions.push_back(ActionType::TURN_LEFT);
-    actions.push_back(ActionType::WAIT);
-    return actions;
+TargetState TrackerModel::getNextTargetState(GridPosition prevPos, int prevYaw) {
+	GridPosition newPos = prevPos;
+	int newYaw = prevYaw;
+	if (targetPolicy_ == 0) {
+
+		// "Wall bouncing" policy. Let target be able to 
+    	// move 3 times during 1 robot turn
+		for (int i = 0; i < 3; i++) {
+	        GridPosition temp = getNewPos(newPos, newYaw, ActionType::FORWARD);
+	        if (!isValid(temp)) {
+	            
+	            // When human reaches wall, he turns 90/135/225/270
+	            int angles[] = {90, 135, 225, 270};
+	           	newYaw += angles[rand() % 4];
+	            if (newYaw > 180) {
+	                newYaw -= 360;
+	            }
+	        } else {
+	            newPos = temp;
+	        }
+	    }
+	} else if (targetPolicy_ == 1) {
+
+		// Zone waypoint policy. 
+		// Randomize to see if the target moves this turn
+    	if (std::bernoulli_distribution(targetP1MoveProbability_)(
+            *getRandomGenerator())) {
+
+    		int goalZone = getGoalZone(prevPos);
+    		int di = 0;
+    		int dj = 0;
+    		if (prevPos.i < zones_[goalZone].i) {
+    			di = 1;
+    		} else if (prevPos.i > zones_[goalZone].i) {
+    			di = -1;
+    		}
+    		if (prevPos.j < zones_[goalZone].j) {
+    			dj = 1;
+    		} else if (prevPos.j > zones_[goalZone].j) {
+    			dj = -1;
+    		}
+    		newPos.i += di;
+    		newPos.j += dj;
+    		newYaw = atan2(-di, dj);
+    	}
+    } else {
+		cout << "Invalid policy number" << endl;
+	}
+
+	return TargetState(newPos, newYaw);
+}
+
+std::unordered_set<TargetState, TargetStateHash> TrackerModel::getNextTargetDist(GridPosition const &prevPos, int prevYaw) {
+	std::unordered_set<TargetState, TargetStateHash> states;
+	if (targetPolicy_ == 0) {
+		getTargetStatesP0(states, prevPos, prevYaw, 3);
+	} else if (targetPolicy_ == 1) {
+		int goalZone = getGoalZone(prevPos);
+		int di = 0;
+		int dj = 0;
+		if (prevPos.i < zones_[goalZone].i) {
+			di = 1;
+		} else if (prevPos.i > zones_[goalZone].i) {
+			di = -1;
+		}
+		if (prevPos.j < zones_[goalZone].j) {
+			dj = 1;
+		} else if (prevPos.j > zones_[goalZone].j) {
+			dj = -1;
+		}
+		GridPosition movePos(prevPos.i + di, prevPos.j + dj);
+		int moveYaw = atan2(-di, dj);
+		states.insert(TargetState(prevPos, prevYaw, 1 - targetP1MoveProbability_));
+		states.insert(TargetState(movePos, moveYaw, targetP1MoveProbability_));
+	}
+	return states;
+}
+
+void TrackerModel::getTargetStatesP0(std::unordered_set<TargetState, TargetStateHash> &states,
+    GridPosition const &pos, int yaw, int numMoves) {
+    if (numMoves <= 0) {
+        states.insert(TargetState(pos, yaw));
+        return;
+    }
+    GridPosition newPos = getNewPos(pos, yaw, ActionType::FORWARD);
+    if (!isValid(newPos)) {
+            
+        // When human reaches wall, he turns 90/135/225/270
+        int angles[] = {90, 135, 225, 270};
+        for (int i : angles) {
+            int newYaw = yaw + i;
+            if (newYaw > 180) {
+                newYaw -= 360;
+            }
+            getTargetStatesP0(states, pos, newYaw, numMoves - 1);
+        }
+    } else {
+        getTargetStatesP0(states, newPos, yaw, numMoves - 1);
+    }   
+}
+
+int TrackerModel::getGoalZone(GridPosition const &pos) {
+	for (std::size_t i = 0; i < zones_.size(); i++) {
+		int next = (i + 1) % zones_.size();
+		if (pos == zones_[i]) {
+			return next;
+		}
+		int pdi = zones_[next].i - zones_[i].i;
+		int pdj = zones_[next].j - zones_[i].j;
+		double pathAngle = atan2(-pdi, pdj);
+		int tdi = pos.i - zones_[i].i;
+		int tdj = pos.j - zones_[i].j;
+		double targetAngle = atan2(-tdi, tdj);
+		double thresh = 20 * M_PI/180;
+		if (abs(targetAngle - pathAngle) < thresh && 
+			pos.euclideanDistanceTo(zones_[i]) < 
+			zones_[next].euclideanDistanceTo(zones_[i])) {
+			return next;
+		}
+	}
 }
 
 GridPosition TrackerModel::getNewPos(GridPosition const &oldPos, int yaw,
@@ -266,23 +391,23 @@ bool TrackerModel::isValid(GridPosition const &position) {
 bool TrackerModel::isTargetVisible(GridPosition const &robotPos, int robotYaw,
     GridPosition const &targetPos) {
 
-    double rangeSquared = 6  * 6;   // cells squared
-    double viewCone = 22.5 * M_PI/180;    // radians
+    float rangeSquared = 6  * 6;   // cells squared
+    float viewCone = 23 * M_PI/180;    // radians
 
     if (robotPos == targetPos) {
         return true;
     }
 
     // Max distance check
-    double di = targetPos.i - robotPos.i;
-    double dj = targetPos.j - robotPos.j;
+    float di = targetPos.i - robotPos.i;
+    float dj = targetPos.j - robotPos.j;
     if (di * di + dj * dj > rangeSquared) {
         return false;
     }
 
     // Angle check 
-    double angle = atan2(-di, dj);
-    if (abs(angle - (robotYaw * M_PI/180)) > viewCone) {
+    float angle = atan2(-di, dj);
+    if (fabs(angle - (robotYaw * M_PI/180)) > viewCone) {
         return false;
     }
 
@@ -395,56 +520,48 @@ std::vector<std::unique_ptr<solver::State>> TrackerModel::generateParticles(
 
     GridPosition newRobotPos(observation.getRobotPos());
     int newRobotYaw = observation.getRobotYaw();
-    /*
-    if (observation.seesTarget()) {
-        // If we saw the target, we must be in the same place.
-        newParticles.push_back(
-                std::make_unique<TrackerState>(newRobotPos, newRobotPos,
-                        actionType == ActionType::TRACKER));
-    } else {*/
-        // We didn't see the target, so we must be in different places.
-        for (solver::State const *state : previousParticles) {
-            TrackerState const *trackerState = static_cast<TrackerState const *>(state);
-            GridPosition oldRobotPos(trackerState->getRobotPos());
-            int oldRobotYaw = trackerState->getRobotYaw();
-            // Ignore states that do not match knowledge of the robot's position.
-            if (newRobotPos != getNewPos(oldRobotPos, oldRobotYaw, actionType) ||
-            	newRobotYaw != getNewYaw(oldRobotYaw, actionType)) {
-                continue;
-            }
-            GridPosition oldTargetPos(trackerState->getTargetPos());
-            int oldTargetYaw = trackerState->getTargetYaw();
-            std::vector<ActionType> actions(makeTargetActions());
-            std::vector<ActionType> newActions;
-            for (ActionType targetAction : actions) {
-                if (getNewPos(oldTargetPos, oldTargetYaw, targetAction) != newRobotPos) {
-                    newActions.push_back(targetAction);
-                }
-            }
-            double probability = 1.0 / newActions.size();
-            for (ActionType targetAction : newActions) {
-                GridPosition newTargetPos = getNewPos(oldTargetPos, oldTargetYaw, targetAction);
-                int newTargetYaw = getNewYaw(oldTargetYaw, targetAction);
-                bool seesTarget = isTargetVisible(newRobotPos, newRobotYaw, newTargetPos);
-                TrackerState newState(newRobotPos, newRobotYaw, newTargetPos, newTargetYaw, seesTarget);
-                weights[newState] += probability;
-                weightTotal += probability;
+
+    for (solver::State const *state : previousParticles) {
+        TrackerState const *trackerState = static_cast<TrackerState const *>(state);
+        GridPosition oldRobotPos(trackerState->getRobotPos());
+        int oldRobotYaw = trackerState->getRobotYaw();
+
+        // Ignore states that do not match knowledge of the robot's position.
+        if (newRobotPos != getNewPos(oldRobotPos, oldRobotYaw, actionType) ||
+        	newRobotYaw != getNewYaw(oldRobotYaw, actionType)) {
+            continue;
+        }
+        GridPosition oldTargetPos(trackerState->getTargetPos());
+        int oldTargetYaw = trackerState->getTargetYaw();
+        std::unordered_set<TargetState, TargetStateHash> targetDistribution;
+        targetDistribution = getNextTargetDist(oldTargetPos, oldTargetYaw);
+        double defaultProbability = 1.0 / targetDistribution.size();
+        for (TargetState t : targetDistribution) {
+            bool seesTarget = isTargetVisible(newRobotPos, newRobotYaw, t.pos);
+            TrackerState newState(newRobotPos, newRobotYaw, t.pos, t.yaw, seesTarget);
+            if (targetPolicy_ == 0) {
+            	weights[newState] += defaultProbability;
+            	weightTotal += defaultProbability;
+            } else {
+                weights[newState] += t.probability;
+                weightTotal += t.probability;
             }
         }
-        double scale = nParticles / weightTotal;
-        for (WeightMap::iterator it = weights.begin(); it != weights.end();
-                it++) {
-            double proportion = it->second * scale;
-            long numToAdd = static_cast<long>(proportion);
-            if (std::bernoulli_distribution(proportion - numToAdd)(
-                    *getRandomGenerator())) {
-                numToAdd += 1;
-            }
-            for (int i = 0; i < numToAdd; i++) {
-                newParticles.push_back(std::make_unique<TrackerState>(it->first));
-            }
+    }
+    double scale = nParticles / weightTotal;
+    for (WeightMap::iterator it = weights.begin(); it != weights.end();
+            it++) {
+        double proportion = it->second * scale;
+        long numToAdd = static_cast<long>(proportion);
+        if (std::bernoulli_distribution(proportion - numToAdd)(
+                *getRandomGenerator())) {
+            numToAdd += 1;
         }
-    //}
+        for (int i = 0; i < numToAdd; i++) {
+            newParticles.push_back(std::make_unique<TrackerState>(it->first));
+        }
+    }
+    
     return newParticles;
 }
 
@@ -456,22 +573,13 @@ std::vector<std::unique_ptr<solver::State>> TrackerModel::generateParticles(
     TrackerObservation const &observation = (static_cast<TrackerObservation const &>(obs));
     ActionType actionType = (static_cast<TrackerAction const &>(action).getActionType());
     GridPosition newRobotPos(observation.getRobotPos());
-    /*if (observation.seesTarget()) {
-        // If we saw the target, we must be in the same place.
-        while ((long)newParticles.size() < nParticles) {
-            newParticles.push_back(
-                std::make_unique<TrackerState>(newRobotPos, newRobotPos,
-                        actionType == ActionType::TRACKER));
+    while ((long)newParticles.size() < nParticles) {
+        std::unique_ptr<solver::State> state = sampleStateUniform();
+        solver::Model::StepResult result = generateStep(*state, action);
+        if (obs == *result.observation) {
+            newParticles.push_back(std::move(result.nextState));
         }
-    } else {*/
-        while ((long)newParticles.size() < nParticles) {
-            std::unique_ptr<solver::State> state = sampleStateUniform();
-            solver::Model::StepResult result = generateStep(*state, action);
-            if (obs == *result.observation) {
-                newParticles.push_back(std::move(result.nextState));
-            }
-        }
-    //}
+    }
     return newParticles;
 }
 
