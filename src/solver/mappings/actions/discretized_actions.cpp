@@ -40,8 +40,7 @@ DiscretizedActionMap::DiscretizedActionMap(BeliefNode *owner, DiscretizedActionP
                 entries_(numberOfBins_),
                 nChildren_(0),
                 numberOfVisitedEntries_(0),
-                binSequence_(std::move(binSequence)),
-                binSequenceIndex_(0),
+                binSequence_(binSequence.begin(), binSequence.end()),
                 totalVisitCount_(0) {
     for (int i = 0; i < numberOfBins_; i++) {
         DiscretizedActionMapEntry &entry = entries_[i];
@@ -100,16 +99,12 @@ ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) c
 }
 
 std::unique_ptr<Action> DiscretizedActionMap::getNextActionToTry() {
-    while (binSequenceIndex_ < binSequence_.size()) {
-        long binNumber = binSequence_[binSequenceIndex_];
-        // Only return unvisited actions.
-        if (entries_[binNumber].visitCount_ <= 0) {
-            return pool_->sampleAnAction(binNumber);
-        }
-        binSequenceIndex_++;
+    // No more bins to try -> no action to try.
+    if (binSequence_.size() == 0) {
+        return nullptr;
     }
-    // No more actions to try!
-    return nullptr;
+    // Otherwise we sample a new action using the first bin to be tried.
+    return pool_->sampleAnAction(binSequence_.getFirst());
 }
 
 long DiscretizedActionMap::getTotalVisitCount() const {
@@ -152,13 +147,15 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
     // Update the visit counts
     if (visitCount_ == 0 && deltaNVisits > 0) {
         map_->numberOfVisitedEntries_++;
+        // Now that we've tried it at least once, we don't have to try it again.
+        map_->binSequence_.remove(binNumber_);
     }
     visitCount_ += deltaNVisits;
     map_->totalVisitCount_ += deltaNVisits;
     if (visitCount_ == 0 && deltaNVisits < 0) {
         map_->numberOfVisitedEntries_--;
         // We've reduced the visit count to 0, so we'll have to try this action again.
-        map_->binSequence_.push_back(binNumber_);
+        map_->binSequence_.add(binNumber_);
     }
 
     // Update the total Q
@@ -194,13 +191,10 @@ void DiscretizedActionTextSerializer::saveActionMapping(
     os << discMap.getTotalVisitCount() << " visits" << std::endl;
 
     os << "Untried (";
-    for (unsigned int index = discMap.binSequenceIndex_;
-            index < discMap.binSequence_.size(); index++) {
-        os << discMap.binSequence_[index];
-        if (index + 1 < discMap.binSequence_.size()) {
+    for (auto it = discMap.binSequence_.begin(); it != discMap.binSequence_.end(); it++) {
+        os << *it;
+        if (std::next(it) != discMap.binSequence_.end()) {
             os << ", ";
-        } else {
-            break;
         }
     }
     os << ")" << std::endl;
@@ -261,10 +255,9 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
             std::getline(sstr2, actionString, ',');
             long code;
             std::istringstream(actionString) >> code;
-            discMap->binSequence_.push_back(code);
+            discMap->binSequence_.add(code);
         }
     }
-    discMap->binSequenceIndex_ = 0;
 
     for (long i = 0; i < discMap->numberOfVisitedEntries_ ; i++) {
         // The first line contains info from the mapping.

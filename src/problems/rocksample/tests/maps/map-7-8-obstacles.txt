@@ -2,7 +2,7 @@
 .o..X..G
 XXX.Xo.G
 ..oo.XXG
-S.....oG
-.......G
-o..o...G
+S....XoG
+.....X.G
+o..o.X.G
 ..o....G

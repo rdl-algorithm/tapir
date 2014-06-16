@@ -12,7 +12,7 @@ class RandomAccessSet {
   public:
     RandomAccessSet() :
         map_(),
-        elements_() {
+        elementList_() {
     }
 
     RandomAccessSet(std::initializer_list<Element> elements) :
@@ -25,28 +25,28 @@ class RandomAccessSet {
     ~RandomAccessSet() = default;
 
     typename std::vector<Element>::const_iterator begin() const {
-        return elements_.cbegin();
+        return elementList_.cbegin();
     }
 
     typename std::vector<Element>::const_iterator end() const {
-        return elements_.cend();
+        return elementList_.cend();
     }
 
     void clear() {
         map_.clear();
-        elements_.clear();
+        elementList_.clear();
     }
 
     long size() const {
-        return elements_.size();
+        return elementList_.size();
     }
 
     void add(Element entry) {
         if (contains(entry)) {
             return;
         }
-        elements_.push_back(entry);
-        map_.emplace(entry, elements_.size() - 1);
+        elementList_.push_back(entry);
+        map_.emplace(entry, elementList_.size() - 1);
     }
 
     void remove(Element entry) {
@@ -54,20 +54,20 @@ class RandomAccessSet {
             return;
         }
         long index = map_[entry];
-        long lastIndex = elements_.size() - 1;
+        long lastIndex = elementList_.size() - 1;
 
         if (index != lastIndex) {
-            Element lastEntry = elements_[lastIndex];
-            elements_[index] = lastEntry;
+            Element lastEntry = elementList_[lastIndex];
+            elementList_[index] = lastEntry;
             map_[lastEntry] = index;
         }
 
         // Remove extraneous elements.
-        elements_.pop_back();
+        elementList_.pop_back();
         map_.erase(entry);
     }
     Element get(long index) const {
-        return elements_[index];
+        return elementList_[index];
     }
 
     bool contains(Element entry) const {
@@ -76,7 +76,7 @@ class RandomAccessSet {
 
   private:
     std::unordered_map<Element, long> map_;
-    std::vector<Element> elements_;
+    std::vector<Element> elementList_;
 };
 } /* namespace abt */
 

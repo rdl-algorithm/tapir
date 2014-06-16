@@ -13,7 +13,7 @@
 #include "ActionPool.hpp"
 #include "ActionMapping.hpp"
 
-#include "RandomAccessSet.hpp"
+#include "LinkedHashSet.hpp"
 #include "global.hpp"
 
 namespace solver {
@@ -76,8 +76,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     long nChildren_;
     long numberOfVisitedEntries_;
 
-    std::vector<long> binSequence_;
-    unsigned int binSequenceIndex_;
+    abt::LinkedHashSet<long> binSequence_;
 
     long totalVisitCount_;
 };
