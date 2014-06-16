@@ -69,8 +69,10 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo, double timeU
     }
 }
 
-SearchStatus MultipleStrategiesExp3::extendSequence(HistorySequence *sequence, long maximumDepth) {
-    double initialRootQValue = sequence->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
+SearchStatus MultipleStrategiesExp3::extendSequence(HistorySequence *sequence, long maximumDepth,
+        bool doBackup) {
+    BeliefNode *rootNode = sequence->getFirstEntry()->getAssociatedBeliefNode();
+    double initialRootQValue = rootNode->getQValue();
 
     std::unordered_set<long> failedStrategies;
     while (true) {
@@ -81,13 +83,16 @@ SearchStatus MultipleStrategiesExp3::extendSequence(HistorySequence *sequence, l
         }
 
         double startTime = abt::clock_ms();
-        SearchStatus status = info->strategy->extendSequence(sequence, maximumDepth);
+        SearchStatus status = info->strategy->extendSequence(sequence, maximumDepth, doBackup);
         double timeUsed = abt::clock_ms() - startTime;
 
         // If the strategy initialized, we backup, update weights, and we're done.
         if (status != SearchStatus::UNINITIALIZED) {
-            double newRootQValue = sequence->getFirstEntry()->getAssociatedBeliefNode()->getQValue();
-            updateStrategyWeights(info->strategyNo, timeUsed, newRootQValue - initialRootQValue);
+            // We can update the weights for Exp3, but only if the sequence was backed up.
+            if (doBackup) {
+                double newRootQValue = rootNode->getQValue();
+                updateStrategyWeights(info->strategyNo, timeUsed, newRootQValue - initialRootQValue);
+            }
             return status;
         }
 

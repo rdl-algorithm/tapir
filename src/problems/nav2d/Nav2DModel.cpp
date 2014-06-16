@@ -428,23 +428,25 @@ solver::Model::StepResult Nav2DModel::generateStep(
     return result;
 }
 
-void Nav2DModel::applyChange(solver::ModelChange const &change,
+void Nav2DModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
         solver::StatePool *pool) {
-    Nav2DChange const &navChange = static_cast<Nav2DChange const &>(change);
-    addArea(navChange.id, navChange.area, navChange.type);
-    if (pool == nullptr) {
-        return;
+    for (auto const &change : changes) {
+        Nav2DChange const &navChange = static_cast<Nav2DChange const &>(*change);
+        addArea(navChange.id, navChange.area, navChange.type);
+        if (pool == nullptr) {
+            continue;
+        }
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+        if (navChange.type == AreaType::OBSERVATION) {
+            visitor.flagsToSet_ = solver::ChangeFlags::OBSERVATION_BEFORE;
+        }
+        tree->boxQuery(visitor,
+                {navChange.area.getLowerLeft().getX(),
+                        navChange.area.getLowerLeft().getY(), -2.0},
+                {navChange.area.getUpperRight().getX(),
+                        navChange.area.getUpperRight().getY(), +2.0});
     }
-    solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
-    solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
-    if (navChange.type == AreaType::OBSERVATION) {
-        visitor.flagsToSet_ = solver::ChangeFlags::OBSERVATION_BEFORE;
-    }
-    tree->boxQuery(visitor,
-            { navChange.area.getLowerLeft().getX(),
-                    navChange.area.getLowerLeft().getY(), -2.0 },
-            { navChange.area.getUpperRight().getX(),
-                    navChange.area.getUpperRight().getY(), -2.0 });
 }
 
 geometry::RTree *Nav2DModel::getTree(AreaType type) {

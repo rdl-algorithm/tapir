@@ -294,57 +294,61 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
 
 
 /* -------------- Methods for handling model changes ---------------- */
-void TagModel::applyChange(solver::ModelChange const &change,
+void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
         solver::StatePool *pool) {
-    TagChange const &tagChange = static_cast<TagChange const &>(change);
-    if (hasVerboseOutput()) {
-        cout << tagChange.changeType << " " << tagChange.i0 << " "
-                << tagChange.j0;
-        cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
-    }
-    if (tagChange.changeType == "Add Obstacles") {
+    for (auto const &change : changes) {
+        TagChange const &tagChange = static_cast<TagChange const &>(*change);
+        if (hasVerboseOutput()) {
+            cout << tagChange.changeType << " " << tagChange.i0 << " "
+                    << tagChange.j0;
+            cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
+        }
+
+        TagCellType cellType;
+        if (tagChange.changeType == "Add Obstacles") {
+            cellType = TagCellType::WALL;
+        } else if (tagChange.changeType == "Remove Obstacles") {
+            cellType = TagCellType::EMPTY;
+        } else {
+            cout << "Invalid change type: " << tagChange.changeType;
+            continue;
+        }
+
         for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
-            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1;
-                    j++) {
-                envMap_[i][j] = TagCellType::WALL;
+            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1; j++) {
+                envMap_[i][j] = cellType;
             }
         }
+
         if (pool == nullptr) {
-            return;
+            continue;
         }
-        solver::RTree *tree =
-                static_cast<solver::RTree *>(pool->getStateIndex());
-        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
-        tree->boxQuery(visitor, std::vector<double> { tagChange.i0,
-                tagChange.j0, 0, 0, 0 }, std::vector<double> { tagChange.i1,
-                tagChange.j1, nRows_ - 1.0, nCols_ - 1.0, 1 });
-        tree->boxQuery(visitor, std::vector<double> { 0, 0, tagChange.i0,
-                tagChange.j0, 0 },
-                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, tagChange.i1,
-                        tagChange.j1, 1 });
-    } else if (tagChange.changeType == "Remove Obstacles") {
-        for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
-            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1;
-                    j++) {
-                envMap_[i][j] = TagCellType::EMPTY;
-            }
+
+        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+        solver::ChangeFlags flags;
+        if (cellType == TagCellType::WALL) {
+            flags = solver::ChangeFlags::DELETED;
+        } else {
+            flags = solver::ChangeFlags::TRANSITION;
         }
-        if (pool == nullptr) {
-            return;
+
+        solver::FlaggingVisitor visitor(pool, flags);
+        double startRow = tagChange.i0;
+        double endRow = tagChange.i1;
+        double startCol = tagChange.j0;
+        double endCol = tagChange.j1;
+        if (cellType == TagCellType::EMPTY) {
+            startRow -= 1;
+            endRow += 1;
+            startCol -= 1;
+            endCol += 1;
         }
-        solver::RTree *tree =
-                static_cast<solver::RTree *>(pool->getStateIndex());
-        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
         tree->boxQuery(visitor,
-                std::vector<double> { tagChange.i0 - 1, tagChange.j0 - 1, 0, 0,
-                        0 },
-                std::vector<double> { tagChange.i1 + 1, tagChange.j1 + 1, nRows_
-                        - 1.0, nCols_ - 1.0, 1 });
+                {startRow,   startCol,   0.0,        0.0,        0.0},
+                {endRow,     endCol,     nRows_-1.0, nCols_-1.0, 1.0});
         tree->boxQuery(visitor,
-                std::vector<double> { 0, 0, tagChange.i0 - 1, tagChange.j0 - 1,
-                        0 },
-                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, tagChange.i1
-                        + 1, tagChange.j1 + 1, 1 });
+                {0.0,        0.0,        startRow,   startCol,   0.0},
+                {nRows_-1.0, nCols_-1.0, endRow,     endCol,     1.0});
     }
 }
 

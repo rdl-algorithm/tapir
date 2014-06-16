@@ -27,7 +27,8 @@ public:
     virtual ~SearchStrategy() = default;
     _NO_COPY_OR_MOVE(SearchStrategy);
 
-    virtual SearchStatus extendSequence(HistorySequence *sequence, long maximumDepth) = 0;
+    virtual SearchStatus extendSequence(HistorySequence *sequence, long maximumDepth,
+            bool doBackup) = 0;
 };
 
 class StepGeneratorFactory {
@@ -89,7 +90,8 @@ public:
     virtual ~BasicSearchStrategy() = default;
     _NO_COPY_OR_MOVE(BasicSearchStrategy);
 
-    virtual SearchStatus extendSequence(HistorySequence *sequence, long maximumDepth) override;
+    virtual SearchStatus extendSequence(HistorySequence *sequence, long maximumDepth,
+            bool doBackup) override;
 private:
     Solver *solver_;
     std::unique_ptr<StepGeneratorFactory> factory_;

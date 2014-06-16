@@ -135,7 +135,8 @@ class Nav2DModel : public ModelWithProgramOptions {
 
 
     /* -------------- Methods for handling model changes ---------------- */
-    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
+    virtual void applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+            solver::StatePool *pool) override;
 
     /** Returns the tree with the given object type. */
     geometry::RTree *getTree(AreaType type);

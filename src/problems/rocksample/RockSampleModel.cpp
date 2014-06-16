@@ -30,6 +30,9 @@
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/abstract-problem/State.hpp"       // for State
 
+#include "solver/indexing/RTree.hpp"
+#include "solver/indexing/FlaggingVisitor.hpp"
+
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/actions/enumerated_actions.hpp"
 #include "solver/mappings/observations/enumerated_observations.hpp"
@@ -128,9 +131,6 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
         drawDistances(rockDistances_[2], std::cout);
         cout << endl;
     }
-
-    mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
-    mdpSolver_->solve();
 }
 
 void RockSampleModel::initialize() {
@@ -436,6 +436,119 @@ solver::Model::StepResult RockSampleModel::generateStep(solver::State const &sta
     result.nextState = std::move(nextState);
     return result;
 }
+
+/* -------------- Methods for handling model changes ---------------- */
+void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+            solver::StatePool *pool) {
+
+    if (hasVerboseOutput() && pool != nullptr)  {
+        cout << "Applying model changes..." << endl;
+    }
+
+    solver::Heuristic heuristic = getHeuristicFunction();
+
+    std::vector<double> allHeuristicValues;
+    if (pool != nullptr) {
+        long nStates = pool->getNumberOfStates();
+        allHeuristicValues.resize(nStates);
+        for (long index = 0; index < nStates; index++) {
+            allHeuristicValues[index] = heuristic(nullptr, pool->getInfoById(index)->getState(),
+                    nullptr);
+        }
+    }
+
+    for (auto const &change : changes) {
+        RockSampleChange const &rsChange = static_cast<RockSampleChange const &>(*change);
+        if (hasVerboseOutput()) {
+            cout << rsChange.changeType << " " << rsChange.i0 << " "
+                    << rsChange.j0;
+            cout << " " << rsChange.i1 << " " << rsChange.j1 << endl;
+        }
+
+        RSCellType cellType;
+        if (rsChange.changeType == "Add Obstacles") {
+            cellType = OBSTACLE;
+        } else if (rsChange.changeType == "Remove Obstacles") {
+            cellType = EMPTY;
+        } else {
+            cout << "Invalid change type: " << rsChange.changeType;
+            continue;
+        }
+
+        for (long i = static_cast<long>(rsChange.i0); i <= rsChange.i1; i++) {
+            for (long j = static_cast<long>(rsChange.j0); j <= rsChange.j1; j++) {
+                envMap_[i][j] = cellType;
+            }
+        }
+
+        if (pool == nullptr) {
+            continue;
+        }
+
+        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+        solver::ChangeFlags flags;
+        if (cellType == OBSTACLE) {
+            flags = solver::ChangeFlags::DELETED;
+        } else {
+            flags = solver::ChangeFlags::TRANSITION;
+        }
+
+        solver::FlaggingVisitor visitor(pool, flags);
+        double startRow = rsChange.i0;
+        double endRow = rsChange.i1;
+        double startCol = rsChange.j0;
+        double endCol = rsChange.j1;
+        if (cellType == EMPTY) {
+            startRow -= 1;
+            endRow += 1;
+            startCol -= 1;
+            endCol += 1;
+        }
+
+        std::vector<double> lowCorner;
+        std::vector<double> highCorner;
+        for (int i = 0; i < nRocks_+2; i++) {
+            lowCorner.push_back(0.0);
+            highCorner.push_back(1.0);
+        }
+
+        lowCorner[0] = startRow;
+        lowCorner[1] = startCol;
+        highCorner[0] = endRow;
+        highCorner[1] = endCol;
+
+        tree->boxQuery(visitor,
+                {startRow,   startCol,   0.0,        0.0,        0.0},
+                {endRow,     endCol,     nRows_-1.0, nCols_-1.0, 1.0});
+        tree->boxQuery(visitor,
+                {0.0,        0.0,        startRow,   startCol,   0.0},
+                {nRows_-1.0, nCols_-1.0, endRow,     endCol,     1.0});
+    }
+
+    // Recalculate all the distances.
+    recalculateAllDistances();
+
+    if (mdpSolver_ != nullptr) {
+        mdpSolver_->solve();
+    }
+
+    if (pool != nullptr) {
+        long nStates = pool->getNumberOfStates();
+        for (long index = 0; index < nStates; index++) {
+            double oldValue = allHeuristicValues[index];
+            solver::StateInfo *info = pool->getInfoById(index);
+            double newValue = heuristic(nullptr, info->getState(), nullptr);
+            if (std::abs(newValue - oldValue) > 1e-5) {
+                pool->setChangeFlags(info, solver::ChangeFlags::HEURISTIC);
+            }
+        }
+    }
+
+    if (hasVerboseOutput() && pool != nullptr) {
+        cout << "Done applying model changes..." << endl;
+    }
+}
+
 
 /* ------------ Methods for handling particle depletion -------------- */
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(

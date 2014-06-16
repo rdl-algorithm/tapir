@@ -58,7 +58,8 @@ std::unique_ptr<TransitionParameters> Model::generateTransition(
 
 /* -------------- Methods for handling model changes ---------------- */
 // Default = no changes.
-void Model::applyChange(ModelChange const &/*change*/, StatePool */*pool*/) {
+void Model::applyChanges(std::vector<std::unique_ptr<ModelChange>> const &/*changes*/,
+        StatePool */*pool*/) {
 }
 
 

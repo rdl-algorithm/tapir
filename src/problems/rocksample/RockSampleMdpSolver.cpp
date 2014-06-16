@@ -21,6 +21,8 @@ void RockSampleMdpSolver::solve() {
         std::cout.flush();
     }
 
+    valueMap_.clear();
+
     // States are represented as pairs of integers.
     // The first number encodes the states of the rocks.
     // The second number encodes the current position (which rock you're on top of).
@@ -129,10 +131,13 @@ RockSampleMdpParser::RockSampleMdpParser(RockSampleModel *model) :
 
 solver::Heuristic RockSampleMdpParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
+    if (model_->getMdpSolver() == nullptr) {
+        model_->makeMdpSolver();
+    }
     return [this] (solver::HistoryEntry const *, solver::State const *state,
             solver::HistoricalData const *) {
-        return this->model_->getMdpSolver()->getQValue(
-                static_cast<RockSampleState const &>(*state));
+        RockSampleMdpSolver *solver = model_->getMdpSolver();
+        return solver->getQValue(static_cast<RockSampleState const &>(*state));
     };
 }
 } /* namespace rocksample */

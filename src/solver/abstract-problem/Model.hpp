@@ -125,7 +125,7 @@ public:
 
 
     /* -------------- Methods for handling model changes ---------------- */
-    virtual void applyChange(ModelChange const &change, StatePool *pool);
+    virtual void applyChanges(std::vector<std::unique_ptr<ModelChange>> const &changes, StatePool *pool);
 
 
     /* ------------ Methods for handling particle depletion -------------- */

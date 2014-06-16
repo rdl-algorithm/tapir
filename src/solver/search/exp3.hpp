@@ -33,7 +33,8 @@ public:
             std::unordered_set<long> { });
     virtual void updateStrategyWeights(long strategyNo, double timeUsed, double deltaRootQValue);
 
-    virtual SearchStatus extendSequence(HistorySequence *sequence, long maximumDepth);
+    virtual SearchStatus extendSequence(HistorySequence *sequence, long maximumDepth,
+            bool doBackup);
 private:
     Solver *solver_;
     Model *model_;

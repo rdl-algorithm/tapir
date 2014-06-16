@@ -243,11 +243,11 @@ void Solver::applyChanges(BeliefNode *changeRoot) {
         }
     }
     if (model_->hasVerboseOutput()) {
-        cout << "Updating " << affectedSequences.size() << " histories!";
-        cout << endl;
+        cout << "Updating " << affectedSequences.size() << " of ";
+        cout << histories_->getNumberOfSequences() << " histories!" << endl;
     }
 
-    // Delete and remove any sequences where the first entry is now invalid.
+    // Delete and remove any sequences where the first state has been deleted.
     std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
     while (it != affectedSequences.end()) {
         HistorySequence *sequence = *it;
@@ -517,7 +517,8 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
         maximumDepth = model_->getMaximumDepth();
     }
 
-    searchStrategy_->extendSequence(sequence, maximumDepth);
+    // Extend and backup sequence.
+    searchStrategy_->extendSequence(sequence, maximumDepth, true);
 }
 
 /* ------------------- Policy mutator helper methods ------------------- */

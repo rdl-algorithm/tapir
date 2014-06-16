@@ -36,7 +36,7 @@ class TagObervation;
 class TagState;
 
 /** Represents a change in the Tag model. */
-struct TagChange : solver::ModelChange {
+struct TagChange : public solver::ModelChange {
     std::string changeType = "";
     double i0 = 0;
     double i1 = 0;
@@ -107,7 +107,8 @@ class TagModel: public ModelWithProgramOptions {
 
 
     /* -------------- Methods for handling model changes ---------------- */
-    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
+    virtual void applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+             solver::StatePool *pool) override;
 
 
     /* ------------ Methods for handling particle depletion -------------- */

@@ -15,6 +15,7 @@
 #include "solver/abstract-problem/Action.hpp"            // for Action
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/abstract-problem/State.hpp"       // for State
+#include "solver/abstract-problem/ModelChange.hpp"
 
 #include "solver/mappings/actions/enumerated_actions.hpp"
 #include "solver/mappings/observations/enumerated_observations.hpp"
@@ -41,6 +42,14 @@ namespace rocksample {
 class RockSampleMdpSolver;
 class RockSampleState;
 class RockSampleObservation;
+
+struct RockSampleChange : public solver::ModelChange {
+    std::string changeType = "";
+    double i0 = 0;
+    double i1 = 0;
+    double j0 = 0;
+    double j1 = 0;
+};
 
 class RockSampleModel : public ModelWithProgramOptions {
 friend class RockSampleMdpSolver;
@@ -103,6 +112,11 @@ friend class RockSampleMdpSolver;
         return preferredVisitCount_;
     }
 
+    /** Sets up the MDP solver for this model. */
+    void makeMdpSolver() {
+        mdpSolver_ = std::make_unique<RockSampleMdpSolver>(this);
+        mdpSolver_->solve();
+    }
     /** Returns the MDP solver for this model. */
     RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
@@ -178,6 +192,8 @@ friend class RockSampleMdpSolver;
 
 
     /* -------------- Methods for handling model changes ---------------- */
+    virtual void applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+                 solver::StatePool *pool) override;
 
 
     /* ------------ Methods for handling particle depletion -------------- */

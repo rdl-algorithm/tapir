@@ -67,7 +67,8 @@ BasicSearchStrategy::BasicSearchStrategy(Solver *solver,
             heuristic_(heuristic) {
 }
 
-SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long maximumDepth) {
+SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long maximumDepth,
+        bool doBackup) {
     HistoryEntry *currentEntry = sequence->getLastEntry();
     BeliefNode *currentNode = currentEntry->getAssociatedBeliefNode();
 
@@ -147,8 +148,10 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
         return status;
     }
 
-    // Finally, we make sure to backup the sequence.
-    solver_->updateSequence(sequence);
+    if (doBackup) {
+        // Finally, we make sure to backup the sequence.
+        solver_->updateSequence(sequence);
+    }
     return status;
 }
 } /* namespace solver */
