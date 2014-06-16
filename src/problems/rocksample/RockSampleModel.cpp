@@ -712,6 +712,10 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
         }
         os << endl;
     }
+    for (double p : goodProportions) {
+        os << p << " ";
+    }
+    os << endl;
 }
 
 /* ---------------------- Basic customizations  ---------------------- */

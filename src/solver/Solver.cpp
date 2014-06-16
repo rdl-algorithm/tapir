@@ -401,7 +401,8 @@ void Solver::updateSequence(HistorySequence *sequence, int sgn, long firstEntryI
     it++;
     BeliefNode *node;
     while (true) {
-        deltaTotalQ += (*it)->immediateReward_;
+        // Apply discount and add the immediate reward.
+        deltaTotalQ = deltaTotalQ * discountFactor + (*it)->immediateReward_;
         node = (*it)->getAssociatedBeliefNode();
         ActionMapping *mapping = node->getMapping();
         ActionMappingEntry *entry = mapping->getEntry(*(*it)->getAction());
@@ -431,7 +432,6 @@ void Solver::updateSequence(HistorySequence *sequence, int sgn, long firstEntryI
             // If we haven't backpropagated the change, we need to do it later.
             addNodeToBackup(node);
         }
-        deltaTotalQ *= discountFactor;
     }
 }
 
