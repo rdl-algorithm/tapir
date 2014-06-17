@@ -283,6 +283,19 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
     return getCellType(pos) == GOAL;
 }
 
+GridPosition RockSampleModel::makeAdjacentPosition(GridPosition position, ActionType actionType) {
+    if (actionType == ActionType::NORTH) {
+        position.i -= 1;
+    } else if (actionType == ActionType::EAST) {
+        position.j += 1;
+    } else if (actionType == ActionType::SOUTH) {
+        position.i += 1;
+    } else if (actionType == ActionType::WEST) {
+        position.j -= 1;
+    }
+    return position;
+}
+
 std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(GridPosition position,
         ActionType actionType) {
 
@@ -439,7 +452,11 @@ solver::Model::StepResult RockSampleModel::generateStep(solver::State const &sta
 
 /* -------------- Methods for handling model changes ---------------- */
 void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
-            solver::StatePool *pool) {
+            solver::Solver *solver) {
+    solver::StatePool *pool = nullptr;
+    if (solver != nullptr) {
+        pool = solver->getStatePool();
+    }
 
     if (hasVerboseOutput() && pool != nullptr)  {
         cout << "Applying model changes..." << endl;
@@ -457,6 +474,9 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
         }
     }
 
+    // The cells that have been affected by these changes.
+    std::unordered_set<GridPosition> affectedCells;
+
     for (auto const &change : changes) {
         RockSampleChange const &rsChange = static_cast<RockSampleChange const &>(*change);
         if (hasVerboseOutput()) {
@@ -465,11 +485,11 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
             cout << " " << rsChange.i1 << " " << rsChange.j1 << endl;
         }
 
-        RSCellType cellType;
+        RSCellType newCellType;
         if (rsChange.changeType == "Add Obstacles") {
-            cellType = OBSTACLE;
+            newCellType = OBSTACLE;
         } else if (rsChange.changeType == "Remove Obstacles") {
-            cellType = EMPTY;
+            newCellType = EMPTY;
         } else {
             cout << "Invalid change type: " << rsChange.changeType;
             continue;
@@ -477,7 +497,11 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
 
         for (long i = static_cast<long>(rsChange.i0); i <= rsChange.i1; i++) {
             for (long j = static_cast<long>(rsChange.j0); j <= rsChange.j1; j++) {
-                envMap_[i][j] = cellType;
+                RSCellType oldCellType = envMap_[i][j];
+                envMap_[i][j] = newCellType;
+                if (newCellType != oldCellType) {
+                    affectedCells.insert(GridPosition(i, j));
+                }
             }
         }
 
@@ -485,25 +509,12 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
             continue;
         }
 
-        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
-        solver::ChangeFlags flags;
-        if (cellType == OBSTACLE) {
-            flags = solver::ChangeFlags::DELETED;
-        } else {
-            flags = solver::ChangeFlags::TRANSITION;
+        if (searchCategory_ == RSActionCategory::LEGAL && newCellType == RSCellType::EMPTY) {
+            // Legal actions + newly empty cells => handled automatically.
         }
 
-        solver::FlaggingVisitor visitor(pool, flags);
-        double startRow = rsChange.i0;
-        double endRow = rsChange.i1;
-        double startCol = rsChange.j0;
-        double endCol = rsChange.j1;
-        if (cellType == EMPTY) {
-            startRow -= 1;
-            endRow += 1;
-            startCol -= 1;
-            endCol += 1;
-        }
+        // If we're adding obstacles, we need to mark the invalid states as deleted.
+        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
 
         std::vector<double> lowCorner;
         std::vector<double> highCorner;
@@ -511,18 +522,41 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
             lowCorner.push_back(0.0);
             highCorner.push_back(1.0);
         }
+        lowCorner[0] = rsChange.i0;
+        lowCorner[1] = rsChange.j0;
+        highCorner[0] = rsChange.i1;
+        highCorner[1] = rsChange.j1;
 
-        lowCorner[0] = startRow;
-        lowCorner[1] = startCol;
-        highCorner[0] = endRow;
-        highCorner[1] = endCol;
 
-        tree->boxQuery(visitor,
-                {startRow,   startCol,   0.0,        0.0,        0.0},
-                {endRow,     endCol,     nRows_-1.0, nCols_-1.0, 1.0});
-        tree->boxQuery(visitor,
-                {0.0,        0.0,        startRow,   startCol,   0.0},
-                {nRows_-1.0, nCols_-1.0, endRow,     endCol,     1.0});
+        solver::ChangeFlags flags = solver::ChangeFlags::DELETED;
+        if (newCellType == RSCellType::EMPTY) {
+            flags = solver::ChangeFlags::TRANSITION;
+            lowCorner[0] -= 1;
+            lowCorner[1] -= 1;
+            highCorner[0] += 1;
+            highCorner[1] += 1;
+        }
+
+        solver::FlaggingVisitor visitor(pool, flags);
+        tree->boxQuery(visitor, lowCorner, highCorner);
+    }
+
+    //
+    if (searchCategory_ == RSActionCategory::LEGAL) {
+        LegalActionsPool *actionPool = static_cast<LegalActionsPool *>(solver->getActionPool());
+        for (GridPosition cell : affectedCells) {
+            bool isLegal = (envMap_[cell.i][cell.j] != OBSTACLE);
+            for (ActionType actionType : {ActionType::NORTH, ActionType::EAST, ActionType::SOUTH,
+                ActionType::WEST}) {
+                GridPosition adjacentCell = makeAdjacentPosition(cell, actionType);
+                // Ignore cells that are out of bounds.
+                if (!isWithinBounds(adjacentCell)) {
+                    continue;
+                }
+                RockSampleAction rsAction(actionType);
+                actionPool->setLegal(isLegal, adjacentCell, rsAction);
+            }
+        }
     }
 
     // Recalculate all the distances.
@@ -532,6 +566,7 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
         mdpSolver_->solve();
     }
 
+    // Check for heuristic changes.
     if (pool != nullptr) {
         long nStates = pool->getNumberOfStates();
         for (long index = 0; index < nStates; index++) {

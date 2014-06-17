@@ -19,27 +19,31 @@ DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, Heuristic heuri
             heuristic_(heuristic) {
 }
 
-void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
+bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
     if (sequence->endAffectedIdx_ < sequence->startAffectedIdx_) {
         debug::show_message("WARNING: Sequence to update has no affected entries!?");
-        return;
+        return true;
     }
 
     // The ID of the entry at which this sequence goes down a different path in the tree to
-    // its previous path.
+    // its previous path; -1 if no divergence has occurred.
     long divergingEntryId = -1;
 
+    bool hitIllegalAction = false; // True iff we hit an illegal action.
     bool hitTerminalState = false; // True iff the sequence terminated prematurely.
 
     std::vector<std::unique_ptr<HistoryEntry>>::iterator historyIterator =
             (sequence->entrySequence_.begin() + sequence->startAffectedIdx_);
     std::vector<std::unique_ptr<HistoryEntry>>::iterator firstUnchanged =
             (sequence->entrySequence_.begin() + sequence->endAffectedIdx_ + 1);
-    HistoryEntry *entry = nullptr;
-    for (; historyIterator != firstUnchanged; historyIterator++) {
-        entry = historyIterator->get();
-        State const *state = entry->getState();
 
+    // Extra variables for use in the iteration.
+    HistoryEntry *entry = historyIterator->get(); // The current history entry.
+    State const *state = entry->getState(); // The current state.
+    // The actual current node that should be associated with this history entry.
+    BeliefNode *actualCurrentNode = entry->getAssociatedBeliefNode();
+
+    while (historyIterator != firstUnchanged) {
         // Check for early termination.
         hitTerminalState = getModel()->isTerminal(*state);
         if (hitTerminalState || entry->action_ == nullptr) {
@@ -53,9 +57,18 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
 
         HistoryEntry *nextEntry = (historyIterator + 1)->get();
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::TRANSITION)) {
-            entry->transitionParameters_ = getModel()->generateTransition(*entry->getState(),
+
+            // Check for illegal actions.
+            ActionMappingEntry *mappingEntry = actualCurrentNode->getMapping()->getEntry(
                     *entry->action_);
-            std::unique_ptr<State> nextState = getModel()->generateNextState(*entry->getState(),
+            if (mappingEntry != nullptr && !mappingEntry->isLegal()) {
+                hitIllegalAction = true;
+                break;
+            }
+
+
+            entry->transitionParameters_ = getModel()->generateTransition(*state, *entry->action_);
+            std::unique_ptr<State> nextState = getModel()->generateNextState(*state,
                     *entry->action_, entry->transitionParameters_.get());
             if (!nextState->equals(*nextEntry->getState())) {
                 StateInfo *nextStateInfo = getSolver()->getStatePool()->createOrGetInfo(*nextState);
@@ -73,12 +86,12 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
 
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::REWARD)) {
             double oldReward = entry->immediateReward_;
-            entry->immediateReward_ = getModel()->generateReward(*entry->getState(),
+            entry->immediateReward_ = getModel()->generateReward(*state,
                     *entry->action_, entry->transitionParameters_.get(), nextEntry->getState());
 
             // If we haven't diverged yet, we update the difference right now.
             if (divergingEntryId == -1 && entry->immediateReward_ != oldReward) {
-                getSolver()->updateImmediate(entry->getAssociatedBeliefNode(),
+                getSolver()->updateImmediate(actualCurrentNode,
                         *entry->action_, *entry->observation_,
                         entry->immediateReward_ - oldReward , 0);
             }
@@ -86,7 +99,7 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         }
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::OBSERVATION)) {
             std::unique_ptr<Observation> newObservation = (getModel()->generateObservation(
-                    entry->getState(), *entry->action_, entry->transitionParameters_.get(),
+                    state, *entry->action_, entry->transitionParameters_.get(),
                     *nextEntry->getState()));
             if (!newObservation->equals(*entry->observation_)) {
 
@@ -94,48 +107,68 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
                     divergingEntryId = entry->entryId_;
                     // We have diverged; this means the rest of the sequence should be negated.
                     getSolver()->updateSequence(sequence, -1, divergingEntryId, false);
+                    // Now that we've negated the sequence, we can start updating node pointers.
                 }
 
                 entry->observation_ = std::move(newObservation);
             }
         }
         entry->resetChangeFlags(); // Reset the change flags for this entry.
+
+
+        // Update our iteration variables.
+        if (divergingEntryId != -1) {
+            // Diverged => create a new node.
+            actualCurrentNode = getSolver()->getPolicy()->createOrGetChild(actualCurrentNode,
+                    *entry->getAction(), *entry->getObservation());
+            historyIterator++;
+            entry = historyIterator->get();
+            entry->registerNode(actualCurrentNode);
+            state = entry->getState();
+        } else {
+            // No divergence => use the previously registered node.
+            historyIterator++;
+            entry = historyIterator->get();
+            actualCurrentNode = entry->getAssociatedBeliefNode();
+            state = entry->getState();
+        }
     }
 
     if (entry->action_ == nullptr) {
         // We hit the last entry in the sequence => handle it as a special case.
 
-        // We only have to deal with changes to the heuristic value if we've flagged it.
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::HEURISTIC)) {
+            // We only have to deal with changes to the heuristic value if we've flagged it.
             double oldValue = entry->immediateReward_;
             if (hitTerminalState) {
                 entry->immediateReward_ = 0;
             } else {
-                entry->immediateReward_ = heuristic_(entry, entry->getState(),
-                        entry->getAssociatedBeliefNode()->getHistoricalData());
+                entry->immediateReward_ = heuristic_(entry, state,
+                        actualCurrentNode->getHistoricalData());
             }
 
             // If no divergence occurred we update the difference in heuristic values here and now.
             if (divergingEntryId == -1) {
-                getSolver()->updateEstimate(entry->getAssociatedBeliefNode(),
-                        entry->immediateReward_ - oldValue, 0);
+                getSolver()->updateEstimate(actualCurrentNode, entry->immediateReward_ - oldValue, 0);
             }
         }
-        entry->resetChangeFlags(); // Ensure the change flags for the last entry are reset.
     } else {
         // The changes did not reach the end of the sequence.
 
-        if (hitTerminalState) { // Early termination!
+        // A terminal state or an illegal action causes early termination.
+        if (hitTerminalState || hitIllegalAction) { // Early termination!
             if (divergingEntryId == -1) {
-                // If it has not yet been negated, negate the sequence from here onwards.
+                // No divergence => not yet negated => negate it from here onwards right now.
                 getSolver()->updateSequence(sequence, -1, entry->entryId_, false);
             }
 
             // Now we have to erase all of the remaining entries in the sequence.
             sequence->erase(entry->entryId_ + 1);
 
-            // Due to the early termination we must negate a continuation.
-            getSolver()->updateEstimate(entry->getAssociatedBeliefNode(), 0, -1);
+            if (entry->entryId_ > 0) {
+                // Due to the early termination we must negate a continuation.
+                getSolver()->updateEstimate(actualCurrentNode, 0, -1);
+            }
 
             // Now we must set the values for this entry properly.
             entry->action_ = nullptr;
@@ -145,20 +178,18 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         }
 
     }
+
     entry->resetChangeFlags(); // Reset the change flags for the last affected entry.
 
-    // If there was divergence, we also have to update the rest of the sequence.
+    // If there was divergence, we must update the rest of the sequence.
     if (divergingEntryId != -1) {
-        historyIterator = sequence->entrySequence_.begin() + divergingEntryId;
-        entry = historyIterator->get();
-        BeliefNode *currentNode = entry->getAssociatedBeliefNode();
         // Update the node pointers for the rest of the sequence.
         while (entry->getAction() != nullptr) {
-            currentNode = getSolver()->getPolicy()->createOrGetChild(currentNode,
+            actualCurrentNode = getSolver()->getPolicy()->createOrGetChild(actualCurrentNode,
                     *entry->getAction(), *entry->getObservation());
             historyIterator++;
             entry = historyIterator->get();
-            entry->registerNode(currentNode);
+            entry->registerNode(actualCurrentNode);
         }
 
         // Now we backup the sequence.
@@ -167,6 +198,9 @@ void DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
 
     // Reset change flags for the sequence as a whole.
     sequence->resetChangeFlags();
+
+    // If we hit an illegal action, the search algorithm will need to extend this sequence.
+    return !hitIllegalAction;
 }
 
 } /* namespace solver */

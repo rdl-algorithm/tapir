@@ -21,11 +21,24 @@ public:
 
     virtual void reviseHistories(
             std::unordered_set<HistorySequence *> &affectedSequences) {
-        for (HistorySequence *sequence : affectedSequences) {
-            reviseSequence(sequence);
+        for (auto it = affectedSequences. begin(); it != affectedSequences.end(); ) {
+            HistorySequence *sequence = *it;
+            if (reviseSequence(sequence)) {
+                // Successful revision => remove it from the set.
+                it = affectedSequences.erase(it);
+            } else {
+                // Search required => leave it in the set.
+                it++;
+            }
         }
     }
-    virtual void reviseSequence(HistorySequence *sequence) = 0;
+
+    /** Revises the given sequence, and returns true if the revision was fully successful.
+     *
+     * Incomplete revisions must later be extended by the search algorithm (e.g. UCB) to
+     * avoid having bad sequences in the tree.
+     */
+    virtual bool reviseSequence(HistorySequence *sequence) = 0;
 
     /** Returns the solver used with this corrector. */
     virtual Solver *getSolver() const {

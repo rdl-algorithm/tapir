@@ -24,6 +24,8 @@ public:
     virtual double getTotalQValue() const = 0;
     /** Returns the mean Q-value for this entry. */
     virtual double getMeanQValue() const = 0;
+    /** Returns true iff this action is legal (illegal => totally ignored) */
+    virtual bool isLegal() const = 0;
 
     /** Updates this action, by adding the given number of visits and the
      * given change in the total q-value.
@@ -42,6 +44,10 @@ public:
      * Returns true if and only if the q value of the action changed.
      */
     virtual bool updateValue(long deltaNVisits, double deltaTotalQ) = 0;
+    /** Sets the legality of this action; this can be combined with model changes to force
+     * replanning instead of taking illegal actions.
+     */
+    virtual void setLegal(bool legal) = 0;
 };
 } /* namespace solver */
 

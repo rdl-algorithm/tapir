@@ -69,7 +69,11 @@ BasicSearchStrategy::BasicSearchStrategy(Solver *solver,
 
 SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long maximumDepth,
         bool doBackup) {
-    HistoryEntry *currentEntry = sequence->getLastEntry();
+    // We extend from the last entry in the sequence.
+    HistoryEntry *firstEntry = sequence->getLastEntry();
+    long firstEntryId = firstEntry->getId();
+
+    HistoryEntry *currentEntry = firstEntry;
     BeliefNode *currentNode = currentEntry->getAssociatedBeliefNode();
 
     SearchStatus status = SearchStatus::UNINITIALIZED;
@@ -87,6 +91,9 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
         return SearchStatus::ERROR;
     } else if (currentEntry->getAction() != nullptr) {
         debug::show_message("ERROR: The last in the sequence already has an action!?");
+        return SearchStatus::ERROR;
+    } else if (currentEntry->immediateReward_ != 0) {
+        debug::show_message("ERROR: The last in the sequence has a nonzero reward!?");
         return SearchStatus::ERROR;
     }
 
@@ -148,9 +155,14 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
         return status;
     }
 
+    // If required, we backup the sequence.
     if (doBackup) {
-        // Finally, we make sure to backup the sequence.
-        solver_->updateSequence(sequence);
+        if (firstEntryId > 0 && currentEntry->getId() > firstEntryId) {
+            // If we've extended a previously terminating sequence, we have to add a continuation.
+            solver_->updateEstimate(firstEntry->getAssociatedBeliefNode(), 0, +1);
+        }
+        // We only do a partial backup along the newly generated part of the sequence.
+        solver_->updateSequence(sequence, +1, firstEntryId);
     }
     return status;
 }

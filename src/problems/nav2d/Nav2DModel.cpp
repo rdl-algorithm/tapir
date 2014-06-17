@@ -429,15 +429,24 @@ solver::Model::StepResult Nav2DModel::generateStep(
 }
 
 void Nav2DModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
-        solver::StatePool *pool) {
+        solver::Solver *solver) {
+    solver::StatePool *pool = nullptr;
+    if (solver != nullptr) {
+        pool = solver->getStatePool();
+    }
+
     for (auto const &change : changes) {
         Nav2DChange const &navChange = static_cast<Nav2DChange const &>(*change);
         addArea(navChange.id, navChange.area, navChange.type);
         if (pool == nullptr) {
             continue;
         }
+
+        // Obstacles => delete states.
         solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
         solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+
+        // Observation areas => update observation on the previous step.
         if (navChange.type == AreaType::OBSERVATION) {
             visitor.flagsToSet_ = solver::ChangeFlags::OBSERVATION_BEFORE;
         }

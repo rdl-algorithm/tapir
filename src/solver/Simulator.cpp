@@ -217,9 +217,8 @@ bool Simulator::stepSimulation() {
 
 bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
         bool areDynamic) {
-    StatePool *statePool = solver_->getStatePool();
     model_->applyChanges(changes, nullptr);
-    solverModel_->applyChanges(changes, statePool);
+    solverModel_->applyChanges(changes, solver_);
 
     // If the current state is deleted, the simulation is broken!
     StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();

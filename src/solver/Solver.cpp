@@ -242,8 +242,11 @@ void Solver::applyChanges(BeliefNode *changeRoot) {
             }
         }
     }
+
+    long numAffected = affectedSequences.size();
+
     if (model_->hasVerboseOutput()) {
-        cout << "Updating " << affectedSequences.size() << " of ";
+        cout << "Must revise " << numAffected << " of ";
         cout << histories_->getNumberOfSequences() << " histories!" << endl;
     }
 
@@ -261,12 +264,33 @@ void Solver::applyChanges(BeliefNode *changeRoot) {
         }
     }
 
+    if (model_->hasVerboseOutput()) {
+        cout << "Deleted " << numAffected - affectedSequences.size() << " histories!" << endl;
+    }
+
     // Revise all of the histories.
     historyCorrector_->reviseHistories(affectedSequences);
 
+    if (model_->hasVerboseOutput()) {
+        cout << "Revision complete. Backing up..." << endl;
+    }
+
+    // Finish the deferred backup so that algorithms requiring backed-up values will work properly.
+    doBackup();
+
     // Reset the set of affected states in the pool.
     statePool_->resetAffectedStates();
-    // Backup all the changes simultaneously.
+
+    // Now we extend sequences with illegal actions.
+    if (model_->hasVerboseOutput()) {
+        cout << "Using search on " << affectedSequences.size() << " histories!" << endl;
+    }
+
+    for (HistorySequence *sequence : affectedSequences) {
+        searchStrategy_->extendSequence(sequence, model_->getMaximumDepth(), true);
+    }
+
+    // Backup all the way to the root to keep the tree consistent.
     doBackup();
 }
 
@@ -496,6 +520,9 @@ void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> st
     for (StateInfo *stateInfo : states) {
         singleSearch(startNode, stateInfo, maximumDepth);
     }
+
+    // Backup all the way back to the root of the tree to maintain consistency.
+    doBackup();
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth) {

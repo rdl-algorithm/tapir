@@ -91,10 +91,12 @@ class DiscretizedActionMapEntry : public solver::ActionMappingEntry {
     virtual long getVisitCount() const override;
     virtual double getTotalQValue() const override;
     virtual double getMeanQValue() const override;
+    virtual bool isLegal() const override;
 
     virtual long getBinNumber() const;
 
     virtual bool updateValue(long deltaNVisits, double deltaTotalQ) override;
+    virtual void setLegal(bool legal) override;
 
   protected:
     long binNumber_ = -1;
@@ -103,6 +105,7 @@ class DiscretizedActionMapEntry : public solver::ActionMappingEntry {
     long visitCount_ = 0;
     double totalQValue_ = 0;
     double meanQValue_ = 0;
+    bool isLegal_ = false; // Entries are illegal by default.
 };
 
 class DiscretizedActionTextSerializer: virtual public solver::Serializer {

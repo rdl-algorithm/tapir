@@ -138,6 +138,10 @@ friend class RockSampleMdpSolver;
         }
         return (*grid)[p.i][p.j];
     }
+    /** Returns true iff the given position is within the RockSample bounds. */
+    bool isWithinBounds(GridPosition p) {
+        return (p.i >= 0 && p.i < nRows_ && p.j >= 0 && p.j < nCols_);
+    }
     /** Returns the cell type for the given position. */
     RSCellType getCellType(GridPosition p) {
         return envMap_[p.i][p.j];
@@ -193,7 +197,7 @@ friend class RockSampleMdpSolver;
 
     /* -------------- Methods for handling model changes ---------------- */
     virtual void applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
-                 solver::StatePool *pool) override;
+                 solver::Solver *solver) override;
 
 
     /* ------------ Methods for handling particle depletion -------------- */
@@ -239,6 +243,8 @@ friend class RockSampleMdpSolver;
 
 
     /* ----------- Non-virtual methods for RockSampleModel ------------- */
+    /** Generates an adjacent position without doing bounds checks or legality checks. */
+    GridPosition makeAdjacentPosition(GridPosition position, ActionType actionType);
     /** Generates the next position for the given position and action. */
     std::pair<GridPosition, bool> makeNextPosition(GridPosition pos, ActionType actionType);
     /**

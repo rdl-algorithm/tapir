@@ -26,6 +26,7 @@ public:
             solver::Observation const &observation) const override;
 
     std::vector<long> generateLegalActions() const;
+    GridPosition getPosition() const;
 
     void print(std::ostream &os) const override;
 private:

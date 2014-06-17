@@ -49,6 +49,10 @@ std::vector<long> PositionData::generateLegalActions() const {
     return legalActions;
 }
 
+GridPosition PositionData::getPosition() const {
+    return position_;
+}
+
 void PositionData::print(std::ostream &os) const {
     os << "Position: " << position_ << std::endl;
 }

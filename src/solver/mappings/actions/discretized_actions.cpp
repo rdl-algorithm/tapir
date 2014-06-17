@@ -46,6 +46,12 @@ DiscretizedActionMap::DiscretizedActionMap(BeliefNode *owner, DiscretizedActionP
         DiscretizedActionMapEntry &entry = entries_[i];
         entry.binNumber_ = i;
         entry.map_ = this;
+        entry.isLegal_ = false;
+    }
+
+    // Only entries in the sequence are legal.
+    for (long binNumber : binSequence_) {
+        entries_[binNumber].isLegal_ = true;
     }
 }
 
@@ -84,6 +90,9 @@ std::vector<ActionMappingEntry const *> DiscretizedActionMap::getVisitedEntries(
     std::vector<ActionMappingEntry const *> returnEntries;
     for (DiscretizedActionMapEntry const &entry : entries_) {
         if (entry.visitCount_ > 0) {
+            if (!entry.isLegal_) {
+                debug::show_message("WARNING: Illegal entry with nonzero visit count!");
+            }
             returnEntries.push_back(&entry);
         }
     }
@@ -134,6 +143,9 @@ double DiscretizedActionMapEntry::getMeanQValue() const {
 long DiscretizedActionMapEntry::getBinNumber() const {
     return binNumber_;
 }
+bool DiscretizedActionMapEntry::isLegal() const {
+    return isLegal_;
+}
 
 bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotalQ) {
     if (deltaNVisits == 0 && deltaTotalQ == 0) {
@@ -142,6 +154,10 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
 
     if (!std::isfinite(deltaTotalQ)) {
         debug::show_message("ERROR: Non-finite delta value!");
+    }
+
+    if (deltaNVisits > 0 && !isLegal_) {
+        debug::show_message("ERROR: Visiting an illegal action!");
     }
 
     // Update the visit counts
@@ -154,8 +170,10 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
     map_->totalVisitCount_ += deltaNVisits;
     if (visitCount_ == 0 && deltaNVisits < 0) {
         map_->numberOfVisitedEntries_--;
-        // We've reduced the visit count to 0, so we'll have to try this action again.
-        map_->binSequence_.add(binNumber_);
+        // Newly unvisited and legal => must try it.
+        if (isLegal_) {
+            map_->binSequence_.add(binNumber_);
+        }
     }
 
     // Update the total Q
@@ -169,6 +187,25 @@ bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotal
         meanQValue_ = totalQValue_ / visitCount_;
     }
     return meanQValue_ != oldMeanQ;
+}
+
+void DiscretizedActionMapEntry::setLegal(bool legal) {
+    if (!isLegal_) {
+        if (legal) {
+            // illegal => legal
+            isLegal_ = true;
+            if (visitCount_ == 0) {
+                // Newly legal and unvisited => must try it.
+                map_->binSequence_.add(binNumber_);
+            }
+        }
+    } else {
+        if (!legal) {
+            // legal => illegal
+            isLegal_ = false;
+            map_->binSequence_.remove(binNumber_);
+        }
+    }
 }
 
 /* ------------------- DiscretizedActionTextSerializer ------------------- */
@@ -203,6 +240,9 @@ void DiscretizedActionTextSerializer::saveActionMapping(
     for (DiscretizedActionMapEntry const &entry : discMap.entries_) {
         if (entry.visitCount_ > 0) {
             visitedCount++;
+        }
+        // An entry is saved if it has a node, or a nonzero visit count.
+        if (entry.visitCount_ > 0 || entry.childNode_ != nullptr) {
             entriesByValue.emplace(
                     std::make_pair(entry.meanQValue_, entry.binNumber_), &entry);
         }
@@ -218,6 +258,9 @@ void DiscretizedActionTextSerializer::saveActionMapping(
         os << "): " << entry.getMeanQValue() << " from ";
         os << entry.getVisitCount() << " visits; total: ";
         os << entry.getTotalQValue();
+        if (!entry.isLegal()) {
+            os << " ILLEGAL";
+        }
         ActionNode *node = entry.getActionNode();
         if (node == nullptr) {
             os << " NO CHILD" << std::endl;
@@ -270,9 +313,10 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
         std::getline(sstr2, tmpStr, ':');
         double meanQValue, totalQValue;
         long visitCount;
+        std::string legalString;
         sstr2 >> meanQValue >> tmpStr;
         sstr2 >> visitCount >> tmpStr >> tmpStr;
-        sstr2 >> totalQValue;
+        sstr2 >> totalQValue >> legalString;
 
         bool hasChild = true;
         std::string tmpStr1, tmpStr2;
@@ -288,6 +332,7 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
         entry.meanQValue_ = meanQValue;
         entry.visitCount_ = visitCount;
         entry.totalQValue_ = totalQValue;
+        entry.isLegal_ = (legalString != "ILLEGAL");
 
         // Read in the action node itself.
         if (hasChild) {
@@ -295,6 +340,11 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
             ActionNode *node = entry.childNode_.get();
             load(*node, is);
         }
+    }
+
+    // Any bins we are supposed to try must be considered legal.
+    for (long binNumber : discMap->binSequence_) {
+        discMap->entries_[binNumber].isLegal_ = true;
     }
     return std::move(discMap);
 }

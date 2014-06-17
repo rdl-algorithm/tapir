@@ -108,7 +108,7 @@ class TagModel: public ModelWithProgramOptions {
 
     /* -------------- Methods for handling model changes ---------------- */
     virtual void applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
-             solver::StatePool *pool) override;
+             solver::Solver *solver) override;
 
 
     /* ------------ Methods for handling particle depletion -------------- */

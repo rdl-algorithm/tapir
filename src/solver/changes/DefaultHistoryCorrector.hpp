@@ -14,7 +14,7 @@ public:
     virtual ~DefaultHistoryCorrector() = default;
     _NO_COPY_OR_MOVE(DefaultHistoryCorrector);
 
-    void reviseSequence(HistorySequence *sequence);
+    virtual bool reviseSequence(HistorySequence *sequence) override;
 private:
     Heuristic heuristic_;
 };

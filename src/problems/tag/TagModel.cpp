@@ -295,7 +295,12 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
 
 /* -------------- Methods for handling model changes ---------------- */
 void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
-        solver::StatePool *pool) {
+        solver::Solver *solver) {
+    solver::StatePool *pool = nullptr;
+    if (solver != nullptr) {
+        pool = solver->getStatePool();
+    }
+
     for (auto const &change : changes) {
         TagChange const &tagChange = static_cast<TagChange const &>(*change);
         if (hasVerboseOutput()) {
@@ -304,11 +309,11 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
             cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
         }
 
-        TagCellType cellType;
+        TagCellType newCellType;
         if (tagChange.changeType == "Add Obstacles") {
-            cellType = TagCellType::WALL;
+            newCellType = TagCellType::WALL;
         } else if (tagChange.changeType == "Remove Obstacles") {
-            cellType = TagCellType::EMPTY;
+            newCellType = TagCellType::EMPTY;
         } else {
             cout << "Invalid change type: " << tagChange.changeType;
             continue;
@@ -316,7 +321,7 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
 
         for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
             for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1; j++) {
-                envMap_[i][j] = cellType;
+                envMap_[i][j] = newCellType;
             }
         }
 
@@ -325,30 +330,38 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
         }
 
         solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
-        solver::ChangeFlags flags;
-        if (cellType == TagCellType::WALL) {
-            flags = solver::ChangeFlags::DELETED;
-        } else {
-            flags = solver::ChangeFlags::TRANSITION;
+
+        double iLo = tagChange.i0;
+        double iHi = tagChange.i1;
+        double iMx = nRows_ - 1.0;
+
+        double jLo = tagChange.j0;
+        double jHi = tagChange.j1;
+        double jMx = nCols_ - 1.0;
+
+        // Adding walls => any states where the robot or the opponent are in a wall must
+        // be deleted.
+        if (newCellType == TagCellType::WALL) {
+            solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+            // Robot is in a wall.
+            tree->boxQuery(visitor,
+                    {iLo, jLo, 0.0, 0.0, 0.0},
+                    {iHi, jHi, iMx, jMx, 1.0});
+            // Opponent is in a wall.
+            tree->boxQuery(visitor,
+                    {0.0, 0.0, iLo, jLo, 0.0},
+                    {iMx, jMx, iHi, jHi, 1.0});
+
         }
 
-        solver::FlaggingVisitor visitor(pool, flags);
-        double startRow = tagChange.i0;
-        double endRow = tagChange.i1;
-        double startCol = tagChange.j0;
-        double endCol = tagChange.j1;
-        if (cellType == TagCellType::EMPTY) {
-            startRow -= 1;
-            endRow += 1;
-            startCol -= 1;
-            endCol += 1;
-        }
+        // Also, state transitions around the edges of the new / former obstacle must be revised.
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
         tree->boxQuery(visitor,
-                {startRow,   startCol,   0.0,        0.0,        0.0},
-                {endRow,     endCol,     nRows_-1.0, nCols_-1.0, 1.0});
+                {iLo - 1, jLo - 1, 0.0, 0.0, 0.0},
+                {iHi + 1, jHi + 1, iMx, jMx, 1.0});
         tree->boxQuery(visitor,
-                {0.0,        0.0,        startRow,   startCol,   0.0},
-                {nRows_-1.0, nCols_-1.0, endRow,     endCol,     1.0});
+                {0.0, 0.0, iLo - 1, jLo - 1, 0.0},
+                {iMx, jMx, iHi + 1, jHi + 1, 1.0});
     }
 }
 
