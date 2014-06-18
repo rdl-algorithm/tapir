@@ -61,8 +61,8 @@ ifeq ($(CFG),perf)
   override CXXFLAGS  += -O3 -ggdb3
 endif
 ifeq ($(CFG),gprof)
-  override CXXFLAGS  += -O3 -pg
-  override LDFLAGS   += -pg
+  override CXXFLAGS  += -O3 -pg -g
+  override LDFLAGS   += -pg -g
 endif
 ifeq ($(CFG),debug)
   override CXXFLAGS  += -O0 -ggdb3
