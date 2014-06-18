@@ -22,14 +22,6 @@ public:
     }
     _NO_COPY_OR_MOVE(CachedValue);
 
-    virtual T operator()(BeliefNode * node) {
-        if (lastUpdateTime_ < node->getTimeOfLastChange()) {
-            updateCache();
-        }
-        function_(node);
-        return getCache();
-    }
-
     virtual void updateCache() {
         lastUpdateTime_ = abt::clock_ms();
         cache_ = function_(node_);
