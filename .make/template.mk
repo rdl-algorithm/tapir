@@ -60,7 +60,7 @@ $(ALL_DIRS_$(n)):
 -include $(DEPS_$(n))
 # Compilation recipe
 $(OBJS_$(n)): $(_O_$(n)): $(_CPP_$(n))
-	$(COMPILE_CMD) $<
+	$(call COMPILE_RECIPE,$<)
 
 # Rebuild if this file changes, or the root makefile does.
 $(OBJS_$(n)): Makefile .make/template.mk

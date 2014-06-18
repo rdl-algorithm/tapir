@@ -43,7 +43,7 @@ LIBRARIES_$(n) += $(EXTRA_LIBRARIES_$(n))
 # Linking rule for the executable targets.
 define problem_build_template
 $(TGTS_$(n)): $(_BIN_$(n)): $(_O_$(n)) $$(LINKER_DEPS_$(n))
-	$$(LINK_CMD) $$< $(LINKER_DEPS_$(n)) $(LIBRARIES_$(n))
+	$$(call LINK_RECIPE,$$< $(LINKER_DEPS_$(n)) $(LIBRARIES_$(n)))
 
 # Executables will be copied to the main folder for convenience
 build-$(n): $$(TGTS_$(n))

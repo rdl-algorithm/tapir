@@ -15,6 +15,10 @@
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
+#ifdef GOOGLE_PROFILER
+#include <google/profiler.h>
+#endif
+
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
@@ -66,7 +70,17 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     double totT;
     double tStart;
     tStart = abt::clock_ms();
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStart("solve.prof");
+#endif
+
     solver.improvePolicy();
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStop();
+#endif
+
     totT = abt::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 

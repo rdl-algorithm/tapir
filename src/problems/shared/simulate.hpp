@@ -27,6 +27,10 @@
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
+#ifdef GOOGLE_PROFILER
+#include <google/profiler.h>
+#endif
+
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
@@ -100,6 +104,11 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     double totalReward = 0;
     double totalTime = 0;
     double totalNSteps = 0;
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStart("simulate.prof");
+#endif
+
     for (long runNumber = 0; runNumber < nRuns; runNumber++) {
         cout << "Run #" << runNumber+1 << endl;
         cout << "PRNG engine state: " << randGen << endl;
@@ -180,6 +189,11 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         }
         cout << "Run complete!" << endl << endl;
     }
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStop();
+#endif
+
     os.close();
 
     cout << nRuns << " runs completed." << endl;
