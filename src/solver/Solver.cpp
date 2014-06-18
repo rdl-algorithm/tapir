@@ -67,7 +67,9 @@ Solver::Solver(std::unique_ptr<Model> model) :
             historyCorrector_(nullptr),
             searchStrategy_(nullptr),
             estimationStrategy_(nullptr),
-            nodesToBackup_() {
+            nodesToBackup_(),
+            changeRoot_(nullptr),
+            isAffectedMap_() {
 }
 
 // Default destructor
@@ -163,12 +165,128 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
     multipleSearches(startNode, samples, maximumDepth);
 }
 
-void Solver::applyChanges(BeliefNode *changeRoot) {
-    std::unique_ptr<std::unordered_map<BeliefNode const *, bool>> isAffectedMap = nullptr;
-    if (changeRoot != nullptr && changeRoot->getDepth() > 0) {
-        isAffectedMap = std::make_unique<std::unordered_map<BeliefNode const *, bool>>();
+BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
+        Observation const &obs, long minParticleCount) {
+    if (minParticleCount < 0) {
+        minParticleCount = model_->getMinParticleCount();
+    }
+    BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
+    long particleCount = nextNode->getNumberOfParticles();
+    long deficit = minParticleCount - particleCount;
+    if (deficit <= 0) {
+        return nextNode;
     }
 
+    if (model_->hasVerboseOutput()) {
+        cout << "Replenishing particles...          ";
+        cout.flush();
+    }
+
+    std::vector<State const *> particles;
+    std::vector<HistoryEntry *>::iterator it;
+    for (HistoryEntry *entry : currNode->particles_) {
+        State const *state = entry->getState();
+        if (!model_->isTerminal(*state)) {
+            particles.push_back(state);
+        }
+    }
+
+    // Attempt to generate particles for next state based on the current belief,
+    // the observation, and the action.
+    std::vector<std::unique_ptr<State>> nextParticles = (model_->generateParticles(currNode, action,
+            obs, deficit, particles));
+    if (nextParticles.empty()) {
+        debug::show_message("WARNING: Could not generate based on belief!");
+        // If that fails, ignore the current belief.
+        nextParticles = model_->generateParticles(currNode, action, obs, deficit);
+    }
+    if (nextParticles.empty()) {
+        debug::show_message("ERROR: Failed to generate new particles!");
+        return nullptr;
+    }
+
+    for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
+        StateInfo *stateInfo = statePool_->createOrGetInfo(*uniqueStatePtr);
+
+        // Create a new history sequence and entry for the new particle.
+        HistorySequence *histSeq = histories_->createSequence();
+        HistoryEntry *histEntry = histSeq->addEntry();
+        histEntry->registerState(stateInfo);
+        histEntry->registerNode(nextNode);
+    }
+    if (model_->hasVerboseOutput()) {
+        cout << "Done" << std::endl;
+    }
+    return nextNode;
+}
+
+/* ------------------- Change handling methods ------------------- */
+BeliefNode *Solver::getChangeRoot() const {
+    return changeRoot_;
+}
+
+void Solver::setChangeRoot(BeliefNode *changeRoot) {
+    if (changeRoot_ != changeRoot) {
+        changeRoot_ = changeRoot;
+        isAffectedMap_.clear();
+    }
+}
+
+bool Solver::isAffected(BeliefNode const *node) {
+    if (changeRoot_ == nullptr) {
+        // No change root => all nodes are affected.
+        return true;
+    }
+    if (node == changeRoot_) {
+        // Same node => must be affected.
+        return true;
+    }
+
+    long rootDepth = changeRoot_->getDepth();
+    if (node->getDepth() <= rootDepth) {
+        // Not below the root and not the root => can't be affected.
+        return false;
+    }
+
+    // If it's deeper, look it up in the mapping.
+    std::unordered_map<BeliefNode const *, bool>::iterator it = isAffectedMap_.find(node);
+    if (it != isAffectedMap_.end()) {
+        return it->second;
+    }
+
+    // We have to traverse the tree to see if it's a descendant.
+    std::vector<BeliefNode const *> ancestors;
+    bool isDescendedFromChangeRoot = false;
+    while (true) {
+        ancestors.push_back(node);
+        node = node->getParentBelief();
+        // If we hit the root, we must be descended from it.
+        if (node == changeRoot_) {
+            isDescendedFromChangeRoot = true;
+            break;
+        }
+        // If we reach the same depth without hitting the root, we aren't descended from it.
+        if (node->getDepth() == rootDepth) {
+            break;
+        }
+
+        it = isAffectedMap_.find(node);
+        // If we hit a node for which we know whether it's descended, we copy its state.
+        if (it != isAffectedMap_.end()) {
+            isDescendedFromChangeRoot = it->second;
+            break;
+        }
+    }
+
+    // Add ancestors to the mapping for efficient lookup later on.
+    for (BeliefNode const *ancestor : ancestors) {
+        isAffectedMap_[ancestor] = isDescendedFromChangeRoot;
+    }
+
+    return isDescendedFromChangeRoot;
+}
+
+void Solver::applyChanges() {
     std::unordered_set<HistorySequence *> affectedSequences;
     for (StateInfo *stateInfo : statePool_->getAffectedStates()) {
         if (changes::has_flag(stateInfo->changeFlags_, ChangeFlags::DELETED)) {
@@ -179,8 +297,8 @@ void Solver::applyChanges(BeliefNode *changeRoot) {
         for (HistoryEntry *entry : stateInfo->usedInHistoryEntries_) {
             BeliefNode *node = entry->getAssociatedBeliefNode();
 
-            // If this node isn't affected,
-            if (isAffectedMap != nullptr && !isAffected(node, changeRoot, isAffectedMap.get())) {
+            // If this node isn't affected, ignore it.
+            if (!isAffected(node)) {
                 continue;
             }
 
@@ -191,7 +309,7 @@ void Solver::applyChanges(BeliefNode *changeRoot) {
             bool hasChanged = false;
             ChangeFlags allFlags = stateInfo->changeFlags_;
 
-            if (node == changeRoot) {
+            if (node == changeRoot_) {
                 // Any flags applying to previous states must be ignored.
                 allFlags &= ~ChangeFlags::TRANSITION_BEFORE;
                 allFlags &= ~ChangeFlags::OBSERVATION_BEFORE;
@@ -292,61 +410,6 @@ void Solver::applyChanges(BeliefNode *changeRoot) {
 
     // Backup all the way to the root to keep the tree consistent.
     doBackup();
-}
-
-BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
-        Observation const &obs, long minParticleCount) {
-    if (minParticleCount < 0) {
-        minParticleCount = model_->getMinParticleCount();
-    }
-    BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
-    long particleCount = nextNode->getNumberOfParticles();
-    long deficit = minParticleCount - particleCount;
-    if (deficit <= 0) {
-        return nextNode;
-    }
-
-    if (model_->hasVerboseOutput()) {
-        cout << "Replenishing particles...          ";
-        cout.flush();
-    }
-
-    std::vector<State const *> particles;
-    std::vector<HistoryEntry *>::iterator it;
-    for (HistoryEntry *entry : currNode->particles_) {
-        State const *state = entry->getState();
-        if (!model_->isTerminal(*state)) {
-            particles.push_back(state);
-        }
-    }
-
-    // Attempt to generate particles for next state based on the current belief,
-    // the observation, and the action.
-    std::vector<std::unique_ptr<State>> nextParticles = (model_->generateParticles(currNode, action,
-            obs, deficit, particles));
-    if (nextParticles.empty()) {
-        debug::show_message("WARNING: Could not generate based on belief!");
-        // If that fails, ignore the current belief.
-        nextParticles = model_->generateParticles(currNode, action, obs, deficit);
-    }
-    if (nextParticles.empty()) {
-        debug::show_message("ERROR: Failed to generate new particles!");
-        return nullptr;
-    }
-
-    for (std::unique_ptr<State> &uniqueStatePtr : nextParticles) {
-        StateInfo *stateInfo = statePool_->createOrGetInfo(*uniqueStatePtr);
-
-        // Create a new history sequence and entry for the new particle.
-        HistorySequence *histSeq = histories_->createSequence();
-        HistoryEntry *histEntry = histSeq->addEntry();
-        histEntry->registerState(stateInfo);
-        histEntry->registerNode(nextNode);
-    }
-    if (model_->hasVerboseOutput()) {
-        cout << "Done" << std::endl;
-    }
-    return nextNode;
 }
 
 /* ------------------ Display methods  ------------------- */
@@ -546,58 +609,6 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
 
     // Extend and backup sequence.
     searchStrategy_->extendSequence(sequence, maximumDepth, true);
-}
-
-/* ------------------- Policy mutator helper methods ------------------- */
-bool Solver::isAffected(BeliefNode const *node, BeliefNode const *changeRoot,
-        std::unordered_map<BeliefNode const *, bool> *isAffectedMap) {
-    if (node == changeRoot) {
-        // Same node => must be affected.
-        return true;
-    }
-
-    long rootDepth = changeRoot->getDepth();
-    if (node->getDepth() <= rootDepth) {
-        // Not below the root and not the root => can't be affected.
-        return false;
-    }
-
-    // If it's deeper, look it up in the mapping.
-    std::unordered_map<BeliefNode const *, bool>::iterator it = isAffectedMap->find(node);
-    if (it != isAffectedMap->end()) {
-        return it->second;
-    }
-
-    // We have to traverse the tree to see if it's a descendant.
-    std::vector<BeliefNode const *> ancestors;
-    bool isDescendedFromChangeRoot = false;
-    while (true) {
-        ancestors.push_back(node);
-        node = node->getParentBelief();
-        // If we hit the root, we must be descended from it.
-        if (node == changeRoot) {
-            isDescendedFromChangeRoot = true;
-            break;
-        }
-        // If we reach the same depth without hitting the root, we aren't descended from it.
-        if (node->getDepth() == rootDepth) {
-            break;
-        }
-
-        it = isAffectedMap->find(node);
-        // If we hit a node for which we know whether it's descended, we copy its state.
-        if (it != isAffectedMap->end()) {
-            isDescendedFromChangeRoot = it->second;
-            break;
-        }
-    }
-
-    // Add ancestors to the mapping for efficient lookup later on.
-    for (BeliefNode const *ancestor : ancestors) {
-        (*isAffectedMap)[ancestor] = isDescendedFromChangeRoot;
-    }
-
-    return isDescendedFromChangeRoot;
 }
 
 /* ------------------ Private deferred backup methods. ------------------- */

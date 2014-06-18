@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "solver/Solver.hpp"
+
 #include "RockSampleModel.hpp"
 #include "position_history.hpp"
 
@@ -38,9 +40,12 @@ std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping(
 }
 
 void LegalActionsPool::setLegal(bool isLegal, GridPosition position,
-        RockSampleAction const &action) {
+        RockSampleAction const &action, solver::Solver *solver) {
     for (solver::DiscretizedActionMap *discMap : mappings_[position]) {
-        discMap->getEntry(action)->setLegal(isLegal);
+        // Only change affected belief nodes.
+        if (solver == nullptr || solver->isAffected(discMap->getOwner())) {
+            discMap->getEntry(action)->setLegal(isLegal);
+        }
     }
 }
 } /* namespace rocksample */

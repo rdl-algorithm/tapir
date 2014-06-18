@@ -319,8 +319,8 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
             continue;
         }
 
-        for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
-            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1; j++) {
+        for (long i = tagChange.i0; i <= tagChange.i1; i++) {
+            for (long j = tagChange.j0; j <= tagChange.j1; j++) {
                 envMap_[i][j] = newCellType;
             }
         }

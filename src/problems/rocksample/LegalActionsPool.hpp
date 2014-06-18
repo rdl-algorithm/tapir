@@ -9,6 +9,7 @@
 
 namespace solver {
 class HistoricalData;
+class Solver;
 }
 
 namespace rocksample {
@@ -27,8 +28,12 @@ class LegalActionsPool: public solver::EnumeratedActionPool {
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping(
             solver::BeliefNode *node) override;
 
-    /* Sets the legality of the given action from the current position. */
-    virtual void setLegal(bool isLegal, GridPosition position, RockSampleAction const &action);
+    /* Sets the legality of the given action from the current position.
+     *
+     * If the solver is not nullptr, it will be queried for which belief nodes are affected
+     * by the current changes, so that only affected belief nodes will be modified. */
+    virtual void setLegal(bool isLegal, GridPosition position, RockSampleAction const &action,
+            solver::Solver *solver);
   private:
     RockSampleModel *model_;
     std::unordered_map<GridPosition, std::unordered_set<solver::DiscretizedActionMap *>> mappings_;

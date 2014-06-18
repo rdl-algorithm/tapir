@@ -31,6 +31,10 @@ public:
     virtual ~RockSampleTextSerializer() = default;
     _NO_COPY_OR_MOVE(RockSampleTextSerializer);
 
+    /* ------------------ Saving change sequences -------------------- */
+    virtual void saveModelChange(solver::ModelChange const &change, std::ostream &os) override;
+    virtual std::unique_ptr<solver::ModelChange> loadModelChange(std::istream &is) override;
+
     void saveState(solver::State const *state, std::ostream &os) override;
     std::unique_ptr<solver::State> loadState(std::istream &is) override;
 

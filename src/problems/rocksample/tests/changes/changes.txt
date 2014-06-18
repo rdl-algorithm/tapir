@@ -1,5 +1,5 @@
 t 5 : 1
 Add Obstacles: (4, 1) (4, 4)
-t 10 : 4
+t 25 : 2
 Remove Obstacles: (0, 4) (0, 4)
 Remove Obstacles: (2, 6) (2, 6)

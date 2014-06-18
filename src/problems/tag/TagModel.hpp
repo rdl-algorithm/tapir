@@ -38,10 +38,10 @@ class TagState;
 /** Represents a change in the Tag model. */
 struct TagChange : public solver::ModelChange {
     std::string changeType = "";
-    double i0 = 0;
-    double i1 = 0;
-    double j0 = 0;
-    double j1 = 0;
+    long i0 = 0;
+    long i1 = 0;
+    long j0 = 0;
+    long j1 = 0;
 };
 
 class TagModel: public ModelWithProgramOptions {

@@ -122,14 +122,14 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
         cout << "Environment:" << endl;
         drawEnv(cout);
         cout << endl;
-
-        cout << "Distances to the goal:" << endl;
-        drawDistances(goalDistances_, std::cout);
-        cout << endl;
-
-        cout << "Distances to rock #2:" << endl;
-        drawDistances(rockDistances_[2], std::cout);
-        cout << endl;
+//
+//        cout << "Distances to the goal:" << endl;
+//        drawDistances(goalDistances_, std::cout);
+//        cout << endl;
+//
+//        cout << "Distances to rock #2:" << endl;
+//        drawDistances(rockDistances_[2], std::cout);
+//        cout << endl;
     }
 }
 
@@ -495,8 +495,8 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
             continue;
         }
 
-        for (long i = static_cast<long>(rsChange.i0); i <= rsChange.i1; i++) {
-            for (long j = static_cast<long>(rsChange.j0); j <= rsChange.j1; j++) {
+        for (long i = rsChange.i0; i <= rsChange.i1; i++) {
+            for (long j = rsChange.j0; j <= rsChange.j1; j++) {
                 RSCellType oldCellType = envMap_[i][j];
                 envMap_[i][j] = newCellType;
                 if (newCellType != oldCellType) {
@@ -541,20 +541,25 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
         tree->boxQuery(visitor, lowCorner, highCorner);
     }
 
-    //
-    if (searchCategory_ == RSActionCategory::LEGAL) {
+    // Only modify actions if we're working with a legal-only search.
+    if (solver != nullptr && searchCategory_ == RSActionCategory::LEGAL) {
         LegalActionsPool *actionPool = static_cast<LegalActionsPool *>(solver->getActionPool());
         for (GridPosition cell : affectedCells) {
             bool isLegal = (envMap_[cell.i][cell.j] != OBSTACLE);
-            for (ActionType actionType : {ActionType::NORTH, ActionType::EAST, ActionType::SOUTH,
-                ActionType::WEST}) {
-                GridPosition adjacentCell = makeAdjacentPosition(cell, actionType);
+            ActionType actionPairs[4][2] = {
+                    {ActionType::NORTH, ActionType::SOUTH},
+                    {ActionType::EAST, ActionType::WEST},
+                    {ActionType::SOUTH, ActionType::NORTH},
+                    {ActionType::WEST, ActionType::EAST}
+            };
+
+            for (auto &pair : actionPairs) {
+                GridPosition adjacentCell = makeAdjacentPosition(cell, pair[0]);
                 // Ignore cells that are out of bounds.
                 if (!isWithinBounds(adjacentCell)) {
                     continue;
                 }
-                RockSampleAction rsAction(actionType);
-                actionPool->setLegal(isLegal, adjacentCell, rsAction);
+                actionPool->setLegal(isLegal, adjacentCell, RockSampleAction(pair[1]), solver);
             }
         }
     }

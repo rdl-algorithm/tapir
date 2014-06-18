@@ -217,6 +217,14 @@ bool Simulator::stepSimulation() {
 
 bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
         bool areDynamic) {
+
+    // Set the change root appropriately.
+    if (areDynamic) {
+        solver_->setChangeRoot(agent_->getCurrentBelief());
+    } else {
+        solver_->setChangeRoot(nullptr);
+    }
+
     model_->applyChanges(changes, nullptr);
     solverModel_->applyChanges(changes, solver_);
 
@@ -241,12 +249,8 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
         }
     }
 
-    // Dynamic changes => apply changes
-    if (areDynamic) {
-        solver_->applyChanges(agent_->getCurrentBelief());
-    } else {
-        solver_->applyChanges(nullptr);
-    }
+    // Finally we apply the changes.
+    solver_->applyChanges();
     return true;
 }
 

@@ -75,18 +75,29 @@ public:
      * the given belief node.
      */
     void improvePolicy(BeliefNode *startNode, long numberOfHistories = -1, long maximumDepth = -1);
-    /** Applies any model changes that have been marked within the state pool.
-     *
-     * Changes are only applied at belief nodes that are descendants of the given node, or at
-     * all belief nodes if the given node is nullptr
-     */
-    void applyChanges(BeliefNode *changeRoot = nullptr);
     /** Replenishes the particle count in the child node, ensuring that it
      * has at least the given number of particles
      * (-1 => default == model.getMinParticleCount())
      */
     BeliefNode *replenishChild(BeliefNode *currNode, Action const &action, Observation const &obs,
             long minParticleCount = -1);
+
+    /* ------------------- Change handling methods ------------------- */
+    /** Returns the current root node for changes. */
+    BeliefNode *getChangeRoot() const;
+    /** Sets the root node for the changes. nullptr = all nodes. */
+    void setChangeRoot(BeliefNode *changeRoot);
+    /** Returns true iff the given node is affected by the current changes, which is expressed
+     * via the change root, and a map storing info as to whether or not nodes have been
+     * affected.
+     */
+    bool isAffected(BeliefNode const *node);
+    /** Applies any model changes that have been marked within the state pool.
+     *
+     * Changes are only applied at belief nodes that are descended from the change root,
+     * or at all belief nodes if the change root is nullptr.
+     */
+    void applyChanges();
 
     /* ------------------ Display methods  ------------------- */
     /** Shows a belief node in a nice, readable way. */
@@ -156,14 +167,6 @@ private:
     /** Continues a pre-existing history sequence from its endpoint. */
     void continueSearch(HistorySequence *sequence, long maximumDepth = -1);
 
-    /* ------------------- Policy mutator helper methods ------------------- */
-    /** Returns true iff the given node is affected by the current change, which is expressed
-     * via the change root, and a map storing info as to whether or not nodes have been
-     * affected.
-     */
-    bool isAffected(BeliefNode const *node, BeliefNode const *changeRoot,
-            std::unordered_map<BeliefNode const *, bool> *isAffectedMap);
-
     /* ------------------ Private deferred backup methods. ------------------- */
     /** Adds a new node that requires backing up. */
     void addNodeToBackup(BeliefNode *node);
@@ -200,6 +203,12 @@ private:
 
     /** The nodes to be updated, sorted by depth (deepest first) */
     std::map<int, std::set<BeliefNode *>, std::greater<int>> nodesToBackup_;
+
+    /** The root node for changes that will be applied. */
+    BeliefNode *changeRoot_;
+
+    /** A map to store which nodes are affected by changes and which are not. */
+    std::unordered_map<BeliefNode const *, bool> isAffectedMap_;
 };
 } /* namespace solver */
 
