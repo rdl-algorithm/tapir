@@ -25,7 +25,8 @@ public:
                 discountFactor_(vm["problem.discountFactor"].as<double>()),
                 minParticleCount_(vm["simulation.minParticleCount"].as<unsigned long>()),
                 historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
-                maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
+                stepTimeout_(vm["ABT.stepTimeout"].as<double>()),
+                maximumDepth_(vm["ABT.maximumDepth"].as<long>()),
                 generatorParsers_(),
                 heuristicParsers_(),
                 searchParsers_(),
@@ -69,6 +70,9 @@ public:
     }
     virtual long getNumberOfHistoriesPerStep() override {
         return historiesPerStep_;
+    }
+    virtual double getStepTimeout() override {
+        return stepTimeout_;
     }
     virtual long getMaximumDepth() override {
         return maximumDepth_;
@@ -127,6 +131,7 @@ private:
 // ABT parameters
     unsigned long minParticleCount_;
     long historiesPerStep_;
+    double stepTimeout_;
     long maximumDepth_;
 
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> generatorParsers_;

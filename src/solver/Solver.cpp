@@ -56,7 +56,6 @@ using std::endl;
 
 namespace solver {
 Solver::Solver(std::unique_ptr<Model> model) :
-            randGen_(model->getRandomGenerator()),
             model_(std::move(model)),
             serializer_(model_->createSerializer(this)),
             statePool_(nullptr),
@@ -115,54 +114,32 @@ void Solver::initializeEmpty() {
 }
 
 /* ------------------- Policy mutators ------------------- */
-void Solver::improvePolicy(long numberOfHistories, long maximumDepth) {
+void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long maximumDepth,
+        double timeout) {
+    double startTime = abt::clock_ms();
+
     if (numberOfHistories < 0) {
         numberOfHistories = model_->getNumberOfHistoriesPerStep();
     }
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
-
-    // Generate the initial states.
-    std::vector<StateInfo *> states;
-    for (long i = 0; i < numberOfHistories; i++) {
-        states.push_back(statePool_->createOrGetInfo(*model_->sampleAnInitState()));
+    if (timeout < 0) {
+        timeout = model_->getStepTimeout();
     }
-    multipleSearches(policy_->getRoot(), states, maximumDepth);
-}
-
-void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long maximumDepth) {
-    if (numberOfHistories < 0) {
-        numberOfHistories = model_->getNumberOfHistoriesPerStep();
-    }
-    if (maximumDepth < 0) {
-        maximumDepth = model_->getMaximumDepth();
-    }
-    if (startNode->getNumberOfParticles() == 0) {
-        debug::show_message("ERROR: No particles in the BeliefNode!");
-        std::exit(10);
+    if (timeout == 0) {
+        // 0 => no timeout.
+        timeout = std::numeric_limits<double>::infinity();
     }
 
-    std::vector<StateInfo *> nonTerminalStates;
-    for (long index = 0; index < startNode->getNumberOfParticles(); index++) {
-        HistoryEntry *entry = startNode->particles_.get(index);
-        if (!model_->isTerminal(*entry->getState())) {
-            nonTerminalStates.push_back(entry->stateInfo_);
-        }
-    }
-    if (nonTerminalStates.empty()) {
-        debug::show_message("ERROR: No non-terminal particles!");
-        std::exit(11);
-    }
 
-    std::vector<StateInfo *> samples;
-    for (long i = 0; i < numberOfHistories; i++) {
-        long index = std::uniform_int_distribution<long>(0, nonTerminalStates.size() - 1)(
-                *randGen_);
-        samples.push_back(nonTerminalStates[index]);
-    }
+    std::vector<StateInfo *> sampledStates = sampleStates(startNode, numberOfHistories);
 
-    multipleSearches(startNode, samples, maximumDepth);
+    // Null start node => use the root.
+    if (startNode == nullptr) {
+        startNode = policy_->getRoot();
+    }
+    multipleSearches(startNode, sampledStates, maximumDepth, startTime + timeout);
 }
 
 BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
@@ -575,13 +552,62 @@ void Solver::initialize() {
 }
 
 /* ------------------ Episode sampling methods ------------------- */
+std::vector<StateInfo *> Solver::sampleStates(BeliefNode *node, long numSamples) {
+    if (node == nullptr) {
+        // Nullptr => sample initial states.
+        std::vector<StateInfo *> sampledStates;
+        for (long i = 0; i < numSamples; i++) {
+            sampledStates.push_back(statePool_->createOrGetInfo(*model_->sampleAnInitState()));
+        }
+        return std::move(sampledStates);
+    }
+
+
+    if (node->getNumberOfParticles() == 0) {
+        debug::show_message("ERROR: No particles in the current node!");
+        return std::vector<StateInfo *>();
+    }
+
+    // First we filter out non-terminal states.
+    std::vector<StateInfo *> nonTerminalStates;
+    for (long index = 0; index < node->getNumberOfParticles(); index++) {
+        HistoryEntry *entry = node->particles_.get(index);
+        if (!model_->isTerminal(*entry->getState())) {
+            nonTerminalStates.push_back(entry->stateInfo_);
+        }
+    }
+    if (nonTerminalStates.empty()) {
+        debug::show_message("ERROR: No non-terminal particles in the current node!");
+        return std::vector<StateInfo *>();
+    }
+
+    std::vector<StateInfo *> sampledStates;
+    for (long i = 0; i < numSamples; i++) {
+        long index = std::uniform_int_distribution<long>(0, nonTerminalStates.size() - 1)(
+                *model_->getRandomGenerator());
+        sampledStates.push_back(nonTerminalStates[index]);
+    }
+    return std::move(sampledStates);
+}
+
 void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> states,
-        long maximumDepth) {
+        long maximumDepth, double endTime) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
     }
+
+    long numSearches = 0;
     for (StateInfo *stateInfo : states) {
+        // If we've gone past the termination time, stop searching.
+        if (abt::clock_ms() >= endTime) {
+            break;
+        }
         singleSearch(startNode, stateInfo, maximumDepth);
+        numSearches++;
+    }
+
+    if (model_->hasVerboseOutput()) {
+        cout << "Stopped early; " << numSearches << " histories generated." << endl;
     }
 
     // Backup all the way back to the root of the tree to maintain consistency.

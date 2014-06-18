@@ -114,7 +114,13 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             return 1;
         }
 
-        std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&randGen, vm);
+        // We want the simulated history to be independent of the solver's searching,
+        // so we create a different random generator here.
+        RandomGenerator solverGen(randGen);
+        // Advance it forward a long way to avoid correlation between the solver and simulator.
+        solverGen.discard(10000);
+
+        std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&solverGen, vm);
         solver::Solver solver(std::move(solverModel));
         solver.getSerializer()->load(inFile);
         inFile.close();

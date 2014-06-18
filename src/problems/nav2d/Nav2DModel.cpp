@@ -119,7 +119,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
         std::ostringstream message;
         message << "Failed to open " << mapPath;
         debug::show_message(message.str());
-        exit(1);
+        std::exit(1);
     }
     std::string line;
     while (std::getline(inFile, line)) {

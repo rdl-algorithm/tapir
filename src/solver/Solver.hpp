@@ -66,15 +66,14 @@ public:
 
     /* ------------------- Policy mutators ------------------- */
     /** Improves the policy by generating the given number of histories from
-     * root node (-1 => default)
-     * Histories are terminated upon reaching the maximum depth in the tree
-     * (-1 => default)
+     * the given belief node; nullptr => sample initial states from the model.
+     *
+     * numberOfHistories is the number of histories to make (-1 => default),
+     * maximumDepth is the maximum depth allowed in the tree (-1 => default),
+     * timeout is the maximum allowed time in milliseconds (-1 => default, 0 => no timeout)
      */
-    void improvePolicy(long numberOfHistories = -1, long maximumDepth = -1);
-    /** Improves the policy by generating the given number of histories from
-     * the given belief node.
-     */
-    void improvePolicy(BeliefNode *startNode, long numberOfHistories = -1, long maximumDepth = -1);
+    void improvePolicy(BeliefNode *startNode = nullptr,
+            long numberOfHistories = -1, long maximumDepth = -1, double timeout = -1);
     /** Replenishes the particle count in the child node, ensuring that it
      * has at least the given number of particles
      * (-1 => default == model.getMinParticleCount())
@@ -159,9 +158,12 @@ private:
     void initialize();
 
     /* ------------------ Episode sampling methods ------------------- */
+    /** Samples starting states for simulations from a belief node. */
+    std::vector<StateInfo *> sampleStates(BeliefNode *node, long numSamples);
+
     /** Runs multiple searches from the given start node and start states. */
     void multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
-            long maximumDepth = -1);
+            long maximumDepth = -1, double endTime = std::numeric_limits<double>::infinity());
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth = -1);
     /** Continues a pre-existing history sequence from its endpoint. */
@@ -172,9 +174,6 @@ private:
     void addNodeToBackup(BeliefNode *node);
 
     /* ------------------ Private data fields ------------------- */
-    /** The random number generator used. */
-    RandomGenerator *randGen_;
-
     /** The POMDP model */
     std::unique_ptr<Model> model_;
 

@@ -101,7 +101,7 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
         std::ostringstream message;
         message << "Failed to open " << mapPath;
         debug::show_message(message.str());
-        exit(1);
+        std::exit(1);
     }
     inFile >> nRows_ >> nCols_;
     std::string tmp;

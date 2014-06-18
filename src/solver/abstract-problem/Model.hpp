@@ -61,6 +61,8 @@ public:
      * in a single time step.
      */
     virtual long getNumberOfHistoriesPerStep() = 0;
+    /** Returns the maximum number of milliseconds per step. */
+    virtual double getStepTimeout() = 0;
     /** Returns the maximum depth allowed in the tree. */
     virtual long getMaximumDepth() = 0;
 
