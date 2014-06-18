@@ -139,7 +139,13 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
     if (startNode == nullptr) {
         startNode = policy_->getRoot();
     }
-    multipleSearches(startNode, sampledStates, maximumDepth, startTime + timeout);
+
+    long numHistories = multipleSearches(
+            startNode, sampledStates, maximumDepth, startTime + timeout);
+    double timeTaken = abt::clock_ms() - startTime;
+    if (model_->hasVerboseOutput()) {
+        cout << numHistories << " histories in " << timeTaken << "ms." << endl;
+    }
 }
 
 BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
@@ -590,7 +596,7 @@ std::vector<StateInfo *> Solver::sampleStates(BeliefNode *node, long numSamples)
     return std::move(sampledStates);
 }
 
-void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> states,
+long Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> states,
         long maximumDepth, double endTime) {
     if (maximumDepth < 0) {
         maximumDepth = model_->getMaximumDepth();
@@ -606,12 +612,10 @@ void Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> st
         numSearches++;
     }
 
-    if (model_->hasVerboseOutput()) {
-        cout << "Stopped early; " << numSearches << " histories generated." << endl;
-    }
-
     // Backup all the way back to the root of the tree to maintain consistency.
     doBackup();
+
+    return numSearches;
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth) {

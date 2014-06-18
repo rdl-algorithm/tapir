@@ -161,8 +161,10 @@ private:
     /** Samples starting states for simulations from a belief node. */
     std::vector<StateInfo *> sampleStates(BeliefNode *node, long numSamples);
 
-    /** Runs multiple searches from the given start node and start states. */
-    void multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
+    /** Runs multiple searches from the given start node and start states.
+     *
+     * Returns the number of histories generated. */
+    long multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
             long maximumDepth = -1, double endTime = std::numeric_limits<double>::infinity());
     /** Searches from the given start node with the given start state. */
     void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth = -1);
