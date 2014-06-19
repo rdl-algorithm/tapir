@@ -143,7 +143,7 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
 
 /* -------------------- Simple setters  ---------------------- */
 void BeliefNode::updateTimeOfLastChange() {
-    tLastChange_ = abt::clock_ms();
+    // tLastChange_ = abt::clock_ms();
 }
 
 /* ----------------- Management of cached values ------------------- */

@@ -23,7 +23,7 @@ public:
     _NO_COPY_OR_MOVE(CachedValue);
 
     virtual void updateCache() {
-        lastUpdateTime_ = abt::clock_ms();
+        // lastUpdateTime_ = abt::clock_ms();
         cache_ = function_(node_);
     }
 

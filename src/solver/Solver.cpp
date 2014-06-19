@@ -602,10 +602,15 @@ long Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> st
         maximumDepth = model_->getMaximumDepth();
     }
 
+    bool hasTimeout = true;
+    if (endTime == std::numeric_limits<double>::infinity()) {
+        hasTimeout = false;
+    }
+
     long numSearches = 0;
     for (StateInfo *stateInfo : states) {
         // If we've gone past the termination time, stop searching.
-        if (abt::clock_ms() >= endTime) {
+        if (hasTimeout && abt::clock_ms() >= endTime) {
             break;
         }
         singleSearch(startNode, stateInfo, maximumDepth);
