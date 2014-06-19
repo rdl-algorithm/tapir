@@ -15,6 +15,7 @@
 
 #include "position_history.hpp"
 #include "smart_history.hpp"
+#include "LegalActionsPool.hpp"
 #include "global.hpp"
 
 namespace solver {
@@ -23,7 +24,6 @@ class Solver;
 
 namespace rocksample {
 class RockSampleTextSerializer: virtual public solver::TextSerializer,
-    virtual public solver::DiscretizedActionTextSerializer,
     virtual public solver::EnumeratedObservationTextSerializer {
 public:
     RockSampleTextSerializer() = default;
@@ -49,7 +49,15 @@ public:
     virtual int getObservationColumnWidth() override;
 };
 
+class RockSampleBasicTextSerializer: public RockSampleTextSerializer,
+    public solver::DiscretizedActionTextSerializer {
+public:
+    RockSampleBasicTextSerializer(solver::Solver *solver);
+    virtual ~RockSampleBasicTextSerializer() = default;
+};
+
 class RockSampleLegalActionsTextSerializer: public RockSampleTextSerializer,
+        public LegalActionsPoolTextSerializer,
         public PositionDataTextSerializer {
 public:
     RockSampleLegalActionsTextSerializer(solver::Solver *solver);
@@ -57,6 +65,7 @@ public:
 };
 
 class RockSamplePreferredActionsTextSerializer: public RockSampleTextSerializer,
+        public solver::DiscretizedActionTextSerializer,
         public PositionAndRockDataTextSerializer {
 public:
     RockSamplePreferredActionsTextSerializer(solver::Solver *solver);

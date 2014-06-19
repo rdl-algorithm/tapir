@@ -880,7 +880,7 @@ std::unique_ptr<solver::Serializer> RockSampleModel::createSerializer(solver::So
     case RSActionCategory::PREFERRED:
         return std::make_unique<RockSamplePreferredActionsTextSerializer>(solver);
     default:
-        return std::make_unique<RockSampleTextSerializer>(solver);
+        return std::make_unique<RockSampleBasicTextSerializer>(solver);
     }
 }
 } /* namespace rocksample */

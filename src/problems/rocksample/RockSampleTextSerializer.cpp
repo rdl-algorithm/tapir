@@ -228,6 +228,9 @@ int RockSampleTextSerializer::getObservationColumnWidth() {
     return 4;
 }
 
+RockSampleBasicTextSerializer::RockSampleBasicTextSerializer(solver::Solver *solver) :
+        Serializer(solver) {
+}
 RockSampleLegalActionsTextSerializer::RockSampleLegalActionsTextSerializer(solver::Solver *solver) :
         Serializer(solver) {
 }

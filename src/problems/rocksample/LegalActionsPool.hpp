@@ -28,6 +28,9 @@ class LegalActionsPool: public solver::EnumeratedActionPool {
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping(
             solver::BeliefNode *node) override;
 
+    /** Adds a mapping to the saved entries for a given grid position. */
+    virtual void addMapping(GridPosition position, solver::DiscretizedActionMap *map);
+
     /* Sets the legality of the given action from the current position.
      *
      * If the solver is not nullptr, it will be queried for which belief nodes are affected
@@ -37,6 +40,16 @@ class LegalActionsPool: public solver::EnumeratedActionPool {
   private:
     RockSampleModel *model_;
     std::unordered_map<GridPosition, std::unordered_set<solver::DiscretizedActionMap *>> mappings_;
+};
+
+class LegalActionsPoolTextSerializer: virtual public solver::DiscretizedActionTextSerializer {
+  public:
+    LegalActionsPoolTextSerializer() = default;
+    virtual ~LegalActionsPoolTextSerializer() = default;
+    _NO_COPY_OR_MOVE(LegalActionsPoolTextSerializer);
+
+    virtual std::unique_ptr<solver::ActionMapping> loadActionMapping(solver::BeliefNode *node,
+            std::istream &is) override;
 };
 } /* namespace rocksample */
 

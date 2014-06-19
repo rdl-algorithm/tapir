@@ -1,5 +1,6 @@
 #include "LegalActionsPool.hpp"
 
+#include <iostream>
 #include <memory>
 
 #include "solver/Solver.hpp"
@@ -34,9 +35,13 @@ std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping(
 
     solver::DiscretizedActionMap *discMap = (
             static_cast<solver::DiscretizedActionMap *>(mapping.get()));
-    mappings_[data.getPosition()].insert(discMap);
+    addMapping(data.getPosition(), discMap);
 
     return std::move(mapping);
+}
+
+void LegalActionsPool::addMapping(GridPosition position, solver::DiscretizedActionMap *map) {
+    mappings_[position].insert(map);
 }
 
 void LegalActionsPool::setLegal(bool isLegal, GridPosition position,
@@ -47,5 +52,18 @@ void LegalActionsPool::setLegal(bool isLegal, GridPosition position,
             discMap->getEntry(action)->setLegal(isLegal);
         }
     }
+}
+
+/* ------------------- LegalActionsPoolTextSerializer ------------------- */
+std::unique_ptr<solver::ActionMapping>
+LegalActionsPoolTextSerializer::loadActionMapping(solver::BeliefNode *owner, std::istream &is) {
+    std::unique_ptr<solver::ActionMapping> mapping = (
+            DiscretizedActionTextSerializer::loadActionMapping(owner, is));
+    solver::DiscretizedActionMap *map = static_cast<solver::DiscretizedActionMap *>(mapping.get());
+    LegalActionsPool &pool = static_cast<LegalActionsPool &>(*getSolver()->getActionPool());
+    GridPosition position = static_cast<PositionData &>(*owner->getHistoricalData()).getPosition();
+    pool.addMapping(position, map);
+
+    return std::move(mapping);
 }
 } /* namespace rocksample */
