@@ -23,7 +23,7 @@ double RolloutHeuristic::getHeuristicValue(HistoryEntry const *entry,
             entry, state, data);
     double value = 0.0;
     double netDiscount = 1.0;
-    double discountFactor = model_->getDiscountFactor();
+    double discountFactor = model_->getOptions()->discountFactor;
 
     Model::StepResult result = generator->getStep(entry, state, data);
     std::unique_ptr<State> currentState = state->copy();

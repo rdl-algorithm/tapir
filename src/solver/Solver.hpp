@@ -14,6 +14,7 @@
 #include "abstract-problem/Action.hpp"                   // for Action
 #include "abstract-problem/Model.hpp"                    // for Model, Model::StepResult
 #include "abstract-problem/Observation.hpp"              // for Observation
+#include "abstract-problem/Options.hpp"              // for Options
 #include "abstract-problem/State.hpp"
 
 #include "changes/ChangeFlags.hpp"               // for ChangeFlags
@@ -49,6 +50,8 @@ public:
     StatePool *getStatePool() const;
     /** Returns the model. */
     Model *getModel() const;
+    /** Returns the options used by the solver and model. */
+    Options const *getOptions() const;
     /** Returns the action pool. */
     ActionPool *getActionPool() const;
     /** Returns the observation pool. */
@@ -180,6 +183,8 @@ private:
     /* ------------------ Private data fields ------------------- */
     /** The POMDP model */
     std::unique_ptr<Model> model_;
+    /** The configuration setings. */
+    Options const *options_;
 
     /** The serializer to be used with this solver. */
     std::unique_ptr<Serializer> serializer_;

@@ -24,6 +24,7 @@ namespace solver {
 Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver, bool hasDynamicChanges) :
         model_(std::move(model)),
         solver_(solver),
+        options_(solver_->getOptions()),
         solverModel_(solver_->getModel()),
         agent_(std::make_unique<Agent>(solver_)),
         hasDynamicChanges_(hasDynamicChanges),
@@ -89,7 +90,7 @@ void Simulator::setMaxStepCount(long maxStepCount) {
 double Simulator::runSimulation() {
     while (stepSimulation()) {
     }
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << endl << endl << "Final State:" << endl;
         State const &currentState = *getCurrentState();
         cout << currentState << endl;
@@ -110,7 +111,7 @@ bool Simulator::stepSimulation() {
     HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     State const *currentState = getCurrentState();
     BeliefNode *currentBelief = agent_->getCurrentBelief();
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << endl << endl << "t-" << stepCount_ << endl;
         cout << "State: " << *currentState << endl;
         cout << "Heuristic Value: " << model_->getHeuristicFunction()(currentEntry,
@@ -130,7 +131,7 @@ bool Simulator::stepSimulation() {
 
     ChangeSequence::iterator iter = changeSequence_.find(stepCount_);
     if (iter != changeSequence_.end()) {
-        if (model_->hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << "Model changing." << endl;
         }
         double changingTimeStart = abt::clock_ms();
@@ -141,7 +142,7 @@ bool Simulator::stepSimulation() {
         }
         double changingTime = abt::clock_ms() - changingTimeStart;
         totalChangingTime_ += changingTime;
-        if (model_->hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << "Changes complete" << endl;
             cout << "Total of " << changingTime << " ms used for changes." << endl;
         }
@@ -151,7 +152,7 @@ bool Simulator::stepSimulation() {
     solver_->improvePolicy(currentBelief);
     totalImprovementTime_ += (abt::clock_ms() - impSolTimeStart);
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         std::stringstream newStream;
         newStream << "After:" << endl;
         solver_->printBelief(currentBelief, newStream);
@@ -172,7 +173,7 @@ bool Simulator::stepSimulation() {
     }
     Model::StepResult result = model_->generateStep(*currentState, *action);
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         if (result.isTerminal) {
             cout << "Reached a terminal state!" << endl;
         }
@@ -204,7 +205,7 @@ bool Simulator::stepSimulation() {
     currentEntry->stateInfo_ = nextInfo;
 
     totalDiscountedReward_ += currentDiscount_ * result.reward;
-    currentDiscount_ *= model_->getDiscountFactor();
+    currentDiscount_ *= options_->discountFactor;
     stepCount_++;
 
     if (currentBelief->getNumberOfParticles() == 0) {

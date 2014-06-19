@@ -1,10 +1,8 @@
-#ifndef MODELWITHPROGRAMOPTIONS_HPP_
-#define MODELWITHPROGRAMOPTIONS_HPP_
+#ifndef SHARED_MODELWITHPROGRAMOPTIONS_HPP_
+#define SHARED_MODELWITHPROGRAMOPTIONS_HPP_
 
 #include <memory>
 #include <string>
-
-#include <boost/program_options.hpp>    // for variables_map, variable_value, program_option
 
 #include "global.hpp"                     // for RandomGenerator
 
@@ -15,27 +13,18 @@
 #include "solver/changes/DefaultHistoryCorrector.hpp"
 
 #include "problems/shared/parsers.hpp"
+#include "problems/shared/SharedOptions.hpp"
 
-namespace po = boost::program_options;
-
+namespace shared {
 class ModelWithProgramOptions: public solver::Model {
 public:
-    ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
+    ModelWithProgramOptions(RandomGenerator *randGen) :
                 randGen_(randGen),
-                discountFactor_(vm["problem.discountFactor"].as<double>()),
-                minParticleCount_(vm["simulation.minParticleCount"].as<unsigned long>()),
-                historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
-                stepTimeout_(vm["ABT.stepTimeout"].as<double>()),
-                maximumDepth_(vm["ABT.maximumDepth"].as<long>()),
+                options_(static_cast<SharedOptions const *>(getOptions())),
                 generatorParsers_(),
                 heuristicParsers_(),
                 searchParsers_(),
-                estimationParsers_(),
-                heuristicString_(vm["ABT.searchHeuristic"].as<std::string>()),
-                searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
-                estimatorString_(vm["ABT.estimator"].as<std::string>()),
-                hasColorOutput_(vm["color"].as<bool>()),
-                hasVerboseOutput_(vm["verbose"].as<bool>()) {
+                estimationParsers_() {
 
         registerGeneratorParser("ucb", std::make_unique<UcbParser>());
         registerGeneratorParser("rollout", std::make_unique<DefaultRolloutParser>());
@@ -46,7 +35,7 @@ public:
         registerHeuristicParser("zero", std::make_unique<ZeroHeuristicParser>());
 
         searchParsers_.setDefaultParser(std::make_unique<BasicSearchParser>(
-                &generatorParsers_, &heuristicParsers_, heuristicString_));
+                &generatorParsers_, &heuristicParsers_, options_->searchHeuristic));
         registerSearchParser("exp3", std::make_unique<Exp3Parser>(&searchParsers_));
 
         registerEstimationParser("mean", std::make_unique<AverageEstimateParser>());
@@ -60,28 +49,6 @@ public:
 // Simple getters
     virtual RandomGenerator *getRandomGenerator() override {
         return randGen_;
-    }
-
-    virtual double getDiscountFactor() override {
-        return discountFactor_;
-    }
-    virtual unsigned long getMinParticleCount() override {
-        return minParticleCount_;
-    }
-    virtual long getNumberOfHistoriesPerStep() override {
-        return historiesPerStep_;
-    }
-    virtual double getStepTimeout() override {
-        return stepTimeout_;
-    }
-    virtual long getMaximumDepth() override {
-        return maximumDepth_;
-    }
-    virtual bool hasColorOutput() override {
-        return hasColorOutput_;
-    }
-    virtual bool hasVerboseOutput() override {
-        return hasVerboseOutput_;
     }
 
     virtual void registerGeneratorParser(std::string name,
@@ -103,19 +70,19 @@ public:
 
     virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(solver::Solver *solver)
             override {
-        return searchParsers_.parse(solver, searchStrategyString_);
+        return searchParsers_.parse(solver, options_->searchStrategy);
     }
     virtual std::unique_ptr<solver::EstimationStrategy> createEstimationStrategy(
             solver::Solver *solver) override {
-        return estimationParsers_.parse(solver, estimatorString_);
+        return estimationParsers_.parse(solver, options_->estimator);
     }
     virtual std::unique_ptr<solver::HistoryCorrector> createHistoryCorrector(
             solver::Solver *solver) override {
         return std::make_unique<solver::DefaultHistoryCorrector>(solver,
-                heuristicParsers_.parse(solver, heuristicString_));
+                heuristicParsers_.parse(solver, options_->searchHeuristic));
     }
     virtual solver::Heuristic getHeuristicFunction() final override {
-        return heuristicParsers_.parse(nullptr, heuristicString_);
+        return heuristicParsers_.parse(nullptr, options_->searchHeuristic);
     }
     virtual double getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
             solver::State const */*state*/, solver::HistoricalData const */*data*/) {
@@ -125,26 +92,13 @@ public:
 private:
     RandomGenerator *randGen_;
 
-// Problem parameters.
-    double discountFactor_;
-
-// ABT parameters
-    unsigned long minParticleCount_;
-    long historiesPerStep_;
-    double stepTimeout_;
-    long maximumDepth_;
+    SharedOptions const *options_;
 
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> generatorParsers_;
     ParserSet<solver::Heuristic> heuristicParsers_;
     ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
     ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
-
-    std::string heuristicString_;
-    std::string searchStrategyString_;
-    std::string estimatorString_;
-
-    bool hasColorOutput_;
-    bool hasVerboseOutput_;
 };
+} /* namespace shared */
 
-#endif /* MODELWITHPROGRAMOPTIONS_HPP_ */
+#endif /* SHARED_MODELWITHPROGRAMOPTIONS_HPP_ */

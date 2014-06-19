@@ -1,5 +1,5 @@
-#ifndef STRATEGY_PARSERS_HPP_
-#define STRATEGY_PARSERS_HPP_
+#ifndef SHARED_PARSERS_HPP_
+#define SHARED_PARSERS_HPP_
 
 #include <unordered_map>
 
@@ -7,6 +7,7 @@
 #include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
 
+namespace shared {
 template<typename TargetType> class Parser;
 class ModelWithProgramOptions;
 
@@ -176,4 +177,6 @@ public:
     virtual std::unique_ptr<solver::EstimationStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
-#endif /* STRATEGY_PARSERS_HPP_ */
+} /* namespace shared */
+
+#endif /* SHARED_PARSERS_HPP_ */

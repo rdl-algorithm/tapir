@@ -19,6 +19,7 @@
 
 #include "problems/shared/ModelWithProgramOptions.hpp"
 
+namespace shared {
 std::vector<std::string> split_function(std::string text) {
     std::size_t i0 = text.find('(');
     std::size_t i1 = text.rfind(')');
@@ -168,3 +169,4 @@ std::unique_ptr<solver::EstimationStrategy> RobustEstimateParser::parse(solver::
         std::vector<std::string> /*args*/) {
     return std::make_unique<solver::EstimationFunction>(solver::estimators::robust_q_value);
 }
+} /* namespace shared */

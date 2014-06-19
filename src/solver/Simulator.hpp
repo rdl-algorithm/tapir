@@ -6,6 +6,7 @@
 #include "abstract-problem/Action.hpp"
 #include "abstract-problem/ModelChange.hpp"
 #include "abstract-problem/Observation.hpp"
+#include "abstract-problem/Options.hpp"
 #include "abstract-problem/State.hpp"
 
 #include "Agent.hpp"
@@ -46,6 +47,7 @@ public:
 private:
     std::unique_ptr<Model> model_;
     Solver *solver_;
+    Options const *options_;
     Model *solverModel_;
     std::unique_ptr<Agent> agent_;
 

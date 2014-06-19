@@ -57,6 +57,7 @@ using std::endl;
 namespace solver {
 Solver::Solver(std::unique_ptr<Model> model) :
             model_(std::move(model)),
+            options_(model_->getOptions()),
             serializer_(model_->createSerializer(this)),
             statePool_(nullptr),
             histories_(nullptr),
@@ -85,17 +86,18 @@ StatePool *Solver::getStatePool() const {
 Model *Solver::getModel() const {
     return model_.get();
 }
+Options const *Solver::getOptions() const {
+    return options_;
+}
 ActionPool *Solver::getActionPool() const {
     return actionPool_.get();
 }
 ObservationPool *Solver::getObservationPool() const {
     return observationPool_.get();
 }
-
 EstimationStrategy *Solver::getEstimationStrategy() const {
     return estimationStrategy_.get();
 }
-
 Serializer *Solver::getSerializer() const {
     return serializer_.get();
 }
@@ -118,13 +120,13 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
         double timeout) {
     double startTime = abt::clock_ms();
     if (numberOfHistories < 0) {
-        numberOfHistories = model_->getNumberOfHistoriesPerStep();
+        numberOfHistories = options_->historiesPerStep;
     }
     if (maximumDepth < 0) {
-        maximumDepth = model_->getMaximumDepth();
+        maximumDepth = options_->maximumDepth;
     }
     if (timeout < 0) {
-        timeout = model_->getStepTimeout();
+        timeout = options_->stepTimeout;
     }
 
     // No timeout => end at t=inf
@@ -147,7 +149,7 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
     long actualNumHistories = multipleSearches(startNode,  sampler, maximumDepth, numberOfHistories,
             startTime + timeout);
     double totalTimeTaken = abt::clock_ms() - startTime;
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << actualNumHistories << " histories in " << totalTimeTaken << "ms." << endl;
     }
 }
@@ -155,7 +157,7 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
 BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
         Observation const &obs, long minParticleCount) {
     if (minParticleCount < 0) {
-        minParticleCount = model_->getMinParticleCount();
+        minParticleCount = options_->minParticleCount;
     }
     BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
     long particleCount = nextNode->getNumberOfParticles();
@@ -164,7 +166,7 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
         return nextNode;
     }
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Replenishing particles...          ";
         cout.flush();
     }
@@ -201,7 +203,7 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
         histEntry->registerState(stateInfo);
         histEntry->registerNode(nextNode);
     }
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Done" << std::endl;
     }
     return nextNode;
@@ -350,7 +352,7 @@ void Solver::applyChanges() {
 
     long numAffected = affectedSequences.size();
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Must revise " << numAffected << " of ";
         cout << histories_->getNumberOfSequences() << " histories!" << endl;
     }
@@ -369,14 +371,14 @@ void Solver::applyChanges() {
         }
     }
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Deleted " << numAffected - affectedSequences.size() << " histories!" << endl;
     }
 
     // Revise all of the histories.
     historyCorrector_->reviseHistories(affectedSequences);
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Revision complete. Backing up..." << endl;
     }
 
@@ -387,12 +389,12 @@ void Solver::applyChanges() {
     statePool_->resetAffectedStates();
 
     // Now we extend sequences with illegal actions.
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Using search on " << affectedSequences.size() << " histories!" << endl;
     }
 
     for (HistorySequence *sequence : affectedSequences) {
-        searchStrategy_->extendSequence(sequence, model_->getMaximumDepth(), true);
+        searchStrategy_->extendSequence(sequence, options_->maximumDepth, true);
     }
 
     // Backup all the way to the root to keep the tree consistent.
@@ -442,7 +444,7 @@ void Solver::doBackup() {
                 double deltaQValue = node->getQValue() - oldQValue;
                 long nContinuations = node->getMapping()->getTotalVisitCount()
                         - node->getNumberOfStartingSequences();
-                double deltaTotalQ = model_->getDiscountFactor() * nContinuations * deltaQValue;
+                double deltaTotalQ = options_->discountFactor * nContinuations * deltaQValue;
 
                 ActionMappingEntry *parentActionEntry =
                         node->getParentActionNode()->getParentEntry();
@@ -464,7 +466,7 @@ void Solver::updateSequence(HistorySequence *sequence, int sgn, long firstEntryI
         return;
     }
 
-    double discountFactor = model_->getDiscountFactor();
+    double discountFactor = options_->discountFactor;
 
 
     // Traverse the sequence in reverse.
@@ -517,7 +519,7 @@ void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNCon
     deltaTotalQ += deltaNContinuations * node->getQValue();
 
     // Apply the discount factor.
-    deltaTotalQ *= model_->getDiscountFactor();
+    deltaTotalQ *= options_->discountFactor;
 
     ActionMappingEntry *parentActionEntry = node->getParentActionNode()->getParentEntry();
     if (parentActionEntry->update(0, deltaTotalQ)) {
@@ -621,7 +623,7 @@ long Solver::multipleSearches(BeliefNode *startNode, std::function<StateInfo *()
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth) {
     if (maximumDepth < 0) {
-        maximumDepth = model_->getMaximumDepth();
+        maximumDepth = options_->maximumDepth;
     }
 
     HistorySequence *sequence = histories_->createSequence();
@@ -635,7 +637,7 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long
 
 void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     if (maximumDepth < 0) {
-        maximumDepth = model_->getMaximumDepth();
+        maximumDepth = options_->maximumDepth;
     }
 
     // Extend and backup sequence.

@@ -34,19 +34,6 @@
 #include "solver/serialization/Serializer.hpp"
 
 namespace solver {
-/* ----------------------- Basic getters  ----------------------- */
-std::string Model::getName() {
-    return "Default Model";
-}
-
-/* ---------- Virtual getters for ABT / model parameters  ---------- */
-bool Model::hasColorOutput() {
-    return false;
-}
-bool Model::hasVerboseOutput() {
-    return false;
-}
-
 /* -------------------- Black box dynamics ---------------------- */
 // Transition parameters are optional
 std::unique_ptr<TransitionParameters> Model::generateTransition(
@@ -127,7 +114,7 @@ std::unique_ptr<Action> Model::getRolloutAction(HistoricalData const */*data*/,
 
 /* ------- Customization of more complex solver functionality  --------- */
 std::unique_ptr<StateIndex> Model::createStateIndex() {
-    return std::make_unique<RTree>(getNumberOfStateVariables());
+    return std::make_unique<RTree>(getOptions()->numberOfStateVariables);
 }
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) {

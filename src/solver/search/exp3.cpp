@@ -50,7 +50,7 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo, double timeU
     strategyInfo.timeSpent += timeUsed;
     strategyInfo.numberOfTimesUsed++;
     strategyInfo.weight *= std::exp(
-            strategyExplorationCoefficient_ * (deltaQ / model_->getMaxVal())
+            strategyExplorationCoefficient_ * (deltaQ / model_->getOptions()->maxVal)
                     / (2 * strategyInfo.probability));
 
     double weightTotal = 0.0;
