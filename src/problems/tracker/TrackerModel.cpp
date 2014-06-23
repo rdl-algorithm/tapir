@@ -391,8 +391,8 @@ bool TrackerModel::isValid(GridPosition const &position) {
 bool TrackerModel::isTargetVisible(GridPosition const &robotPos, int robotYaw,
     GridPosition const &targetPos) {
 
-    float rangeSquared = 6  * 6;   // cells squared
-    float viewCone = 23 * M_PI/180;    // radians
+    float rangeSquared = 7  * 7;   // cells squared
+    float viewCone = 25 * M_PI/180;    // radians
 
     if (robotPos == targetPos) {
         return true;
