@@ -21,11 +21,12 @@ using std::cout;
 using std::endl;
 
 namespace solver {
-Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver) :
+Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver, bool hasDynamicChanges) :
         model_(std::move(model)),
         solver_(solver),
         solverModel_(solver_->getModel()),
         agent_(std::make_unique<Agent>(solver_)),
+        hasDynamicChanges_(hasDynamicChanges),
         changeSequence_(),
         stepCount_(0),
         maxStepCount_(100),
@@ -37,7 +38,8 @@ Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver) :
         totalImprovementTime_(0.0) {
     std::unique_ptr<State> initialState = model_->sampleAnInitState();
     StateInfo *initInfo = solver_->getStatePool()->createOrGetInfo(*initialState);
-    actualHistory_->addEntry(initInfo);
+    HistoryEntry *newEntry = actualHistory_->addEntry();
+    newEntry->stateInfo_ = initInfo;
 }
 Model *Simulator::getModel() const {
     return model_.get();
@@ -105,12 +107,14 @@ bool Simulator::stepSimulation() {
     }
 
     std::stringstream prevStream;
+    HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     State const *currentState = getCurrentState();
     BeliefNode *currentBelief = agent_->getCurrentBelief();
     if (model_->hasVerboseOutput()) {
         cout << endl << endl << "t-" << stepCount_ << endl;
         cout << "State: " << *currentState << endl;
-        cout << "Heuristic Value: " << model_->getHeuristicValue(*currentState) << endl;
+        cout << "Heuristic Value: " << model_->getHeuristicFunction()(currentEntry,
+                currentState, currentBelief->getHistoricalData()) << endl;
         cout << "Belief #" << currentBelief->getId() << endl;
 
         solver::HistoricalData *data = currentBelief->getHistoricalData();
@@ -131,7 +135,7 @@ bool Simulator::stepSimulation() {
         }
         double changingTimeStart = abt::clock_ms();
         // Apply all the changes!
-        bool noError = handleChanges(iter->second);
+        bool noError = handleChanges(iter->second, hasDynamicChanges_);
         if (!noError) {
             return false;
         }
@@ -191,13 +195,13 @@ bool Simulator::stepSimulation() {
     agent_->updateBelief(*result.action, *result.observation);
     currentBelief = agent_->getCurrentBelief();
 
-    HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     currentEntry->action_ = std::move(result.action);
     currentEntry->observation_ = std::move(result.observation);
-    currentEntry->reward_ = result.reward;
+    currentEntry->immediateReward_ = result.reward;
     currentEntry->transitionParameters_ = std::move(result.transitionParameters);
     StateInfo *nextInfo = solver_->getStatePool()->createOrGetInfo(*result.nextState);
-    currentEntry = actualHistory_->addEntry(nextInfo);
+    currentEntry = actualHistory_->addEntry();
+    currentEntry->stateInfo_ = nextInfo;
 
     totalDiscountedReward_ += currentDiscount_ * result.reward;
     currentDiscount_ *= model_->getDiscountFactor();
@@ -211,29 +215,41 @@ bool Simulator::stepSimulation() {
     return !result.isTerminal;
 }
 
-bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes) {
-    StatePool *statePool = solver_->getStatePool();
-    for (std::unique_ptr<ModelChange> const &change : changes) {
-        model_->applyChange(*change, nullptr);
-        solverModel_->applyChange(*change, statePool);
+bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
+        bool areDynamic) {
+
+    // Set the change root appropriately.
+    if (areDynamic) {
+        solver_->setChangeRoot(agent_->getCurrentBelief());
+    } else {
+        solver_->setChangeRoot(nullptr);
     }
 
-    // Check if the model changes have invalidated our history...
+    model_->applyChanges(changes, nullptr);
+    solverModel_->applyChanges(changes, solver_);
+
+    // If the current state is deleted, the simulation is broken!
     StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();
     if (changes::has_flag(lastInfo->changeFlags_, ChangeFlags::DELETED)) {
         debug::show_message("ERROR: Current simulation state deleted!");
         return false;
     }
-    for (long i = 0; i < actualHistory_->getLength() - 1; i++) {
-        StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
-        if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
-            std::ostringstream message;
-            message << "ERROR: Impossible simulation history! Includes ";
-            message << *info->getState();
-            debug::show_message(message.str());
+
+    // If the changes are not dynamic and a past state is deleted, the simulation is broken.
+    if (!areDynamic) {
+        for (long i = 0; i < actualHistory_->getLength() - 1; i++) {
+            StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
+            if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
+                std::ostringstream message;
+                message << "ERROR: Impossible simulation history! Includes ";
+                message << *info->getState();
+                debug::show_message(message.str());
+                return false;
+            }
         }
     }
 
+    // Finally we apply the changes.
     solver_->applyChanges();
     return true;
 }

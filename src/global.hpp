@@ -12,6 +12,8 @@
 #include <sstream>
 #include <utility>                      // for forward
 
+#include "solver/abstract-problem/Point.hpp"
+
 #define _NO_COPY_OR_MOVE(ClassName) \
     ClassName(ClassName const &) = delete; \
     ClassName(ClassName &&) = delete; \
@@ -20,6 +22,8 @@
 
 typedef std::default_random_engine RandomGenerator;
 
+
+#if __cplusplus <= 201103L
 namespace std {
     template<class T> struct _Unique_if {
         typedef unique_ptr<T> _Single_object;
@@ -50,8 +54,20 @@ namespace std {
         typename _Unique_if<T>::_Known_bound
         make_unique(Args&&...) = delete;
 }
+#endif
 
 namespace abt {
+inline double clock_ms() {
+    return std::clock() * 1000.0 / CLOCKS_PER_SEC;
+}
+
+
+template<class T>
+inline void hash_combine(std::size_t &seed, T const &v) {
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
 // trim from start
 static inline std::string &ltrim(std::string &s) {
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
@@ -67,16 +83,6 @@ static inline std::string &rtrim(std::string &s) {
 // trim from both ends
 static inline std::string &trim(std::string &s) {
         return ltrim(rtrim(s));
-}
-
-inline double clock_ms() {
-    return std::clock() * 1000.0 / CLOCKS_PER_SEC;
-}
-
-template<class T>
-inline void hash_combine(std::size_t &seed, T const &v) {
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 template <typename T>
@@ -117,5 +123,4 @@ namespace debug {
         return sstr.str();
     }
 } /* namespace debug */
-
 #endif /* GLOBAL_HPP_ */

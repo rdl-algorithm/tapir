@@ -1,7 +1,7 @@
 # Root project folder
 ROOT := .
 
-HAS_ROOT_MAKEFILE = true
+HAS_ROOT_MAKEFILE := true
 
 # Build configurations
 DEFAULT_CFG := release
@@ -13,7 +13,7 @@ endif
 $(info Configuration: $(CFG))
 $(info )
 
-BUILDDIR = $(ROOT)/builds/$(CFG)
+BUILDDIR := $(ROOT)/builds/$(CFG)
 
 # ----------------------------------------------------------------------
 # Compiler & linker
@@ -42,25 +42,35 @@ override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
 ifeq ($(CXX),clang++)
   WARN               += -Weverything -Wno-c++98-compat
 endif
-ifeq ($(CXX),g++)
+ifneq (,$(findstring g++,$(CXX)))
   WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
   WARN               += -Wswitch-default -Wfatal-errors
   override CXXFLAGS  += -frounding-math
+  GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
+  ifeq ($(GCC_VERSION), 4.9)
+	CXXFLAGS_BASE := -std=c++1y
+	override CXXFLAGS += -fdiagnostics-color=auto
+  endif
 endif
 
 # Configuration-specific flags
 ifeq ($(CFG),release)
   override CXXFLAGS  += -O3
-endif
-ifeq ($(CFG),perf)
+else ifeq ($(CFG),profile)
+  override CPPFLAGS  += -DGOOGLE_PROFILER
   override CXXFLAGS  += -O3 -ggdb3
-endif
-ifeq ($(CFG),gprof)
-  override CXXFLAGS  += -O3 -pg
-  override LDFLAGS   += -pg
-endif
-ifeq ($(CFG),debug)
+  override LDFLAGS   += -ggdb3
+  override LDLIBS    += /usr/lib/libprofiler.so.0
+else ifeq ($(CFG),prof)
+  override CXXFLAGS  += -O3 -p -ggdb3
+  override LDFLAGS   += -p -ggdb3
+else ifeq ($(CFG),gprof)
+  override CXXFLAGS  += -O3 -pg -ggdb3
+  override LDFLAGS   += -pg -ggdb3
+else ifeq ($(CFG),debug)
   override CXXFLAGS  += -O0 -ggdb3
+else
+  $(error Could not find configuration $(CFG))
 endif
 
 # ----------------------------------------------------------------------
@@ -68,15 +78,15 @@ endif
 # ----------------------------------------------------------------------
 
 # Library directories
-override LIBDIRS  += -L/usr/lib/x86_64-linux-gnu/
+override LIBDIRS += -L/usr/lib/x86_64-linux-gnu/
 override LDFLAGS += $(LIBDIRS)
 
 # ----------------------------------------------------------------------
 # General-purpose recipes
 # ----------------------------------------------------------------------
-COMPILE_CMD = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c -o $@
-LINK_CMD    = $(CXX) $(LDFLAGS) -o $@
-MKDIR_RECIPE = @mkdir -p $@
+COMPILE_RECIPE = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $(1) -o $@
+LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
+MKDIR_RECIPE   = @mkdir -p $@
 
 # ----------------------------------------------------------------------
 # Universal grouping targets

@@ -33,8 +33,8 @@
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
 
-#include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations.hpp"
+#include "solver/mappings/actions/enumerated_actions.hpp"
+#include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
@@ -43,6 +43,7 @@
 #include "TrackerAction.hpp"
 #include "TrackerObservation.hpp"
 #include "TrackerState.hpp"
+#include "TrackerTextSerializer.hpp"
 #include "TrackerRos.hpp"   // getCurrYaw45(), getCurrCell(), isRayBlocked
 
 using std::cout;
@@ -68,8 +69,6 @@ TrackerModel::TrackerModel(RandomGenerator *randGen, po::variables_map vm) :
     maxVal_(visibleReward_),
     targetPolicy_(0)
 {
-	setAllActions(getAllActionsInOrder());
-
     if (hasVerboseOutput()) {
         cout << "Constructed the TrackerModel" << endl;
         cout << "Discount: " << getDiscountFactor() << endl;
@@ -121,6 +120,8 @@ void TrackerModel::setPolicyZones(std::vector<GridPosition> zones, int currZone,
 	targetP1MoveProbability_ = moveProbability;
 }
 
+
+/* --------------- The model interface proper ----------------- */
 std::unique_ptr<solver::State> TrackerModel::sampleAnInitState() {
     return sampleStateUniform();
 }
@@ -157,23 +158,7 @@ bool TrackerModel::isTerminal(solver::State const &state) {
     return false;
 }
 
-double TrackerModel::getHeuristicValue(solver::State const &state) {
-    return 0;
-
-    /*if (!heuristicEnabled()) {
-        return getDefaultVal();
-    }
-    TrackerState const &TrackerState = static_cast<TrackerState const &>(state);
-    GridPosition robotPos = trackerState.getRobotPosition();
-    GridPosition targetPos = trackerState.getTargetPosition();
-    long dist = robotPos.manhattanDistanceTo(targetPos);
-    double nSteps = dist;// / targetStayProbability_;
-    double finalDiscount = std::pow(getDiscountFactor(), nSteps);
-    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
-    qVal += finalDiscount * visibleReward_;
-    return qVal;*/
-}
-
+/* -------------------- Black box dynamics ---------------------- */
 std::pair<std::unique_ptr<TrackerState>, bool> TrackerModel::makeNextState(
         solver::State const &state, solver::Action const &action) {
 
@@ -500,6 +485,7 @@ solver::Model::StepResult TrackerModel::generateStep(solver::State const &state,
 }
 
 
+/* ------------ Methods for handling particle depletion -------------- */
 std::vector<std::unique_ptr<solver::State>> TrackerModel::generateParticles(
         solver::BeliefNode */*previousBelief*/, solver::Action const &action,
         solver::Observation const &obs,
@@ -583,61 +569,80 @@ std::vector<std::unique_ptr<solver::State>> TrackerModel::generateParticles(
     return newParticles;
 }
 
-void TrackerModel::applyChange(solver::ModelChange const &change,
-        solver::StatePool *pool) {
-
-    TrackerChange const &trackerChange = static_cast<TrackerChange const &>(change);
-    if (hasVerboseOutput()) {
-        cout << trackerChange.changeType << " " << trackerChange.i0 << " "
-                << trackerChange.j0;
-        cout << " " << trackerChange.i1 << " " << trackerChange.j1 << endl;
+/* -------------- Methods for handling model changes ---------------- */
+void TrackerModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+        solver::Solver *solver) {
+    solver::StatePool *pool = nullptr;
+    if (solver != nullptr) {
+        pool = solver->getStatePool();
     }
-    if (trackerChange.changeType == "Add Obstacles") {
-        for (long i = static_cast<long>(trackerChange.i0); i <= trackerChange.i1; i++) {
-            for (long j = static_cast<long>(trackerChange.j0); j <= trackerChange.j1;
-                    j++) {
-                envMap_[i][j] = TrackerCellType::WALL;
+
+    for (auto const &change : changes) {
+        TrackerChange const &trackerChange = static_cast<TrackerChange const &>(*change);
+        if (hasVerboseOutput()) {
+            cout << trackerChange.changeType << " " << trackerChange.i0 << " "
+                    << trackerChange.j0;
+            cout << " " << trackerChange.i1 << " " << trackerChange.j1 << endl;
+        }
+
+        TrackerCellType newCellType;
+        if (trackerChange.changeType == "Add Obstacles") {
+            newCellType = TrackerCellType::WALL;
+        } else if (trackerChange.changeType == "Remove Obstacles") {
+            newCellType = TrackerCellType::EMPTY;
+        } else {
+            cout << "Invalid change type: " << trackerChange.changeType;
+            continue;
+        }
+
+        for (long i = trackerChange.i0; i <= trackerChange.i1; i++) {
+            for (long j = trackerChange.j0; j <= trackerChange.j1; j++) {
+                envMap_[i][j] = newCellType;
             }
         }
+
         if (pool == nullptr) {
-            return;
+            continue;
         }
-        solver::RTree *tree =
-                static_cast<solver::RTree *>(pool->getStateIndex());
-        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
-        tree->boxQuery(visitor, std::vector<double> { trackerChange.i0,
-                trackerChange.j0, 0, 0, 0 }, std::vector<double> { trackerChange.i1,
-                trackerChange.j1, nRows_ - 1.0, nCols_ - 1.0, 1 });
-        tree->boxQuery(visitor, std::vector<double> { 0, 0, trackerChange.i0,
-                trackerChange.j0, 0 },
-                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, trackerChange.i1,
-                        trackerChange.j1, 1 });
-    } else if (trackerChange.changeType == "Remove Obstacles") {
-        for (long i = static_cast<long>(trackerChange.i0); i <= trackerChange.i1; i++) {
-            for (long j = static_cast<long>(trackerChange.j0); j <= trackerChange.j1;
-                    j++) {
-                envMap_[i][j] = TrackerCellType::EMPTY;
-            }
+
+        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+
+        double iLo = trackerChange.i0;
+        double iHi = trackerChange.i1;
+        double iMx = nRows_ - 1.0;
+
+        double jLo = trackerChange.j0;
+        double jHi = trackerChange.j1;
+        double jMx = nCols_ - 1.0;
+
+        // Adding walls => any states where the robot or the opponent are in a wall must
+        // be deleted.
+        if (newCellType == TrackerCellType::WALL) {
+            solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+            // Robot is in a wall.
+            tree->boxQuery(visitor,
+                    {iLo, jLo, 0.0, 0.0, 0.0},
+                    {iHi, jHi, iMx, jMx, 1.0});
+            // Opponent is in a wall.
+            tree->boxQuery(visitor,
+                    {0.0, 0.0, iLo, jLo, 0.0},
+                    {iMx, jMx, iHi, jHi, 1.0});
+
         }
-        if (pool == nullptr) {
-            return;
-        }
-        solver::RTree *tree =
-                static_cast<solver::RTree *>(pool->getStateIndex());
+
+        // Also, state transitions around the edges of the new / former obstacle must be revised.
         solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
         tree->boxQuery(visitor,
-                std::vector<double> { trackerChange.i0 - 1, trackerChange.j0 - 1, 0, 0,
-                        0 },
-                std::vector<double> { trackerChange.i1 + 1, trackerChange.j1 + 1, nRows_
-                        - 1.0, nCols_ - 1.0, 1 });
+                {iLo - 1, jLo - 1, 0.0, 0.0, 0.0},
+                {iHi + 1, jHi + 1, iMx, jMx, 1.0});
         tree->boxQuery(visitor,
-                std::vector<double> { 0, 0, trackerChange.i0 - 1, trackerChange.j0 - 1,
-                        0 },
-                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, trackerChange.i1
-                        + 1, trackerChange.j1 + 1, 1 });
+                {0.0, 0.0, iLo - 1, jLo - 1, 0.0},
+                {iMx, jMx, iHi + 1, jHi + 1, 1.0});
     }
 }
 
+
+/* --------------- Pretty printing methods ----------------- */
 void TrackerModel::dispCell(TrackerCellType cellType, std::ostream &os) {
     if (cellType >= EMPTY) {
         os << std::setw(2);
@@ -681,14 +686,6 @@ void TrackerModel::drawSimulationState(solver::BeliefNode const *belief,
         solver::State const &state, std::ostream &os) {
 }
 
-std::vector<std::unique_ptr<solver::DiscretizedPoint>> TrackerModel::getAllActionsInOrder() {
-    std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
-    for (long code = 0; code < nActions_; code++) {
-        allActions.push_back(std::make_unique<TrackerAction>(code));
-    }
-    return allActions;
-}
-
 std::vector<std::vector<float>> TrackerModel::getTargetPosBelief(solver::BeliefNode const *belief) {
     std::vector<solver::State const *> particles = belief->getStates();
     std::vector<std::vector<long>> particleCounts(nRows_,  std::vector<long>(nCols_));
@@ -705,6 +702,29 @@ std::vector<std::vector<float>> TrackerModel::getTargetPosBelief(solver::BeliefN
         }
     }
     return result;
+}
+
+/* ---------------------- Basic customizations  ---------------------- */
+double TrackerModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+            solver::State const *state, solver::HistoricalData const */*data*/) {
+    // TODO
+    return 0;
+}
+
+/* ------- Customization of more complex solver functionality  --------- */
+std::vector<std::unique_ptr<solver::DiscretizedPoint>> TrackerModel::getAllActionsInOrder() {
+    std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
+    for (long code = 0; code < nActions_; code++) {
+        allActions.push_back(std::make_unique<TrackerAction>(code));
+    }
+    return allActions;
+}
+
+std::unique_ptr<solver::ActionPool> TrackerModel::createActionPool(solver::Solver */*solver*/) {
+    return std::make_unique<solver::EnumeratedActionPool>(this, getAllActionsInOrder());
+}
+std::unique_ptr<solver::Serializer> TrackerModel::createSerializer(solver::Solver *solver) {
+    return std::make_unique<TrackerTextSerializer>(solver);
 }
 
 } /* namespace tracker */

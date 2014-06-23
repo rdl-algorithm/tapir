@@ -24,6 +24,7 @@ core
 *.pol
 *.pol2
 *.m
+*.prof
 
 # backup files
 *~

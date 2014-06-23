@@ -11,12 +11,11 @@
 
 namespace solver {
 class ActionMapping;
-class AbstractSearchInstance;
+class BasicSearchStrategy;
 class BeliefNode;
 class Solver;
 
 class BeliefTree {
-    friend class AbstractSearchInstance;
     friend class Agent;
     friend class HistorySequence;
     friend class Solver;
@@ -40,6 +39,14 @@ public:
     /** Retrieves a vector of all belief nodes within the policy. */
     std::vector<BeliefNode *> getNodes() const;
 
+    /* ------------------- Creation of new nodes in the tree ------------------- */
+    // Use with care!!!
+    /**
+     * Adds a child belief node to the given belief node; this node will be
+     * added to the flattened node list if and only if it is actually new.
+     */
+    BeliefNode *createOrGetChild(BeliefNode *node, Action const &action,
+            Observation const &obs);
 
 private:
     /* ------------------- Node index modification ------------------- */
@@ -49,12 +56,9 @@ private:
     /* ------------------- Tree modification ------------------- */
     /** Resets the tree, creating a new root node and returning it. */
     BeliefNode *reset();
-    /**
-     * Adds a child belief node to the given belief node; this node will be
-     * added to the flattened node list if and only if it is actually new.
-     */
-    BeliefNode *createOrGetChild(BeliefNode *node, Action const &action,
-            Observation const &obs);
+    /** Initializes the root node - for creating a new tree from scratch. */
+    void initializeRoot();
+
 
 private:
     Solver *solver_;

@@ -65,31 +65,28 @@ add_library(AbtSolver
 	src/solver/Solver.cpp
 	src/solver/StateInfo.cpp
 	src/solver/StatePool.cpp
-	src/solver/abstract-problem/VectorLP.cpp
-	src/solver/abstract-problem/Vector.cpp
-	src/solver/abstract-problem/Model.cpp
 	src/solver/abstract-problem/DiscretizedPoint.cpp
-	src/solver/backpropagation/AveragePropagator.cpp
-	src/solver/backpropagation/BackpropagationStrategy.cpp
-	src/solver/backpropagation/MaximumPropagator.cpp
-	src/solver/backpropagation/RobustPropagator.cpp
+	src/solver/abstract-problem/Model.cpp
+	src/solver/abstract-problem/Vector.cpp
+	src/solver/abstract-problem/heuristics/rollout_heuristic.cpp
+	src/solver/belief-estimators/estimators.cpp
 	src/solver/changes/DefaultHistoryCorrector.cpp
 	src/solver/indexing/FlaggingVisitor.cpp
 	src/solver/indexing/RTree.cpp
 	src/solver/indexing/SpatialIndexVisitor.cpp
-	src/solver/mappings/approximate_observations.cpp
-	src/solver/mappings/discrete_observations.cpp
-	src/solver/mappings/discretized_actions.cpp
-	src/solver/mappings/enumerated_actions.cpp
-	src/solver/mappings/enumerated_observations.cpp
-	src/solver/search/DefaultRolloutStrategy.cpp
-	src/solver/search/MultipleStrategiesExp3.cpp
-	src/solver/search/NnRolloutStrategy.cpp
-	##src/solver/search/RandomRolloutStrategy.cpp
-	src/solver/search/SearchStrategy.cpp
-	src/solver/search/UcbSelectionStrategy.cpp
+	src/solver/mappings/actions/ActionMappingEntry.cpp
+	src/solver/mappings/actions/discretized_actions.cpp
+	src/solver/mappings/actions/enumerated_actions.cpp
+	src/solver/mappings/observations/approximate_observations.cpp
+	src/solver/mappings/observations/discrete_observations.cpp
+	src/solver/mappings/observations/enumerated_observations.cpp
+	src/solver/search/exp3.cpp
+	src/solver/search/search_interface.cpp
+	src/solver/search/action-choosers/choosers.cpp
+	src/solver/search/steppers/default_rollout.cpp
+	src/solver/search/steppers/nn_rollout.cpp
+	src/solver/search/steppers/ucb_search.cpp
 	src/solver/serialization/TextSerializer.cpp
-	src/solver/serialization/VectorLPTextSerializer.cpp
 	src/problems/shared/parsers.cpp
 	src/problems/shared/geometry/Point2D.cpp
 	src/problems/shared/geometry/Rectangle2D.cpp

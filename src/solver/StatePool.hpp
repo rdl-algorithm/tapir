@@ -48,6 +48,7 @@ class StatePool {
     StateInfo *getInfo(State const &state) const;
     StateInfo *getInfoById(long stId) const;
     StateIndex *getStateIndex() const;
+    long getNumberOfStates() const;
 
     /* ------------------ State lookup ------------------- */
     StateInfo *createOrGetInfo(State const &state);

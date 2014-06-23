@@ -1,6 +1,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+
+#include <memory>                       // for unique_ptr
 #include <string>
 #include <sstream>
 
@@ -28,7 +30,6 @@
 #include "TrackerObservation.hpp"
 #include "TrackerOptions.hpp"
 #include "TrackerState.hpp"
-#include "TrackerTextSerializer.hpp"
 #include "TrackerModel.hpp"
 #include "TrackerRos.hpp"
 
@@ -210,9 +211,7 @@ int main(int argc, char **argv)
     TrackerModel *model = newModel.get();
 
     // Initialise Solver
-    solver::Solver solver(&randGen, std::move(newModel));
-    std::unique_ptr<solver::Serializer> serializer(std::make_unique<TrackerTextSerializer>(&solver));
-    solver.setSerializer(std::move(serializer));
+    solver::Solver solver(std::move(newModel));
     solver.initializeEmpty();
 
     // Generate policy
@@ -270,6 +269,7 @@ int main(int argc, char **argv)
     		cout << "Octomap search resolution: " << octomapTree->getNodeSize(searchDepth) << "m" << endl;
     		octomapTree->updateInnerOccupancy();	// Update occupancy of inner(branch) nodes
     		solver::StatePool *statePool = solver.getStatePool();
+            std::vector<std::unique_ptr<solver::ModelChange>> changes;
     		for (int i = 0; i < envMap.size(); i++) {
     			for (int j = 0; j < envMap[0].size(); j++) {
     				GridPosition cell(i, j);
@@ -286,19 +286,46 @@ int main(int argc, char **argv)
 
 	    			// Add obstacle change
 	    			if (occupied && envMap[i][j] != TrackerModel::TrackerCellType::WALL) {
-	    				TrackerChange change("Add Obstacles", i, i, j, j);
-	    				model->applyChange(change, statePool);
+	    				changes.push_back(std::make_unique<TrackerChange>("Add Obstacles", i, i, j, j));
 	    				envMap[i][j] = TrackerModel::TrackerCellType::WALL;
 	    			}
 
 	    			// Remove obstacle change
 	    			if (!occupied && envMap[i][j] != TrackerModel::TrackerCellType::EMPTY) {
-	    				TrackerChange change("Add Obstacles", i, i, j, j);
-	    				model->applyChange(change, statePool);
+	    				changes.push_back(std::make_unique<TrackerChange>("Remove Obstacles", i, i, j, j));
 	    				envMap[i][j] = TrackerModel::TrackerCellType::EMPTY;
 	    			}
 	    		}
 	    	}
+
+            // Set the change root appropriately.
+            solver.setChangeRoot(agent.getCurrentBelief());
+
+            model->applyChanges(changes, &solver);
+
+            // If the current state is deleted, the simulation is broken!
+            /*
+            StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();
+            if (changes::has_flag(lastInfo->changeFlags_, ChangeFlags::DELETED)) {
+                debug::show_message("ERROR: Current simulation state deleted!");
+                return false;
+            }
+
+            // If the changes are not dynamic and a past state is deleted, the simulation is broken.
+            if (!areDynamic) {
+                for (long i = 0; i < actualHistory_->getLength() - 1; i++) {
+                    StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
+                    if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
+                        std::ostringstream message;
+                        message << "ERROR: Impossible simulation history! Includes ";
+                        message << *info->getState();
+                        debug::show_message(message.str());
+                        return false;
+                    }
+                }
+            }
+            */
+            // Finally we apply the changes.
 		    solver.applyChanges();
 	    }
 

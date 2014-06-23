@@ -14,24 +14,15 @@ HistoryEntry::HistoryEntry() :
 }
 
 HistoryEntry::HistoryEntry(HistorySequence* owningSequence, long entryId) :
+    owningSequence_(owningSequence),
+    entryId_(entryId),
+    associatedBeliefNode_(nullptr),
     stateInfo_(nullptr),
     action_(nullptr),
     transitionParameters_(nullptr),
     observation_(nullptr),
-    hasBeenBackedUp_(false),
-    entryId_(entryId),
-    reward_(0),
-    rewardFromHere_(0),
-    owningSequence_(owningSequence),
-    associatedBeliefNode_(nullptr),
-    isRegisteredAsParticle_(false),
+    immediateReward_(0),
     changeFlags_(ChangeFlags::UNCHANGED) {
-}
-
-HistoryEntry::HistoryEntry(StateInfo *stateInfo,
-        HistorySequence* owningSequence, long entryId) :
-                HistoryEntry(owningSequence, entryId) {
-    registerState(stateInfo);
 }
 
 HistoryEntry::~HistoryEntry() {
@@ -41,11 +32,8 @@ HistoryEntry::~HistoryEntry() {
 long HistoryEntry::getId() const {
     return entryId_;
 }
-double HistoryEntry::getReward() const {
-    return reward_;
-}
-double HistoryEntry::getCumulativeReward() const {
-    return rewardFromHere_;
+double HistoryEntry::getImmediateReward() const {
+    return immediateReward_;
 }
 State const *HistoryEntry::getState() const {
     return stateInfo_->getState();
@@ -66,25 +54,20 @@ BeliefNode *HistoryEntry::getAssociatedBeliefNode() const {
     return associatedBeliefNode_;
 }
 
-/* -------------- Registration methods ---------------- */
-bool HistoryEntry::isRegisteredAsParticle() const {
-    return isRegisteredAsParticle_;
-}
-
 
 /* ============================ PRIVATE ============================ */
 
 
 /* -------------- Registration methods ---------------- */
 void HistoryEntry::registerNode(BeliefNode *node) {
-    // If it's registered, we deregister it.
-    if (isRegisteredAsParticle_) {
-        isRegisteredAsParticle_ = false;
-        associatedBeliefNode_->removeParticle(this);
+    if (associatedBeliefNode_ == node) {
+        return;
     }
-    // Then we register it with the new node.
+    if (associatedBeliefNode_ != nullptr) {
+        associatedBeliefNode_->removeParticle(this);
+        associatedBeliefNode_ = nullptr;
+    }
     if (node != nullptr) {
-        isRegisteredAsParticle_ = true;
         associatedBeliefNode_ = node;
         associatedBeliefNode_->addParticle(this);
     }

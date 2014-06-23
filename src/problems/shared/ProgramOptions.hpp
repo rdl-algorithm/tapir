@@ -9,14 +9,11 @@
 namespace po = boost::program_options;
 
 void load_overrides(po::variables_map &vm) {
-    if (!vm["sel"].empty()) {
-        vm.at("ABT.selectionStrategy") = vm["sel"];
+    if (!vm["ss"].empty()) {
+        vm.at("ABT.searchStrategy") = vm["ss"];
     }
-    if (!vm["rol"].empty()) {
-        vm.at("ABT.rolloutStrategy") = vm["rol"];
-    }
-    if (!vm["bp"].empty()) {
-        vm.at("ABT.backpropagationStrategy") = vm["bp"];
+    if (!vm["est"].empty()) {
+        vm.at("ABT.estimator") = vm["est"];
     }
 }
 
@@ -35,6 +32,8 @@ class ProgramOptions {
                         "policy file path (output)")
                 ("seed,s", po::value<unsigned long>()->default_value(0),
                         "RNG seed; use a value of 0 to seed using the current time")
+                ("state,t", po::value<unsigned long>(),
+                        "RNG state")
                 ("color,c", po::value<bool>()->default_value(false)->implicit_value(true),
                         "whether to use color output")
                 ("verbose,v", po::value<bool>()->default_value(false)->implicit_value(true),
@@ -50,6 +49,9 @@ class ProgramOptions {
                         "file to log changes to")
                 ("changes.hasChanges,u", po::value<bool>()->default_value(false)->implicit_value(true),
                         "whether the PODMP model will change at runtime.")
+                ("changes.areDynamic,d", po::value<bool>()->default_value(false)->implicit_value(true),
+                        "true if the changes should only apply to history entries that are in "
+                        "the future, not in the past (or in alternate futures).")
                 ("changes.changesPath,g", po::value<std::string>(),
                         "path to the file with runtime changes to the POMDP model")
                 ("simulation.nSteps,n", po::value<long>(),
@@ -70,22 +72,22 @@ class ProgramOptions {
     virtual po::options_description getABTOptions() {
         po::options_description abt("ABT settings");
         abt.add_options()
-                ("sel", po::value<std::string>(),
-                        "overriding alias for ABT.selectionStrategy")
-                ("rol", po::value<std::string>(),
-                        "overriding alias for ABT.rolloutStrategy")
-                ("bp", po::value<std::string>(),
-                        "overriding alias for ABT.backpropagationStrategy")
+                ("ss", po::value<std::string>(),
+                        "overriding alias for ABT.searchStrategy")
+                ("est", po::value<std::string>(),
+                        "overriding alias for ABT.estimator")
                 ("ABT.historiesPerStep,i", po::value<long>(),
                         "the number of episodes to sample for each step.")
-                ("ABT.maximumDepth", po::value<double>(),
+                ("ABT.stepTimeout", po::value<double>()->default_value(0),
+                        "the maximum time per search step, in milliseconds; 0 => no timeout")
+                ("ABT.maximumDepth", po::value<long>(),
                         "maximum Depth allowed before search stops.")
-                ("ABT.selectionStrategy", po::value<std::string>(),
+                ("ABT.searchHeuristic", po::value<std::string>(),
+                        "the heuristic to use in searches")
+                ("ABT.searchStrategy", po::value<std::string>(),
                         "the search strategy to use")
-                ("ABT.rolloutStrategy", po::value<std::string>(),
-                        "the rollout strategy to use")
-                ("ABT.backpropagationStrategy", po::value<std::string>(),
-                        "the backpropagation strategy to use")
+                ("ABT.estimator", po::value<std::string>(),
+                        "the function that estimates the q-value of a belief.")
                 ("ABT.maxObservationDistance", po::value<double>(),
                         "Maximum distance between observations to group them"
                         " together - only applicable if approximate"
@@ -102,15 +104,9 @@ class ProgramOptions {
         return problem;
     }
 
-    /** Returns configuration options for the specific heuristic used for the
-     * problem
-     */
+    /** Returns configuration options for problem heuristics. */
     virtual po::options_description getHeuristicOptions() {
         po::options_description heuristics("Heuristic settings");
-        heuristics.add_options()
-                ("heuristics.enabled,h", po::value<bool>()->default_value(true)->implicit_value(true),
-                        "whether any heuristic should be used - no heuristic"
-                        " means a default value will always be returned.");
         return heuristics;
     }
 };

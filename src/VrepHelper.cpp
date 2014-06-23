@@ -121,9 +121,7 @@ geometry_msgs::PoseStamped VrepHelper::getPose(long handle) {
 void VrepHelper::infoCallback(const abt::VrepInfo::ConstPtr& msg) {
 
     // Set running_ true iff simulation is not stopped/paused
-    // bit0 set: simulation not stopped
-    // bit1 set: simulation paused
     int status = msg->simulatorState.data;
-    running_ = status & 0b1 == 1 && status & 0b10 == 2;
+    running_ = (status == 1);
 }
 

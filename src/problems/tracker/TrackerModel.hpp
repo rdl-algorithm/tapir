@@ -21,8 +21,8 @@
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
 #include "solver/abstract-problem/State.hpp"
 
-#include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations.hpp"
+#include "solver/mappings/actions/enumerated_actions.hpp"
+#include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "TrackerAction.hpp"
 
@@ -37,15 +37,15 @@ class TrackerObervation;
 class TrackerState;
 
 /** Represents a change in the Tracker model. */
-struct TrackerChange : solver::ModelChange {
+struct TrackerChange : public solver::ModelChange {
     std::string changeType = "";
-    double i0 = 0;
-    double i1 = 0;
-    double j0 = 0;
-    double j1 = 0;
+    long i0 = 0;
+    long i1 = 0;
+    long j0 = 0;
+    long j1 = 0;
 
-    TrackerChange(std::string argType, double argi0, double argi1,
-    double argj0, double argj1) : 
+    TrackerChange(std::string argType, long argi0, long argi1,
+    long argj0, long argj1) : 
         changeType(argType),
         i0(argi0),
         i1(argi1),
@@ -78,9 +78,7 @@ struct TargetStateHash {
     }
 };
 
-class TrackerModel: virtual public ModelWithProgramOptions,
-        virtual public solver::ModelWithEnumeratedActions,
-        virtual public solver::ModelWithDiscreteObservations {
+class TrackerModel: virtual public ModelWithProgramOptions {
     friend class TrackerObservation;
 
   public:
@@ -103,11 +101,12 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     void setEnvMap(std::vector<std::vector<TrackerCellType>> envMap);
     void setPolicyZones(std::vector<GridPosition> zones, int currZone, double moveProbability);
 
+    /* ----------------------- Basic getters  ------------------- */
 	std::string getName() override {
         return "Tracker";
     }
 
-    /***** Start implementation of Model's virtual methods *****/
+    /* ---------- Virtual getters for ABT / model parameters  ---------- */
     // Simple getters
     long getNumberOfStateVariables() override {
         return nStVars_;
@@ -118,19 +117,15 @@ class TrackerModel: virtual public ModelWithProgramOptions,
     double getMaxVal() override {
         return maxVal_;
     }
-    double getDefaultVal() override {
-        return 0;
-    }
 
+    /* --------------- The model interface proper ----------------- */
     // Other virtual methods
     std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates an untrackerged state uniformly at random. */
     std::unique_ptr<solver::State> sampleStateUniform() override;
-
     bool isTerminal(solver::State const &state) override;
-    double getHeuristicValue(solver::State const &state) override;
 
-    /* --------------- Black box dynamics ----------------- */
+    /* -------------------- Black box dynamics ---------------------- */
     virtual std::unique_ptr<solver::State> generateNextState(
             solver::State const &state,
             solver::Action const &action,
@@ -152,29 +147,45 @@ class TrackerModel: virtual public ModelWithProgramOptions,
             solver::Action const &action) override;
 
 
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
+    /* -------------- Methods for handling model changes ---------------- */
+    virtual void applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+             solver::Solver *solver) override;
+
+
+    /* ------------ Methods for handling particle depletion -------------- */
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
             long nParticles,
             std::vector<solver::State const *> const &previousParticles) override;
-    std::vector<std::unique_ptr<solver::State>> generateParticles(
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
             long nParticles) override;
 
-    virtual void applyChange(solver::ModelChange const &change, solver::StatePool *pool) override;
 
+    /* --------------- Pretty printing methods ----------------- */
     /** Displays a single cell of the map. */
-    void dispCell(TrackerCellType cellType, std::ostream &os);
-    void drawEnv(std::ostream &os) override;
-    void drawEnvAndPos(std::ostream &os, GridPosition pos);
-
-    /* TODO */
-    void drawSimulationState(solver::BeliefNode const *belief,
+    virtual void dispCell(TrackerCellType cellType, std::ostream &os);
+    virtual void drawEnv(std::ostream &os) override;
+    virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
             std::ostream &os) override;
+
+    void drawEnvAndPos(std::ostream &os, GridPosition pos);
+
+
+    /* ---------------------- Basic customizations  ---------------------- */
+    virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
+                solver::State const *state, solver::HistoricalData const *data) override;
+
+    /* ------- Customization of more complex solver functionality  --------- */
+    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
+    virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver) override;
+
+    virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
     /**
      * Returns proportion of belief particles about the target's
@@ -182,8 +193,7 @@ class TrackerModel: virtual public ModelWithProgramOptions,
      */
     std::vector<std::vector<float>> getTargetPosBelief(solver::BeliefNode const *belief);
 
-    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
-
+    
     /** Gets the expected coordinates after taking the given action;
      *  this may result in invalid coordinates.
      */

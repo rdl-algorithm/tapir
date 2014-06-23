@@ -1,4 +1,4 @@
-#include "ActionNode.hpp"
+#include "solver/ActionNode.hpp"
 
 #include <memory>                       // for unique_ptr
 #include <utility>                      // for make_pair, move, pair
@@ -6,14 +6,16 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "BeliefNode.hpp"
-#include "Solver.hpp"
+#include "solver/BeliefNode.hpp"
+#include "solver/Solver.hpp"
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
+#include "solver/belief-estimators/estimators.hpp"
 
-#include "mappings/ActionPool.hpp"       // for ActionPool
-#include "mappings/ObservationMapping.hpp"       // for ObservationMapping
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+
+#include "solver/mappings/actions/ActionPool.hpp"       // for ActionPool
+#include "solver/mappings/observations/ObservationMapping.hpp"       // for ObservationMapping
 
 namespace solver {
 ActionNode::ActionNode() :
@@ -51,17 +53,15 @@ BeliefNode *ActionNode::getChild(Observation const &obs) const {
 /* -------------------- Tree-related setters  ---------------------- */
 void ActionNode::setMapping(std::unique_ptr<ObservationMapping> mapping) {
     observationMap_ = std::move(mapping);
-    observationMap_->setOwner(this);
 }
 
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver *solver,
+std::pair<BeliefNode *, bool> ActionNode::createOrGetChild(Solver */*solver*/,
         Observation const &obs) {
     BeliefNode *childNode = getChild(obs);
     bool added = false;
     if (childNode == nullptr) {
         childNode = observationMap_->createBelief(obs);
-        childNode->setMapping(solver->getActionPool()->createActionMapping());
         added = true;
     }
     return std::make_pair(childNode, added);

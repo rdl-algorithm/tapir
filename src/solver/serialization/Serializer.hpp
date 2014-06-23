@@ -8,8 +8,8 @@
 #include "solver/abstract-problem/ModelChange.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"
 
-#include "solver/mappings/ActionPool.hpp"
-#include "solver/mappings/ObservationPool.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
 
 #include "solver/Solver.hpp"                   // for Solver
 
@@ -120,11 +120,11 @@ public:
             std::ostream &os) = 0;
     /** Loads the pool handling all the actions. */
     virtual  std::unique_ptr<ActionPool> loadActionPool(std::istream &is) = 0;
-    /** Saves a mapping of observations to belief nodes. */
+    /** Saves a mapping of actions to action nodes. */
     virtual void saveActionMapping(ActionMapping const &map,
             std::ostream &os) = 0;
-    /** Loads a mapping of observations to belief nodes. */
-    virtual std::unique_ptr<ActionMapping> loadActionMapping(
+    /** Loads a mapping of actions to action nodes for the given belief. */
+    virtual std::unique_ptr<ActionMapping> loadActionMapping(BeliefNode *node,
             std::istream &is) = 0;
 
     /** Saves the pool handling all the actions. */
@@ -137,7 +137,7 @@ public:
     virtual void saveObservationMapping(ObservationMapping const &map,
             std::ostream &os) = 0;
     /** Loads a mapping of observations to belief nodes. */
-    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(
+    virtual std::unique_ptr<ObservationMapping> loadObservationMapping(ActionNode *node,
             std::istream &is) = 0;
 
     /* --------------- Saving extra belief data ----------------- */

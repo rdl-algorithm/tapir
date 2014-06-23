@@ -29,8 +29,8 @@
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
 
-#include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations.hpp"
+#include "solver/mappings/actions/enumerated_actions.hpp"
+#include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
@@ -39,6 +39,7 @@
 #include "TagAction.hpp"
 #include "TagObservation.hpp"
 #include "TagState.hpp"                 // for TagState
+#include "TagTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
@@ -46,18 +47,19 @@ namespace po = boost::program_options;
 
 namespace tag {
 TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
-        ModelWithProgramOptions(randGen, vm), moveCost_(
-                vm["problem.moveCost"].as<double>()), tagReward_(
-                vm["problem.tagReward"].as<double>()), failedTagPenalty_(
-                vm["problem.failedTagPenalty"].as<double>()), opponentStayProbability_(
-                vm["problem.opponentStayProbability"].as<double>()), nRows_(0), // to be updated
-        nCols_(0), // to be updated
-        mapText_(), // will be pushed to
-        envMap_(), // will be pushed to
-        nActions_(5), nStVars_(5), minVal_(
-                -failedTagPenalty_ / (1 - getDiscountFactor())), maxVal_(
-                tagReward_) {
-    setAllActions(getAllActionsInOrder());
+            ModelWithProgramOptions(randGen, vm),
+            moveCost_(vm["problem.moveCost"].as<double>()),
+            tagReward_(vm["problem.tagReward"].as<double>()),
+            failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
+            opponentStayProbability_(vm["problem.opponentStayProbability"].as<double>()),
+            nRows_(0), // to be updated
+            nCols_(0), // to be updated
+            mapText_(), // will be pushed to
+            envMap_(), // will be pushed to
+            nActions_(5),
+            nStVars_(5),
+            minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
+            maxVal_(tagReward_) {
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -123,6 +125,8 @@ GridPosition TagModel::randomEmptyCell() {
     return pos;
 }
 
+
+/* --------------- The model interface proper ----------------- */
 std::unique_ptr<solver::State> TagModel::sampleAnInitState() {
     return sampleStateUniform();
 }
@@ -137,25 +141,8 @@ bool TagModel::isTerminal(solver::State const &state) {
     return static_cast<TagState const &>(state).isTagged();
 }
 
-double TagModel::getHeuristicValue(solver::State const &state) {
-    if (!heuristicEnabled()) {
-        return getDefaultVal();
-    }
 
-    TagState const &tagState = static_cast<TagState const &>(state);
-    if (tagState.isTagged()) {
-        return 0;
-    }
-    GridPosition robotPos = tagState.getRobotPosition();
-    GridPosition opponentPos = tagState.getOpponentPosition();
-    long dist = robotPos.manhattanDistanceTo(opponentPos);
-    double nSteps = dist / opponentStayProbability_;
-    double finalDiscount = std::pow(getDiscountFactor(), nSteps);
-    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
-    qVal += finalDiscount * tagReward_;
-    return qVal;
-}
-
+/* -------------------- Black box dynamics ---------------------- */
 std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
         solver::State const &state, solver::Action const &action) {
     TagState const &tagState = static_cast<TagState const &>(state);
@@ -305,6 +292,81 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
     return result;
 }
 
+
+/* -------------- Methods for handling model changes ---------------- */
+void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+        solver::Solver *solver) {
+    solver::StatePool *pool = nullptr;
+    if (solver != nullptr) {
+        pool = solver->getStatePool();
+    }
+
+    for (auto const &change : changes) {
+        TagChange const &tagChange = static_cast<TagChange const &>(*change);
+        if (hasVerboseOutput()) {
+            cout << tagChange.changeType << " " << tagChange.i0 << " "
+                    << tagChange.j0;
+            cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
+        }
+
+        TagCellType newCellType;
+        if (tagChange.changeType == "Add Obstacles") {
+            newCellType = TagCellType::WALL;
+        } else if (tagChange.changeType == "Remove Obstacles") {
+            newCellType = TagCellType::EMPTY;
+        } else {
+            cout << "Invalid change type: " << tagChange.changeType;
+            continue;
+        }
+
+        for (long i = tagChange.i0; i <= tagChange.i1; i++) {
+            for (long j = tagChange.j0; j <= tagChange.j1; j++) {
+                envMap_[i][j] = newCellType;
+            }
+        }
+
+        if (pool == nullptr) {
+            continue;
+        }
+
+        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+
+        double iLo = tagChange.i0;
+        double iHi = tagChange.i1;
+        double iMx = nRows_ - 1.0;
+
+        double jLo = tagChange.j0;
+        double jHi = tagChange.j1;
+        double jMx = nCols_ - 1.0;
+
+        // Adding walls => any states where the robot or the opponent are in a wall must
+        // be deleted.
+        if (newCellType == TagCellType::WALL) {
+            solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+            // Robot is in a wall.
+            tree->boxQuery(visitor,
+                    {iLo, jLo, 0.0, 0.0, 0.0},
+                    {iHi, jHi, iMx, jMx, 1.0});
+            // Opponent is in a wall.
+            tree->boxQuery(visitor,
+                    {0.0, 0.0, iLo, jLo, 0.0},
+                    {iMx, jMx, iHi, jHi, 1.0});
+
+        }
+
+        // Also, state transitions around the edges of the new / former obstacle must be revised.
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
+        tree->boxQuery(visitor,
+                {iLo - 1, jLo - 1, 0.0, 0.0, 0.0},
+                {iHi + 1, jHi + 1, iMx, jMx, 1.0});
+        tree->boxQuery(visitor,
+                {0.0, 0.0, iLo - 1, jLo - 1, 0.0},
+                {iMx, jMx, iHi + 1, jHi + 1, 1.0});
+    }
+}
+
+
+/* ------------ Methods for handling particle depletion -------------- */
 std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         solver::BeliefNode */*previousBelief*/, solver::Action const &action,
         solver::Observation const &obs,
@@ -402,60 +464,8 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     return newParticles;
 }
 
-void TagModel::applyChange(solver::ModelChange const &change,
-        solver::StatePool *pool) {
-    TagChange const &tagChange = static_cast<TagChange const &>(change);
-    if (hasVerboseOutput()) {
-        cout << tagChange.changeType << " " << tagChange.i0 << " "
-                << tagChange.j0;
-        cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
-    }
-    if (tagChange.changeType == "Add Obstacles") {
-        for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
-            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1;
-                    j++) {
-                envMap_[i][j] = TagCellType::WALL;
-            }
-        }
-        if (pool == nullptr) {
-            return;
-        }
-        solver::RTree *tree =
-                static_cast<solver::RTree *>(pool->getStateIndex());
-        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
-        tree->boxQuery(visitor, std::vector<double> { tagChange.i0,
-                tagChange.j0, 0, 0, 0 }, std::vector<double> { tagChange.i1,
-                tagChange.j1, nRows_ - 1.0, nCols_ - 1.0, 1 });
-        tree->boxQuery(visitor, std::vector<double> { 0, 0, tagChange.i0,
-                tagChange.j0, 0 },
-                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, tagChange.i1,
-                        tagChange.j1, 1 });
-    } else if (tagChange.changeType == "Remove Obstacles") {
-        for (long i = static_cast<long>(tagChange.i0); i <= tagChange.i1; i++) {
-            for (long j = static_cast<long>(tagChange.j0); j <= tagChange.j1;
-                    j++) {
-                envMap_[i][j] = TagCellType::EMPTY;
-            }
-        }
-        if (pool == nullptr) {
-            return;
-        }
-        solver::RTree *tree =
-                static_cast<solver::RTree *>(pool->getStateIndex());
-        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
-        tree->boxQuery(visitor,
-                std::vector<double> { tagChange.i0 - 1, tagChange.j0 - 1, 0, 0,
-                        0 },
-                std::vector<double> { tagChange.i1 + 1, tagChange.j1 + 1, nRows_
-                        - 1.0, nCols_ - 1.0, 1 });
-        tree->boxQuery(visitor,
-                std::vector<double> { 0, 0, tagChange.i0 - 1, tagChange.j0 - 1,
-                        0 },
-                std::vector<double> { nRows_ - 1.0, nCols_ - 1.0, tagChange.i1
-                        + 1, tagChange.j1 + 1, 1 });
-    }
-}
 
+/* --------------- Pretty printing methods ----------------- */
 void TagModel::dispCell(TagCellType cellType, std::ostream &os) {
     if (cellType >= EMPTY) {
         os << std::setw(2);
@@ -540,6 +550,26 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 }
 
+
+/* ---------------------- Basic customizations  ---------------------- */
+double TagModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+            solver::State const *state, solver::HistoricalData const */*data*/) {
+    TagState const &tagState = static_cast<TagState const &>(*state);
+    if (tagState.isTagged()) {
+        return 0;
+    }
+    GridPosition robotPos = tagState.getRobotPosition();
+    GridPosition opponentPos = tagState.getOpponentPosition();
+    long dist = robotPos.manhattanDistanceTo(opponentPos);
+    double nSteps = dist / opponentStayProbability_;
+    double finalDiscount = std::pow(getDiscountFactor(), nSteps);
+    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
+    qVal += finalDiscount * tagReward_;
+    return qVal;
+}
+
+
+/* ------- Customization of more complex solver functionality  --------- */
 std::vector<std::unique_ptr<solver::DiscretizedPoint>> TagModel::getAllActionsInOrder() {
     std::vector<std::unique_ptr<solver::DiscretizedPoint>> allActions;
     for (long code = 0; code < nActions_; code++) {
@@ -566,4 +596,10 @@ std::vector<std::vector<float>> TagModel::getBeliefProportions(solver::BeliefNod
     return result;
 }
 
+std::unique_ptr<solver::ActionPool> TagModel::createActionPool(solver::Solver */*solver*/) {
+    return std::make_unique<solver::EnumeratedActionPool>(this, getAllActionsInOrder());
+}
+std::unique_ptr<solver::Serializer> TagModel::createSerializer(solver::Solver *solver) {
+    return std::make_unique<TagTextSerializer>(solver);
+}
 } /* namespace tag */

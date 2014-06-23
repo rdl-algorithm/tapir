@@ -1,43 +1,57 @@
 #ifndef MODELWITHPROGRAMOPTIONS_HPP_
 #define MODELWITHPROGRAMOPTIONS_HPP_
 
+#include <memory>
+#include <string>
+
 #include <boost/program_options.hpp>    // for variables_map, variable_value, program_option
 
 #include "global.hpp"                     // for RandomGenerator
 
 #include "solver/abstract-problem/Model.hpp"             // for Model
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/belief-estimators/estimators.hpp"
+#include "solver/search/search_interface.hpp"
+#include "solver/changes/DefaultHistoryCorrector.hpp"
 
-#include "parsers.hpp"
+#include "problems/shared/parsers.hpp"
 
 namespace po = boost::program_options;
 
-class ModelWithProgramOptions: public virtual solver::Model {
+class ModelWithProgramOptions: public solver::Model {
 public:
     ModelWithProgramOptions(RandomGenerator *randGen, po::variables_map vm) :
                 randGen_(randGen),
                 discountFactor_(vm["problem.discountFactor"].as<double>()),
                 minParticleCount_(vm["simulation.minParticleCount"].as<unsigned long>()),
                 historiesPerStep_(vm["ABT.historiesPerStep"].as<long>()),
-                maximumDepth_(vm["ABT.maximumDepth"].as<double>()),
-                selectionParsers_(),
-                rolloutParsers_(),
-                backpropParsers_(),
-                selectionStrategyString_(vm["ABT.selectionStrategy"].as<std::string>()),
-                rolloutStrategyString_(vm["ABT.rolloutStrategy"].as<std::string>()),
-                backpropagationStrategyString_(vm["ABT.backpropagationStrategy"].as<std::string>()),
+                stepTimeout_(vm["ABT.stepTimeout"].as<double>()),
+                maximumDepth_(vm["ABT.maximumDepth"].as<long>()),
+                generatorParsers_(),
+                heuristicParsers_(),
+                searchParsers_(),
+                estimationParsers_(),
+                heuristicString_(vm["ABT.searchHeuristic"].as<std::string>()),
+                searchStrategyString_(vm["ABT.searchStrategy"].as<std::string>()),
+                estimatorString_(vm["ABT.estimator"].as<std::string>()),
                 hasColorOutput_(vm["color"].as<bool>()),
-                hasVerboseOutput_(vm["verbose"].as<bool>()),
-                heuristicEnabled_(vm["heuristics.enabled"].as<bool>()) {
-        registerSelectionParser("ucb", std::make_unique<UcbSearchParser>());
-        registerSelectionParser("exp3", std::make_unique<Exp3Parser>());
+                hasVerboseOutput_(vm["verbose"].as<bool>()) {
 
-        registerRolloutParser("nn", std::make_unique<NnRolloutParser>());
-        registerRolloutParser("default", std::make_unique<DefaultRolloutParser>());
-        registerRolloutParser("exp3", std::make_unique<Exp3Parser>());
+        registerGeneratorParser("ucb", std::make_unique<UcbParser>());
+        registerGeneratorParser("rollout", std::make_unique<DefaultRolloutParser>());
+        registerGeneratorParser("nn", std::make_unique<NnRolloutParser>());
+        registerGeneratorParser("staged", std::make_unique<StagedParser>(&generatorParsers_));
 
-        registerBackpropagationParser("mean", std::make_unique<AveragePropagatorParser>());
-        registerBackpropagationParser("max", std::make_unique<MaximumPropagatorParser>());
-        registerBackpropagationParser("robust", std::make_unique<RobustPropagatorParser>());
+        registerHeuristicParser("default", std::make_unique<DefaultHeuristicParser>(this));
+        registerHeuristicParser("zero", std::make_unique<ZeroHeuristicParser>());
+
+        searchParsers_.setDefaultParser(std::make_unique<BasicSearchParser>(
+                &generatorParsers_, &heuristicParsers_, heuristicString_));
+        registerSearchParser("exp3", std::make_unique<Exp3Parser>(&searchParsers_));
+
+        registerEstimationParser("mean", std::make_unique<AverageEstimateParser>());
+        registerEstimationParser("max", std::make_unique<MaxEstimateParser>());
+        registerEstimationParser("robust", std::make_unique<RobustEstimateParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -57,6 +71,9 @@ public:
     virtual long getNumberOfHistoriesPerStep() override {
         return historiesPerStep_;
     }
+    virtual double getStepTimeout() override {
+        return stepTimeout_;
+    }
     virtual long getMaximumDepth() override {
         return maximumDepth_;
     }
@@ -66,32 +83,43 @@ public:
     virtual bool hasVerboseOutput() override {
         return hasVerboseOutput_;
     }
-    virtual bool heuristicEnabled() {
-        return heuristicEnabled_;
+
+    virtual void registerGeneratorParser(std::string name,
+            std::unique_ptr<Parser<std::unique_ptr<solver::StepGeneratorFactory>> > parser) {
+        generatorParsers_.addParser(name, std::move(parser));
     }
-    virtual void registerSelectionParser(std::string name,
-            std::unique_ptr<Parser<solver::SearchStrategy>> parser) {
-        selectionParsers_.addParser(name, std::move(parser));
+    virtual void registerHeuristicParser(std::string name,
+            std::unique_ptr<Parser<solver::Heuristic> > parser) {
+        heuristicParsers_.addParser(name, std::move(parser));
     }
-    virtual void registerRolloutParser(std::string name,
-            std::unique_ptr<Parser<solver::SearchStrategy>> parser) {
-        rolloutParsers_.addParser(name, std::move(parser));
+    virtual void registerSearchParser(std::string name,
+            std::unique_ptr<Parser<std::unique_ptr<solver::SearchStrategy>> > parser) {
+        searchParsers_.addParser(name, std::move(parser));
     }
-    virtual void registerBackpropagationParser(std::string name,
-            std::unique_ptr<Parser<solver::BackpropagationStrategy>> parser) {
-        backpropParsers_.addParser(name, std::move(parser));
+    virtual void registerEstimationParser(std::string name,
+            std::unique_ptr<Parser<std::unique_ptr<solver::EstimationStrategy>> > parser) {
+        estimationParsers_.addParser(name, std::move(parser));
     }
-    virtual std::unique_ptr<solver::SearchStrategy> createSelectionStrategy(
+
+    virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(solver::Solver *solver)
+            override {
+        return searchParsers_.parse(solver, searchStrategyString_);
+    }
+    virtual std::unique_ptr<solver::EstimationStrategy> createEstimationStrategy(
             solver::Solver *solver) override {
-        return selectionParsers_.parse(solver, selectionStrategyString_);
+        return estimationParsers_.parse(solver, estimatorString_);
     }
-    virtual std::unique_ptr<solver::SearchStrategy> createRolloutStrategy(
+    virtual std::unique_ptr<solver::HistoryCorrector> createHistoryCorrector(
             solver::Solver *solver) override {
-        return rolloutParsers_.parse(solver, rolloutStrategyString_);
+        return std::make_unique<solver::DefaultHistoryCorrector>(solver,
+                heuristicParsers_.parse(solver, heuristicString_));
     }
-    virtual std::unique_ptr<solver::BackpropagationStrategy> createBackpropagationStrategy(
-            solver::Solver *solver) override {
-        return backpropParsers_.parse(solver, backpropagationStrategyString_);
+    virtual solver::Heuristic getHeuristicFunction() final override {
+        return heuristicParsers_.parse(nullptr, heuristicString_);
+    }
+    virtual double getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+            solver::State const */*state*/, solver::HistoricalData const */*data*/) {
+        return 0;
     }
 
 private:
@@ -103,19 +131,20 @@ private:
 // ABT parameters
     unsigned long minParticleCount_;
     long historiesPerStep_;
+    double stepTimeout_;
     long maximumDepth_;
 
-    ParserSet<solver::SearchStrategy> selectionParsers_;
-    ParserSet<solver::SearchStrategy> rolloutParsers_;
-    ParserSet<solver::BackpropagationStrategy> backpropParsers_;
+    ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> generatorParsers_;
+    ParserSet<solver::Heuristic> heuristicParsers_;
+    ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
+    ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
 
-    std::string selectionStrategyString_;
-    std::string rolloutStrategyString_;
-    std::string backpropagationStrategyString_;
+    std::string heuristicString_;
+    std::string searchStrategyString_;
+    std::string estimatorString_;
 
     bool hasColorOutput_;
     bool hasVerboseOutput_;
-    bool heuristicEnabled_;
 };
 
 #endif /* MODELWITHPROGRAMOPTIONS_HPP_ */

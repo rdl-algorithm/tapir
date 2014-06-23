@@ -15,11 +15,15 @@
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
+#ifdef GOOGLE_PROFILER
+#include <google/profiler.h>
+#endif
+
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
 
-template<typename ModelType, typename SerializerType>
+template<typename ModelType>
 int solve(int argc, char const *argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
@@ -60,15 +64,23 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
     randGen.discard(10);
 
     std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen, vm);
-    solver::Solver solver(&randGen, std::move(newModel));
-    std::unique_ptr<solver::Serializer> serializer(std::make_unique<SerializerType>(&solver));
-    solver.setSerializer(std::move(serializer));
+    solver::Solver solver(std::move(newModel));
     solver.initializeEmpty();
 
     double totT;
     double tStart;
     tStart = abt::clock_ms();
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStart("solve.prof");
+#endif
+
     solver.improvePolicy();
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStop();
+#endif
+
     totT = abt::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 

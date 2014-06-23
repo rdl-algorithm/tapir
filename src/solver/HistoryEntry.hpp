@@ -18,9 +18,8 @@ class HistorySequence;
 class StateInfo;
 
 class HistoryEntry {
-  public:
-    friend class AbstractBackpropagationStrategy;
-    friend class AbstractSearchInstance;
+public:
+    friend class BasicSearchStrategy;
     friend class DefaultHistoryCorrector;
     friend class HistorySequence;
     friend class Simulator;
@@ -33,11 +32,6 @@ class HistoryEntry {
      * owning sequence, and entry ID.
      */
     HistoryEntry(HistorySequence *owningSequence, long entryId);
-    /** Constructs a new history entry with the given state info,
-     *  cumulative discount, owning sequence, and entry ID.
-     */
-    HistoryEntry(StateInfo *stateInfo, HistorySequence *owningSequence,
-            long entryId);
     /** Destroys this HistoryEntry. */
     ~HistoryEntry();
     _NO_COPY_OR_MOVE(HistoryEntry);
@@ -46,7 +40,7 @@ class HistoryEntry {
     /** Returns the id of this entry (0 = first entry in the sequence). */
     long getId() const;
     /** Returns the immediate reward for this entry. */
-    double getReward() const;
+    double getImmediateReward() const;
     /** Returns the cumulative discounted reward, starting at this entry. */
     double getCumulativeReward() const;
     /** Returns the state associated with this history entry. */
@@ -64,10 +58,6 @@ class HistoryEntry {
     /** Returns the belief node associated with this history entry. */
     BeliefNode *getAssociatedBeliefNode() const;
 
-    /* -------------- Registration methods ---------------- */
-    /** Returns true iff this entry is already registered as a particle. */
-    bool isRegisteredAsParticle() const;
-
 private:
     /* ----------------- Change flagging ------------------- */
     /**  Resets the changes that apply to this history entry. */
@@ -76,9 +66,7 @@ private:
     void setChangeFlags(ChangeFlags flags);
 
     /* -------------- Registration methods ---------------- */
-    /** Registers this history entry as a particle of the given belief node.
-     * A value of nullptr will deregister this particle from that node.
-     */
+    /** Registers this entry as one of the particles of the given node. */
     void registerNode(BeliefNode *node);
     /** Registers this history entry as one of the particles that contains
      * the given state.
@@ -86,7 +74,14 @@ private:
      */
     void registerState(StateInfo *info);
 
-  private:
+private:
+    /** The history sequence that owns this entry. */
+    HistorySequence *owningSequence_;
+    /** The id of the specific entry within the sequence. */
+    long entryId_;
+    /** The belief node this entry is associated with. */
+    BeliefNode *associatedBeliefNode_;
+
     /** The state information for this history entry. */
     StateInfo *stateInfo_;
     /** Action performed in this entry. */
@@ -95,22 +90,8 @@ private:
     std::unique_ptr<TransitionParameters> transitionParameters_;
     /** Observation received in this entry. */
     std::unique_ptr<Observation> observation_;
-
-    /** True iff this entry has been backpropagated, and false otherwise. */
-    bool hasBeenBackedUp_;
-    /** The id of the specific entry within the sequence. */
-    long entryId_;
     /** Non-discounted reward. */
-    double reward_;
-    /** Cumulative discounted reward, starting from this action. */
-    double rewardFromHere_;
-
-    /** The history sequence that owns this entry. */
-    HistorySequence *owningSequence_;
-    /** The belief node this entry is associated with. */
-    BeliefNode *associatedBeliefNode_;
-    /** Whether a belief node has this entry registered as a particle. */
-    bool isRegisteredAsParticle_;
+    double immediateReward_;
 
     /** The flags associated with current POMDP model updates. */
     ChangeFlags changeFlags_;

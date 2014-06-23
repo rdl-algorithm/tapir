@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "global.hpp"
+
 struct GridPosition {
     long i;
     long j;
@@ -22,6 +24,18 @@ struct GridPosition {
         return std::abs(i - other.i) + std::abs(j - other.j);
     }
 };
+
+// We define a hash function directly in the std namespace.
+namespace std {
+template <> struct hash<GridPosition> {
+    std::size_t operator()(GridPosition const &pos) const {
+        std::size_t hashValue = 0;
+        abt::hash_combine(hashValue, pos.i);
+        abt::hash_combine(hashValue, pos.j);
+        return hashValue;
+    }
+};
+} /* namespace std */
 
 inline std::ostream &operator<<(std::ostream &os, GridPosition const &obj) {
     os << "(" << obj.i << ", " << obj.j << ")";

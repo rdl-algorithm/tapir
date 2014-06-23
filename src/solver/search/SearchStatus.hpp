@@ -6,12 +6,8 @@ namespace solver {
 enum class SearchStatus : long {
     UNINITIALIZED,
     INITIAL,
-    INSIDE_TREE,
-    REACHED_ROLLOUT_NODE,
-    ROLLING_OUT,
-    ROLLOUT_COMPLETE,
-    HIT_TERMINAL_STATE,
-    HIT_DEPTH_LIMIT,
+    OUT_OF_STEPS,
+    FINISHED,
     ERROR
 };
 

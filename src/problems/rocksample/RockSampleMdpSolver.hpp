@@ -6,9 +6,12 @@
 #include <unordered_set>
 #include <utility>
 
-#include "problems/shared/GridPosition.hpp"
-
 #include "global.hpp"
+
+#include "problems/shared/GridPosition.hpp"
+#include "problems/shared/parsers.hpp"
+
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 
 namespace rocksample {
 class RockSampleModel;
@@ -25,6 +28,7 @@ public:
 
     /** Solves the MDP. */
     void solve();
+
     /** Calculates the exact value for the given state. */
     double getQValue(RockSampleState const &state) const;
 
@@ -47,6 +51,16 @@ private:
     std::map<std::pair<int, int>, double> valueMap_;
 };
 
+class RockSampleMdpParser : public Parser<solver::Heuristic> {
+public:
+    RockSampleMdpParser(RockSampleModel *model);
+    virtual ~RockSampleMdpParser() = default;
+    _NO_COPY_OR_MOVE(RockSampleMdpParser);
+
+    virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
+private:
+    RockSampleModel *model_;
+};
 } /* namespace rocksample */
 
 #endif /* ROCKSAMPLE_MDPSOLVER_HPP_ */

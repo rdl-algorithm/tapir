@@ -34,8 +34,8 @@
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 
-#include "solver/mappings/discretized_actions.hpp"
-#include "solver/mappings/approximate_observations.hpp"
+#include "solver/mappings/actions/discretized_actions.hpp"
+#include "solver/mappings/observations/approximate_observations.hpp"
 
 #include "solver/indexing/RTree.hpp"
 #include "solver/indexing/FlaggingVisitor.hpp"
@@ -45,8 +45,10 @@
 #include "solver/StatePool.hpp"
 
 #include "Nav2DAction.hpp"         // for Nav2DAction
+#include "Nav2DActionPool.hpp"         // for Nav2DActionPool
 #include "Nav2DObservation.hpp"    // for Nav2DObservation
 #include "Nav2DState.hpp"          // for Nav2DState
+#include "Nav2DTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
@@ -117,7 +119,7 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
         std::ostringstream message;
         message << "Failed to open " << mapPath;
         debug::show_message(message.str());
-        exit(1);
+        std::exit(1);
     }
     std::string line;
     while (std::getline(inFile, line)) {
@@ -291,43 +293,6 @@ bool Nav2DModel::isTerminal(solver::State const &state) {
             AreaType::GOAL);
 }
 
-double Nav2DModel::getHeuristicValue(solver::State const &state) {
-    if (!heuristicEnabled()) {
-        return getDefaultVal();
-    }
-
-    Nav2DState const &navState = static_cast<Nav2DState const &>(state);
-    Point2D closestPoint = getClosestPointOfType(navState.getPosition(),
-            AreaType::GOAL);
-    Vector2D displacement = closestPoint - navState.getPosition();
-    double distance = displacement.getMagnitude();
-    double turnAmount = std::abs(geometry::normalizeTurn(
-            displacement.getDirection() - navState.getDirection()));
-    long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
-    numSteps += std::floor(turnAmount / (maxRotationalSpeed_
-            * timeStepLength_));
-    if (numSteps <= 0) {
-        numSteps = 1;
-    }
-    double costPerStep = costPerUnitDistance_ * distance / numSteps;
-    costPerStep += costPerRevolution_ * turnAmount / numSteps;
-    costPerStep += costPerUnitTime_ * timeStepLength_;
-
-    double discountFactor = getDiscountFactor();
-    double reward = 0;
-    if (discountFactor < 1.0) {
-        double finalDiscount = std::pow(discountFactor, numSteps);
-        reward = finalDiscount * goalReward_;
-        reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
-    } else {
-        reward = goalReward_ - costPerStep * numSteps;
-    }
-    if (!std::isfinite(reward)) {
-        debug::show_message("Bad reward!");
-    }
-    return reward;
-}
-
 std::unique_ptr<Nav2DState> Nav2DModel::extrapolateState(
         Nav2DState const &state, double speed,
         double rotationalSpeed, double moveRatio) {
@@ -463,23 +428,34 @@ solver::Model::StepResult Nav2DModel::generateStep(
     return result;
 }
 
-void Nav2DModel::applyChange(solver::ModelChange const &change,
-        solver::StatePool *pool) {
-    Nav2DChange const &navChange = static_cast<Nav2DChange const &>(change);
-    addArea(navChange.id, navChange.area, navChange.type);
-    if (pool == nullptr) {
-        return;
+void Nav2DModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+        solver::Solver *solver) {
+    solver::StatePool *pool = nullptr;
+    if (solver != nullptr) {
+        pool = solver->getStatePool();
     }
-    solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
-    solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
-    if (navChange.type == AreaType::OBSERVATION) {
-        visitor.flagsToSet_ = solver::ChangeFlags::OBSERVATION_BEFORE;
+
+    for (auto const &change : changes) {
+        Nav2DChange const &navChange = static_cast<Nav2DChange const &>(*change);
+        addArea(navChange.id, navChange.area, navChange.type);
+        if (pool == nullptr) {
+            continue;
+        }
+
+        // Obstacles => delete states.
+        solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
+        solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+
+        // Observation areas => update observation on the previous step.
+        if (navChange.type == AreaType::OBSERVATION) {
+            visitor.flagsToSet_ = solver::ChangeFlags::OBSERVATION_BEFORE;
+        }
+        tree->boxQuery(visitor,
+                {navChange.area.getLowerLeft().getX(),
+                        navChange.area.getLowerLeft().getY(), -2.0},
+                {navChange.area.getUpperRight().getX(),
+                        navChange.area.getUpperRight().getY(), +2.0});
     }
-    tree->boxQuery(visitor,
-            { navChange.area.getLowerLeft().getX(),
-                    navChange.area.getLowerLeft().getY(), -2.0 },
-            { navChange.area.getUpperRight().getX(),
-                    navChange.area.getUpperRight().getY(), -2.0 });
 }
 
 geometry::RTree *Nav2DModel::getTree(AreaType type) {
@@ -729,15 +705,50 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 }
 
-long Nav2DModel::getNumberOfBins() {
-    return Nav2DAction::getNumberOfBins();
+
+double Nav2DModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
+        solver::State const *state, solver::HistoricalData const */*data*/) {
+    Nav2DState const &nav2DState = static_cast<Nav2DState const &>(*state);
+    Point2D closestPoint = getClosestPointOfType(nav2DState.getPosition(),
+            AreaType::GOAL);
+    Vector2D displacement = closestPoint - nav2DState.getPosition();
+    double distance = displacement.getMagnitude();
+    double turnAmount = std::abs(geometry::normalizeTurn(
+            displacement.getDirection() - nav2DState.getDirection()));
+    long numSteps = std::floor(distance / (maxSpeed_ * timeStepLength_));
+    numSteps += std::floor(turnAmount / (maxRotationalSpeed_
+            * timeStepLength_));
+    if (numSteps <= 0) {
+        numSteps = 1;
+    }
+    double costPerStep = costPerUnitDistance_ * distance / numSteps;
+    costPerStep += costPerRevolution_ * turnAmount / numSteps;
+    costPerStep += costPerUnitTime_ * timeStepLength_;
+
+    double discountFactor = getDiscountFactor();
+    double reward = 0;
+    if (discountFactor < 1.0) {
+        double finalDiscount = std::pow(discountFactor, numSteps);
+        reward = finalDiscount * goalReward_;
+        reward -= costPerStep * (1 - finalDiscount) / (1 - discountFactor);
+    } else {
+        reward = goalReward_ - costPerStep * numSteps;
+    }
+    if (!std::isfinite(reward)) {
+        debug::show_message("Bad reward!");
+    }
+    return reward;
 }
 
-std::unique_ptr<solver::Action> Nav2DModel::sampleAnAction(long binNumber) {
-    return std::make_unique<Nav2DAction>(binNumber, this);
-}
 
-double Nav2DModel::getMaxObservationDistance() {
-    return maxObservationDistance_;
+std::unique_ptr<solver::ActionPool> Nav2DModel::createActionPool(solver::Solver */*solver*/) {
+    return std::make_unique<Nav2DActionPool>(this);
+}
+std::unique_ptr<solver::ObservationPool> Nav2DModel::createObservationPool(
+        solver::Solver */*solver*/) {
+    return std::make_unique<solver::ApproximateObservationPool>(maxObservationDistance_);
+}
+std::unique_ptr<solver::Serializer> Nav2DModel::createSerializer(solver::Solver *solver) {
+    return std::make_unique<Nav2DTextSerializer>(solver);
 }
 } /* namespace nav2d */

@@ -1,4 +1,4 @@
-#include "BeliefNode.hpp"
+#include "solver/BeliefNode.hpp"
 
 #include <map>                          // for _Rb_tree_iterator, map<>::iterator, map
 #include <memory>                       // for unique_ptr
@@ -10,37 +10,47 @@
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "RandomAccessSet.hpp"
 
-#include "ActionNode.hpp"               // for ActionNode
-#include "HistoryEntry.hpp"             // for HistoryEntry
-#include "Solver.hpp"                   // for Solver
+#include "solver/cached_values.hpp"
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
-#include "abstract-problem/State.hpp"                    // for State
+#include "solver/ActionNode.hpp"               // for ActionNode
+#include "solver/HistoryEntry.hpp"             // for HistoryEntry
+#include "solver/Solver.hpp"                   // for Solver
 
-#include "mappings/ActionMapping.hpp"
-#include "mappings/ObservationMapping.hpp"
-#include "mappings/ObservationPool.hpp"
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/HistoricalData.hpp"
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/State.hpp"                    // for State
 
-#include "search/HistoricalData.hpp"
+#include "solver/search/action-choosers/choosers.hpp"
 
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
 
 namespace solver {
 BeliefNode::BeliefNode() :
-    BeliefNode(-1, nullptr) {
+            BeliefNode(-1, nullptr) {
 }
 BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry) :
-    BeliefNode(-1, parentEntry) {
+            BeliefNode(-1, parentEntry) {
 }
+
 BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
-        id_(id),
-        depth_(-1),
-        parentEntry_(parentEntry),
-        data_(nullptr),
-        particles_(),
-        nStartingSequences_(0),
-        tLastChange_(-1),
-        actionMap_(nullptr) {
+            id_(id),
+            depth_(-1),
+            parentEntry_(parentEntry),
+            data_(nullptr),
+            particles_(),
+            nStartingSequences_(0),
+            tLastChange_(-1),
+            actionMap_(nullptr),
+            cachedValues_(),
+            qEstimator_(nullptr) {
+    if (parentEntry_ == nullptr) {
+        depth_ = 0;
+    } else {
+        depth_ = getParentBelief()->getDepth() + 1;
+    }
 }
 
 // Do-nothing destructor
@@ -71,12 +81,6 @@ long BeliefNode::getId() const {
 long BeliefNode::getDepth() const {
     return depth_;
 }
-std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
-    return actionMap_->getRecommendedAction();
-}
-double BeliefNode::getQValue() const {
-    return actionMap_->getMaxQValue();
-}
 long BeliefNode::getNumberOfParticles() const {
     return particles_.size();
 }
@@ -98,7 +102,7 @@ double BeliefNode::getTimeOfLastChange() const {
 ActionMapping *BeliefNode::getMapping() const {
     return actionMap_.get();
 }
-ObservationMappingEntry *BeliefNode::getParentEntry() const{
+ObservationMappingEntry *BeliefNode::getParentEntry() const {
     return parentEntry_;
 }
 ActionNode *BeliefNode::getParentActionNode() const {
@@ -137,12 +141,42 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
 }
 
 
-/* ============================ PRIVATE ============================ */
+/* -------------------- Simple setters  ---------------------- */
+void BeliefNode::updateTimeOfLastChange() {
+    // tLastChange_ = abt::clock_ms();
+}
 
+/* ----------------- Management of cached values ------------------- */
+BaseCachedValue *BeliefNode::addCachedValue(std::unique_ptr<BaseCachedValue> value) {
+    BaseCachedValue *rawPtr = value.get();
+    cachedValues_[rawPtr] = std::move(value);
+    return rawPtr;
+}
+void BeliefNode::removeCachedValue(BaseCachedValue *value) {
+    cachedValues_.erase(value);
+}
+
+/* ------------ Q-value calculation and action selection -------------- */
+void BeliefNode::setQEstimator(CachedValue<double> *qEstimator) {
+    qEstimator_ = qEstimator;
+}
+
+/* ------------ Q-value calculation and action selection -------------- */
+std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
+    return choosers::max_action(this);
+}
+double BeliefNode::getQValue() const {
+    return qEstimator_->getCache();
+}
+void BeliefNode::recalculateQValue() {
+    qEstimator_->updateCache();
+}
+
+/* ============================ PRIVATE ============================ */
 
 /* -------------- Particle management / sampling ---------------- */
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
-    tLastChange_ = abt::clock_ms();
+    updateTimeOfLastChange();
     particles_.add(newHistEntry);
     if (newHistEntry->getId() == 0) {
         nStartingSequences_++;
@@ -150,7 +184,7 @@ void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
 }
 
 void BeliefNode::removeParticle(HistoryEntry *histEntry) {
-    tLastChange_ = abt::clock_ms();
+    updateTimeOfLastChange();
     particles_.remove(histEntry);
     if (histEntry->getId() == 0) {
         nStartingSequences_--;
@@ -160,19 +194,18 @@ void BeliefNode::removeParticle(HistoryEntry *histEntry) {
 /* -------------------- Tree-related setters  ---------------------- */
 void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
     actionMap_ = std::move(mapping);
-    actionMap_->setOwner(this);
 }
 void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
     data_ = std::move(data);
 }
 
 /* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver,
-        Action const &action, Observation const &obs) {
+std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver, Action const &action,
+        Observation const &obs) {
     ActionNode *actionNode = actionMap_->getActionNode(action);
     if (actionNode == nullptr) {
         actionNode = actionMap_->createActionNode(action);
-        actionNode->setMapping(solver->getObservationPool()->createObservationMapping());
+        actionNode->setMapping(solver->getObservationPool()->createObservationMapping(actionNode));
     }
     return actionNode->createOrGetChild(solver, obs);
 }

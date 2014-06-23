@@ -23,7 +23,6 @@
 #include "TagObservation.hpp"
 #include "TagOptions.hpp"
 #include "TagState.hpp"
-#include "TagTextSerializer.hpp"
 #include "TagModel.hpp"
 
 using std::cout;
@@ -154,9 +153,7 @@ int main(int argc, char **argv)
     TagModel *model = newModel.get();
 
     // Initialise Solver
-    solver::Solver solver(&randGen, std::move(newModel));
-    std::unique_ptr<solver::Serializer> serializer(std::make_unique<TagTextSerializer>(&solver));
-    solver.setSerializer(std::move(serializer));
+    solver::Solver solver(std::move(newModel));
     solver.initializeEmpty();
 
     // Generate policy
@@ -169,7 +166,7 @@ int main(int argc, char **argv)
 
     // Initialise ABT's Simulator (not VREP!!)
     std::unique_ptr<TagModel> simulatorModel = std::make_unique<TagModel>(&randGen, vm);
-    solver::Simulator simulator(std::move(simulatorModel), &solver);
+    solver::Simulator simulator(std::move(simulatorModel), &solver, true);
     //if (hasChanges) {
     //    simulator.loadChangeSequence(changesPath);
     //}
@@ -195,18 +192,13 @@ int main(int argc, char **argv)
 	/******************* Main loop *******************/
 
 	long stepNumber = 0;
-    bool wasPaused = false;
 	while (ros::ok()) {
 
         // Don't loop if VREP is paused
         if (!vrepHelper.isRunning()) {
-            if (!wasPaused) {
-                ROS_WARN_STREAM("VREP tag scenario is not running");
-                wasPaused = true;
-            }
+            cout << "Waiting for VREP" << endl;
+            ros::Duration(1).sleep();
             continue;
-        } else {
-            wasPaused = false;
         }
 
         // Process any changes (i.e. cell type changing between WALL and EMPTY)

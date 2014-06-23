@@ -27,11 +27,15 @@
 
 #include "ProgramOptions.hpp"           // for ProgramOptions
 
+#ifdef GOOGLE_PROFILER
+#include <google/profiler.h>
+#endif
+
 using std::cout;
 using std::endl;
 namespace po = boost::program_options;
 
-template<typename ModelType, typename SerializerType>
+template<typename ModelType>
 int simulate(int argc, char const *argv[], ProgramOptions *options) {
     po::options_description visibleOptions;
     po::options_description allOptions;
@@ -68,6 +72,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
     std::string polPath = vm["policy"].as<std::string>();
     bool hasChanges = vm["changes.hasChanges"].as<bool>();
+    bool hasDynamicChanges = vm["changes.areDynamic"].as<bool>();
     std::string changesPath;
     if (hasChanges) {
         changesPath = vm["changes.changesPath"].as<std::string>();
@@ -81,18 +86,32 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     if (seed == 0) {
         seed = std::time(nullptr);
     }
-    cout << "Seed: " << seed << endl << endl;
+    cout << "Global seed: " << seed << endl << endl;
     RandomGenerator randGen;
     randGen.seed(seed);
     randGen.discard(10);
 
     std::ofstream os(logPath);
 
+    if (!vm["state"].empty()) {
+        std::stringstream sstr;
+        unsigned long state = vm["state"].as<unsigned long>();
+        sstr << state;
+        sstr >> randGen;
+        cout << "Loaded PRNG state " << state << endl;
+    }
+
     double totalReward = 0;
     double totalTime = 0;
     double totalNSteps = 0;
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStart("simulate.prof");
+#endif
+
     for (long runNumber = 0; runNumber < nRuns; runNumber++) {
         cout << "Run #" << runNumber+1 << endl;
+        cout << "PRNG engine state: " << randGen << endl;
         cout << "Loading policy... " << endl;
 
         std::ifstream inFile;
@@ -104,15 +123,19 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             return 1;
         }
 
-        std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&randGen, vm);
-        solver::Solver solver(&randGen, std::move(solverModel));
-        std::unique_ptr<solver::Serializer> newSerializer(std::make_unique<SerializerType>(&solver));
-        solver.setSerializer(std::move(newSerializer));
+        // We want the simulated history to be independent of the solver's searching,
+        // so we create a different random generator here.
+        RandomGenerator solverGen(randGen);
+        // Advance it forward a long way to avoid correlation between the solver and simulator.
+        solverGen.discard(10000);
+
+        std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&solverGen, vm);
+        solver::Solver solver(std::move(solverModel));
         solver.getSerializer()->load(inFile);
         inFile.close();
 
         std::unique_ptr<ModelType> simulatorModel = std::make_unique<ModelType>(&randGen, vm);
-        solver::Simulator simulator(std::move(simulatorModel), &solver);
+        solver::Simulator simulator(std::move(simulatorModel), &solver, hasDynamicChanges);
         if (hasChanges) {
             simulator.loadChangeSequence(changesPath);
         }
@@ -139,9 +162,9 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
             os << "S: " << *entry->getState() << endl;
             os << "A: " << *entry->getAction() << endl;
             os << "O: " << *entry->getObservation() << endl;
-            os << "R: " << entry->getReward() << endl;
+            os << "R: " << entry->getImmediateReward() << endl;
         }
-        os << "Final State: " << sequence->getLastEntry()->getState();
+        os << "Final State: " << *sequence->getLastEntry()->getState();
         os << endl;
 
         cout << "Total discounted reward: " << reward << endl;
@@ -166,12 +189,18 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         }
         cout << "Run complete!" << endl << endl;
     }
+
+#ifdef GOOGLE_PROFILER
+    ProfilerStop();
+#endif
+
     os.close();
 
     cout << nRuns << " runs completed." << endl;
     cout << "Mean reward: " << totalReward / nRuns << endl;
     cout << "Mean number of steps: " << totalNSteps / nRuns << endl;
     cout << "Mean time taken: " << totalTime / nRuns << "ms" << endl;
+    cout << "Mean time per step: " << totalTime / totalNSteps << "ms" << endl;
     return 0;
 }
 

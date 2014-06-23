@@ -9,8 +9,8 @@
 #include "solver/abstract-problem/State.hpp"             // for State
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
-#include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations.hpp"
+#include "solver/mappings/actions/enumerated_actions.hpp"
+#include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "TagAction.hpp"
 #include "TagModel.hpp"
@@ -41,9 +41,9 @@ void TagTextSerializer::saveModelChange(solver::ModelChange const &change, std::
     TagChange const &tagChange = static_cast<TagChange const &>(change);
     os << tagChange.changeType;
     os << ": ";
-    saveVector(std::vector<long> {(long)tagChange.i0, (long)tagChange.j0}, os);
+    saveVector(std::vector<long> {tagChange.i0, tagChange.j0}, os);
     os << " ";
-    saveVector(std::vector<long> {(long)tagChange.i1, (long)tagChange.j1}, os);
+    saveVector(std::vector<long> {tagChange.i1, tagChange.j1}, os);
 }
 std::vector<long> loadVector(std::istream &is) {
     std::vector<long> values;

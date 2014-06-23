@@ -3,7 +3,6 @@
 # ----------------------------------------------------------------------
 
 n := $(MODULE_NAME)
-
 DIR_RELATIVE_$(n) := $(patsubst /%,%,$(subst $(ROOT)/src,,$(d)))
 
 # Source folder
@@ -35,6 +34,7 @@ _O_$(n)          := $(OBJDIR_$(n))/%.o
 _D_$(n)          := $(OBJDIR_$(n))/%.d
 
 OBJS_$(n)        := $(patsubst $(_CPP_$(n)),$(_O_$(n)),$(SRCS_$(n)))
+
 DEPS_$(n)        := $(patsubst $(_O_$(n)),$(_D_$(n)),$(OBJS_$(n)))
 OUTPUTS_TO_CLEAN_$(n)  := $(OBJS_$(n)) $(DEPS_$(n))
 
@@ -60,7 +60,7 @@ $(ALL_DIRS_$(n)):
 -include $(DEPS_$(n))
 # Compilation recipe
 $(OBJS_$(n)): $(_O_$(n)): $(_CPP_$(n))
-	$(COMPILE_CMD) $<
+	$(call COMPILE_RECIPE,$<)
 
 # Rebuild if this file changes, or the root makefile does.
 $(OBJS_$(n)): Makefile .make/template.mk

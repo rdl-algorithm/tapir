@@ -21,13 +21,15 @@
 #include "solver/StateInfo.hpp"                // for StateInfo, StateInfo::currId
 #include "solver/StatePool.hpp"                // for StatePool, StatePool::StateInfoSet
 
-#include "solver/mappings/ActionMapping.hpp"
-#include "solver/mappings/ObservationMapping.hpp"          // for ObservationMapping
-
 #include "solver/abstract-problem/Action.hpp"              // for Action
 #include "solver/abstract-problem/ModelChange.hpp"              // for ModelChange
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State, operator<<
+
+#include "solver/belief-estimators/estimators.hpp"
+
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"          // for ObservationMapping
 
 #include "Serializer.hpp"               // for Serializer
 
@@ -167,13 +169,9 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
             std::ios_base::left);
 
     os << " r:";
-    abt::print_double(entry.reward_, os, 6, 2,
+    abt::print_double(entry.immediateReward_, os, 6, 2,
             std::ios_base::fixed | std::ios_base::showpos
                     | std::ios_base::left);
-
-    os << " v:";
-    abt::print_double(entry.rewardFromHere_, os, 0, 1,
-                std::ios_base::fixed | std::ios_base::showpos);
 
     os << ");   S:";
     saveState(entry.stateInfo_->getState(), os);
@@ -190,11 +188,7 @@ void TextSerializer::load(HistoryEntry &entry, std::istream &is) {
     entry.transitionParameters_ = std::move(loadTransitionParameters(is));
     entry.observation_ = std::move(loadObservation(is));
     std::getline(is, tmpStr, ':');
-    is >> entry.reward_;
-    std::getline(is, tmpStr, ':');
-    std::getline(is, tmpStr, ')');
-    std::istringstream(tmpStr) >> entry.rewardFromHere_;
-    entry.hasBeenBackedUp_ = true;
+    is >> entry.immediateReward_;
     entry.registerState(getSolver()->getStatePool()->getInfoById(stateId));
 }
 
@@ -270,7 +264,7 @@ void TextSerializer::save(ActionNode const &node, std::ostream &os) {
 }
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
-    node.setMapping(loadObservationMapping(is));
+    node.setMapping(loadObservationMapping(&node, is));
     for (ObservationMappingEntry const *entry : node.getMapping()->getAllEntries()) {
         BeliefNode *childNode = entry->getBeliefNode();
         if (childNode != nullptr) {
@@ -335,7 +329,8 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
         }
     }
     node.setHistoricalData(loadHistoricalData(is));
-    node.setMapping(loadActionMapping(is));
+    node.setMapping(loadActionMapping(&node, is));
+    getSolver()->getEstimationStrategy()->setQEstimator(getSolver(), &node);
 }
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
@@ -372,7 +367,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         std::istringstream(line) >> tmpStr >> nodeId;
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
-        node->getMapping()->recalculate();
+        node->recalculateQValue();
         // Ignore an empty line after each belief node.
         std::getline(is, line);
         std::getline(is, line);

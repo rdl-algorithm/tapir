@@ -1,6 +1,7 @@
 #ifndef SOLVER_BELIEFNODE_HPP_
 #define SOLVER_BELIEFNODE_HPP_
 
+#include <functional>
 #include <map>                          // for map, map<>::value_compare
 #include <memory>                       // for unique_ptr
 #include <set>
@@ -9,15 +10,17 @@
 #include "global.hpp"                     // for RandomGenerator
 #include "RandomAccessSet.hpp"
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/State.hpp"
-#include "abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/HistoricalData.hpp"
+#include "solver/abstract-problem/State.hpp"
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
 
-#include "mappings/ActionMapping.hpp"
-
-#include "search/HistoricalData.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
 
 namespace solver {
+class BaseCachedValue;
+template <typename T> class CachedValue;
+
 class ActionMapping;
 class ActionNode;
 class HistoricalData;
@@ -26,7 +29,7 @@ class ObservationMappingEntry;
 class Solver;
 
 class BeliefNode {
-  public:
+public:
     friend class ActionNode;
     friend class BeliefTree;
     friend class HistoryEntry;
@@ -48,7 +51,6 @@ class BeliefNode {
     ~BeliefNode();
     _NO_COPY_OR_MOVE(BeliefNode);
 
-
     /* ---------------- Useful calculations ------------------ */
     /** Calculates the distance between this belief node and another by
      * calculating the average pairwise distance between the individual
@@ -61,10 +63,6 @@ class BeliefNode {
     long getId() const;
     /** Returns the depth of this node in the tree (0 = root). */
     long getDepth() const;
-    /** Returns the recommended action to take from this node. */
-    std::unique_ptr<Action> getRecommendedAction() const;
-    /** Returns the best q-value */
-    double getQValue() const;
     /** Returns the number of particles in this node. */
     long getNumberOfParticles() const;
     /** Returns the number of sequences starting from this node. */
@@ -73,7 +71,6 @@ class BeliefNode {
     std::vector<State const *> getStates() const;
     /** Returns the time at which the last change occurred. */
     double getTimeOfLastChange() const;
-
 
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
@@ -95,8 +92,29 @@ class BeliefNode {
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
 
+    /* -------------------- Simple setters  ---------------------- */
+    /** Sets the time of the last change to the current time. */
+    void updateTimeOfLastChange();
 
-  private:
+    /* ----------------- Management of cached values ------------------- */
+    /** Adds a value to be cached by this belief node. */
+    BaseCachedValue *addCachedValue(std::unique_ptr<BaseCachedValue> value);
+    /** Removes a value cached by this belief node. */
+    void removeCachedValue(BaseCachedValue *value);
+
+    /* ------------ Control of Q-value calculation and action selection -------------- */
+    /** Sets the way in which the q-value for this belief node will be calculated. */
+    void setQEstimator(CachedValue<double> *qEstimator);
+
+    /* ------------ Q-value calculation and action selection -------------- */
+    /** Returns the recommended action to take from this node. */
+    std::unique_ptr<Action> getRecommendedAction() const;
+    /** Returns the best q-value */
+    double getQValue() const;
+    /** Recalculates the q-value for this belief node. */
+    void recalculateQValue();
+
+private:
     /* -------------- Particle management / sampling ---------------- */
     /** Adds the given history entry to this belief node. */
     void addParticle(HistoryEntry *newHistEntry);
@@ -114,8 +132,8 @@ class BeliefNode {
      * returns the child node, and a boolean which is true iff a new node was
      * actually created.
      */
-    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver,
-            Action const &action, Observation const &obs);
+    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver, Action const &action,
+            Observation const &obs);
 
 private:
     /** The ID of this node. */
@@ -138,6 +156,12 @@ private:
 
     /** A mapping of actions to action children for this node. */
     std::unique_ptr<ActionMapping> actionMap_;
+
+    /** The cached values for this belief node. */
+    std::unordered_map<BaseCachedValue const *, std::unique_ptr<BaseCachedValue>> cachedValues_;
+
+    /** Determines the q-value for this node. */
+    CachedValue<double> *qEstimator_;
 };
 } /* namespace solver */
 

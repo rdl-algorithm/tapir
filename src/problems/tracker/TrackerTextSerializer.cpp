@@ -9,8 +9,8 @@
 #include "solver/abstract-problem/State.hpp"             // for State
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
-#include "solver/mappings/enumerated_actions.hpp"
-#include "solver/mappings/discrete_observations.hpp"
+#include "solver/mappings/actions/enumerated_actions.hpp"
+#include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "TrackerAction.hpp"
 #include "TrackerModel.hpp"
