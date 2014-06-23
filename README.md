@@ -4,8 +4,8 @@ Installation:
 **V-REP**  
 http://www.coppeliarobotics.com/downloads.html 
 
-**ROS-Groovy**  
-http://wiki.ros.org/groovy/Installation/Ubuntu 
+**ROS-Hydro**  
+http://wiki.ros.org/hydro/Installation
 
 **Boost 1.48**  
 Note: On Ubuntu 12.04, Groovy depends on Boost 1.46, while ABT depends on Boost 1.48. To solve this, Boost 1.48 source is downloaded and referred to in ABT. Dependence on Boost 1.48 is expected to be removed in the future. 
@@ -18,7 +18,7 @@ Note: You can change the location of the boost source to use by editing the CMak
 **Other System Requirements:**  
 - **GNU C++ compiler** (>= 4.8) or equivalent - "g++" or "g++-4.8"
 - **libspatialindex** (>= 1.7.0) - "libspatialindex-dev"
-- **Octomap** - ros-groovy-octomap, ros-groovy-octomap-ros, ros-groovy-octomap-rviz-plugins
+- **Octomap** - ros-hydro-octomap, ros-hydro-octomap-ros, ros-hydro-octomap-rviz-plugins, ros-hydro-octomap-server
 
 **Make a ROS Catkin workspace**  
 
