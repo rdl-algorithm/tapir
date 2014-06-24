@@ -10,7 +10,7 @@ find_package(Boost 1.48.0 REQUIRED COMPONENTS program_options)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS 
-	roscpp roslib std_msgs geometry_msgs tf message_generation)
+	roscpp roslib std_msgs geometry_msgs tf message_generation laser_geometry)
 
 ## Find OctoMap package
 find_package(octomap REQUIRED)
@@ -47,7 +47,7 @@ generate_messages(
 catkin_package(
 	INCLUDE_DIRS src
 	LIBRARIES ${PROJECT_NAME}
-	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs tf message_runtime)
+	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs tf message_runtime laser_geometry)
 
 include_directories(src ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
@@ -118,3 +118,6 @@ target_link_libraries(tracker_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_
 
 add_executable(tag_node src/problems/tag/TagVrep.cpp)
 target_link_libraries(tag_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTag AbtSolver )
+
+add_executable(scan_to_pcl_node src/ScanToPcl.cpp)
+target_link_libraries(scan_to_pcl_node ${Boost_LIBRARIES} ${catkin_LIBRARIES})

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="gps_enabled" value="true"/>
+    <arg name="imu_enabled" value="true"/>
+    <arg name="lidar_enabled" value="true"/>
+    <!-- Send the Husky A200 Robot URDF/XACRO to param server -->
+    <param name="robot_description" command="$(find xacro)/xacro.py 
+        '$(find husky_description)/urdf/base.urdf.xacro' 
+        gps_enabled:=$(arg gps_enabled)
+        imu_enabled:=$(arg imu_enabled)
+        lidar_enabled:=$(arg lidar_enabled)
+    " />
+
+    <!-- Estimates 3D pose of robot from wheel odometry, IMU, visual odometry -->
+    <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+        <rosparam>
+            freq: 10.0
+            sensor_timeout: 1.0
+            publish_tf: true
+            odom_used: true
+            vo_used: false
+            output_frame: odom
+        </rosparam>
+    </node>
+    
+
+    <!-- Subscribes to joint_states from VREP, publishes tf data -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="30.0" />
+    </node>
+
+</launch>   

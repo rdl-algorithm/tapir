@@ -445,10 +445,9 @@ double TrackerModel::generateReward(
         reward -= moveCost_;
     }
 
-    // Cost for collision with wall
+    // Cost for collision with human/wall
     if (actionType == ActionType::FORWARD) {
-        GridPosition newPos = getNewPos(robotPos, robotYaw, actionType);
-        if (!isValid(newPos)) {
+        if (!isValid(robotPos) || robotPos == targetPos) {
             reward -= collideCost_;
         }
     }

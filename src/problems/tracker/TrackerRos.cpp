@@ -10,8 +10,9 @@
 #include <ros/time.h>
 #include <ros/package.h>  // For finding package path
 #include <std_msgs/Int32.h>
-#include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <octomap/octomap.h>
 #include <octomap_msgs/Octomap.h>
@@ -80,14 +81,14 @@ double getCurrYaw();
 
 // Send motor commands to move towards goal position (in metres) 
 // until goal is reached or timeLimit (seconds) reached
-void moveTo(double goalX, double goalY, double timeLimit = 6);
+void moveTo(double goalX, double goalY, double timeLimit = 6000);
 
 // Send motor commands to turn on the spot until goalYaw (in radians)
 // is reached or timeLimit (seconds) reached
-void turnTo(double goalYaw, double timeLimit = 6);
+void turnTo(double goalYaw, double timeLimit = 6000);
 
-// Publish desired wheel speeds on ROS topic
-void publishSpeeds(double rightSpeed, double leftSpeed);
+// Publish desired robot speed and turn rate on ROS topic
+void publishSpeeds(double linearSpeed, double yawSpeed);
 
 // Callback when ROS message from VREP is received
 // with information on whether target is visible or not
@@ -95,11 +96,11 @@ void visibleCallback(const std_msgs::Int32::ConstPtr& msg);
 
 void octomapCallback(const octomap_msgs::Octomap::ConstPtr& msg);
 
+
 } /* namespace tracker */
 
 // ROS variables
-ros::Publisher leftWheelsPub;
-ros::Publisher rightWheelsPub; 
+ros::Publisher cmdVelPub;
 //tf::StampedTransform robotTf;
 
 bool seesTarget;
@@ -126,8 +127,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "tracker_node");
 	ros::NodeHandle node;
 	ros::Rate loopRate(10);
-    leftWheelsPub = node.advertise<std_msgs::Float64>("left_wheels_speed", 1);
-    rightWheelsPub = node.advertise<std_msgs::Float64>("right_wheels_speed", 1);
+    cmdVelPub = node.advertise<geometry_msgs::Twist>("husky/cmd_vel", 1);
     ros::Publisher beliefPub = node.advertise<std_msgs::String>("target_pos_belief", 1);
     ros::Subscriber visibleSub = node.subscribe("human_visible", 1, visibleCallback);
     ros::Subscriber octomapSub = node.subscribe("octomap_full", 1, octomapCallback);
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     vrepHelper.setRosNode(&node);
 
     // Get handle of objects in VREP
-    robotHandle = vrepHelper.getHandle("robot");
+    robotHandle = vrepHelper.getHandle("husky_footprint");
     long targetHandle = vrepHelper.getHandle("Bill_goalDummy");
 
     // Update knowledge of current pose (used by ABT)
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
     	zones.push_back(xyToGrid(7.5, -7.5));
     	zones.push_back(xyToGrid(-7.5, -7.5));
     	zones.push_back(xyToGrid(-7.5, 7.5));
-    	newModel->setPolicyZones(zones, startZone, 0.3);
+    	newModel->setPolicyZones(zones, startZone, 0.4);
     	vrepHelper.moveObject("Bill", 7.5, 7.5, 0);
     	vrepHelper.moveObject("Bill_goalDummy", 7.5, 7.5, 0);
     }
@@ -335,7 +335,8 @@ int main(int argc, char **argv)
 		// Improve the policy
 		cout << "Improving policy" << endl;
 		solver::BeliefNode *currentBelief = agent.getCurrentBelief();
-		solver.improvePolicy(currentBelief);
+        double timeout = 2000;
+		solver.improvePolicy(currentBelief,-1,-1,timeout);
 
         // Publish belief on target's position. This will be visualised in VREP
         cout << "Publishing belief to ROS" << endl;
@@ -547,9 +548,10 @@ void moveTo(double goalX, double goalY, double timeLimit) {
         Point goalPos(goalX, goalY);
 
         // Check if goal is reached, break if it is
-        double thresh = 0.1;
-        if (currPos.dist(goalPos) < thresh)
+        double goalDist = currPos.dist(goalPos);
+        if (goalDist < 0.1) {
             break;
+        }
 
         // Find bearing of target point relative to robot's forward
         // Positive clockwise
@@ -557,50 +559,53 @@ void moveTo(double goalX, double goalY, double timeLimit) {
         double relBearing =  getCurrYaw() - angle;
 
         // Ensure relative bearing is between -pi and pi
-        while (relBearing > 0.5 * M_PI)
+        while (relBearing > 0.5 * M_PI) {
             relBearing -= 2 * M_PI;
-        while (relBearing < -0.5 * M_PI)
+        }
+        while (relBearing < -0.5 * M_PI) {
             relBearing += 2 * M_PI;
+        }
 
         // Convert to degrees
         relBearing *= 180/M_PI;
 
-        double rightSpeed, leftSpeed;
-        double maxSpeed = 5;
-
-        // Smooth right turn / straight ahead
-        if (relBearing >= 0 && relBearing <= 45) {
-            rightSpeed = (1 - relBearing/45) * maxSpeed;
-            leftSpeed = maxSpeed;
+        // Calculate turn rate
+        double relBearingMag = std::abs(relBearing);
+        double yawSpeed = 2;
+        if (relBearingMag < 25) {
+            yawSpeed = relBearingMag / 25;
+        }
+        if (relBearing > 0) {
+            yawSpeed *= -1;
         }
 
-        // Smooth left turn
-        else if (relBearing <= 0 && relBearing >= -45) {
-            rightSpeed = maxSpeed;
-            leftSpeed = (1 + relBearing/45) * maxSpeed;
+        // Calculate linear speed
+        double linearSpeed = 1;
+        if (goalDist < 0.5) {
+            linearSpeed = goalDist / 0.5;
         }
 
-        // Reverse
-        else if (relBearing >= 135 && relBearing <= 180) {
-            rightSpeed = (1 + (relBearing - 180)/45) * -maxSpeed;
-            leftSpeed = -maxSpeed;
-        }
-        else if (relBearing <= -135 && relBearing >= -180) {
-            rightSpeed = -maxSpeed;
-            leftSpeed = (1 - (relBearing + 180)/45) * -maxSpeed;
+        if (relBearingMag >= 135 && relBearingMag <= 180) {
+
+            // Reverse
+            linearSpeed *= -1;
+
+            yawSpeed = 2;
+            if (std::abs(relBearingMag - 180) < 25) {
+                yawSpeed = std::abs(relBearingMag - 180) / 25;
+            }
+            if (relBearing < 0) {
+                yawSpeed *= -1;
+            }
+        } else if  (relBearingMag > 45) {
+
+            // On the spot turn
+            linearSpeed = 0;
         }
 
-        // On the spot turn
-        else if (relBearing > 45) { // && relBearing <= 135
-            rightSpeed = -maxSpeed;
-            leftSpeed = maxSpeed;
-        }
-        else {      // relBearing < -45 && relBearing > -135
-            rightSpeed = maxSpeed;
-            leftSpeed = -maxSpeed;
-        }
+        
 
-        publishSpeeds(rightSpeed, leftSpeed);
+        publishSpeeds(linearSpeed, yawSpeed);
         ros::spinOnce();
         loopRate.sleep();
     }
@@ -620,36 +625,36 @@ void turnTo(double goalYaw, double timeLimit) {
         robotPose = vrepHelper.getPose(robotHandle);
 
         // Check time limit. Break if passed
-        if (ros::Time::now() - startTime > ros::Duration(timeLimit))
+        if (ros::Time::now() - startTime > ros::Duration(timeLimit)) {
             break;
+        }
 
         double relBearing = getCurrYaw() - goalYaw;
 
         // Ensure relative bearing is between -pi and pi
-        while (relBearing > 0.5 * M_PI)
+        while (relBearing > 0.5 * M_PI) {
             relBearing -= 2 * M_PI;
-        while (relBearing < -0.5 * M_PI)
+        }
+        while (relBearing < -0.5 * M_PI) {
             relBearing += 2 * M_PI;
+        }
 
         // Check if goal is reached, break if it is
-        double thresh = 0.2;
-        if (std::abs(relBearing) < thresh) 
+        double thresh = 0.1;
+        if (std::abs(relBearing) < thresh) {
             break;
-
-        double rightSpeed, leftSpeed;
-
-        double maxSpeed = 0.5 + 1.2 * std::abs(relBearing);
-
-        if (relBearing > 0) { 
-            rightSpeed = -maxSpeed;
-            leftSpeed = maxSpeed;
-        }
-        else {
-            rightSpeed = maxSpeed;
-            leftSpeed = -maxSpeed;
         }
 
-        publishSpeeds(rightSpeed, leftSpeed);
+        // Calculate turn rate
+        double yawSpeed = 2;
+        if (std::abs(relBearing) < 0.5) {
+            yawSpeed = std::abs(relBearing) / 0.5;
+        }
+        if (relBearing > 0) {
+            yawSpeed *= -1;
+        }
+
+        publishSpeeds(0, yawSpeed);
         ros::spinOnce();
         loopRate.sleep();
     }
@@ -658,16 +663,16 @@ void turnTo(double goalYaw, double timeLimit) {
     publishSpeeds(0, 0);
 }
 
-// Publish desired wheel speeds on ROS topic
-void publishSpeeds(double rightSpeed, double leftSpeed) {
-    std_msgs::Float64 rightWheelsMsg;
-    std_msgs::Float64 leftWheelsMsg;
-
-    rightWheelsMsg.data = rightSpeed;
-    leftWheelsMsg.data = leftSpeed;
-
-    rightWheelsPub.publish(rightWheelsMsg);
-    leftWheelsPub.publish(leftWheelsMsg);
+// Publish desired robot speed and turn rate on ROS topic
+void publishSpeeds(double linearSpeed, double yawSpeed) {
+    geometry_msgs::Vector3 linear;
+    linear.x = linearSpeed;
+    geometry_msgs::Vector3 angular;
+    angular.z = yawSpeed;
+    geometry_msgs::Twist msg;
+    msg.linear = linear;
+    msg.angular = angular;
+    cmdVelPub.publish(msg);
 }
 
 // Callback when ROS message from VREP is received

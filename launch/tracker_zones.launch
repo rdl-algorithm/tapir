@@ -5,15 +5,20 @@
 		<param name="resolution" value="0.125" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/world" />
+		<param name="frame_id" type="string" value="odom" />
 		
 		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="7.0" />
+		<!-- should be less than actual scan range if laser scanner puts artificial points at max range -->
+		<param name="sensor_model/max_range" value="6.0" />
 		
 		<!-- data source to integrate (PointCloud2) -->
 		<!-- <remap from="cloud_in" to="/narrow_stereo/points_filtered2" /> -->
 	
 	</node>
+
+	<node pkg="abt" type="scan_to_pcl_node" name="scan_to_pcl_node"/>
+
+	<include file="$(find abt)/launch/husky_vrep.launch"/>
 
 	<!-- tracker node -->
 	<param name="target_policy" value="1" />
