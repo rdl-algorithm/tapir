@@ -18,8 +18,6 @@ PolicyIterator::PolicyIterator(Policy initialPolicy, double discountFactor, int 
         possibleNextStates_(possibleNextStates),
         transitionProbability_(transitionProbability),
         reward_(reward) {
-    std::cout << std::endl;
-    std::cout << "#states: " << numStates << std::endl;
 }
 
 void PolicyIterator::fixValue(State state, double value) {
@@ -49,41 +47,48 @@ void PolicyIterator::updateValues() {
                 }
                 constants_[state] += prob * reward_(state, action, nextState);
             }
-            triplets.emplace_back(state, state, diagonalValue);
         }
+        triplets.emplace_back(state, state, diagonalValue);
     }
-
     coefficients_.setFromTriplets(triplets.begin(), triplets.end());
-
-    // std::cout << coefficients_ << std::endl;
     SparseSolverXd solver;
-//    std::cout << "Analyzing..." << std::endl;
     solver.compute(coefficients_);
-    std::cout << (solver.info() == Eigen::Success) << std::endl;
-//    std::cout << "Solving..." << std::endl;
     Eigen::VectorXd solution = solver.solve(constants_);
-//    std::cout << "Solved..." << std::endl;
+
     for (State state = 0; state < numStates_; state++) {
         values_[state] = solution[state];
     }
 }
 
-void PolicyIterator::solve() {
+long PolicyIterator::solve() {
     bool policyChanged = true;
+
+    long numIterations = 0;
     while (policyChanged) {
+        numIterations++;
         policyChanged = false;
         updateValues();
 
         for (State state = 0; state < numStates_; state++) {
+            // Ignore terminal states.
+            if (fixedValues_.count(state) > 0) {
+                continue;
+            }
+
             double bestQ = values_[state];
             for (Action action = 0; action < numActions_; action++) {
+                // Ignore the current best action.
+                if (action == policy_[state]) {
+                    continue;
+                }
+
                 double actionQ = 0;
                 for (State nextState : possibleNextStates_(state, action)) {
                     double prob = transitionProbability_(state, action, nextState);
                     actionQ += prob * (reward_(state, action, nextState)
                             + discountFactor_ * values_[nextState]);
                 }
-                if (actionQ > bestQ) {
+                if (actionQ > bestQ + 1e-10) {
                     policy_[state] = action;
                     bestQ = actionQ;
                     policyChanged = true;
@@ -91,6 +96,7 @@ void PolicyIterator::solve() {
             }
         }
     }
+    return numIterations;
 }
 
 Policy PolicyIterator::getCurrentPolicy() {

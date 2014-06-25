@@ -163,7 +163,7 @@ void TagMdpSolver::solve() {
 
     iterator.fixValue(allStates.size(), 0.0);
 
-    iterator.solve();
+    long numSteps = iterator.solve();
     std::vector<double> stateValues = iterator.getCurrentValues();
 
     // Now put all of the state values into our map.
@@ -172,7 +172,7 @@ void TagMdpSolver::solve() {
     }
 
     if (model_->hasVerboseOutput()) {
-        std::cout << "                   Done." << std::endl << std::endl;
+        std::cout << "        Done; took " << numSteps << " steps." << std::endl << std::endl;
     }
 }
 

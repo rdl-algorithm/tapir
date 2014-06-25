@@ -7,8 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <eigen3/Eigen/SparseCore>
-#include <eigen3/Eigen/SparseQR>
+#include <eigen3/Eigen/Sparse>
 
 namespace mdp {
 typedef int State;
@@ -25,7 +24,7 @@ public:
     _NO_COPY_OR_MOVE(PolicyIterator);
 
     void fixValue(State state, double value);
-    void solve();
+    long solve();
     Policy getCurrentPolicy();
     std::vector<double> getCurrentValues();
 
@@ -37,7 +36,7 @@ private:
     std::unordered_map<int, double> fixedValues_;
 
     typedef Eigen::SparseMatrix<double, Eigen::ColMajor, int> SparseMatrixXd;
-    typedef Eigen::SparseQR<SparseMatrixXd, Eigen::COLAMDOrdering<int>> SparseSolverXd;
+    typedef Eigen::SparseLU<SparseMatrixXd, Eigen::COLAMDOrdering<int>> SparseSolverXd;
     SparseMatrixXd coefficients_;
     Eigen::VectorXd constants_;
 
