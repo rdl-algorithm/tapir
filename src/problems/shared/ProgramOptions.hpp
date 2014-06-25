@@ -78,7 +78,7 @@ class ProgramOptions {
                         "overriding alias for ABT.estimator")
                 ("ABT.historiesPerStep,i", po::value<long>(),
                         "the number of episodes to sample for each step.")
-                ("ABT.stepTimeout", po::value<double>()->default_value(0),
+                ("ABT.stepTimeout,x", po::value<double>()->default_value(0),
                         "the maximum time per search step, in milliseconds; 0 => no timeout")
                 ("ABT.maximumDepth", po::value<long>(),
                         "maximum Depth allowed before search stops.")

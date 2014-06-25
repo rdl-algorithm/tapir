@@ -68,7 +68,7 @@ public:
     /** Improves the policy by generating the given number of histories from
      * the given belief node; nullptr => sample initial states from the model.
      *
-     * numberOfHistories is the number of histories to make (-1 => default),
+     * numberOfHistories is the number of histories to make (-1 => default, 0 => no limit),
      * maximumDepth is the maximum depth allowed in the tree (-1 => default),
      * timeout is the maximum allowed time in milliseconds (-1 => default, 0 => no timeout)
      */
@@ -158,18 +158,20 @@ private:
     void initialize();
 
     /* ------------------ Episode sampling methods ------------------- */
-    /** Samples starting states for simulations from a belief node. */
-    std::vector<StateInfo *> sampleStates(BeliefNode *node, long numSamples);
+    /** Returns a function that will sample states from the given node.
+     * nullptr => sample initial states from the model.
+     */
+    std::function<StateInfo *()> getStateSampler(BeliefNode *node);
 
     /** Runs multiple searches from the given start node and start states.
      *
-     * Returns the number of histories generated. */
-    long multipleSearches(BeliefNode *node, std::vector<StateInfo *> states,
-            long maximumDepth = -1, double endTime = std::numeric_limits<double>::infinity());
+     * Returns the actual number of histories generated. */
+    long multipleSearches(BeliefNode *startNode, std::function<StateInfo *()> sampler,
+            long maximumDepth, long maxNumSearches, double endTime);
     /** Searches from the given start node with the given start state. */
-    void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth = -1);
+    void singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth);
     /** Continues a pre-existing history sequence from its endpoint. */
-    void continueSearch(HistorySequence *sequence, long maximumDepth = -1);
+    void continueSearch(HistorySequence *sequence, long maximumDepth);
 
     /* ------------------ Private deferred backup methods. ------------------- */
     /** Adds a new node that requires backing up. */

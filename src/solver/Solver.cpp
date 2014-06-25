@@ -117,7 +117,6 @@ void Solver::initializeEmpty() {
 void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long maximumDepth,
         double timeout) {
     double startTime = abt::clock_ms();
-
     if (numberOfHistories < 0) {
         numberOfHistories = model_->getNumberOfHistoriesPerStep();
     }
@@ -127,24 +126,29 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
     if (timeout < 0) {
         timeout = model_->getStepTimeout();
     }
+
+    // No timeout => end at t=inf
     if (timeout == 0) {
-        // 0 => no timeout.
+        // 0 => no timeout (infinity)
         timeout = std::numeric_limits<double>::infinity();
     }
 
-
-    std::vector<StateInfo *> sampledStates = sampleStates(startNode, numberOfHistories);
+    // Retrieve the sampling function to use.
+    std::function<StateInfo *()> sampler = getStateSampler(startNode);
+    if (sampler == nullptr) {
+        return;
+    }
 
     // Null start node => use the root.
     if (startNode == nullptr) {
         startNode = policy_->getRoot();
     }
 
-    long numHistories = multipleSearches(
-            startNode, sampledStates, maximumDepth, startTime + timeout);
-    double timeTaken = abt::clock_ms() - startTime;
+    long actualNumHistories = multipleSearches(startNode,  sampler, maximumDepth, numberOfHistories,
+            startTime + timeout);
+    double totalTimeTaken = abt::clock_ms() - startTime;
     if (model_->hasVerboseOutput()) {
-        cout << numHistories << " histories in " << timeTaken << "ms." << endl;
+        cout << actualNumHistories << " histories in " << totalTimeTaken << "ms." << endl;
     }
 }
 
@@ -558,23 +562,15 @@ void Solver::initialize() {
 }
 
 /* ------------------ Episode sampling methods ------------------- */
-std::vector<StateInfo *> Solver::sampleStates(BeliefNode *node, long numSamples) {
+std::function<StateInfo *()> Solver::getStateSampler(BeliefNode *node) {
+    // Nullptr => sample initial sates from the model.
     if (node == nullptr) {
-        // Nullptr => sample initial states.
-        std::vector<StateInfo *> sampledStates;
-        for (long i = 0; i < numSamples; i++) {
-            sampledStates.push_back(statePool_->createOrGetInfo(*model_->sampleAnInitState()));
-        }
-        return std::move(sampledStates);
+        return [this]() {
+            return statePool_->createOrGetInfo(*model_->sampleAnInitState());
+        };
     }
 
-
-    if (node->getNumberOfParticles() == 0) {
-        debug::show_message("ERROR: No particles in the current node!");
-        return std::vector<StateInfo *>();
-    }
-
-    // First we filter out non-terminal states.
+    // Filter out any terminal states.
     std::vector<StateInfo *> nonTerminalStates;
     for (long index = 0; index < node->getNumberOfParticles(); index++) {
         HistoryEntry *entry = node->particles_.get(index);
@@ -582,38 +578,38 @@ std::vector<StateInfo *> Solver::sampleStates(BeliefNode *node, long numSamples)
             nonTerminalStates.push_back(entry->stateInfo_);
         }
     }
+
+    // No non-terminal states => return an empty function.
     if (nonTerminalStates.empty()) {
         debug::show_message("ERROR: No non-terminal particles in the current node!");
-        return std::vector<StateInfo *>();
+        return std::function<StateInfo *()>();
     }
 
-    std::vector<StateInfo *> sampledStates;
-    for (long i = 0; i < numSamples; i++) {
-        long index = std::uniform_int_distribution<long>(0, nonTerminalStates.size() - 1)(
-                *model_->getRandomGenerator());
-        sampledStates.push_back(nonTerminalStates[index]);
-    }
-    return std::move(sampledStates);
+    RandomGenerator *randGen = model_->getRandomGenerator();
+    return [randGen, nonTerminalStates]() {
+        long index = std::uniform_int_distribution<long>(0, nonTerminalStates.size() - 1)(*randGen);
+        return nonTerminalStates[index];
+    };
 }
 
-long Solver::multipleSearches(BeliefNode *startNode, std::vector<StateInfo *> states,
-        long maximumDepth, double endTime) {
-    if (maximumDepth < 0) {
-        maximumDepth = model_->getMaximumDepth();
-    }
-
+long Solver::multipleSearches(BeliefNode *startNode, std::function<StateInfo *()> sampler,
+        long maximumDepth, long maxNumSearches, double endTime) {
     bool hasTimeout = true;
     if (endTime == std::numeric_limits<double>::infinity()) {
         hasTimeout = false;
     }
 
     long numSearches = 0;
-    for (StateInfo *stateInfo : states) {
+    while (true) {
+        // If we've done enough searches, stop searching.
+        if (maxNumSearches != 0 && numSearches >= maxNumSearches) {
+            break;
+        }
         // If we've gone past the termination time, stop searching.
         if (hasTimeout && abt::clock_ms() >= endTime) {
             break;
         }
-        singleSearch(startNode, stateInfo, maximumDepth);
+        singleSearch(startNode, sampler(), maximumDepth);
         numSearches++;
     }
 
