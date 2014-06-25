@@ -157,12 +157,14 @@ void TagMdpSolver::solve() {
                 return transitions[state][action].at(nextState).second;
             };
 
-    mdp::solve(policy, model_->getDiscountFactor(),
+    mdp::PolicyIterator iterator(policy, model_->getDiscountFactor(),
             allStates.size() + 1, allActions.size(),
             possibleNextStates, transitionProbability, reward);
 
-    std::vector<double> stateValues;
-    stateValues[-1] =
+    iterator.fixValue(allStates.size(), 0.0);
+
+    iterator.solve();
+    std::vector<double> stateValues = iterator.getCurrentValues();
 
     // Now put all of the state values into our map.
     for (unsigned int stateNo = 0; stateNo < allStates.size(); stateNo++) {
