@@ -41,4 +41,13 @@ class TagState : public solver::VectorState {
 };
 } /* namespace tag */
 
+// We define a hash function directly in the std namespace.
+namespace std {
+template<> struct hash<tag::TagState> {
+    std::size_t operator()(tag::TagState const &state) const {
+        return state.hash();
+    }
+};
+} /* namespace std */
+
 #endif /* TAGSTATE_HPP_ */

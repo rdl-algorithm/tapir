@@ -42,5 +42,4 @@ inline bool operator!=(Point const &s1, Point const &s2) {
     return !s1.equals(s2); // || !s2.equals(s1); (symmetry)
 }
 } /* namespace solver */
-
 #endif /* SOLVER_POINT_HPP_ */

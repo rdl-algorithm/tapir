@@ -59,7 +59,10 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
             nActions_(5),
             nStVars_(5),
             minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
-            maxVal_(tagReward_) {
+            maxVal_(tagReward_),
+            mdpSolver_(nullptr) {
+    registerHeuristicParser("exactMdp", std::make_unique<TagMdpParser>(this));
+
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -102,7 +105,7 @@ void TagModel::initialize() {
             char c = mapText_[p.i][p.j];
             TagCellType cellType;
             if (c == 'X') {
-                cellType = WALL;
+                cellType = TagCellType::WALL;
             } else {
                 cellType = TagCellType::EMPTY;
             }
@@ -240,7 +243,7 @@ std::pair<GridPosition, bool> TagModel::getMovedPos(GridPosition const &position
 
 bool TagModel::isValid(GridPosition const &position) {
     return (position.i >= 0 && position.i < nRows_ && position.j >= 0
-            && position.j < nCols_ && envMap_[position.i][position.j] != WALL);
+            && position.j < nCols_ && envMap_[position.i][position.j] != TagCellType::WALL);
 }
 
 std::unique_ptr<solver::Observation> TagModel::makeObservation(
@@ -299,6 +302,17 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
     solver::StatePool *pool = nullptr;
     if (solver != nullptr) {
         pool = solver->getStatePool();
+    }
+
+    solver::Heuristic heuristic = getHeuristicFunction();
+    std::vector<double> allHeuristicValues;
+    if (pool != nullptr) {
+        long nStates = pool->getNumberOfStates();
+        allHeuristicValues.resize(nStates);
+        for (long index = 0; index < nStates; index++) {
+            allHeuristicValues[index] = heuristic(nullptr, pool->getInfoById(index)->getState(),
+                    nullptr);
+        }
     }
 
     for (auto const &change : changes) {
@@ -362,6 +376,23 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
         tree->boxQuery(visitor,
                 {0.0, 0.0, iLo - 1, jLo - 1, 0.0},
                 {iMx, jMx, iHi + 1, jHi + 1, 1.0});
+    }
+
+    if (mdpSolver_ != nullptr) {
+        mdpSolver_->solve();
+    }
+
+    // Check for heuristic changes.
+    if (pool != nullptr) {
+        long nStates = pool->getNumberOfStates();
+        for (long index = 0; index < nStates; index++) {
+            double oldValue = allHeuristicValues[index];
+            solver::StateInfo *info = pool->getInfoById(index);
+            double newValue = heuristic(nullptr, info->getState(), nullptr);
+            if (std::abs(newValue - oldValue) > 1e-5) {
+                pool->setChangeFlags(info, solver::ChangeFlags::HEURISTIC);
+            }
+        }
     }
 }
 
@@ -467,17 +498,15 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 
 /* --------------- Pretty printing methods ----------------- */
 void TagModel::dispCell(TagCellType cellType, std::ostream &os) {
-    if (cellType >= EMPTY) {
-        os << std::setw(2);
-        os << cellType;
-        return;
-    }
     switch (cellType) {
-    case WALL:
+    case TagCellType::EMPTY:
+        os << " 0";
+        break;
+    case TagCellType::WALL:
         os << "XX";
         break;
     default:
-        os << "ERROR-" << cellType;
+        os << "ER";
         break;
     }
 }
@@ -536,7 +565,7 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
             } else if (hasOpponent) {
                 os << "o";
             } else {
-                if (envMap_[i][j] == WALL) {
+                if (envMap_[i][j] == TagCellType::WALL) {
                     os << "X";
                 } else {
                     os << ".";

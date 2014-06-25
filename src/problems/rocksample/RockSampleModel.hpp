@@ -121,6 +121,7 @@ friend class RockSampleMdpSolver;
     RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
     }
+
     /** Returns the starting position for this problem. */
     GridPosition getStartPosition() {
         return startPos_;
@@ -350,6 +351,7 @@ friend class RockSampleMdpSolver;
     long nStVars_;
     double minVal_, maxVal_;
 
+    /** Solver for the MDP version of the problem. */
     std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 };
 } /* namespace rocksample */

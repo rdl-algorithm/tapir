@@ -70,6 +70,13 @@ class RandomAccessSet {
         return elementList_[index];
     }
 
+    int indexOf(Element entry) const {
+        if (!contains(entry)) {
+            return -1;
+        }
+        return map_[entry];
+    }
+
     bool contains(Element entry) const {
         return map_.count(entry) > 0;
     }

@@ -24,6 +24,7 @@
 #include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "TagAction.hpp"
+#include "TagMdpSolver.hpp"
 
 namespace po = boost::program_options;
 
@@ -46,6 +47,7 @@ struct TagChange : public solver::ModelChange {
 
 class TagModel: public ModelWithProgramOptions {
     friend class TagObservation;
+    friend class TagMdpSolver;
 
   public:
     TagModel(RandomGenerator *randGen, po::variables_map vm);
@@ -55,10 +57,8 @@ class TagModel: public ModelWithProgramOptions {
     TagModel &operator=(TagModel const &) = delete;
     TagModel &operator=(TagModel &&) = delete;
 
-    /** The cells are either empty or walls; empty cells are numbered
-     * starting at 0
-     */
-    enum TagCellType : int {
+    /** The cells are either empty or walls. */
+    enum class TagCellType : int {
         EMPTY = 0,
         WALL = -1
     };
@@ -78,6 +78,25 @@ class TagModel: public ModelWithProgramOptions {
     }
     double getMaxVal() override {
         return maxVal_;
+    }
+
+
+    /* ---------- Custom getters for extra functionality  ---------- */
+    long getNRows() const {
+        return nRows_;
+    }
+    long getNCols() const {
+        return nCols_;
+    }
+
+    /** Sets up the MDP solver for this model. */
+    void makeMdpSolver() {
+        mdpSolver_ = std::make_unique<TagMdpSolver>(this);
+        mdpSolver_->solve();
+    }
+    /** Returns the MDP solver for this model. */
+    TagMdpSolver *getMdpSolver() {
+        return mdpSolver_.get();
     }
 
     /* --------------- The model interface proper ----------------- */
@@ -198,6 +217,9 @@ class TagModel: public ModelWithProgramOptions {
     // General problem parameters
     long nActions_, nStVars_;
     double minVal_, maxVal_;
+
+    /** Solver for the MDP version of the problem. */
+    std::unique_ptr<TagMdpSolver> mdpSolver_;
 };
 } /* namespace tag */
 

@@ -92,7 +92,8 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
         rolloutCategory_ = heuristicType_;
     }
 
-    registerHeuristicParser("exact", std::make_unique<RockSampleMdpParser>(this));
+    registerHeuristicParser("exactMdp", std::make_unique<RockSampleMdpParser>(this));
+
     // Read the map from the file.
     std::ifstream inFile;
     char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
@@ -463,7 +464,6 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
     }
 
     solver::Heuristic heuristic = getHeuristicFunction();
-
     std::vector<double> allHeuristicValues;
     if (pool != nullptr) {
         long nStates = pool->getNumberOfStates();

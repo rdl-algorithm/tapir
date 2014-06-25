@@ -27,7 +27,7 @@ struct GridPosition {
 
 // We define a hash function directly in the std namespace.
 namespace std {
-template <> struct hash<GridPosition> {
+template<> struct hash<GridPosition> {
     std::size_t operator()(GridPosition const &pos) const {
         std::size_t hashValue = 0;
         abt::hash_combine(hashValue, pos.i);
