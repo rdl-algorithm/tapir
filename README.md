@@ -30,7 +30,8 @@ below.
 - **Boost Program Options** (>= 1.48) - "libboost-program-options-dev" or
     "libboost-program-options1.48-dev"; used for custom cfg files and/or
     command-line options for problem parameters.
-
+- **Eigen** (tested with 3.2.1).
+ 
 Configuration and Building
 --------------------------
 The code should build OK without any special configuration, by running "make all"
