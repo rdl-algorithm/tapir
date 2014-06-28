@@ -1,12 +1,12 @@
-#ifndef PROGRAMOPTIONS_HPP_
-#define PROGRAMOPTIONS_HPP_
+#ifndef OPTIONPARSER_HPP_
+#define OPTIONPARSER_HPP_
 
 #include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
 #include <string>                       // for basic_string, string
 
-#include <boost/program_options.hpp>    // for value, typed_value, options_description_easy_init, options_description, program_options
+class OptionParser {
 
-namespace po = boost::program_options;
+};
 
 void load_overrides(po::variables_map &vm) {
     if (!vm["ss"].empty()) {
@@ -111,4 +111,4 @@ class ProgramOptions {
     }
 };
 
-#endif /* PROGRAMOPTIONS_HPP_ */
+#endif /* OPTIONPARSER_HPP_ */
