@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "solver/cached_values.hpp"
+#include "solver/abstract-problem/heuristics/Heuristic.hpp"
 #include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
 

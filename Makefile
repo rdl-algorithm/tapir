@@ -26,7 +26,7 @@ CXX  := g++
 # Compiler flags
 # ----------------------------------------------------------------------
 # Preprocessor flags.
-override INCDIRS     += -I$(ROOT)/src
+override INCDIRS     += -I$(ROOT)/src -I$(ROOT)/src/options
 
 override CPPFLAGS    += $(INCDIRS)
 ifeq ($(CFG),debug)

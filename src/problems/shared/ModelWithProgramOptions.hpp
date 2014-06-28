@@ -18,13 +18,14 @@
 namespace shared {
 class ModelWithProgramOptions: public solver::Model {
 public:
-    ModelWithProgramOptions(RandomGenerator *randGen) :
-                randGen_(randGen),
-                options_(static_cast<SharedOptions const *>(getOptions())),
-                generatorParsers_(),
-                heuristicParsers_(),
-                searchParsers_(),
-                estimationParsers_() {
+    ModelWithProgramOptions(std::string problemName, RandomGenerator *randGen,
+            std::unique_ptr<SharedOptions> options) :
+        Model(problemName, randGen, std::move(options)),
+        options_(static_cast<SharedOptions const *>(getOptions())),
+        generatorParsers_(),
+        heuristicParsers_(),
+        searchParsers_(),
+        estimationParsers_() {
 
         registerGeneratorParser("ucb", std::make_unique<UcbParser>());
         registerGeneratorParser("rollout", std::make_unique<DefaultRolloutParser>());
@@ -45,11 +46,6 @@ public:
 
     virtual ~ModelWithProgramOptions() = default;
     _NO_COPY_OR_MOVE(ModelWithProgramOptions);
-
-// Simple getters
-    virtual RandomGenerator *getRandomGenerator() override {
-        return randGen_;
-    }
 
     virtual void registerGeneratorParser(std::string name,
             std::unique_ptr<Parser<std::unique_ptr<solver::StepGeneratorFactory>> > parser) {
@@ -90,8 +86,6 @@ public:
     }
 
 private:
-    RandomGenerator *randGen_;
-
     SharedOptions const *options_;
 
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> generatorParsers_;

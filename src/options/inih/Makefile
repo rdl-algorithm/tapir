@@ -1,12 +1,12 @@
-MODULE_NAME = global
+MODULE_NAME = inih
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS := problems solver options
+CHILD_FOLDERS :=
 include .make/template.mk
 include .make/build.mk
 
 else
-ROOT = ..
+ROOT = ../../..
 include $(ROOT)/.make/redirect.mk
 endif

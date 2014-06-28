@@ -16,7 +16,7 @@ RockSampleMdpSolver::RockSampleMdpSolver(RockSampleModel *model) :
 }
 
 void RockSampleMdpSolver::solve() {
-    if (model_->hasVerboseOutput()) {
+    if (model_->options_->hasVerboseOutput) {
         std::cout << "Solving MDP...";
         std::cout.flush();
     }
@@ -68,7 +68,7 @@ void RockSampleMdpSolver::solve() {
         }
     }
 
-    if (model_->hasVerboseOutput()) {
+    if (model_->options_->hasVerboseOutput) {
         std::cout << "                   Done." << std::endl << std::endl;
     }
 }
@@ -120,7 +120,7 @@ double RockSampleMdpSolver::calculateQValue(GridPosition pos, long rockStateCode
         nextQValue = valueMap_.at(std::make_pair(nextCode, action));
     }
 
-    double discountFactor = model_->getDiscountFactor();
+    double discountFactor = model_->options_->discountFactor;
     return std::pow(discountFactor, actionsUntilReward) * (reward + discountFactor * nextQValue);
 }
 

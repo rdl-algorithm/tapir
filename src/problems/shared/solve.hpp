@@ -7,13 +7,11 @@
 #include <string>                       // for string
 #include <utility>                      // for move                // IWYU pragma: keep
 
-#include <boost/program_options.hpp>    // for options_description, variables_map, positional_options_description, store, variable_value, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
-
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "solver/serialization/Serializer.hpp"        // for Serializer
 #include "solver/Solver.hpp"            // for Solver
 
-#include "ProgramOptions.hpp"           // for ProgramOptions
+#include "options/option_parser.hpp"
 
 #ifdef GOOGLE_PROFILER
 #include <google/profiler.h>
@@ -21,49 +19,29 @@
 
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
-template<typename ModelType>
-int solve(int argc, char const *argv[], ProgramOptions *options) {
-    po::options_description visibleOptions;
-    po::options_description allOptions;
-    visibleOptions.add(options->getGenericOptions()).add(
-            options->getABTOptions()).add(options->getProblemOptions()).add(
-            options->getHeuristicOptions());
-    allOptions.add(visibleOptions).add(options->getSimulationOptions());
+template<typename ModelType, typename OptionsType>
+int solve(int argc, char const *argv[]) {
+    OptionsType options;
+    std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
+    parser->setOptions(&options);
 
-    // Set up positional options
-    po::positional_options_description positional;
-    positional.add("problem.mapPath", 1);
-    positional.add("cfg", 2);
-    positional.add("policy", 3);
-
-    po::variables_map vm;
-    po::store(
-            po::command_line_parser(argc, argv).options(allOptions).positional(
-                    positional).run(), vm);
-    if (vm.count("help")) {
-        cout << "Usage: solve [mapPath] [cfgPath] [policyPath]" << endl;
-        cout << visibleOptions << endl;
-        return 0;
+    parser->parseCmdLine(argc, argv);
+    if (!options.configPath.empty()) {
+        parser->parseCfgFile(options.configPath);
     }
+    parser->finalize();
 
-    std::string cfgPath = vm["cfg"].as<std::string>();
-    po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
-    po::notify(vm);
-    load_overrides(vm);
-
-    std::string polPath = vm["policy"].as<std::string>();
-    unsigned long seed = vm["seed"].as<unsigned long>();
-    if (seed == 0) {
-        seed = std::time(nullptr);
+    if (options.seed == 0) {
+        options.seed = std::time(nullptr);
     }
-    cout << "Seed: " << seed << endl;
+    cout << "Seed: " << options.seed << endl;
     RandomGenerator randGen;
-    randGen.seed(seed);
+    randGen.seed(options.seed);
     randGen.discard(10);
 
-    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen, vm);
+    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
+            std::make_unique<OptionsType>(options));
     solver::Solver solver(std::move(newModel));
     solver.initializeEmpty();
 
@@ -86,7 +64,7 @@ int solve(int argc, char const *argv[], ProgramOptions *options) {
 
     cout << "Saving to file...";
     cout.flush();
-    std::ofstream outFile(polPath);
+    std::ofstream outFile(options.policyPath);
     solver.getSerializer()->save(outFile);
     outFile.close();
     cout << "    Done." << endl;

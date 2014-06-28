@@ -34,6 +34,23 @@
 #include "solver/serialization/Serializer.hpp"
 
 namespace solver {
+Model::Model(std::string problemName, RandomGenerator *randGen, std::unique_ptr<Options> options) :
+        problemName_(problemName),
+        randGen_(randGen),
+        options_(std::move(options)) {
+
+}
+
+/* -------------------- Simple getters ---------------------- */
+RandomGenerator *Model::getRandomGenerator() const {
+    return randGen_;
+}
+
+Options const *Model::getOptions() const {
+    return options_.get();
+}
+
+
 /* -------------------- Black box dynamics ---------------------- */
 // Transition parameters are optional
 std::unique_ptr<TransitionParameters> Model::generateTransition(

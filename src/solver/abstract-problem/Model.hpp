@@ -31,15 +31,19 @@ class StatePool;
 
 class Model {
 public:
-    Model() = default;
+    Model(std::string name, RandomGenerator *randGen, std::unique_ptr<Options> options);
     virtual ~Model() = default;
     _NO_COPY_OR_MOVE(Model);
 
+    /* -------------------- Simple getters ---------------------- */
     /** Returns the random number generator used by this model. */
-    virtual RandomGenerator *getRandomGenerator() = 0;
+    RandomGenerator *getRandomGenerator() const;
 
     /** Returns the configuration options for this model. */
-    virtual Options const *getOptions() = 0;
+    Options const *getOptions() const;
+
+    /** The name of this problem. */
+    std::string getName() const;
 
     /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the belief vector. */
@@ -168,6 +172,11 @@ public:
 
     /** Creates a serializer for the given solver. */
     virtual std::unique_ptr<Serializer> createSerializer(Solver *solver);
+
+private:
+    std::string problemName_;
+    RandomGenerator *randGen_;
+    std::unique_ptr<Options> options_;
 };
 } /* namespace solver */
 
