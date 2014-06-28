@@ -181,11 +181,17 @@ class TagModel: public ModelWithProgramOptions {
      */
     std::unique_ptr<solver::Observation> makeObservation(
             solver::Action const &action, TagState const &nextState);
-    /** Moves the opponent. */
-    GridPosition getMovedOpponentPos(GridPosition const &robotPos,
-            GridPosition const &opponentPos);
+
+
     /** Generates the distribution for the opponent's actions. */
     std::vector<ActionType> makeOpponentActions(GridPosition const &robotPos,
+            GridPosition const &opponentPos);
+    /** Generates a proper distribution for next opponent positions. */
+    std::unordered_map<GridPosition, double> getNextOpponentPositionDistribution(
+            GridPosition const &robotPos, GridPosition const &opponentPos);
+
+    /** Moves the opponent. */
+    GridPosition sampleNextOpponentPosition(GridPosition const &robotPos,
             GridPosition const &opponentPos);
 
     /** Gets the expected coordinates after taking the given action;

@@ -163,7 +163,7 @@ std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
                 std::make_unique<TagState>(robotPos, opponentPos, true), true);
     }
 
-    GridPosition newOpponentPos = getMovedOpponentPos(robotPos, opponentPos);
+    GridPosition newOpponentPos = sampleNextOpponentPosition(robotPos, opponentPos);
     GridPosition newRobotPos;
     bool wasValid;
     std::tie(newRobotPos, wasValid) = getMovedPos(robotPos, tagAction.getActionType());
@@ -197,7 +197,20 @@ std::vector<ActionType> TagModel::makeOpponentActions(
     return actions;
 }
 
-GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
+/** Generates a proper distribution for next opponent positions. */
+std::unordered_map<GridPosition, double> TagModel::getNextOpponentPositionDistribution(
+        GridPosition const &robotPos, GridPosition const &opponentPos) {
+    std::vector<ActionType> actions = makeOpponentActions(robotPos, opponentPos);
+    std::unordered_map<GridPosition, double> distribution;
+    double actionProb = (1 - opponentStayProbability_) / actions.size();
+    for (ActionType action : actions) {
+        distribution[getMovedPos(opponentPos, action).first] += actionProb;
+    }
+    distribution[opponentPos] += opponentStayProbability_;
+    return std::move(distribution);
+}
+
+GridPosition TagModel::sampleNextOpponentPosition(GridPosition const &robotPos,
         GridPosition const &opponentPos) {
     // Randomize to see if the opponent stays still.
     if (std::bernoulli_distribution(opponentStayProbability_)(
@@ -433,21 +446,18 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
             if (newRobotPos != getMovedPos(oldRobotPos, actionType).first) {
                 continue;
             }
+
+            // Get the probability distribution for opponent moves.
             GridPosition oldOpponentPos(tagState->getOpponentPosition());
-            std::vector<ActionType> actions(
-                    makeOpponentActions(oldRobotPos, oldOpponentPos));
-            std::vector<ActionType> newActions;
-            for (ActionType opponentAction : actions) {
-                if (getMovedPos(oldOpponentPos, opponentAction).first != newRobotPos) {
-                    newActions.push_back(opponentAction);
+            std::unordered_map<GridPosition, double> opponentPosDistribution = (
+                    getNextOpponentPositionDistribution(oldRobotPos, oldOpponentPos));
+
+            for (auto const &entry : opponentPosDistribution) {
+                if (entry.first != newRobotPos) {
+                    TagState newState(newRobotPos, entry.first, false);
+                    weights[newState] += entry.second;
+                    weightTotal += entry.second;
                 }
-            }
-            double probability = 1.0 / newActions.size();
-            for (ActionType opponentAction : newActions) {
-                GridPosition newOpponentPos = getMovedPos(oldOpponentPos, opponentAction).first;
-                TagState newState(newRobotPos, newOpponentPos, false);
-                weights[newState] += probability;
-                weightTotal += probability;
             }
         }
         double scale = nParticles / weightTotal;

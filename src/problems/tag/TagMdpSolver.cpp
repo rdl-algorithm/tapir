@@ -101,18 +101,9 @@ void TagMdpSolver::solve() {
         GridPosition robotPos = state.getRobotPosition();
         GridPosition opponentPos = state.getOpponentPosition();
 
-        std::vector<ActionType> opponentActions = (
-                model_->makeOpponentActions(robotPos, opponentPos));
-
         // Generate a distribution of possible opponent positions.
-        std::unordered_map<GridPosition, double> nextOpponentPosDistribution;
-        for (ActionType opponentAction : opponentActions) {
-            GridPosition nextOpponentPos = model_->getMovedPos(opponentPos, opponentAction).first;
-            nextOpponentPosDistribution[nextOpponentPos] += 1.0;
-        }
-        for (auto &entry : nextOpponentPosDistribution) {
-            entry.second /= opponentActions.size();
-        }
+        std::unordered_map<GridPosition, double> nextOpponentPosDistribution = (
+                model_->getNextOpponentPositionDistribution(robotPos, opponentPos));;
 
         transitions[stateNo].resize(allActions.size());
         for (unsigned int actionNo = 0; actionNo < allActions.size(); actionNo++) {
