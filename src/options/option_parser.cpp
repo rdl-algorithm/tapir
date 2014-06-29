@@ -4,7 +4,9 @@
 
 namespace options {
 OptionParser::OptionParser(std::string const &message) :
-        options_(nullptr), cmdLine_(message), optionsMap_() {
+        options_(nullptr),
+        cmdLine_(message),
+        optionsMap_() {
 }
 
 BaseOptions *OptionParser::getOptions() {

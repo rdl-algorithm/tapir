@@ -20,6 +20,7 @@ BUILDDIR := $(ROOT)/builds/$(CFG)
 # ----------------------------------------------------------------------
 
 AR   := ar
+CC   := gcc
 CXX  := g++
 
 # ----------------------------------------------------------------------
@@ -40,16 +41,17 @@ override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
 
 # Differences in flags between clang++ and g++
 ifeq ($(CXX),clang++)
-  WARN               += -Weverything -Wno-c++98-compat
-endif
-ifneq (,$(findstring g++,$(CXX)))
-  WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
-  WARN               += -Wswitch-default -Wfatal-errors
-  override CXXFLAGS  += -frounding-math
+  override INCDIRS    += -I/usr/include/c++/4.8
+#  WARN                += -Weverything
+  WARN                += -Wno-c++98-compat
+else ifneq (,$(findstring g++,$(CXX)))
+  WARN                += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
+  WARN                += -Wswitch-default -Wfatal-errors
+  override CXXFLAGS   += -frounding-math
   GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
   ifeq ($(GCC_VERSION), 4.9)
-	CXXFLAGS_BASE := -std=c++1y
-	override LDFLAGS += -fdiagnostics-color=auto
+	CXXFLAGS_BASE     := -std=c++1y
+	override LDFLAGS  += -fdiagnostics-color=auto
 	override CXXFLAGS += -fdiagnostics-color=auto
   endif
 endif
@@ -85,7 +87,8 @@ override LDFLAGS += $(LIBDIRS)
 # ----------------------------------------------------------------------
 # General-purpose recipes
 # ----------------------------------------------------------------------
-COMPILE_RECIPE = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $(1) -o $@
+CXX_RECIPE     = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $(1) -o $@
+CC_RECIPE      = $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c $(1) -o $@
 LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
 MKDIR_RECIPE   = @mkdir -p $@
 

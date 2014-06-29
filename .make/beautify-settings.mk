@@ -12,7 +12,6 @@ BEAUTIFY_FLAGS := --no-backup
 IWYU_MAPPING_FILE := $(ROOT)/.make/mappings.imp
 IWYU_CMD := include-what-you-use
 IWYU_FLAGS := -Xiwyu --mapping_file=$(IWYU_MAPPING_FILE) -Xiwyu --verbose=3
-IWYU_FLAGS += $(CPPFLAGS) $(CXXFLAGS_BASE)
 
 IWYU_FIX_CMD   := fix-includes
 IWYU_FIX_FLAGS := --separate_c_cxx
@@ -23,7 +22,8 @@ IWYU_FIX_FLAGS += -o $(dir $@)
 # Code cleaner recipes.
 # ----------------------------------------------------------------------
 BEAUTIFY_RECIPE := $(BEAUTIFY_CMD) $(BEAUTIFY_FLAGS) $<
-IWYU_RECIPE := $(IWYU_CMD) $(IWYU_FLAGS) $< 2>&1 | tee $@
+IWYU_CXX_RECIPE := $(IWYU_CMD) $(IWYU_FLAGS) $(CPPFLAGS) $(CXXFLAGS_BASE) $< 2>&1 | tee $@
+IWYU_CC_RECIPE := $(IWYU_CMD) $(IWYU_FLAGS) $(CPPFLAGS) $(CFLAGS) $< 2>&1 | tee $@
 IWYU_FIX_RECIPE := $(IWYU_FIX_CMD) $(IWYU_FIX_FLAGS) < $< 2>&1 | tee $@
 IWYU_FORCE_RECIPE := echo "\#include \"../EMPTY_HEADER.hpp\"" >> $<
 IWYU_DOFIX_RECIPE := cp -p $(dir $@)/$* $<

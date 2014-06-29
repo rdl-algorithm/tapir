@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 #include <tclap/CmdLine.h>
-#include <inih/ini.hpp>
+#include <inih/ini.h>
 
 #include "global.hpp"
 
@@ -249,9 +249,10 @@ template<typename ValueType, typename OptionsType> void OptionParser::addValueAr
             shortOpt, longOpt, description, false, ValueType(), typeDescription);
 }
 
-template<typename OptionsType> void OptionParser::addSwitchArg(std::string section, std::string name,
-        bool OptionsType::*optionPtr, std::string shortOpt, std::string longOpt,
-        std::string description,  bool switchValue) {
+template<typename OptionsType> void OptionParser::addSwitchArg(
+        std::string section, std::string name, bool OptionsType::*optionPtr,
+        std::string shortOpt, std::string longOpt,
+        std::string description, bool switchValue) {
     addCmdAlias<TCLAP::SwitchArg, bool, OptionsType>(section, name, optionPtr,
             shortOpt, longOpt, description, !switchValue);
 }
