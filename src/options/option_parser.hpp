@@ -17,6 +17,8 @@
 
 namespace options {
 struct BaseOptions {
+    BaseOptions() = default;
+    virtual ~BaseOptions() = default;
 };
 
 class BaseArg {

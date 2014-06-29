@@ -7,6 +7,9 @@
 
 namespace rocksample {
 struct RockSampleOptions : public shared::SharedOptions {
+    RockSampleOptions() = default;
+    virtual ~RockSampleOptions() = default;
+
     /* -------- Settings specific to the RockSample POMDP -------- */
     /** Path to the map file. */
     std::string mapPath = "";

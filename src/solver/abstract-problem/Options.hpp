@@ -5,6 +5,9 @@
 
 namespace solver {
 struct Options : options::BaseOptions {
+    Options() = default;
+    virtual ~Options() = default;
+
     /* ------------------- Model-specific settings  --------------- */
     /** The number of state variables for this problem. */
     long numberOfStateVariables = -1;

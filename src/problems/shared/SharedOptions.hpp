@@ -7,6 +7,9 @@
 
 namespace shared {
 struct SharedOptions: public solver::Options {
+    SharedOptions() = default;
+    virtual ~SharedOptions() = default;
+
     /* ---------------------- Generic settings  ------------------ */
     /** The path to the configuration file. */
     std::string configPath = "";

@@ -7,6 +7,9 @@
 
 namespace tag {
 struct TagOptions : public shared::SharedOptions {
+    TagOptions() = default;
+    virtual ~TagOptions() = default;
+
     /* -------- Settings specific to the Tag POMDP -------- */
     /** Path to the map file. */
     std::string mapPath = "";

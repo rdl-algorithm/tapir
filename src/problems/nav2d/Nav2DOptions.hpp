@@ -5,6 +5,9 @@
 
 namespace nav2d {
 struct Nav2DOptions : public shared::SharedOptions {
+    Nav2DOptions() = default;
+    virtual ~Nav2DOptions() = default;
+
     /* -------- Settings specific to the Nav2D POMDP -------- */
     /** Path to the map file. */
     std::string mapPath = "";
