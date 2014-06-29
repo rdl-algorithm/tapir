@@ -48,9 +48,24 @@
 #include <tclap/CmdLine.h>
 #include <inih/ini.h>
 
-#include "global.hpp"
+// A macro used to delete all copy- and move- -constructors and -assignment operators
+#define _NO_COPY_OR_MOVE(ClassName) \
+    ClassName(ClassName const &) = delete; \
+    ClassName(ClassName &&) = delete; \
+    ClassName &operator=(ClassName const &) = delete; \
+    ClassName &operator=(ClassName &&) = delete
 
 namespace options {
+class OptionParsingException : public std::exception {
+public:
+    OptionParsingException(std::string const &message);
+    virtual char const *what() const throw() {
+        return message_.c_str();
+    }
+private:
+    std::string message_;
+};
+
 /** The base option struct. */
 struct BaseOptions {
     BaseOptions() = default;

@@ -21,13 +21,15 @@
 
 /** file: option_parser.cpp
  *
- * Contains the implementations for the non-template methods of OptionParser.
+ * Contains the implementations for the non-template methods used in parsing options.
  */
 #include "options/option_parser.hpp"
 
-#include "global.hpp"
-
 namespace options {
+OptionParsingException::OptionParsingException(std::string const &message) :
+        message_(message) {
+}
+
 OptionParser::OptionParser(std::string const &message) :
         options_(nullptr),
         cmdLine_(message),
@@ -66,8 +68,7 @@ int OptionParser::iniHandler(void *user, char const *section, char const *name, 
     } catch (std::out_of_range const &oor) {
         std::ostringstream message;
         message << "ERROR: Invalid option in config file: " << section << "." << name << std::endl;
-        debug::show_message(message.str());
-        std::exit(2);
+        throw OptionParsingException(message.str());
     }
     return 1;
 }
@@ -80,8 +81,7 @@ void OptionParser::finalize() {
                 message << "ERROR: Missing mandatory option ";
                 message << entry.first << "." << entry2.first << std::endl;
                 entry2.second->printAliases(message);
-                debug::show_message(message.str());
-                std::exit(1);
+                throw OptionParsingException(message.str());
             }
         }
     }

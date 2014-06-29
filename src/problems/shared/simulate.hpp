@@ -35,12 +35,17 @@ int simulate(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
 
     OptionsType options;
-    parser->setOptions(&options);
-    parser->parseCmdLine(argc, argv);
-    if (!options.configPath.empty()) {
-        parser->parseCfgFile(options.configPath);
+    try {
+        parser->setOptions(&options);
+        parser->parseCmdLine(argc, argv);
+        if (!options.configPath.empty()) {
+            parser->parseCfgFile(options.configPath);
+        }
+        parser->finalize();
+    } catch (options::OptionParsingException const &e) {
+        std::cerr << e.what();
+        return 2;
     }
-    parser->finalize();
 
     if (options.seed == 0) {
         options.seed = std::time(nullptr);

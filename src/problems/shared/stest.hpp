@@ -23,34 +23,39 @@ int stest(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(false);
 
     OptionsType options;
-    parser->setOptions(&options);
-    parser->parseCmdLine(argc, argv);
-    if (!options.configPath.empty()) {
-        parser->parseCfgFile(options.configPath);
+    try {
+        parser->setOptions(&options);
+        parser->parseCmdLine(argc, argv);
+        if (!options.configPath.empty()) {
+            parser->parseCfgFile(options.configPath);
+        }
+        parser->finalize();
+    } catch (options::OptionParsingException const &e) {
+        std::cerr << e.what();
+        return 2;
     }
-    parser->finalize();
 
-       std::ifstream inFile;
-       inFile.open(options.policyPath);
-       if (!inFile.is_open()) {
-           std::ostringstream message;
-           message << "Failed to open " << options.policyPath;
-           debug::show_message(message.str());
-           return 1;
-       }
+    std::ifstream inFile;
+    inFile.open(options.policyPath);
+    if (!inFile.is_open()) {
+        std::ostringstream message;
+        message << "Failed to open " << options.policyPath;
+        debug::show_message(message.str());
+        return 1;
+    }
 
-       RandomGenerator randGen;
-       std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
-               std::make_unique<OptionsType>(options));
-       solver::Solver solver(std::move(newModel));
-       solver.getSerializer()->load(inFile);
+    RandomGenerator randGen;
+    std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
+            std::make_unique<OptionsType>(options));
+    solver::Solver solver(std::move(newModel));
+    solver.getSerializer()->load(inFile);
 
-       std::ostringstream sstr;
-       sstr << options.policyPath << "2";
-       std::ofstream outFile(sstr.str());
-       solver.getSerializer()->save(outFile);
-       outFile.close();
-       return 0;
+    std::ostringstream sstr;
+    sstr << options.policyPath << "2";
+    std::ofstream outFile(sstr.str());
+    solver.getSerializer()->save(outFile);
+    outFile.close();
+    return 0;
 }
 
 #endif /* STEST_HPP_ */
