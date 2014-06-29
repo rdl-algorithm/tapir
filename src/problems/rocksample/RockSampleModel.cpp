@@ -62,8 +62,8 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockS
             goodRockReward_(options_->goodRockReward),
             badRockPenalty_(options_->badRockPenalty),
             exitReward_(options_->exitReward),
-            illegalMovePenalty_(options->illegalMovePenalty),
-            halfEfficiencyDistance_(options->halfEfficiencyDistance),
+            illegalMovePenalty_(options_->illegalMovePenalty),
+            halfEfficiencyDistance_(options_->halfEfficiencyDistance),
             nRows_(0), // update
             nCols_(0), // update
             nRocks_(0), // update
@@ -77,9 +77,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockS
             heuristicType_(parseCategory(options_->heuristicType)),
             searchCategory_(parseCategory(options_->searchHeuristicType)),
             rolloutCategory_(parseCategory(options_->rolloutHeuristicType)),
-            usingPreferredInit_(options->usePreferredInit),
-            preferredQValue_(options->preferredQValue),
-            preferredVisitCount_(options->preferredVisitCount),
+            usingPreferredInit_(options_->usePreferredInit),
+            preferredQValue_(options_->preferredQValue),
+            preferredVisitCount_(options_->preferredVisitCount),
             mdpSolver_(nullptr) {
 
     if (searchCategory_ > heuristicType_) {
@@ -93,10 +93,10 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockS
 
     // Read the map from the file.
     std::ifstream inFile;
-    inFile.open(options->mapPath);
+    inFile.open(options_->mapPath);
     if (!inFile.is_open()) {
         std::ostringstream message;
-        message << "Failed to open " << options->mapPath;
+        message << "Failed to open " << options_->mapPath;
         debug::show_message(message.str());
         std::exit(1);
     }
@@ -110,9 +110,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockS
     inFile.close();
 
     initialize();
-    if (options->hasVerboseOutput) {
+    if (options_->hasVerboseOutput) {
         cout << "Constructed the RockSampleModel" << endl;
-        cout << "Discount: " << options->discountFactor << endl;
+        cout << "Discount: " << options_->discountFactor << endl;
         cout << "Size: " << nRows_ << " by " << nCols_ << endl;
         cout << "nRocks: " << nRocks_ << endl;
 

@@ -36,6 +36,7 @@ int simulate(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
     parser->setOptions(&options);
 
+    parser->initialize();
     parser->parseCmdLine(argc, argv);
     if (!options.configPath.empty()) {
         parser->parseCfgFile(options.configPath);
@@ -99,7 +100,7 @@ int simulate(int argc, char const *argv[]) {
         if (options.hasChanges) {
             simulator.loadChangeSequence(options.changesPath);
         }
-        simulator.setMaxStepCount(options.nSteps);
+        simulator.setMaxStepCount(options.nSimulationSteps);
         cout << "Running..." << endl;
 
         double tStart = abt::clock_ms();

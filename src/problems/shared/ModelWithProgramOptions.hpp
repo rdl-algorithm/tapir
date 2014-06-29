@@ -26,7 +26,6 @@ public:
         heuristicParsers_(),
         searchParsers_(),
         estimationParsers_() {
-
         registerGeneratorParser("ucb", std::make_unique<UcbParser>());
         registerGeneratorParser("rollout", std::make_unique<DefaultRolloutParser>());
         registerGeneratorParser("nn", std::make_unique<NnRolloutParser>());

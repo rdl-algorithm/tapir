@@ -24,17 +24,18 @@ int stest(int argc, char const *argv[]) {
     OptionsType options;
     parser->setOptions(&options);
 
+    parser->initialize();
     parser->parseCmdLine(argc, argv);
-    if (!options->configPath.empty()) {
-        parser->parseCfgFile(options->configPath);
+    if (!options.configPath.empty()) {
+        parser->parseCfgFile(options.configPath);
     }
     parser->finalize();
 
        std::ifstream inFile;
-       inFile.open(options->policyPath);
+       inFile.open(options.policyPath);
        if (!inFile.is_open()) {
            std::ostringstream message;
-           message << "Failed to open " << options->policyPath;
+           message << "Failed to open " << options.policyPath;
            debug::show_message(message.str());
            return 1;
        }
@@ -46,7 +47,7 @@ int stest(int argc, char const *argv[]) {
        solver.getSerializer()->load(inFile);
 
        std::ostringstream sstr;
-       sstr << options->policyPath << "2";
+       sstr << options.policyPath << "2";
        std::ofstream outFile(sstr.str());
        solver.getSerializer()->save(outFile);
        outFile.close();

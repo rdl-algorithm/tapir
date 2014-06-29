@@ -2,7 +2,7 @@ MODULE_NAME = global
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS := problems solver options
+CHILD_FOLDERS := options solver problems
 include .make/template.mk
 include .make/build.mk
 

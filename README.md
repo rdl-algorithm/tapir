@@ -27,9 +27,6 @@ all be available via a package manager; Debian/Ubuntu package names are given
 below.
 - **GNU C++ compiler** (>= 4.8) or equivalent - "g++" or "g++-4.8"
 - **libspatialindex** (>= 1.7.0) - "libspatialindex-dev"
-- **Boost Program Options** (>= 1.48) - "libboost-program-options-dev" or
-    "libboost-program-options1.48-dev"; used for custom cfg files and/or
-    command-line options for problem parameters.
 - **Eigen** (tested with 3.2.1).
  
 Configuration and Building

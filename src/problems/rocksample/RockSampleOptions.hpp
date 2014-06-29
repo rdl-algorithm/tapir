@@ -1,7 +1,6 @@
 #ifndef ROCKSAMPLE_OPTIONS_HPP_
 #define ROCKSAMPLE_OPTIONS_HPP_
 
-#include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
 #include <string>                       // for string
 
 #include "problems/shared/SharedOptions.hpp"
@@ -82,7 +81,7 @@ struct RockSampleOptions : public shared::SharedOptions {
 
         parser->addOption<std::string>("heuristics", "rollout", &RockSampleOptions::rolloutHeuristicType);
         parser->addValueArg<std::string>("heuristics", "rollout", &RockSampleOptions::rolloutHeuristicType,
-                "", "search", "restricted rollout actions", "all/legal/preferred");
+                "", "rollout", "restricted rollout actions", "all/legal/preferred");
 
         parser->addOptionWithDefault<bool>("heuristics", "usePreferredInit", &RockSampleOptions::usePreferredInit, false);
         parser->addSwitchArg("heuristics", "usePreferredInit", &RockSampleOptions::usePreferredInit,
@@ -93,7 +92,7 @@ struct RockSampleOptions : public shared::SharedOptions {
         parser->addValueArg<double>("heuristics", "preferredQValue", &RockSampleOptions::preferredQValue,
                 "", "preferred-q", "the initial q-value for preferred actions", "real");
 
-        parser->addOption<long>("heuristics", "preferredQValue", &RockSampleOptions::preferredVisitCount);
+        parser->addOption<long>("heuristics", "preferredVisitCount", &RockSampleOptions::preferredVisitCount);
         parser->addValueArg<long>("heuristics", "preferredVisitCount", &RockSampleOptions::preferredVisitCount,
                 "", "preferred-visits", "the initial visit count for preferred actions", "int");
     }

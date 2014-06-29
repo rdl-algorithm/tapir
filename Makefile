@@ -49,6 +49,7 @@ ifneq (,$(findstring g++,$(CXX)))
   GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
   ifeq ($(GCC_VERSION), 4.9)
 	CXXFLAGS_BASE := -std=c++1y
+	override LDFLAGS += -fdiagnostics-color=auto
 	override CXXFLAGS += -fdiagnostics-color=auto
   endif
 endif

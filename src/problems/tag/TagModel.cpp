@@ -12,8 +12,6 @@
 #include <unordered_map>                // for _Node_iterator, operator!=, unordered_map<>::iterator, _Node_iterator_base, unordered_map
 #include <utility>                      // for make_pair, move, pair
 
-#include <boost/program_options.hpp>    // for variables_map, variable_value
-
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
@@ -38,38 +36,39 @@
 
 #include "TagAction.hpp"
 #include "TagObservation.hpp"
+#include "TagOptions.hpp"
 #include "TagState.hpp"                 // for TagState
 #include "TagTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
 namespace tag {
-TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
-            ModelWithProgramOptions(randGen, vm),
-            moveCost_(vm["problem.moveCost"].as<double>()),
-            tagReward_(vm["problem.tagReward"].as<double>()),
-            failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
-            opponentStayProbability_(vm["problem.opponentStayProbability"].as<double>()),
+TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options) :
+            ModelWithProgramOptions("Tag", randGen, std::move(options)),
+            options_(const_cast<TagOptions *>(static_cast<TagOptions const *>(getOptions()))),
+            moveCost_(options_->moveCost),
+            tagReward_(options_->tagReward),
+            failedTagPenalty_(options_->failedTagPenalty),
+            opponentStayProbability_(options_->opponentStayProbability),
             nRows_(0), // to be updated
             nCols_(0), // to be updated
             mapText_(), // will be pushed to
             envMap_(), // will be pushed to
             nActions_(5),
-            nStVars_(5),
-            minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
-            maxVal_(tagReward_),
             mdpSolver_(nullptr) {
+    options_->numberOfStateVariables = 5;
+    options_->minVal = -failedTagPenalty_ / 1 - options_->discountFactor;
+    options_->maxVal = tagReward_;
+
     registerHeuristicParser("exactMdp", std::make_unique<TagMdpParser>(this));
 
     // Read the map from the file.
     std::ifstream inFile;
-    char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
-    inFile.open(mapPath);
+    inFile.open(options_->mapPath);
     if (!inFile.is_open()) {
         std::ostringstream message;
-        message << "ERROR: Failed to open " << mapPath;
+        message << "ERROR: Failed to open " << options_->mapPath;
         debug::show_message(message.str());
         std::exit(1);
     }
@@ -83,14 +82,14 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     inFile.close();
 
     initialize();
-    if (hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Constructed the TagModel" << endl;
-        cout << "Discount: " << getDiscountFactor() << endl;
+        cout << "Discount: " << options_->discountFactor << endl;
         cout << "Size: " << nRows_ << " by " << nCols_ << endl;
         cout << "move cost: " << moveCost_ << endl;
         cout << "nActions: " << nActions_ << endl;
-        cout << "nStVars: " << nStVars_ << endl;
-        cout << "minParticleCount: " << getMinParticleCount() << endl;
+        cout << "nStVars: " << options_->numberOfStateVariables << endl;
+        cout << "minParticleCount: " << options_->minParticleCount << endl;
         cout << "Environment:" << endl << endl;
         drawEnv(cout);
     }
@@ -330,7 +329,7 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
 
     for (auto const &change : changes) {
         TagChange const &tagChange = static_cast<TagChange const &>(*change);
-        if (hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << tagChange.changeType << " " << tagChange.i0 << " "
                     << tagChange.j0;
             cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
@@ -544,7 +543,7 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 
     std::vector<int> colors { 196, 161, 126, 91, 56, 21, 26, 31, 36, 41, 46 };
-    if (hasColorOutput()) {
+    if (options_->hasColorOutput) {
         os << "Color map: ";
         for (int color : colors) {
             os << "\033[38;5;" << color << "m";
@@ -557,7 +556,7 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
             double proportion = (double) particleCounts[i][j]
                     / particles.size();
-            if (hasColorOutput()) {
+            if (options_->hasColorOutput) {
                 if (proportion > 0) {
                     int color = colors[proportion * (colors.size() - 1)];
                     os << "\033[38;5;" << color << "m";
@@ -581,7 +580,7 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
                     os << ".";
                 }
             }
-            if (hasColorOutput()) {
+            if (options_->hasColorOutput) {
                 os << "\033[0m";
             }
         }
@@ -601,8 +600,8 @@ double TagModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
     GridPosition opponentPos = tagState.getOpponentPosition();
     long dist = robotPos.manhattanDistanceTo(opponentPos);
     double nSteps = dist / opponentStayProbability_;
-    double finalDiscount = std::pow(getDiscountFactor(), nSteps);
-    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
+    double finalDiscount = std::pow(options_->discountFactor, nSteps);
+    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
     qVal += finalDiscount * tagReward_;
     return qVal;
 }

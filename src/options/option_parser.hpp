@@ -1,6 +1,8 @@
 #ifndef OPTION_PARSER_HPP_
 #define OPTION_PARSER_HPP_
 
+#include "global.hpp"
+
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -17,10 +19,22 @@ namespace options {
 struct BaseOptions {
 };
 
+class BaseArg {
+public:
+    BaseArg() = default;
+    virtual ~BaseArg() = default;
+    _NO_COPY_OR_MOVE(BaseArg);
+
+    virtual TCLAP::Arg &getArg() = 0;
+};
+
+
 class BaseOption {
 public:
     BaseOption(std::string section, std::string name) :
-            section_(section), name_(name) {
+            section_(section),
+            name_(name),
+            aliases_() {
     }
     virtual ~BaseOption() = default;
 
@@ -32,25 +46,41 @@ public:
         return name_;
     }
 
-    virtual void parse(std::string s) = 0;
-    virtual void finalize() = 0;
+    void addAlias(std::unique_ptr<BaseArg> alias) {
+        aliases_.push_back(std::move(alias));
+    }
 
+    void printAliases(std::ostream &os) {
+        if (!aliases_.empty()) {
+            os << "Aliases for " << getSection() << "." << getName() << ":" << std::endl;
+            for (auto const &alias : aliases_) {
+                std::string shortOpt = alias->getArg().getFlag();
+                if (!shortOpt.empty()) {
+                    os << "-" << shortOpt << std::endl;
+                }
+                std::string longOpt = alias->getArg().getName();
+                if (!longOpt.empty()) {
+                    os << "--" << longOpt << std::endl;
+                }
+            }
+        }
+    }
+
+    virtual void parse(std::string s) = 0;
+    virtual void setDefault() = 0;
+    virtual bool isSet() = 0;
+    virtual bool isDefaulted() = 0;
 private:
     std::string section_;
     std::string name_;
-};
-
-class BaseArg {
-public:
-    virtual ~BaseArg() = default;
-    virtual TCLAP::Arg &getArg() = 0;
+    std::vector<std::unique_ptr<BaseArg>> aliases_;
 };
 
 class OptionParser {
 public:
-    _NO_COPY_OR_MOVE(OptionParser);
     OptionParser(std::string const &message);
     ~OptionParser() = default;
+    _NO_COPY_OR_MOVE(OptionParser);
 
     template<typename ValueType, typename OptionsType>
     void addOption(std::string section, std::string name, ValueType OptionsType::*optionPtr);
@@ -74,6 +104,7 @@ public:
     BaseOptions *getOptions();
     void setOptions(BaseOptions *options);
 
+    void initialize();
     void parseCmdLine(int argc, char const *argv[]);
     void parseCfgFile(std::string path);
     void finalize();
@@ -101,52 +132,61 @@ template<> struct Parser<std::string> {
     }
 };
 
+// Specialised parser for bool
+template<> struct Parser<bool> {
+    static bool parse(std::string s) {
+        bool value;
+        std::istringstream(s) >> std::boolalpha >> value;
+        return value;
+    }
+};
+
 template<typename ValueType, typename OptionsType>
 class Option: public BaseOption {
 public:
     _NO_COPY_OR_MOVE(Option);
     Option(std::string section, std::string name, OptionParser *parser,
             ValueType OptionsType::*optionPtr, std::unique_ptr<ValueType> defaultValue = nullptr) :
-            BaseOption(section, name), parser_(parser), optionPtr_(optionPtr), isSet_(false), defaultValue_(
-                    std::move(defaultValue)), aliases_() {
+            BaseOption(section, name),
+            parser_(parser),
+            optionPtr_(optionPtr),
+            isSet_(false),
+            isDefaulted_(false),
+            defaultValue_(std::move(defaultValue)) {
     }
     ~Option() = default;
 
-    void addCmdAlias(std::unique_ptr<BaseArg> alias) {
-        aliases_.push_back(std::move(alias));
+    virtual bool isSet() override {
+        return isSet_;
     }
 
-    virtual void finalize() override {
-        if (!isSet_) {
-            setValue();
-        }
+    virtual bool isDefaulted() override {
+        return isDefaulted_;
     }
 
     virtual void parse(std::string s) override {
-        if (!isSet_) {
-            setValue(Parser<ValueType>::parse(s));
-        }
+        setValue(Parser<ValueType>::parse(s));
     }
 
-    void setValue() {
-        if (defaultValue_ == nullptr) {
-            std::cerr << "ERROR: Missing option " << getSection() << "." << getName() << std::endl;
-            std::exit(1);
+    virtual void setDefault() override {
+        if (defaultValue_ != nullptr) {
+            setValue(*defaultValue_);
+            isDefaulted_ = true;
         }
-        setValue(*defaultValue_);
     }
 
     void setValue(ValueType value) {
         static_cast<OptionsType &>(*parser_->getOptions()).*optionPtr_ = value;
         isSet_ = true;
+        isDefaulted_ = false;
     }
 
 private:
     OptionParser *parser_;
     ValueType OptionsType::*optionPtr_;
     bool isSet_;
+    bool isDefaulted_;
     std::unique_ptr<ValueType> defaultValue_;
-    std::vector<std::unique_ptr<BaseArg>> aliases_;
 };
 
 template<typename ArgType, typename ValueType, typename OptionsType>
@@ -173,10 +213,6 @@ private:
     ArgType arg_;
 };
 
-OptionParser::OptionParser(std::string const &message) :
-        options_(nullptr), cmdLine_(message), optionsMap_() {
-}
-
 template<typename ValueType, typename OptionsType>
 void OptionParser::addOption(std::string section, std::string name,
         ValueType OptionsType::*optionPtr) {
@@ -196,10 +232,11 @@ void OptionParser::addCmdAlias(std::string section, std::string name,
         ValueType OptionsType::*/*optionPtr*/, Args&& ... args) {
     Option<ValueType, OptionsType> *option =
             static_cast<Option<ValueType, OptionsType> *>(optionsMap_[section][name].get());
-    auto visitor = std::make_unique<VisitingArg<ArgType, ValueType, OptionsType>>(this, option,
-            std::forward<Args>(args)...);
+    std::unique_ptr<BaseArg> visitor = (
+            std::make_unique<VisitingArg<ArgType, ValueType, OptionsType>>(
+                    this, option, std::forward<Args>(args)...));
     cmdLine_.add(visitor->getArg());
-    option->addCmdAlias(std::move(visitor));
+    option->addAlias(std::move(visitor));
 }
 
 template<typename ValueType, typename OptionsType> void OptionParser::addValueArg(
@@ -215,46 +252,7 @@ template<typename OptionsType> void OptionParser::addSwitchArg(std::string secti
         std::string description,  bool switchValue) {
     addCmdAlias<TCLAP::SwitchArg, bool, OptionsType>(section, name, optionPtr,
             shortOpt, longOpt, description, !switchValue);
-
 }
-
-BaseOptions *OptionParser::getOptions() {
-    return options_;
-}
-
-void OptionParser::setOptions(BaseOptions *options) {
-    options_ = options;
-}
-
-void OptionParser::parseCmdLine(int argc, char const *argv[]) {
-    cmdLine_.parse(argc, argv);
-}
-
-void OptionParser::parseCfgFile(std::string path) {
-    ini_parse(path.c_str(), OptionParser::iniHandler, this);
-}
-
-int OptionParser::iniHandler(void *user, char const *section, char const *name, char const *value) {
-    OptionParser *parser = static_cast<OptionParser *>(user);
-    try {
-        BaseOption *option = parser->optionsMap_.at(section).at(name).get();
-        option->parse(value);
-    } catch (std::out_of_range const &oor) {
-        std::cerr << "ERROR: Invalid option in config file: " << section << "." << name
-                << std::endl;
-        std::exit(2);
-    }
-    return 1;
-}
-
-void OptionParser::finalize() {
-    for (auto &entry : optionsMap_) {
-        for (auto &entry2 : entry.second) {
-            entry2.second->finalize();
-        }
-    }
-}
-
 } /* namespace options */
 
 #endif /* OPTION_PARSER_HPP_ */

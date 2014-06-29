@@ -26,6 +26,7 @@ int solve(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
     parser->setOptions(&options);
 
+    parser->initialize();
     parser->parseCmdLine(argc, argv);
     if (!options.configPath.empty()) {
         parser->parseCfgFile(options.configPath);

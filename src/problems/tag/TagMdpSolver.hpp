@@ -34,7 +34,7 @@ private:
     std::unordered_map<TagState, double> valueMap_;
 };
 
-class TagMdpParser : public Parser<solver::Heuristic> {
+class TagMdpParser : public shared::Parser<solver::Heuristic> {
 public:
     TagMdpParser(TagModel *model);
     virtual ~TagMdpParser() = default;

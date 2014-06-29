@@ -1,38 +1,52 @@
 #ifndef TAGOPTIONS_HPP_
 #define TAGOPTIONS_HPP_
 
-#include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
 #include <string>                       // for string
 
-#include <boost/program_options.hpp>    // for value, options_description, options_description_easy_init, typed_value
-
-#include "problems/shared/ProgramOptions.hpp"  // for ProgramOptions
-
-namespace po = boost::program_options;
+#include "problems/shared/SharedOptions.hpp"
 
 namespace tag {
-class TagOptions : public ProgramOptions {
-    /** Returns configurations options for the Tag POMDP */
-    po::options_description getProblemOptions() {
-        po::options_description problem("Settings specific to the Tag POMDP");
-        problem.add(ProgramOptions::getProblemOptions());
-        problem.add_options()
-                ("problem.mapPath,m", po::value<std::string>(), "path to map file")
-                ("problem.moveCost", po::value<double>(), "movement cost")
-                ("problem.tagReward", po::value<double>(),
-                        "reward for tagging the opponent")
-                ("problem.failedTagPenalty", po::value<double>(),
-                        "penalty for attempting to tag the opponent but failing")
-                ("problem.opponentStayProbability", po::value<double>(),
-                        "probability that the opponent will stay in place");
-        return problem;
+struct TagOptions : public shared::SharedOptions {
+    /* -------- Settings specific to the Tag POMDP -------- */
+    /** Path to the map file. */
+    std::string mapPath = "";
+    /** Cost per move. */
+    double moveCost = 0.0;
+    /** Reward for tagging. */
+    double tagReward = 0.0;
+    /** Penalty for a failed tag attempt. */
+    double failedTagPenalty = 0.0;
+    /** Probability the opponent will stay in place. */
+    double opponentStayProbability = 0.0;
+
+    static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
+        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating);
+        addTagOptions(parser.get());
+        return std::move(parser);
     }
 
-    /** Returns configuration options for the Tag heuristic */
-    po::options_description getHeuristicOptions() {
-        po::options_description heuristics("Tag heuristic configuration");
-        heuristics.add(ProgramOptions::getHeuristicOptions());
-        return heuristics;
+    static void addTagOptions(options::OptionParser *parser) {
+        parser->addOption<std::string>("problem", "mapPath", &TagOptions::mapPath);
+        parser->addValueArg<std::string>("problem", "mapPath", &TagOptions::mapPath,
+                "m", "map", "the path to the map file", "path");
+
+        parser->addOption<double>("problem", "moveCost", &TagOptions::moveCost);
+        parser->addValueArg<double>("problem", "moveCost", &TagOptions::moveCost,
+                "", "cost", "cost per move", "real");
+
+        parser->addOption<double>("problem", "tagReward", &TagOptions::tagReward);
+        parser->addValueArg<double>("problem", "tagReward", &TagOptions::tagReward,
+                "", "reward", "reward for tagging", "real");
+
+        parser->addOption<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty);
+        parser->addValueArg<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty,
+                "", "penalty", "penalty for a failed tag attempt", "real");
+
+        parser->addOption<double>("problem", "opponentStayProbability",
+                &TagOptions::opponentStayProbability);
+        parser->addValueArg<double>("problem", "opponentStayProbability",
+                &TagOptions::opponentStayProbability, "", "stay-prob",
+                "probability the opponent will choose no action", "real");
     }
 };
 } /* namespace tag */

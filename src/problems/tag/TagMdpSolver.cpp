@@ -22,7 +22,7 @@ TagMdpSolver::TagMdpSolver(TagModel *model) :
 }
 
 void TagMdpSolver::solve() {
-    if (model_->hasVerboseOutput()) {
+    if (model_->options_->hasVerboseOutput) {
         std::cout << "Solving MDP...";
         std::cout.flush();
     }
@@ -148,7 +148,7 @@ void TagMdpSolver::solve() {
                 return transitions[state][action].at(nextState).second;
             };
 
-    mdp::PolicyIterator iterator(policy, model_->getDiscountFactor(),
+    mdp::PolicyIterator iterator(policy, model_->options_->discountFactor,
             allStates.size() + 1, allActions.size(),
             possibleNextStates, transitionProbability, reward);
 
@@ -162,7 +162,7 @@ void TagMdpSolver::solve() {
         valueMap_[allStates[stateNo]] = stateValues[stateNo];
     }
 
-    if (model_->hasVerboseOutput()) {
+    if (model_->options_->hasVerboseOutput) {
         std::cout << "        Done; took " << numSteps << " steps." << std::endl << std::endl;
     }
 }

@@ -7,8 +7,6 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include <boost/program_options.hpp>    // for variables_map
-
 #include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
@@ -24,9 +22,8 @@
 #include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "TagAction.hpp"
+#include "TagOptions.hpp"
 #include "TagMdpSolver.hpp"
-
-namespace po = boost::program_options;
 
 namespace solver {
 class StatePool;
@@ -45,12 +42,12 @@ struct TagChange : public solver::ModelChange {
     long j1 = 0;
 };
 
-class TagModel: public ModelWithProgramOptions {
+class TagModel: public shared::ModelWithProgramOptions {
     friend class TagObservation;
     friend class TagMdpSolver;
 
   public:
-    TagModel(RandomGenerator *randGen, po::variables_map vm);
+    TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options);
     ~TagModel() = default;
     TagModel(TagModel const &) = delete;
     TagModel(TagModel &&) = delete;
@@ -62,24 +59,6 @@ class TagModel: public ModelWithProgramOptions {
         EMPTY = 0,
         WALL = -1
     };
-
-    /* ----------------------- Basic getters  ------------------- */
-    std::string getName() override {
-        return "Tag";
-    }
-
-    /* ---------- Virtual getters for ABT / model parameters  ---------- */
-    // Simple getters
-    long getNumberOfStateVariables() override {
-        return nStVars_;
-    }
-    double getMinVal() override {
-        return minVal_;
-    }
-    double getMaxVal() override {
-        return maxVal_;
-    }
-
 
     /* ---------- Custom getters for extra functionality  ---------- */
     long getNRows() const {
@@ -201,6 +180,8 @@ class TagModel: public ModelWithProgramOptions {
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
 
+    TagOptions *options_;
+
     /** The penalty for each movement. */
     double moveCost_;
     /** The reward for taggint the opponent. */
@@ -221,8 +202,7 @@ class TagModel: public ModelWithProgramOptions {
     std::vector<std::vector<TagCellType>> envMap_;
 
     // General problem parameters
-    long nActions_, nStVars_;
-    double minVal_, maxVal_;
+    long nActions_;
 
     /** Solver for the MDP version of the problem. */
     std::unique_ptr<TagMdpSolver> mdpSolver_;

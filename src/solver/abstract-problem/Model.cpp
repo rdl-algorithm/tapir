@@ -38,7 +38,6 @@ Model::Model(std::string problemName, RandomGenerator *randGen, std::unique_ptr<
         problemName_(problemName),
         randGen_(randGen),
         options_(std::move(options)) {
-
 }
 
 /* -------------------- Simple getters ---------------------- */
