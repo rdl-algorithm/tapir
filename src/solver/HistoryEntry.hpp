@@ -1,22 +1,47 @@
+/** file: HistoryEntry.hpp
+ *
+ * Contains the HistoryEntry class, which represents a single entry in a history sequence.
+ *
+ * The core functionality of the entry is to store a state, action, observation and reward
+ * tuple (s, a, o, r), as per the ABT algorithm.
+ */
 #ifndef SOLVER_HISTORYENTRY_HPP_
 #define SOLVER_HISTORYENTRY_HPP_
 
 #include <memory>
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
-#include "abstract-problem/State.hpp"
-
-#include "abstract-problem/TransitionParameters.hpp"
-#include "changes/ChangeFlags.hpp"              // for ChangeFlags
-
 #include "global.hpp"
+
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/State.hpp"
+
+#include "solver/abstract-problem/TransitionParameters.hpp"
+#include "solver/changes/ChangeFlags.hpp"              // for ChangeFlags
 
 namespace solver {
 class BeliefNode;
 class HistorySequence;
 class StateInfo;
 
+/** Represents a single entry in a sequence.
+ *
+ * A history entry is associated with a specific state (represented via StateInfo), and can also
+ * own an action, transition parameters, and an observation; it also has an associated immediate
+ * reward value - this represents the (s, a, o, r) tuple.
+ *
+ * If the action is null, this means that this entry is at the end of a history sequence, and
+ * the transition parameters and observation should also be null. Otherwise, there will be
+ * subsequent entries, and the resulting next state will be the state associated with the next
+ * entry in the sequence.
+ *
+ * The entry has an ID, which is its position in the sequence (0 => first entry); it also keeps
+ * a pointer to the history sequence that owns it, and the belief node this entry is associated
+ * with.
+ *
+ * A history entry also keeps track of change flags, which mark off the ways in which this
+ * entry has been affected by changes to the model.
+ */
 class HistoryEntry {
 public:
     friend class BasicSearchStrategy;

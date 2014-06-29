@@ -1,4 +1,8 @@
-#include "Solver.hpp"
+/** file: Solver.cpp
+ *
+ * Contains the implementation of the Solver class.
+ */
+#include "solver/Solver.hpp"
 
 #include <cmath>                        // for pow, exp
 #include <cstdio>
@@ -48,8 +52,6 @@
 #include "solver/HistorySequence.hpp"          // for HistorySequence
 #include "solver/StateInfo.hpp"                // for StateInfo
 #include "solver/StatePool.hpp"                // for StatePool
-
-#include "problems/rocksample/RockSampleAction.hpp"
 
 using std::cout;
 using std::endl;
@@ -365,7 +367,7 @@ void Solver::applyChanges() {
             it = affectedSequences.erase(it);
             // Now we undo the sequence, and delete it entirely.
             updateSequence(sequence, -1);
-            histories_->deleteSequence(sequence->id_);
+            histories_->deleteSequence(sequence);
         } else {
             it++;
         }
@@ -403,7 +405,7 @@ void Solver::applyChanges() {
 
 /* ------------------ Display methods  ------------------- */
 void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
-    os << belief->getQValue();
+    os << belief->getCachedValue();
     os << " from " << belief->getNumberOfParticles() << " p.";
     os << " with " << belief->getNumberOfStartingSequences() << " starts.";
     os << endl;
@@ -437,11 +439,11 @@ void Solver::doBackup() {
         long depth = firstEntry->first;
         for (BeliefNode *node : firstEntry->second) {
             if (depth == 0) {
-                node->recalculateQValue();
+                node->recalculateValue();
             } else {
-                double oldQValue = node->getQValue();
-                node->recalculateQValue();
-                double deltaQValue = node->getQValue() - oldQValue;
+                double oldQValue = node->getCachedValue();
+                node->recalculateValue();
+                double deltaQValue = node->getCachedValue() - oldQValue;
                 long nContinuations = node->getMapping()->getTotalVisitCount()
                         - node->getNumberOfStartingSequences();
                 double deltaTotalQ = options_->discountFactor * nContinuations * deltaQValue;
@@ -496,12 +498,12 @@ void Solver::updateSequence(HistorySequence *sequence, int sgn, long firstEntryI
             break;
         }
 
-        double oldQ = node->getQValue();
+        double oldQ = node->getCachedValue();
         deltaTotalQ = oldQ;
         if (propagateQChanges) {
             // Backpropagate the change in the q-value of the node.
-            node->recalculateQValue();
-            double newQ = node->getQValue();
+            node->recalculateValue();
+            double newQ = node->getCachedValue();
             long nContinuations = mapping->getTotalVisitCount() - node->getNumberOfStartingSequences();
             deltaTotalQ += (newQ - oldQ) * nContinuations;
         } else {
@@ -516,7 +518,7 @@ void Solver::updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNCon
         return;
     }
 
-    deltaTotalQ += deltaNContinuations * node->getQValue();
+    deltaTotalQ += deltaNContinuations * node->getCachedValue();
 
     // Apply the discount factor.
     deltaTotalQ *= options_->discountFactor;

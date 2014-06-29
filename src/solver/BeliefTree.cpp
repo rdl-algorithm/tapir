@@ -1,4 +1,8 @@
-#include "BeliefTree.hpp"
+/** file: BeliefTree.cpp
+ *
+ * Contains the implementation of BeliefTree.
+ */
+#include "solver/BeliefTree.hpp"
 
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
@@ -62,7 +66,7 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
             childNode->setHistoricalData(data->createChild(action, obs));
         }
         childNode->setMapping(solver_->getActionPool()->createActionMapping(childNode));
-        solver_->getEstimationStrategy()->setQEstimator(solver_, childNode);
+        solver_->getEstimationStrategy()->setValueEstimator(solver_, childNode);
     }
     return childNode;
 }
@@ -96,6 +100,6 @@ BeliefNode *BeliefTree::reset() {
 void BeliefTree::initializeRoot() {
     root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
     root_->setMapping(solver_->getActionPool()->createActionMapping(root_.get()));
-    solver_->getEstimationStrategy()->setQEstimator(solver_, root_.get());
+    solver_->getEstimationStrategy()->setValueEstimator(solver_, root_.get());
 }
 } /* namespace solver */

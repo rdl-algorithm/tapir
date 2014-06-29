@@ -1,10 +1,14 @@
-#include "HistoryEntry.hpp"
+/** file: HistoryEntry.cpp
+ *
+ * Contains the implementation of the HistoryEntry class.
+ */
+#include "solver/HistoryEntry.hpp"
 
 #include <iostream>
 
-#include "BeliefNode.hpp"
-#include "changes/ChangeFlags.hpp"              // for ChangeFlags
-#include "StateInfo.hpp"                // for StateInfo
+#include "solver/BeliefNode.hpp"
+#include "solver/changes/ChangeFlags.hpp"              // for ChangeFlags
+#include "solver/StateInfo.hpp"                // for StateInfo
 
 namespace solver {
 class HistorySequence;

@@ -1,3 +1,8 @@
+/** file: Solver.hpp
+ *
+ * Contains the Solver class, which is the core ABT solver class. A solver also owns a model,
+ * which is its representation of the POMDP problem.
+ */
 #ifndef SOLVER_SOLVER_HPP_
 #define SOLVER_SOLVER_HPP_
 
@@ -11,13 +16,13 @@
 
 #include "global.hpp"                     // for RandomGenerator
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Model.hpp"                    // for Model, Model::StepResult
-#include "abstract-problem/Observation.hpp"              // for Observation
-#include "abstract-problem/Options.hpp"              // for Options
-#include "abstract-problem/State.hpp"
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Model.hpp"                    // for Model, Model::StepResult
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/Options.hpp"              // for Options
+#include "solver/abstract-problem/State.hpp"
 
-#include "changes/ChangeFlags.hpp"               // for ChangeFlags
+#include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags
 
 namespace solver {
 class ActionPool;
@@ -33,14 +38,35 @@ class Serializer;
 class StateInfo;
 class StatePool;
 
+/** The core class of the ABT algorithm.
+ *
+ * * The core data structures for a solver, all of which are owned by the solver
+ * (i.e. stored in unique_ptr), are:
+ * - Model, which represents the POMDP model used to solve the problem.
+ * - BeliefTree, which is used to represent the policy.
+ * - StatePool, which keeps a collection of all of the states encountered so far; it can
+ *      also keep a StateIndex for efficient indexing of the states, e.g. via a spatial index.
+ *      This allows efficient lookup of which states are affected by a given change.
+ * - Histories, which represents the collection of Histories that make up the belief tree. This
+ *      is the key structure to allow incremental modification of the policy, since individual
+ *      histories can be updated without updating the entire tree.
+ *
+ * The core functionality of the Solver lies in three methods:
+ * - improvePolicy(), which incrementally improves the policy stored within the solver by
+ *      generating new history sequences starting from a specific belief node.
+ * - replenishChild(), which replenishes particles in a child belief based on its parent belief
+ *      and the action and observation taken to get there.
+ * - applyChanges(), which updates the histories to account for changes in the model, and also
+ *      updates the tree with the effects of those changes so that the policy will remain valid.
+ */
 class Solver {
 public:
     friend class Serializer;
     friend class TextSerializer;
 
+    /** Constructs a new solver, based on the given POMDP model. */
     Solver(std::unique_ptr<Model> model);
     ~Solver();
-
     _NO_COPY_OR_MOVE(Solver);
 
     /* ------------------ Simple getters. ------------------- */
@@ -127,7 +153,6 @@ public:
     void updateSequence(HistorySequence *sequence, int sgn = +1, long firstEntryId = 0,
             bool propagateQChanges = true);
 
-
     /** Performs a deferred update on the q-value for the parent belief and action of the
      * given belief.
      *
@@ -138,7 +163,6 @@ public:
      * this node).
      */
     void updateEstimate(BeliefNode *node, double deltaTotalQ, long deltaNContinuations);
-
 
     /**
      * Updates the values for taking the given action and receiving the given

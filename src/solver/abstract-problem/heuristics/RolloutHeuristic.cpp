@@ -1,4 +1,8 @@
-#include "solver/abstract-problem/heuristics/rollout_heuristic.hpp"
+/** file: RolloutHeuristic.cpp
+ *
+ * Contains the implementation of the RolloutHeuristic class.
+ */
+#include "solver/abstract-problem/heuristics/RolloutHeuristic.hpp"
 
 #include <memory>
 
@@ -16,6 +20,7 @@ RolloutHeuristic::RolloutHeuristic(Model *model, std::unique_ptr<StepGeneratorFa
         factory_(std::move(factory)),
         heuristic_(heuristic) {
 }
+
 double RolloutHeuristic::getHeuristicValue(HistoryEntry const *entry,
         State const *state, HistoricalData const *data) {
     SearchStatus status = SearchStatus::UNINITIALIZED;
@@ -41,5 +46,10 @@ double RolloutHeuristic::getHeuristicValue(HistoryEntry const *entry,
     }
     value += netDiscount * heuristic_(nullptr, currentState.get(), data);
     return value;
+}
+
+Heuristic RolloutHeuristic::asFunction() {
+    using namespace std::placeholders;
+    return std::bind(&RolloutHeuristic::getHeuristicValue, this, _1, _2, _3);
 }
 } /* namespace solver */

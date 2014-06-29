@@ -1,20 +1,24 @@
-#include "Simulator.hpp"
+/** file: Simulator.cpp
+ *
+ * Contains the implementation of the Simulator class.
+ */
+#include "solver/Simulator.hpp"
 
 #include <fstream>                      // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, ofstream, endl, ostream, ifstream
 #include <iomanip>
 #include <iostream>                     // for operator<<, ostream, basic_ostream, endl, basic_ostream<>::__ostream_type, cout
 
-#include "abstract-problem/Observation.hpp"
-#include "abstract-problem/ModelChange.hpp"
+#include "solver/abstract-problem/Observation.hpp"
+#include "solver/abstract-problem/ModelChange.hpp"
 
-#include "serialization/Serializer.hpp"
+#include "solver/serialization/Serializer.hpp"
 
-#include "Agent.hpp"
-#include "BeliefNode.hpp"
-#include "HistoryEntry.hpp"
-#include "HistorySequence.hpp"
-#include "Solver.hpp"
-#include "StatePool.hpp"
+#include "solver/Agent.hpp"
+#include "solver/BeliefNode.hpp"
+#include "solver/HistoryEntry.hpp"
+#include "solver/HistorySequence.hpp"
+#include "solver/Solver.hpp"
+#include "solver/StatePool.hpp"
 
 
 using std::cout;
@@ -141,7 +145,6 @@ bool Simulator::stepSimulation() {
             return false;
         }
         double changingTime = abt::clock_ms() - changingTimeStart;
-        totalChangingTime_ += changingTime;
         if (options_->hasVerboseOutput) {
             cout << "Changes complete" << endl;
             cout << "Total of " << changingTime << " ms used for changes." << endl;
@@ -227,7 +230,10 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
     }
 
     model_->applyChanges(changes, nullptr);
+
+    double startTime = abt::clock_ms();
     solverModel_->applyChanges(changes, solver_);
+    totalChangingTime_ += abt::clock_ms() - startTime;
 
     // If the current state is deleted, the simulation is broken!
     StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();
@@ -251,7 +257,9 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
     }
 
     // Finally we apply the changes.
+    startTime = abt::clock_ms();
     solver_->applyChanges();
+    totalChangingTime_ += abt::clock_ms() - startTime;
     return true;
 }
 

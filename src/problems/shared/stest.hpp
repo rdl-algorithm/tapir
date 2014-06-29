@@ -21,10 +21,9 @@ using std::endl;
 template<typename ModelType, typename OptionsType>
 int stest(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(false);
+
     OptionsType options;
     parser->setOptions(&options);
-
-    parser->initialize();
     parser->parseCmdLine(argc, argv);
     if (!options.configPath.empty()) {
         parser->parseCfgFile(options.configPath);

@@ -1,16 +1,24 @@
+/** file: HistorySequence.hpp
+ *
+ * Contains the HistorySequence class, which represents a single history sequence.
+ *
+ * For the most part, a history sequence is just a vector of history entries; it also stores
+ * the starting index and ending index of any changes that affect this sequence, as well as
+ * the collective types of these changes.
+ */
 #ifndef SOLVER_HISTORYSEQUENCE_HPP_
 #define SOLVER_HISTORYSEQUENCE_HPP_
 
 #include <memory>                       // for unique_ptr
 #include <vector>                       // for vector
 
-#include "changes/ChangeFlags.hpp"               // for ChangeFlags
-
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
-#include "abstract-problem/State.hpp"
-
 #include "global.hpp"
+
+#include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags
+
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/State.hpp"
 
 namespace solver {
 class BeliefNode;
@@ -18,6 +26,14 @@ class BeliefTree;
 class HistoryEntry;
 class StateInfo;
 
+/** Represents a single history sequence.
+ *
+ * The sequence owns its entries, which are stored in a vector of unique_ptr<HistoryEntry>.
+ *
+ * The sequence also keeps track of the first index and last index for entries that have been
+ * affected by changes, as well as the logical disjunction (or) of all changes that affect the
+ * entries in the sequence.
+ */
 class HistorySequence {
   public:
     friend class BasicSearchStrategy;
@@ -51,20 +67,11 @@ class HistorySequence {
     std::vector<State const *> getStates() const;
 
   private:
-    /** A method that verifies the validity of this sequence - this shouldn't
-     * be necessary.
-     */
-    bool testBackup(bool backingUp);
-
     /* ----------- Methods to add or remove history entries ------------- */
     /** Erases all of the entries in this sequence, starting from firstEntryId. */
     void erase(long firstEntryId = 0);
-    /** Adds a new entry to this sequence. */
+    /** Adds a new entry to this sequence, and returns a pointer to it. */
     HistoryEntry *addEntry();
-
-    /* -------------- Registration methods ---------------- */
-    /** Registers the sequence with the given starting belief node. */
-    void registerWith(BeliefNode *startNode, BeliefTree *policy);
 
     /* -------------- Change flagging methods ---------------- */
     /** Resets the changes for this sequence and all its entries. */

@@ -33,8 +33,6 @@
 
 #include "Serializer.hpp"               // for Serializer
 
-using std::endl;
-
 namespace solver {
 /* ------------------ Saving change sequences -------------------- */
 void TextSerializer::saveChangeSequence(ChangeSequence const &sequence, std::ostream &os) {
@@ -105,13 +103,13 @@ void TextSerializer::load(StateInfo &info, std::istream &is) {
 }
 
 void TextSerializer::save(StatePool const &pool, std::ostream &os) {
-    os << "STATESPOOL-BEGIN" << endl;
-    os << "numStates: " << pool.stateInfoMap_.size() << endl;
+    os << "STATESPOOL-BEGIN" << std::endl;
+    os << "numStates: " << pool.stateInfoMap_.size() << std::endl;
     for (std::unique_ptr<StateInfo> const &stateInfo : pool.statesByIndex_) {
         save(*stateInfo, os);
-        os << endl;
+        os << std::endl;
     }
-    os << "STATESPOOL-END" << endl;
+    os << "STATESPOOL-END" << std::endl;
 }
 
 void TextSerializer::load(StatePool &pool, std::istream &is) {
@@ -197,7 +195,7 @@ void TextSerializer::save(HistorySequence const &seq, std::ostream &os) {
     os << " - length " << seq.entrySequence_.size() << std::endl;
     for (std::unique_ptr<HistoryEntry> const &entry : seq.entrySequence_) {
         save(*entry, os);
-        os << endl;
+        os << std::endl;
     }
 }
 
@@ -220,12 +218,12 @@ void TextSerializer::load(HistorySequence &seq, std::istream &is) {
 }
 
 void TextSerializer::save(Histories const &histories, std::ostream &os) {
-    os << "HISTORIES-BEGIN" << endl;
-    os << "numHistories: " << histories.getNumberOfSequences() << endl;
+    os << "HISTORIES-BEGIN" << std::endl;
+    os << "numHistories: " << histories.getNumberOfSequences() << std::endl;
     for (std::unique_ptr<HistorySequence> const &seq : histories.sequencesById_) {
         save(*seq, os);
     }
-    os << "HISTORIES-END" << endl;
+    os << "HISTORIES-END" << std::endl;
 }
 
 void TextSerializer::load(Histories &histories, std::istream &is) {
@@ -275,9 +273,9 @@ void TextSerializer::load(ActionNode &node, std::istream &is) {
 
 void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
     if (node.getNumberOfParticles() == 0) {
-        os << "No particles!" << endl;
+        os << "No particles!" << std::endl;
     } else {
-        os << node.getNumberOfParticles() << " particles begin" << endl;
+        os << node.getNumberOfParticles() << " particles begin" << std::endl;
         int count = 0;
         for (auto it = node.particles_.begin(); it != node.particles_.end();
                 ++it) {
@@ -289,13 +287,13 @@ void TextSerializer::save(BeliefNode const &node, std::ostream &os) {
             count += 1;
             if (count >= NUM_PARTICLES_PER_LINE
                     || (it+1) == node.particles_.end()) {
-                os << endl;
+                os << std::endl;
                 count = 0;
             } else {
                 os << ", ";
             }
         }
-        os << "particles end" << endl;
+        os << "particles end" << std::endl;
     }
     saveHistoricalData(node.getHistoricalData(), os);
     saveActionMapping(*node.getMapping(), os);
@@ -330,18 +328,18 @@ void TextSerializer::load(BeliefNode &node, std::istream &is) {
     }
     node.setHistoricalData(loadHistoricalData(is));
     node.setMapping(loadActionMapping(&node, is));
-    getSolver()->getEstimationStrategy()->setQEstimator(getSolver(), &node);
+    getSolver()->getEstimationStrategy()->setValueEstimator(getSolver(), &node);
 }
 
 void TextSerializer::save(BeliefTree const &tree, std::ostream &os) {
-    os << "BELIEFTREE-BEGIN" << endl;
-    os << "numNodes: " << tree.getNumberOfNodes() << endl;
+    os << "BELIEFTREE-BEGIN" << std::endl;
+    os << "numNodes: " << tree.getNumberOfNodes() << std::endl;
     for (BeliefNode *node : tree.allNodes_) {
-        os << "NODE " << node->id_ << endl;
+        os << "NODE " << node->id_ << std::endl;
         save(*node, os);
-        os << endl;
+        os << std::endl;
     }
-    os << "BELIEFTREE-END" << endl;
+    os << "BELIEFTREE-END" << std::endl;
 }
 
 void TextSerializer::load(BeliefTree &tree, std::istream &is) {
@@ -367,7 +365,7 @@ void TextSerializer::load(BeliefTree &tree, std::istream &is) {
         std::istringstream(line) >> tmpStr >> nodeId;
         BeliefNode *node = tree.getNode(nodeId);
         load(*node, is);
-        node->recalculateQValue();
+        node->recalculateValue();
         // Ignore an empty line after each belief node.
         std::getline(is, line);
         std::getline(is, line);

@@ -1,3 +1,7 @@
+/** file: BeliefNode.cpp
+ *
+ * Contains the implementation for the BeliefNode class.
+ */
 #include "solver/BeliefNode.hpp"
 
 #include <map>                          // for _Rb_tree_iterator, map<>::iterator, map
@@ -42,10 +46,9 @@ BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             data_(nullptr),
             particles_(),
             nStartingSequences_(0),
-            tLastChange_(-1),
             actionMap_(nullptr),
             cachedValues_(),
-            qEstimator_(nullptr) {
+            valueEstimator_(nullptr) {
     if (parentEntry_ == nullptr) {
         depth_ = 0;
     } else {
@@ -94,9 +97,6 @@ std::vector<State const *> BeliefNode::getStates() const {
     }
     return states;
 }
-double BeliefNode::getTimeOfLastChange() const {
-    return tLastChange_;
-}
 
 /* -------------------- Tree-related getters  ---------------------- */
 ActionMapping *BeliefNode::getMapping() const {
@@ -140,12 +140,6 @@ BeliefNode *BeliefNode::getChild(Action const &action, Observation const &obs) c
     return node->getChild(obs);
 }
 
-
-/* -------------------- Simple setters  ---------------------- */
-void BeliefNode::updateTimeOfLastChange() {
-    // tLastChange_ = abt::clock_ms();
-}
-
 /* ----------------- Management of cached values ------------------- */
 BaseCachedValue *BeliefNode::addCachedValue(std::unique_ptr<BaseCachedValue> value) {
     BaseCachedValue *rawPtr = value.get();
@@ -156,27 +150,24 @@ void BeliefNode::removeCachedValue(BaseCachedValue *value) {
     cachedValues_.erase(value);
 }
 
-/* ------------ Q-value calculation and action selection -------------- */
-void BeliefNode::setQEstimator(CachedValue<double> *qEstimator) {
-    qEstimator_ = qEstimator;
+/* ------------ Value estimation and action selection -------------- */
+void BeliefNode::setValueEstimator(CachedValue<double> *estimator) {
+    valueEstimator_ = estimator;
 }
-
-/* ------------ Q-value calculation and action selection -------------- */
 std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
     return choosers::max_action(this);
 }
-double BeliefNode::getQValue() const {
-    return qEstimator_->getCache();
+double BeliefNode::getCachedValue() const {
+    return valueEstimator_->getCache();
 }
-void BeliefNode::recalculateQValue() {
-    qEstimator_->updateCache();
+void BeliefNode::recalculateValue() {
+    valueEstimator_->updateCache();
 }
 
 /* ============================ PRIVATE ============================ */
 
 /* -------------- Particle management / sampling ---------------- */
 void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
-    updateTimeOfLastChange();
     particles_.add(newHistEntry);
     if (newHistEntry->getId() == 0) {
         nStartingSequences_++;
@@ -184,7 +175,6 @@ void BeliefNode::addParticle(HistoryEntry *newHistEntry) {
 }
 
 void BeliefNode::removeParticle(HistoryEntry *histEntry) {
-    updateTimeOfLastChange();
     particles_.remove(histEntry);
     if (histEntry->getId() == 0) {
         nStartingSequences_--;

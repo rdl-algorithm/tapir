@@ -1,8 +1,12 @@
-#include "Agent.hpp"
+/** file: Agent.cpp
+ *
+ * Contains the implementation of the Agent class.
+ */
+#include "solver/Agent.hpp"
 
-#include "BeliefNode.hpp"
-#include "BeliefTree.hpp"
-#include "Solver.hpp"
+#include "solver/BeliefNode.hpp"
+#include "solver/BeliefTree.hpp"
+#include "solver/Solver.hpp"
 
 namespace solver {
 
@@ -24,7 +28,4 @@ BeliefNode *Agent::getCurrentBelief() const {
 void Agent::updateBelief(Action const &action, Observation const &observation) {
     currentBelief_ = solver_->getPolicy()->createOrGetChild(currentBelief_, action, observation);
 }
-
-
-
 } /* namespace solver */

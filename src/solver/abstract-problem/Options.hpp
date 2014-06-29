@@ -1,9 +1,25 @@
+/** file: Options.hpp
+ *
+ * Defines the base Options class. These are the core parameters that ABT requires in order to
+ * function correctly.
+ */
 #ifndef SOLVER_OPTIONS_HPP_
 #define SOLVER_OPTIONS_HPP_
 
 #include "options/option_parser.hpp"
 
 namespace solver {
+/** The base Options class for the ABT solver.
+ *
+ * This is the data structure into which options are parsed; it is also used by the Model, Solver
+ * and Simulator to access the configuration settings, e.g. whether or not verbose output should
+ * be printed.
+ *
+ * The values of numberOfStateVariables, minVal, and maxVal should be set by the model to
+ * correctly reflect the specific problem.
+ *
+ * Additional configuration settings can be added by inheriting from this class.
+ */
 struct Options : options::BaseOptions {
     Options() = default;
     virtual ~Options() = default;

@@ -1,3 +1,9 @@
+/** file: Histories.hpp
+ *
+ * Contains the Histories class, which represents a collection of history sequences.
+ *
+ * This class owns the associated sequences, which are stored in a vector of unique_ptr
+ */
 #ifndef SOLVER_HISTORIES_HPP_
 #define SOLVER_HISTORIES_HPP_
 
@@ -10,6 +16,19 @@ namespace solver {
 class HistoryEntry;
 class HistorySequence;
 
+/** Owns a collection of history sequences.
+ *
+ * The createSequence() method is the usual way to make a new history sequence, as it will
+ * be owned by this Histories object.
+ *
+ * Individual sequences can also be removed outright using the deleteSequence() method. Note that
+ * this is done by moving the sequence from the last position in the vector into the newly
+ * deleted spot.
+ *
+ * Since the ID of a history sequence corresponds to its index in the vector, this means that
+ * the ID of a history sequence is not guaranteed to remain constant. If you need to keep a
+ * permanent reference to a sequence as long as it exists, just use a raw pointer to it.
+ */
 class Histories {
   public:
     friend class Solver;
@@ -35,11 +54,11 @@ class Histories {
     void reset();
     /** Adds a new history sequence. */
     HistorySequence *createSequence();
-    /** Deletes the history sequence with the given ID. */
-    void deleteSequence(long seqId);
-
+    /** Deletes the given history sequence. */
+    void deleteSequence(HistorySequence *sequence);
 
   private:
+    /** A vector to hold all of the sequences in this collection. */
     std::vector<std::unique_ptr<HistorySequence>> sequencesById_;
 };
 } /* namespace solver */

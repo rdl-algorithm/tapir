@@ -1,4 +1,9 @@
-#include "Vector.hpp"
+/** file: Vector.cpp
+ *
+ * Provides default implementations for some basic methods of the vector class in terms of the
+ * asVector() method.
+ */
+#include "solver/abstract-problem/Vector.hpp"
 
 #include <cmath>
 #include <cstddef>

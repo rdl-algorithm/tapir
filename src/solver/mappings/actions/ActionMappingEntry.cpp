@@ -6,7 +6,6 @@
 
 namespace solver {
 bool ActionMappingEntry::update(long deltaNVisits, double deltaTotalQ) {
-    getMapping()->getOwner()->updateTimeOfLastChange();
     return updateValue(deltaNVisits, deltaTotalQ);
 }
 } /* namespace solver */

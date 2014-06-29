@@ -1,4 +1,8 @@
-#include "HistorySequence.hpp"
+/** file: HistorySequence.cpp
+ *
+ * Contains the implementation of the HistorySequence class.
+ */
+#include "solver/HistorySequence.hpp"
 
 #include <limits>
 
@@ -8,15 +12,15 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "abstract-problem/Action.hpp"                   // for Action
-#include "abstract-problem/Observation.hpp"              // for Observation
+#include "solver/BeliefNode.hpp"
+#include "solver/BeliefTree.hpp"
+#include "solver/HistoryEntry.hpp"             // for HistoryEntry
+#include "solver/StateInfo.hpp"                // for StateInfo
 
-#include "changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
+#include "solver/abstract-problem/Action.hpp"                   // for Action
+#include "solver/abstract-problem/Observation.hpp"              // for Observation
 
-#include "BeliefNode.hpp"
-#include "BeliefTree.hpp"
-#include "HistoryEntry.hpp"             // for HistoryEntry
-#include "StateInfo.hpp"                // for StateInfo
+#include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags, ChangeFlags::UNCHANGED
 
 namespace solver {
 HistorySequence::HistorySequence() :

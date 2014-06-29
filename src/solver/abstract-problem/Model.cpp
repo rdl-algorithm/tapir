@@ -149,7 +149,7 @@ std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
 }
 
 std::unique_ptr<EstimationStrategy> Model::createEstimationStrategy(Solver */*solver*/) {
-    return std::make_unique<EstimationFunction>(estimators::average_q_value);
+    return std::make_unique<EstimationFunction>(estimators::average);
 }
 
 std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {
