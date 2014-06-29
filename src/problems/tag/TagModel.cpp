@@ -44,6 +44,16 @@ using std::cout;
 using std::endl;
 
 namespace tag {
+TagUBParser::TagUBParser(TagModel *model) :
+        model_(model) {
+}
+solver::Heuristic TagUBParser::parse(solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
+    return [this] (solver::HistoryEntry const *, solver::State const *state,
+            solver::HistoricalData const *) {
+        return model_->getUpperBoundHeuristicValue(*state);
+    };
+}
+
 TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options) :
             ModelWithProgramOptions("Tag", randGen, std::move(options)),
             options_(const_cast<TagOptions *>(static_cast<TagOptions const *>(getOptions()))),
@@ -61,6 +71,7 @@ TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options
     options_->minVal = -failedTagPenalty_ / 1 - options_->discountFactor;
     options_->maxVal = tagReward_;
 
+    registerHeuristicParser("upper", std::make_unique<TagUBParser>(this));
     registerHeuristicParser("exactMdp", std::make_unique<TagMdpParser>(this));
 
     // Read the map from the file.
@@ -601,6 +612,20 @@ double TagModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
     long dist = robotPos.manhattanDistanceTo(opponentPos);
     double nSteps = dist / opponentStayProbability_;
     double finalDiscount = std::pow(options_->discountFactor, nSteps);
+    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
+    qVal += finalDiscount * tagReward_;
+    return qVal;
+}
+
+double TagModel::getUpperBoundHeuristicValue(solver::State const &state) {
+    TagState const &tagState = static_cast<TagState const &>(state);
+    if (tagState.isTagged()) {
+        return 0;
+    }
+    GridPosition robotPos = tagState.getRobotPosition();
+    GridPosition opponentPos = tagState.getOpponentPosition();
+    long dist = robotPos.manhattanDistanceTo(opponentPos);
+    double finalDiscount = std::pow(options_->discountFactor, dist);
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
     qVal += finalDiscount * tagReward_;
     return qVal;

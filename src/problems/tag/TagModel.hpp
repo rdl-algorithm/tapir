@@ -42,6 +42,17 @@ struct TagChange : public solver::ModelChange {
     long j1 = 0;
 };
 
+class TagUBParser : public shared::Parser<solver::Heuristic> {
+public:
+    TagUBParser(TagModel *model);
+    virtual ~TagUBParser() = default;
+    _NO_COPY_OR_MOVE(TagUBParser);
+
+    virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
+private:
+    TagModel *model_;
+};
+
 class TagModel: public shared::ModelWithProgramOptions {
     friend class TagObservation;
     friend class TagMdpSolver;
@@ -135,6 +146,8 @@ class TagModel: public shared::ModelWithProgramOptions {
     /* ---------------------- Basic customizations  ---------------------- */
     virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
                 solver::State const *state, solver::HistoricalData const *data) override;
+
+    virtual double getUpperBoundHeuristicValue(solver::State const &state);
 
     /* ------- Customization of more complex solver functionality  --------- */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
