@@ -21,7 +21,7 @@ class PreferredActionsPool: public solver::EnumeratedActionPool {
     virtual ~PreferredActionsPool() = default;
     _NO_COPY_OR_MOVE(PreferredActionsPool);
 
-    virtual std::vector<long> createBinSequence(solver::HistoricalData const *data) override;
+    virtual std::vector<long> createBinSequence(solver::BeliefNode *node) override;
 
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping(solver::BeliefNode *node)
             override;

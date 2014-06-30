@@ -19,7 +19,9 @@
 //    THE SOFTWARE.
 
 
-/** A basic option parser that is able to parse configuration settings from both the command line,
+/** file: option_parser.hpp
+ *
+ * A basic option parser that is able to parse configuration settings from both the command line,
  * and from INI-style configuration files.
  *
  * This parser uses the following libraries to do the underlying parsing:

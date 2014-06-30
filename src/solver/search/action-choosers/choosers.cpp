@@ -53,6 +53,11 @@ std::unique_ptr<Action> ucb_action(BeliefNode const *node, double explorationCoe
 
     ActionMapping *mapping = node->getMapping();
     for (ActionMappingEntry const *entry : mapping->getVisitedEntries()) {
+        // Ignore illegal actions.
+        if (!entry->isLegal()) {
+            continue;
+        }
+
         double tmpValue = entry->getMeanQValue()
                 + explorationCoefficient
                         * std::sqrt(

@@ -1,4 +1,4 @@
-/** ucb_search.cpp
+/** file: ucb_search.cpp
  *
  * Contains the basic implementation code for a UCB-based search strategy.
  */

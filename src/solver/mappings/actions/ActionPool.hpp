@@ -1,5 +1,14 @@
-#ifndef SOLVER_ACTION_MAPPING_INTERFACE_HPP_
-#define SOLVER_ACTION_MAPPING_INTERFACE_HPP_
+/** file: ActionPool.hpp
+ *
+ * Defines the ActionPool interface, which allows customization of how the mapping for each
+ * individual belief node is set up.
+ *
+ * Using a single class in this way allows certain aspects of the mappings to be stored globally,
+ * e.g. to keep statistics that are shared across all of the mappings rather than stored on
+ * a per-mapping basis.
+ */
+#ifndef SOLVER_ACTIONPOOL_HPP_
+#define SOLVER_ACTIONPOOL_HPP_
 
 #include <memory>                       // for unique_ptr
 
@@ -16,6 +25,11 @@ class HistoricalData;
 class ObservationPool;
 class Solver;
 
+/** An interface class which is a factory for creating action mappings.
+ *
+ * Using a central factory instance allows each individual mapping to interface with this single
+ * instance; this allows shared statistics to be kept.
+ */
 class ActionPool {
 public:
     ActionPool() = default;
@@ -25,4 +39,4 @@ public:
 };
 } /* namespace solver */
 
-#endif /* SOLVER_ACTION_MAPPING_INTERFACE_HPP_ */
+#endif /* SOLVER_ACTIONPOOL_HPP_ */

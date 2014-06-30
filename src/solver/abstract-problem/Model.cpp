@@ -1,4 +1,4 @@
-/** file: Model.hpp
+/** file: Model.cpp
  *
  * Contains default implementations for some of the methods of Model.
  *

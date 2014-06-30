@@ -1,4 +1,4 @@
-/** nn_rollout.hpp
+/** file: nn_rollout.hpp
  *
  * Contains the necessary classes for an approximate-nearest-neighbor-based rollout strategy;
  * this is done via an implementation of StepGenerator and StepGeneratorFactory;

@@ -1,11 +1,16 @@
+/** file: enumerated_actions.cpp
+ *
+ * Contains an implementation for the action mapping interfaces in terms of an enumerated
+ * set of actions, which is done via a simple implementation of the abstract class
+ * DiscretizedActionPool.
+ */
 #include "solver/mappings/actions/enumerated_actions.hpp"
 
 namespace solver {
 /* ------------------- EnumeratedActionPool ------------------- */
 EnumeratedActionPool::EnumeratedActionPool(Model *model,
         std::vector<std::unique_ptr<DiscretizedPoint>> allActions) :
-        DiscretizedActionPool(model),
-        model_(model),
+        randGen_(model->getRandomGenerator()),
         allActions_(std::move(allActions)) {
 }
 long EnumeratedActionPool::getNumberOfBins() {
@@ -16,12 +21,12 @@ std::unique_ptr<Action> EnumeratedActionPool::sampleAnAction(
     return allActions_[binNumber]->copy();
 }
 
-std::vector<long> EnumeratedActionPool::createBinSequence(HistoricalData const */*data*/) {
+std::vector<long> EnumeratedActionPool::createBinSequence(BeliefNode */*node*/) {
     std::vector<long> bins;
     for (int i = 0; i < getNumberOfBins(); i++) {
         bins.push_back(i);
     }
-    std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
+    std::shuffle(bins.begin(), bins.end(), *randGen_);
     return std::move(bins);
 }
 } /* namespace solver */

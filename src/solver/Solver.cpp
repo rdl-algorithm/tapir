@@ -538,10 +538,14 @@ void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation
         return;
     }
 
-    ActionMapping *actionMap = node->getMapping();
-    actionMap->getActionNode(action)->getMapping()->updateVisitCount(observation, deltaNVisits);
+    // Retrieve the associated ActionMappingEntry.
+    ActionMappingEntry *entry = node->getMapping()->getEntry(action);
 
-    if (actionMap->update(action, deltaNVisits, deltaTotalQ)) {
+    // Update the visit count for the observation.
+    entry->getActionNode()->getMapping()->updateVisitCount(observation, deltaNVisits);
+
+    // Update the action.
+    if (entry->update(deltaNVisits, deltaTotalQ)) {
         addNodeToBackup(node);
     }
 }

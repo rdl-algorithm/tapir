@@ -10,7 +10,8 @@ PreferredActionsPool::PreferredActionsPool(RockSampleModel *model) :
         model_(model) {
 }
 
-std::vector<long> PreferredActionsPool::createBinSequence(solver::HistoricalData const *data) {
+std::vector<long> PreferredActionsPool::createBinSequence(solver::BeliefNode *node) {
+    solver::HistoricalData const *data = node->getHistoricalData();
     RockSampleModel::RSActionCategory category = model_->getSearchActionCategory();
     if (category == RockSampleModel::RSActionCategory::LEGAL) {
         std::vector<long> bins = static_cast<PositionAndRockData const *>(data)->generateLegalActions();
@@ -21,23 +22,22 @@ std::vector<long> PreferredActionsPool::createBinSequence(solver::HistoricalData
         std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
         return std::move(bins);
     } else {
-        return EnumeratedActionPool::createBinSequence(data);
+        return EnumeratedActionPool::createBinSequence(node);
     }
 }
 
 std::unique_ptr<solver::ActionMapping> PreferredActionsPool::createActionMapping(
-        solver::BeliefNode *owner) {
+        solver::BeliefNode *node) {
     std::unique_ptr<solver::DiscretizedActionMap> discMap = (
-            std::make_unique<solver::DiscretizedActionMap>(owner, this,
-                    createBinSequence(owner->getHistoricalData())));
+            std::make_unique<solver::DiscretizedActionMap>(node, this, createBinSequence(node)));
 
     PositionAndRockData const &data =
-            static_cast<PositionAndRockData const &>(*owner->getHistoricalData());
+            static_cast<PositionAndRockData const &>(*node->getHistoricalData());
 
     if (model_->usingPreferredInit()) {
         for (RockSampleAction const &action : data.generatePreferredActions()) {
             long visitCount = model_->getPreferredVisitCount();
-            discMap->update(action, visitCount, visitCount * model_->getPreferredQValue());
+            discMap->getEntry(action)->update(visitCount, visitCount * model_->getPreferredQValue());
         }
     }
 

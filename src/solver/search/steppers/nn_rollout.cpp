@@ -1,4 +1,4 @@
-/** nn_rollout.cpp
+/** file: nn_rollout.cpp
  *
  * Contains the implementation for an approximate-nearest-neighbor-based rollout strategy.
  */
