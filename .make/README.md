@@ -79,5 +79,4 @@ library libspatialindex.
 
 If your problem needs to be linked to additional libraries, you can specify
 this by adding those dependencies to the variable
-EXTRA_LINKER_DEPS\_[module] - see
-[the "nav2d" Makefile](../src/problems/nav2d/Makefile) for an example.
+EXTRA_LINKER_DEPS\_[module].
