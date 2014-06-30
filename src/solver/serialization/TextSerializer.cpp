@@ -49,6 +49,11 @@ ChangeSequence TextSerializer::loadChangeSequence(
     std::map<long, std::vector<std::unique_ptr<ModelChange>>> changes;
     std::string line;
     while (std::getline(is, line)) {
+        abt::trim(line);
+        if (line.empty()) {
+            continue;
+        }
+
         std::string tmpStr;
         long time;
         long nChanges;
