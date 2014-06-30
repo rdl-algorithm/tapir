@@ -1,3 +1,11 @@
+/** file: ChangeFlags.hpp
+ *
+ * Contains an enum class used to define flags for the different types of changes that can
+ * apply at a single state and, in turn, a history entry with that state.
+ *
+ * This file also defines some basic operators (Bitwise OR, AND, NOT) to allow combinations of
+ * flags, even thoug this class is used as a strict enum.
+ */
 #ifndef SOLVER_CHANGEFLAGS_HPP_
 #define SOLVER_CHANGEFLAGS_HPP_
 
@@ -6,8 +14,16 @@
 #include <initializer_list>
 
 namespace solver {
+/** The integer type used to store changes. */
 typedef uint8_t ChangeFlagsIntType;
 
+/** An enumeration that defines the types of flags that can apply at a single state, and, in turn,
+ * at all of the history entries associated with that state.
+ *
+ * This is a strict enum (enum class) in order to ensure that the type is used carefully. Instead
+ * of allowing them to be treated as a numeric type, we provide operators to allow bitwise or
+ * and bitwise and operations.
+ */
 enum class ChangeFlags : ChangeFlagsIntType {
     // No changes
     UNCHANGED = 0x000,
@@ -38,41 +54,41 @@ enum class ChangeFlags : ChangeFlagsIntType {
     HEURISTIC = 0x040,
 };
 
-inline ChangeFlags &operator|=(ChangeFlags &lhs, const ChangeFlags &rhs) {
-    lhs = static_cast<ChangeFlags>(static_cast<ChangeFlagsIntType>(lhs) | static_cast<ChangeFlagsIntType>(rhs));
+/** Bitwise OR assignment operator. */
+inline ChangeFlags &operator|=(ChangeFlags &lhs, ChangeFlags const &rhs) {
+    lhs = static_cast<ChangeFlags>(
+            static_cast<ChangeFlagsIntType>(lhs) | static_cast<ChangeFlagsIntType>(rhs));
     return lhs;
 }
 
-inline ChangeFlags operator|(ChangeFlags lhs, const ChangeFlags &rhs) {
+/** Bitwise OR operator. */
+inline ChangeFlags operator|(ChangeFlags lhs, ChangeFlags const &rhs) {
     lhs |= rhs;
     return lhs;
 }
 
-inline ChangeFlags &operator&=(ChangeFlags &lhs, const ChangeFlags &rhs) {
-    lhs = static_cast<ChangeFlags>(static_cast<ChangeFlagsIntType>(lhs) & static_cast<ChangeFlagsIntType>(rhs));
+/** Bitwise AND assignment operator. */
+inline ChangeFlags &operator&=(ChangeFlags &lhs, ChangeFlags const &rhs) {
+    lhs = static_cast<ChangeFlags>(
+            static_cast<ChangeFlagsIntType>(lhs) & static_cast<ChangeFlagsIntType>(rhs));
     return lhs;
 }
 
-inline ChangeFlags operator&(ChangeFlags lhs, const ChangeFlags &rhs) {
+/** Bitwise AND operator. */
+inline ChangeFlags operator&(ChangeFlags lhs, ChangeFlags const &rhs) {
     lhs &= rhs;
     return lhs;
 }
 
+/** Bitwise NOT operator. */
 inline ChangeFlags operator~(ChangeFlags const &cf) {
     return static_cast<ChangeFlags>(~static_cast<ChangeFlagsIntType>(cf));
 }
 
 namespace changes {
-inline ChangeFlags combine_flags(std::initializer_list<ChangeFlags> flags) {
-    ChangeFlags combined = ChangeFlags::UNCHANGED;
-    for (ChangeFlags flag : flags) {
-        combined |= flag;
-    }
-    return combined;
-}
-
-inline bool has_flag(ChangeFlags value, ChangeFlags flag) {
-    return (value & flag) == flag;
+/** Returns true iff all of the given flags are set in the given value. */
+inline bool has_flags(ChangeFlags value, ChangeFlags flags) {
+    return (value & flags) == flags;
 }
 } /* namespace changes */
 } /* namespace solver */

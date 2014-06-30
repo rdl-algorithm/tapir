@@ -1,4 +1,4 @@
-/** file: RandomAccessSet.hpp
+/** file: LinkedHashSet.hpp
  *
  * Contains the LinkedHashSet class, which stores a set that keeps ordering between elements.
  */

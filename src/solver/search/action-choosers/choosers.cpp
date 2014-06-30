@@ -1,3 +1,7 @@
+/** file: choosers.cpp
+ *
+ * Contains implementations of basic action selection functions.
+ */
 #include "solver/search/action-choosers/choosers.hpp"
 
 #include "solver/BeliefNode.hpp"

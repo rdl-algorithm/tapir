@@ -1,11 +1,11 @@
 /** file: defs.hpp
  *
- * Some key definitions / macros for C++ programs.
+ * Some key definitions and macros for C++ programs.
  */
 #ifndef DEFS_HPP_
 #define DEFS_HPP_
 
-// A macro used to delete all copy- and move- -constructors and -assignment operators
+// A macro used to delete all copy- and move-constructors and -assignment operators
 #define _NO_COPY_OR_MOVE(ClassName) \
     ClassName(ClassName const &) = delete; \
     ClassName(ClassName &&) = delete; \

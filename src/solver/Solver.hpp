@@ -203,6 +203,8 @@ private:
     /* ------------------ Private deferred backup methods. ------------------- */
     /** Adds a new node that requires backing up. */
     void addNodeToBackup(BeliefNode *node);
+    /** Removes a node from the deferred backup queue. */
+    void removeNodeToBackup(BeliefNode *node);
 
     /* ------------------ Private data fields ------------------- */
     /** The POMDP model */

@@ -237,7 +237,7 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
 
     // If the current state is deleted, the simulation is broken!
     StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();
-    if (changes::has_flag(lastInfo->changeFlags_, ChangeFlags::DELETED)) {
+    if (changes::has_flags(lastInfo->changeFlags_, ChangeFlags::DELETED)) {
         debug::show_message("ERROR: Current simulation state deleted!");
         return false;
     }
@@ -246,7 +246,7 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
     if (!areDynamic) {
         for (HistoryEntry::IdType i = 0; i < actualHistory_->getLength() - 1; i++) {
             StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
-            if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
+            if (changes::has_flags(info->changeFlags_, ChangeFlags::DELETED)) {
                 std::ostringstream message;
                 message << "ERROR: Impossible simulation history! Includes ";
                 message << *info->getState();

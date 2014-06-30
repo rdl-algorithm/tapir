@@ -1,3 +1,7 @@
+/** nn_rollout.cpp
+ *
+ * Contains the implementation for an approximate-nearest-neighbor-based rollout strategy.
+ */
 #include "solver/search/steppers/nn_rollout.hpp"
 
 #include "solver/BeliefNode.hpp"
@@ -18,9 +22,12 @@ NnRolloutFactory::NnRolloutFactory(Solver *solver, long maxNnComparisons, double
 }
 
 BeliefNode* NnRolloutFactory::findNeighbor(BeliefNode *belief) {
+    // A maximum distance of 0 means this function is disabled.
     if (maxNnDistance_ < 0) {
         return nullptr;
     }
+
+    // Initially there is no minimum distance, unless we've already stored a neighbor.
     double minDist = std::numeric_limits<double>::infinity();
     BeliefNode *nearestBelief = nnMap_[belief].neighbor;
     if (nearestBelief != nullptr) {
@@ -29,46 +36,46 @@ BeliefNode* NnRolloutFactory::findNeighbor(BeliefNode *belief) {
 
     long numTried = 0;
     for (BeliefNode *otherBelief : solver_->getPolicy()->getNodes()) {
+        // Obviously we don't want the belief itself.
         if (belief == otherBelief) {
             continue;
         }
+
         if (numTried >= maxNnComparisons_) {
+            // Stop if we reach the maximum # of comparisons.
             break;
         } else {
-            // Time comparisons are currently disabled due to slow performance.
-
-//            if (nnMap_[belief].tNnComp < belief->getTimeOfLastChange()
-//                    || nnMap_[belief].tNnComp < otherBelief->getTimeOfLastChange()) {
-//                double distance = belief->distL1Independent(otherBelief);
-//                if (distance < minDist) {
-//                    minDist = distance;
-//                    nearestBelief = otherBelief;
-//                }
-//            }
+            double distance = belief->distL1Independent(otherBelief);
+            if (distance < minDist) {
+                minDist = distance;
+                nearestBelief = otherBelief;
+            }
             numTried++;
         }
     }
-    nnMap_[belief].tNnComp = abt::clock_ms();
+
+    // If it's not near enough, we've failed.
     if (minDist > maxNnDistance_) {
         return nullptr;
     }
+
+    // Otherwise update the mapping with the new neighbor.
     nnMap_[belief].neighbor = nearestBelief;
     return nearestBelief;
 }
 
 std::unique_ptr<StepGenerator> NnRolloutFactory::createGenerator(SearchStatus &status,
         HistoryEntry const *entry, State const */*state*/, HistoricalData const */*data*/) {
-    return std::make_unique<NnRolloutGenerator>(status, solver_, this, entry);
+    // Find a neighbor, and use it to make a new generator.
+    BeliefNode *neighbor = findNeighbor(entry->getAssociatedBeliefNode());
+    return std::make_unique<NnRolloutGenerator>(status, solver_, neighbor);
 }
 
-NnRolloutGenerator::NnRolloutGenerator(SearchStatus &status, Solver *solver,
-        NnRolloutFactory *factory, HistoryEntry const *entry) :
+NnRolloutGenerator::NnRolloutGenerator(SearchStatus &status, Solver *solver, BeliefNode *neighbor) :
             StepGenerator(status),
             model_(solver->getModel()),
-            factory_(factory),
-            currentNeighborNode_(nullptr) {
-    BeliefNode *currentNode = entry->getAssociatedBeliefNode();
-    currentNeighborNode_ = factory_->findNeighbor(currentNode);
+            currentNeighborNode_(neighbor) {
+    // Set the initial status appropriately.
     if (currentNeighborNode_ == nullptr) {
         status_ = SearchStatus::UNINITIALIZED;
     } else{
@@ -79,15 +86,17 @@ NnRolloutGenerator::NnRolloutGenerator(SearchStatus &status, Solver *solver,
 Model::StepResult NnRolloutGenerator::getStep(HistoryEntry const */*entry*/, State const *state,
         HistoricalData const */*data*/) {
     if (currentNeighborNode_ == nullptr) {
-        // NN rollout is done.
+        // If we have no neighbor, the NN rollout is finished.
         status_ = SearchStatus::OUT_OF_STEPS;
         return Model::StepResult { };
     }
 
+    // Generate a step using the recommended action from the neighboring node.
     std::unique_ptr<Action> action = currentNeighborNode_->getRecommendedAction();
     Model::StepResult result = model_->generateStep(*state, *action);
+
+    // getChild() will return nullptr if the child doesn't yet exist => this will be the last step.
     currentNeighborNode_ = currentNeighborNode_->getChild(*action, *result.observation);
     return std::move(result);
 }
-
 } /* namespace solver */

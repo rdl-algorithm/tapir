@@ -88,7 +88,7 @@ long PolicyIterator::solve() {
                     actionQ += prob * (reward_(state, action, nextState)
                             + discountFactor_ * values_[nextState]);
                 }
-                if (actionQ > bestQ + 1e-10) {
+                if (actionQ > bestQ + 1e-15) {
                     policy_[state] = action;
                     bestQ = actionQ;
                     policyChanged = true;

@@ -1,4 +1,9 @@
-#include "TextSerializer.hpp"
+/** file: TextSerializer.cpp
+ *
+ * Contains the implementation of the TextSerializer class, which provides a human-readable
+ * serialization of all of the basic data structures.
+ */
+#include "solver/serialization/TextSerializer.hpp"
 
 #include <cstddef>                      // for size_t
 
@@ -31,7 +36,7 @@
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/observations/ObservationMapping.hpp"          // for ObservationMapping
 
-#include "Serializer.hpp"               // for Serializer
+#include "solver/serialization/Serializer.hpp"               // for Serializer
 
 namespace solver {
 /* ------------------ Saving change sequences -------------------- */
@@ -44,6 +49,7 @@ void TextSerializer::saveChangeSequence(ChangeSequence const &sequence, std::ost
         }
     }
 }
+
 ChangeSequence TextSerializer::loadChangeSequence(
         std::istream &is){
     std::map<long, std::vector<std::unique_ptr<ModelChange>>> changes;
@@ -68,6 +74,7 @@ ChangeSequence TextSerializer::loadChangeSequence(
     }
     return changes;
 }
+
 void TextSerializer::saveModelChange(ModelChange const &/*change*/, std::ostream &/*os*/) {
     // Do nothing!
 }
@@ -88,12 +95,14 @@ std::unique_ptr<TransitionParameters> TextSerializer::loadTransitionParameters(
 /* ------------------ Saving historical data -------------------- */
 void TextSerializer::saveHistoricalData(HistoricalData const */*data*/,
         std::ostream &/*os*/) {
+    // Do nothing!
 }
 std::unique_ptr<HistoricalData> TextSerializer::loadHistoricalData(
         std::istream &/*is*/) {
     return nullptr;
 }
 
+/* ------------------ Saving the state pool -------------------- */
 void TextSerializer::save(StateInfo const &info, std::ostream &os) {
     os << "State ";
     os << std::setw(6) << info.id_;
@@ -142,6 +151,7 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
     }
 }
 
+/* ------------------ Saving the histories -------------------- */
 void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     os << "HistoryEntry < ";
     os << entry.owningSequence_->id_ << " " << entry.entryId_ << " >: (S";
@@ -262,6 +272,8 @@ void TextSerializer::load(Histories &histories, std::istream &is) {
     }
 }
 
+
+/* ------------------ Saving the policy tree -------------------- */
 void TextSerializer::save(ActionNode const &node, std::ostream &os) {
     saveObservationMapping(*node.getMapping(), os);
 }

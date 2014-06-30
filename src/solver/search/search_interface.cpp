@@ -1,3 +1,10 @@
+/** file: search_interface.cpp
+ *
+ * Provides some basic implementations of classes for generating history sequences.
+ *
+ * See BasicSearchStrategy::extendSequence() for the core implementation used to extend and
+ * backup most history sequences.
+ */
 #include "solver/search/search_interface.hpp"
 
 #include <functional>
@@ -20,17 +27,6 @@ StepGenerator::StepGenerator(SearchStatus &status) :
             status_(status) {
 }
 
-/* ------------------- StagedStepGeneratorFactory --------------------- */
-StagedStepGeneratorFactory::StagedStepGeneratorFactory(
-        std::vector<std::unique_ptr<StepGeneratorFactory>> factories) :
-            factories_(std::move(factories)) {
-}
-
-std::unique_ptr<StepGenerator> StagedStepGeneratorFactory::createGenerator(SearchStatus &status,
-        HistoryEntry const *entry, State const *state, HistoricalData const *data) {
-    return std::make_unique<StagedStepGenerator>(status, factories_, entry, state, data);
-}
-
 /* ------------------- StagedStepGenerator --------------------- */
 StagedStepGenerator::StagedStepGenerator(SearchStatus &status,
         std::vector<std::unique_ptr<StepGeneratorFactory>> const &factories,
@@ -46,8 +42,11 @@ StagedStepGenerator::StagedStepGenerator(SearchStatus &status,
 Model::StepResult StagedStepGenerator::getStep(HistoryEntry const *entry, State const *state,
         HistoricalData const *data) {
     Model::StepResult result = generator_->getStep(entry, state, data);
+
+    // If the action was null, we may need to continue on to the next generator.
     while (result.action == nullptr) {
-        if (status_ == SearchStatus::FINISHED || iterator_ == factories_.cend()) {
+        // Go on to the next generator only if we're out of steps and there's more left.
+        if (status_ != SearchStatus::OUT_OF_STEPS || iterator_ == factories_.cend()) {
             generator_ = nullptr;
             return result;
         }
@@ -59,7 +58,18 @@ Model::StepResult StagedStepGenerator::getStep(HistoryEntry const *entry, State 
     return result;
 }
 
-/* ------------------- AbstractSearchStrategy --------------------- */
+/* ------------------- StagedStepGeneratorFactory --------------------- */
+StagedStepGeneratorFactory::StagedStepGeneratorFactory(
+        std::vector<std::unique_ptr<StepGeneratorFactory>> factories) :
+            factories_(std::move(factories)) {
+}
+
+std::unique_ptr<StepGenerator> StagedStepGeneratorFactory::createGenerator(SearchStatus &status,
+        HistoryEntry const *entry, State const *state, HistoricalData const *data) {
+    return std::make_unique<StagedStepGenerator>(status, factories_, entry, state, data);
+}
+
+/* ------------------- BasicSearchStrategy --------------------- */
 BasicSearchStrategy::BasicSearchStrategy(Solver *solver,
         std::unique_ptr<StepGeneratorFactory> factory, Heuristic heuristic) :
             solver_(solver),
@@ -67,8 +77,8 @@ BasicSearchStrategy::BasicSearchStrategy(Solver *solver,
             heuristic_(heuristic) {
 }
 
-SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long maximumDepth,
-        bool doBackup) {
+/** This is the default implementation for extending and backing up a history sequence. */
+SearchStatus BasicSearchStrategy::extendAndBackup(HistorySequence *sequence, long maximumDepth) {
     // We extend from the last entry in the sequence.
     HistoryEntry *firstEntry = sequence->getLastEntry();
     long firstEntryId = firstEntry->getId();
@@ -84,6 +94,7 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
         return status;
     }
 
+    // We check for some invalid possibilities in order to deal with them more cleanly.
     Model *model = solver_->getModel();
     if (model->isTerminal(*currentEntry->getState())) {
         debug::show_message("WARNING: Attempted to continue sequence"
@@ -99,6 +110,7 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
 
     while (true) {
         if (currentNode->getDepth() >= maximumDepth) {
+            // We've hit the depth limit, so we can't generate any more steps in the sequence.
             status = SearchStatus::OUT_OF_STEPS;
             break;
         }
@@ -111,59 +123,61 @@ SearchStatus BasicSearchStrategy::extendSequence(HistorySequence *sequence, long
             break;
         }
 
+        // Set the parameters of the current history entry using the ones we got from the result.
         currentEntry->immediateReward_ = result.reward;
-        currentEntry->action_ = result.action->copy();
+        currentEntry->action_ = std::move(result.action);
         currentEntry->transitionParameters_ = std::move(result.transitionParameters);
-        currentEntry->observation_ = result.observation->copy();
+        currentEntry->observation_ = std::move(result.observation);
 
-        // Create the child belief node and do an update.
-        BeliefNode *nextNode = solver_->getPolicy()->createOrGetChild(currentNode, *result.action,
-                *result.observation);
+        // Create the child belief node, and set the current node to be that node.
+        BeliefNode *nextNode = solver_->getPolicy()->createOrGetChild(currentNode,
+                *currentEntry->action_, *currentEntry->observation_);
         currentNode = nextNode;
 
         // Now we create a new history entry and step the history forward.
         StateInfo *nextStateInfo = solver_->getStatePool()->createOrGetInfo(*result.nextState);
         currentEntry = sequence->addEntry();
+
+        // Register the new history entry with its state, and with its associated belief node.
         currentEntry->registerState(nextStateInfo);
         currentEntry->registerNode(currentNode);
 
         if (result.isTerminal) {
+            // Terminal state => search complete.
             status = SearchStatus::FINISHED;
             break;
         }
     }
 
-
+    // OUT_OF_STEPS => must calculated a heuristic estimate.
     if (status == SearchStatus::OUT_OF_STEPS) {
-        // If we require a heuristic estimate, calculate it.
         currentEntry->immediateReward_ = heuristic_(currentEntry, currentEntry->getState(),
                 currentNode->getHistoricalData());
         status = SearchStatus::FINISHED;
-    } else if (status == SearchStatus::FINISHED) {
-        // Finished normally; no problems.
-    } else if (status == SearchStatus::UNINITIALIZED) {
-        debug::show_message("ERROR: Search algorithm could not initialize.");
-        return status;
-    } else if (status == SearchStatus::INITIAL) {
-        debug::show_message("ERROR: Search algorithm initialized but did not run.");
-        return status;
-    } else if (status == SearchStatus::ERROR) {
-        debug::show_message("ERROR: Error in search algorithm!");
-        return status;
-    } else {
-        debug::show_message("ERROR: Invalid search status.");
-        return status;
     }
 
-    // If required, we backup the sequence.
-    if (doBackup) {
+    if (status == SearchStatus::FINISHED) {
+        // Now that we're finished, we back up the sequence.
         if (firstEntryId > 0 && currentEntry->getId() > firstEntryId) {
             // If we've extended a previously terminating sequence, we have to add a continuation.
             solver_->updateEstimate(firstEntry->getAssociatedBeliefNode(), 0, +1);
         }
         // We only do a partial backup along the newly generated part of the sequence.
         solver_->updateSequence(sequence, +1, firstEntryId);
+    } else {
+        // This shouldn't happen => print out an error message.
+        if (status == SearchStatus::UNINITIALIZED) {
+            debug::show_message("ERROR: Search algorithm could not initialize.");
+        } else if (status == SearchStatus::INITIAL) {
+            debug::show_message("ERROR: Search algorithm initialized but did not run!?");
+        } else if (status == SearchStatus::ERROR) {
+            debug::show_message("ERROR: Error in search algorithm!");
+        } else {
+            debug::show_message("ERROR: Invalid search status.");
+        }
     }
+
+    // Finally, we just return the status.
     return status;
 }
 } /* namespace solver */
