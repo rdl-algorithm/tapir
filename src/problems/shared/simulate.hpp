@@ -121,7 +121,8 @@ int simulate(int argc, char const *argv[]) {
 
         solver::HistorySequence *sequence = simulator.getHistory();
 
-        for (long entryNo = 0; entryNo < sequence->getLength() - 1; entryNo++) {
+        for (solver::HistoryEntry::IdType entryNo = 0;
+                entryNo < sequence->getLength() - 1; entryNo++) {
             solver::HistoryEntry *entry = sequence->getEntry(entryNo);
             os << "t = " << entryNo << endl;
             os << "S: " << *entry->getState() << endl;

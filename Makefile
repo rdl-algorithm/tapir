@@ -36,18 +36,24 @@ endif
 
 # Compile flags
 CXXFLAGS_BASE        := -std=c++11
-WARN                 :=
-override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
+CXXWARN              :=
+CWARN                :=
+override CXXFLAGS    += $(CXXFLAGS_BASE) $(CXXWARN)
+override CFLAGS      += $(CWARN)
 
 # Differences in flags between clang++ and g++
 ifeq ($(CXX),clang++)
   override INCDIRS    += -I/usr/include/c++/4.8
-#  WARN                += -Weverything
-  WARN                += -Wno-c++98-compat
+#  CWARN               += -Weverything
+  CWARN               += -Wno-c++98-compat
+  CXXWARN             := $(CWARN)
 else ifneq (,$(findstring g++,$(CXX)))
-  WARN                += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
-  WARN                += -Wswitch-default -Wfatal-errors
+  CWARN               += -Wpedantic -Wall -Wextra -Wshadow
+  CWARN               += -Wswitch-default -Wfatal-errors
+  CXXWARN             := $(CWARN) -Weffc++
   override CXXFLAGS   += -frounding-math
+
+# For GCC >= 4.9 we can use C++1y and color diagnostics
   GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
   ifeq ($(GCC_VERSION), 4.9)
 	CXXFLAGS_BASE     := -std=c++1y

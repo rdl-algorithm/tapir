@@ -8,6 +8,8 @@
 #ifndef SOLVER_HISTORYENTRY_HPP_
 #define SOLVER_HISTORYENTRY_HPP_
 
+#include <cstdint>
+
 #include <memory>
 
 #include "global.hpp"
@@ -51,19 +53,21 @@ public:
     friend class Solver;
     friend class TextSerializer;
 
+    typedef uint16_t IdType;
+
     /** Constructs a new history entry, without a state!! */
     HistoryEntry();
     /** Constructs a new history entry with the given cumulative discount,
      * owning sequence, and entry ID.
      */
-    HistoryEntry(HistorySequence *owningSequence, long entryId);
+    HistoryEntry(HistorySequence *owningSequence, IdType entryId);
     /** Destroys this HistoryEntry. */
     ~HistoryEntry();
     _NO_COPY_OR_MOVE(HistoryEntry);
 
     /* ----------------- Simple getters ------------------- */
     /** Returns the id of this entry (0 = first entry in the sequence). */
-    long getId() const;
+    IdType getId() const;
     /** Returns the immediate reward for this entry. */
     double getImmediateReward() const;
     /** Returns the cumulative discounted reward, starting at this entry. */
@@ -102,8 +106,6 @@ private:
 private:
     /** The history sequence that owns this entry. */
     HistorySequence *owningSequence_;
-    /** The id of the specific entry within the sequence. */
-    long entryId_;
     /** The belief node this entry is associated with. */
     BeliefNode *associatedBeliefNode_;
 
@@ -118,6 +120,8 @@ private:
     /** Non-discounted reward. */
     double immediateReward_;
 
+    /** The id of the specific entry within the sequence. */
+    IdType entryId_;
     /** The flags associated with current POMDP model updates. */
     ChangeFlags changeFlags_;
 };

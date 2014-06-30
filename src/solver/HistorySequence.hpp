@@ -14,6 +14,8 @@
 
 #include "global.hpp"
 
+#include "solver/HistoryEntry.hpp"
+
 #include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags
 
 #include "solver/abstract-problem/Action.hpp"                   // for Action
@@ -23,7 +25,6 @@
 namespace solver {
 class BeliefNode;
 class BeliefTree;
-class HistoryEntry;
 class StateInfo;
 
 /** Represents a single history sequence.
@@ -58,7 +59,7 @@ class HistorySequence {
     /** Returns the length of this sequence. */
     long getLength() const;
     /** Returns the history entry in this sequence with the given ID. */
-    HistoryEntry *getEntry(long entryId) const;
+    HistoryEntry *getEntry(HistoryEntry::IdType entryId) const;
     /** Returns the first entry in this sequence. */
     HistoryEntry *getFirstEntry() const;
     /** Returns the last entry in this sequence. */
@@ -69,7 +70,7 @@ class HistorySequence {
   private:
     /* ----------- Methods to add or remove history entries ------------- */
     /** Erases all of the entries in this sequence, starting from firstEntryId. */
-    void erase(long firstEntryId = 0);
+    void erase(HistoryEntry::IdType firstEntryId = 0);
     /** Adds a new entry to this sequence, and returns a pointer to it. */
     HistoryEntry *addEntry();
 
@@ -77,13 +78,13 @@ class HistorySequence {
     /** Resets the changes for this sequence and all its entries. */
     void resetChangeFlags();
     /** Sets the given entry as having the given flags. */
-    void setChangeFlags(long index, ChangeFlags flags);
+    void setChangeFlags(HistoryEntry::IdType entryId, ChangeFlags flags);
     /** Sets the given change flags for this sequence. */
     void setChangeFlags(ChangeFlags flags);
     /** Resets the range affected indices for this sequence. */
     void resetAffectedIndices();
     /** Adds the given index as one of those affected by changes. */
-    void addAffectedIndex(long index);
+    void addAffectedIndex(HistoryEntry::IdType entryId);
 
   private:
     /** The ID of this sequence. */

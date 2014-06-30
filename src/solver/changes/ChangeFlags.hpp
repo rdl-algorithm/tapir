@@ -1,11 +1,14 @@
 #ifndef SOLVER_CHANGEFLAGS_HPP_
 #define SOLVER_CHANGEFLAGS_HPP_
 
+#include <cstdint>
+
 #include <initializer_list>
 
 namespace solver {
+typedef uint8_t ChangeFlagsIntType;
 
-enum class ChangeFlags : long {
+enum class ChangeFlags : ChangeFlagsIntType {
     // No changes
     UNCHANGED = 0x000,
 
@@ -36,7 +39,7 @@ enum class ChangeFlags : long {
 };
 
 inline ChangeFlags &operator|=(ChangeFlags &lhs, const ChangeFlags &rhs) {
-    lhs = static_cast<ChangeFlags>(static_cast<long>(lhs) | static_cast<long>(rhs));
+    lhs = static_cast<ChangeFlags>(static_cast<ChangeFlagsIntType>(lhs) | static_cast<ChangeFlagsIntType>(rhs));
     return lhs;
 }
 
@@ -46,7 +49,7 @@ inline ChangeFlags operator|(ChangeFlags lhs, const ChangeFlags &rhs) {
 }
 
 inline ChangeFlags &operator&=(ChangeFlags &lhs, const ChangeFlags &rhs) {
-    lhs = static_cast<ChangeFlags>(static_cast<long>(lhs) & static_cast<long>(rhs));
+    lhs = static_cast<ChangeFlags>(static_cast<ChangeFlagsIntType>(lhs) & static_cast<ChangeFlagsIntType>(rhs));
     return lhs;
 }
 
@@ -56,7 +59,7 @@ inline ChangeFlags operator&(ChangeFlags lhs, const ChangeFlags &rhs) {
 }
 
 inline ChangeFlags operator~(ChangeFlags const &cf) {
-    return static_cast<ChangeFlags>(~static_cast<long>(cf));
+    return static_cast<ChangeFlags>(~static_cast<ChangeFlagsIntType>(cf));
 }
 
 namespace changes {

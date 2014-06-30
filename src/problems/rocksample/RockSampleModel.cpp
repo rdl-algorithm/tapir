@@ -82,6 +82,18 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockS
             preferredVisitCount_(options_->preferredVisitCount),
             mdpSolver_(nullptr) {
 
+//    cout << "HistoryEntry: " << sizeof(solver::HistoryEntry) << endl;
+//    cout << "HistoryEntry*: " << sizeof(solver::HistoryEntry*) << endl;
+//    cout << "State: " << sizeof(RockSampleState) << endl;
+//    cout << "Action: " << sizeof(RockSampleAction) << endl;
+//    cout << "Observation: " << sizeof(RockSampleObservation) << endl;
+//    int overhead = 0;
+//    overhead += sizeof(solver::HistoryEntry);
+//    overhead += sizeof(solver::HistoryEntry*) * 4;
+//    overhead += sizeof(RockSampleAction);
+//    overhead += sizeof(RockSampleObservation);
+//    cout << "OVERHEAD PER ENTRY: " << overhead << endl;
+
     if (searchCategory_ > heuristicType_) {
         searchCategory_ = heuristicType_;
     }

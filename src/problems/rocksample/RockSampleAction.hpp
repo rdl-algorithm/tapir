@@ -2,6 +2,7 @@
 #define ROCKSAMPLE_ACTION_HPP_
 
 #include <cstddef>                      // for size_t
+#include <cstdint>
 
 #include <ostream>                      // for ostream
 #include <vector>                       // for vector
@@ -10,7 +11,9 @@
 #include "solver/abstract-problem/DiscretizedPoint.hpp"             // for DiscretizedPoint
 
 namespace rocksample {
-enum class ActionType : long {
+typedef uint8_t ActionTypeIntType;
+
+enum class ActionType : ActionTypeIntType {
     NORTH = 0,
     EAST = 1,
     SOUTH = 2,
@@ -40,7 +43,7 @@ inline std::ostream &operator<<(std::ostream &os, ActionType const actionType) {
         os << "SAMPLE";
         break;
     default:
-        os << "ERROR-" << static_cast<long>(actionType);
+        os << "ERROR-" << static_cast<ActionTypeIntType>(actionType);
         break;
     }
     return os;
@@ -49,7 +52,7 @@ inline std::ostream &operator<<(std::ostream &os, ActionType const actionType) {
 class RockSampleAction : public solver::DiscretizedPoint {
     friend class RockSampleTextSerializer;
   public:
-    RockSampleAction(ActionType actionType, long rockNo = 0);
+    RockSampleAction(ActionType actionType, uint8_t rockNo = 0);
     RockSampleAction(long code);
     virtual ~RockSampleAction() = default;
 
@@ -60,10 +63,10 @@ class RockSampleAction : public solver::DiscretizedPoint {
     long getBinNumber() const override;
 
     ActionType getActionType() const;
-    long getRockNo() const;
+    uint8_t getRockNo() const;
   private:
     ActionType actionType_;
-    long rockNo_;
+    uint8_t rockNo_;
 };
 } /* namespace rocksample */
 

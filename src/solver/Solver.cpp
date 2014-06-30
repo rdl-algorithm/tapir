@@ -294,7 +294,7 @@ void Solver::applyChanges() {
             }
 
             HistorySequence *sequence = entry->owningSequence_;
-            long entryId = entry->entryId_;
+            HistoryEntry::IdType entryId = entry->entryId_;
 
             // True iff any changes have been applied to this sequence.
             bool hasChanged = false;

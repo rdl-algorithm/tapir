@@ -17,15 +17,15 @@ HistoryEntry::HistoryEntry() :
     HistoryEntry(nullptr, 0) {
 }
 
-HistoryEntry::HistoryEntry(HistorySequence* owningSequence, long entryId) :
+HistoryEntry::HistoryEntry(HistorySequence* owningSequence, HistoryEntry::IdType entryId) :
     owningSequence_(owningSequence),
-    entryId_(entryId),
     associatedBeliefNode_(nullptr),
     stateInfo_(nullptr),
     action_(nullptr),
     transitionParameters_(nullptr),
     observation_(nullptr),
     immediateReward_(0),
+    entryId_(entryId),
     changeFlags_(ChangeFlags::UNCHANGED) {
 }
 
@@ -33,7 +33,7 @@ HistoryEntry::~HistoryEntry() {
 }
 
 /* ----------------- Simple getters ------------------- */
-long HistoryEntry::getId() const {
+HistoryEntry::IdType HistoryEntry::getId() const {
     return entryId_;
 }
 double HistoryEntry::getImmediateReward() const {

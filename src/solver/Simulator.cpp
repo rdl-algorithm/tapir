@@ -244,7 +244,7 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
 
     // If the changes are not dynamic and a past state is deleted, the simulation is broken.
     if (!areDynamic) {
-        for (long i = 0; i < actualHistory_->getLength() - 1; i++) {
+        for (HistoryEntry::IdType i = 0; i < actualHistory_->getLength() - 1; i++) {
             StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
             if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
                 std::ostringstream message;

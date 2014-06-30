@@ -46,7 +46,7 @@ long HistorySequence::getId() const {
 long HistorySequence::getLength() const {
     return entrySequence_.size();
 }
-HistoryEntry *HistorySequence::getEntry(long entryId) const {
+HistoryEntry *HistorySequence::getEntry(HistoryEntry::IdType entryId) const {
     return entrySequence_[entryId].get();
 }
 HistoryEntry *HistorySequence::getFirstEntry() const {
@@ -68,7 +68,7 @@ std::vector<State const *> HistorySequence::getStates() const {
 
 
 /* ----------- Methods to add or remove history entries ------------- */
-void HistorySequence::erase(long firstEntryId) {
+void HistorySequence::erase(HistoryEntry::IdType firstEntryId) {
     for (auto it = entrySequence_.crbegin();
             it != entrySequence_.crend() && (*it)->entryId_ >= firstEntryId; it++) {
         (*it)->registerNode(nullptr);
@@ -91,10 +91,10 @@ void HistorySequence::resetChangeFlags() {
     resetAffectedIndices();
 }
 
-void HistorySequence::setChangeFlags(long index, ChangeFlags flags) {
+void HistorySequence::setChangeFlags(HistoryEntry::IdType entryId, ChangeFlags flags) {
     setChangeFlags(flags);
-    getEntry(index)->setChangeFlags(flags);
-    addAffectedIndex(index);
+    getEntry(entryId)->setChangeFlags(flags);
+    addAffectedIndex(entryId);
 }
 
 // These are private and ought not to be called outside HistorySequence.
@@ -107,12 +107,12 @@ void HistorySequence::resetAffectedIndices() {
     endAffectedIdx_ = -1;
 }
 
-void HistorySequence::addAffectedIndex(long index) {
-    if (startAffectedIdx_ > index) {
-        startAffectedIdx_ = index;
+void HistorySequence::addAffectedIndex(HistoryEntry::IdType entryId) {
+    if (startAffectedIdx_ > entryId) {
+        startAffectedIdx_ = entryId;
     }
-    if (endAffectedIdx_ < index) {
-        endAffectedIdx_ = index;
+    if (endAffectedIdx_ < entryId) {
+        endAffectedIdx_ = entryId;
     }
 }
 } /* namespace solver */
