@@ -64,7 +64,7 @@ TrackerModel::TrackerModel(RandomGenerator *randGen, po::variables_map vm) :
     mapText_(), // will be pushed to
     envMap_(),  // will be pushed to
     nActions_(4),   // set to 5 to allow reverse
-    nStVars_(5),
+    nStVars_(7),
     minVal_(0),
     maxVal_(visibleReward_),
     targetPolicy_(0)
@@ -370,7 +370,7 @@ int TrackerModel::getNewYaw(int yaw, ActionType action) {
 
 bool TrackerModel::isValid(GridPosition const &position) {
     return (position.i >= 0 && position.i < nRows_ && position.j >= 0
-            && position.j < nCols_ && envMap_[position.i][position.j] != WALL);
+            && position.j < nCols_ && envMap_[position.i][position.j] != TrackerCellType::WALL);
 }
 
 bool TrackerModel::isTargetVisible(GridPosition const &robotPos, int robotYaw,
@@ -432,11 +432,6 @@ double TrackerModel::generateReward(
         reward -= obstructCost_;
     }
 
-    // Reward for seeing target
-    if (tState.seesTarget()) {
-        reward += visibleReward_;
-    }
-
     // Cost for moving/waiting
     ActionType actionType = (static_cast<TrackerAction const &>(action).getActionType());
     if (actionType == ActionType::WAIT) {
@@ -446,10 +441,12 @@ double TrackerModel::generateReward(
     }
 
     // Cost for collision with human/wall
-    if (actionType == ActionType::FORWARD) {
-        if (!isValid(robotPos) || robotPos == targetPos) {
-            reward -= collideCost_;
-        }
+    if (!isValid(robotPos) || robotPos == targetPos) {
+        reward -= collideCost_;
+    } else if (tState.seesTarget()) {
+
+        // Reward for seeing target
+        reward += visibleReward_;
     }
 
     return reward;
@@ -620,23 +617,22 @@ void TrackerModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>
             solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::DELETED);
             // Robot is in a wall.
             tree->boxQuery(visitor,
-                    {iLo, jLo, 0.0, 0.0, 0.0},
-                    {iHi, jHi, iMx, jMx, 1.0});
+                    {iLo, jLo, -181.0, 0.0, 0.0, -181.0, 0.0},
+                    {iHi, jHi, 181.0, iMx, jMx, 181.0, 1.0});
             // Opponent is in a wall.
             tree->boxQuery(visitor,
-                    {0.0, 0.0, iLo, jLo, 0.0},
-                    {iMx, jMx, iHi, jHi, 1.0});
-
+                    {0.0, 0.0, -181.0, iLo, jLo, -181.0, 0.0},
+                    {iMx, jMx, 181.0, iHi, jHi, 181.0, 1.0});
         }
 
         // Also, state transitions around the edges of the new / former obstacle must be revised.
         solver::FlaggingVisitor visitor(pool, solver::ChangeFlags::TRANSITION);
         tree->boxQuery(visitor,
-                {iLo - 1, jLo - 1, 0.0, 0.0, 0.0},
-                {iHi + 1, jHi + 1, iMx, jMx, 1.0});
+                {iLo - 1, jLo - 1, -180.0, 0.0, 0.0, -180.0, 0.0},
+                {iHi + 1, jHi + 1, 180.0, iMx, jMx, 180.0, 1.0});
         tree->boxQuery(visitor,
-                {0.0, 0.0, iLo - 1, jLo - 1, 0.0},
-                {iMx, jMx, iHi + 1, jHi + 1, 1.0});
+                {0.0, 0.0, -180.0, iLo - 1, jLo - 1, -180.0, 0.0},
+                {iMx, jMx, 180.0, iHi + 1, jHi + 1, 180.0, 1.0});
     }
 }
 

@@ -81,11 +81,11 @@ double getCurrYaw();
 
 // Send motor commands to move towards goal position (in metres) 
 // until goal is reached or timeLimit (seconds) reached
-void moveTo(double goalX, double goalY, double timeLimit = 6000);
+void moveTo(double goalX, double goalY, double timeLimit = 7);
 
 // Send motor commands to turn on the spot until goalYaw (in radians)
 // is reached or timeLimit (seconds) reached
-void turnTo(double goalYaw, double timeLimit = 6000);
+void turnTo(double goalYaw, double timeLimit = 7);
 
 // Publish desired robot speed and turn rate on ROS topic
 void publishSpeeds(double linearSpeed, double yawSpeed);
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
     	zones.push_back(xyToGrid(7.5, -7.5));
     	zones.push_back(xyToGrid(-7.5, -7.5));
     	zones.push_back(xyToGrid(-7.5, 7.5));
-    	newModel->setPolicyZones(zones, startZone, 0.4);
+    	newModel->setPolicyZones(zones, startZone, 0.3);
     	vrepHelper.moveObject("Bill", 7.5, 7.5, 0);
     	vrepHelper.moveObject("Bill_goalDummy", 7.5, 7.5, 0);
     }
