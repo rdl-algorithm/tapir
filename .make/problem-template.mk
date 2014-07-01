@@ -35,15 +35,24 @@ $(LIB_$(n)): .make/problem-template.mk
 # ----------------------------------------------------------------------
 # Dependencies for the linker
 LINKER_DEPS_$(n) := $(LIB_$(n)) $$(LIB_solver)
-LINKER_DEPS_$(n) += $(EXTRA_LINKER_DEPS_$(n))
 
-LIBRARIES_$(n) := -lspatialindex
-LIBRARIES_$(n) += $(EXTRA_LIBRARIES_$(n))
 
+LINKER_ARGS_$(n) += $(LIB_$(n))
+ifeq ($(CFG),shared)
+LINKER_ARGS_$(n) += -Lbuilds/shared -Wl;-rpath=$(ABS_ROOT)/builds/shared -labt
+else
+LINKER_ARGS_$(n) += $$(LIB_solver)
+endif
+
+LINKER_ARGS_$(n) += -lspatialindex
+LINKER_ARGS_$(n) += $(EXTRA_ARGS_$(n))
+
+# This is so we can escape commas!
+,=,
 # Linking rule for the executable targets.
 define problem_build_template
 $(TGTS_$(n)): $(_BIN_$(n)): $(_O_$(n)) $$(LINKER_DEPS_$(n))
-	$$(call LINK_RECIPE,$$< $(LINKER_DEPS_$(n)) $(LIBRARIES_$(n)))
+	$$(subst ;,$$(,),$$(call LINK_RECIPE,$$< $(LINKER_ARGS_$(n))))
 
 # Executables will be copied to the main folder for convenience
 build-$(n): $$(TGTS_$(n))

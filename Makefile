@@ -1,5 +1,6 @@
 # Root project folder
 ROOT := .
+ABS_ROOT := $(abspath $(ROOT))
 
 HAS_ROOT_MAKEFILE := true
 
@@ -65,6 +66,8 @@ endif
 # Configuration-specific flags
 ifeq ($(CFG),release)
   override CXXFLAGS  += -O3
+else ifeq ($(CFG),shared)
+  override CXXFLAGS  += -O3 -fpic
 else ifeq ($(CFG),profile)
   override CPPFLAGS  += -DGOOGLE_PROFILER
   override CXXFLAGS  += -O3 -ggdb3
@@ -98,24 +101,26 @@ CC_RECIPE      = $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c $(1) -o $@
 LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
 MKDIR_RECIPE   = @mkdir -p $@
 
+.PHONY: default
+default: build-solver ;
+
 # ----------------------------------------------------------------------
 # Documentation targets
 # ----------------------------------------------------------------------
-README_DOXYGEN.md: README_BASE.md doxygen_links.md
+docs/README.md: README.md docs/doxygen_links.md
 	cat $^ > $@
 
-README.md: README_BASE.md github_links.md
+docs/BUILD_README.md: .make/README.md docs/doxygen_links.md
 	cat $^ > $@
 
 .PHONY: doc
-doc: README.md README_DOXYGEN.md
+doc: docs/Doxyfile docs/README.md docs/BUILD_README.md
 	doxygen docs/Doxyfile
 
 # ----------------------------------------------------------------------
 # Universal grouping targets
 # ----------------------------------------------------------------------
-.PHONY: default nothing
-default: build-solver ;
+.PHONY: nothing
 nothing: ;
 
 .PHONY: all build build-all

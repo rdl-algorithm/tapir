@@ -14,8 +14,8 @@ Code structure and examples
 ---------------------------
 The core solver code is located in src/solver, while several example problems
 are given in src/problems:
-- **Tag** (problems/tag)
-- **RockSample** (problems/rocksample)
+- [Tag]
+- [RockSample]
 
 System Requirements
 -------------------
@@ -25,15 +25,15 @@ build OK in Windows.
 Building and running the C++ source code requires the following, which should
 all be available via a package manager; Debian/Ubuntu package names are given
 below.
-- **GNU C++ compiler** (>= 4.8) or equivalent - "g++" or "g++-4.8"
-- **libspatialindex** (>= 1.7.0) - "libspatialindex-dev"
-- **Eigen** (tested with 3.2.1).
+- [GNU C++ compiler](https://gcc.gnu.org) (>= 4.8) or equivalent - "g++" or "g++-4.8"
+- [libspatialindex](http://libspatialindex.github.io) (>= 1.7.0) - "libspatialindex-dev"
+- [Eigen 3](http://eigen.tuxfamily.org) (>= 3.2.0) - "libeigen3-dev"
 
 Configuration and Building
 --------------------------
 The code should build OK without any special configuration, by running "make all"
 from the root directory - this should build the solver and all of the problems.
-If required, change build settings via the root Makefile.
+If required, change build settings via the [root Makefile][Makefile].
 
 Alternatively, specific problems can be built by running "make" from within the
 problem's source folder, or by specifying that problem as a target, e.g.
@@ -43,10 +43,12 @@ If you want debugging output, set add "CFG=debug" to the arguments for make,
 e.g. "make all CFG=debug" or "make tag CFG=debug".
 
 For additional documentation of the build system being used for this project,
-see [this README](.make/README.md).
+see [this README][Build README].
 
 Usage
 -----
+First of all, 
+
 Each problem should generate two executables - "solve" for initial offline
 policy generation, and "simulate" for online simulation. Run the executable
 with an argument of "--help" for specific usage documentation..
@@ -58,24 +60,13 @@ default parameter values for each problem.
 Implementing a POMDP Problem
 -----------------------------
 At its core, implementation of a specific POMDP problem is done via an
-implementation of the [Model](src/solver/abstract-problem/Model.hpp) interface.
+implementation of the [Model] interface, as well as implementations for
+[State], [Action], and [Observation].
 
-Typically this will also involve implementations for
-[State](src/solver/abstract-problem/State.hpp),
-[Action](src/solver/abstract-problem/Action.hpp), and
-[Observation](src/solver/abstract-problem/Observation.hpp).
-Alternatively, you can use [VectorLP](src/solver/abstract-problem/VectorLP.hpp),
-for State, Action, or Observation - VectorLP represents a vector in
-R<sup>n</sup> using the L<sup>p</sup>-norm.
-
-Implementations of the serialization methods in
-[Serializer](src/solver/serialization/Serializer/hpp)
-are also required; a default implementation for serializing the state of the
-solver is given in
-[TextSerializer](src/solver/serialization/TextSerializer/hpp),
-but any remaining pure virtual methods will still require implementation;
-Serialization methods for VectorLP are given in
-[VectorLPTextSerializer](src/solver/serialization/VectorLPTextSerializer.cpp).
+Implementations of the serialization methods in [Serializer] are also required;
+a default implementation for serializing the state of the solver is given in
+[TextSerializer] but any remaining pure virtual methods will still require
+implementations.
 
 In addition to these core classes, you also need to define how actions and
 observations are mapped out; this is defined by
@@ -171,9 +162,30 @@ Further description is given below:
 
 For additional convenience, template methods to generate binaries for an
 individual problem are given in:
-- [solve.hpp](src/problems/shared/solve.hpp) --- initial offline policy
-    generation; see [solve.cpp for Tag](src/problems/tag/solve.cpp)
-    for a usage example.
-- [simulate.hpp](src/problems/shared/simulate.hpp) --- simulation with online
-    POMDP solution; see [simulate.cpp for Tag](src/problems/tag/simulate.cpp)
-    for a usage example.
+- [solve.hpp] --- initial offline policy generation; see
+    [solve.cpp for Tag][Tag_solve.cpp] for a usage example.
+- [simulate.hpp] --- simulation with online POMDP solution; see 
+    [simulate.cpp for Tag][Tag_simulate.cpp] for a usage example.
+[Tag]: @ref src/problems/tag
+[RockSample]: @ref src/problems/rocksample
+
+[Model]: @ref solver::Model
+[State]: @ref solver::Point
+[Action]: @ref solver::Point
+[Observation]: @ref solver::Point
+[Serializer]: @ref solver::Serializer
+[TextSerializer]: @ref solver::TextSerializer
+
+[solve.hpp]: @ref solve.hpp
+[simulate.hpp]: @ref simulate.hpp
+[Tag_solve.cpp]: @ref src/problems/tag/solve.cpp
+[Tag_simulate.cpp]: @ref src/problems/tag/simulate.cpp
+
+[Makefile]: ../Makefile
+[Makefile_src]: ../src/Makefile
+[Makefile_solver]: ../src/solver/Makefile
+[Build README]: @ref docs/BUILD_README.md
+[build.mk]: ../.make/build.mk
+[stack.mk]: ../.make/stack.mk
+[template.mk]: ../.make/template.mk
+[problem-template.mk]: ../.make/problem-template.mk
