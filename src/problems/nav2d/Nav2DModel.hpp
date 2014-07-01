@@ -8,8 +8,6 @@
 #include <unordered_map>                // for unordered_map
 #include <vector>                       // for vector
 
-#include <boost/program_options.hpp>    // for variables_map
-
 #include "problems/shared/geometry/Point2D.hpp"  // for Point2D
 #include "problems/shared/geometry/Rectangle2D.hpp"  // for Rectangle2D
 #include "problems/shared/geometry/RTree.hpp"  // for RTree
@@ -26,12 +24,10 @@
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 
-
+#include "Nav2DOptions.hpp"
 #include "Nav2DState.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
-
-namespace po = boost::program_options;
 
 namespace solver {
 class ActionMapping;
@@ -54,12 +50,11 @@ struct Nav2DTransition : public solver::TransitionParameters {
     void print(std::ostream &os) const override;
 };
 
-class Nav2DModel : public ModelWithProgramOptions {
-
+class Nav2DModel : public shared::ModelWithProgramOptions {
     friend class Nav2DAction;
     friend class Nav2DTextSerializer;
   public:
-    Nav2DModel(RandomGenerator *randGen, po::variables_map vm);
+    Nav2DModel(RandomGenerator *randGen, std::unique_ptr<Nav2DOptions> options);
     ~Nav2DModel() = default;
     _NO_COPY_OR_MOVE(Nav2DModel);
 
@@ -81,31 +76,11 @@ class Nav2DModel : public ModelWithProgramOptions {
         WORLD = 6
     };
 
-    /* ----------------------- Basic getters  ------------------- */
-    virtual std::string getName() override {
-        return "Nav2D";
-    }
-
-
-    /* ---------- Virtual getters for ABT / model parameters  ---------- */
-    // Simple getters
-    virtual long getNumberOfStateVariables() override {
-        return nStVars_;
-    }
-    virtual double getMinVal() override {
-        return minVal_;
-    }
-    virtual double getMaxVal() override {
-        return maxVal_;
-    }
-
-
     /* --------------- The model interface proper ----------------- */
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates a state uniformly at random. */
     virtual std::unique_ptr<solver::State> sampleStateUniform() override;
     virtual bool isTerminal(solver::State const &state) override;
-
 
     /* -------------------- Black box dynamics ---------------------- */
     virtual std::unique_ptr<solver::TransitionParameters> generateTransition(
@@ -195,6 +170,11 @@ class Nav2DModel : public ModelWithProgramOptions {
     /** Samples a state at the given point. */
     std::unique_ptr<Nav2DState> sampleStateAt(geometry::Point2D position);
 
+    Nav2DOptions *options_;
+
+    /** The number of dimensions. */
+    double nDimensions_;
+
     /** Amount of time per single time step. */
     double timeStepLength_;
     /** Cost per unit time. */
@@ -229,10 +209,6 @@ class Nav2DModel : public ModelWithProgramOptions {
     /** Maximum distance between observations to group them together. */
     double maxObservationDistance_;
 
-    // Generic problem parameters
-    long nStVars_;
-    double minVal_, maxVal_;
-
     geometry::Rectangle2D mapArea_;
     AreasById startAreas_;
     double totalStartArea_;
@@ -253,17 +229,12 @@ class Nav2DModel : public ModelWithProgramOptions {
     double getCostPerRevolution() const { return costPerRevolution_; }
 };
 
-
 /** Represents a change in the Tag model. */
 struct Nav2DChange : public solver::ModelChange {
     std::string operation = "";
     Nav2DModel::AreaType type = Nav2DModel::AreaType::EMPTY;
     int64_t id = 0;
     geometry::Rectangle2D area{};
-};
-
-class Nav2DActionsPool : public solver::DiscretizedActionPool {
-
 };
 } /* namespace nav2d */
 

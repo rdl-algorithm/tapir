@@ -1,20 +1,24 @@
-#include "Simulator.hpp"
+/** file: Simulator.cpp
+ *
+ * Contains the implementation of the Simulator class.
+ */
+#include "solver/Simulator.hpp"
 
 #include <fstream>                      // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, ofstream, endl, ostream, ifstream
 #include <iomanip>
 #include <iostream>                     // for operator<<, ostream, basic_ostream, endl, basic_ostream<>::__ostream_type, cout
 
-#include "abstract-problem/Observation.hpp"
-#include "abstract-problem/ModelChange.hpp"
+#include "solver/abstract-problem/Observation.hpp"
+#include "solver/abstract-problem/ModelChange.hpp"
 
-#include "serialization/Serializer.hpp"
+#include "solver/serialization/Serializer.hpp"
 
-#include "Agent.hpp"
-#include "BeliefNode.hpp"
-#include "HistoryEntry.hpp"
-#include "HistorySequence.hpp"
-#include "Solver.hpp"
-#include "StatePool.hpp"
+#include "solver/Agent.hpp"
+#include "solver/BeliefNode.hpp"
+#include "solver/HistoryEntry.hpp"
+#include "solver/HistorySequence.hpp"
+#include "solver/Solver.hpp"
+#include "solver/StatePool.hpp"
 
 
 using std::cout;
@@ -24,6 +28,7 @@ namespace solver {
 Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver, bool hasDynamicChanges) :
         model_(std::move(model)),
         solver_(solver),
+        options_(solver_->getOptions()),
         solverModel_(solver_->getModel()),
         agent_(std::make_unique<Agent>(solver_)),
         hasDynamicChanges_(hasDynamicChanges),
@@ -89,7 +94,7 @@ void Simulator::setMaxStepCount(long maxStepCount) {
 double Simulator::runSimulation() {
     while (stepSimulation()) {
     }
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << endl << endl << "Final State:" << endl;
         State const &currentState = *getCurrentState();
         cout << currentState << endl;
@@ -110,7 +115,7 @@ bool Simulator::stepSimulation() {
     HistoryEntry *currentEntry = actualHistory_->getLastEntry();
     State const *currentState = getCurrentState();
     BeliefNode *currentBelief = agent_->getCurrentBelief();
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << endl << endl << "t-" << stepCount_ << endl;
         cout << "State: " << *currentState << endl;
         cout << "Heuristic Value: " << model_->getHeuristicFunction()(currentEntry,
@@ -130,7 +135,7 @@ bool Simulator::stepSimulation() {
 
     ChangeSequence::iterator iter = changeSequence_.find(stepCount_);
     if (iter != changeSequence_.end()) {
-        if (model_->hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << "Model changing." << endl;
         }
         double changingTimeStart = abt::clock_ms();
@@ -140,8 +145,7 @@ bool Simulator::stepSimulation() {
             return false;
         }
         double changingTime = abt::clock_ms() - changingTimeStart;
-        totalChangingTime_ += changingTime;
-        if (model_->hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << "Changes complete" << endl;
             cout << "Total of " << changingTime << " ms used for changes." << endl;
         }
@@ -151,7 +155,7 @@ bool Simulator::stepSimulation() {
     solver_->improvePolicy(currentBelief);
     totalImprovementTime_ += (abt::clock_ms() - impSolTimeStart);
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         std::stringstream newStream;
         newStream << "After:" << endl;
         solver_->printBelief(currentBelief, newStream);
@@ -172,7 +176,7 @@ bool Simulator::stepSimulation() {
     }
     Model::StepResult result = model_->generateStep(*currentState, *action);
 
-    if (model_->hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         if (result.isTerminal) {
             cout << "Reached a terminal state!" << endl;
         }
@@ -204,7 +208,7 @@ bool Simulator::stepSimulation() {
     currentEntry->stateInfo_ = nextInfo;
 
     totalDiscountedReward_ += currentDiscount_ * result.reward;
-    currentDiscount_ *= model_->getDiscountFactor();
+    currentDiscount_ *= options_->discountFactor;
     stepCount_++;
 
     if (currentBelief->getNumberOfParticles() == 0) {
@@ -226,7 +230,10 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
     }
 
     model_->applyChanges(changes, nullptr);
+
+    double startTime = abt::clock_ms();
     solverModel_->applyChanges(changes, solver_);
+    totalChangingTime_ += abt::clock_ms() - startTime;
 
     // If the current state is deleted, the simulation is broken!
     StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();
@@ -237,7 +244,7 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
 
     // If the changes are not dynamic and a past state is deleted, the simulation is broken.
     if (!areDynamic) {
-        for (long i = 0; i < actualHistory_->getLength() - 1; i++) {
+        for (HistoryEntry::IdType i = 0; i < actualHistory_->getLength() - 1; i++) {
             StateInfo const *info = actualHistory_->getEntry(i)->getStateInfo();
             if (changes::has_flag(info->changeFlags_, ChangeFlags::DELETED)) {
                 std::ostringstream message;
@@ -250,7 +257,9 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
     }
 
     // Finally we apply the changes.
+    startTime = abt::clock_ms();
     solver_->applyChanges();
+    totalChangingTime_ += abt::clock_ms() - startTime;
     return true;
 }
 

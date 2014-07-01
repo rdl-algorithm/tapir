@@ -48,7 +48,7 @@ double Nav2DState::distanceTo(solver::State const &otherState) const {
 }
 
 double Nav2DState::round(double value) const {
-    return std::round(value * 1e6) / 1e6;
+    return std::round(value * 1e10) / 1e10;
 }
 
 bool Nav2DState::equals(solver::State const &otherState) const {

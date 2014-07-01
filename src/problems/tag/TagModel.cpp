@@ -12,8 +12,6 @@
 #include <unordered_map>                // for _Node_iterator, operator!=, unordered_map<>::iterator, _Node_iterator_base, unordered_map
 #include <utility>                      // for make_pair, move, pair
 
-#include <boost/program_options.hpp>    // for variables_map, variable_value
-
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator!=, operator<<
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
@@ -38,35 +36,50 @@
 
 #include "TagAction.hpp"
 #include "TagObservation.hpp"
+#include "TagOptions.hpp"
 #include "TagState.hpp"                 // for TagState
 #include "TagTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
 namespace tag {
-TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
-            ModelWithProgramOptions(randGen, vm),
-            moveCost_(vm["problem.moveCost"].as<double>()),
-            tagReward_(vm["problem.tagReward"].as<double>()),
-            failedTagPenalty_(vm["problem.failedTagPenalty"].as<double>()),
-            opponentStayProbability_(vm["problem.opponentStayProbability"].as<double>()),
+TagUBParser::TagUBParser(TagModel *model) :
+        model_(model) {
+}
+solver::Heuristic TagUBParser::parse(solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
+    return [this] (solver::HistoryEntry const *, solver::State const *state,
+            solver::HistoricalData const *) {
+        return model_->getUpperBoundHeuristicValue(*state);
+    };
+}
+
+TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options) :
+            ModelWithProgramOptions("Tag", randGen, std::move(options)),
+            options_(const_cast<TagOptions *>(static_cast<TagOptions const *>(getOptions()))),
+            moveCost_(options_->moveCost),
+            tagReward_(options_->tagReward),
+            failedTagPenalty_(options_->failedTagPenalty),
+            opponentStayProbability_(options_->opponentStayProbability),
             nRows_(0), // to be updated
             nCols_(0), // to be updated
             mapText_(), // will be pushed to
             envMap_(), // will be pushed to
             nActions_(5),
-            nStVars_(5),
-            minVal_(-failedTagPenalty_ / (1 - getDiscountFactor())),
-            maxVal_(tagReward_) {
+            mdpSolver_(nullptr) {
+    options_->numberOfStateVariables = 5;
+    options_->minVal = -failedTagPenalty_ / 1 - options_->discountFactor;
+    options_->maxVal = tagReward_;
+
+    registerHeuristicParser("upper", std::make_unique<TagUBParser>(this));
+    registerHeuristicParser("exactMdp", std::make_unique<TagMdpParser>(this));
+
     // Read the map from the file.
     std::ifstream inFile;
-    char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
-    inFile.open(mapPath);
+    inFile.open(options_->mapPath);
     if (!inFile.is_open()) {
         std::ostringstream message;
-        message << "ERROR: Failed to open " << mapPath;
+        message << "ERROR: Failed to open " << options_->mapPath;
         debug::show_message(message.str());
         std::exit(1);
     }
@@ -80,14 +93,14 @@ TagModel::TagModel(RandomGenerator *randGen, po::variables_map vm) :
     inFile.close();
 
     initialize();
-    if (hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Constructed the TagModel" << endl;
-        cout << "Discount: " << getDiscountFactor() << endl;
+        cout << "Discount: " << options_->discountFactor << endl;
         cout << "Size: " << nRows_ << " by " << nCols_ << endl;
         cout << "move cost: " << moveCost_ << endl;
         cout << "nActions: " << nActions_ << endl;
-        cout << "nStVars: " << nStVars_ << endl;
-        cout << "minParticleCount: " << getMinParticleCount() << endl;
+        cout << "nStVars: " << options_->numberOfStateVariables << endl;
+        cout << "minParticleCount: " << options_->minParticleCount << endl;
         cout << "Environment:" << endl << endl;
         drawEnv(cout);
     }
@@ -102,7 +115,7 @@ void TagModel::initialize() {
             char c = mapText_[p.i][p.j];
             TagCellType cellType;
             if (c == 'X') {
-                cellType = WALL;
+                cellType = TagCellType::WALL;
             } else {
                 cellType = TagCellType::EMPTY;
             }
@@ -160,7 +173,7 @@ std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(
                 std::make_unique<TagState>(robotPos, opponentPos, true), true);
     }
 
-    GridPosition newOpponentPos = getMovedOpponentPos(robotPos, opponentPos);
+    GridPosition newOpponentPos = sampleNextOpponentPosition(robotPos, opponentPos);
     GridPosition newRobotPos;
     bool wasValid;
     std::tie(newRobotPos, wasValid) = getMovedPos(robotPos, tagAction.getActionType());
@@ -194,7 +207,20 @@ std::vector<ActionType> TagModel::makeOpponentActions(
     return actions;
 }
 
-GridPosition TagModel::getMovedOpponentPos(GridPosition const &robotPos,
+/** Generates a proper distribution for next opponent positions. */
+std::unordered_map<GridPosition, double> TagModel::getNextOpponentPositionDistribution(
+        GridPosition const &robotPos, GridPosition const &opponentPos) {
+    std::vector<ActionType> actions = makeOpponentActions(robotPos, opponentPos);
+    std::unordered_map<GridPosition, double> distribution;
+    double actionProb = (1 - opponentStayProbability_) / actions.size();
+    for (ActionType action : actions) {
+        distribution[getMovedPos(opponentPos, action).first] += actionProb;
+    }
+    distribution[opponentPos] += opponentStayProbability_;
+    return std::move(distribution);
+}
+
+GridPosition TagModel::sampleNextOpponentPosition(GridPosition const &robotPos,
         GridPosition const &opponentPos) {
     // Randomize to see if the opponent stays still.
     if (std::bernoulli_distribution(opponentStayProbability_)(
@@ -240,7 +266,7 @@ std::pair<GridPosition, bool> TagModel::getMovedPos(GridPosition const &position
 
 bool TagModel::isValid(GridPosition const &position) {
     return (position.i >= 0 && position.i < nRows_ && position.j >= 0
-            && position.j < nCols_ && envMap_[position.i][position.j] != WALL);
+            && position.j < nCols_ && envMap_[position.i][position.j] != TagCellType::WALL);
 }
 
 std::unique_ptr<solver::Observation> TagModel::makeObservation(
@@ -301,9 +327,20 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
         pool = solver->getStatePool();
     }
 
+    solver::Heuristic heuristic = getHeuristicFunction();
+    std::vector<double> allHeuristicValues;
+    if (pool != nullptr) {
+        long nStates = pool->getNumberOfStates();
+        allHeuristicValues.resize(nStates);
+        for (long index = 0; index < nStates; index++) {
+            allHeuristicValues[index] = heuristic(nullptr, pool->getInfoById(index)->getState(),
+                    nullptr);
+        }
+    }
+
     for (auto const &change : changes) {
         TagChange const &tagChange = static_cast<TagChange const &>(*change);
-        if (hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << tagChange.changeType << " " << tagChange.i0 << " "
                     << tagChange.j0;
             cout << " " << tagChange.i1 << " " << tagChange.j1 << endl;
@@ -363,6 +400,23 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
                 {0.0, 0.0, iLo - 1, jLo - 1, 0.0},
                 {iMx, jMx, iHi + 1, jHi + 1, 1.0});
     }
+
+    if (mdpSolver_ != nullptr) {
+        mdpSolver_->solve();
+    }
+
+    // Check for heuristic changes.
+    if (pool != nullptr) {
+        long nStates = pool->getNumberOfStates();
+        for (long index = 0; index < nStates; index++) {
+            double oldValue = allHeuristicValues[index];
+            solver::StateInfo *info = pool->getInfoById(index);
+            double newValue = heuristic(nullptr, info->getState(), nullptr);
+            if (std::abs(newValue - oldValue) > 1e-5) {
+                pool->setChangeFlags(info, solver::ChangeFlags::HEURISTIC);
+            }
+        }
+    }
 }
 
 
@@ -402,21 +456,18 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
             if (newRobotPos != getMovedPos(oldRobotPos, actionType).first) {
                 continue;
             }
+
+            // Get the probability distribution for opponent moves.
             GridPosition oldOpponentPos(tagState->getOpponentPosition());
-            std::vector<ActionType> actions(
-                    makeOpponentActions(oldRobotPos, oldOpponentPos));
-            std::vector<ActionType> newActions;
-            for (ActionType opponentAction : actions) {
-                if (getMovedPos(oldOpponentPos, opponentAction).first != newRobotPos) {
-                    newActions.push_back(opponentAction);
+            std::unordered_map<GridPosition, double> opponentPosDistribution = (
+                    getNextOpponentPositionDistribution(oldRobotPos, oldOpponentPos));
+
+            for (auto const &entry : opponentPosDistribution) {
+                if (entry.first != newRobotPos) {
+                    TagState newState(newRobotPos, entry.first, false);
+                    weights[newState] += entry.second;
+                    weightTotal += entry.second;
                 }
-            }
-            double probability = 1.0 / newActions.size();
-            for (ActionType opponentAction : newActions) {
-                GridPosition newOpponentPos = getMovedPos(oldOpponentPos, opponentAction).first;
-                TagState newState(newRobotPos, newOpponentPos, false);
-                weights[newState] += probability;
-                weightTotal += probability;
             }
         }
         double scale = nParticles / weightTotal;
@@ -467,17 +518,15 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
 
 /* --------------- Pretty printing methods ----------------- */
 void TagModel::dispCell(TagCellType cellType, std::ostream &os) {
-    if (cellType >= EMPTY) {
-        os << std::setw(2);
-        os << cellType;
-        return;
-    }
     switch (cellType) {
-    case WALL:
+    case TagCellType::EMPTY:
+        os << " 0";
+        break;
+    case TagCellType::WALL:
         os << "XX";
         break;
     default:
-        os << "ERROR-" << cellType;
+        os << "ER";
         break;
     }
 }
@@ -505,7 +554,7 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 
     std::vector<int> colors { 196, 161, 126, 91, 56, 21, 26, 31, 36, 41, 46 };
-    if (hasColorOutput()) {
+    if (options_->hasColorOutput) {
         os << "Color map: ";
         for (int color : colors) {
             os << "\033[38;5;" << color << "m";
@@ -518,7 +567,7 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
             double proportion = (double) particleCounts[i][j]
                     / particles.size();
-            if (hasColorOutput()) {
+            if (options_->hasColorOutput) {
                 if (proportion > 0) {
                     int color = colors[proportion * (colors.size() - 1)];
                     os << "\033[38;5;" << color << "m";
@@ -536,13 +585,13 @@ void TagModel::drawSimulationState(solver::BeliefNode const *belief,
             } else if (hasOpponent) {
                 os << "o";
             } else {
-                if (envMap_[i][j] == WALL) {
+                if (envMap_[i][j] == TagCellType::WALL) {
                     os << "X";
                 } else {
                     os << ".";
                 }
             }
-            if (hasColorOutput()) {
+            if (options_->hasColorOutput) {
                 os << "\033[0m";
             }
         }
@@ -562,8 +611,22 @@ double TagModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
     GridPosition opponentPos = tagState.getOpponentPosition();
     long dist = robotPos.manhattanDistanceTo(opponentPos);
     double nSteps = dist / opponentStayProbability_;
-    double finalDiscount = std::pow(getDiscountFactor(), nSteps);
-    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - getDiscountFactor());
+    double finalDiscount = std::pow(options_->discountFactor, nSteps);
+    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
+    qVal += finalDiscount * tagReward_;
+    return qVal;
+}
+
+double TagModel::getUpperBoundHeuristicValue(solver::State const &state) {
+    TagState const &tagState = static_cast<TagState const &>(state);
+    if (tagState.isTagged()) {
+        return 0;
+    }
+    GridPosition robotPos = tagState.getRobotPosition();
+    GridPosition opponentPos = tagState.getOpponentPosition();
+    long dist = robotPos.manhattanDistanceTo(opponentPos);
+    double finalDiscount = std::pow(options_->discountFactor, dist);
+    double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
     qVal += finalDiscount * tagReward_;
     return qVal;
 }

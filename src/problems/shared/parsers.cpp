@@ -19,6 +19,7 @@
 
 #include "problems/shared/ModelWithProgramOptions.hpp"
 
+namespace shared {
 std::vector<std::string> split_function(std::string text) {
     std::size_t i0 = text.find('(');
     std::size_t i1 = text.rfind(')');
@@ -158,13 +159,14 @@ std::unique_ptr<solver::SearchStrategy> Exp3Parser::parse(solver::Solver *solver
 std::unique_ptr<solver::EstimationStrategy> AverageEstimateParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
     return std::make_unique<solver::EstimationFunction>(
-            std::function<double(solver::BeliefNode const *)>(solver::estimators::average_q_value));
+            std::function<double(solver::BeliefNode const *)>(solver::estimators::average));
 }
 std::unique_ptr<solver::EstimationStrategy> MaxEstimateParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::EstimationFunction>(solver::estimators::max_q_value);
+    return std::make_unique<solver::EstimationFunction>(solver::estimators::max);
 }
 std::unique_ptr<solver::EstimationStrategy> RobustEstimateParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
-    return std::make_unique<solver::EstimationFunction>(solver::estimators::robust_q_value);
+    return std::make_unique<solver::EstimationFunction>(solver::estimators::robust);
 }
+} /* namespace shared */

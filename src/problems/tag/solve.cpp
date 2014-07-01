@@ -4,6 +4,5 @@
 #include "TagOptions.hpp"               // for TagOptions
 
 int main(int argc, char const *argv[]) {
-    tag::TagOptions options;
-    return solve<tag::TagModel>(argc, argv, &options);
+    return solve<tag::TagModel, tag::TagOptions>(argc, argv);
 }

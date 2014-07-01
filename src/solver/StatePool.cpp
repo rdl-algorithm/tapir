@@ -1,4 +1,8 @@
-#include "StatePool.hpp"
+/** file: StatePool.cpp
+ *
+ * Contains the implementation of the  StatePool class.
+ */
+#include "solver/StatePool.hpp"
 
 #include <map>                          // for multimap, __alloc_traits<>::value_type
 #include <set>                          // for set
@@ -8,9 +12,10 @@
 
 #include "global.hpp"                     // for make_unique
 
-#include "changes/ChangeFlags.hpp"               // for ChangeFlags
-#include "abstract-problem/State.hpp"
-#include "StateInfo.hpp"                // for StateInfo, StateInfo::currId
+#include "solver/StateInfo.hpp"                // for StateInfo, StateInfo::currId
+
+#include "solver/abstract-problem/State.hpp"
+#include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags
 
 namespace solver {
 
@@ -76,13 +81,6 @@ std::unordered_set<StateInfo *> StatePool::getAffectedStates() const {
 
 
 /* ------------------ Mutators for the pool ------------------- */
-void StatePool::reset() {
-    stateInfoMap_.clear();
-    statesByIndex_.clear();
-    stateIndex_->reset();
-    changedStates_.clear();
-}
-
 StateInfo *StatePool::add(std::unique_ptr<StateInfo> newInfo) {
     std::pair<StateInfoMap::iterator, bool> ret = (
             stateInfoMap_.emplace(newInfo->getState(), newInfo.get()));

@@ -20,11 +20,10 @@
 //#include <tf/transform_listener.h>
 
 #include "solver/Agent.hpp"
-
-#include "problems/shared/ProgramOptions.hpp"
+#include "solver/Solver.hpp"
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/simulate.hpp"
-
+#include "options/option_parser.hpp"
 #include "VrepHelper.hpp"
 
 #include "TrackerAction.hpp"
@@ -37,7 +36,6 @@
 using namespace tracker;
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
 namespace tracker {
 
@@ -149,37 +147,21 @@ int main(int argc, char **argv)
 
 	/**************** ABT init ***********************/
 
-	TrackerOptions tracker_options;
-	ProgramOptions *options = &tracker_options;
-
-	po::options_description visibleOptions;
-    po::options_description allOptions;
-    visibleOptions.add(options->getGenericOptions()).add(
-            options->getABTOptions()).add(options->getProblemOptions()).add(
-            options->getHeuristicOptions());
-    allOptions.add(visibleOptions).add(options->getSimulationOptions());
-
-    // Set up positional options using ABT's command line interface
-    //po::positional_options_description positional;
-
-    po::variables_map vm;
-    //po::store(
-     //       po::command_line_parser(argc, argv).options(allOptions).positional(
-     //               positional).run(), vm);
-
     std::string trackerPath = ros::package::getPath("abt") + "/src/problems/tracker/";
     std::string cfgPath = trackerPath + "tests/default.cfg";
-    po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
-    po::notify(vm);
-    load_overrides(vm);
+	std::unique_ptr<options::OptionParser> parser = TrackerOptions::makeParser(false);
+	TrackerOptions trackerOptions;
+	parser->setOptions(&trackerOptions);
+	parser->parseCfgFile(cfgPath);
+	parser->finalize();
 
-    unsigned long seed = vm["seed"].as<unsigned long>();
-    if (seed == 0) {
-        seed = std::time(nullptr);
+	if (trackerOptions.seed == 0) {
+        trackerOptions.seed = std::time(nullptr);
     }
-    cout << "Seed: " << seed << endl;
+
+    cout << "Seed: " << trackerOptions.seed << endl;
     RandomGenerator randGen;
-    randGen.seed(seed);
+    randGen.seed(trackerOptions.seed);
     randGen.discard(10);
     
     // Prepare environment map and initialise tracker model
@@ -193,7 +175,8 @@ int main(int argc, char **argv)
             envMap[i][j] = TrackerModel::TrackerCellType::EMPTY;
         }
     }
-    std::unique_ptr<TrackerModel> newModel = std::make_unique<TrackerModel>(&randGen, vm);
+    std::unique_ptr<TrackerModel> newModel = std::make_unique<TrackerModel>(
+    	&randGen, std::make_unique<TrackerOptions>(trackerOptions));
     newModel->setEnvMap(envMap);
     
     // Zones mode
@@ -229,7 +212,7 @@ int main(int argc, char **argv)
 	ros::spinOnce();
 
 	// Get height of sensor
-	long sensorHandle = vrepHelper.getHandle("scanner");
+	long sensorHandle = vrepHelper.getHandle("SICK_S300_ref");
 	geometry_msgs::PoseStamped sensorPose = vrepHelper.getPose(sensorHandle);
 	sensorHeight = sensorPose.pose.position.z;
 

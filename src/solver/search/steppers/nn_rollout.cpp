@@ -35,14 +35,16 @@ BeliefNode* NnRolloutFactory::findNeighbor(BeliefNode *belief) {
         if (numTried >= maxNnComparisons_) {
             break;
         } else {
-            if (nnMap_[belief].tNnComp < belief->getTimeOfLastChange()
-                    || nnMap_[belief].tNnComp < otherBelief->getTimeOfLastChange()) {
-                double distance = belief->distL1Independent(otherBelief);
-                if (distance < minDist) {
-                    minDist = distance;
-                    nearestBelief = otherBelief;
-                }
-            }
+            // Time comparisons are currently disabled due to slow performance.
+
+//            if (nnMap_[belief].tNnComp < belief->getTimeOfLastChange()
+//                    || nnMap_[belief].tNnComp < otherBelief->getTimeOfLastChange()) {
+//                double distance = belief->distL1Independent(otherBelief);
+//                if (distance < minDist) {
+//                    minDist = distance;
+//                    nearestBelief = otherBelief;
+//                }
+//            }
             numTried++;
         }
     }

@@ -1,4 +1,8 @@
-#include "StateInfo.hpp"
+/** file: StateInfo.cpp
+ *
+ * Contains the implementation of the StateInfo class.
+ */
+#include "solver/StateInfo.hpp"
 
 #include <algorithm>                    // for find
 #include <memory>                       // for unique_ptr
@@ -6,8 +10,8 @@
 #include <utility>                      // for move
 #include <vector>                       // for vector, vector<>::iterator
 
-#include "changes/ChangeFlags.hpp"              // for ChangeFlags, ChangeFlags::UNCHANGED
-#include "abstract-problem/State.hpp"                    // for State
+#include "solver/abstract-problem/State.hpp"                    // for State
+#include "solver/changes/ChangeFlags.hpp"              // for ChangeFlags, ChangeFlags::UNCHANGED
 
 namespace solver {
 class BeliefNode;

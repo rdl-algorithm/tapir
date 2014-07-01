@@ -1,3 +1,10 @@
+/** file: BeliefNode.hpp
+ *
+ * Contains the BeliefNode class, which represents a single belief node within the belief tree.
+ *
+ * The core data stored by a belief node is the set of particles (history entries) associated with
+ * this node, as well as an ActionMapping and a back-pointer.
+ */
 #ifndef SOLVER_BELIEFNODE_HPP_
 #define SOLVER_BELIEFNODE_HPP_
 
@@ -28,6 +35,22 @@ class HistoryEntry;
 class ObservationMappingEntry;
 class Solver;
 
+/** Represents a single node in a belief tree.
+ *
+ * The key functionality is a set of all the particles associated with this belief node, where
+ * each particle is a pointer to a HistoryEntry.
+ *
+ * Additionally, a belief node owns an ActionMapping, which stores the actions that have been
+ * taken from this belief, as well as their associated statistics and subtrees.
+ *
+ * The belief node can also store a vector of cached values, which is convenient if you want
+ * to cache values that are derived from the contents of the belief via a relatively expensive
+ * calculation.
+ *
+ * This caching is also particularly useful for incremental updates - the cached value can be
+ * compared to its new value after recalculation, and then the change in value can be easily
+ * backpropagated.
+ */
 class BeliefNode {
 public:
     friend class ActionNode;
@@ -69,8 +92,6 @@ public:
     long getNumberOfStartingSequences() const;
     /** Returns a vector containing all of the states contained in node. */
     std::vector<State const *> getStates() const;
-    /** Returns the time at which the last change occurred. */
-    double getTimeOfLastChange() const;
 
     /* -------------------- Tree-related getters  ---------------------- */
     /** Returns the action mapping for this node. */
@@ -92,27 +113,21 @@ public:
      */
     BeliefNode *getChild(Action const &action, Observation const &obs) const;
 
-    /* -------------------- Simple setters  ---------------------- */
-    /** Sets the time of the last change to the current time. */
-    void updateTimeOfLastChange();
-
     /* ----------------- Management of cached values ------------------- */
     /** Adds a value to be cached by this belief node. */
     BaseCachedValue *addCachedValue(std::unique_ptr<BaseCachedValue> value);
     /** Removes a value cached by this belief node. */
     void removeCachedValue(BaseCachedValue *value);
 
-    /* ------------ Control of Q-value calculation and action selection -------------- */
-    /** Sets the way in which the q-value for this belief node will be calculated. */
-    void setQEstimator(CachedValue<double> *qEstimator);
-
-    /* ------------ Q-value calculation and action selection -------------- */
+    /* ------------ Value estimation and action selection -------------- */
+    /** Sets the way in which the value for this belief node will be calculated. */
+    void setValueEstimator(CachedValue<double> *qEstimator);
     /** Returns the recommended action to take from this node. */
     std::unique_ptr<Action> getRecommendedAction() const;
-    /** Returns the best q-value */
-    double getQValue() const;
-    /** Recalculates the q-value for this belief node. */
-    void recalculateQValue();
+    /** Returns the current cached value */
+    double getCachedValue() const;
+    /** Recalculates the cached value for this belief node. */
+    void recalculateValue();
 
 private:
     /* -------------- Particle management / sampling ---------------- */
@@ -131,6 +146,10 @@ private:
     /** Adds a child for the given action and observation;
      * returns the child node, and a boolean which is true iff a new node was
      * actually created.
+     *
+     * NOTE: This method doesn't add this belief node to the node vector in the belief tree;
+     * this method should always be called via BeliefTree::createOrGetChild rather than
+     * being called directly.
      */
     std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver, Action const &action,
             Observation const &obs);
@@ -138,30 +157,25 @@ private:
 private:
     /** The ID of this node. */
     long id_;
-
     /** The depth of this node in the tree. */
     long depth_;
-
     /** The observation entry that is this node's parent / owner. */
     ObservationMappingEntry *parentEntry_;
 
+    /** The smart history-based data, to be used for history-based policies. */
     std::unique_ptr<HistoricalData> data_;
-
     /** The set of particles belonging to this node. */
     abt::RandomAccessSet<HistoryEntry *> particles_;
     /** The number of sequences that start at this node. */
     long nStartingSequences_;
-    /** The time at which the last particle modification occurred. */
-    double tLastChange_;
 
     /** A mapping of actions to action children for this node. */
     std::unique_ptr<ActionMapping> actionMap_;
 
     /** The cached values for this belief node. */
     std::unordered_map<BaseCachedValue const *, std::unique_ptr<BaseCachedValue>> cachedValues_;
-
-    /** Determines the q-value for this node. */
-    CachedValue<double> *qEstimator_;
+    /** Calculates and caches the estimated value of this node. */
+    CachedValue<double> *valueEstimator_;
 };
 } /* namespace solver */
 

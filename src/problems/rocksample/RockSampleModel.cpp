@@ -18,8 +18,6 @@
 #include <utility>                      // for move, pair, make_pair
 #include <vector>                       // for vector, vector<>::reference, __alloc_traits<>::value_type, operator==
 
-#include <boost/program_options.hpp>    // for variables_map, variable_value
-
 #include "global.hpp"                     // for RandomGenerator, make_unique
 
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator<<
@@ -50,21 +48,22 @@
 #include "RockSampleAction.hpp"         // for RockSampleAction
 #include "RockSampleMdpSolver.hpp"
 #include "RockSampleObservation.hpp"    // for RockSampleObservation
+#include "RockSampleOptions.hpp"
 #include "RockSampleState.hpp"          // for RockSampleState
 #include "RockSampleTextSerializer.hpp"
 
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
 namespace rocksample {
-RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm) :
-            ModelWithProgramOptions(randGen, vm),
-            goodRockReward_(vm["problem.goodRockReward"].as<double>()),
-            badRockPenalty_(vm["problem.badRockPenalty"].as<double>()),
-            exitReward_(vm["problem.exitReward"].as<double>()),
-            illegalMovePenalty_(vm["problem.illegalMovePenalty"].as<double>()),
-            halfEfficiencyDistance_(vm["problem.halfEfficiencyDistance"].as<double>()),
+RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockSampleOptions> options) :
+            shared::ModelWithProgramOptions("RockSample", randGen, std::move(options)),
+            options_(const_cast<RockSampleOptions *>(static_cast<RockSampleOptions const *>(getOptions()))),
+            goodRockReward_(options_->goodRockReward),
+            badRockPenalty_(options_->badRockPenalty),
+            exitReward_(options_->exitReward),
+            illegalMovePenalty_(options_->illegalMovePenalty),
+            halfEfficiencyDistance_(options_->halfEfficiencyDistance),
             nRows_(0), // update
             nCols_(0), // update
             nRocks_(0), // update
@@ -75,16 +74,26 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
             envMap_(), // push rows
             goalDistances_(), // calculate distances
             rockDistances_(), // calculate distances
-            heuristicType_(parseCategory(vm["heuristics.type"].as<std::string>())),
-            searchCategory_(parseCategory(vm["heuristics.search"].as<std::string>())),
-            rolloutCategory_(parseCategory(vm["heuristics.rollout"].as<std::string>())),
-            usingPreferredInit_(vm["heuristics.usePreferredInit"].as<bool>()),
-            preferredQValue_(vm["heuristics.preferredQValue"].as<double>()),
-            preferredVisitCount_(vm["heuristics.preferredVisitCount"].as<long>()),
-            nStVars_(), // depends on nRocks
-            minVal_(-illegalMovePenalty_ / (1 - getDiscountFactor())),
-            maxVal_(0), // depends on nRocks
+            heuristicType_(parseCategory(options_->heuristicType)),
+            searchCategory_(parseCategory(options_->searchHeuristicType)),
+            rolloutCategory_(parseCategory(options_->rolloutHeuristicType)),
+            usingPreferredInit_(options_->usePreferredInit),
+            preferredQValue_(options_->preferredQValue),
+            preferredVisitCount_(options_->preferredVisitCount),
             mdpSolver_(nullptr) {
+
+//    cout << "HistoryEntry: " << sizeof(solver::HistoryEntry) << endl;
+//    cout << "HistoryEntry*: " << sizeof(solver::HistoryEntry*) << endl;
+//    cout << "State: " << sizeof(RockSampleState) << endl;
+//    cout << "Action: " << sizeof(RockSampleAction) << endl;
+//    cout << "Observation: " << sizeof(RockSampleObservation) << endl;
+//    int overhead = 0;
+//    overhead += sizeof(solver::HistoryEntry);
+//    overhead += sizeof(solver::HistoryEntry*) * 4;
+//    overhead += sizeof(RockSampleAction);
+//    overhead += sizeof(RockSampleObservation);
+//    cout << "OVERHEAD PER ENTRY: " << overhead << endl;
+
     if (searchCategory_ > heuristicType_) {
         searchCategory_ = heuristicType_;
     }
@@ -92,14 +101,14 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
         rolloutCategory_ = heuristicType_;
     }
 
-    registerHeuristicParser("exact", std::make_unique<RockSampleMdpParser>(this));
+    registerHeuristicParser("exactMdp", std::make_unique<RockSampleMdpParser>(this));
+
     // Read the map from the file.
     std::ifstream inFile;
-    char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
-    inFile.open(mapPath);
+    inFile.open(options_->mapPath);
     if (!inFile.is_open()) {
         std::ostringstream message;
-        message << "Failed to open " << mapPath;
+        message << "Failed to open " << options_->mapPath;
         debug::show_message(message.str());
         std::exit(1);
     }
@@ -113,9 +122,9 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, po::variables_map vm)
     inFile.close();
 
     initialize();
-    if (hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Constructed the RockSampleModel" << endl;
-        cout << "Discount: " << getDiscountFactor() << endl;
+        cout << "Discount: " << options_->discountFactor << endl;
         cout << "Size: " << nRows_ << " by " << nCols_ << endl;
         cout << "nRocks: " << nRocks_ << endl;
 
@@ -160,9 +169,9 @@ void RockSampleModel::initialize() {
         }
     }
 
-    nStVars_ = 2 + nRocks_;
-    minVal_ = -illegalMovePenalty_ / (1 - getDiscountFactor());
-    maxVal_ = goodRockReward_ * nRocks_ + exitReward_;
+    options_->numberOfStateVariables = 2 + nRocks_;
+    options_->minVal = -illegalMovePenalty_ / (1 - options_->discountFactor);
+    options_->minVal = goodRockReward_ * nRocks_ + exitReward_;
 
     goalDistances_.resize(nRows_);
     for (std::vector<int> &row : goalDistances_) {
@@ -458,12 +467,11 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
         pool = solver->getStatePool();
     }
 
-    if (hasVerboseOutput() && pool != nullptr)  {
+    if (options_->hasVerboseOutput && pool != nullptr)  {
         cout << "Applying model changes..." << endl;
     }
 
     solver::Heuristic heuristic = getHeuristicFunction();
-
     std::vector<double> allHeuristicValues;
     if (pool != nullptr) {
         long nStates = pool->getNumberOfStates();
@@ -479,7 +487,7 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
 
     for (auto const &change : changes) {
         RockSampleChange const &rsChange = static_cast<RockSampleChange const &>(*change);
-        if (hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << rsChange.changeType << " " << rsChange.i0 << " "
                     << rsChange.j0;
             cout << " " << rsChange.i1 << " " << rsChange.j1 << endl;
@@ -584,7 +592,7 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
         }
     }
 
-    if (hasVerboseOutput() && pool != nullptr) {
+    if (options_->hasVerboseOutput && pool != nullptr) {
         cout << "Done applying model changes..." << endl;
     }
 }
@@ -725,7 +733,7 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
     }
 
     std::vector<int> colors { 196, 161, 126, 91, 56, 21, 26, 31, 36, 41, 46 };
-    if (hasColorOutput()) {
+    if (options_->hasColorOutput) {
         os << "Color map: ";
         for (int color : colors) {
             os << "\033[38;5;" << color << "m";
@@ -737,7 +745,7 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
     for (std::size_t i = 0; i < envMap_.size(); i++) {
         for (std::size_t j = 0; j < envMap_[0].size(); j++) {
             long rockNo = envMap_[i][j] - ROCK;
-            if (rockNo >= 0 && hasColorOutput()) {
+            if (rockNo >= 0 && options_->hasColorOutput) {
                 int color = colors[goodProportions[rockNo] * (colors.size() - 1)];
                 os << "\033[38;5;" << color << "m";
             }
@@ -746,7 +754,7 @@ void RockSampleModel::drawSimulationState(solver::BeliefNode const *belief,
             } else {
                 dispCell(envMap_[i][j], os);
             }
-            if (rockNo >= 0 && hasColorOutput()) {
+            if (rockNo >= 0 && options_->hasColorOutput) {
                 os << "\033[0m";
             }
         }
@@ -788,14 +796,14 @@ double RockSampleModel::getDefaultHeuristicValue(solver::HistoryEntry const */*e
                 lowestDist = dist;
             }
         }
-        currentDiscount *= std::pow(getDiscountFactor(), lowestDist);
+        currentDiscount *= std::pow(options_->discountFactor, lowestDist);
         qVal += currentDiscount * goodRockReward_;
         goodRocks.erase(bestRock);
         currentPos = rockPositions_[bestRock];
     }
 
     // Now move to a goal square.
-    currentDiscount *= std::pow(getDiscountFactor(), getDistance(currentPos, -1));
+    currentDiscount *= std::pow(options_->discountFactor, getDistance(currentPos, -1));
     qVal += currentDiscount * exitReward_;
     return qVal;
 }

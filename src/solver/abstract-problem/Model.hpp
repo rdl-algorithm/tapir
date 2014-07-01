@@ -11,6 +11,7 @@
 #include "solver/abstract-problem/ModelChange.hpp"                    // for State
 #include "solver/abstract-problem/State.hpp"                    // for State
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
+#include "solver/abstract-problem/Options.hpp"              // for Options
 #include "solver/abstract-problem/TransitionParameters.hpp"
 
 #include "solver/abstract-problem/heuristics/Heuristic.hpp"
@@ -30,47 +31,19 @@ class StatePool;
 
 class Model {
 public:
-    Model() = default;
+    Model(std::string name, RandomGenerator *randGen, std::unique_ptr<Options> options);
     virtual ~Model() = default;
     _NO_COPY_OR_MOVE(Model);
 
-    /* ----------------------- Basic getters  ------------------- */
-    /** Returns the name of this model. */
-    virtual std::string getName();
+    /* -------------------- Simple getters ---------------------- */
     /** Returns the random number generator used by this model. */
-    virtual RandomGenerator *getRandomGenerator() = 0;
+    RandomGenerator *getRandomGenerator() const;
 
-    /* ---------- Virtual getters for ABT / model parameters  ---------- */
-    // POMDP parameters
-    /** Returns the POMDP discount factor. */
-    virtual double getDiscountFactor() = 0;
+    /** Returns the configuration options for this model. */
+    Options const *getOptions() const;
 
-    /** Returns the number of state variables */
-    virtual long getNumberOfStateVariables() = 0;
-    /** Returns a lower bound on the q-value. */
-    virtual double getMinVal() = 0;
-    /** Returns an upper bound on the q-value. */
-    virtual double getMaxVal() = 0;
-
-    // ABT algorithm parameters
-    /** Returns the preferred number of particles per belief - this number will
-     * be regenerated if particle depletion is detected.
-     */
-    virtual unsigned long getMinParticleCount() = 0;
-    /** Returns the maximum number of trials (i.e. simulated episodes) to run
-     * in a single time step.
-     */
-    virtual long getNumberOfHistoriesPerStep() = 0;
-    /** Returns the maximum number of milliseconds per step. */
-    virtual double getStepTimeout() = 0;
-    /** Returns the maximum depth allowed in the tree. */
-    virtual long getMaximumDepth() = 0;
-
-    /** Returns whether color output is available. */
-    virtual bool hasColorOutput();
-    /** Returns whether verbose output should be used. */
-    virtual bool hasVerboseOutput();
-
+    /** The name of this problem. */
+    std::string getName() const;
 
     /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the belief vector. */
@@ -199,6 +172,11 @@ public:
 
     /** Creates a serializer for the given solver. */
     virtual std::unique_ptr<Serializer> createSerializer(Solver *solver);
+
+private:
+    std::string problemName_;
+    RandomGenerator *randGen_;
+    std::unique_ptr<Options> options_;
 };
 } /* namespace solver */
 

@@ -1,3 +1,7 @@
+/** file: estimators.cpp
+ *
+ * Provides implementations of some core estimation strategies.
+ */
 #include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/cached_values.hpp"
@@ -8,7 +12,7 @@
 
 namespace solver {
 namespace estimators {
-double average_q_value(BeliefNode const *node) {
+double average(BeliefNode const *node) {
     ActionMapping *mapping = node->getMapping();
     if (mapping->getNumberOfVisitedEntries() == 0) {
         return 0;
@@ -26,7 +30,7 @@ double average_q_value(BeliefNode const *node) {
     return averageQValue;
 }
 
-double max_q_value(BeliefNode const *node) {
+double max(BeliefNode const *node) {
     ActionMapping *mapping = node->getMapping();
     if (mapping->getNumberOfVisitedEntries() == 0) {
         return 0;
@@ -42,7 +46,7 @@ double max_q_value(BeliefNode const *node) {
     return maxQValue;
 }
 
-double robust_q_value(BeliefNode const *node) {
+double robust(BeliefNode const *node) {
     ActionMapping *mapping = node->getMapping();
     if (mapping->getNumberOfVisitedEntries() == 0) {
         return 0;
@@ -68,10 +72,10 @@ EstimationFunction::EstimationFunction(std::function<double(BeliefNode const *)>
             function_(function) {
 }
 
-void EstimationFunction::setQEstimator(Solver */*solver*/, BeliefNode *node) {
+void EstimationFunction::setValueEstimator(Solver */*solver*/, BeliefNode *node) {
     std::unique_ptr<CachedValue<double>> cachedValue = std::make_unique<CachedValue<double>>(node,
             function_);
-    node->setQEstimator(cachedValue.get());
+    node->setValueEstimator(cachedValue.get());
     node->addCachedValue(std::move(cachedValue));
 }
 } /* namespace solver */

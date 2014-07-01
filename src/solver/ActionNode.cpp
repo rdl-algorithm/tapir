@@ -1,3 +1,7 @@
+/** file: ActionNode.cpp
+ *
+ * Contains the implementation of ActionNode.
+ */
 #include "solver/ActionNode.hpp"
 
 #include <memory>                       // for unique_ptr

@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "solver/ActionNode.hpp"
 #include "solver/BeliefNode.hpp"
 #include "solver/BeliefTree.hpp"
 #include "solver/HistoryEntry.hpp"
@@ -11,6 +12,8 @@
 
 #include "solver/abstract-problem/Model.hpp"
 #include "solver/abstract-problem/State.hpp"
+
+#include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace solver {
 
@@ -70,8 +73,8 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
             entry->transitionParameters_ = getModel()->generateTransition(*state, *entry->action_);
             std::unique_ptr<State> nextState = getModel()->generateNextState(*state,
                     *entry->action_, entry->transitionParameters_.get());
-            if (!nextState->equals(*nextEntry->getState())) {
-                StateInfo *nextStateInfo = getSolver()->getStatePool()->createOrGetInfo(*nextState);
+            StateInfo *nextStateInfo = getSolver()->getStatePool()->createOrGetInfo(*nextState);
+            if (nextStateInfo != nextEntry->getStateInfo()) {
                 nextEntry->registerState(nextStateInfo);
                 if (historyIterator + 1 == firstUnchanged) {
                     firstUnchanged++;
@@ -97,12 +100,15 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
             }
 
         }
+
         if (changes::has_flag(entry->changeFlags_, ChangeFlags::OBSERVATION)) {
             std::unique_ptr<Observation> newObservation = (getModel()->generateObservation(
                     state, *entry->action_, entry->transitionParameters_.get(),
                     *nextEntry->getState()));
-            if (!newObservation->equals(*entry->observation_)) {
 
+            ObservationMapping *obsMap = actualCurrentNode->getMapping()->getActionNode(
+                    *entry->action_)->getMapping();
+            if (obsMap->getEntry(*entry->observation_) == obsMap->getEntry(*newObservation)) {
                 if (divergingEntryId == -1) {
                     divergingEntryId = entry->entryId_;
                     // We have diverged; this means the rest of the sequence should be negated.

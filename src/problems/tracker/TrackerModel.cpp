@@ -42,45 +42,37 @@
 
 #include "TrackerAction.hpp"
 #include "TrackerObservation.hpp"
+#include "TrackerOptions.hpp"
 #include "TrackerState.hpp"
 #include "TrackerTextSerializer.hpp"
 #include "TrackerRos.hpp"   // getCurrYaw45(), getCurrCell(), isRayBlocked
 
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
 namespace tracker {
 
-TrackerModel::TrackerModel(RandomGenerator *randGen, po::variables_map vm) :
-	ModelWithProgramOptions(randGen, vm),
-	moveCost_(vm["problem.moveCost"].as<double>()),
-    waitCost_(vm["problem.waitCost"].as<double>()),
-    obstructCost_(vm["problem.obstructCost"].as<double>()),
-    collideCost_(vm["problem.collideCost"].as<double>()),
-	visibleReward_(vm["problem.visibleReward"].as<double>()),
+TrackerModel::TrackerModel(RandomGenerator *randGen, std::unique_ptr<TrackerOptions> options) :
+	ModelWithProgramOptions("Tracker", randGen, std::move(options)),
+    options_(const_cast<TrackerOptions *>(static_cast<TrackerOptions const *>(getOptions()))),
+	moveCost_(options_->moveCost),
+    waitCost_(options_->waitCost),
+    obstructCost_(options_->obstructCost),
+    collideCost_(options_->collideCost),
+	visibleReward_(options_->visibleReward),
 	nRows_(0), // to be updated
 	nCols_(0), // to be updated
     mapText_(), // will be pushed to
     envMap_(),  // will be pushed to
     nActions_(4),   // set to 5 to allow reverse
-    nStVars_(7),
-    minVal_(0),
-    maxVal_(visibleReward_),
     targetPolicy_(0)
 {
-    if (hasVerboseOutput()) {
+    options_->numberOfStateVariables = 5;
+    options_->minVal = -collideCost_ / 1 - options_->discountFactor;
+    options_->maxVal = visibleReward_;
+
+    if (options_->hasVerboseOutput) {
         cout << "Constructed the TrackerModel" << endl;
-        cout << "Discount: " << getDiscountFactor() << endl;
-        cout << "move cost: " << moveCost_ << endl;
-        cout << "obstruct  cost: " << obstructCost_ << endl;
-        cout << "visible reward: " << visibleReward_ << endl;
-        cout << "nActions: " << nActions_ << endl;
-        cout << "nStVars: " << nStVars_ << endl;
-        cout << "minParticleCount: " << getMinParticleCount() << endl;
-        cout << "histories per step: " << getNumberOfHistoriesPerStep() << endl;
-        cout << "max depth: " << getMaximumDepth() << endl;
-        cout << "Environment:" << endl << endl;
     }
 }
 
@@ -107,7 +99,7 @@ void TrackerModel::setEnvMap(std::vector<std::vector<TrackerCellType>> envMap) {
 	nCols_ = envMap.size();
 	envMap_ = envMap;
 
-    if (hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Got environment map" << endl;
         cout << "Rows: " << nRows_ << endl;
         cout << "Cols: " << nCols_ << endl;
@@ -441,7 +433,9 @@ double TrackerModel::generateReward(
     }
 
     // Cost for collision with human/wall
-    if (!isValid(robotPos) || robotPos == targetPos) {
+    GridPosition nextPos = getNewPos(robotPos, robotYaw, actionType);
+    if (!isValid(nextPos) || nextPos == targetPos || 
+        !isValid(robotPos) || robotPos == targetPos) {
         reward -= collideCost_;
     } else if (tState.seesTarget()) {
 
@@ -575,7 +569,7 @@ void TrackerModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>
 
     for (auto const &change : changes) {
         TrackerChange const &trackerChange = static_cast<TrackerChange const &>(*change);
-        if (hasVerboseOutput()) {
+        if (options_->hasVerboseOutput) {
             cout << trackerChange.changeType << " " << trackerChange.i0 << " "
                     << trackerChange.j0;
             cout << " " << trackerChange.i1 << " " << trackerChange.j1 << endl;
@@ -639,17 +633,15 @@ void TrackerModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>
 
 /* --------------- Pretty printing methods ----------------- */
 void TrackerModel::dispCell(TrackerCellType cellType, std::ostream &os) {
-    if (cellType >= EMPTY) {
-        os << std::setw(2);
-        os << cellType;
-        return;
-    }
     switch (cellType) {
-    case WALL:
+    case TrackerCellType::EMPTY:
+        os << " 0";
+        break;
+    case TrackerCellType::WALL:
         os << "XX";
         break;
     default:
-        os << "ERROR-" << cellType;
+        os << "ER";
         break;
     }
 }

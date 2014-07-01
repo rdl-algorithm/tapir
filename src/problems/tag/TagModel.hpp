@@ -7,8 +7,6 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include <boost/program_options.hpp>    // for variables_map
-
 #include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
@@ -24,8 +22,8 @@
 #include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "TagAction.hpp"
-
-namespace po = boost::program_options;
+#include "TagOptions.hpp"
+#include "TagMdpSolver.hpp"
 
 namespace solver {
 class StatePool;
@@ -44,21 +42,31 @@ struct TagChange : public solver::ModelChange {
     long j1 = 0;
 };
 
-class TagModel: public ModelWithProgramOptions {
+class TagUBParser : public shared::Parser<solver::Heuristic> {
+public:
+    TagUBParser(TagModel *model);
+    virtual ~TagUBParser() = default;
+    _NO_COPY_OR_MOVE(TagUBParser);
+
+    virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
+private:
+    TagModel *model_;
+};
+
+class TagModel: public shared::ModelWithProgramOptions {
     friend class TagObservation;
+    friend class TagMdpSolver;
 
   public:
-    TagModel(RandomGenerator *randGen, po::variables_map vm);
+    TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options);
     ~TagModel() = default;
     TagModel(TagModel const &) = delete;
     TagModel(TagModel &&) = delete;
     TagModel &operator=(TagModel const &) = delete;
     TagModel &operator=(TagModel &&) = delete;
 
-    /** The cells are either empty or walls; empty cells are numbered
-     * starting at 0
-     */
-    enum TagCellType : int {
+    /** The cells are either empty or walls. */
+    enum class TagCellType : int {
         EMPTY = 0,
         WALL = -1
     };
@@ -75,23 +83,23 @@ class TagModel: public ModelWithProgramOptions {
      * position for each grid position in the map
      */
     std::vector<std::vector<float>> getBeliefProportions(solver::BeliefNode const *belief);
-    
 
-    /* ----------------------- Basic getters  ------------------- */
-    std::string getName() override {
-        return "Tag";
+    /* ---------- Custom getters for extra functionality  ---------- */
+    long getNRows() const {
+        return nRows_;
+    }
+    long getNCols() const {
+        return nCols_;
     }
 
-    /* ---------- Virtual getters for ABT / model parameters  ---------- */
-    // Simple getters
-    long getNumberOfStateVariables() override {
-        return nStVars_;
+    /** Sets up the MDP solver for this model. */
+    void makeMdpSolver() {
+        mdpSolver_ = std::make_unique<TagMdpSolver>(this);
+        mdpSolver_->solve();
     }
-    double getMinVal() override {
-        return minVal_;
-    }
-    double getMaxVal() override {
-        return maxVal_;
+    /** Returns the MDP solver for this model. */
+    TagMdpSolver *getMdpSolver() {
+        return mdpSolver_.get();
     }
 
     /* --------------- The model interface proper ----------------- */
@@ -152,6 +160,8 @@ class TagModel: public ModelWithProgramOptions {
     virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
                 solver::State const *state, solver::HistoricalData const *data) override;
 
+    virtual double getUpperBoundHeuristicValue(solver::State const &state);
+
     /* ------- Customization of more complex solver functionality  --------- */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
     virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver) override;
@@ -176,11 +186,17 @@ class TagModel: public ModelWithProgramOptions {
      */
     std::unique_ptr<solver::Observation> makeObservation(
             solver::Action const &action, TagState const &nextState);
-    /** Moves the opponent. */
-    GridPosition getMovedOpponentPos(GridPosition const &robotPos,
-            GridPosition const &opponentPos);
+
+
     /** Generates the distribution for the opponent's actions. */
     std::vector<ActionType> makeOpponentActions(GridPosition const &robotPos,
+            GridPosition const &opponentPos);
+    /** Generates a proper distribution for next opponent positions. */
+    std::unordered_map<GridPosition, double> getNextOpponentPositionDistribution(
+            GridPosition const &robotPos, GridPosition const &opponentPos);
+
+    /** Moves the opponent. */
+    GridPosition sampleNextOpponentPosition(GridPosition const &robotPos,
             GridPosition const &opponentPos);
 
     /** Gets the expected coordinates after taking the given action;
@@ -189,6 +205,8 @@ class TagModel: public ModelWithProgramOptions {
     std::pair<GridPosition, bool> getMovedPos(GridPosition const &position, ActionType action);
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
+
+    TagOptions *options_;
 
     /** The penalty for each movement. */
     double moveCost_;
@@ -210,8 +228,10 @@ class TagModel: public ModelWithProgramOptions {
     std::vector<std::vector<TagCellType>> envMap_;
 
     // General problem parameters
-    long nActions_, nStVars_;
-    double minVal_, maxVal_;
+    long nActions_;
+
+    /** Solver for the MDP version of the problem. */
+    std::unique_ptr<TagMdpSolver> mdpSolver_;
 };
 } /* namespace tag */
 

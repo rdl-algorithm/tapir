@@ -17,8 +17,6 @@
 #include <utility>                      // for move, pair, make_pair
 #include <vector>                       // for vector, vector<>::reference, __alloc_traits<>::value_type, operator==
 
-#include <boost/program_options.hpp>    // for variables_map, variable_value
-
 #include "global.hpp"                     // for RandomGenerator, make_unique
 #include "problems/shared/geometry/Point2D.hpp"
 #include "problems/shared/geometry/Vector2D.hpp"
@@ -47,6 +45,7 @@
 #include "Nav2DAction.hpp"         // for Nav2DAction
 #include "Nav2DActionPool.hpp"         // for Nav2DActionPool
 #include "Nav2DObservation.hpp"    // for Nav2DObservation
+#include "Nav2DOptions.hpp"
 #include "Nav2DState.hpp"          // for Nav2DState
 #include "Nav2DTextSerializer.hpp"
 
@@ -57,8 +56,6 @@ using geometry::Point2D;
 using geometry::Vector2D;
 using geometry::Rectangle2D;
 using geometry::RTree;
-
-namespace po = boost::program_options;
 
 namespace nav2d {
 void Nav2DTransition::print(std::ostream &os) const {
@@ -75,49 +72,49 @@ void Nav2DTransition::print(std::ostream &os) const {
     }
 }
 
-Nav2DModel::Nav2DModel(RandomGenerator *randGen,
-        po::variables_map vm) :
-    ModelWithProgramOptions(randGen, vm),
-    timeStepLength_(vm["problem.timeStepLength"].as<double>()),
-    costPerUnitTime_(vm["problem.costPerUnitTime"].as<double>()),
-    interpolationStepCount_(vm["problem.interpolationStepCount"].as<double>()),
-    crashPenalty_(vm["problem.crashPenalty"].as<double>()),
-    boundsHitPenalty_(vm["problem.boundsHitPenalty"].as<double>()),
-    goalReward_(vm["problem.goalReward"].as<double>()),
-    maxSpeed_(vm["problem.maxSpeed"].as<double>()),
-    costPerUnitDistance_(vm["problem.costPerUnitDistance"].as<double>()),
-    speedErrorSD_(vm["problem.speedErrorSD"].as<double>()),
+Nav2DModel::Nav2DModel(RandomGenerator *randGen, std::unique_ptr<Nav2DOptions> options) :
+    shared::ModelWithProgramOptions("Nav2D", randGen, std::move(options)),
+    options_(const_cast<Nav2DOptions *>(static_cast<Nav2DOptions const *>(getOptions()))),
+    nDimensions_(2),
+    timeStepLength_(options_->timeStepLength),
+    costPerUnitTime_(options_->costPerUnitTime),
+    interpolationStepCount_(options_->interpolationStepCount),
+    crashPenalty_(options_->crashPenalty),
+    boundsHitPenalty_(options_->boundsHitPenalty),
+    goalReward_(options_->goalReward),
+    maxSpeed_(options_->maxSpeed),
+    costPerUnitDistance_(options_->costPerUnitDistance),
+    speedErrorSD_(options_->speedErrorSD),
     speedErrorType_(speedErrorSD_ <= 0 ? ErrorType::NONE : parseErrorType(
-                vm["problem.speedErrorType"].as<std::string>())),
-    maxRotationalSpeed_(vm["problem.maxRotationalSpeed"].as<double>()),
-    costPerRevolution_(vm["problem.costPerRevolution"].as<double>()),
-    rotationErrorSD_(vm["problem.rotationErrorSD"].as<double>()),
+            options_->speedErrorType)),
+    maxRotationalSpeed_(options_->maxRotationalSpeed),
+    costPerRevolution_(options_->costPerRevolution),
+    rotationErrorSD_(options_->rotationErrorSD),
     rotationErrorType_(rotationErrorSD_ <= 0 ? ErrorType::NONE : parseErrorType(
-                vm["problem.rotationErrorType"].as<std::string>())),
-    maxObservationDistance_(vm["ABT.maxObservationDistance"].as<double>()),
-    nStVars_(2),
-    minVal_(-(crashPenalty_ + maxSpeed_ * costPerUnitDistance_
-            + maxRotationalSpeed_ * costPerRevolution_)
-            / (1 - getDiscountFactor())),
-    maxVal_(goalReward_),
+            options_->rotationErrorType)),
+    maxObservationDistance_(options_->maxObservationDistance),
     mapArea_(),
     startAreas_(),
     totalStartArea_(0),
     observationAreas_(),
     goalAreas_(),
     obstacles_(),
-    obstacleTree_(nStVars_),
-    goalAreaTree_(nStVars_),
-    startAreaTree_(nStVars_),
-    observationAreaTree_(nStVars_)
-         {
+    obstacleTree_(nDimensions_),
+    goalAreaTree_(nDimensions_),
+    startAreaTree_(nDimensions_),
+    observationAreaTree_(nDimensions_) {
+
+    options_->numberOfStateVariables = nDimensions_;
+    options_->minVal = -(crashPenalty_ + maxSpeed_ * costPerUnitDistance_
+            + maxRotationalSpeed_ * costPerRevolution_) / (1 - options_->discountFactor);
+    options_->maxVal = goalReward_;
+
     // Read the map from the file.
     std::ifstream inFile;
-    char const *mapPath = vm["problem.mapPath"].as<std::string>().c_str();
-    inFile.open(mapPath);
+    inFile.open(options_->mapPath);
     if (!inFile.is_open()) {
         std::ostringstream message;
-        message << "Failed to open " << mapPath;
+        message << "Failed to open " << options_->mapPath;
         debug::show_message(message.str());
         std::exit(1);
     }
@@ -136,10 +133,10 @@ Nav2DModel::Nav2DModel(RandomGenerator *randGen,
     }
     inFile.close();
 
-    if (hasVerboseOutput()) {
+    if (options_->hasVerboseOutput) {
         cout << "Constructed the Nav2DModel" << endl;
-        cout << "Discount: " << getDiscountFactor() << endl;
-        cout << "historiesPerStep: " << getNumberOfHistoriesPerStep() << endl;
+        cout << "Discount: " << options_->discountFactor << endl;
+        cout << "historiesPerStep: " << options_->historiesPerStep << endl;
         cout << endl << endl;
     }
 }
@@ -251,7 +248,7 @@ void Nav2DModel::addArea(int64_t id, Rectangle2D const &area,
     getAreas(type)->emplace(id, area);
     std::vector<double> lowCorner = area.getLowerLeft().asVector();
     std::vector<double> highCorner = area.getUpperRight().asVector();
-    SpatialIndex::Region region(&lowCorner[0], &highCorner[0], nStVars_);
+    SpatialIndex::Region region(&lowCorner[0], &highCorner[0], nDimensions_);
     getTree(type)->getTree()->insertData(0, nullptr, region, id);
     if (type == AreaType::START) {
         totalStartArea_ += area.getArea();
@@ -661,7 +658,7 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
     std::vector<int> colors {22, 28, 34, 40, 46,
             82, 118, 154, 190, 226,
             227, 228, 229, 230, 231 };
-    if (hasColorOutput()) {
+    if (options_->hasColorOutput) {
         os << "Color map: ";
         for (int color : colors) {
             os << "\033[38;5;" << color << "m";
@@ -684,7 +681,7 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
                 dispPoint(getAreaType( { x, y }), os);
                 continue;
             }
-            if (hasColorOutput()) {
+            if (options_->hasColorOutput) {
                 int color = colors[proportion * (colors.size() - 1)];
                 os << "\033[38;5;" << color << "m";
             }
@@ -697,7 +694,7 @@ void Nav2DModel::drawSimulationState(solver::BeliefNode const *belief,
             } else {
                 os << (char) ('a' + proportion * 25);
             }
-            if (hasColorOutput()) {
+            if (options_->hasColorOutput) {
                 os << "\033[0m";
             }
         }
@@ -725,7 +722,7 @@ double Nav2DModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*
     costPerStep += costPerRevolution_ * turnAmount / numSteps;
     costPerStep += costPerUnitTime_ * timeStepLength_;
 
-    double discountFactor = getDiscountFactor();
+    double discountFactor = options_->discountFactor;
     double reward = 0;
     if (discountFactor < 1.0) {
         double finalDiscount = std::pow(discountFactor, numSteps);

@@ -75,7 +75,7 @@ which are the key executables for running ABT on a specific problem.
 The core of this template is defining all of the dependencies for each problem.
 The default dependencies are the other object files in the same folder as
 solve.cpp and simulate.cpp, the solver archive libabt.a, and the external
-libraries Boost.Program_options and libspatialindex.
+library libspatialindex.
 
 If your problem needs to be linked to additional libraries, you can specify
 this by adding those dependencies to the variable

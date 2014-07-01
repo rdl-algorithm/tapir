@@ -1,3 +1,8 @@
+/** file: ActionNode.hpp
+ *
+ * Contains the ActionNode class, which represents a belief-action pair (i.e. the part of the
+ * belief tree corresponding to taking a given action from a specific belief.
+ */
 #ifndef SOLVER_ACTIONNODE_HPP_
 #define SOLVER_ACTIONNODE_HPP_
 
@@ -18,6 +23,16 @@ class BeliefNode;
 class ObservationMapping;
 class Solver;
 
+/** The base level interface used by the solver to store the results of taking a specific action
+ * from a specific belief.
+ *
+ * For purposes of customizability most of the work is done in the ActionMapping and
+ * ObservationMapping interfaces, which allow for custom approaches to implementing those mappings.
+ *
+ * This class contains only two fields; a back-pointer to the ActionMappingEntry that owns this
+ * action node (and stores relevant statistics), and an ObservationMapping, which is owned by
+ * this ActionNode, and stores information about the observations branching out of this node.
+ */
 class ActionNode {
     friend class BeliefNode;
     friend class TextSerializer;
@@ -58,7 +73,11 @@ class ActionNode {
             Observation const &obs);
 
   private:
+    /** The mapping entry that owns this action node. */
     ActionMappingEntry *parentEntry_;
+    /** A mapping to store the observations that branch out of this node, and their associated
+     * entries, statistics, and subtrees.
+     */
     std::unique_ptr<ObservationMapping> observationMap_;
 };
 } /* namespace solver */

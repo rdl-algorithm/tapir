@@ -32,10 +32,11 @@ DiscreteObservationMap::DiscreteObservationMap(ActionNode *owner) :
 }
 
 BeliefNode* DiscreteObservationMap::getBelief(Observation const &obs) const {
-    try {
-        return childMap_.at(obs.copy())->childNode_.get();
-    } catch (const std::out_of_range &oor) {
+    ObservationMappingEntry const *entry = getEntry(obs);
+    if (entry == nullptr) {
         return nullptr;
+    } else {
+        return entry->getBeliefNode();
     }
 }
 
@@ -55,10 +56,18 @@ long DiscreteObservationMap::getNChildren() const {
     return childMap_.size();
 }
 ObservationMappingEntry *DiscreteObservationMap::getEntry(Observation const &obs) {
-    return childMap_.at(obs.copy()).get();
+    try {
+        return childMap_.at(obs.copy()).get();
+    } catch (const std::out_of_range &oor) {
+        return nullptr;
+    }
 }
 ObservationMappingEntry const *DiscreteObservationMap::getEntry(Observation const &obs) const {
-    return childMap_.at(obs.copy()).get();
+    try {
+        return childMap_.at(obs.copy()).get();
+    } catch (const std::out_of_range &oor) {
+        return nullptr;
+    }
 }
 std::vector<ObservationMappingEntry const *> DiscreteObservationMap::getAllEntries() const {
     std::vector<ObservationMappingEntry const *> returnEntries;

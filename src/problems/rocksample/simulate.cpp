@@ -4,6 +4,5 @@
 #include "RockSampleOptions.hpp"        // for RockSampleOptions
 
 int main(int argc, char const *argv[]) {
-    rocksample::RockSampleOptions options;
-    return simulate<rocksample::RockSampleModel>(argc, argv, &options);
+    return simulate<rocksample::RockSampleModel, rocksample::RockSampleOptions>(argc, argv);
 }

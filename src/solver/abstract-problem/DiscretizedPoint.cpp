@@ -1,6 +1,10 @@
-#include "DiscretizedPoint.hpp"
+/** file: DiscretizedPoint.cpp
+ *
+ * Contains the implementation of the DiscretizedPoint class.
+ */
+#include "solver/abstract-problem/DiscretizedPoint.hpp"
 
-#include "Point.hpp"
+#include "solver/abstract-problem/Point.hpp"
 
 namespace solver {
 bool DiscretizedPoint::equals(Point const &otherPoint) const {

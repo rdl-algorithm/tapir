@@ -1,10 +1,15 @@
-#include "Histories.hpp"
+/** file: Histories.cpp
+ *
+ * Contains the implementation of the Histories class
+ */
+#include "solver/Histories.hpp"
 
 #include <utility>                      // for move
 
 #include "global.hpp"                     // for make_unique
-#include "HistoryEntry.hpp"             // for HistoryEntry
-#include "HistorySequence.hpp"          // for HistorySequence
+
+#include "solver/HistoryEntry.hpp"             // for HistoryEntry
+#include "solver/HistorySequence.hpp"          // for HistorySequence
 
 namespace solver {
 Histories::Histories() :
@@ -34,8 +39,14 @@ HistorySequence *Histories::createSequence() {
     sequencesById_.push_back(std::move(histSeq));
     return rawPtr;
 }
-void Histories::deleteSequence(long seqId) {
-    HistorySequence *sequence = getSequence(seqId);
+void Histories::deleteSequence(HistorySequence *sequence) {
+    // Retrieve the current ID of the sequence, which should be its position in the vector.
+    long seqId = sequence->id_;
+
+    if (sequencesById_[seqId].get() != sequence) {
+        debug::show_message("ERROR: sequence ID does not match its index!");
+    }
+
     // Deregister and clear the sequence.
     sequence->erase();
     if (seqId < static_cast<long>(sequencesById_.size()) - 1) {

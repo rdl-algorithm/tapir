@@ -9,8 +9,6 @@
 #include <utility>                      // for move                // IWYU pragma: keep
 #include <vector>                       // for vector, vector<>::iterator
 
-#include <boost/program_options.hpp>    // for variables_map, options_description, positional_options_description, variable_value, store, basic_command_line_parser, command_line_parser, notify, operator<<, parse_config_file, basic_command_line_parser::basic_command_line_parser<charT>, basic_command_line_parser::options, basic_command_line_parser::positional, basic_command_line_parser::run
-
 #include "global.hpp"                     // for RandomGenerator, make_unique
 
 #include "solver/abstract-problem/Action.hpp"
@@ -25,80 +23,45 @@
 #include "solver/Simulator.hpp"            // for Simulator
 #include "solver/Solver.hpp"            // for Solver
 
-#include "ProgramOptions.hpp"           // for ProgramOptions
-
 #ifdef GOOGLE_PROFILER
 #include <google/profiler.h>
 #endif
 
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
-template<typename ModelType>
-int simulate(int argc, char const *argv[], ProgramOptions *options) {
-    po::options_description visibleOptions;
-    po::options_description allOptions;
-    visibleOptions.add(options->getGenericOptions()).add(
-            options->getABTOptions()).add(options->getProblemOptions()).add(
-            options->getHeuristicOptions().add(
-                    options->getSimulationOptions()));
-    allOptions.add(visibleOptions);
+template<typename ModelType, typename OptionsType>
+int simulate(int argc, char const *argv[]) {
+    std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
 
-    // Set up positional options
-    po::positional_options_description positional;
-    positional.add("problem.mapPath", 1);
-    positional.add("cfg", 2);
-    positional.add("policy", 3);
-    positional.add("changes.changesPath", 4);
-    positional.add("simulation.nSteps", 5);
-    positional.add("simulation.nRuns", 6);
-    positional.add("log", 7);
-
-    po::variables_map vm;
-    po::store(
-            po::command_line_parser(argc, argv).options(allOptions).positional(
-                    positional).run(), vm);
-    if (vm.count("help")) {
-        cout << "Usage: solve [options] [mapPath] [cfgPath] [policyPath]"
-            " [changesPath] [nSteps] [nRuns] [logPath]" << endl;
-        cout << visibleOptions << endl;
-        return 0;
+    OptionsType options;
+    try {
+        parser->setOptions(&options);
+        parser->parseCmdLine(argc, argv);
+        if (!options.configPath.empty()) {
+            parser->parseCfgFile(options.configPath);
+        }
+        parser->finalize();
+    } catch (options::OptionParsingException const &e) {
+        std::cerr << e.what();
+        return 2;
     }
-    std::string cfgPath = vm["cfg"].as<std::string>();
-    po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
-    po::notify(vm);
-    load_overrides(vm);
 
-    std::string polPath = vm["policy"].as<std::string>();
-    bool hasChanges = vm["changes.hasChanges"].as<bool>();
-    bool hasDynamicChanges = vm["changes.areDynamic"].as<bool>();
-    std::string changesPath;
-    if (hasChanges) {
-        changesPath = vm["changes.changesPath"].as<std::string>();
+    if (options.seed == 0) {
+        options.seed = std::time(nullptr);
     }
-    std::string logPath = vm["log"].as<std::string>();
-    long nSteps = vm["simulation.nSteps"].as<long>();
-    long nRuns = vm["simulation.nRuns"].as<long>();
-    unsigned long seed = vm["seed"].as<unsigned long>();
-
-    bool savePolicy = vm["simulation.savePolicy"].as<bool>();
-    if (seed == 0) {
-        seed = std::time(nullptr);
-    }
-    cout << "Global seed: " << seed << endl << endl;
+    cout << "Global seed: " << options.seed << endl << endl;
     RandomGenerator randGen;
-    randGen.seed(seed);
+    randGen.seed(options.seed);
     randGen.discard(10);
 
-    std::ofstream os(logPath);
+    std::ofstream os(options.logPath);
 
-    if (!vm["state"].empty()) {
+    if (options.rngState > 0) {
         std::stringstream sstr;
-        unsigned long state = vm["state"].as<unsigned long>();
-        sstr << state;
+        sstr << options.rngState;
         sstr >> randGen;
-        cout << "Loaded PRNG state " << state << endl;
+        cout << "Loaded PRNG state " << options.rngState << endl;
     }
 
     double totalReward = 0;
@@ -109,16 +72,16 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
     ProfilerStart("simulate.prof");
 #endif
 
-    for (long runNumber = 0; runNumber < nRuns; runNumber++) {
+    for (long runNumber = 0; runNumber < options.nRuns; runNumber++) {
         cout << "Run #" << runNumber+1 << endl;
         cout << "PRNG engine state: " << randGen << endl;
         cout << "Loading policy... " << endl;
 
         std::ifstream inFile;
-        inFile.open(polPath);
+        inFile.open(options.policyPath);
         if (!inFile.is_open()) {
             std::ostringstream message;
-            message << "Failed to open " << polPath;
+            message << "Failed to open " << options.policyPath;
             debug::show_message(message.str());
             return 1;
         }
@@ -129,17 +92,19 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         // Advance it forward a long way to avoid correlation between the solver and simulator.
         solverGen.discard(10000);
 
-        std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&solverGen, vm);
+        std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&solverGen,
+                std::make_unique<OptionsType>(options));;
         solver::Solver solver(std::move(solverModel));
         solver.getSerializer()->load(inFile);
         inFile.close();
 
-        std::unique_ptr<ModelType> simulatorModel = std::make_unique<ModelType>(&randGen, vm);
-        solver::Simulator simulator(std::move(simulatorModel), &solver, hasDynamicChanges);
-        if (hasChanges) {
-            simulator.loadChangeSequence(changesPath);
+        std::unique_ptr<ModelType> simulatorModel = std::make_unique<ModelType>(&randGen,
+                std::make_unique<OptionsType>(options));
+        solver::Simulator simulator(std::move(simulatorModel), &solver, options.areDynamic);
+        if (options.hasChanges) {
+            simulator.loadChangeSequence(options.changesPath);
         }
-        simulator.setMaxStepCount(nSteps);
+        simulator.setMaxStepCount(options.nSimulationSteps);
         cout << "Running..." << endl;
 
         double tStart = abt::clock_ms();
@@ -156,7 +121,8 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
         solver::HistorySequence *sequence = simulator.getHistory();
 
-        for (long entryNo = 0; entryNo < sequence->getLength() - 1; entryNo++) {
+        for (solver::HistoryEntry::IdType entryNo = 0;
+                entryNo < sequence->getLength() - 1; entryNo++) {
             solver::HistoryEntry *entry = sequence->getEntry(entryNo);
             os << "t = " << entryNo << endl;
             os << "S: " << *entry->getState() << endl;
@@ -176,7 +142,7 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
         cout << "Time spent replenishing particles: ";
         cout << simulator.getTotalReplenishingTime() << "ms" << endl;
         cout << "Total time taken: " << totT << "ms" << endl;
-        if (savePolicy) {
+        if (options.savePolicy) {
             // Write the final policy to a file.
             cout << "Saving final policy..." << endl;
             std::ofstream outFile;
@@ -196,10 +162,10 @@ int simulate(int argc, char const *argv[], ProgramOptions *options) {
 
     os.close();
 
-    cout << nRuns << " runs completed." << endl;
-    cout << "Mean reward: " << totalReward / nRuns << endl;
-    cout << "Mean number of steps: " << totalNSteps / nRuns << endl;
-    cout << "Mean time taken: " << totalTime / nRuns << "ms" << endl;
+    cout << options.nRuns << " runs completed." << endl;
+    cout << "Mean reward: " << totalReward / options.nRuns << endl;
+    cout << "Mean number of steps: " << totalNSteps / options.nRuns << endl;
+    cout << "Mean time taken: " << totalTime / options.nRuns << "ms" << endl;
     cout << "Mean time per step: " << totalTime / totalNSteps << "ms" << endl;
     return 0;
 }

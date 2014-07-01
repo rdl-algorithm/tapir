@@ -45,4 +45,13 @@ class TrackerState : public solver::VectorState {
 };
 } /* namespace tracker */
 
+// We define a hash function directly in the std namespace.
+namespace std {
+template<> struct hash<tracker::TrackerState> {
+    std::size_t operator()(tracker::TrackerState const &state) const {
+        return state.hash();
+    }
+};
+} /* namespace std */
+
 #endif /* TRACKERSTATE_HPP_ */

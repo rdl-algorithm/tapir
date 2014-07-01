@@ -7,8 +7,6 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include <boost/program_options.hpp>    // for variables_map
-
 #include "global.hpp"                     // for RandomGenerator
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
@@ -25,8 +23,7 @@
 #include "solver/mappings/observations/discrete_observations.hpp"
 
 #include "TrackerAction.hpp"
-
-namespace po = boost::program_options;
+#include "TrackerOptions.hpp"
 
 namespace solver {
 class StatePool;
@@ -78,21 +75,19 @@ struct TargetStateHash {
     }
 };
 
-class TrackerModel: virtual public ModelWithProgramOptions {
+class TrackerModel: public shared::ModelWithProgramOptions {
     friend class TrackerObservation;
 
   public:
 
-    TrackerModel(RandomGenerator *randGen, po::variables_map vm);
+    TrackerModel(RandomGenerator *randGen, std::unique_ptr<TrackerOptions> options);
     ~TrackerModel() = default;
     TrackerModel(TrackerModel const &) = delete;
     TrackerModel(TrackerModel &&) = delete;
     TrackerModel &operator=(TrackerModel const &) = delete;
     TrackerModel &operator=(TrackerModel &&) = delete;
 
-    /** The cells are either empty or walls; empty cells are numbered
-     * starting at 0
-     */
+    /** The cells are either empty or walls. */
     enum TrackerCellType : int {
         EMPTY = 0,
         WALL = -1
@@ -101,21 +96,12 @@ class TrackerModel: virtual public ModelWithProgramOptions {
     void setEnvMap(std::vector<std::vector<TrackerCellType>> envMap);
     void setPolicyZones(std::vector<GridPosition> zones, int currZone, double moveProbability);
 
-    /* ----------------------- Basic getters  ------------------- */
-	std::string getName() override {
-        return "Tracker";
+    /* ---------- Custom getters for extra functionality  ---------- */
+    long getNRows() const {
+        return nRows_;
     }
-
-    /* ---------- Virtual getters for ABT / model parameters  ---------- */
-    // Simple getters
-    long getNumberOfStateVariables() override {
-        return nStVars_;
-    }
-    double getMinVal() override {
-        return minVal_;
-    }
-    double getMaxVal() override {
-        return maxVal_;
+    long getNCols() const {
+        return nCols_;
     }
 
     /* --------------- The model interface proper ----------------- */
@@ -203,6 +189,8 @@ class TrackerModel: virtual public ModelWithProgramOptions {
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
 
+    TrackerOptions *options_;
+
     /** Returns true iff target is visible from robot */
     bool isTargetVisible(GridPosition const &robotPos, int robotYaw, GridPosition const &targetPos);
 
@@ -258,8 +246,7 @@ class TrackerModel: virtual public ModelWithProgramOptions {
     std::vector<std::vector<TrackerCellType>> envMap_;
 
     // General problem parameters
-    long nActions_, nStVars_;
-    double minVal_, maxVal_;
+    long nActions_;
 
     /** The target policy. 0 for wall bouncing, 1 for zone waypoints */
     int targetPolicy_;

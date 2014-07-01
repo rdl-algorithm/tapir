@@ -7,8 +7,6 @@
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 
-#include <boost/program_options.hpp>    // for variables_map
-
 #include "problems/shared/GridPosition.hpp"  // for GridPosition
 #include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
 
@@ -26,11 +24,10 @@
 #include "position_history.hpp"
 #include "smart_history.hpp"
 #include "RockSampleMdpSolver.hpp"
+#include "RockSampleOptions.hpp"
 #include "RockSampleAction.hpp"
 
 #include "global.hpp"                     // for RandomGenerator
-
-namespace po = boost::program_options;
 
 namespace solver {
 class ActionMapping;
@@ -51,10 +48,10 @@ struct RockSampleChange : public solver::ModelChange {
     long j1 = 0;
 };
 
-class RockSampleModel : public ModelWithProgramOptions {
+class RockSampleModel : public shared::ModelWithProgramOptions {
 friend class RockSampleMdpSolver;
   public:
-    RockSampleModel(RandomGenerator *randGen, po::variables_map vm);
+    RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockSampleOptions> options);
     ~RockSampleModel() = default;
     _NO_COPY_OR_MOVE(RockSampleModel);
 
@@ -87,10 +84,6 @@ friend class RockSampleMdpSolver;
 
 
     /* ----------------------- Basic getters  ------------------- */
-    /** Returns the name of this problem. */
-    virtual std::string getName() override {
-        return "RockSample";
-    }
     /** Returns the number of rocks used in this model. */
     long getNumberOfRocks() {
         return nRocks_;
@@ -121,6 +114,7 @@ friend class RockSampleMdpSolver;
     RockSampleMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
     }
+
     /** Returns the starting position for this problem. */
     GridPosition getStartPosition() {
         return startPos_;
@@ -154,18 +148,6 @@ friend class RockSampleMdpSolver;
      * given distance. */
     double getSensorCorrectnessProbability(double distance) {
         return (1 + std::pow(2, -distance / halfEfficiencyDistance_)) * 0.5;
-    }
-
-
-    /* ---------- Virtual getters for ABT / model parameters  ---------- */
-    virtual long getNumberOfStateVariables() override {
-        return nStVars_;
-    }
-    virtual double getMinVal() override {
-        return minVal_;
-    }
-    virtual double getMaxVal() override {
-        return maxVal_;
     }
 
 
@@ -297,6 +279,8 @@ friend class RockSampleMdpSolver;
     /** Encodes rocks to an integer. */
     long encodeRocks(std::vector<bool> rockStates);
 
+    RockSampleOptions *options_;
+
     /** The reward for sampling a good rock. */
     double goodRockReward_;
     /** The penalty for sampling a bad rock. */
@@ -346,10 +330,7 @@ friend class RockSampleMdpSolver;
     /** The initial visit count for preferred actions. */
     long preferredVisitCount_;
 
-    // Generic problem parameters
-    long nStVars_;
-    double minVal_, maxVal_;
-
+    /** Solver for the MDP version of the problem. */
     std::unique_ptr<RockSampleMdpSolver> mdpSolver_;
 };
 } /* namespace rocksample */

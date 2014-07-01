@@ -1,36 +1,57 @@
 #ifndef TRACKEROPTIONS_HPP_
 #define TRACKEROPTIONS_HPP_
 
-#include <sstream>                      // for basic_stringbuf<>::int_type, basic_stringbuf<>::pos_type, basic_stringbuf<>::__streambuf_type
 #include <string>                       // for string
 
-#include <boost/program_options.hpp>    // for value, options_description, options_description_easy_init, typed_value
-
-#include "problems/shared/ProgramOptions.hpp"  // for ProgramOptions
-
-namespace po = boost::program_options;
+#include "problems/shared/SharedOptions.hpp"
 
 namespace tracker {
-class TrackerOptions : public ProgramOptions {
-    /** Returns configurations options for the Tracker POMDP */
-    po::options_description getProblemOptions() {
-        po::options_description problem("Settings specific to the Tracker POMDP");
-        problem.add(ProgramOptions::getProblemOptions());
-        problem.add_options()
-                ("problem.moveCost", po::value<double>(), "movement cost")
-                ("problem.waitCost", po::value<double>(), "cost for staying still")
-                ("problem.obstructCost", po::value<double>(), "obstructing human cost")
-                ("problem.collideCost", po::value<double>(), "obstacle collision cost")
-                ("problem.visibleReward", po::value<double>(),
-                        "reward for keeping target visible");
-        return problem;
+
+struct TrackerOptions : public shared::SharedOptions {
+    TrackerOptions() = default;
+    virtual ~TrackerOptions() = default;
+
+    /* -------- Settings specific to the Tracker POMDP -------- */
+    /** Path to the map file. */
+    std::string mapPath = "";
+    /** Cost per move. */
+    double moveCost = 0.0;
+    /** Cost for waiting instead of moving */
+    double waitCost = 0.0;
+    /** Cost for getting in human's way */
+    double obstructCost = 0.0;
+    /** Cost for collision with obstacle */
+    double collideCost = 0.0;
+    /** Reward for having target visible */
+    double visibleReward = 0.0;
+
+    static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
+        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating);
+        addTrackerOptions(parser.get());
+        return std::move(parser);
     }
 
-    /** Returns configuration options for the Tracker heuristic */
-    po::options_description getHeuristicOptions() {
-        po::options_description heuristics("Tracker heuristic configuration");
-        heuristics.add(ProgramOptions::getHeuristicOptions());
-        return heuristics;
+    static void addTrackerOptions(options::OptionParser *parser) {
+        parser->addOption<double>("problem", "moveCost", &TrackerOptions::moveCost);
+        parser->addValueArg<double>("problem", "moveCost", &TrackerOptions::moveCost,
+                "", "move", "cost per move", "real");
+
+        parser->addOption<double>("problem", "waitCost", &TrackerOptions::waitCost);
+        parser->addValueArg<double>("problem", "waitCost", &TrackerOptions::waitCost,
+                "", "wait", "cost for waiting instead of moving", "real");
+
+        parser->addOption<double>("problem", "obstructCost", &TrackerOptions::obstructCost);
+        parser->addValueArg<double>("problem", "obstructCost", &TrackerOptions::obstructCost,
+                "", "obstruct", "cost for getting in human's way", "real");
+
+        parser->addOption<double>("problem", "collideCost", &TrackerOptions::collideCost);
+        parser->addValueArg<double>("problem", "collideCost", &TrackerOptions::collideCost,
+                "", "collide", "cost for collision with obstacle ", "real");
+
+        parser->addOption<double>("problem", "visibleReward", &TrackerOptions::visibleReward);
+        parser->addValueArg<double>("problem", "visibleReward", &TrackerOptions::visibleReward,
+                "", "visible", "Reward for having target visible", "real");
+
     }
 };
 } /* namespace tracker */

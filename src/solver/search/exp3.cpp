@@ -50,7 +50,7 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo, double timeU
     strategyInfo.timeSpent += timeUsed;
     strategyInfo.numberOfTimesUsed++;
     strategyInfo.weight *= std::exp(
-            strategyExplorationCoefficient_ * (deltaQ / model_->getMaxVal())
+            strategyExplorationCoefficient_ * (deltaQ / model_->getOptions()->maxVal)
                     / (2 * strategyInfo.probability));
 
     double weightTotal = 0.0;
@@ -72,7 +72,7 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo, double timeU
 SearchStatus MultipleStrategiesExp3::extendSequence(HistorySequence *sequence, long maximumDepth,
         bool doBackup) {
     BeliefNode *rootNode = sequence->getFirstEntry()->getAssociatedBeliefNode();
-    double initialRootQValue = rootNode->getQValue();
+    double initialRootQValue = rootNode->getCachedValue();
 
     std::unordered_set<long> failedStrategies;
     while (true) {
@@ -90,7 +90,7 @@ SearchStatus MultipleStrategiesExp3::extendSequence(HistorySequence *sequence, l
         if (status != SearchStatus::UNINITIALIZED) {
             // We can update the weights for Exp3, but only if the sequence was backed up.
             if (doBackup) {
-                double newRootQValue = rootNode->getQValue();
+                double newRootQValue = rootNode->getCachedValue();
                 updateStrategyWeights(info->strategyNo, timeUsed, newRootQValue - initialRootQValue);
             }
             return status;

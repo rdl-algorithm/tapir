@@ -34,18 +34,21 @@
 #include "solver/serialization/Serializer.hpp"
 
 namespace solver {
-/* ----------------------- Basic getters  ----------------------- */
-std::string Model::getName() {
-    return "Default Model";
+Model::Model(std::string problemName, RandomGenerator *randGen, std::unique_ptr<Options> options) :
+        problemName_(problemName),
+        randGen_(randGen),
+        options_(std::move(options)) {
 }
 
-/* ---------- Virtual getters for ABT / model parameters  ---------- */
-bool Model::hasColorOutput() {
-    return false;
+/* -------------------- Simple getters ---------------------- */
+RandomGenerator *Model::getRandomGenerator() const {
+    return randGen_;
 }
-bool Model::hasVerboseOutput() {
-    return false;
+
+Options const *Model::getOptions() const {
+    return options_.get();
 }
+
 
 /* -------------------- Black box dynamics ---------------------- */
 // Transition parameters are optional
@@ -127,7 +130,7 @@ std::unique_ptr<Action> Model::getRolloutAction(HistoricalData const */*data*/,
 
 /* ------- Customization of more complex solver functionality  --------- */
 std::unique_ptr<StateIndex> Model::createStateIndex() {
-    return std::make_unique<RTree>(getNumberOfStateVariables());
+    return std::make_unique<RTree>(getOptions()->numberOfStateVariables);
 }
 
 std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) {
@@ -146,7 +149,7 @@ std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
 }
 
 std::unique_ptr<EstimationStrategy> Model::createEstimationStrategy(Solver */*solver*/) {
-    return std::make_unique<EstimationFunction>(estimators::average_q_value);
+    return std::make_unique<EstimationFunction>(estimators::average);
 }
 
 std::unique_ptr<HistoricalData> Model::createRootHistoricalData() {

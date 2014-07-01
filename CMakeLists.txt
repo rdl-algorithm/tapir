@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(abt)
 
 # Set make arguments
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wpedantic -Wall -Wextra -Wshadow -Weffc++ -Wswitch-default -Wfatal-errors -frounding-math -L/usr/lib" ) 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Weffc++ -frounding-math" ) 
 
 ## Use Boost 1.48.0 from source, different to my system's default version
 set(BOOST_ROOT "~/boost_1_48_0")
-find_package(Boost 1.48.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.48.0 REQUIRED)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS 
@@ -45,11 +45,11 @@ generate_messages(
 
 ## Declare a catkin package
 catkin_package(
-	INCLUDE_DIRS src
+	INCLUDE_DIRS src src/options
 	LIBRARIES ${PROJECT_NAME}
 	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs tf message_runtime laser_geometry)
 
-include_directories(src ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include src src/options ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} include)
 
 add_library(AbtSolver
 	src/global.cpp
@@ -68,7 +68,7 @@ add_library(AbtSolver
 	src/solver/abstract-problem/DiscretizedPoint.cpp
 	src/solver/abstract-problem/Model.cpp
 	src/solver/abstract-problem/Vector.cpp
-	src/solver/abstract-problem/heuristics/rollout_heuristic.cpp
+	src/solver/abstract-problem/heuristics/RolloutHeuristic.cpp
 	src/solver/belief-estimators/estimators.cpp
 	src/solver/changes/DefaultHistoryCorrector.cpp
 	src/solver/indexing/FlaggingVisitor.cpp
@@ -87,12 +87,15 @@ add_library(AbtSolver
 	src/solver/search/steppers/nn_rollout.cpp
 	src/solver/search/steppers/ucb_search.cpp
 	src/solver/serialization/TextSerializer.cpp
+	src/options/inih/ini.c
+	src/options/option_parser.cpp
 	src/problems/shared/parsers.cpp
 	src/problems/shared/geometry/Point2D.cpp
 	src/problems/shared/geometry/Rectangle2D.cpp
 	src/problems/shared/geometry/RTree.cpp
 	src/problems/shared/geometry/utilities.cpp
 	src/problems/shared/geometry/Vector2D.cpp
+	src/problems/shared/policy_iteration.cpp
 )
 
 add_library(AbtTracker
@@ -105,6 +108,7 @@ add_library(AbtTracker
 
 add_library(AbtTag
 	src/problems/tag/TagAction.cpp
+	src/problems/tag/TagMdpSolver.cpp
 	src/problems/tag/TagModel.cpp
 	src/problems/tag/TagObservation.cpp
 	src/problems/tag/TagState.cpp

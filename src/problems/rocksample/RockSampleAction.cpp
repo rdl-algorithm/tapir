@@ -1,6 +1,7 @@
 #include "RockSampleAction.hpp"
 
 #include <cstddef>                      // for size_t
+#include <cstdint>
 
 #include <algorithm>                    // for copy
 #include <iterator>                     // for ostream_iterator
@@ -12,7 +13,7 @@
 #include "solver/abstract-problem/State.hpp"             // for State
 
 namespace rocksample {
-RockSampleAction::RockSampleAction(ActionType actionType, long rockNo) :
+RockSampleAction::RockSampleAction(ActionType actionType, uint8_t rockNo) :
         actionType_(actionType),
         rockNo_(rockNo) {
 }
@@ -49,7 +50,7 @@ ActionType RockSampleAction::getActionType() const {
     return actionType_;
 }
 
-long RockSampleAction::getRockNo() const {
+uint8_t RockSampleAction::getRockNo() const {
     return rockNo_;
 }
 } /* namespace rocksample */

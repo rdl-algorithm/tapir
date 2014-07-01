@@ -1,6 +1,4 @@
 [
-    { include: ["@<boost/program_options/.*.hpp>", "public",
-        "<boost/program_options.hpp>", "public"] },
     { include: ["<ext/alloc_traits.h>", "public", "<deque>", "public"] },
     { include: ["<ext/alloc_traits.h>", "public", "<forward_list>", "public"] },
     { include: ["<ext/alloc_traits.h>", "public", "<list>", "public"] },

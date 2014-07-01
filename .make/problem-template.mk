@@ -19,7 +19,7 @@ $(TGTS_$(n)): | $(BINDIR_$(n))
 # Library pattern.
 LIB_$(n) := $(BUILDDIR_$(n))/lib$(n).a
 OUTPUTS_TO_CLEAN_$(n) += $(LIB_$(n))
-MEMBERS_$(n) := $(OBJS_NTGT_$(n)) $(OBJS_shared)
+MEMBERS_$(n) := $(OBJS_NTGT_$(n)) $(OBJS_shared) $(OBJS_options) $(OBJS_inih)
 
 define library_template
 $(LIB_$(n)): $$(MEMBERS_$(n))
@@ -37,7 +37,7 @@ $(LIB_$(n)): .make/problem-template.mk
 LINKER_DEPS_$(n) := $(LIB_$(n)) $$(LIB_solver)
 LINKER_DEPS_$(n) += $(EXTRA_LINKER_DEPS_$(n))
 
-LIBRARIES_$(n) := -lboost_program_options -lspatialindex
+LIBRARIES_$(n) := -lspatialindex
 LIBRARIES_$(n) += $(EXTRA_LIBRARIES_$(n))
 
 # Linking rule for the executable targets.

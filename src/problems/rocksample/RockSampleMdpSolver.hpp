@@ -51,7 +51,7 @@ private:
     std::map<std::pair<int, int>, double> valueMap_;
 };
 
-class RockSampleMdpParser : public Parser<solver::Heuristic> {
+class RockSampleMdpParser : public shared::Parser<solver::Heuristic> {
 public:
     RockSampleMdpParser(RockSampleModel *model);
     virtual ~RockSampleMdpParser() = default;

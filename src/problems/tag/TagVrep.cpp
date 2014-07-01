@@ -14,8 +14,7 @@
 #include <geometry_msgs/Point.h>
 
 #include "VrepHelper.hpp"
-
-#include "problems/shared/ProgramOptions.hpp"
+#include "options/option_parser.hpp"
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/simulate.hpp"
 
@@ -27,7 +26,6 @@
 
 using std::cout;
 using std::endl;
-namespace po = boost::program_options;
 
 using namespace tag;
 
@@ -107,49 +105,26 @@ int main(int argc, char **argv)
     ros::Subscriber selectSub = node.subscribe("selected_cells", 1, selectCallback);
 
 	/**************** ABT init ***********************/
-
-	TagOptions tag_options;
-	ProgramOptions *options = &tag_options;
-
-	po::options_description visibleOptions;
-    po::options_description allOptions;
-    visibleOptions.add(options->getGenericOptions()).add(
-            options->getABTOptions()).add(options->getProblemOptions()).add(
-            options->getHeuristicOptions());
-    allOptions.add(visibleOptions).add(options->getSimulationOptions());
-
-    // Set up positional options using ABT's command line interface
-    po::positional_options_description positional;
-    positional.add("problem.mapPath", 1);
-    positional.add("cfg", 2);
-    positional.add("policy", 3);
-
     std::string tagPath = ros::package::getPath("abt") + "/src/problems/tag/";
     std::string argMapPath = tagPath + "tests/maps/map.txt";
-    std::string argCfgPath = tagPath + "tests/default.cfg";
-    char* poArgv[] = {"solve ", &argMapPath[0], &argCfgPath[0]};
+    std::string cfgPath = tagPath + "tests/default.cfg";
+    std::unique_ptr<options::OptionParser> parser = TagOptions::makeParser(true);
+	TagOptions tagOptions;
+    parser->setOptions(&tagOptions);
+    parser->parseCfgFile(cfgPath);
+    parser->finalize();
 
-    po::variables_map vm;
-    po::store(
-            po::command_line_parser(3, poArgv).options(allOptions).positional(
-                    positional).run(), vm);
-
-    std::string cfgPath = vm["cfg"].as<std::string>();
-    po::store(po::parse_config_file<char>(cfgPath.c_str(), allOptions), vm);
-    po::notify(vm);
-    load_overrides(vm);
-
-    unsigned long seed = vm["seed"].as<unsigned long>();
-    if (seed == 0) {
-        seed = std::time(nullptr);
+    if (tagOptions.seed == 0) {
+        tagOptions.seed = std::time(nullptr);
     }
-    cout << "Seed: " << seed << endl;
+    cout << "Seed: " << tagOptions.seed << endl;
     RandomGenerator randGen;
-    randGen.seed(seed);
+    randGen.seed(tagOptions.seed);
     randGen.discard(10);
 
     // Initialise TagModel
-    std::unique_ptr<TagModel> newModel = std::make_unique<TagModel>(&randGen, vm);
+    std::unique_ptr<TagModel> newModel = std::make_unique<TagModel>(
+        &randGen, std::make_unique<TagOptions>(tagOptions));
     TagModel *model = newModel.get();
 
     // Initialise Solver
@@ -165,7 +140,8 @@ int main(int argc, char **argv)
     cout << "Total solving time: " << totT << "ms" << endl;
 
     // Initialise ABT's Simulator (not VREP!!)
-    std::unique_ptr<TagModel> simulatorModel = std::make_unique<TagModel>(&randGen, vm);
+    std::unique_ptr<TagModel> simulatorModel = std::make_unique<TagModel>(
+        &randGen, std::make_unique<TagOptions>(tagOptions));
     solver::Simulator simulator(std::move(simulatorModel), &solver, true);
     //if (hasChanges) {
     //    simulator.loadChangeSequence(changesPath);
@@ -279,7 +255,7 @@ void publishEnvMap(std::vector<std::vector<TagModel::TagCellType>> const &envMap
             Point p = gridToPoint(GridPosition(i, j));
             ss << (float) p.x << ",";
             ss << (float) p.y << ",";
-            ss << envMap[i][j] << " ";
+            ss << (float) envMap[i][j] << " ";
         }
     }
     std_msgs::String stringMsg;

@@ -1,3 +1,7 @@
+/** file: global.cpp
+ *
+ * Implementation for show_message() - a great place for breakpoints!
+ */
 #include "global.hpp"
 
 #include <iostream>
