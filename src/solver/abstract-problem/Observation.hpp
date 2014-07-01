@@ -9,6 +9,9 @@
 #include "solver/abstract-problem/Point.hpp"
 
 namespace solver {
+    /** Currently Observation has no requirements over and above Point,
+     * so this is just a typedef.
+     */
     typedef Point Observation;
 } /* namespace solver */
 

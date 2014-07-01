@@ -122,11 +122,17 @@ public:
      * whether or not the resulting next state is a terminal state.
      */
     struct StepResult {
+        /** The action taken, which caused this result. */
         std::unique_ptr<Action> action = nullptr;
+        /** The transition parameters, if any, describing the transition. */
         std::unique_ptr<TransitionParameters> transitionParameters = nullptr;
+        /** The observation received. */
         std::unique_ptr<Observation> observation = nullptr;
+        /** The resulting reward. */
         double reward = 0;
+        /** The next state */
         std::unique_ptr<State> nextState = nullptr;
+        /** True iff the next state is terminal. */
         bool isTerminal = false;
     };
 

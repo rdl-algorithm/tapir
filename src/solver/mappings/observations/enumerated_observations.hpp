@@ -62,6 +62,10 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
   public:
     friend class EnumeratedObservationMapEntry;
     friend class EnumeratedObservationTextSerializer;
+
+    /** Creates a new EnumeratedObservationMap, which will be owned by the given ActionNode, and
+     * whose observations will be defined by the given vector of observations.
+     */
     EnumeratedObservationMap(ActionNode *owner,
             std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations);
 

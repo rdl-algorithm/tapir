@@ -9,6 +9,9 @@
 #include "solver/abstract-problem/Vector.hpp"
 
 namespace solver {
+    /** The VectorState class currently has the same interface as Vector, because there are no
+     * special methods required by State.
+     */
     typedef Vector VectorState;
 }
 

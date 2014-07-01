@@ -15,6 +15,7 @@
 namespace solver {
 /** The data associated with a near neighbor. */
 struct NnData {
+    /** The closest neighbor found so far for this node. */
     BeliefNode *neighbor = nullptr;
 };
 

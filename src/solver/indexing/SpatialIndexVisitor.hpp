@@ -24,15 +24,24 @@ class StatePool;
  */
 class SpatialIndexVisitor: public SpatialIndex::IVisitor {
   public:
+    /** Constructs a new SpatialIndexVisitor, which will query the given StatePool in order to
+     * access the StateInfo instances associated with the entries in the spatial index.
+     */
     SpatialIndexVisitor(StatePool *statePool);
     virtual ~SpatialIndexVisitor();
     _NO_COPY_OR_MOVE(SpatialIndexVisitor);
 
-    virtual void visitNode(const SpatialIndex::INode &node);
-    virtual void visitData(const SpatialIndex::IData &data);
+    /** The method used when visiting an individual node - we don't use this one. */
+    virtual void visitNode(const SpatialIndex::INode &node) override;
+    /** This is the key method of IVisitor we need to override in order to implement the
+     * functionality we need.
+     */
+    virtual void visitData(const SpatialIndex::IData &data) override;
 
-    /** This is the key method we implement in order to allow queries over StateInfo. */
-    virtual void visitData(std::vector<const SpatialIndex::IData*> &v);
+    /** The method used when visiting a vector of data - we don't use this one as we visit one
+     * data entry at a time.
+     */
+    virtual void visitData(std::vector<const SpatialIndex::IData*> &v) override;
 
     /** A method following the visitor design patter, allowing each StateInfo to be processed. */
     virtual void visit(StateInfo *info) = 0;

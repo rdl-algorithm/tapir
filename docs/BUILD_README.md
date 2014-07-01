@@ -82,14 +82,17 @@ library libspatialindex.
 
 If your problem needs to be linked to additional libraries, you can specify
 this by adding those dependencies to the variable
-EXTRA_LINKER_DEPS\_[module].
+EXTRA_LINKER_ARGS\_[module].
 [Tag]: @ref src/problems/tag
 [RockSample]: @ref src/problems/rocksample
 
 [Model]: @ref solver::Model
-[State]: @ref solver::Point
-[Action]: @ref solver::Point
-[Observation]: @ref solver::Point
+[State]: @ref solver::State
+[Action]: @ref solver::Action
+[Observation]: @ref solver::Observation
+[Vector]: @ref solver::Vector
+[VectorState]: @ref solver::VectorState
+
 [Serializer]: @ref solver::Serializer
 [TextSerializer]: @ref solver::TextSerializer
 

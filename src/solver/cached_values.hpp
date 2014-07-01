@@ -27,6 +27,9 @@ public:
  */
 template<typename T> class CachedValue : public BaseCachedValue {
 public:
+    /** Constructs a new CachedValue for the given node, which will use the given function in order
+     * to recalculate the cahced value whenever it is needed.
+     */
     CachedValue(BeliefNode const *node, std::function<T(BeliefNode const *)> f) :
                 node_(node),
                 function_(f),
@@ -34,10 +37,14 @@ public:
     }
     _NO_COPY_OR_MOVE(CachedValue);
 
+    /** Updates the cache inside this cached value by using the stored function on the associated
+     * belief node.
+     */
     virtual void updateCache() {
         cache_ = function_(node_);
     }
 
+    /** Returns the currently cached value. */
     virtual T getCache() {
         return cache_;
     }

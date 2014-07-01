@@ -2,9 +2,12 @@
 [RockSample]: @ref src/problems/rocksample
 
 [Model]: @ref solver::Model
-[State]: @ref solver::Point
-[Action]: @ref solver::Point
-[Observation]: @ref solver::Point
+[State]: @ref solver::State
+[Action]: @ref solver::Action
+[Observation]: @ref solver::Observation
+[Vector]: @ref solver::Vector
+[VectorState]: @ref solver::VectorState
+
 [Serializer]: @ref solver::Serializer
 [TextSerializer]: @ref solver::TextSerializer
 

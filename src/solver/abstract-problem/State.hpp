@@ -9,6 +9,7 @@
 #include "solver/abstract-problem/Point.hpp"
 
 namespace solver {
+    /** Currently State has no requirements over and above Point, so this is just a typedef. */
     typedef Point State;
 } /* namespace solver */
 
