@@ -102,9 +102,11 @@ MKDIR_RECIPE   = @mkdir -p $@
 # Universal grouping targets
 # ----------------------------------------------------------------------
 
-.PHONY: default nothing
+.PHONY: default nothing doxygen
 default: build-solver ;
 nothing: ;
+doxygen:
+	doxygen docs/Doxyfile
 
 .PHONY: all build build-all
 all: build-all
@@ -113,7 +115,7 @@ build: build-solver
 .PHONY: clean clean-all
 clean-all:
 	@echo Removing all build folders!
-	@rm -rfv $(ROOT)/builds | grep "directory" ; true
+	@rm -rfv $(ROOT)/builds $(ROOT)/html | grep "directory" ; true
 
 # Some stuff used for code beautification
 include .make/beautify-settings.mk
