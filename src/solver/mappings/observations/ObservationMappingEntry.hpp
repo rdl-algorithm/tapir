@@ -1,3 +1,10 @@
+/** file: ObservationMappingEntry.hpp
+ *
+ * Defines the ObservationMappingEntry interface, which defines the core methods for an edge in
+ * the tree between an ActionNode and a subsequent BeliefNode.
+ *
+ * In particular, this involves storing the visit count for this specific edge in the tree.
+ */
 #ifndef SOLVER_OBSERVATIONMAPPINGENTRY_HPP_
 #define SOLVER_OBSERVATIONMAPPINGENTRY_HPP_
 
@@ -12,6 +19,16 @@ class ActionNode;
 class BeliefNode;
 class ObservationMapping;
 
+/** An interface that represents an edge in the belief tree between an action node and a
+ * subsequent belief node; this interface is provided so that observations can be grouped together
+ * in custom ways.
+ *
+ * Conceptually, this corresponds to a (belief, action, observation) triplet (b, a, o), or,
+ * equivalently, it can be seen as the parent edge of the resulting belief (b').
+ *
+ * Apart from grouping observations together, the primary purpose of this entry is to store
+ * a visit count - i.e. the number of times this edge has been visited during searching.
+ */
 class ObservationMappingEntry {
 public:
     ObservationMappingEntry() = default;

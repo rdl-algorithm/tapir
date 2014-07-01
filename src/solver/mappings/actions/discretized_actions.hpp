@@ -2,7 +2,12 @@
  *
  * Provides a default implementation for an action mapping that uses a set of discretized actions,
  * i.e. there is an enumerated set of action categories, and the actions in each of these
- * categories will map to the same child nodes in the belief tree.
+ * categories will map to the same child nodes in the belief tree. In order to use this mapping,
+ *
+ *
+ * Since the number of bins is pre-set and finite, this mapping class simply stores the action
+ * mapping entries for each belief node in an array, where the index into the array is simply the
+ * number of the bin.
  *
  * This involves subclasses of the following abstract classes:
  * -ActionPool
@@ -140,7 +145,8 @@ class DiscretizedActionMap: public solver::ActionMapping {
 
 /** A concrete class implementing ActionMappingEntry for a discretized action space.
  *
- *
+ * Each entry stores its bin number and a reference back to its parent map, as well as a child node,
+ * visit count, total and mean Q-values, and a flag for whether or not the action is legal.
  */
 class DiscretizedActionMapEntry : public solver::ActionMappingEntry {
     friend class DiscretizedActionMap;

@@ -3,8 +3,11 @@
  * Contains the abstract base class ActionMapping.
  *
  * In essence, this class defines, for a single belief node, the mapping of actions to
- * (belief, action) edges in the belief tree - each of these is
- * represented by an ActionMappingEntry.
+ * (belief, action) edges in the belief tree - each of these is represented by an
+ * ActionMappingEntry.
+ *
+ * The purpose of this abstract class is to allow different actions to be grouped together in
+ * customizable ways.
  */
 #ifndef SOLVER_ACTIONMAPPING_HPP_
 #define SOLVER_ACTIONMAPPING_HPP_

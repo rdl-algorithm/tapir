@@ -487,9 +487,11 @@ void Solver::updateSequence(HistorySequence *sequence, int sgn, long firstEntryI
         ActionMappingEntry *entry = mapping->getEntry(*(*it)->getAction());
         // Update the action value and visit count.
         entry->update(sgn, sgn * deltaTotalQ);
-        // Update the observation visit count.
-        entry->getActionNode()->getMapping()->updateVisitCount(*(*it)->getObservation(), sgn);
 
+        // Update the observation visit count.
+        ObservationMappingEntry *obsEntry = (
+                entry->getActionNode()->getMapping()->getEntry(*(*it)->getObservation()));
+        obsEntry->updateVisitCount(sgn);
 
         // If we've gone past the source node, we don't need to update further.
         // Backpropagation may need to go further, but we can simply defer it.
@@ -542,7 +544,7 @@ void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation
     ActionMappingEntry *entry = node->getMapping()->getEntry(action);
 
     // Update the visit count for the observation.
-    entry->getActionNode()->getMapping()->updateVisitCount(observation, deltaNVisits);
+    entry->getActionNode()->getMapping()->getEntry(observation)->updateVisitCount(deltaNVisits);
 
     // Update the action.
     if (entry->update(deltaNVisits, deltaTotalQ)) {
