@@ -99,14 +99,24 @@ LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
 MKDIR_RECIPE   = @mkdir -p $@
 
 # ----------------------------------------------------------------------
+# Documentation targets
+# ----------------------------------------------------------------------
+README_DOXYGEN.md: README_BASE.md doxygen_links.md
+	cat $^ > $@
+
+README.md: README_BASE.md github_links.md
+	cat $^ > $@
+
+.PHONY: doc
+doc: README.md README_DOXYGEN.md
+	doxygen docs/Doxyfile
+
+# ----------------------------------------------------------------------
 # Universal grouping targets
 # ----------------------------------------------------------------------
-
-.PHONY: default nothing doxygen
+.PHONY: default nothing
 default: build-solver ;
 nothing: ;
-doxygen:
-	doxygen docs/Doxyfile
 
 .PHONY: all build build-all
 all: build-all

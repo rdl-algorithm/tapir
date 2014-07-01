@@ -177,4 +177,3 @@ individual problem are given in:
 - [simulate.hpp](src/problems/shared/simulate.hpp) --- simulation with online
     POMDP solution; see [simulate.cpp for Tag](src/problems/tag/simulate.cpp)
     for a usage example.
-[Tag]: src/problems/tag "The Tag source code"
