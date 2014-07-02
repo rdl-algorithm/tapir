@@ -69,22 +69,23 @@ and then link against it.
 
 If you want to run the example problems, you should first compile those
 problems, as per the [previous section](#configuration-and-building).
-Each problem should generate two core
-executables - "solve" for initial offline policy generation, and "simulate"
-for online simulation. After building, these executables are copied back into
-the source tree, as that is where the config files for each problem are located;
-it will be easiest to run each problem from there.
+Each problem should generate two core executables - "solve" for initial offline
+policy generation, and "simulate" for online simulation.
+After building, these executables are placed into the directory bin/basic;
+in order to use the default configuration settings, the executables must be run
+from the main project folder.
 
 Each problem will have its own setings, which can be configured in one of two
 ways - via command line parameters, or via configuration files. Any parameters
 passed via command line will override the settings in the file. For a quick
 summary of the command-line parameters available, run the executable with an
 argument of "--help" for the usage information. More advanced settings are
-available via config files - see tests/default.cfg in each problem folder for
-the default settings, e.g. [tag/tests/default.cfg][Tag_config]. The actual
-settings that are available in each config file are defined by sublcass of the
-base [Options] class, e.g. [TagOptions] specifies all of the options that can
-be configured for Tag.
+available via config files; default versions of the configuration files are
+located in the directory "cfg" - for example, see
+[cfg/tag/default.cfg][Tag_config].
+The actual settings that are available in each config file are defined by
+subclasses of the base [Options] class, e.g. [TagOptions] specifies all of
+the options that can be configured for Tag.
 
 Implementing a new POMDP model
 ------------------------------
@@ -164,7 +165,7 @@ specified by [Model::getHeuristicFunction] - this uses a functional programming
 interface, and should return a [Heuristic]. By default, the heuristic function
 is simply one that always returns zero.
 
-If you wish the model to handle changes, see 
+If you wish the model to handle changes, see
 [the section on changes](#implementing-changes)
 below; in short, doing so requires implementations for several other methods,
 most notably [Model::applyChanges].
@@ -404,7 +405,7 @@ individual problem are given in:
 [SharedOptions]: src/problems/shared/SharedOptions.hpp
 
 
-[Tag_config]: src/problems/tag/tests/default.cfg
+[Tag_config]: cfg/tag/default.cfg
 [TagOptions]: src/problems/tag/TagOptions.hpp
 [TagModel]: src/problems/tag/TagModel.cpp
 [TagState]: src/problems/tag/TagState.cpp

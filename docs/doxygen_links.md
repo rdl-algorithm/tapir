@@ -77,7 +77,7 @@
 [SharedOptions]: @ref shared::SharedOptions
 
 
-[Tag_config]: ../src/problems/tag/tests/default.cfg
+[Tag_config]: @ref tag/default.cfg
 [TagOptions]: @ref tag::TagOptions
 [TagModel]: @ref tag::TagModel
 [TagState]: @ref tag::TagState

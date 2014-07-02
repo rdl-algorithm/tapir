@@ -132,8 +132,8 @@ Configuration and Building </h2>
 <h2><a class="anchor" id="usage"></a>
 Usage </h2>
 <p>First of all, the solver can be used for your own purposes in library form; simply build it as either a static or dynamic library (as per the <a href="#configuration-and-building">previous section</a>) and then link against it.</p>
-<p>If you want to run the example problems, you should first compile those problems, as per the <a href="#configuration-and-building">previous section</a>. Each problem should generate two core executables - "solve" for initial offline policy generation, and "simulate" for online simulation. After building, these executables are copied back into the source tree, as that is where the config files for each problem are located; it will be easiest to run each problem from there.</p>
-<p>Each problem will have its own setings, which can be configured in one of two ways - via command line parameters, or via configuration files. Any parameters passed via command line will override the settings in the file. For a quick summary of the command-line parameters available, run the executable with an argument of "--help" for the usage information. More advanced settings are available via config files - see tests/default.cfg in each problem folder for the default settings, e.g. <a href="../src/problems/tag/tests/default.cfg">tag/tests/default.cfg</a>. The actual settings that are available in each config file are defined by sublcass of the base <a class="el" href="structsolver_1_1Options.html">Options</a> class, e.g. <a class="el" href="structtag_1_1TagOptions.html">TagOptions</a> specifies all of the options that can be configured for Tag.</p>
+<p>If you want to run the example problems, you should first compile those problems, as per the <a href="#configuration-and-building">previous section</a>. Each problem should generate two core executables - "solve" for initial offline policy generation, and "simulate" for online simulation. After building, these executables are placed into the directory bin/basic; in order to use the default configuration settings, the executables must be run from the main project folder.</p>
+<p>Each problem will have its own setings, which can be configured in one of two ways - via command line parameters, or via configuration files. Any parameters passed via command line will override the settings in the file. For a quick summary of the command-line parameters available, run the executable with an argument of "--help" for the usage information. More advanced settings are available via config files; default versions of the configuration files are located in the directory "cfg" - for example, see <a class="el" href="tag_2default_8cfg_source.html">cfg/tag/default.cfg</a>. The actual settings that are available in each config file are defined by subclasses of the base <a class="el" href="structsolver_1_1Options.html">Options</a> class, e.g. <a class="el" href="structtag_1_1TagOptions.html">TagOptions</a> specifies all of the options that can be configured for Tag.</p>
 <h2><a class="anchor" id="implementing-a-new-pomdp-model"></a>
 Implementing a new POMDP model </h2>
 <p>At its core, implementation of a specific POMDP problem is done via an implementation of the <a class="el" href="classsolver_1_1Model.html">Model</a> interface, which represents a black-box generative model of a POMDP. See <a class="el" href="classtag_1_1TagModel.html">TagModel</a> for an example implementation of this interface for the Tag POMDP.</p>
@@ -232,7 +232,7 @@ Generating binaries for a new POMDP model </h2>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 02:47:01 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
