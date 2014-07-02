@@ -1,4 +1,4 @@
-/** file: search_interface.hpp
+/** @file search_interface.hpp
  *
  * Defines the interface for "searching" - i.e. generating new history sequences, both inside
  * and outside the policy tree.

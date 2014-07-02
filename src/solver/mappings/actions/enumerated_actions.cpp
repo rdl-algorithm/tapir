@@ -1,4 +1,4 @@
-/** file: enumerated_actions.cpp
+/** @file enumerated_actions.cpp
  *
  * Contains an implementation for the action mapping interfaces in terms of an enumerated
  * set of actions, which is done via a simple implementation of the abstract class

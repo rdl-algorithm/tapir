@@ -1,4 +1,4 @@
-/** file: enumerated_actions.hpp
+/** @file enumerated_actions.hpp
  *
  * Provides a default implementation for the action mapping interfaces in terms of an enumerated
  * set of actions. This is just like the discretized action mapping, but there is only one action
@@ -61,6 +61,11 @@ class EnumeratedActionPool : public solver::DiscretizedActionPool {
     /** The vector of all of the possible actions. */
     std::vector<std::unique_ptr<DiscretizedPoint>> allActions_;
 };
+
+/** Since we're just using DiscretizedActionMap to do all of the work, we can simply re-use
+ * DiscretizedActionTextSerializer to do the work of serializing enumerated mappigns.
+ */
+typedef DiscretizedActionTextSerializer EnumeratedActionTextSerializer;
 } /* namespace solver */
 
 #endif /* SOLVER_ENUMERATED_ACTIONS_HPP_ */

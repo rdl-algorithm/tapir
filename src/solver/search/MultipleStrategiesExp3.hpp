@@ -1,4 +1,4 @@
-/** file: MultipleStrategiesExp3.hpp
+/** @file MultipleStrategiesExp3.hpp
  *
  * Provides an EXP3-based approach to combining multiple different search strategies together.
  */

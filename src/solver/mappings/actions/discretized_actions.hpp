@@ -1,4 +1,4 @@
-/** file: discretized_actions.hpp
+/** @file discretized_actions.hpp
  *
  * Provides a default implementation for an action mapping that uses a set of discretized actions,
  * i.e. there is an enumerated set of action categories, and the actions in each of these

@@ -1,4 +1,4 @@
-/** file: ActionPool.hpp
+/** @file ActionPool.hpp
  *
  * Defines the ActionPool interface, which allows customization of how the mapping for each
  * individual belief node is set up.

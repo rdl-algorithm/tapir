@@ -1,4 +1,4 @@
-/** file: Agent.cpp
+/** @file Agent.cpp
  *
  * Contains the implementation of the Agent class.
  */

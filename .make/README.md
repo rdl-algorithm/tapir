@@ -1,5 +1,5 @@
-Custom non-recursive Make system
-================================
+Custom non-recursive Make system {#build-system}
+================================================
 
 Introduction
 ------------

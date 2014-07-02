@@ -1,4 +1,4 @@
-/** file: VectorState.hpp
+/** @file VectorState.hpp
  *
  * Defines the VectorState interface; currently this is the same as Vector, so this is just a
  * straight typedef.

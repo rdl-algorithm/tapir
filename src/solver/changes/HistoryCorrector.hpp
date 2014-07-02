@@ -1,4 +1,4 @@
-/** file: HistoryCorrector.hpp
+/** @file HistoryCorrector.hpp
  *
  * Defines an abstract base class for correcting history sequences.
  */

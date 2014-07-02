@@ -1,4 +1,4 @@
-/** file: ChangeFlags.hpp
+/** @file ChangeFlags.hpp
  *
  * Contains an enum class used to define flags for the different types of changes that can
  * apply at a single state and, in turn, a history entry with that state.

@@ -226,7 +226,7 @@ std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
 //    });
 }
 
-std::unique_ptr<solver::State> RockSampleModel::sampleStateUniform() {
+std::unique_ptr<solver::State> RockSampleModel::sampleStateUninformed() {
     while (true) {
         GridPosition position = samplePosition();
         // States that are on top of an obstacle are completely invalid.
@@ -640,7 +640,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::Observation const &obs, long nParticles) {
     std::vector<std::unique_ptr<solver::State>> particles;
     while ((long) particles.size() < nParticles) {
-        std::unique_ptr<solver::State> state = sampleStateUniform();
+        std::unique_ptr<solver::State> state = sampleStateUninformed();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {
             particles.push_back(std::move(result.nextState));

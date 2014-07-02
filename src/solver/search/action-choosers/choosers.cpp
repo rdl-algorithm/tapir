@@ -1,4 +1,4 @@
-/** file: choosers.cpp
+/** @file choosers.cpp
  *
  * Contains implementations of basic action selection functions.
  */

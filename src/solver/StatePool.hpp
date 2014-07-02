@@ -1,4 +1,4 @@
-/** file: StatePool.hpp
+/** @file StatePool.hpp
  *
  * Contains the StatePool class, which stores all of the states that have been encountered by
  * the solver.

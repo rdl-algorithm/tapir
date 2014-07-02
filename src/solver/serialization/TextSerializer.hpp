@@ -1,4 +1,4 @@
-/** file: TextSerializer.hpp
+/** @file TextSerializer.hpp
  *
  * Defines the TextSerializer, which provides a basic Serializer implementation that uses
  * a human-readable text-based approach to serializing all of the data structures.

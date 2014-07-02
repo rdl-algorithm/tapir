@@ -1,4 +1,4 @@
-/** file: ModelChange.hpp
+/** @file ModelChange.hpp
  *
  * Defines an interface for storing changes to a model; this also defines a class
  * for a sequence of model changes, which is represented by a map from change times to

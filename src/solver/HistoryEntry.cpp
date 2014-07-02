@@ -1,4 +1,4 @@
-/** file: HistoryEntry.cpp
+/** @file HistoryEntry.cpp
  *
  * Contains the implementation of the HistoryEntry class.
  */

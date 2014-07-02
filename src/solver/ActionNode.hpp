@@ -1,4 +1,4 @@
-/** file: ActionNode.hpp
+/** @file ActionNode.hpp
  *
  * Contains the ActionNode class, which represents a belief-action pair (i.e. the part of the
  * belief tree corresponding to taking a given action from a specific belief.

@@ -1,4 +1,4 @@
-/** file: ObservationMappingEntry.hpp
+/** @file ObservationMappingEntry.hpp
  *
  * Defines the ObservationMappingEntry interface, which defines the core methods for an edge in
  * the tree between an ActionNode and a subsequent BeliefNode.

@@ -1,4 +1,4 @@
-/** file: BeliefTree.hpp
+/** @file BeliefTree.hpp
  *
  * Contains the BeliefTree class, which represents an entire belief tree.
  *

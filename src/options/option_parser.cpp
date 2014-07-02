@@ -19,7 +19,7 @@
 //    THE SOFTWARE.
 
 
-/** file: option_parser.cpp
+/** @file option_parser.cpp
  *
  * Contains the implementations for the non-template methods used in parsing options.
  */
@@ -67,7 +67,7 @@ int OptionParser::iniHandler(void *user, char const *section, char const *name, 
         }
     } catch (std::out_of_range const &oor) {
         std::ostringstream message;
-        message << "ERROR: Invalid option in config file: " << section << "." << name << std::endl;
+        message << "ERROR: Invalid option in config @file " << section << "." << name << std::endl;
         throw OptionParsingException(message.str());
     }
     return 1;

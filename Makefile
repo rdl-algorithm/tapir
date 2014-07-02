@@ -107,11 +107,13 @@ default: build-solver ;
 # ----------------------------------------------------------------------
 # Documentation targets
 # ----------------------------------------------------------------------
-docs/README.md: README.md docs/doxygen_links.md
-	cat $^ > $@
+docs/README.md: README.md docs/doxygen_links.md Makefile
+	echo "ABT Documentation {#mainpage}" > $@
+	echo "============================" >> $@
+	cat README.md docs/doxygen_links.md >> $@
 
-docs/BUILD_README.md: .make/README.md docs/doxygen_links.md
-	cat $^ > $@
+docs/BUILD_README.md: .make/README.md docs/doxygen_links.md Makefile
+	cat .make/README.md docs/doxygen_links.md > $@
 
 .PHONY: doc
 doc: docs/Doxyfile docs/README.md docs/BUILD_README.md

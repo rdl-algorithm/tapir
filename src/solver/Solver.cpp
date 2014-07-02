@@ -1,4 +1,4 @@
-/** file: Solver.cpp
+/** @file Solver.cpp
  *
  * Contains the implementation of the Solver class.
  */

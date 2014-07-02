@@ -1,4 +1,4 @@
-/** file: search_interface.cpp
+/** @file search_interface.cpp
  *
  * Provides some basic implementations of classes for generating history sequences.
  *

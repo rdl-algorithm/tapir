@@ -1,4 +1,4 @@
-/** file: DefaultHistoryCorrector.cpp
+/** @file DefaultHistoryCorrector.cpp
  *
  * Contains the implementation of the DefaultHistoryCorrector class.
  */

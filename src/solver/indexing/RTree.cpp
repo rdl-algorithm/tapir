@@ -1,4 +1,4 @@
-/** file: RTree.cpp
+/** @file RTree.cpp
  *
  * Contains the implementation of the RTree class, which is a thin wrapper for the libspatialindex
  * ISpatialIndex interface that also implements the ABT interface StateIndex.

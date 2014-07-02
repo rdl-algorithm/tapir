@@ -1,4 +1,4 @@
-/** file: BeliefNode.cpp
+/** @file BeliefNode.cpp
  *
  * Contains the implementation for the BeliefNode class.
  */

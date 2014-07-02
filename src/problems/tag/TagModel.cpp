@@ -141,10 +141,10 @@ GridPosition TagModel::randomEmptyCell() {
 
 /* --------------- The model interface proper ----------------- */
 std::unique_ptr<solver::State> TagModel::sampleAnInitState() {
-    return sampleStateUniform();
+    return sampleStateUninformed();
 }
 
-std::unique_ptr<solver::State> TagModel::sampleStateUniform() {
+std::unique_ptr<solver::State> TagModel::sampleStateUninformed() {
     GridPosition robotPos = randomEmptyCell();
     GridPosition opponentPos = randomEmptyCell();
     return std::make_unique<TagState>(robotPos, opponentPos, false);
@@ -505,7 +505,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
         }
     } else {
         while ((long)newParticles.size() < nParticles) {
-            std::unique_ptr<solver::State> state = sampleStateUniform();
+            std::unique_ptr<solver::State> state = sampleStateUninformed();
             solver::Model::StepResult result = generateStep(*state, action);
             if (obs == *result.observation) {
                 newParticles.push_back(std::move(result.nextState));

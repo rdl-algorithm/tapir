@@ -11,7 +11,7 @@ do
     fi
 
     doc="$(grep -m 1 "^/\*\*" $f)"
-    if [[ ${doc:0:10} != '/** file: ' ]]
+    if [[ ${doc:0:10} != '/** @file ' ]]
     then
         need_doc+="$f "
     else

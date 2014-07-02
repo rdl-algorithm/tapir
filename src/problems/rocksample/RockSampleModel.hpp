@@ -154,7 +154,7 @@ friend class RockSampleMdpSolver;
     /* --------------- The model interface proper ----------------- */
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates a state uniformly at random. */
-    virtual std::unique_ptr<solver::State> sampleStateUniform() override;
+    virtual std::unique_ptr<solver::State> sampleStateUninformed() override;
     virtual bool isTerminal(solver::State const &state) override;
 
 

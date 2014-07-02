@@ -1,4 +1,4 @@
-/** file: choosers.hpp
+/** @file choosers.hpp
  *
  * Defines some useful basic functions for selecting an action from a belief node.
  */

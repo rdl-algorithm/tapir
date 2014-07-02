@@ -1,4 +1,4 @@
-/** file: approximate_observations.cpp
+/** @file approximate_observations.cpp
  *
  * Contains the implementations of the classes for approximate observation mappings.
  */

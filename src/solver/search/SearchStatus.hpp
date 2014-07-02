@@ -1,4 +1,4 @@
-/** file: SearchStatus.hpp
+/** @file SearchStatus.hpp
  *
  * Defines a basic enumeration of the different states the search for an individual history
  * could be in.

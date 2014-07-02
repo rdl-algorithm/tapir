@@ -15,6 +15,7 @@
 #include "problems/shared/parsers.hpp"
 #include "problems/shared/SharedOptions.hpp"
 
+/** A namespace for useful functionality that is shared by various different problems. */
 namespace shared {
 class ModelWithProgramOptions: public solver::Model {
 public:

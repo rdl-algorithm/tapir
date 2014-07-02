@@ -1,4 +1,4 @@
-/** file: FlaggingVisitor.hpp
+/** @file FlaggingVisitor.hpp
  *
  * Defines the FlaggingVisitor class, which is useful for flagging affected states that are looked
  * up via an RTree-based StateIndex.

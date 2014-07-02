@@ -83,14 +83,10 @@ struct SharedOptions: public solver::Options {
         parser->addOptionWithDefault("", "color", &SharedOptions::hasColorOutput, false);
         parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "c", "color",
                 "use color output", true);
-        parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "", "color=false",
-                "don't use color output", false);
 
         parser->addOptionWithDefault("", "verbose", &SharedOptions::hasVerboseOutput, false);
         parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "v", "verbose",
                         "use verbose output", true);
-        parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "", "verbose=false",
-                                "don't use verbose output", false);
     }
 
     static void addSimulationOptions(options::OptionParser *parser, bool simulating) {
@@ -103,39 +99,40 @@ struct SharedOptions: public solver::Options {
 
         if (!simulating) {
             parser->addOptionWithDefault<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps, 200);
-            parser->addOptionWithDefault<unsigned long>("simulation", "minParticleCount",
+            parser->addOptionWithDefault<unsigned long>("ABT", "minParticleCount",
                     &Options::minParticleCount, 5000);
         } else {
             parser->addOption<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps);
-            parser->addOption<unsigned long>("simulation", "minParticleCount", &Options::minParticleCount);
+            parser->addOption<unsigned long>("ABT", "minParticleCount", &Options::minParticleCount);
         }
 
         parser->addOptionWithDefault<long>("simulation", "nRuns", &SharedOptions::nRuns, 1);
         parser->addOptionWithDefault<bool>("simulation", "savePolicy", &SharedOptions::savePolicy, false);
 
         if (simulating) {
+            // These command line options are for simulation only.
             parser->addValueArg("", "log", &SharedOptions::logPath, "l", "log",
                     "file to log changes to", "path");
 
             parser->addSwitchArg("changes", "hasChanges", &SharedOptions::hasChanges, "u",
-                    "has-changes", "whether the POMDP model will change at runtime", true);
+                    "has-changes", "Set the POMDP model to load changes at runtime", true);
 
             parser->addSwitchArg("changes", "areDynamic", &SharedOptions::areDynamic, "d",
-                    "dynamic", "whether the changes are dynamic (apply only to the future, not"
+                    "dynamic", "Sets the changes to be dynamic, i.e. apply only to the future, not"
                     " to the past or to alternate futures).", true);
 
             parser->addValueArg("changes", "changesPath", &SharedOptions::changesPath,
                     "g", "changes-path", "path to file with runtime changes", "path");
             parser->addValueArg<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps,
                     "n", "steps", "Maximum number of steps to simulate", "int");
-            parser->addValueArg<unsigned long>("simulation", "minParticleCount",
-                    &Options::minParticleCount, "", "min-particles", "Minimum allowable particles"
+            parser->addValueArg<unsigned long>("ABT", "minParticleCount",
+                    &Options::minParticleCount, "z", "min-particles", "Minimum allowable particles"
                             " per belief during simulation - if the count drops below this value,"
                             " extra particles will be resampled via a particle filter.", "int");
             parser->addValueArg<long>("simulation", "nRuns", &SharedOptions::nRuns,
                                 "r", "runs", "Number of runs", "int");
 
-            parser->addSwitchArg("simulation", "savePolicy", &SharedOptions::savePolicy, "a",
+            parser->addSwitchArg("simulation", "savePolicy", &SharedOptions::savePolicy, "",
                     "save", "save policies to a file after simulation (these files can be very"
                             " large).", true);
         }
@@ -156,24 +153,24 @@ struct SharedOptions: public solver::Options {
                 "Maximum depth to go down the tree", "int");
 
         parser->addOption<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic);
-        parser->addValueArg<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic,
-                "", "heuristic", "the heuristic to use to estimate the value at the end of a"
-                        " history sequence", "string");
+//        parser->addValueArg<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic,
+//                "", "heuristic", "the heuristic to use to estimate the value at the end of a"
+//                        " history sequence", "string");
 
         parser->addOption<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy);
-        parser->addValueArg<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy,
-                "", "strategy", "the strategy for searching the tree", "string");
+//        parser->addValueArg<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy,
+//                "", "strategy", "the strategy for searching the tree", "string");
 
         parser->addOption<std::string>("ABT", "estimator", &SharedOptions::estimator);
-        parser->addValueArg<std::string>("ABT", "estimator", &SharedOptions::estimator,
-                "", "estimator", "the function to estimate the q-value of a belief", "string");
+//        parser->addValueArg<std::string>("ABT", "estimator", &SharedOptions::estimator,
+//                "", "estimator", "the function to estimate the q-value of a belief", "string");
 
         parser->addOptionWithDefault<double>("ABT", "maxObservationDistance",
                 &SharedOptions::maxObservationDistance, 0.0);
-        parser->addValueArg<double>("ABT", "maxObservationDistance",
-                &SharedOptions::maxObservationDistance, "", "max-obs-dist",
-                "the maximum distance between observations to group them together - only applies if"
-                " the ApproximatObservationMap is being used.", "real");
+//        parser->addValueArg<double>("ABT", "maxObservationDistance",
+//                &SharedOptions::maxObservationDistance, "", "max-obs-dist",
+//                "the maximum distance between observations to group them together - only applies if"
+//                " the ApproximatObservationMap is being used.", "real");
     }
 
     static void addProblemOptions(options::OptionParser *parser) {

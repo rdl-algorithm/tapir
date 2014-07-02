@@ -1,4 +1,4 @@
-/** file: ActionMappingEntry.hpp
+/** @file ActionMappingEntry.hpp
  *
  * Defines the ActionMappingEntry interface class,
  *

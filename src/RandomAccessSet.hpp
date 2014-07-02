@@ -1,4 +1,4 @@
-/** file: RandomAccessSet.hpp
+/** @file RandomAccessSet.hpp
  *
  * Contains the RandomAccessSet class, which represents a basic set with random access.
  */

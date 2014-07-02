@@ -1,4 +1,4 @@
-/** file: HistoryEntry.hpp
+/** @file HistoryEntry.hpp
  *
  * Contains the HistoryEntry class, which represents a single entry in a history sequence.
  *

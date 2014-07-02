@@ -1,4 +1,4 @@
-/** file: SpatialIndexVisitor.cpp
+/** @file SpatialIndexVisitor.cpp
  *
  * Contains the implementation of SpatialIndexVisitor.
  */

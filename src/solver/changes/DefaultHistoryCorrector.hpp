@@ -1,4 +1,4 @@
-/** file: DefaultHistoryCorrector.hpp
+/** @file DefaultHistoryCorrector.hpp
  *
  * Provides a default, general-purpose implementation of a HistoryCorrector that will be able to
  * deal with any POMDP model.

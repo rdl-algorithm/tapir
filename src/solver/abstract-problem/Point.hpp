@@ -1,4 +1,4 @@
-/** file: Point.hpp
+/** @file Point.hpp
  *
  * Defines the abstract Point class. This is primarily in the sense of point-set topology; in other
  * words, each point will be a member of some set, e.g. the set of actions for a given POMDP.

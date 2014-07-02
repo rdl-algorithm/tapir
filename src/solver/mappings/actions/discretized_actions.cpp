@@ -1,4 +1,4 @@
-/** file: discretized_actions.cpp
+/** @file discretized_actions.cpp
  *
  * Contains the implementations of the classes for discretized action mappings.
  */

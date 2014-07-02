@@ -1,4 +1,4 @@
-/** file: Vector.hpp
+/** @file Vector.hpp
  *
  * An abstract extension of the Point class for points that can be easily be represented as
  * real vectors.

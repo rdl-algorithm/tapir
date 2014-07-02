@@ -1,4 +1,4 @@
-/** file: default_rollout.cpp
+/** @file default_rollout.cpp
  *
  * Contains the implementation for a basic rollout strategy, which queries the model for a
  * history-based rollout action at every time step.

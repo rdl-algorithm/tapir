@@ -1,4 +1,4 @@
-/** file: global.hpp
+/** @file global.hpp
  *
  * Contains some key definitions used throughout the ABT code.
  */
@@ -20,35 +20,40 @@
 
 #include "solver/abstract-problem/Point.hpp"
 
-// The RNG engine to use throughout the code.
+/** The RNG engine to use throughout the code. */
 typedef std::default_random_engine RandomGenerator;
 
-// Returns the time (in ms) since the program started running.
+
+
+/** A global utility namespace; holds some global functions that are used throughout the ABT code,
+ * as well as some basic data structures.
+ */
 namespace abt {
+/** Returns the time (in ms) since the program started running. */
 inline double clock_ms() {
     return std::clock() * 1000.0 / CLOCKS_PER_SEC;
 }
 
-// A template method to combine hash values - from boost::hash_combine
+/** A template method to combine hash values - from boost::hash_combine */
 template<class T>
 inline void hash_combine(std::size_t &seed, T const &v) {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-// trim from start
+/** Trim the string from the left. */
 static inline std::string &ltrim(std::string &s) {
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
         return s;
 }
 
-// trim from end
+/** Trim the string from the right. */
 static inline std::string &rtrim(std::string &s) {
         s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
         return s;
 }
 
-// trim from both ends
+/** Trim the string from the left and right. */
 static inline std::string &trim(std::string &s) {
         return ltrim(rtrim(s));
 }
@@ -81,6 +86,8 @@ inline void print_double(double value, std::ostream &os, int width = 10,
 }
 } /* namespace abt */
 
+
+/** A namespace for global functions that serve useful debugging purposes. */
 namespace debug {
     /** Global debug method to display an error / warning message.
      * This method is a great place for setting breakpoints!
@@ -98,4 +105,6 @@ namespace debug {
         return sstr.str();
     }
 } /* namespace debug */
+
+
 #endif /* GLOBAL_HPP_ */

@@ -1,4 +1,4 @@
-/** file: Agent.hpp
+/** @file Agent.hpp
  *
  * Contains the Agent class, which represents an actual agent embedded in an environment.
  *

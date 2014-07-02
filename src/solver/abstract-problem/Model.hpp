@@ -1,4 +1,4 @@
-/** file: Model.hpp
+/** @file Model.hpp
  *
  * Defines the Model class, which is an abstract class representing a POMDP model to be solved by
  * the solver. The core of the Model class is represented by a "black box" generative model which
@@ -60,10 +60,11 @@ class StatePool;
  * - getHeuristicFunction() - this defines a heuristic function that will be applied to the
  *      end of a history sequence that did not reach a terminal state. By default this is simply
  *      a function that returns zero.
- *
+ * - createActionPool() - this defines the way in which actions are mapped out inside the policy
+ *      tree, and also which actions the ABT solver will attempt, and in which order.
  *
  * For the purposes of more subtle generation, ABT allows for a more incremental approach
- * to the generative model. In particular, we introduce optional "transition parameters" (y), which
+ * to the generative model. In particular, we introduce optional "transition parameters", which
  * can serve the following key purposes:
  * - Encompassing any and all "randomness" that features in a state transition. This has two key
  *      advantages:
@@ -77,10 +78,10 @@ class StatePool;
  * The generative model is therefore further broken down into the following methods; some of these
  * parameters are optional and nullptr can be used for those values if they are not in use. In the
  * summary below, optional parameters are surrounded by square brackets [].
- * generateTransition() -  (s, a) => [y]
- * generateNextState() -   (s, a, [y]) => s'
- * generateObservation() - ([s], a, [y], s') => o
- * generateReward() -      (s, a, [y], [s']) => r
+ * - generateTransition() -  (s, a) => [x]
+ * - generateNextState() -   (s, a, [x]) => s'
+ * - generateObservation() - ([s], a, [x], s') => o
+ * - generateReward() -      (s, a, [x], [s']) => r
  */
 class Model {
 public:
@@ -106,10 +107,10 @@ public:
     /* --------------- The model interface proper ----------------- */
     /** Samples an initial state from the initial belief. */
     virtual std::unique_ptr<State> sampleAnInitState() = 0;
-    /** Samples a state uniformly at random from all states (this is required because it is used
-     * by the default implementation of the second generateParticles method).
+    /** Samples a state from a poorly-informed prior. This is used by the provided default
+     * implementation of the second generateParticles() method.
      */
-    virtual std::unique_ptr<State> sampleStateUniform() = 0;
+    virtual std::unique_ptr<State> sampleStateUninformed() = 0;
     /** Returns true iff the given state is terminal. */
     virtual bool isTerminal(State const &state) = 0;
 
@@ -158,33 +159,39 @@ public:
 
     /** Generates the next state, based on the state and action, and, if used,
      * the transition parameters.
+     *
+     * This method is only mandatory if you implement the applyChanges() method.
      */
     virtual std::unique_ptr<State> generateNextState(
             State const &state,
             Action const &action,
             TransitionParameters const *transitionParameters // optional
-            ) = 0;
+            );
 
     /** Generates an observation, given the action and resulting next state;
      * optionally, the previous state and the transition parameters can also be used.
+     *
+     * This method is only mandatory if you implement the applyChanges() method.
      */
     virtual std::unique_ptr<Observation> generateObservation(
             State const *state, // optional
             Action const &action,
             TransitionParameters const *transitionParameters, // optional
             State const &nextState
-            ) = 0;
+            );
 
     /** Returns the reward for the given state, action; optionally this also
      * includes transition parameters and the next state - if they aren't
      * being used it is OK to use nullptr for those inputs.
+     *
+     * This method is only mandatory if you implement the applyChanges() method.
      */
     virtual double generateReward(
             State const &state,
             Action const &action,
             TransitionParameters const *transitionParameters, // optional
             State const *nextState // optional
-            ) = 0;
+            );
 
 
     /* -------------- Methods for handling model changes ---------------- */
@@ -194,7 +201,9 @@ public:
      * are affected, and hence need to be updated in whichever history sequences they occur.
      * This should be done via the Solver's StatePool and StateIndex.
      *
-     * Since handling of changes is not mandatory, this method does nothing by default.
+     * Since handling of changes is not mandatory, this method does nothing by default. However,
+     * if you do implement it, you must also implement
+     * generateNextState(), generateObservation(), and generateReward().
      */
     virtual void applyChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
             Solver *solver);

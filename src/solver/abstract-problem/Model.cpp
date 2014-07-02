@@ -1,4 +1,4 @@
-/** file: Model.cpp
+/** @file Model.cpp
  *
  * Contains default implementations for some of the methods of Model.
  *
@@ -55,11 +55,38 @@ Options const *Model::getOptions() const {
 }
 
 /* -------------------- Black box dynamics ---------------------- */
-// Transition parameters are optional
+// The more detailed methods are optional.
+
 std::unique_ptr<TransitionParameters> Model::generateTransition(
         State const &/*state*/,
         Action const &/*action*/) {
     return nullptr;
+}
+
+std::unique_ptr<State> Model::generateNextState(
+        State const &/*state*/,
+        Action const &/*action*/,
+        TransitionParameters const */*transitionParameters*/ // optional
+        ) {
+    return nullptr;
+}
+
+std::unique_ptr<Observation> Model::generateObservation(
+          State const */*state*/, // optional
+          Action const &/*action*/,
+          TransitionParameters const */*transitionParameters*/, // optional
+          State const &/*nextState*/
+          ) {
+    return nullptr;
+}
+
+double Model::generateReward(
+          State const &/*state*/,
+          Action const &/*action*/,
+          TransitionParameters const */*transitionParameters*/, // optional
+          State const */*nextState*/ // optional
+          ) {
+    return 0;
 }
 
 
@@ -105,7 +132,7 @@ std::vector<std::unique_ptr<State>> Model::generateParticles(
     // Use rejection sampling to generate the required number of particles.
     while ((long)particles.size() < nParticles) {
         // Sample a state uniformly at random.
-        std::unique_ptr<State> state = sampleStateUniform();
+        std::unique_ptr<State> state = sampleStateUninformed();
 
         // Now generate a step in the model, and compare the observation to the actual observation.
         // Note that this comparison is done implicitly via the observation mapping, to ensure

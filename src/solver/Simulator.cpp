@@ -1,4 +1,4 @@
-/** file: Simulator.cpp
+/** @file Simulator.cpp
  *
  * Contains the implementation of the Simulator class.
  */

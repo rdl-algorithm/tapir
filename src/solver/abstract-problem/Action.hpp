@@ -1,4 +1,4 @@
-/** file: Action.hpp
+/** @file Action.hpp
  *
  * Defines the Action interface; currently this is the same as Point, so this is just a straight
  * typedef.

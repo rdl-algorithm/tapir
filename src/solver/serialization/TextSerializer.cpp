@@ -1,4 +1,4 @@
-/** file: TextSerializer.cpp
+/** @file TextSerializer.cpp
  *
  * Contains the implementation of the TextSerializer class, which provides a human-readable
  * serialization of all of the basic data structures.

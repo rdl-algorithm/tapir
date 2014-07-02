@@ -1,4 +1,4 @@
-/** file: FlaggingVisitor.cpp
+/** @file FlaggingVisitor.cpp
  *
  * Contains the implementation of the FlaggingVisitor class.
  */

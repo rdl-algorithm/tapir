@@ -1,4 +1,4 @@
-/** file: StateInfo.cpp
+/** @file StateInfo.cpp
  *
  * Contains the implementation of the StateInfo class.
  */

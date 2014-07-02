@@ -22,7 +22,7 @@ using std::endl;
 
 template<typename ModelType, typename OptionsType>
 int solve(int argc, char const *argv[]) {
-    std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
+    std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(false);
 
     OptionsType options;
     try {

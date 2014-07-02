@@ -1,4 +1,4 @@
-/** file: global.cpp
+/** @file global.cpp
  *
  * Implementation for show_message() - a great place for breakpoints!
  */

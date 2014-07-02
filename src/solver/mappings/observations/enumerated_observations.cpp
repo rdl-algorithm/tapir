@@ -1,4 +1,4 @@
-/** file: enumerated_observations.cpp
+/** @file enumerated_observations.cpp
  *
  * Contains the implementations of the classes for enumerated observation mappings.
  */

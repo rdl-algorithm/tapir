@@ -34,22 +34,22 @@ struct TagOptions : public shared::SharedOptions {
                 "m", "map", "the path to the map file", "path");
 
         parser->addOption<double>("problem", "moveCost", &TagOptions::moveCost);
-        parser->addValueArg<double>("problem", "moveCost", &TagOptions::moveCost,
-                "", "cost", "cost per move", "real");
+//        parser->addValueArg<double>("problem", "moveCost", &TagOptions::moveCost,
+//                "", "cost", "cost per move", "real");
 
         parser->addOption<double>("problem", "tagReward", &TagOptions::tagReward);
-        parser->addValueArg<double>("problem", "tagReward", &TagOptions::tagReward,
-                "", "reward", "reward for tagging", "real");
+//        parser->addValueArg<double>("problem", "tagReward", &TagOptions::tagReward,
+//                "", "reward", "reward for tagging", "real");
 
         parser->addOption<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty);
-        parser->addValueArg<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty,
-                "", "penalty", "penalty for a failed tag attempt", "real");
+//        parser->addValueArg<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty,
+//                "", "penalty", "penalty for a failed tag attempt", "real");
 
         parser->addOption<double>("problem", "opponentStayProbability",
                 &TagOptions::opponentStayProbability);
-        parser->addValueArg<double>("problem", "opponentStayProbability",
-                &TagOptions::opponentStayProbability, "", "stay-prob",
-                "probability the opponent will choose no action", "real");
+//        parser->addValueArg<double>("problem", "opponentStayProbability",
+//                &TagOptions::opponentStayProbability, "", "stay-prob",
+//                "probability the opponent will choose no action", "real");
     }
 };
 } /* namespace tag */

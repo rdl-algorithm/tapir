@@ -1,4 +1,4 @@
-/** file: Serializer.hpp
+/** @file Serializer.hpp
  *
  * Defines Serializer, an abstract base class for serialization of an ABT solver instance.
  */

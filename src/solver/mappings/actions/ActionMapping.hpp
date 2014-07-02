@@ -1,4 +1,4 @@
-/** file: ActionMapping.hpp
+/** @file ActionMapping.hpp
  *
  * Contains the abstract base class ActionMapping.
  *

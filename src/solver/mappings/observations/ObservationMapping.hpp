@@ -1,4 +1,4 @@
-/** file: ObservationMapping.hpp
+/** @file ObservationMapping.hpp
  *
  * Contains the abstract base class ObservationMapping.
  *

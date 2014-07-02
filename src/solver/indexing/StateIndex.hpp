@@ -1,4 +1,4 @@
-/** file: StateIndex.hpp
+/** @file StateIndex.hpp
  *
  * Defines an interface allowing states to be indexed in a custom manner.
  *

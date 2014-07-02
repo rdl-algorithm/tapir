@@ -1,4 +1,4 @@
-/** file: Solver.hpp
+/** @file Solver.hpp
  *
  * Contains the Solver class, which is the core ABT solver class. A solver also owns a model,
  * which is its representation of the POMDP problem.
@@ -24,6 +24,9 @@
 
 #include "solver/changes/ChangeFlags.hpp"               // for ChangeFlags
 
+/** A namespace to hold all of the various classes used by the solver - particularly the main
+ * Solver class, of course.
+ */
 namespace solver {
 class ActionPool;
 class BackpropagationStrategy;

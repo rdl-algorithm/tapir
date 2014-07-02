@@ -1,4 +1,4 @@
-/** file: MultipleStrategiesExp3.cpp
+/** @file MultipleStrategiesExp3.cpp
  *
  * Contains the implementation of MultipleStrategiesExp3, which defines an EXP3-based approach
  * to combining multiple strategies.

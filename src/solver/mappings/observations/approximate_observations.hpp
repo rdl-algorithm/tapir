@@ -1,4 +1,4 @@
-/** file: approximate_observations.hpp
+/** @file approximate_observations.hpp
  *
  * Provides an implementation of the observation mapping interface that is designed for
  * continuous observation spaces.

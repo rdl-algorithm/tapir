@@ -1,4 +1,4 @@
-/** file: default_rollout.hpp
+/** @file default_rollout.hpp
  *
  * Defines a simple rollout strategy that queries the model for a history-based rollout action.
  * This is done via the StepGenerator and StepGeneratory factory classes in search_interface.hpp.

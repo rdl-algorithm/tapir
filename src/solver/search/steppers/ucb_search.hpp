@@ -1,4 +1,4 @@
-/** file: ucb_search.hpp
+/** @file ucb_search.hpp
  *
  * Contains the necessary classes for a UCB-based search strategy; this is done via an
  * implementation of StepGenerator and StepGeneratorFactory; the latter can then be wrapped

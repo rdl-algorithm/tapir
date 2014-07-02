@@ -1,4 +1,4 @@
-/** file: LinkedHashSet.hpp
+/** @file LinkedHashSet.hpp
  *
  * Contains the LinkedHashSet class, which stores a set that keeps ordering between elements.
  */
@@ -10,12 +10,12 @@
 #include <list>
 #include <unordered_map>
 
+namespace abt {
 /** LinkedHashSet
  *
  * Represents a set of elements which maintains iteration in the order of insertion.
  * - Insertion / deletion in constant average time complexity (using std::unordered_map)
  */
-namespace abt {
 template <typename Element>
 class LinkedHashSet {
   public:

@@ -1,4 +1,4 @@
-/** file: SpatialIndexVisitor.hpp
+/** @file SpatialIndexVisitor.hpp
  *
  * Defines the SpatialIndexVisitor class, which provides a visitor pattern-based approach to
  * deal with the results of querying states within an RTree.

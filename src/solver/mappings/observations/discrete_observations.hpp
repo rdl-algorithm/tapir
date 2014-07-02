@@ -1,4 +1,4 @@
-/** file: discrete_observations.hpp
+/** @file discrete_observations.hpp
  *
  * Provides an implementation of the observation mapping interface that is designed for a space
  * of discrete observations, which could potentially be relatively large but only sparsely used.

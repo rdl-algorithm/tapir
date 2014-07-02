@@ -1,4 +1,4 @@
-/** file: Observation.hpp
+/** @file Observation.hpp
  *
  * Defines the Observation interface; currently this is the same as Point, so this is just a
  * straight typedef.

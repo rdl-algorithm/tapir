@@ -1,4 +1,4 @@
-/** file: ObservationPool.hpp
+/** @file ObservationPool.hpp
  *
  * Defines the ObservationPool interface, which allows customization of how the mapping for each
  * individual action node is set up.

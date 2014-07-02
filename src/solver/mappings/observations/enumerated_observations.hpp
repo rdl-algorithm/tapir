@@ -1,4 +1,4 @@
-/** file: enumerated_observations.hpp
+/** @file enumerated_observations.hpp
  *
  * Provides an implementation of the observation mapping interface that is designed for an
  * enumerated set of observations - this set should generally be relatively small, and they should

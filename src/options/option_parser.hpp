@@ -19,7 +19,7 @@
 //    THE SOFTWARE.
 
 
-/** file: option_parser.hpp
+/** @file option_parser.hpp
  *
  * A basic option parser that is able to parse configuration settings from both the command line,
  * and from INI-style configuration files.
@@ -50,7 +50,7 @@
 #include <tclap/CmdLine.h>
 #include <inih/ini.h>
 
-#include "options/defs.hpp"
+#include "defs.hpp"
 
 namespace options {
 class OptionParsingException : public std::exception {

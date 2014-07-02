@@ -1,4 +1,4 @@
-/** file: discrete_observations.cpp
+/** @file discrete_observations.cpp
  *
  * Contains the implementations of the classes for discrete observation mappings.
  */

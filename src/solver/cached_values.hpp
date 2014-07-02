@@ -1,4 +1,4 @@
-/** file: cached_values.hpp
+/** @file cached_values.hpp
  *
  * Contains the classes used to store cached values for a belief node.
  */
