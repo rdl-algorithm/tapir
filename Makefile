@@ -15,6 +15,7 @@ $(info Configuration: $(CFG))
 $(info )
 
 BUILDDIR := $(ROOT)/builds/$(CFG)
+BINDIR   := $(ROOT)/bin
 
 # ----------------------------------------------------------------------
 # Compiler & linker
@@ -135,7 +136,7 @@ build: build-solver
 .PHONY: clean clean-all
 clean-all:
 	@echo Removing all build folders!
-	@rm -rfv $(ROOT)/builds $(ROOT)/html | grep "directory" ; true
+	@rm -rfv $(ROOT)/builds $(ROOT)/bin $(ROOT)/html | grep "directory" ; true
 
 # Some stuff used for code beautification
 include .make/beautify-settings.mk

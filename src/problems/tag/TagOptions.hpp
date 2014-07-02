@@ -23,7 +23,8 @@ struct TagOptions : public shared::SharedOptions {
     double opponentStayProbability = 0.0;
 
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
-        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating);
+        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
+                "cfg/tag/default.cfg");
         addTagOptions(parser.get());
         return std::move(parser);
     }
@@ -34,22 +35,10 @@ struct TagOptions : public shared::SharedOptions {
                 "m", "map", "the path to the map file", "path");
 
         parser->addOption<double>("problem", "moveCost", &TagOptions::moveCost);
-//        parser->addValueArg<double>("problem", "moveCost", &TagOptions::moveCost,
-//                "", "cost", "cost per move", "real");
-
         parser->addOption<double>("problem", "tagReward", &TagOptions::tagReward);
-//        parser->addValueArg<double>("problem", "tagReward", &TagOptions::tagReward,
-//                "", "reward", "reward for tagging", "real");
-
         parser->addOption<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty);
-//        parser->addValueArg<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty,
-//                "", "penalty", "penalty for a failed tag attempt", "real");
-
         parser->addOption<double>("problem", "opponentStayProbability",
                 &TagOptions::opponentStayProbability);
-//        parser->addValueArg<double>("problem", "opponentStayProbability",
-//                &TagOptions::opponentStayProbability, "", "stay-prob",
-//                "probability the opponent will choose no action", "real");
     }
 };
 } /* namespace tag */

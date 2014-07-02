@@ -51,19 +51,20 @@ struct SharedOptions: public solver::Options {
 
 
 
-    static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
+    static std::unique_ptr<options::OptionParser> makeParser(bool simulating,
+            std::string defaultConfigPath) {
         std::unique_ptr<options::OptionParser> parser = std::make_unique<options::OptionParser>(
                 "ABT command line interface");
-        addGenericOptions(parser.get());
+        addGenericOptions(parser.get(), defaultConfigPath);
         addSimulationOptions(parser.get(), simulating);
         addABTOptions(parser.get());
         addProblemOptions(parser.get());
         return std::move(parser);
     }
 
-    static void addGenericOptions(options::OptionParser *parser) {
+    static void addGenericOptions(options::OptionParser *parser, std::string defaultConfigPath) {
         parser->addOptionWithDefault<std::string>("", "cfg", &SharedOptions::configPath,
-                "tests/default.cfg");
+                defaultConfigPath);
         parser->addValueArg("", "cfg", &SharedOptions::configPath, "f", "cfg", "config file path",
                 "path");
 
@@ -153,24 +154,10 @@ struct SharedOptions: public solver::Options {
                 "Maximum depth to go down the tree", "int");
 
         parser->addOption<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic);
-//        parser->addValueArg<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic,
-//                "", "heuristic", "the heuristic to use to estimate the value at the end of a"
-//                        " history sequence", "string");
-
         parser->addOption<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy);
-//        parser->addValueArg<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy,
-//                "", "strategy", "the strategy for searching the tree", "string");
-
         parser->addOption<std::string>("ABT", "estimator", &SharedOptions::estimator);
-//        parser->addValueArg<std::string>("ABT", "estimator", &SharedOptions::estimator,
-//                "", "estimator", "the function to estimate the q-value of a belief", "string");
-
         parser->addOptionWithDefault<double>("ABT", "maxObservationDistance",
                 &SharedOptions::maxObservationDistance, 0.0);
-//        parser->addValueArg<double>("ABT", "maxObservationDistance",
-//                &SharedOptions::maxObservationDistance, "", "max-obs-dist",
-//                "the maximum distance between observations to group them together - only applies if"
-//                " the ApproximatObservationMap is being used.", "real");
     }
 
     static void addProblemOptions(options::OptionParser *parser) {

@@ -40,7 +40,8 @@ struct RockSampleOptions : public shared::SharedOptions {
     long preferredVisitCount = 0;
 
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
-        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating);
+        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
+                "cfg/rocksample/default.cfg");
         addRocksampleOptions(parser.get());
         addHeuristicOptions(parser.get());
         return std::move(parser);
@@ -52,52 +53,21 @@ struct RockSampleOptions : public shared::SharedOptions {
                 "m", "map", "the path to the map file", "path");
 
         parser->addOption<double>("problem", "goodRockReward", &RockSampleOptions::goodRockReward);
-//        parser->addValueArg<double>("problem", "goodRockReward", &RockSampleOptions::goodRockReward,
-//                "", "good", "reward for sampling a good rock", "real");
-
         parser->addOption<double>("problem", "badRockPenalty", &RockSampleOptions::badRockPenalty);
-//        parser->addValueArg<double>("problem", "badRockPenalty", &RockSampleOptions::badRockPenalty,
-//                "", "bad",  "penalty for sampling a bad rock", "real");
-
         parser->addOption<double>("problem", "exitReward", &RockSampleOptions::exitReward);
-//        parser->addValueArg<double>("problem", "exitReward", &RockSampleOptions::exitReward,
-//                "", "exit", "reward for moving into the exit area", "real");
-
         parser->addOption<double>("problem", "illegalMovePenalty", &RockSampleOptions::illegalMovePenalty);
-//        parser->addValueArg<double>("problem", "illegalMovePenalty", &RockSampleOptions::illegalMovePenalty,
-//                "", "illegal", "penalty for an illegal move", "real");
-
         parser->addOption<double>("problem", "halfEfficiencyDistance", &RockSampleOptions::halfEfficiencyDistance);
-//        parser->addValueArg<double>("problem", "halfEfficiencyDistance", &RockSampleOptions::halfEfficiencyDistance,
-//                "", "d0", "half-efficiency distance d0; sensor efficiency = 2^(-d/d0)", "real");
     }
 
 
     static void addHeuristicOptions(options::OptionParser *parser) {
         parser->addOption<std::string>("heuristics", "type", &RockSampleOptions::heuristicType);
-//        parser->addValueArg<std::string>("heuristics", "type", &RockSampleOptions::heuristicType,
-//                "", "history", "the type of history-based heuristic to use", "none/legal/preferred");
-
         parser->addOption<std::string>("heuristics", "search", &RockSampleOptions::searchHeuristicType);
-//        parser->addValueArg<std::string>("heuristics", "search", &RockSampleOptions::searchHeuristicType,
-//                "", "search", "restricted search actions", "all/legal/preferred");
-
         parser->addOption<std::string>("heuristics", "rollout", &RockSampleOptions::rolloutHeuristicType);
-//        parser->addValueArg<std::string>("heuristics", "rollout", &RockSampleOptions::rolloutHeuristicType,
-//                "", "rollout", "restricted rollout actions", "all/legal/preferred");
 
         parser->addOptionWithDefault<bool>("heuristics", "usePreferredInit", &RockSampleOptions::usePreferredInit, false);
-//        parser->addSwitchArg("heuristics", "usePreferredInit", &RockSampleOptions::usePreferredInit,
-//                "", "preferred-init", "Initialise the tree with q-values biased towards preferred"
-//                " actions", true);
-
         parser->addOption<double>("heuristics", "preferredQValue", &RockSampleOptions::preferredQValue);
-//        parser->addValueArg<double>("heuristics", "preferredQValue", &RockSampleOptions::preferredQValue,
-//                "", "preferred-q", "the initial q-value for preferred actions", "real");
-
         parser->addOption<long>("heuristics", "preferredVisitCount", &RockSampleOptions::preferredVisitCount);
-//        parser->addValueArg<long>("heuristics", "preferredVisitCount", &RockSampleOptions::preferredVisitCount,
-//                "", "preferred-visits", "the initial visit count for preferred actions", "int");
     }
 };
 } /* namespace rocksample */
