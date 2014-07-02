@@ -1,11 +1,8 @@
 [TOC]
 
+[Solver]: @ref solver::Solver
 [Tag]: @ref src/problems/tag
 [RockSample]: @ref src/problems/rocksample
-
-
-[Solver]: @ref solver::Solver
-
 
 [Action]: @ref solver::Action
 [Model]: @ref solver::Model
@@ -19,14 +16,9 @@
 [VectorState]: @ref solver::VectorState
 
 
-[Model::isTerminal]: @ref solver::Model::isTerminal
 [Model::sampleAnInitState]: @ref solver::Model::sampleAnInitState
 [Model::sampleStateUninformed]: @ref solver::Model::sampleStateUninformed
-[Model::applyChanges]: @ref solver::Model::applyChanges
-[Model::getHeuristicFunction]: @ref solver::Model::getHeuristicFunction
-
-[Model::generateParticles]: @ref solver::Model::generateParticles
-[Model::generateParticles2]: @ref solver::Model::generateParticles(BeliefNode*, Action const &, Observation const &, long)
+[Model::isTerminal]: @ref solver::Model::isTerminal
 
 [Model::generateStep]: @ref solver::Model::generateStep
 [Model::generateTransition]: @ref solver::Model::generateTransition
@@ -34,12 +26,18 @@
 [Model::generateObservation]: @ref solver::Model::generateObservation
 [Model::generateReward]: @ref solver::Model::generateReward
 
+[Model::applyChanges]: @ref solver::Model::applyChanges
+
+[Model::generateParticles]: @ref solver::Model::generateParticles
+[Model::generateParticles2]: @ref solver::Model::generateParticles(BeliefNode*, Action const &, Observation const &, long)
+
+[Model::getHeuristicFunction]: @ref solver::Model::getHeuristicFunction
+
 [Model::createActionPool]: @ref solver::Model::createActionPool
 [Model::createStateIndex]: @ref solver::Model::createStateIndex
 
-
-[Options::discountFactor]: @ref solver::Options::discountFactor
 [Options::numberOfStateVariables]: @ref solver::Options::numberOfStateVariables
+[Options::discountFactor]: @ref solver::Options::discountFactor
 
 
 [copy()]: @ref solver::Point::copy
@@ -54,7 +52,6 @@
 [RTree]: @ref solver::RTree
 [Vector::asVector]: @ref solver::Vector::asVector
 
-
 [ActionPool]: @ref solver::ActionPool
 [ActionMapping]: @ref solver::ActionMapping
 [ActionMapping::getNextActionToTry]: @ref solver::ActionMapping::getNextActionToTry
@@ -64,11 +61,8 @@
 [DiscretizedPoint]: @ref solver::DiscretizedPoint
 [DiscretizedPoint::getBinNumber]: @ref solver::DiscretizedPoint::getBinNumber
 
-
 [HistoryCorrector]: @ref solver::HistoryCorrector
 [DefaultHistoryCorrector]: @ref solver::DefaultHistoryCorrector
-
-
 
 [Serializer]: @ref solver::Serializer
 [TextSerializer]: @ref solver::TextSerializer
@@ -79,9 +73,9 @@
 [TagTextSerializer]: @ref tag::TagTextSerializer
 
 
-
 [ModelWithProgramOptions]: @ref shared::ModelWithProgramOptions
 [SharedOptions]: @ref shared::SharedOptions
+
 
 [Tag_config]: ../src/problems/tag/tests/default.cfg
 [TagOptions]: @ref tag::TagOptions
@@ -95,19 +89,21 @@
 [TagTextSerializer::loadModelChange]: @ref tag::TagTextSerializer::loadModelChange
 [TagModel::applyChanges]: @ref tag::TagModel::applyChanges
 
-
-
 [solve.hpp]: @ref solve.hpp
 [simulate.hpp]: @ref simulate.hpp
 [Tag_solve.cpp]: @ref src/problems/tag/solve.cpp
 [Tag_simulate.cpp]: @ref src/problems/tag/simulate.cpp
 
 
+[Build README]: docs/generated/BUILD.md
+[Makefile]: ../Makefile
+
+
+[stack]: @ref stack.mk
+[build]: @ref build.mk
+[template]: @ref template.mk
+[problem-template]: @ref problem-template.mk
+
 [Makefile]: ../Makefile
 [Makefile_src]: ../src/Makefile
 [Makefile_solver]: ../src/solver/Makefile
-[Build README]: @ref build-system
-[build.mk]: ../.make/build.mk
-[stack.mk]: ../.make/stack.mk
-[template.mk]: ../.make/template.mk
-[problem-template.mk]: ../.make/problem-template.mk

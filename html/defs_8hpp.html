@@ -103,10 +103,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstd_1_1__Unique__if.html">std::_Unique_if&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SFINAE struct for single objects.  <a href="structstd_1_1__Unique__if.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstd_1_1__Unique__if_3_01T[]_4.html">std::_Unique_if&lt; T[]&gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SFINAE struct for arrays with unknown bounds.  <a href="structstd_1_1__Unique__if_3_01T[]_4.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstd_1_1__Unique__if_3_01T[N]_4.html">std::_Unique_if&lt; T[N]&gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SFINAE struct for arrays with known bounds.  <a href="structstd_1_1__Unique__if_3_01T[N]_4.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
@@ -114,23 +117,23 @@ Macros</h2></td></tr>
 <tr class="memitem:a61671c8dd4803bc1d9b5baca2eb52d70"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a>(ClassName)</td></tr>
 <tr class="memdesc:a61671c8dd4803bc1d9b5baca2eb52d70"><td class="mdescLeft">&#160;</td><td class="mdescRight">A macro used to delete all copy- and move-constructors and -assignment operators.  <a href="#a61671c8dd4803bc1d9b5baca2eb52d70">More...</a><br/></td></tr>
 <tr class="separator:a61671c8dd4803bc1d9b5baca2eb52d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fb86ab4862a05bdc4e911fdc89a6b65"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0fb86ab4862a05bdc4e911fdc89a6b65"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>__STD__MAKE__UNIQUE___</b></td></tr>
+<tr class="memitem:a0fb86ab4862a05bdc4e911fdc89a6b65"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="defs_8hpp.html#a0fb86ab4862a05bdc4e911fdc89a6b65">__STD__MAKE__UNIQUE___</a></td></tr>
+<tr class="memdesc:a0fb86ab4862a05bdc4e911fdc89a6b65"><td class="mdescLeft">&#160;</td><td class="mdescRight">We use an inclusion guard to make sure this definition is only included once.  <a href="#a0fb86ab4862a05bdc4e911fdc89a6b65">More...</a><br/></td></tr>
 <tr class="separator:a0fb86ab4862a05bdc4e911fdc89a6b65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aeed762bb3f0cb12954aa25f90c6be1d7"><td class="memTemplParams" colspan="2"><a class="anchor" id="aeed762bb3f0cb12954aa25f90c6be1d7"></a>
-template&lt;class T , class... Args&gt; </td></tr>
+<tr class="memitem:aeed762bb3f0cb12954aa25f90c6be1d7"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
 <tr class="memitem:aeed762bb3f0cb12954aa25f90c6be1d7"><td class="memTemplItemLeft" align="right" valign="top">_Unique_if&lt; T &gt;::_Single_object&#160;</td><td class="memTemplItemRight" valign="bottom"><b>std::make_unique</b> (Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:aeed762bb3f0cb12954aa25f90c6be1d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The standard single-object make_unique.  <a href="#aeed762bb3f0cb12954aa25f90c6be1d7">More...</a><br/></td></tr>
 <tr class="separator:aeed762bb3f0cb12954aa25f90c6be1d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a114e9c954eee68b8f2058949ef4c8345"><td class="memTemplParams" colspan="2"><a class="anchor" id="a114e9c954eee68b8f2058949ef4c8345"></a>
-template&lt;class T &gt; </td></tr>
+<tr class="memitem:a114e9c954eee68b8f2058949ef4c8345"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a114e9c954eee68b8f2058949ef4c8345"><td class="memTemplItemLeft" align="right" valign="top">_Unique_if&lt; T &gt;::_Unknown_bound&#160;</td><td class="memTemplItemRight" valign="bottom"><b>std::make_unique</b> (size_t n)</td></tr>
+<tr class="memdesc:a114e9c954eee68b8f2058949ef4c8345"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construction of arrays with unknown bound.  <a href="#a114e9c954eee68b8f2058949ef4c8345">More...</a><br/></td></tr>
 <tr class="separator:a114e9c954eee68b8f2058949ef4c8345"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf12c752a5b1bdeb568aa5bf2086dd16"><td class="memTemplParams" colspan="2"><a class="anchor" id="adf12c752a5b1bdeb568aa5bf2086dd16"></a>
-template&lt;class T , class... Args&gt; </td></tr>
+<tr class="memitem:adf12c752a5b1bdeb568aa5bf2086dd16"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
 <tr class="memitem:adf12c752a5b1bdeb568aa5bf2086dd16"><td class="memTemplItemLeft" align="right" valign="top">_Unique_if&lt; T &gt;::_Known_bound&#160;</td><td class="memTemplItemRight" valign="bottom"><b>std::make_unique</b> (Args &amp;&amp;...)=delete</td></tr>
+<tr class="memdesc:adf12c752a5b1bdeb568aa5bf2086dd16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construction of arrays with a known bound is disallowed.  <a href="#adf12c752a5b1bdeb568aa5bf2086dd16">More...</a><br/></td></tr>
 <tr class="separator:adf12c752a5b1bdeb568aa5bf2086dd16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -138,6 +141,22 @@ template&lt;class T , class... Args&gt; </td></tr>
 
 <p>Definition in file <a class="el" href="defs_8hpp_source.html">defs.hpp</a>.</p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
+<a class="anchor" id="a0fb86ab4862a05bdc4e911fdc89a6b65"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __STD__MAKE__UNIQUE___</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>We use an inclusion guard to make sure this definition is only included once. </p>
+
+<p>Definition at line <a class="el" href="defs_8hpp_source.html#l00019">19</a> of file <a class="el" href="defs_8hpp_source.html">defs.hpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a61671c8dd4803bc1d9b5baca2eb52d70"></a>
 <div class="memitem">
 <div class="memproto">
@@ -165,7 +184,7 @@ template&lt;class T , class... Args&gt; </td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:45 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:47:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

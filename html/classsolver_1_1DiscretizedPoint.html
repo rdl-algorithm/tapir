@@ -121,8 +121,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab3d6d8eb76987e3130822a04209d5f66"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedPoint.html#ab3d6d8eb76987e3130822a04209d5f66">equals</a> (<a class="el" href="classsolver_1_1Point.html">Point</a> const &amp;otherPoint) const override</td></tr>
 <tr class="memdesc:ab3d6d8eb76987e3130822a04209d5f66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true iff this point is equal to the the given point.  <a href="#ab3d6d8eb76987e3130822a04209d5f66">More...</a><br/></td></tr>
 <tr class="separator:ab3d6d8eb76987e3130822a04209d5f66"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a908f01e7627704f5c478a74cece0916e"><td class="memItemLeft" align="right" valign="top">virtual std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedPoint.html#a908f01e7627704f5c478a74cece0916e">hash</a> () const override</td></tr>
-<tr class="memdesc:a908f01e7627704f5c478a74cece0916e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a hash value for this point.  <a href="#a908f01e7627704f5c478a74cece0916e">More...</a><br/></td></tr>
+<tr class="memitem:a908f01e7627704f5c478a74cece0916e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a908f01e7627704f5c478a74cece0916e"></a>
+virtual std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedPoint.html#a908f01e7627704f5c478a74cece0916e">hash</a> () const override</td></tr>
+<tr class="memdesc:a908f01e7627704f5c478a74cece0916e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a hash value for this point - should be consistent with <a class="el" href="classsolver_1_1DiscretizedPoint.html#ab3d6d8eb76987e3130822a04209d5f66" title="Returns true iff this point is equal to the the given point. ">equals()</a> <br/></td></tr>
 <tr class="separator:a908f01e7627704f5c478a74cece0916e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acae99c9bf9996e044a589b1233a6205f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acae99c9bf9996e044a589b1233a6205f"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedPoint.html#acae99c9bf9996e044a589b1233a6205f">print</a> (std::ostream &amp;os) const override</td></tr>
@@ -140,7 +141,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <div class="textblock"><p>Represents a point within a discretized space. </p>
 <p>This can be used to easily implement a simple, discrete state space by simply associating a unique ID with each individual state.</p>
 <p>However, there need not be only one point in each bin; a bin can have as many or as few points as you prefer.</p>
-<p>For convenience, the standard implementations for the <a class="el" href="classsolver_1_1DiscretizedPoint.html#ab3d6d8eb76987e3130822a04209d5f66" title="Returns true iff this point is equal to the the given point. ">equals()</a>, <a class="el" href="classsolver_1_1DiscretizedPoint.html#a908f01e7627704f5c478a74cece0916e" title="Returns a hash value for this point. ">hash()</a> and <a class="el" href="classsolver_1_1DiscretizedPoint.html#acae99c9bf9996e044a589b1233a6205f" title="Prints this point in a human-readable way [optional]. ">print()</a> are implemented simply by using the ID. If you want something more sophisticated, override them. </p>
+<p>For convenience, the standard implementations for the <a class="el" href="classsolver_1_1DiscretizedPoint.html#ab3d6d8eb76987e3130822a04209d5f66" title="Returns true iff this point is equal to the the given point. ">equals()</a>, <a class="el" href="classsolver_1_1DiscretizedPoint.html#a908f01e7627704f5c478a74cece0916e" title="Returns a hash value for this point - should be consistent with equals() ">hash()</a> and <a class="el" href="classsolver_1_1DiscretizedPoint.html#acae99c9bf9996e044a589b1233a6205f" title="Prints this point in a human-readable way [optional]. ">print()</a> are implemented simply by using the ID. If you want something more sophisticated, override them. </p>
 
 <p>Definition at line <a class="el" href="DiscretizedPoint_8hpp_source.html#l00032">32</a> of file <a class="el" href="DiscretizedPoint_8hpp_source.html">DiscretizedPoint.hpp</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -203,37 +204,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 
 </div>
 </div>
-<a class="anchor" id="a908f01e7627704f5c478a74cece0916e"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::size_t solver::DiscretizedPoint::hash </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Returns a hash value for this point. </p>
-
-<p>Implements <a class="el" href="classsolver_1_1Point.html#aa44e8c9c79e70c98a3a6ce58801b7984">solver::Point</a>.</p>
-
-<p>Reimplemented in <a class="el" href="classrocksample_1_1RockSampleObservation.html#a012e16c0cbcdf5fdaa663013545cc6b0">rocksample::RockSampleObservation</a>.</p>
-
-<p>Definition at line <a class="el" href="DiscretizedPoint_8cpp_source.html#l00016">16</a> of file <a class="el" href="DiscretizedPoint_8cpp_source.html">DiscretizedPoint.cpp</a>.</p>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/solver/abstract-problem/<a class="el" href="DiscretizedPoint_8hpp_source.html">DiscretizedPoint.hpp</a></li>
 <li>src/solver/abstract-problem/<a class="el" href="DiscretizedPoint_8cpp_source.html">DiscretizedPoint.cpp</a></li>
@@ -241,7 +211,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:46 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:47:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -95,6 +95,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">options::OptionParsingException Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A simple exception class, thrown when there is something wrong with the input.  
+ <a href="classoptions_1_1OptionParsingException.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="option__parser_8hpp_source.html">option_parser.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for options::OptionParsingException:</div>
 <div class="dyncontent">
@@ -106,24 +111,80 @@ Inheritance diagram for options::OptionParsingException:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2698854d4fc500dea4da8d170b22dffe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2698854d4fc500dea4da8d170b22dffe"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>OptionParsingException</b> (std::string const &amp;message)</td></tr>
+<tr class="memitem:a2698854d4fc500dea4da8d170b22dffe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoptions_1_1OptionParsingException.html#a2698854d4fc500dea4da8d170b22dffe">OptionParsingException</a> (std::string const &amp;message)</td></tr>
+<tr class="memdesc:a2698854d4fc500dea4da8d170b22dffe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new <a class="el" href="classoptions_1_1OptionParsingException.html" title="A simple exception class, thrown when there is something wrong with the input. ">OptionParsingException</a> with the given message string.  <a href="#a2698854d4fc500dea4da8d170b22dffe">More...</a><br/></td></tr>
 <tr class="separator:a2698854d4fc500dea4da8d170b22dffe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b04f141ca817c33da0e7e090a5cbdbf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3b04f141ca817c33da0e7e090a5cbdbf"></a>
-virtual char const *&#160;</td><td class="memItemRight" valign="bottom"><b>what</b> () const   throw ()</td></tr>
+<tr class="memitem:a3b04f141ca817c33da0e7e090a5cbdbf"><td class="memItemLeft" align="right" valign="top">virtual char const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf">what</a> () const   throw ()</td></tr>
+<tr class="memdesc:a3b04f141ca817c33da0e7e090a5cbdbf"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf" title="what() is the standard way for an exception to communicate an error message. ">what()</a> is the standard way for an exception to communicate an error message.  <a href="#a3b04f141ca817c33da0e7e090a5cbdbf">More...</a><br/></td></tr>
 <tr class="separator:a3b04f141ca817c33da0e7e090a5cbdbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="option__parser_8hpp_source.html#l00056">56</a> of file <a class="el" href="option__parser_8hpp_source.html">option_parser.hpp</a>.</p>
-</div><hr/>The documentation for this class was generated from the following files:<ul>
+<div class="textblock"><p>A simple exception class, thrown when there is something wrong with the input. </p>
+
+<p>Definition at line <a class="el" href="option__parser_8hpp_source.html#l00057">57</a> of file <a class="el" href="option__parser_8hpp_source.html">option_parser.hpp</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a2698854d4fc500dea4da8d170b22dffe"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">options::OptionParsingException::OptionParsingException </td>
+          <td>(</td>
+          <td class="paramtype">std::string const &amp;&#160;</td>
+          <td class="paramname"><em>message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Constructs a new <a class="el" href="classoptions_1_1OptionParsingException.html" title="A simple exception class, thrown when there is something wrong with the input. ">OptionParsingException</a> with the given message string. </p>
+
+<p>Definition at line <a class="el" href="option__parser_8cpp_source.html#l00029">29</a> of file <a class="el" href="option__parser_8cpp_source.html">option_parser.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a3b04f141ca817c33da0e7e090a5cbdbf"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual char const* options::OptionParsingException::what </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+        <tr>
+          <td align="right">throw </td><td>(</td><td colspan="2"></td>
+        </tr>
+        <tr>
+          <td align="right"></td><td>)</td><td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf" title="what() is the standard way for an exception to communicate an error message. ">what()</a> is the standard way for an exception to communicate an error message. </p>
+
+<p>Definition at line <a class="el" href="option__parser_8hpp_source.html#l00062">62</a> of file <a class="el" href="option__parser_8hpp_source.html">option_parser.hpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/options/<a class="el" href="option__parser_8hpp_source.html">option_parser.hpp</a></li>
 <li>src/options/<a class="el" href="option__parser_8cpp_source.html">option_parser.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:45 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:47:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

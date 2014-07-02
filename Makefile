@@ -107,16 +107,19 @@ default: build-solver ;
 # ----------------------------------------------------------------------
 # Documentation targets
 # ----------------------------------------------------------------------
-docs/README.md: README.md docs/doxygen_links.md Makefile
-	echo "ABT Documentation {#mainpage}" > $@
-	echo "============================" >> $@
-	cat README.md docs/doxygen_links.md >> $@
+docs/generated/README.md: README.md docs/doxygen_links.md Makefile
+	@echo "# ABT Documentation {#mainpage}\n" > $@
+	@cat README.md docs/doxygen_links.md >> $@
+	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#abt}\2/mg' $@
+	@perl -0pi -e 's/^(.*)(\n-+)$$/\1 {#\L\1}\2/mg' $@
+	@perl -0pi -e 's/^([#]{2,}\s+)(.*)$$/\1\2 {#\L\2}/mg' $@
+	@perl -pi -e 's/({#.*})/($$res = $$1) =~ s\/ \/-\/g,$$res/eg' $@
 
-docs/BUILD_README.md: .make/README.md docs/doxygen_links.md Makefile
-	cat .make/README.md docs/doxygen_links.md > $@
+docs/generated/BUILD.md: .make/README.md docs/doxygen_links.md Makefile
+	@cat .make/README.md docs/doxygen_links.md > $@
 
 .PHONY: doc
-doc: docs/Doxyfile docs/README.md docs/BUILD_README.md
+doc: docs/Doxyfile docs/generated/README.md docs/generated/BUILD.md
 	doxygen docs/Doxyfile
 
 # ----------------------------------------------------------------------

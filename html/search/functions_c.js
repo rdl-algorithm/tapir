@@ -11,5 +11,6 @@ var searchData=
   ['operator_7c_3d',['operator|=',['../namespacesolver.html#a025c7634258976685f73d6d41369112f',1,'solver']]],
   ['operator_7e',['operator~',['../namespacesolver.html#a643da94f57372accf68cfb17ae02e746',1,'solver']]],
   ['option',['Option',['../classoptions_1_1Option.html#ad05f607a662859965cc9ec83ba0136bd',1,'options::Option']]],
-  ['optionparser',['OptionParser',['../classoptions_1_1OptionParser.html#a60369fa1120a8f5d243660deb0f7b0a6',1,'options::OptionParser']]]
+  ['optionparser',['OptionParser',['../classoptions_1_1OptionParser.html#a60369fa1120a8f5d243660deb0f7b0a6',1,'options::OptionParser']]],
+  ['optionparsingexception',['OptionParsingException',['../classoptions_1_1OptionParsingException.html#a2698854d4fc500dea4da8d170b22dffe',1,'options::OptionParsingException']]]
 ];

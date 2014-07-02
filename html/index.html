@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: ABT Documentation</title>
+<title>ABT: Main Page</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -77,16 +77,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div class="header">
   <div class="headertitle">
-<div class="title">ABT Documentation </div>  </div>
+<div class="title">ABT Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
-<ul><li class="level1"><a href="#title">abt - Adaptive Belief Tree </a><ul><li class="level2"><a href="#intro">Introduction </a></li>
-<li class="level2"><a href="#structure">Code structure and examples </a></li>
-<li class="level2"><a href="#reqs">System Requirements </a></li>
-<li class="level2"><a href="#build">Configuration and Building </a></li>
+<ul><li class="level1"><a href="#abt">abt - Adaptive Belief Tree </a><ul><li class="level2"><a href="#introduction">Introduction </a></li>
+<li class="level2"><a href="#code-structure-and-examples">Code structure and examples </a></li>
+<li class="level2"><a href="#system-requirements">System Requirements </a></li>
+<li class="level2"><a href="#configuration-and-building">Configuration and Building </a></li>
 <li class="level2"><a href="#usage">Usage </a></li>
-<li class="level2"><a href="#pomdp">Implementing a new POMDP model</a><ul><li class="level3"><a href="#model">Model</a></li>
+<li class="level2"><a href="#implementing-a-new-pomdp-model">Implementing a new POMDP model </a><ul><li class="level3"><a href="#model">Model</a></li>
 <li class="level3"><a href="#options">Options</a></li>
 <li class="level3"><a href="#state">State</a></li>
 <li class="level3"><a href="#observation">Observation</a></li>
@@ -95,25 +95,25 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li class="level3"><a href="#serializer">Serializer</a></li>
 </ul>
 </li>
-<li class="level2"><a href="#changes">Implementing changes </a></li>
-<li class="level2"><a href="#binaries">Generating binaries for a new POMDP model </a></li>
+<li class="level2"><a href="#implementing-changes">Implementing changes </a></li>
+<li class="level2"><a href="#generating-binaries-for-a-new-pomdp-model">Generating binaries for a new POMDP model </a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="textblock"><h1><a class="anchor" id="title"></a>
+<div class="textblock"><h1><a class="anchor" id="abt"></a>
 abt - Adaptive Belief Tree </h1>
-<h2><a class="anchor" id="intro"></a>
+<h2><a class="anchor" id="introduction"></a>
 Introduction </h2>
 <p>An online POMDP solver capable of adapting to modifications to the POMDP model without the need to reconstruct the policy from scratch. The solver uses informed sampling methods to generate a sampled belief tree, which embodies the current policy, while also keeping track of all of the sampled trajectories in order to allow for efficient updates in response to changes to the POMDP model.</p>
-<h2><a class="anchor" id="structure"></a>
+<h2><a class="anchor" id="code-structure-and-examples"></a>
 Code structure and examples </h2>
 <p>The core solver code is located in src/solver, while several example problems are given in src/problems:</p>
 <ul>
 <li><a class="el" href="dir_7fd0f5f213bcbde0c602c6d58d54ed57.html">Tag</a></li>
 <li><a class="el" href="dir_5c43e7e6616020857693cbaff300da49.html">RockSample</a></li>
 </ul>
-<h2><a class="anchor" id="reqs"></a>
+<h2><a class="anchor" id="system-requirements"></a>
 System Requirements </h2>
 <p>The code is written primarily for Linux environments, although it should also build OK in Windows.</p>
 <p>Building and running the C++ source code requires the following, which should all be available via a package manager; Debian/Ubuntu package names are given below.</p>
@@ -122,20 +122,20 @@ System Requirements </h2>
 <li><a href="http://libspatialindex.github.io">libspatialindex</a> (&gt;= 1.7.0) - "libspatialindex-dev"</li>
 <li><a href="http://eigen.tuxfamily.org">Eigen 3</a> (&gt;= 3.2.0) - "libeigen3-dev"</li>
 </ul>
-<h2><a class="anchor" id="build"></a>
+<h2><a class="anchor" id="configuration-and-building"></a>
 Configuration and Building </h2>
-<p>This project uses a custom GNU Make build system, which is documented in further detail in <a class="el" href="build-system.html">this README</a>; the dependencies are cleanly generated and make can easily be run in parallel (e.g. make -j8). The code should build OK without any special configuration, but if need be the core build settings ca be changed via the <a href="../Makefile">root Makefile</a>.</p>
+<p>This project uses a custom GNU Make build system, which is documented in further detail in <a class="el" href="md_docs_generated_BUILD.html">this README</a>; the dependencies are cleanly generated and make can easily be run in parallel (e.g. make -j8). The code should build OK without any special configuration, but if need be the core build settings ca be changed via the <a href="../Makefile">root Makefile</a>.</p>
 <p>To build the core solver, simply use the command "make solver" - this will build the solver as a static library in builds/release/libabt.a. Alternatively, the solver can also be built as a shared library - use the command "make solver CFG=shared", and the library file will be output to builds/shared/libabt.so.</p>
 <p>The supplied code also comes with several example problems, as mentioned previously. To build the code with all of the example problems, simply use the command "make all" from the root directory. Alternatively, you can build only a specific problem by specifying that problem as a target (e.g. "make tag"), or by running the make command from within that problem's source folder.</p>
 <p>Different build configurations are available via the "CFG" variable in the Makefile, which can be set from the command line, e.g. "make CFG=shared", which, as previously mentioned, builds the solver as a shared library rather than via static linking. For debugging output, use "make CFG=debug", or change "DEFAULT_CFG:=debug" in the <a href="../Makefile">root Makefile</a>. Each configuration sends its output into a different directory, which will be "builds/$(CFG)".</p>
-<p>For additional documentation on the build system, see the <a class="el" href="build-system.html">build system README</a>.</p>
+<p>For additional documentation on the build system, see the <a class="el" href="md_docs_generated_BUILD.html">build system README</a>.</p>
 <h2><a class="anchor" id="usage"></a>
 Usage </h2>
-<p>First of all, the solver can be used for your own purposes in library form; simply build it as either a static or dynamic library (as per the previous section) and then link against it.</p>
-<p>If you want to run the example problems, you should first compile those problems, as per the previous section. Each problem should generate two core executables - "solve" for initial offline policy generation, and "simulate" for online simulation. After building, these executables are copied back into the source tree, as that is where the config files for each problem are located; it will be easiest to run each problem from there.</p>
+<p>First of all, the solver can be used for your own purposes in library form; simply build it as either a static or dynamic library (as per the <a href="#configuration-and-building">previous section</a>) and then link against it.</p>
+<p>If you want to run the example problems, you should first compile those problems, as per the <a href="#configuration-and-building">previous section</a>. Each problem should generate two core executables - "solve" for initial offline policy generation, and "simulate" for online simulation. After building, these executables are copied back into the source tree, as that is where the config files for each problem are located; it will be easiest to run each problem from there.</p>
 <p>Each problem will have its own setings, which can be configured in one of two ways - via command line parameters, or via configuration files. Any parameters passed via command line will override the settings in the file. For a quick summary of the command-line parameters available, run the executable with an argument of "--help" for the usage information. More advanced settings are available via config files - see tests/default.cfg in each problem folder for the default settings, e.g. <a href="../src/problems/tag/tests/default.cfg">tag/tests/default.cfg</a>. The actual settings that are available in each config file are defined by sublcass of the base <a class="el" href="structsolver_1_1Options.html">Options</a> class, e.g. <a class="el" href="structtag_1_1TagOptions.html">TagOptions</a> specifies all of the options that can be configured for Tag.</p>
-<h2><a class="anchor" id="pomdp"></a>
-Implementing a new POMDP model</h2>
+<h2><a class="anchor" id="implementing-a-new-pomdp-model"></a>
+Implementing a new POMDP model </h2>
 <p>At its core, implementation of a specific POMDP problem is done via an implementation of the <a class="el" href="classsolver_1_1Model.html">Model</a> interface, which represents a black-box generative model of a POMDP. See <a class="el" href="classtag_1_1TagModel.html">TagModel</a> for an example implementation of this interface for the Tag POMDP.</p>
 <p>Formally, a POMDP can be specified as an 8-tuple, (S, A, O, T, Z, R, b0, γ), where</p>
 <ul>
@@ -161,7 +161,7 @@ Implementing a new POMDP model</h2>
 Model</h3>
 <p>As previously mentioned, the <a class="el" href="classsolver_1_1Model.html">Model</a> class is the core interface for the specification of a POMDP model; see <a class="el" href="classtag_1_1TagModel.html">TagModel</a> for a concrete example. An implementation of <a class="el" href="classsolver_1_1Model.html">Model</a> must, at the very least, implement all of the pure virtual methods in the abstract base class. These include the aforementioned core methods <a class="el" href="classsolver_1_1Model.html#a2e62295cded9ac6e59ac46bbe98ba70c">Model::sampleAnInitState</a>, <a class="el" href="classsolver_1_1Model.html#ac935e5b653acc3a19dd5bc963bf4a14d">Model::generateStep</a>, and <a class="el" href="classsolver_1_1Model.html#afaefbb5cafd6984d16d0e7972e96befd">Model::isTerminal</a>, as specified previously. A <a class="el" href="classsolver_1_1Model.html">Model</a> instance will also possess an <a class="el" href="structsolver_1_1Options.html">Options</a> instance, which specifies various ABT and POMDP parameters.</p>
 <p>In addition to the these three core methods, and <a class="el" href="classsolver_1_1Model.html#a153e447124946743272c156ee40e7024">Model::createActionPool</a> (see <a href="#actionpool">this section</a> for further details), a Model must also implement <a class="el" href="classsolver_1_1Model.html#a7c3fd2691ae717aa5cdf61fe32269f5c">Model::sampleStateUninformed</a>, which should generate states according to an uninformed prior (as opposed to from the initial belief); this is used by the default implementation for the <a class="el" href="classsolver_1_1Model.html#a0dc0aa58463c5da7385824e08a242dc5">uninformed generateParticles</a> method. Custom implementations for the two particle filtering methods ( <a class="el" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b">informed</a> and <a class="el" href="classsolver_1_1Model.html#a0dc0aa58463c5da7385824e08a242dc5">uninformed</a> ) can be written if better handling of particle depletion is needed. Also of key importance (although not mandatory) is a heuristic function, which is specified by <a class="el" href="classsolver_1_1Model.html#a080de609bc622ed1b2985a9c73cca392">Model::getHeuristicFunction</a> - this uses a functional programming interface, and should return a <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a>. By default, the heuristic function is simply one that always returns zero.</p>
-<p>If you wish the model to handle changes, see <a href="#changes">the section on changes</a> below; in short, doing so requires implementations for several other methods, most notably <a class="el" href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818">Model::applyChanges</a>.</p>
+<p>If you wish the model to handle changes, see <a href="#implementing-changes">the section on changes</a> below; in short, doing so requires implementations for several other methods, most notably <a class="el" href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818">Model::applyChanges</a>.</p>
 <p>A convenient subclass of <a class="el" href="classsolver_1_1Model.html">Model</a> is <a class="el" href="classshared_1_1ModelWithProgramOptions.html">ModelWithProgramOptions</a>, which uses additional options from <a class="el" href="structshared_1_1SharedOptions.html">SharedOptions</a> to provide some extra configuration settings, including text-based parsing in order to select different search strategies.</p>
 <h3><a class="anchor" id="options"></a>
 Options</h3>
@@ -204,7 +204,7 @@ ActionPool</h3>
 Serializer</h3>
 <p>If you require the ability to serialize a solver policy (e.g. to save it to a file), you must provide an implementation of the abstract <a class="el" href="classsolver_1_1Serializer.html">Serializer</a> class. A basic implementation that generates human-readable text representations of all of the core ABT solver classes is provided by <a class="el" href="classsolver_1_1TextSerializer.html">TextSerializer</a>, but this implementation is only partial, because it doesn't come with implementations for the various configurable data structures. As such, in order to fully implement a <a class="el" href="classsolver_1_1Serializer.html">Serializer</a> for your problem, you will also need to implement methods to serialize a few of the core interface classes - that is, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a>, <a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a>, and <a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a>. Additionally, the action and observation mappings also need serialization. The default observation mapping is <a class="el" href="classsolver_1_1DiscreteObservationPool.html">DiscreteObservationPool</a>, which should suffice for most purposes; in order to serialize this mapping class, the serializer implementation should also inherit from <a class="el" href="classsolver_1_1DiscreteObservationTextSerializer.html">DiscreteObservationTextSerializer</a>. Similarly, if you use <a class="el" href="classsolver_1_1EnumeratedActionPool.html">EnumeratedActionPool</a> for mapping actions, your serializer should inherit from <a class="el" href="namespacesolver.html#ab167a812619957f474a48b358b64eb1d">EnumeratedActionTextSerializer</a>.</p>
 <p>To see a good example of the above, have a look at <a class="el" href="classtag_1_1TagTextSerializer.html">TagTextSerializer</a>.</p>
-<h2><a class="anchor" id="changes"></a>
+<h2><a class="anchor" id="implementing-changes"></a>
 Implementing changes </h2>
 <p>It is not mandatory for a <a class="el" href="classsolver_1_1Model.html">Model</a> implementation to deal with changes, but if you require this functionality, the following two core implementation details are the most important:</p>
 <ul>
@@ -222,7 +222,7 @@ Implementing changes </h2>
 <li><a class="el" href="classsolver_1_1Model.html#a57f002206fa228bf82cf0fb67037d7c4">Model::generateReward</a> to generate rewards - an implicit definition of R(s, a)</li>
 </ul>
 <p>These three methods are used instead of <a class="el" href="classsolver_1_1Model.html#ac935e5b653acc3a19dd5bc963bf4a14d">Model::generateStep</a> in order to avoid unnecessary recalculation, and to minize the extent to which new histories diverge from old ones due to re-randomization. To minimize such issues even further, you can use <a class="el" href="classsolver_1_1TransitionParameters.html">TransitionParameters</a> and <a class="el" href="classsolver_1_1Model.html#ab63a02a646be252ec1bd3b2c6c1d9f14">Model::generateTransition</a>, which allows you to store extra information about a generated step. This can be used, for example, to store intermediate calculations, or generated random numbers. See the documentation of <a class="el" href="classsolver_1_1Model.html">Model</a> for greater detail.</p>
-<h2><a class="anchor" id="binaries"></a>
+<h2><a class="anchor" id="generating-binaries-for-a-new-pomdp-model"></a>
 Generating binaries for a new POMDP model </h2>
 <p>For additional convenience, template methods to generate binaries for an individual problem are given in:</p>
 <ul>
@@ -232,7 +232,7 @@ Generating binaries for a new POMDP model </h2>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:46 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:47:01 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

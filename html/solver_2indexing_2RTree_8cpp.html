@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: Custom non-recursive Make system</title>
+<title>ABT: src/solver/indexing/RTree.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -38,10 +38,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li class="current"><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="files.html"><span>Files</span></a></li>
+      <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -60,6 +60,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -74,42 +80,47 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_041db6ad6a3d44280e40e5af409429cb.html">solver</a></li><li class="navelem"><a class="el" href="dir_81644a5c8606e3e82d8798bbafb93003.html">indexing</a></li>  </ul>
+</div>
 </div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a>  </div>
   <div class="headertitle">
-<div class="title">Custom non-recursive Make system </div>  </div>
+<div class="title">RTree.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h2>Introduction </h2>
-<p>The build system uses a non-recursive approach with GNU make, similar to the one documented in the paper <a href="http://aegis.sourceforge.net/auug97.pdf">Recursive Make Considered Harmful</a> by Peter Miller, and adapting some Makefile code from <a href="http://evbergen.home.xs4all.nl/nonrecursive-make.html">here</a>.</p>
-<p>The paper describes many advantages to non-recursive Make; in short, it results in a cleaner and more robust dependency tree, and it means that the code can quite easily be compiled in parallel.</p>
-<p>The system used here adds two key conveniences to the aforementioned system:</p>
-<ul>
-<li>Improved readability by moving standard code, especially the recursion, into template files wihin the .make directory. The recursion is located in <a href="../.make/stack.mk">stack.mk</a>.</li>
-<li>The ability to call make from any child folder and have it behave the way you would expect it to if that child folder were the root.</li>
-</ul>
-<h2>General usage </h2>
-<p>Global configuration settings are set in the <a href="../Makefile">root Makefile</a>, and then individual modules can each be configured via the Makefile in their own subfolder (e.g. <a href="../src/Makefile">this</a>).</p>
-<p>The subfolder Makefiles should work more or less like normal Makefiles, although it is processed relative to the root folder, which means that any paths should be relative to the root - the variable  is provided as shorthand for the relative path of the current module w.r.t. the root.</p>
-<p>Each module is also required to define two variables that are used for the recursive processing:</p>
-<ul>
-<li>MODULE_NAME: The module name; should be a unique identifier. This is used for generating intermediate targets for each specific module.</li>
-<li>CHILD_FOLDERS: The subdirectories that are required to be processed.</li>
-</ul>
-<p>However, in order to mainain consistency with the rest of the build system, particularly with regards to build modes (release vs. debug) and with regards to the structure of the build output directories (e.g. builds/release and builds/debug), it is best to use the provided templates to automatically generate most of the rules. Refer to <a href="../src/Makefile">the Makefile in the src folder</a> for a simple example, or read the next section for greater depth.</p>
-<h2>Makefile templates </h2>
-<p>The key rules that do most of the work are located in <a href="../.make/template.mk">template.mk</a>, which detects .cpp source files and includes a default .cpp -&gt; .o recipe, as well as automatic dependency handling.</p>
-<p>To provide rules on how to build the module as a whole rather than implicitly via other modules that depend on it, you need to add the targets you want as prerequisites for the phony build targets. For example, build-solver is the target that builds the entire "solver" module.</p>
-<p>The simplest way to define the build pattern for a module is to simply build every individual object file - the rule for this is given in <a href="../.make/build.mk">build.mk</a>.</p>
-<p>The solver code is currently set to build into an archive called "libabt.a"; the rules to do this are defined in <a href="../src/solver/Makefile">the "solver" Makefile</a> As you can see there, the rule defines all of the files that make up this library in terms of the automatic OBJS_[module] variables generated by the template code.</p>
-<h2>Problem templates </h2>
-<p>A more complex example is the build template used for each individual problem, which is located in <a href="../.make/problem-template.mk">problem-template.mk</a>. Its purpose is to defines recipes for the "solve" and "simulate" executables, which are the key executables for running ABT on a specific problem.</p>
-<p>The core of this template is defining all of the dependencies for each problem. The default dependencies are the other object files in the same folder as solve.cpp and simulate.cpp, the solver archive libabt.a, and the external library libspatialindex.</p>
-<p>If your problem needs to be linked to additional libraries, you can specify this by adding those dependencies to the variable EXTRA_LINKER_ARGS_[module]. </p>
+
+<p>Contains the implementation of the RTree class, which is a thin wrapper for the libspatialindex ISpatialIndex interface that also implements the ABT interface StateIndex.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="solver_2indexing_2RTree_8hpp_source.html">solver/indexing/RTree.hpp</a>&quot;</code><br/>
+<code>#include &lt;memory&gt;</code><br/>
+<code>#include &lt;spatialindex/SpatialIndex.h&gt;</code><br/>
+<code>#include &lt;spatialindex/RTree.h&gt;</code><br/>
+<code>#include &lt;spatialindex/tools/Tools.h&gt;</code><br/>
+<code>#include &quot;<a class="el" href="global_8hpp_source.html">global.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="StateInfo_8hpp_source.html">solver/StateInfo.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="VectorState_8hpp_source.html">solver/abstract-problem/VectorState.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="SpatialIndexVisitor_8hpp_source.html">solver/indexing/SpatialIndexVisitor.hpp</a>&quot;</code><br/>
+</div>
+<p><a href="solver_2indexing_2RTree_8cpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacesolver"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesolver.html">solver</a></td></tr>
+<tr class="memdesc:namespacesolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">A namespace to hold all of the various classes used by the solver - particularly the main <a class="el" href="classsolver_1_1Solver.html" title="The core class of the ABT algorithm. ">Solver</a> class, of course. <br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains the implementation of the RTree class, which is a thin wrapper for the libspatialindex ISpatialIndex interface that also implements the ABT interface StateIndex. </p>
+
+<p>Definition in file <a class="el" href="solver_2indexing_2RTree_8cpp_source.html">RTree.cpp</a>.</p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:45 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:47:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

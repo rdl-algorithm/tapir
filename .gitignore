@@ -4,6 +4,9 @@
 /.settings
 /EMPTY_HEADER.hpp
 
+# Automatically generated documentation
+docs/generated
+
 # Binaries
 /builds
 /build

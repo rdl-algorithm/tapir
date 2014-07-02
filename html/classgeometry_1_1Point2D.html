@@ -122,8 +122,9 @@ virtual double&#160;</td><td class="memItemRight" valign="bottom"><b>distanceTo<
 <tr class="memitem:a8a31325524a79e142152fdef3f7190fb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8a31325524a79e142152fdef3f7190fb"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>equals</b> (Point const &amp;otherPoint) const override</td></tr>
 <tr class="separator:a8a31325524a79e142152fdef3f7190fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55e16e7e4f364fa8ab484435a99d93d3"><td class="memItemLeft" align="right" valign="top">virtual std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgeometry_1_1Point2D.html#a55e16e7e4f364fa8ab484435a99d93d3">hash</a> () const override</td></tr>
-<tr class="memdesc:a55e16e7e4f364fa8ab484435a99d93d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a hash value for this point.  <a href="#a55e16e7e4f364fa8ab484435a99d93d3">More...</a><br/></td></tr>
+<tr class="memitem:a55e16e7e4f364fa8ab484435a99d93d3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a55e16e7e4f364fa8ab484435a99d93d3"></a>
+virtual std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgeometry_1_1Point2D.html#a55e16e7e4f364fa8ab484435a99d93d3">hash</a> () const override</td></tr>
+<tr class="memdesc:a55e16e7e4f364fa8ab484435a99d93d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a hash value for this point - should be consistent with equals() <br/></td></tr>
 <tr class="separator:a55e16e7e4f364fa8ab484435a99d93d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9580ebe1da1d611831a69020d45b4c2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa9580ebe1da1d611831a69020d45b4c2"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgeometry_1_1Point2D.html#aa9580ebe1da1d611831a69020d45b4c2">print</a> (std::ostream &amp;os) const override</td></tr>
@@ -219,35 +220,6 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a55e16e7e4f364fa8ab484435a99d93d3"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::size_t geometry::Point2D::hash </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Returns a hash value for this point. </p>
-
-<p>Reimplemented from <a class="el" href="classsolver_1_1Vector.html#aaa3e70435ded46d9e51d9c4bd7ecf03d">solver::Vector</a>.</p>
-
-<p>Definition at line <a class="el" href="Point2D_8cpp_source.html#l00042">42</a> of file <a class="el" href="Point2D_8cpp_source.html">Point2D.cpp</a>.</p>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/problems/shared/geometry/<a class="el" href="Point2D_8hpp_source.html">Point2D.hpp</a></li>
 <li>src/problems/shared/geometry/<a class="el" href="Point2D_8cpp_source.html">Point2D.cpp</a></li>
@@ -255,7 +227,7 @@ Friends</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:45 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:47:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

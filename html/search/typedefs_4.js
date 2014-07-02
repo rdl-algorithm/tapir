@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['idtype',['IdType',['../classsolver_1_1HistoryEntry.html#adc89f7778ef47ae7b07f9093eadf73b7',1,'solver::HistoryEntry']]]
+  ['heuristic',['Heuristic',['../namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966',1,'solver']]]
 ];

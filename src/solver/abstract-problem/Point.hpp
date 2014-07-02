@@ -39,15 +39,17 @@ class Point {
      */
     virtual std::unique_ptr<Point> copy() const = 0;
 
+    /** Returns true iff this point is equal to the the given point. */
+    virtual bool equals(Point const &otherPoint) const = 0;
+
+    /** Returns a hash value for this point - should be consistent with equals() */
+    virtual std::size_t hash() const = 0;
+
     /** Returns the distance from this point to the given point [optional]. */
     virtual double distanceTo(Point const &/*otherPoint*/) const {
         return std::numeric_limits<double>::infinity();
     }
 
-    /** Returns true iff this point is equal to the the given point. */
-    virtual bool equals(Point const &otherPoint) const = 0;
-    /** Returns a hash value for this point. */
-    virtual std::size_t hash() const = 0;
     /** Prints this point in a human-readable way [optional] */
     virtual void print(std::ostream &/*os*/) const {};
 };

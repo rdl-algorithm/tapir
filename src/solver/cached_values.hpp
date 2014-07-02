@@ -57,11 +57,12 @@ private:
     T cache_;
 };
 
-/** A template specialization for caches of type unique_ptr<Point> - Since a unique_ptr can only
- * be moved we need to make a new Point via the method Point::copy()
+/** A template specialization for caches of type unique_ptr<Point>.
+ *
+ * Since a unique_ptr can only be moved we need to make a new Point via the method Point::copy()
  */
-template<>
-inline std::unique_ptr<solver::Point> CachedValue<std::unique_ptr<solver::Point>>::getCache() {
+template<> inline std::unique_ptr<solver::Point>
+CachedValue<std::unique_ptr<solver::Point>>::getCache() {
     return cache_->copy();
 }
 } /* namespace solver */

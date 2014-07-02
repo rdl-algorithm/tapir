@@ -123,7 +123,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        }</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        parser-&gt;finalize();</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    } <span class="keywordflow">catch</span> (<a class="code" href="classoptions_1_1OptionParsingException.html">options::OptionParsingException</a> <span class="keyword">const</span> &amp;e) {</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        std::cerr &lt;&lt; e.what();</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        std::cerr &lt;&lt; e.<a class="code" href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf">what</a>();</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <span class="keywordflow">return</span> 2;</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    }</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
@@ -156,15 +156,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="Observation_8hpp_html"><div class="ttname"><a href="Observation_8hpp.html">Observation.hpp</a></div><div class="ttdoc">Defines the Observation interface; currently this is the same as Point, so this is just a straight ty...</div></div>
 <div class="ttc" id="global_8hpp_html_a080b7731c061f9bafcf79d5e2f0c388a"><div class="ttname"><a href="global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a">RandomGenerator</a></div><div class="ttdeci">std::default_random_engine RandomGenerator</div><div class="ttdoc">The RNG engine to use throughout the code. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00024">global.hpp:24</a></div></div>
 <div class="ttc" id="State_8hpp_html"><div class="ttname"><a href="State_8hpp.html">State.hpp</a></div><div class="ttdoc">Defines the State interface; currently this is the same as Point, so this is just a straight typedef...</div></div>
+<div class="ttc" id="classoptions_1_1OptionParsingException_html_a3b04f141ca817c33da0e7e090a5cbdbf"><div class="ttname"><a href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf">options::OptionParsingException::what</a></div><div class="ttdeci">virtual char const * what() const </div><div class="ttdoc">what() is the standard way for an exception to communicate an error message. </div><div class="ttdef"><b>Definition:</b> <a href="option__parser_8hpp_source.html#l00062">option_parser.hpp:62</a></div></div>
 <div class="ttc" id="Serializer_8hpp_html"><div class="ttname"><a href="Serializer_8hpp.html">Serializer.hpp</a></div><div class="ttdoc">Defines Serializer, an abstract base class for serialization of an ABT solver instance. </div></div>
 <div class="ttc" id="Action_8hpp_html"><div class="ttname"><a href="Action_8hpp.html">Action.hpp</a></div><div class="ttdoc">Defines the Action interface; currently this is the same as Point, so this is just a straight typedef...</div></div>
 <div class="ttc" id="classsolver_1_1Solver_html"><div class="ttname"><a href="classsolver_1_1Solver.html">solver::Solver</a></div><div class="ttdoc">The core class of the ABT algorithm. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8hpp_source.html#l00065">Solver.hpp:65</a></div></div>
 <div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
-<div class="ttc" id="classoptions_1_1OptionParsingException_html"><div class="ttname"><a href="classoptions_1_1OptionParsingException.html">options::OptionParsingException</a></div><div class="ttdef"><b>Definition:</b> <a href="option__parser_8hpp_source.html#l00056">option_parser.hpp:56</a></div></div>
+<div class="ttc" id="classoptions_1_1OptionParsingException_html"><div class="ttname"><a href="classoptions_1_1OptionParsingException.html">options::OptionParsingException</a></div><div class="ttdoc">A simple exception class, thrown when there is something wrong with the input. </div><div class="ttdef"><b>Definition:</b> <a href="option__parser_8hpp_source.html#l00057">option_parser.hpp:57</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:45 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:46:59 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -1,8 +1,8 @@
-abt - Adaptive Belief Tree {#title}
-===================================
+abt - Adaptive Belief Tree
+==========================
 
-Introduction {#intro}
----------------------
+Introduction
+------------
 An online POMDP solver capable of adapting to modifications to the POMDP model
 without the need to reconstruct the policy from scratch. The solver uses
 informed sampling methods to generate a sampled belief tree, which embodies the
@@ -10,15 +10,15 @@ current policy, while also keeping track of all of the sampled trajectories
 in order to allow for efficient updates in response to changes to the
 POMDP model.
 
-Code structure and examples {#structure}
-----------------------------------------
+Code structure and examples
+---------------------------
 The core solver code is located in src/solver, while several example problems
 are given in src/problems:
 - [Tag]
 - [RockSample]
 
-System Requirements {#reqs}
----------------------------
+System Requirements
+-------------------
 The code is written primarily for Linux environments, although it should also
 build OK in Windows.
 
@@ -29,8 +29,8 @@ below.
 - [libspatialindex](http://libspatialindex.github.io) (>= 1.7.0) - "libspatialindex-dev"
 - [Eigen 3](http://eigen.tuxfamily.org) (>= 3.2.0) - "libeigen3-dev"
 
-Configuration and Building {#build}
------------------------------------
+Configuration and Building
+--------------------------
 This project uses a custom GNU Make build system, which is documented in further
 detail in [this README][Build README]; the dependencies are cleanly generated
 and make can easily be run in parallel (e.g. make -j8). The code should build OK
@@ -60,14 +60,16 @@ sends its output into a different directory, which will be "builds/$(CFG)".
 For additional documentation on the build system, see the
 [build system README][Build README].
 
-Usage {#usage}
---------------
+Usage
+-----
 First of all, the solver can be used for your own purposes in library form;
-simply build it as either a static or dynamic library (as per the previous
-section) and then link against it.
+simply build it as either a static or dynamic library (as per the
+[previous section](#configuration-and-building))
+and then link against it.
 
 If you want to run the example problems, you should first compile those
-problems, as per the previous section. Each problem should generate two core
+problems, as per the [previous section](#configuration-and-building).
+Each problem should generate two core
 executables - "solve" for initial offline policy generation, and "simulate"
 for online simulation. After building, these executables are copied back into
 the source tree, as that is where the config files for each problem are located;
@@ -84,8 +86,8 @@ settings that are available in each config file are defined by sublcass of the
 base [Options] class, e.g. [TagOptions] specifies all of the options that can
 be configured for Tag.
 
-Implementing a new POMDP model{#pomdp}
---------------------------------------
+Implementing a new POMDP model
+------------------------------
 At its core, implementation of a specific POMDP problem is done via an
 implementation of the [Model] interface, which represents a black-box generative
 model of a POMDP. See [TagModel] for an example implementation of this interface
@@ -138,7 +140,7 @@ see the [section below](#actionpool) for some additional details.
 See below for a more detailed description of the core functionality needed
 in order to make a new problem for the ABT code.
 
-### Model {#model}
+### Model
 As previously mentioned, the [Model] class is the core interface for the
 specification of a POMDP model; see [TagModel] for a concrete example.
 An implementation of [Model] must, at the very least, implement all of the pure
@@ -162,7 +164,8 @@ specified by [Model::getHeuristicFunction] - this uses a functional programming
 interface, and should return a [Heuristic]. By default, the heuristic function
 is simply one that always returns zero.
 
-If you wish the model to handle changes, see [the section on changes](#changes)
+If you wish the model to handle changes, see 
+[the section on changes](#implementing-changes)
 below; in short, doing so requires implementations for several other methods,
 most notably [Model::applyChanges].
 
@@ -171,7 +174,7 @@ additional options from [SharedOptions] to provide some extra configuration
 settings, including text-based parsing in order to select different search
 strategies.
 
-### Options {#options}
+### Options
 Each [Model] instance should possess an [Options] instance, which specifies
 the various configuration settings to use for that problem, and for ABT to
 use when solving that problem. The base [Options] class has several parameters
@@ -181,7 +184,7 @@ values that must be specified:
 - [Options::numberOfStateVariables] - the number of state variables used to
     define a state of the POMDP.
 
-### State {#state}
+### State
 Represents a state within the state space of the problem.
 See [TagState] for an example.
 
@@ -213,21 +216,21 @@ Alternatively, a custom [StateIndex] implementation can be given by
 implementing [StateIndex] and having [Model::createStateIndex] return an
 instance of that custom implementation.
 
-### Observation {#observation}
+### Observation
 Represents an observation within the action space of the problem.
 See [TagObservation] for an example.
 Like [State], the [Observation] interface requires implementations for
 [copy()], [equals()], and [hash()],
 and custom implementations can be given for [distanceTo()] and [print()]
 
-### Action {#action}
+### Action
 Represents an action within the action space of the problem.
 See [TagAction] for an example.
 Like [State], the [Action] interface requires implementations for
 [copy()], [equals()], and [hash()],
 and custom implementations can be given for [distanceTo()] and [print()]
 
-### ActionPool {#actionpool}
+### ActionPool
 In order for the ABT solver to be able to search the space of possible actions,
 it needs a way to know which actions it will need to try, and at which belief
 nodes. This is handled in a generic manner by the [ActionPool] interface - the
@@ -251,7 +254,7 @@ has two prerequsites:
 - The [EnumeratedActionPool] constructor requires, as a constructor argument,
     a vector containing all of the actions, in the order of their enumeration.
 
-### Serializer {#serializer}
+### Serializer
 If you require the ability to serialize a solver policy (e.g. to save it to
 a file), you must provide an implementation of the abstract [Serializer]
 class. A basic implementation that generates human-readable text representations
@@ -270,8 +273,8 @@ serializer should inherit from [EnumeratedActionTextSerializer].
 
 To see a good example of the above, have a look at [TagTextSerializer].
 
-Implementing changes {#changes}
--------------------------------
+Implementing changes
+--------------------
 It is not mandatory for a [Model] implementation to deal with changes, but
 if you require this functionality, the following two core implementation details
 are the most important:
@@ -310,11 +313,114 @@ This can be used, for example, to store intermediate calculations,
 or generated random numbers. See the documentation of [Model] for greater
 detail.
 
-Generating binaries for a new POMDP model {#binaries}
------------------------------------------------------
+Generating binaries for a new POMDP model
+-----------------------------------------
 For additional convenience, template methods to generate binaries for an
 individual problem are given in:
 - [solve.hpp] --- initial offline policy generation; see
     [solve.cpp for Tag][Tag_solve.cpp] for a usage example.
 - [simulate.hpp] --- simulation with online POMDP solution; see
     [simulate.cpp for Tag][Tag_simulate.cpp] for a usage example.
+
+
+
+
+
+
+[Solver]: src/solver/Solver.hpp
+[Tag]: src/problems/tag
+[RockSample]: src/problems/rocksample
+
+[Action]: src/solver/abstract-problem/Action.hpp
+[Model]: src/solver/abstract-problem/Model.hpp
+[ModelChange]: src/solver/abstract-problem/ModelChange.hpp
+[Heuristic]: src/solver/abstract-problem/Heuristic.hpp
+[Observation]: src/solver/abstract-problem/Observation.hpp
+[Options]: src/solver/abstract-problem/Options.hpp
+[State]: src/solver/abstract-problem/State.hpp
+[TransitionParameters]: src/solver/abstract-problem/TransitionParameters.hpp
+[Vector]: src/solver/abstract-problem/Vector.hpp
+[VectorState]: src/solver/abstract-problem/VectorState.hpp
+
+
+[Model::sampleAnInitState]: src/solver/abstract-problem/Model.hpp#L109
+[Model::sampleStateUninformed]: src/solver/abstract-problem/Model.hpp#L113
+[Model::isTerminal]: src/solver/abstract-problem/Model.hpp#L115
+
+[Model::generateStep]: src/solver/abstract-problem/Model.hpp#L146
+[Model::generateTransition]: src/solver/abstract-problem/Model.hpp#L155
+[Model::generateNextState]: src/solver/abstract-problem/Model.hpp#L165
+[Model::generateObservation]: src/solver/abstract-problem/Model.hpp#L176
+[Model::generateReward]: src/solver/abstract-problem/Model.hpp#L189
+
+[Model::applyChanges]: src/solver/abstract-problem/Model.hpp#L208
+
+[Model::generateParticles]: src/solver/abstract-problem/Model.hpp#L219
+[Model::generateParticles2]: src/solver/abstract-problem/Model.hpp#L232
+
+[Model::getHeuristicFunction]: src/solver/abstract-problem/Model.hpp#L257
+
+[Model::createActionPool]: src/solver/abstract-problem/Model.hpp#L309
+[Model::createStateIndex]: src/solver/abstract-problem/Model.hpp#L289
+
+[Options::numberOfStateVariables]: src/solver/abstract-problem/Options.hpp#L29
+[Options::discountFactor]: src/solver/abstract-problem/Options.hpp#L37
+
+
+[copy()]: src/solver/abstract-problem/Point.hpp#L40
+[equals()]: src/solver/abstract-problem/Point.hpp#L43
+[hash()]: src/solver/abstract-problem/Point.hpp#L46
+[distanceTo()]: src/solver/abstract-problem/Point.hpp#L49
+[print()]: src/solver/abstract-problem/Point.hpp#L54
+
+
+[StatePool]: src/solver/StatePool.hpp
+[StateIndex]: src/solver/indexing/StateIndex.hpp
+[RTree]: src/solver/indexing/RTree.hpp
+[Vector::asVector]: src/solver/abstract-problem/Vector.hpp#L39
+
+[ActionPool]: src/solver/mappings/actions/ActionPool.hpp
+[ActionMapping]: src/solver/mappings/actions/ActionMapping.hpp
+[ActionMapping::getNextActionToTry]: src/solver/mappings/actions/ActionMapping.hpp#L84
+[UCB search strategy]: src/solver/search/steppers/ucb_search.cpp#L27
+
+[EnumeratedActionPool]: src/solver/mappings/actions/enumerated_actions.hpp#L37
+[DiscretizedPoint]: src/solver/abstract-problem/DiscretizedPoint.hpp
+[DiscretizedPoint::getBinNumber]: src/solver/abstract-problem/DiscretizedPoint.hpp#L38
+
+[HistoryCorrector]: src/solver/changes/HistoryCorrector.hpp
+[DefaultHistoryCorrector]: src/solver/changes/DefaultHistoryCorrector.hpp
+
+[Serializer]: src/solver/serialization/Serializer.hpp
+[TextSerializer]: src/solver/serialization/TextSerializer.hpp
+[DiscreteObservationPool]: src/solver/mappings/observations/discrete_observations.hpp#L36
+[DiscreteObservationTextSerializer]: src/solver/mappings/observations/discrete_observations.hpp#L36
+[EnumeratedActionPool]: src/solver/mappings/actions/enumerated_actions.hpp#L37
+[EnumeratedActionTextSerializer]: src/solver/mappings/actions/enumerated_actions.hpp#L68
+[TagTextSerializer]: src/problems/tag/TagTextSerializer.hpp
+
+
+[ModelWithProgramOptions]: src/problems/shared/ModelWithProgramOptions.hpp
+[SharedOptions]: src/problems/shared/SharedOptions.hpp
+
+
+[Tag_config]: src/problems/tag/tests/default.cfg
+[TagOptions]: src/problems/tag/TagOptions.hpp
+[TagModel]: src/problems/tag/TagModel.cpp
+[TagState]: src/problems/tag/TagState.cpp
+[TagAction]: src/problems/tag/TagAction.cpp
+[TagObservation]: src/problems/tag/TagObservation.cpp
+
+[TagChange]: src/problems/tag/TagModel.hpp#L37
+[TagTextSerializer::saveModelChange]: src/problems/tag/TagTextSerializer.cpp#L40
+[TagTextSerializer::loadModelChange]: src/problems/tag/TagTextSerializer.cpp#L61
+[TagModel::applyChanges]: src/problems/tag/TagModel.cpp#L323
+
+[solve.hpp]: src/problems/shared/solve.hpp
+[simulate.hpp]: src/problems/shared/simulate.hpp
+[Tag_solve.cpp]: src/problems/tag/solve.cpp
+[Tag_simulate.cpp]: src/problems/tag/simulate.cpp
+
+
+[Makefile]: Makefile
+[Build README]: .make/README.md

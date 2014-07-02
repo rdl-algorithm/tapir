@@ -45,7 +45,7 @@ LINKER_ARGS_$(n) += $$(LIB_solver)
 endif
 
 LINKER_ARGS_$(n) += -lspatialindex
-LINKER_ARGS_$(n) += $(EXTRA_ARGS_$(n))
+LINKER_ARGS_$(n) += $(EXTRA_LINKER_ARGS_$(n))
 
 # This is so we can escape commas!
 ,=,

@@ -123,9 +123,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a62f6d3700100ec7e6a6039a026a0c660"><td class="memItemLeft" align="right" valign="top">virtual T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1CachedValue.html#a62f6d3700100ec7e6a6039a026a0c660">getCache</a> ()</td></tr>
 <tr class="memdesc:a62f6d3700100ec7e6a6039a026a0c660"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the currently cached value.  <a href="#a62f6d3700100ec7e6a6039a026a0c660">More...</a><br/></td></tr>
 <tr class="separator:a62f6d3700100ec7e6a6039a026a0c660"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:add70326f32522e86e2a097778900b6b2"><td class="memTemplParams" colspan="2"><a class="anchor" id="add70326f32522e86e2a097778900b6b2"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:add70326f32522e86e2a097778900b6b2"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classsolver_1_1Point.html">solver::Point</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getCache</b> ()</td></tr>
+<tr class="memitem:add70326f32522e86e2a097778900b6b2"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:add70326f32522e86e2a097778900b6b2"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classsolver_1_1Point.html">solver::Point</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classsolver_1_1CachedValue.html#add70326f32522e86e2a097778900b6b2">getCache</a> ()</td></tr>
 <tr class="separator:add70326f32522e86e2a097778900b6b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -167,6 +166,34 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="add70326f32522e86e2a097778900b6b2"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="classsolver_1_1Point.html">solver::Point</a> &gt; <a class="el" href="classsolver_1_1CachedValue.html">solver::CachedValue</a>&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1Point.html">solver::Point</a> &gt; &gt;::getCache </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Since a unique_ptr can only be moved we need to make a new <a class="el" href="classsolver_1_1Point.html" title="Represents a point within a certain set, in the sense of point-set topology. ">Point</a> via the method <a class="el" href="classsolver_1_1Point.html#a1d14e193b8a2401b2687b6235ec7d476" title="You must provide a copy() method for any subclass. ">Point::copy()</a> </p>
+
+<p>Definition at line <a class="el" href="cached__values_8hpp_source.html#l00065">65</a> of file <a class="el" href="cached__values_8hpp_source.html">cached_values.hpp</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/solver/<a class="el" href="BeliefNode_8hpp_source.html">BeliefNode.hpp</a></li>
 <li>src/solver/<a class="el" href="cached__values_8hpp_source.html">cached_values.hpp</a></li>
@@ -174,7 +201,7 @@ template&lt;typename T&gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:46 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:47:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

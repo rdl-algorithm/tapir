@@ -35,12 +35,11 @@ var searchData=
   ['approximateobservationmap',['ApproximateObservationMap',['../classsolver_1_1ApproximateObservationMap.html',1,'solver']]],
   ['approximateobservationmap',['ApproximateObservationMap',['../classsolver_1_1ApproximateObservationMap.html#ab3c108537c219db4706f62ac9984e87d',1,'solver::ApproximateObservationMap']]],
   ['approximateobservationmapentry',['ApproximateObservationMapEntry',['../classsolver_1_1ApproximateObservationMapEntry.html',1,'solver']]],
-  ['approximateobservationpool',['ApproximateObservationPool',['../classsolver_1_1ApproximateObservationPool.html#aca241f78c4271dc0272db998d29394d2',1,'solver::ApproximateObservationPool']]],
   ['approximateobservationpool',['ApproximateObservationPool',['../classsolver_1_1ApproximateObservationPool.html',1,'solver']]],
+  ['approximateobservationpool',['ApproximateObservationPool',['../classsolver_1_1ApproximateObservationPool.html#aca241f78c4271dc0272db998d29394d2',1,'solver::ApproximateObservationPool']]],
   ['approximateobservationtextserializer',['ApproximateObservationTextSerializer',['../classsolver_1_1ApproximateObservationTextSerializer.html',1,'solver']]],
   ['aredynamic',['areDynamic',['../structshared_1_1SharedOptions.html#ae64859c47531a991dbf292efe0ceeb0f',1,'shared::SharedOptions']]],
   ['asfunction',['asFunction',['../classsolver_1_1RolloutHeuristic.html#a4867213cc0dbfc5969530bf02b81651f',1,'solver::RolloutHeuristic']]],
   ['asvector',['asVector',['../classrocksample_1_1RockSampleState.html#a263ee2d12c9bd8a7a75a3c1410f6526b',1,'rocksample::RockSampleState::asVector()'],['../classgeometry_1_1Point2D.html#a6cb824ba8cdba3da73a3f4eb98b8aa6d',1,'geometry::Point2D::asVector()'],['../classgeometry_1_1Vector2D.html#ad9a2781834dfe1c51af72690a949ea34',1,'geometry::Vector2D::asVector()'],['../classtag_1_1TagState.html#a902c16089753e2602100f78b04c90fbf',1,'tag::TagState::asVector()'],['../classsolver_1_1Vector.html#a66a51dedfc2032726c9eb37c0bdbd0a0',1,'solver::Vector::asVector()']]],
-  ['averageestimateparser',['AverageEstimateParser',['../classshared_1_1AverageEstimateParser.html',1,'shared']]],
-  ['abt_20documentation',['ABT Documentation',['../index.html',1,'']]]
+  ['averageestimateparser',['AverageEstimateParser',['../classshared_1_1AverageEstimateParser.html',1,'shared']]]
 ];

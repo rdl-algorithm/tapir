@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['randomgenerator',['RandomGenerator',['../global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a',1,'global.hpp']]]
+  ['observation',['Observation',['../namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f',1,'solver']]]
 ];

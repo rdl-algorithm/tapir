@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: docs/BUILD_README.md Source File</title>
+<title>ABT: docs/generated/BUILD.md Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -83,11 +83,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div class="header">
   <div class="headertitle">
-<div class="title">docs/BUILD_README.md</div>  </div>
+<div class="title">docs/generated/BUILD.md</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;Custom non-recursive Make system {#build-system}</div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;================================================</div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;Custom non-recursive Make system</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;================================</div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;Introduction</div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;------------</div>
@@ -104,7 +104,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;The system used here adds two key conveniences to the aforementioned system:</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;- Improved readability by moving standard code, especially the recursion,</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    into <span class="keyword">template</span> files wihin the .make directory.</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    The recursion is located in [stack.mk].</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    The recursion is located in [stack.mk][stack].</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;- The ability to call make from any child folder and have it behave the way</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    you would expect it to <span class="keywordflow">if</span> that child folder were the root.</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
@@ -136,7 +136,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;Makefile templates</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;------------------</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;The key rules that <span class="keywordflow">do</span> most of the work are located in</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;[<span class="keyword">template</span>.mk][<span class="keyword">template</span>.mk], which detects .cpp source files and includes</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;[<span class="keyword">template</span>.mk][<span class="keyword">template</span>], which detects .cpp source files and includes</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;a <span class="keywordflow">default</span> .cpp -&gt; .o recipe, as well as automatic dependency handling.</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;To provide rules on how to build the module as a whole rather than implicitly</div>
@@ -147,59 +147,59 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;The simplest way to define the build pattern <span class="keywordflow">for</span> a module is to simply build</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;every individual <span class="keywordtype">object</span> file - the rule <span class="keywordflow">for</span> <span class="keyword">this</span> is given in</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;[build.mk][build.mk].</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;[build.mk][build].</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;The solver code is currently set to build into an archive called <span class="stringliteral">&quot;libabt.a&quot;</span>;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;the rules to <span class="keywordflow">do</span> <span class="keyword">this</span> are defined in</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;[the <span class="stringliteral">&quot;solver&quot;</span> Makefile][Makefile_solver]</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;As you can see there, the rule defines all of the files that make up <span class="keyword">this</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;library in terms of the automatic OBJS\_[module] variables generated by</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;the <span class="keyword">template</span> code.</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;Problem templates</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;-----------------</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;A more complex example is the build <span class="keyword">template</span> used <span class="keywordflow">for each</span> individual</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;problem, which is located in [problem-<span class="keyword">template</span>.mk][problem-<span class="keyword">template</span>.mk].</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;Its purpose is to defines recipes <span class="keywordflow">for</span> the <span class="stringliteral">&quot;solve&quot;</span> and <span class="stringliteral">&quot;simulate&quot;</span> executables,</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;which are the key executables <span class="keywordflow">for</span> running ABT on a specific problem.</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;The core of <span class="keyword">this</span> <span class="keyword">template</span> is defining all of the dependencies <span class="keywordflow">for each</span> problem.</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;The <span class="keywordflow">default</span> dependencies are the other <span class="keywordtype">object</span> files in the same folder as</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;solve.cpp and simulate.cpp, the solver archive libabt.a, and the external</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;library libspatialindex.</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;If your problem needs to be linked to additional libraries, you can specify</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="keyword">this</span> by adding those dependencies to the variable</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;EXTRA_LINKER_ARGS\_[module].</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;[TOC]</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;[Tag]: @ref src/problems/tag</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;[RockSample]: @ref src/problems/rocksample</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;the rules to <span class="keywordflow">do</span> <span class="keyword">this</span> are defined in [the <span class="stringliteral">&quot;solver&quot;</span> Makefile][Makefile_solver].</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;As you can see there, the rule defines all of the files that make up <span class="keyword">this</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;library in terms of the automatic OBJS\_[module] variables generated by</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;the <span class="keyword">template</span> code.</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;Problem templates</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;-----------------</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;A more complex example is the build <span class="keyword">template</span> used <span class="keywordflow">for each</span> individual</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;problem, which is located in [problem-<span class="keyword">template</span>.mk][problem-<span class="keyword">template</span>].</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;Its purpose is to defines recipes <span class="keywordflow">for</span> the <span class="stringliteral">&quot;solve&quot;</span> and <span class="stringliteral">&quot;simulate&quot;</span> executables,</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;which are the key executables <span class="keywordflow">for</span> running ABT on a specific problem.</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;The core of <span class="keyword">this</span> <span class="keyword">template</span> is defining all of the dependencies <span class="keywordflow">for each</span> problem.</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;The <span class="keywordflow">default</span> dependencies are the other <span class="keywordtype">object</span> files in the same folder as</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;solve.cpp and simulate.cpp, the solver archive libabt.a, and the external</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;library libspatialindex.</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;If your problem needs to be linked to additional libraries, you can specify</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="keyword">this</span> by adding those dependencies to the variable</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;EXTRA_LINKER_ARGS\_[module].</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;[stack]: stack.mk</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;[build]: build.mk</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;[<span class="keyword">template</span>]: <span class="keyword">template</span>.mk</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;[problem-<span class="keyword">template</span>]: problem-<span class="keyword">template</span>.mk</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;[Solver]: @ref <a class="code" href="classsolver_1_1Solver.html">solver::Solver</a></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;[<a class="code" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a>]: @ref <a class="code" href="classsolver_1_1Point.html">solver::Action</a></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;[Model]: @ref <a class="code" href="classsolver_1_1Model.html">solver::Model</a></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;[ModelChange]: @ref <a class="code" href="classsolver_1_1ModelChange.html">solver::ModelChange</a></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;[<a class="code" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a>]: @ref <a class="code" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;[<a class="code" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a>]: @ref <a class="code" href="classsolver_1_1Point.html">solver::Observation</a></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;[Options]: @ref <a class="code" href="structsolver_1_1Options.html">solver::Options</a></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;[<a class="code" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a>]: @ref <a class="code" href="classsolver_1_1Point.html">solver::State</a></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;[TransitionParameters]: @ref <a class="code" href="classsolver_1_1TransitionParameters.html">solver::TransitionParameters</a></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;[Vector]: @ref <a class="code" href="classsolver_1_1Vector.html">solver::Vector</a></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;[<a class="code" href="namespacesolver.html#a221357f38a1ef1eaefd1232214b283c5">VectorState</a>]: @ref <a class="code" href="classsolver_1_1Vector.html">solver::VectorState</a></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;[Model::isTerminal]: @ref <a class="code" href="classsolver_1_1Model.html#afaefbb5cafd6984d16d0e7972e96befd">solver::Model::isTerminal</a></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;[Model::sampleAnInitState]: @ref <a class="code" href="classsolver_1_1Model.html#a2e62295cded9ac6e59ac46bbe98ba70c">solver::Model::sampleAnInitState</a></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;[Model::sampleStateUninformed]: @ref <a class="code" href="classsolver_1_1Model.html#a7c3fd2691ae717aa5cdf61fe32269f5c">solver::Model::sampleStateUninformed</a></div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;[Model::applyChanges]: @ref <a class="code" href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818">solver::Model::applyChanges</a></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;[Model::getHeuristicFunction]: @ref <a class="code" href="classsolver_1_1Model.html#a080de609bc622ed1b2985a9c73cca392">solver::Model::getHeuristicFunction</a></div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;[Model::generateParticles]: @ref <a class="code" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b">solver::Model::generateParticles</a></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;[Model::generateParticles2]: @ref <a class="code" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b">solver::Model::generateParticles</a>(BeliefNode*, <a class="code" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> <span class="keyword">const</span> &amp;, <a class="code" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> <span class="keyword">const</span> &amp;, <span class="keywordtype">long</span>)</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;[Makefile]: ../Makefile</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;[Makefile_src]: ../src/Makefile</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;[Makefile_solver]: ../src/solver/Makefile</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;[TOC]</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;[Solver]: @ref <a class="code" href="classsolver_1_1Solver.html">solver::Solver</a></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;[Tag]: @ref src/problems/tag</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;[RockSample]: @ref src/problems/rocksample</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;[<a class="code" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a>]: @ref <a class="code" href="classsolver_1_1Point.html">solver::Action</a></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;[Model]: @ref <a class="code" href="classsolver_1_1Model.html">solver::Model</a></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;[ModelChange]: @ref <a class="code" href="classsolver_1_1ModelChange.html">solver::ModelChange</a></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;[<a class="code" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a>]: @ref <a class="code" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;[<a class="code" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a>]: @ref <a class="code" href="classsolver_1_1Point.html">solver::Observation</a></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;[Options]: @ref <a class="code" href="structsolver_1_1Options.html">solver::Options</a></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;[<a class="code" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a>]: @ref <a class="code" href="classsolver_1_1Point.html">solver::State</a></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;[TransitionParameters]: @ref <a class="code" href="classsolver_1_1TransitionParameters.html">solver::TransitionParameters</a></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;[Vector]: @ref <a class="code" href="classsolver_1_1Vector.html">solver::Vector</a></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;[<a class="code" href="namespacesolver.html#a221357f38a1ef1eaefd1232214b283c5">VectorState</a>]: @ref <a class="code" href="classsolver_1_1Vector.html">solver::VectorState</a></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;[Model::sampleAnInitState]: @ref <a class="code" href="classsolver_1_1Model.html#a2e62295cded9ac6e59ac46bbe98ba70c">solver::Model::sampleAnInitState</a></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;[Model::sampleStateUninformed]: @ref <a class="code" href="classsolver_1_1Model.html#a7c3fd2691ae717aa5cdf61fe32269f5c">solver::Model::sampleStateUninformed</a></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;[Model::isTerminal]: @ref <a class="code" href="classsolver_1_1Model.html#afaefbb5cafd6984d16d0e7972e96befd">solver::Model::isTerminal</a></div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;[Model::generateStep]: @ref <a class="code" href="classsolver_1_1Model.html#ac935e5b653acc3a19dd5bc963bf4a14d">solver::Model::generateStep</a></div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;[Model::generateTransition]: @ref <a class="code" href="classsolver_1_1Model.html#ab63a02a646be252ec1bd3b2c6c1d9f14">solver::Model::generateTransition</a></div>
@@ -207,68 +207,68 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;[Model::generateObservation]: @ref <a class="code" href="classsolver_1_1Model.html#a40e63ec3d653c9e42120e8690a311d4c">solver::Model::generateObservation</a></div>
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;[Model::generateReward]: @ref <a class="code" href="classsolver_1_1Model.html#a57f002206fa228bf82cf0fb67037d7c4">solver::Model::generateReward</a></div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;[Model::createActionPool]: @ref <a class="code" href="classsolver_1_1Model.html#a153e447124946743272c156ee40e7024">solver::Model::createActionPool</a></div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;[Model::createStateIndex]: @ref <a class="code" href="classsolver_1_1Model.html#aa9099de4b2b73a8b55a916a5ba827401">solver::Model::createStateIndex</a></div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;[Options::discountFactor]: @ref <a class="code" href="structsolver_1_1Options.html#a3c9e50bb47ebb7ccb8b715544432e875">solver::Options::discountFactor</a></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;[Options::numberOfStateVariables]: @ref <a class="code" href="structsolver_1_1Options.html#a03872680ab1ff2b338c94a82cb2850f0">solver::Options::numberOfStateVariables</a></div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;[Model::applyChanges]: @ref <a class="code" href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818">solver::Model::applyChanges</a></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;[Model::generateParticles]: @ref <a class="code" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b">solver::Model::generateParticles</a></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;[Model::generateParticles2]: @ref <a class="code" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b">solver::Model::generateParticles</a>(BeliefNode*, <a class="code" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> <span class="keyword">const</span> &amp;, <a class="code" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> <span class="keyword">const</span> &amp;, <span class="keywordtype">long</span>)</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;[Model::getHeuristicFunction]: @ref <a class="code" href="classsolver_1_1Model.html#a080de609bc622ed1b2985a9c73cca392">solver::Model::getHeuristicFunction</a></div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;[copy()]: @ref <a class="code" href="classsolver_1_1Point.html#a1d14e193b8a2401b2687b6235ec7d476">solver::Point::copy</a></div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;[equals()]: @ref <a class="code" href="classsolver_1_1Point.html#a2e9f83b0a727213df18d57093b0afcc6">solver::Point::equals</a></div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;[hash()]: @ref <a class="code" href="classsolver_1_1Point.html#aa44e8c9c79e70c98a3a6ce58801b7984">solver::Point::hash</a></div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;[distanceTo()]: @ref <a class="code" href="classsolver_1_1Point.html#ae0fc60b29ff9ccffdaf483d7fe0b012d">solver::Point::distanceTo</a></div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;[print()]: @ref <a class="code" href="classsolver_1_1Point.html#ac91e590198c9b870453c0f6959d5b92d">solver::Point::print</a></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;[Model::createActionPool]: @ref <a class="code" href="classsolver_1_1Model.html#a153e447124946743272c156ee40e7024">solver::Model::createActionPool</a></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;[Model::createStateIndex]: @ref <a class="code" href="classsolver_1_1Model.html#aa9099de4b2b73a8b55a916a5ba827401">solver::Model::createStateIndex</a></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;[Options::numberOfStateVariables]: @ref <a class="code" href="structsolver_1_1Options.html#a03872680ab1ff2b338c94a82cb2850f0">solver::Options::numberOfStateVariables</a></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;[Options::discountFactor]: @ref <a class="code" href="structsolver_1_1Options.html#a3c9e50bb47ebb7ccb8b715544432e875">solver::Options::discountFactor</a></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
 <div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;[StatePool]: @ref <a class="code" href="classsolver_1_1StatePool.html">solver::StatePool</a></div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;[StateIndex]: @ref <a class="code" href="classsolver_1_1StateIndex.html">solver::StateIndex</a></div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;[RTree]: @ref <a class="code" href="classsolver_1_1RTree.html">solver::RTree</a></div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;[Vector::asVector]: @ref <a class="code" href="classsolver_1_1Vector.html#a66a51dedfc2032726c9eb37c0bdbd0a0">solver::Vector::asVector</a></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;[copy()]: @ref <a class="code" href="classsolver_1_1Point.html#a1d14e193b8a2401b2687b6235ec7d476">solver::Point::copy</a></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;[equals()]: @ref <a class="code" href="classsolver_1_1Point.html#a2e9f83b0a727213df18d57093b0afcc6">solver::Point::equals</a></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;[hash()]: @ref <a class="code" href="classsolver_1_1Point.html#aa44e8c9c79e70c98a3a6ce58801b7984">solver::Point::hash</a></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;[distanceTo()]: @ref <a class="code" href="classsolver_1_1Point.html#ae0fc60b29ff9ccffdaf483d7fe0b012d">solver::Point::distanceTo</a></div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;[print()]: @ref <a class="code" href="classsolver_1_1Point.html#ac91e590198c9b870453c0f6959d5b92d">solver::Point::print</a></div>
 <div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;</div>
 <div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;[ActionPool]: @ref <a class="code" href="classsolver_1_1ActionPool.html">solver::ActionPool</a></div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;[ActionMapping]: @ref <a class="code" href="classsolver_1_1ActionMapping.html">solver::ActionMapping</a></div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;[ActionMapping::getNextActionToTry]: @ref <a class="code" href="classsolver_1_1ActionMapping.html#aae4246fd955d59ec925b839867a8463d">solver::ActionMapping::getNextActionToTry</a></div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;[UCB search strategy]: @ref <a class="code" href="classsolver_1_1UcbStepGenerator.html#a18f4dd0ac38aa3684e293342471992d7">solver::UcbStepGenerator::getStep</a></div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;[StatePool]: @ref <a class="code" href="classsolver_1_1StatePool.html">solver::StatePool</a></div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;[StateIndex]: @ref <a class="code" href="classsolver_1_1StateIndex.html">solver::StateIndex</a></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;[RTree]: @ref <a class="code" href="classsolver_1_1RTree.html">solver::RTree</a></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;[Vector::asVector]: @ref <a class="code" href="classsolver_1_1Vector.html#a66a51dedfc2032726c9eb37c0bdbd0a0">solver::Vector::asVector</a></div>
 <div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;[EnumeratedActionPool]: @ref <a class="code" href="classsolver_1_1EnumeratedActionPool.html">solver::EnumeratedActionPool</a></div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;[DiscretizedPoint]: @ref <a class="code" href="classsolver_1_1DiscretizedPoint.html">solver::DiscretizedPoint</a></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;[DiscretizedPoint::getBinNumber]: @ref <a class="code" href="classsolver_1_1DiscretizedPoint.html#a1e86841df87b1f575a00ed728dfd3de3">solver::DiscretizedPoint::getBinNumber</a></div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;[ActionPool]: @ref <a class="code" href="classsolver_1_1ActionPool.html">solver::ActionPool</a></div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;[ActionMapping]: @ref <a class="code" href="classsolver_1_1ActionMapping.html">solver::ActionMapping</a></div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;[ActionMapping::getNextActionToTry]: @ref <a class="code" href="classsolver_1_1ActionMapping.html#aae4246fd955d59ec925b839867a8463d">solver::ActionMapping::getNextActionToTry</a></div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;[UCB search strategy]: @ref <a class="code" href="classsolver_1_1UcbStepGenerator.html#a18f4dd0ac38aa3684e293342471992d7">solver::UcbStepGenerator::getStep</a></div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;[HistoryCorrector]: @ref <a class="code" href="classsolver_1_1HistoryCorrector.html">solver::HistoryCorrector</a></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;[DefaultHistoryCorrector]: @ref <a class="code" href="classsolver_1_1DefaultHistoryCorrector.html">solver::DefaultHistoryCorrector</a></div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;[EnumeratedActionPool]: @ref <a class="code" href="classsolver_1_1EnumeratedActionPool.html">solver::EnumeratedActionPool</a></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;[DiscretizedPoint]: @ref <a class="code" href="classsolver_1_1DiscretizedPoint.html">solver::DiscretizedPoint</a></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;[DiscretizedPoint::getBinNumber]: @ref <a class="code" href="classsolver_1_1DiscretizedPoint.html#a1e86841df87b1f575a00ed728dfd3de3">solver::DiscretizedPoint::getBinNumber</a></div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;[Serializer]: @ref <a class="code" href="classsolver_1_1Serializer.html">solver::Serializer</a></div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;[TextSerializer]: @ref <a class="code" href="classsolver_1_1TextSerializer.html">solver::TextSerializer</a></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;[DiscreteObservationPool]: @ref <a class="code" href="classsolver_1_1DiscreteObservationPool.html">solver::DiscreteObservationPool</a></div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;[DiscreteObservationTextSerializer]: @ref <a class="code" href="classsolver_1_1DiscreteObservationTextSerializer.html">solver::DiscreteObservationTextSerializer</a></div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;[EnumeratedActionPool]: @ref <a class="code" href="classsolver_1_1EnumeratedActionPool.html">solver::EnumeratedActionPool</a></div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;[<a class="code" href="namespacesolver.html#ab167a812619957f474a48b358b64eb1d">EnumeratedActionTextSerializer</a>]: @ref <a class="code" href="classsolver_1_1DiscretizedActionTextSerializer.html">solver::EnumeratedActionTextSerializer</a></div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;[TagTextSerializer]: @ref <a class="code" href="classtag_1_1TagTextSerializer.html">tag::TagTextSerializer</a></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;[HistoryCorrector]: @ref <a class="code" href="classsolver_1_1HistoryCorrector.html">solver::HistoryCorrector</a></div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;[DefaultHistoryCorrector]: @ref <a class="code" href="classsolver_1_1DefaultHistoryCorrector.html">solver::DefaultHistoryCorrector</a></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;[Serializer]: @ref <a class="code" href="classsolver_1_1Serializer.html">solver::Serializer</a></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;[TextSerializer]: @ref <a class="code" href="classsolver_1_1TextSerializer.html">solver::TextSerializer</a></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;[DiscreteObservationPool]: @ref <a class="code" href="classsolver_1_1DiscreteObservationPool.html">solver::DiscreteObservationPool</a></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;[DiscreteObservationTextSerializer]: @ref <a class="code" href="classsolver_1_1DiscreteObservationTextSerializer.html">solver::DiscreteObservationTextSerializer</a></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;[EnumeratedActionPool]: @ref <a class="code" href="classsolver_1_1EnumeratedActionPool.html">solver::EnumeratedActionPool</a></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;[<a class="code" href="namespacesolver.html#ab167a812619957f474a48b358b64eb1d">EnumeratedActionTextSerializer</a>]: @ref <a class="code" href="classsolver_1_1DiscretizedActionTextSerializer.html">solver::EnumeratedActionTextSerializer</a></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;[TagTextSerializer]: @ref <a class="code" href="classtag_1_1TagTextSerializer.html">tag::TagTextSerializer</a></div>
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;[ModelWithProgramOptions]: @ref <a class="code" href="classshared_1_1ModelWithProgramOptions.html">shared::ModelWithProgramOptions</a></div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;[SharedOptions]: @ref <a class="code" href="structshared_1_1SharedOptions.html">shared::SharedOptions</a></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;[Tag_config]: ../src/problems/tag/tests/<span class="keywordflow">default</span>.cfg</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;[TagOptions]: @ref <a class="code" href="structtag_1_1TagOptions.html">tag::TagOptions</a></div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;[TagModel]: @ref <a class="code" href="classtag_1_1TagModel.html">tag::TagModel</a></div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;[TagState]: @ref <a class="code" href="classtag_1_1TagState.html">tag::TagState</a></div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;[TagAction]: @ref <a class="code" href="classtag_1_1TagAction.html">tag::TagAction</a></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;[TagObservation]: @ref <a class="code" href="classtag_1_1TagObservation.html">tag::TagObservation</a></div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;[TagChange]: @ref <a class="code" href="structtag_1_1TagChange.html">tag::TagChange</a></div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;[TagTextSerializer::saveModelChange]: @ref <a class="code" href="classtag_1_1TagTextSerializer.html#acc406902451a19c3c420ea2f5c93daaf">tag::TagTextSerializer::saveModelChange</a></div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;[TagTextSerializer::loadModelChange]: @ref <a class="code" href="classtag_1_1TagTextSerializer.html#ac2a68c270a347e2e5dbcc7bdc738667f">tag::TagTextSerializer::loadModelChange</a></div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;[TagModel::applyChanges]: @ref <a class="code" href="classtag_1_1TagModel.html#aee78581d756decfeb7a7f8584151a8ff">tag::TagModel::applyChanges</a></div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;[ModelWithProgramOptions]: @ref <a class="code" href="classshared_1_1ModelWithProgramOptions.html">shared::ModelWithProgramOptions</a></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;[SharedOptions]: @ref <a class="code" href="structshared_1_1SharedOptions.html">shared::SharedOptions</a></div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;[Tag_config]: ../src/problems/tag/tests/<span class="keywordflow">default</span>.cfg</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;[TagOptions]: @ref <a class="code" href="structtag_1_1TagOptions.html">tag::TagOptions</a></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;[TagModel]: @ref <a class="code" href="classtag_1_1TagModel.html">tag::TagModel</a></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;[TagState]: @ref <a class="code" href="classtag_1_1TagState.html">tag::TagState</a></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;[TagAction]: @ref <a class="code" href="classtag_1_1TagAction.html">tag::TagAction</a></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;[TagObservation]: @ref <a class="code" href="classtag_1_1TagObservation.html">tag::TagObservation</a></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;[TagChange]: @ref <a class="code" href="structtag_1_1TagChange.html">tag::TagChange</a></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;[TagTextSerializer::saveModelChange]: @ref <a class="code" href="classtag_1_1TagTextSerializer.html#acc406902451a19c3c420ea2f5c93daaf">tag::TagTextSerializer::saveModelChange</a></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;[TagTextSerializer::loadModelChange]: @ref <a class="code" href="classtag_1_1TagTextSerializer.html#ac2a68c270a347e2e5dbcc7bdc738667f">tag::TagTextSerializer::loadModelChange</a></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;[TagModel::applyChanges]: @ref <a class="code" href="classtag_1_1TagModel.html#aee78581d756decfeb7a7f8584151a8ff">tag::TagModel::applyChanges</a></div>
 <div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;</div>
 <div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;[solve.hpp]: @ref solve.hpp</div>
 <div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;[simulate.hpp]: @ref simulate.hpp</div>
@@ -276,21 +276,25 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;[Tag_simulate.cpp]: @ref src/problems/tag/simulate.cpp</div>
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;</div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;[Makefile]: ../Makefile</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;[Makefile_src]: ../src/Makefile</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;[Makefile_solver]: ../src/solver/Makefile</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;[Build README]: @ref build-system</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;[build.mk]: ../.make/build.mk</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;[stack.mk]: ../.make/stack.mk</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;[<span class="keyword">template</span>.mk]: ../.make/<span class="keyword">template</span>.mk</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;[problem-<span class="keyword">template</span>.mk]: ../.make/problem-<span class="keyword">template</span>.mk</div>
-<div class="ttc" id="classsolver_1_1Point_html_aa44e8c9c79e70c98a3a6ce58801b7984"><div class="ttname"><a href="classsolver_1_1Point.html#aa44e8c9c79e70c98a3a6ce58801b7984">solver::Point::hash</a></div><div class="ttdeci">virtual std::size_t hash() const =0</div><div class="ttdoc">Returns a hash value for this point. </div></div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;[Build README]: docs/generated/BUILD.md</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;[Makefile]: ../Makefile</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;[stack]: @ref stack.mk</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;[build]: @ref build.mk</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;[<span class="keyword">template</span>]: @ref <span class="keyword">template</span>.mk</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;[problem-<span class="keyword">template</span>]: @ref problem-<span class="keyword">template</span>.mk</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;[Makefile]: ../Makefile</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;[Makefile_src]: ../src/Makefile</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;[Makefile_solver]: ../src/solver/Makefile</div>
+<div class="ttc" id="classsolver_1_1Point_html_aa44e8c9c79e70c98a3a6ce58801b7984"><div class="ttname"><a href="classsolver_1_1Point.html#aa44e8c9c79e70c98a3a6ce58801b7984">solver::Point::hash</a></div><div class="ttdeci">virtual std::size_t hash() const =0</div><div class="ttdoc">Returns a hash value for this point - should be consistent with equals() </div></div>
 <div class="ttc" id="classtag_1_1TagModel_html"><div class="ttname"><a href="classtag_1_1TagModel.html">tag::TagModel</a></div><div class="ttdef"><b>Definition:</b> <a href="TagModel_8hpp_source.html#l00056">TagModel.hpp:56</a></div></div>
 <div class="ttc" id="classsolver_1_1TransitionParameters_html"><div class="ttname"><a href="classsolver_1_1TransitionParameters.html">solver::TransitionParameters</a></div><div class="ttdoc">An abstract base to store transitional values for a generative model. </div><div class="ttdef"><b>Definition:</b> <a href="TransitionParameters_8hpp_source.html#l00025">TransitionParameters.hpp:25</a></div></div>
 <div class="ttc" id="classsolver_1_1TextSerializer_html"><div class="ttname"><a href="classsolver_1_1TextSerializer.html">solver::TextSerializer</a></div><div class="ttdoc">Implements a text-based serialization of the core solver classes, i.e. </div><div class="ttdef"><b>Definition:</b> <a href="TextSerializer_8hpp_source.html#l00053">TextSerializer.hpp:53</a></div></div>
 <div class="ttc" id="classsolver_1_1Point_html_a1d14e193b8a2401b2687b6235ec7d476"><div class="ttname"><a href="classsolver_1_1Point.html#a1d14e193b8a2401b2687b6235ec7d476">solver::Point::copy</a></div><div class="ttdeci">virtual std::unique_ptr&lt; Point &gt; copy() const =0</div><div class="ttdoc">You must provide a copy() method for any subclass. </div></div>
 <div class="ttc" id="classsolver_1_1Model_html"><div class="ttname"><a href="classsolver_1_1Model.html">solver::Model</a></div><div class="ttdoc">An abstract class representing a black-box POMDP model for use by the ABT solver. ...</div><div class="ttdef"><b>Definition:</b> <a href="Model_8hpp_source.html#l00086">Model.hpp:86</a></div></div>
-<div class="ttc" id="classsolver_1_1Point_html_ac91e590198c9b870453c0f6959d5b92d"><div class="ttname"><a href="classsolver_1_1Point.html#ac91e590198c9b870453c0f6959d5b92d">solver::Point::print</a></div><div class="ttdeci">virtual void print(std::ostream &amp;) const </div><div class="ttdoc">Prints this point in a human-readable way [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00052">Point.hpp:52</a></div></div>
+<div class="ttc" id="classsolver_1_1Point_html_ac91e590198c9b870453c0f6959d5b92d"><div class="ttname"><a href="classsolver_1_1Point.html#ac91e590198c9b870453c0f6959d5b92d">solver::Point::print</a></div><div class="ttdeci">virtual void print(std::ostream &amp;) const </div><div class="ttdoc">Prints this point in a human-readable way [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00054">Point.hpp:54</a></div></div>
 <div class="ttc" id="classsolver_1_1DefaultHistoryCorrector_html"><div class="ttname"><a href="classsolver_1_1DefaultHistoryCorrector.html">solver::DefaultHistoryCorrector</a></div><div class="ttdoc">A default HistoryCorrector implementation which should work quite well regardless of the specific pro...</div><div class="ttdef"><b>Definition:</b> <a href="DefaultHistoryCorrector_8hpp_source.html#l00019">DefaultHistoryCorrector.hpp:19</a></div></div>
 <div class="ttc" id="classsolver_1_1Model_html_a40e63ec3d653c9e42120e8690a311d4c"><div class="ttname"><a href="classsolver_1_1Model.html#a40e63ec3d653c9e42120e8690a311d4c">solver::Model::generateObservation</a></div><div class="ttdeci">virtual std::unique_ptr&lt; Observation &gt; generateObservation(State const *state, Action const &amp;action, TransitionParameters const *transitionParameters, State const &amp;nextState)</div><div class="ttdoc">Generates an observation, given the action and resulting next state; optionally, the previous state a...</div><div class="ttdef"><b>Definition:</b> <a href="Model_8cpp_source.html#l00074">Model.cpp:74</a></div></div>
 <div class="ttc" id="namespacesolver_html_ab167a812619957f474a48b358b64eb1d"><div class="ttname"><a href="namespacesolver.html#ab167a812619957f474a48b358b64eb1d">solver::EnumeratedActionTextSerializer</a></div><div class="ttdeci">DiscretizedActionTextSerializer EnumeratedActionTextSerializer</div><div class="ttdoc">Since we&#39;re just using DiscretizedActionMap to do all of the work, we can simply re-use DiscretizedAc...</div><div class="ttdef"><b>Definition:</b> <a href="enumerated__actions_8hpp_source.html#l00068">enumerated_actions.hpp:68</a></div></div>
@@ -307,7 +311,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1RTree_html"><div class="ttname"><a href="classsolver_1_1RTree.html">solver::RTree</a></div><div class="ttdoc">A thin wrapper class that used the RTree class of libspatialindex to allow for range-based state quer...</div><div class="ttdef"><b>Definition:</b> <a href="solver_2indexing_2RTree_8hpp_source.html#l00034">RTree.hpp:34</a></div></div>
 <div class="ttc" id="classtag_1_1TagTextSerializer_html_ac2a68c270a347e2e5dbcc7bdc738667f"><div class="ttname"><a href="classtag_1_1TagTextSerializer.html#ac2a68c270a347e2e5dbcc7bdc738667f">tag::TagTextSerializer::loadModelChange</a></div><div class="ttdeci">virtual std::unique_ptr&lt; solver::ModelChange &gt; loadModelChange(std::istream &amp;is) override</div><div class="ttdoc">Loads a single ModelChange. </div><div class="ttdef"><b>Definition:</b> <a href="TagTextSerializer_8cpp_source.html#l00061">TagTextSerializer.cpp:61</a></div></div>
 <div class="ttc" id="classsolver_1_1Model_html_a73fc7fe3f7ebe845604fac46adc0383b"><div class="ttname"><a href="classsolver_1_1Model.html#a73fc7fe3f7ebe845604fac46adc0383b">solver::Model::generateNextState</a></div><div class="ttdeci">virtual std::unique_ptr&lt; State &gt; generateNextState(State const &amp;state, Action const &amp;action, TransitionParameters const *transitionParameters)</div><div class="ttdoc">Generates the next state, based on the state and action, and, if used, the transition parameters...</div><div class="ttdef"><b>Definition:</b> <a href="Model_8cpp_source.html#l00066">Model.cpp:66</a></div></div>
-<div class="ttc" id="classsolver_1_1Point_html_ae0fc60b29ff9ccffdaf483d7fe0b012d"><div class="ttname"><a href="classsolver_1_1Point.html#ae0fc60b29ff9ccffdaf483d7fe0b012d">solver::Point::distanceTo</a></div><div class="ttdeci">virtual double distanceTo(Point const &amp;) const </div><div class="ttdoc">Returns the distance from this point to the given point [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00043">Point.hpp:43</a></div></div>
+<div class="ttc" id="classsolver_1_1Point_html_ae0fc60b29ff9ccffdaf483d7fe0b012d"><div class="ttname"><a href="classsolver_1_1Point.html#ae0fc60b29ff9ccffdaf483d7fe0b012d">solver::Point::distanceTo</a></div><div class="ttdeci">virtual double distanceTo(Point const &amp;) const </div><div class="ttdoc">Returns the distance from this point to the given point [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00049">Point.hpp:49</a></div></div>
 <div class="ttc" id="classsolver_1_1StateIndex_html"><div class="ttname"><a href="classsolver_1_1StateIndex.html">solver::StateIndex</a></div><div class="ttdoc">An interface class for storing states and looking them up in custom ways. </div><div class="ttdef"><b>Definition:</b> <a href="StateIndex_8hpp_source.html#l00030">StateIndex.hpp:30</a></div></div>
 <div class="ttc" id="classsolver_1_1Model_html_aa9099de4b2b73a8b55a916a5ba827401"><div class="ttname"><a href="classsolver_1_1Model.html#aa9099de4b2b73a8b55a916a5ba827401">solver::Model::createStateIndex</a></div><div class="ttdeci">virtual std::unique_ptr&lt; StateIndex &gt; createStateIndex()</div><div class="ttdoc">Creates a StateIndex, which manages searching for states that have been used in a StatePool...</div><div class="ttdef"><b>Definition:</b> <a href="Model_8cpp_source.html#l00174">Model.cpp:174</a></div></div>
 <div class="ttc" id="classsolver_1_1Point_html"><div class="ttname"><a href="classsolver_1_1Point.html">solver::Point</a></div><div class="ttdoc">Represents a point within a certain set, in the sense of point-set topology. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00030">Point.hpp:30</a></div></div>
@@ -350,7 +354,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 2 2014 20:24:45 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 02:46:59 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
