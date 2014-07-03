@@ -3,8 +3,11 @@ MODULE_NAME = observation_mappings
 ifdef HAS_ROOT_MAKEFILE
 
 include .make/template.mk
+include .make/build.mk
 
 else
-ROOT = ../../../..
-include $(ROOT)/.make/redirect.mk
+REDIRECT=$(MODULE_NAME)
+.PHONY: $(MAKECMDGOALS) call-upwards
+$(MAKECMDGOALS) call-upwards:
+	@$(MAKE) --no-print-directory -C .. $(MAKECMDGOALS) REDIRECT=$(REDIRECT)
 endif

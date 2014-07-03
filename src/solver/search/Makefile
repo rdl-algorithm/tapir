@@ -1,13 +1,14 @@
 MODULE_NAME = search
+CHILD_FOLDERS := steppers action-choosers
 
 ifdef HAS_ROOT_MAKEFILE
-
-CHILD_FOLDERS := steppers action-choosers
 
 include .make/template.mk
 include .make/build.mk   
 
 else
-ROOT = ../../..
-include $(ROOT)/.make/redirect.mk
+REDIRECT=$(MODULE_NAME)
+.PHONY: $(MAKECMDGOALS) call-upwards
+$(MAKECMDGOALS) call-upwards:
+	@$(MAKE) --no-print-directory -C .. $(MAKECMDGOALS) REDIRECT=$(REDIRECT)
 endif

@@ -1,12 +1,14 @@
 MODULE_NAME = global
+CHILD_FOLDERS := options solver problems
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS := options solver problems
 include .make/template.mk
 include .make/build.mk
 
 else
-ROOT = ..
-include $(ROOT)/.make/redirect.mk
+REDIRECT=$(MODULE_NAME)
+.PHONY: $(MAKECMDGOALS) call-upwards
+$(MAKECMDGOALS) call-upwards:
+	@$(MAKE) --no-print-directory -C .. $(MAKECMDGOALS) REDIRECT=$(REDIRECT)
 endif

@@ -1,12 +1,12 @@
 MODULE_NAME = solver
+CHILD_FOLDERS := indexing mappings serialization abstract-problem changes
+CHILD_FOLDERS += search belief-estimators
 
 ifdef HAS_ROOT_MAKEFILE
 
-CHILD_FOLDERS := indexing mappings serialization abstract-problem changes
-CHILD_FOLDERS += search belief-estimators
 include .make/template.mk
 
-# Elements that make up the library
+# Elements that make up the library - deferred expansion!
 MEMBERS_solver            = $(ALL_OBJS_solver) $(OBJS_global)
 
 # The output file for the library.
@@ -33,6 +33,8 @@ endif
 $(LIB_solver): $(d)/Makefile
 
 else
-ROOT = ../..
-include $(ROOT)/.make/redirect.mk
+REDIRECT=$(MODULE_NAME)
+.PHONY: $(MAKECMDGOALS) call-upwards
+$(MAKECMDGOALS) call-upwards:
+	@$(MAKE) --no-print-directory -C .. $(MAKECMDGOALS) REDIRECT=$(REDIRECT)
 endif
