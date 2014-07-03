@@ -1,0 +1,238 @@
+#ifndef HOMECAREMODEL_HPP_
+#define HOMECAREMODEL_HPP_
+
+#include <memory>                       // for unique_ptr
+#include <ostream>                      // for ostream
+#include <string>                       // for string
+#include <utility>                      // for pair
+#include <vector>                       // for vector
+
+#include "global.hpp"                     // for RandomGenerator
+#include "problems/shared/GridPosition.hpp"  // for GridPosition
+#include "problems/shared/ModelWithProgramOptions.hpp"  // for ModelWithProgramOptions
+
+#include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
+#include "solver/abstract-problem/ModelChange.hpp"             // for ModelChange
+#include "solver/abstract-problem/TransitionParameters.hpp"
+#include "solver/abstract-problem/Action.hpp"            // for Action
+#include "solver/abstract-problem/Observation.hpp"       // for Observation
+#include "solver/abstract-problem/State.hpp"
+
+#include "solver/mappings/actions/enumerated_actions.hpp"
+#include "solver/mappings/observations/discrete_observations.hpp"
+
+#include "HomecareAction.hpp"
+#include "HomecareOptions.hpp"
+
+namespace solver {
+class StatePool;
+} /* namespace solver */
+
+namespace homecare {
+class HomecareObervation;
+class HomecareState;
+
+/** Represents a change in the Homecare model. */
+struct HomecareChange : public solver::ModelChange {
+    std::string changeType = "";
+    long i0 = 0;
+    long i1 = 0;
+    long j0 = 0;
+    long j1 = 0;
+};
+
+class HomecareModel: public shared::ModelWithProgramOptions {
+    friend class HomecareObservation;
+
+  public:
+    HomecareModel(RandomGenerator *randGen, std::unique_ptr<HomecareOptions> options);
+    ~HomecareModel() = default;
+    HomecareModel(HomecareModel const &) = delete;
+    HomecareModel(HomecareModel &&) = delete;
+    HomecareModel &operator=(HomecareModel const &) = delete;
+    HomecareModel &operator=(HomecareModel &&) = delete;
+
+    enum class HomecarePathCell : int {
+        EMPTY = 0,
+        UP = 1,
+        RIGHT = 2,
+        DOWN = 3,
+        LEFT = 4,
+        UP_OR_RIGHT = 5,
+        DOWN_OR_RIGHT = 6,
+        DOWN_OR_LEFT = 7,
+        UP_OR_LEFT = 8,
+        WALL = -1
+    };
+
+    enum class HomecareTypeCell : int {
+        OTHER = 0,
+        TARGET_START = 1,
+        WASHROOM = 2,
+        START = 3,
+    };
+
+    /* ---------- Custom getters for extra functionality  ---------- */
+    long getNRows() const {
+        return nRows_;
+    }
+    long getNCols() const {
+        return nCols_;
+    }
+
+    /* --------------- The model interface proper ----------------- */
+    // Other virtual methods
+    std::unique_ptr<solver::State> sampleAnInitState() override;
+    /** Generates a state uniformly at random. */
+    std::unique_ptr<solver::State> sampleStateUninformed() override;
+    bool isTerminal(solver::State const &state) override;
+
+    /* -------------------- Black box dynamics ---------------------- */
+    virtual std::unique_ptr<solver::State> generateNextState(
+            solver::State const &state,
+            solver::Action const &action,
+            solver::TransitionParameters const */*tp*/) override;
+    virtual std::unique_ptr<solver::Observation> generateObservation(
+            solver::State const */*state*/,
+            solver::Action const &action,
+            solver::TransitionParameters const */*tp*/,
+            solver::State const &nextState) override;
+    virtual double generateReward(
+                solver::State const &state,
+                solver::Action const &action,
+                solver::TransitionParameters const */*tp*/,
+                solver::State const */*nextState*/) override;
+    virtual Model::StepResult generateStep(solver::State const &state,
+            solver::Action const &action) override;
+
+
+    /* -------------- Methods for handling model changes ---------------- */
+    virtual void applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> const &changes,
+             solver::Solver *solver) override;
+
+
+    /* ------------ Methods for handling particle depletion -------------- */
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
+            solver::BeliefNode *previousBelief,
+            solver::Action const &action,
+            solver::Observation const &obs,
+            long nParticles,
+            std::vector<solver::State const *> const &previousParticles) override;
+    virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
+            solver::BeliefNode *previousBelief,
+            solver::Action const &action,
+            solver::Observation const &obs,
+            long nParticles) override;
+
+
+    /* --------------- Pretty printing methods ----------------- */
+    /** Displays a single cell of the map. */
+    //virtual void dispCell(HomecareCellType cellType, std::ostream &os);
+    virtual void drawEnv(std::ostream &os) override;
+    virtual void drawSimulationState(solver::BeliefNode const *belief,
+            solver::State const &state,
+            std::ostream &os) override;
+
+
+    /* ---------------------- Basic customizations  ---------------------- */
+    virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
+                solver::State const *state, solver::HistoricalData const *data) override;
+
+    /* ------- Customization of more complex solver functionality  --------- */
+    virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
+    virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver) override;
+
+    virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
+
+  private:
+
+    /** Read map text from file */
+    std::vector<std::string> readMapText(std::string filename);
+    /** Initialises the required data structures and variables */
+    void initialize();
+
+    /** Generates random cell. */
+    GridPosition randomTCell();
+    GridPosition randomSCell();
+    GridPosition randomPCell();
+    GridPosition randomNotWallCell();
+
+    /**
+     * Generates a next state for the given state and action;
+     * returns true if the action was legal, and false if it was illegal.
+     */
+    std::pair<std::unique_ptr<HomecareState>, bool> makeNextState(
+            solver::State const &state, solver::Action const &action);
+    /** Generates an observation given a next state (i.e. after the action)
+     * and an action.
+     */
+    std::unique_ptr<solver::Observation> makeObservation(
+            solver::Action const &action, HomecareState const &nextState);
+
+    /** Samples a reading from region sensors */
+    int sampleObservationRegion(HomecareState const &state);
+
+    /** Generates vector of valid cells target can move to*/
+    std::vector<GridPosition> validMovedTargetPositions(
+            GridPosition const &targetPos);
+    /** Generates a proper distribution for next target positions. */
+    std::unordered_map<GridPosition, double> getNextTargetPositionDistribution(
+            GridPosition const &targetPos, bool call);
+
+    /** Moves the robot/target. */
+    GridPosition sampleMovedRobotPosition(GridPosition const &targetPos, ActionType action);
+    GridPosition sampleMovedTargetPosition(GridPosition const &targetPos);
+
+    /** Gets the expected coordinates after taking the given action;
+     *  this may result in invalid coordinates.
+     */
+    std::pair<GridPosition, bool> getMovedPos(GridPosition const &position, ActionType action);
+    /** Returns true iff the given GridPosition form a valid position. */
+    bool isValid(GridPosition const &pos);
+
+    bool updateCall(GridPosition robotPos, GridPosition targetPos, bool call);
+
+    HomecareOptions *options_;
+
+    /** The penalty for each movement. */
+    double moveCost_;
+    double diaMoveCost_;
+    /** The reward for reaching the target when it needs help */
+    double helpReward_;
+    /** The probability that the target stays still on a W tile */
+    double targetWStayProbability_;
+    /** The probability that the target will stay still. */
+    double targetStayProbability_;
+    /** The probability for correct robot motion */
+    double moveAccuracy_;
+    /** The probability for correct localisation of target by region sensors */
+    double regionSensorAccuracy_;
+    /** The probability target will need help */
+    double callProbability_;
+    /** The probability target will still need help if it currently does */
+    double continueCallProbability_;
+
+    /** The number of rows in the map. */
+    long nRows_;
+    /** The number of columns in the map. */
+    long nCols_;
+
+    /** The environment map in text form. */
+    std::vector<std::string> pathMapText_;
+    std::vector<std::string> typeMapText_;
+    /** The environment map in vector form. */
+    std::vector<std::vector<HomecarePathCell>> pathMap_;
+    std::vector<std::vector<HomecareTypeCell>> typeMap_;
+    /** Vector of special cells. */
+    std::vector<GridPosition> tCells_;
+    std::vector<GridPosition> wCells_;
+    std::vector<GridPosition> sCells_;
+    std::vector<GridPosition> pCells_;
+
+    // General problem parameters
+    long nActions_;
+
+};
+} /* namespace homecare */
+
+#endif /* HOMECAREMODEL_HPP_ */

@@ -7,12 +7,6 @@ http://www.coppeliarobotics.com/downloads.html
 **ROS-Hydro**  
 http://wiki.ros.org/hydro/Installation
 
-**Boost 1.48**  
-Note: On Ubuntu 12.04, Groovy depends on Boost 1.46, while ABT depends on Boost 1.48. To solve this, Boost 1.48 source is downloaded and referred to in ABT. Dependence on Boost 1.48 is expected to be removed in the future. 
-
-Download source and extract to ~/boost_1_48_0  
-http://www.boost.org/users/history/version_1_48_0.html  
-
 Note: You can change the location of the boost source to use by editing the CMakeLists.txt inside the abt folder.  
 
 **Other System Requirements:**  
@@ -73,9 +67,11 @@ Other:
 Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:
 
 ```
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt-get update
 sudo apt-get install g++-4.8
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 60
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 40
 ```
 
 Here, 4.6 priority is set to 60, higher than 4.8. To swap to 4.8 use:

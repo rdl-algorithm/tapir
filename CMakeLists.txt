@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(abt)
 
 # Set make arguments
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Weffc++ -frounding-math" ) 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" ) 
 
 ## Use Boost 1.48.0 from source, different to my system's default version
-set(BOOST_ROOT "~/boost_1_48_0")
-find_package(Boost 1.48.0 REQUIRED)
+##set(BOOST_ROOT "~/boost_1_48_0")
+##find_package(Boost 1.48.0 REQUIRED)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS 
@@ -95,8 +95,10 @@ add_library(AbtSolver
 	src/problems/shared/geometry/RTree.cpp
 	src/problems/shared/geometry/utilities.cpp
 	src/problems/shared/geometry/Vector2D.cpp
-	src/problems/shared/policy_iteration.cpp
+	##src/problems/shared/policy_iteration.cpp
 )
+
+add_dependencies(AbtSolver abt_generate_messages_cpp)
 
 add_library(AbtTracker
 	src/problems/tracker/TrackerAction.cpp
@@ -106,22 +108,24 @@ add_library(AbtTracker
 	src/problems/tracker/TrackerTextSerializer.cpp
 )
 
-add_library(AbtTag
-	src/problems/tag/TagAction.cpp
-	src/problems/tag/TagMdpSolver.cpp
-	src/problems/tag/TagModel.cpp
-	src/problems/tag/TagObservation.cpp
-	src/problems/tag/TagState.cpp
-	src/problems/tag/TagTextSerializer.cpp
-)
+##add_library(AbtTag
+##	src/problems/tag/TagAction.cpp
+##	src/problems/tag/TagMdpSolver.cpp
+##	src/problems/tag/TagModel.cpp
+##	src/problems/tag/TagObservation.cpp
+##	src/problems/tag/TagState.cpp
+##	src/problems/tag/TagTextSerializer.cpp
+##)
 
-target_link_libraries(AbtSolver spatialindex ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(AbtSolver spatialindex ${catkin_LIBRARIES})
 
 add_executable(tracker_node src/problems/tracker/TrackerRos.cpp)
-target_link_libraries(tracker_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES} AbtTracker AbtSolver )
+target_link_libraries(tracker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} AbtTracker AbtSolver )
+add_dependencies(tracker_node abt_generate_messages_cpp)
 
-add_executable(tag_node src/problems/tag/TagVrep.cpp)
-target_link_libraries(tag_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} AbtTag AbtSolver )
+##add_executable(tag_node src/problems/tag/TagVrep.cpp)
+##target_link_libraries(tag_node ${catkin_LIBRARIES} AbtTag AbtSolver )
+##add_dependencies(tracker_node abt_generate_messages_cpp)
 
 add_executable(scan_to_pcl_node src/ScanToPcl.cpp)
-target_link_libraries(scan_to_pcl_node ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(scan_to_pcl_node ${catkin_LIBRARIES})
