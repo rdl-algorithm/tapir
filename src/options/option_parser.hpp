@@ -19,7 +19,9 @@
 //    THE SOFTWARE.
 
 
-/** A basic option parser that is able to parse configuration settings from both the command line,
+/** @file option_parser.hpp
+ *
+ * A basic option parser that is able to parse configuration settings from both the command line,
  * and from INI-style configuration files.
  *
  * This parser uses the following libraries to do the underlying parsing:
@@ -48,12 +50,15 @@
 #include <tclap/CmdLine.h>
 #include <inih/ini.h>
 
-#include "options/defs.hpp"
+#include "defs.hpp"
 
 namespace options {
+/** A simple exception class, thrown when there is something wrong with the input. */
 class OptionParsingException : public std::exception {
 public:
+    /** Constructs a new OptionParsingException with the given message string. */
     OptionParsingException(std::string const &message);
+    /** what() is the standard way for an exception to communicate an error message. */
     virtual char const *what() const throw() {
         return message_.c_str();
     }
@@ -74,6 +79,7 @@ public:
     virtual ~BaseArg() = default;
     _NO_COPY_OR_MOVE(BaseArg);
 
+    /** Returns the TCLAP::Arg wrapped by this BaseArg. */
     virtual TCLAP::Arg &getArg() = 0;
 };
 
@@ -228,6 +234,7 @@ private:
 
 /** Generic parser. */
 template<typename ValueType> struct Parser {
+    /** Parses a string into the templated value type. */
     static ValueType parse(std::string s) {
         ValueType value;
         std::istringstream(s) >> value;
@@ -235,15 +242,17 @@ template<typename ValueType> struct Parser {
     }
 };
 
-/** Specialised parser for std::string */
+/** Specialised parser for std::string so that spaces will be correctly handled. */
 template<> struct Parser<std::string> {
+    /** Parses a string into a string (we just copy it). */
     static std::string parse(std::string s) {
         return s;
     }
 };
 
-/* Specialised parser for bool */
+/** Specialised parser for bool (we need to properly handle "true" and "false". */
 template<> struct Parser<bool> {
+    /** Parses a string into a boolean. */
     static bool parse(std::string s) {
         bool value;
         std::istringstream(s) >> std::boolalpha >> value;

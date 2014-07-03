@@ -1,4 +1,4 @@
-/** file: Options.hpp
+/** @file Options.hpp
  *
  * Defines the base Options class. These are the core parameters that ABT requires in order to
  * function correctly.

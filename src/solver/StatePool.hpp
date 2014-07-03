@@ -1,4 +1,4 @@
-/** file: StatePool.hpp
+/** @file StatePool.hpp
  *
  * Contains the StatePool class, which stores all of the states that have been encountered by
  * the solver.
@@ -50,14 +50,15 @@ class StatePool {
   public:
     /** A hash function that operates on states via pointers to them. */
     struct Hash {
+        /** Returns the hash value for the pointed-to state. */
         std::size_t operator()(State const *state) const {
             return state->hash();
         }
     };
     /** An equality test that operates on states via pointers to them. */
     struct EqualityTest {
-        bool operator()(State const *s1,
-                State const *s2) const {
+        /** Returns true if the two pointed-to stated are equal. */
+        bool operator()(State const *s1, State const *s2) const {
             return *s1 == *s2;
         }
     };

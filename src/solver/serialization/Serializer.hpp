@@ -1,8 +1,16 @@
+/** @file Serializer.hpp
+ *
+ * Defines Serializer, an abstract base class for serialization of an ABT solver instance.
+ */
 #ifndef SOLVER_SERIALIZER_HPP_
 #define SOLVER_SERIALIZER_HPP_
 
 #include <istream>                      // for istream, ostream
 #include <memory>                       // for unique_ptr
+
+#include "global.hpp"
+
+#include "solver/Solver.hpp"                   // for Solver
 
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/ModelChange.hpp"              // for Observation
@@ -10,10 +18,6 @@
 
 #include "solver/mappings/actions/ActionPool.hpp"
 #include "solver/mappings/observations/ObservationPool.hpp"
-
-#include "solver/Solver.hpp"                   // for Solver
-
-#include "global.hpp"
 
 namespace solver {
 class ActionMapping;
@@ -28,24 +32,33 @@ class ObservationMapping;
 class StateInfo;
 class StatePool;
 
+/** An abstract base class to perform the function of serializing an ABT solver instance.
+ *
+ * This is useful for loading a pre-generated policy as a starting point for further searching.
+ */
 class Serializer {
 public:
     /** Constructs a serializer without an associated solver. */
     Serializer() :
             solver_(nullptr) {
     }
+
     /** Constructs a serializer for the given solver. */
     Serializer(Solver *solver) :
             solver_(solver) {
     }
 
+    /** Sets the associated solver of this Serializer to be the given solver. */
     void setSolver(Solver *solver) {
         solver_ = solver;
     }
+
+    /** Returns the associated solver for this Serializer. */
     Solver *getSolver() const {
         return solver_;
     }
 
+    /** Returns the model of the associated solver for this Serializer. */
     Model *getModel() const {
         return solver_->getModel();
     }
@@ -58,7 +71,9 @@ public:
 
     /* --------------- Saving the entirnode.e solver. ----------------- */
 
-    /** Saves the sate of the solver. */
+    /** Saves (serializes) the full state of the associated ABT solver to the given
+     * output stream.
+     */
     virtual void save(std::ostream &os) {
         save(*(solver_->statePool_), os);
         save(*(solver_->histories_), os);
@@ -66,8 +81,12 @@ public:
         saveObservationPool(*(solver_->observationPool_), os);
         save(*(solver_->policy_), os);
     }
-    /** Loads the state of the solver. */
+
+    /** Loads (deserializes) the full state of the associated ABT solver from the given
+     * input stream.
+     */
     virtual void load(std::istream &is) {
+        // First we have to initialize all of the required data structures.
     	solver_->initialize();
 
         load(*(solver_->statePool_), is);
@@ -88,9 +107,9 @@ public:
     /** Loads a single ModelChange. */
     virtual std::unique_ptr<ModelChange> loadModelChange(std::istream &is) = 0;
 
-    /* --------------- Saving states & observations ----------------- */
-    // NOTE: null values need to be handled for saving of observations
-    // and of actions
+    /* ----------- Saving states/actions/transition parameters/observations ------------- */
+    // NOTE: null values need to be handled for saving of states, observations, actions, and
+    // transition parameters.
 
     /** Saves a State. */
     virtual void saveState(State const *state, std::ostream &os) = 0;
@@ -115,6 +134,7 @@ public:
     virtual std::unique_ptr<Observation> loadObservation(std::istream &is) = 0;
 
 
+    /* -------------- Saving custom mapping data structures ---------------- */
     /** Saves the pool handling all the actions. */
     virtual void saveActionPool(ActionPool const &actionPool,
             std::ostream &os) = 0;
@@ -127,10 +147,10 @@ public:
     virtual std::unique_ptr<ActionMapping> loadActionMapping(BeliefNode *node,
             std::istream &is) = 0;
 
-    /** Saves the pool handling all the actions. */
+    /** Saves the pool handling all the observations. */
     virtual void saveObservationPool(
             ObservationPool const &observationPool, std::ostream &os) = 0;
-    /** Loads the pool handling all the actions. */
+    /** Loads the pool handling all the observations. */
     virtual std::unique_ptr<ObservationPool> loadObservationPool(
             std::istream &is) = 0;
     /** Saves a mapping of observations to belief nodes. */
@@ -184,7 +204,9 @@ public:
     virtual void save(BeliefTree const &tree, std::ostream &os) = 0;
     /** Loads a BeliefTree. */
     virtual void load(BeliefTree &tree, std::istream &is) = 0;
+
   private:
+    /** The ABT solver instance associated with this serializer. */
     Solver *solver_;
 };
 } /* namespace solver */

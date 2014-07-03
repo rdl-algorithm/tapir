@@ -1,4 +1,4 @@
-/** file: HistoryEntry.hpp
+/** @file HistoryEntry.hpp
  *
  * Contains the HistoryEntry class, which represents a single entry in a history sequence.
  *
@@ -53,6 +53,7 @@ public:
     friend class Solver;
     friend class TextSerializer;
 
+    /** The ID type of this HistoryEntry. This should be an integer type with at least 16 bits. */
     typedef uint16_t IdType;
 
     /** Constructs a new history entry, without a state!! */

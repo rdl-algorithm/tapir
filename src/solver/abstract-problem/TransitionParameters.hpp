@@ -1,4 +1,4 @@
-/** file: TransitionParameters.hpp
+/** @file TransitionParameters.hpp
  *
  * An abstract base class for transition parameters, which allow intermediate generation of
  * steps in a sequence. If used, the idea is that the transition parameters can work as follows:

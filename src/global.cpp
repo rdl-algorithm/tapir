@@ -1,4 +1,4 @@
-/** file: global.cpp
+/** @file global.cpp
  *
  * Implementation for show_message() - a great place for breakpoints!
  */
@@ -19,5 +19,6 @@ void show_message(std::string message, bool print, bool bp_branch) {
     }
 }
 
+/** Instantiation of the to_string template for easier printing of points in GDB. */
 template std::string to_string<solver::Point &>(solver::Point &);
 } /* namespace debug */

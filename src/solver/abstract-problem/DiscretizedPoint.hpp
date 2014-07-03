@@ -1,4 +1,4 @@
-/** file: DiscretizedPoint.hpp
+/** @file DiscretizedPoint.hpp
  *
  * Defines a point within a discretized space. In addition to the default point methods, this class
  * requires each point to be able to return its associated bin number.

@@ -1,4 +1,4 @@
-/** file: Histories.hpp
+/** @file Histories.hpp
  *
  * Contains the Histories class, which represents a collection of history sequences.
  *

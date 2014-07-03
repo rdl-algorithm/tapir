@@ -1,4 +1,4 @@
-/** file: Heuristic.hpp
+/** @file Heuristic.hpp
  *
  * Contains a typedef for the "Heuristic" type, which is represented via a function that takes
  * pointers to a history entry, state, and/or historical data, and returns a double value.

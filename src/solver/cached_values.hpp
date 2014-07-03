@@ -1,4 +1,4 @@
-/** file: cached_values.hpp
+/** @file cached_values.hpp
  *
  * Contains the classes used to store cached values for a belief node.
  */
@@ -27,6 +27,9 @@ public:
  */
 template<typename T> class CachedValue : public BaseCachedValue {
 public:
+    /** Constructs a new CachedValue for the given node, which will use the given function in order
+     * to recalculate the cahced value whenever it is needed.
+     */
     CachedValue(BeliefNode const *node, std::function<T(BeliefNode const *)> f) :
                 node_(node),
                 function_(f),
@@ -34,10 +37,14 @@ public:
     }
     _NO_COPY_OR_MOVE(CachedValue);
 
+    /** Updates the cache inside this cached value by using the stored function on the associated
+     * belief node.
+     */
     virtual void updateCache() {
         cache_ = function_(node_);
     }
 
+    /** Returns the currently cached value. */
     virtual T getCache() {
         return cache_;
     }
@@ -50,11 +57,12 @@ private:
     T cache_;
 };
 
-/** A template specialization for caches of type unique_ptr<Point> - Since a unique_ptr can only
- * be moved we need to make a new Point via the method Point::copy()
+/** A template specialization for caches of type unique_ptr<Point>.
+ *
+ * Since a unique_ptr can only be moved we need to make a new Point via the method Point::copy()
  */
-template<>
-inline std::unique_ptr<solver::Point> CachedValue<std::unique_ptr<solver::Point>>::getCache() {
+template<> inline std::unique_ptr<solver::Point>
+CachedValue<std::unique_ptr<solver::Point>>::getCache() {
     return cache_->copy();
 }
 } /* namespace solver */

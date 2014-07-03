@@ -154,7 +154,7 @@ friend class RockSampleMdpSolver;
     /* --------------- The model interface proper ----------------- */
     virtual std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates a state uniformly at random. */
-    virtual std::unique_ptr<solver::State> sampleStateUniform() override;
+    virtual std::unique_ptr<solver::State> sampleStateUninformed() override;
     virtual bool isTerminal(solver::State const &state) override;
 
 
@@ -209,8 +209,8 @@ friend class RockSampleMdpSolver;
     virtual double getDefaultHeuristicValue(solver::HistoryEntry const *entry,
             solver::State const *state, solver::HistoricalData const *data) override;
 
-    virtual std::unique_ptr<solver::Action> getRolloutAction(solver::HistoricalData const *data,
-            solver::State const *state) override;
+    virtual std::unique_ptr<solver::Action> getRolloutAction(solver::HistoryEntry const *entry,
+            solver::State const *state, solver::HistoricalData const *data) override;
 
 
     /* ------- Customization of more complex solver functionality  --------- */

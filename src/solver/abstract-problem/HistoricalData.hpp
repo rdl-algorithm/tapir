@@ -1,4 +1,4 @@
-/** file: HistoricalData.hpp
+/** @file HistoricalData.hpp
  *
  * Defines an abstract base class for storing history-based heuristic information within a belief
  * node.

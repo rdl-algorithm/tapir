@@ -1,4 +1,4 @@
-/** file: Action.hpp
+/** @file Action.hpp
  *
  * Defines the Action interface; currently this is the same as Point, so this is just a straight
  * typedef.
@@ -9,6 +9,7 @@
 #include "solver/abstract-problem/Point.hpp"
 
 namespace solver {
+    /** Currently Action has no requirements over and above Point, so this is just a typedef. */
     typedef Point Action;
 } /* namespace solver */
 

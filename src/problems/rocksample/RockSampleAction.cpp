@@ -34,7 +34,7 @@ double RockSampleAction::distanceTo(solver::Action const &/*otherAction*/) const
 void RockSampleAction::print(std::ostream &os) const {
     os << actionType_;
     if (actionType_ == ActionType::CHECK) {
-        os << rockNo_;
+        os << static_cast<long>(rockNo_);
     }
 }
 
@@ -50,7 +50,7 @@ ActionType RockSampleAction::getActionType() const {
     return actionType_;
 }
 
-uint8_t RockSampleAction::getRockNo() const {
+long RockSampleAction::getRockNo() const {
     return rockNo_;
 }
 } /* namespace rocksample */

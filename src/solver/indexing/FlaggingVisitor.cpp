@@ -1,4 +1,8 @@
-#include "FlaggingVisitor.hpp"
+/** @file FlaggingVisitor.cpp
+ *
+ * Contains the implementation of the FlaggingVisitor class.
+ */
+#include "solver/indexing/FlaggingVisitor.hpp"
 
 #include "solver/changes/ChangeFlags.hpp"
 #include "solver/StatePool.hpp"

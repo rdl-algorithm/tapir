@@ -1,3 +1,7 @@
+/** @file choosers.cpp
+ *
+ * Contains implementations of basic action selection functions.
+ */
 #include "solver/search/action-choosers/choosers.hpp"
 
 #include "solver/BeliefNode.hpp"
@@ -49,6 +53,11 @@ std::unique_ptr<Action> ucb_action(BeliefNode const *node, double explorationCoe
 
     ActionMapping *mapping = node->getMapping();
     for (ActionMappingEntry const *entry : mapping->getVisitedEntries()) {
+        // Ignore illegal actions.
+        if (!entry->isLegal()) {
+            continue;
+        }
+
         double tmpValue = entry->getMeanQValue()
                 + explorationCoefficient
                         * std::sqrt(

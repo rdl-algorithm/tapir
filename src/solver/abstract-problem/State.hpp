@@ -1,4 +1,4 @@
-/** file: State.hpp
+/** @file State.hpp
  *
  * Defines the State interface; currently this is the same as Point, so this is just a straight
  * typedef.
@@ -9,6 +9,7 @@
 #include "solver/abstract-problem/Point.hpp"
 
 namespace solver {
+    /** Currently State has no requirements over and above Point, so this is just a typedef. */
     typedef Point State;
 } /* namespace solver */
 

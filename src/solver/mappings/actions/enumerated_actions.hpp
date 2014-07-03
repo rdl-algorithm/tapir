@@ -1,39 +1,71 @@
+/** @file enumerated_actions.hpp
+ *
+ * Provides a default implementation for the action mapping interfaces in terms of an enumerated
+ * set of actions. This is just like the discretized action mapping, but there is only one action
+ * in each bin.
+ *
+ * Indeed, the actual mapping classes are the same as those for discretized actions;
+ * the enumerated action case is handled simply by providing implementations for the pure virtual
+ * methods of DiscretizedActionPool.
+ */
 #ifndef SOLVER_ENUMERATED_ACTIONS_HPP_
 #define SOLVER_ENUMERATED_ACTIONS_HPP_
 
 #include <memory>
 #include <vector>
 
-#include "discretized_actions.hpp"
+#include "global.hpp"
+#include "RandomAccessSet.hpp"
 
 #include "solver/serialization/Serializer.hpp"
 #include "solver/abstract-problem/Action.hpp"
 #include "solver/abstract-problem/DiscretizedPoint.hpp"
 #include "solver/abstract-problem/Model.hpp"
 
-#include "ActionPool.hpp"
-#include "ActionMapping.hpp"
-
-#include "global.hpp"
-#include "RandomAccessSet.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/actions/discretized_actions.hpp"
 
 namespace solver {
 class ActionPool;
 
+/** Defines an action pool that uses an enumerated set of actions.
+ *
+ * This class keeps a vector of all of the possible actions, which it then uses in order to
+ * conveniently implement the abstract class DiscretizedActionPool.
+ */
 class EnumeratedActionPool : public solver::DiscretizedActionPool {
   public:
+    /** Creates a new EnumeratedActionPool from the given model, with the given vector of actions
+     * as the enumerated vector of all of the actions, in order.
+     */
     EnumeratedActionPool(Model *model, std::vector<std::unique_ptr<DiscretizedPoint>> allActions);
     virtual ~EnumeratedActionPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedActionPool);
 
     virtual long getNumberOfBins() override;
     virtual std::unique_ptr<Action> sampleAnAction(long binNumber) override;
-    virtual std::vector<long> createBinSequence(HistoricalData const *data) override;
+    /** This provides a default implementation of createBinSequence(), which works by simply
+     * creating a vector of all the bins [0, 1, ..., getNumberOfBins()-1], and shuffling that
+     * vector.
+     *
+     * This means that the actions will be taken in a random order, but the order is determined
+     * at the time this mapping is created. Taking this approach means the same interface can be
+     * used to make a deterministic, prioritized list of actions instead..
+     */
+    virtual std::vector<long> createBinSequence(BeliefNode *node) override;
 
   private:
-    Model *model_;
+    /** The random number engine, taken from the model. */
+    RandomGenerator *randGen_;
+    /** The vector of all of the possible actions. */
     std::vector<std::unique_ptr<DiscretizedPoint>> allActions_;
 };
+
+/** Since we're just using DiscretizedActionMap to do all of the work, we can simply re-use
+ * DiscretizedActionTextSerializer to do the work of serializing enumerated mappigns.
+ */
+typedef DiscretizedActionTextSerializer EnumeratedActionTextSerializer;
 } /* namespace solver */
 
 #endif /* SOLVER_ENUMERATED_ACTIONS_HPP_ */

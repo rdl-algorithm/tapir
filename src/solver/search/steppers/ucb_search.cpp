@@ -1,3 +1,7 @@
+/** @file ucb_search.cpp
+ *
+ * Contains the basic implementation code for a UCB-based search strategy.
+ */
 #include "solver/search/steppers/ucb_search.hpp"
 
 #include "solver/ActionNode.hpp"
@@ -11,16 +15,6 @@
 #include "solver/mappings/actions/ActionMapping.hpp"
 
 namespace solver {
-UcbStepGeneratorFactory::UcbStepGeneratorFactory(Solver *solver, double explorationCoefficient) :
-            solver_(solver),
-            explorationCoefficient_(explorationCoefficient) {
-}
-
-std::unique_ptr<StepGenerator> UcbStepGeneratorFactory::createGenerator(SearchStatus &status,
-        HistoryEntry const */*entry*/, State const */*state*/, HistoricalData const */*data*/) {
-    return std::make_unique<UcbStepGenerator>(status, solver_, explorationCoefficient_);
-}
-
 UcbStepGenerator::UcbStepGenerator(SearchStatus &status, Solver *solver,
         double explorationCoefficient) :
             StepGenerator(status),
@@ -32,11 +26,14 @@ UcbStepGenerator::UcbStepGenerator(SearchStatus &status, Solver *solver,
 
 Model::StepResult UcbStepGenerator::getStep(HistoryEntry const *entry, State const *state,
         HistoricalData const */*data*/) {
+    // If we previously chose a new action that hadn't been tried before, UCB is over.
     if (choseUnvisitedAction_) {
         // We've reached the new leaf node - this search is over.
         status_ = SearchStatus::OUT_OF_STEPS;
         return Model::StepResult { };
     }
+
+    // Retrieve the mapping.
     BeliefNode *currentNode = entry->getAssociatedBeliefNode();
     ActionMapping *mapping = currentNode->getMapping();
 
@@ -56,6 +53,17 @@ Model::StepResult UcbStepGenerator::getStep(HistoryEntry const *entry, State con
         return Model::StepResult { };
     }
 
+    // Use the model to generate the step.
     return model_->generateStep(*state, *action);
+}
+
+UcbStepGeneratorFactory::UcbStepGeneratorFactory(Solver *solver, double explorationCoefficient) :
+            solver_(solver),
+            explorationCoefficient_(explorationCoefficient) {
+}
+
+std::unique_ptr<StepGenerator> UcbStepGeneratorFactory::createGenerator(SearchStatus &status,
+        HistoryEntry const */*entry*/, State const */*state*/, HistoricalData const */*data*/) {
+    return std::make_unique<UcbStepGenerator>(status, solver_, explorationCoefficient_);
 }
 } /* namespace solver */

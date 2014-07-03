@@ -1,4 +1,4 @@
-/** file: BeliefTree.hpp
+/** @file BeliefTree.hpp
  *
  * Contains the BeliefTree class, which represents an entire belief tree.
  *
@@ -40,10 +40,8 @@ class BeliefTree {
     friend class TextSerializer;
 
 public:
-    /* Constructs an empty belief tree. */
+    /** Constructs an empty belief tree. */
     BeliefTree(Solver *solver);
-
-    // Default destructor; copying and moving disallowed!
     ~BeliefTree();
     _NO_COPY_OR_MOVE(BeliefTree);
 

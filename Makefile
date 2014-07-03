@@ -1,5 +1,6 @@
 # Root project folder
 ROOT := .
+ABS_ROOT := $(abspath $(ROOT))
 
 HAS_ROOT_MAKEFILE := true
 
@@ -14,19 +15,21 @@ $(info Configuration: $(CFG))
 $(info )
 
 BUILDDIR := $(ROOT)/builds/$(CFG)
+BINDIR   := $(ROOT)/bin
 
 # ----------------------------------------------------------------------
 # Compiler & linker
 # ----------------------------------------------------------------------
 
 AR   := ar
+CC   := gcc
 CXX  := g++
 
 # ----------------------------------------------------------------------
 # Compiler flags
 # ----------------------------------------------------------------------
 # Preprocessor flags.
-override INCDIRS     += -I$(ROOT)/src
+override INCDIRS     += -I$(ROOT)/src -I$(ROOT)/src/options
 
 override CPPFLAGS    += $(INCDIRS)
 ifeq ($(CFG),debug)
@@ -35,20 +38,28 @@ endif
 
 # Compile flags
 CXXFLAGS_BASE        := -std=c++11
-WARN                 :=
-override CXXFLAGS    += $(CXXFLAGS_BASE) $(WARN)
+CXXWARN              :=
+CWARN                :=
+override CXXFLAGS    += $(CXXFLAGS_BASE) $(CXXWARN)
+override CFLAGS      += $(CWARN)
 
 # Differences in flags between clang++ and g++
 ifeq ($(CXX),clang++)
-  WARN               += -Weverything -Wno-c++98-compat
-endif
-ifneq (,$(findstring g++,$(CXX)))
-  WARN               += -Wpedantic -Wall -Wextra -Wshadow -Weffc++
-  WARN               += -Wswitch-default -Wfatal-errors
-  override CXXFLAGS  += -frounding-math
+  override INCDIRS    += -I/usr/include/c++/4.8
+#  CWARN               += -Weverything
+  CWARN               += -Wno-c++98-compat
+  CXXWARN             := $(CWARN)
+else ifneq (,$(findstring g++,$(CXX)))
+  CWARN               += -Wpedantic -Wall -Wextra -Wshadow
+  CWARN               += -Wswitch-default -Wfatal-errors
+  CXXWARN             := $(CWARN) -Weffc++
+  override CXXFLAGS   += -frounding-math
+
+# For GCC >= 4.9 we can use C++1y and color diagnostics
   GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
   ifeq ($(GCC_VERSION), 4.9)
-	CXXFLAGS_BASE := -std=c++1y
+	CXXFLAGS_BASE     := -std=c++1y
+	override LDFLAGS  += -fdiagnostics-color=auto
 	override CXXFLAGS += -fdiagnostics-color=auto
   endif
 endif
@@ -56,6 +67,8 @@ endif
 # Configuration-specific flags
 ifeq ($(CFG),release)
   override CXXFLAGS  += -O3
+else ifeq ($(CFG),shared)
+  override CXXFLAGS  += -O3 -fpic
 else ifeq ($(CFG),profile)
   override CPPFLAGS  += -DGOOGLE_PROFILER
   override CXXFLAGS  += -O3 -ggdb3
@@ -84,16 +97,36 @@ override LDFLAGS += $(LIBDIRS)
 # ----------------------------------------------------------------------
 # General-purpose recipes
 # ----------------------------------------------------------------------
-COMPILE_RECIPE = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $(1) -o $@
+CXX_RECIPE     = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $(1) -o $@
+CC_RECIPE      = $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c $(1) -o $@
 LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
 MKDIR_RECIPE   = @mkdir -p $@
+
+.PHONY: default
+default: build-solver ;
+
+# ----------------------------------------------------------------------
+# Documentation targets
+# ----------------------------------------------------------------------
+docs/generated/README.md: README.md docs/doxygen_links.md Makefile
+	@echo "# ABT Documentation {#mainpage}\n" > $@
+	@cat README.md docs/doxygen_links.md >> $@
+	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#abt}\2/mg' $@
+	@perl -0pi -e 's/^(.*)(\n-+)$$/\1 {#\L\1}\2/mg' $@
+	@perl -0pi -e 's/^([#]{2,}\s+)(.*)$$/\1\2 {#\L\2}/mg' $@
+	@perl -pi -e 's/({#.*})/($$res = $$1) =~ s\/ \/-\/g,$$res/eg' $@
+
+docs/generated/BUILD.md: .make/README.md docs/doxygen_links.md Makefile
+	@cat .make/README.md docs/doxygen_links.md > $@
+
+.PHONY: doc
+doc: docs/Doxyfile docs/generated/README.md docs/generated/BUILD.md
+	doxygen docs/Doxyfile
 
 # ----------------------------------------------------------------------
 # Universal grouping targets
 # ----------------------------------------------------------------------
-
-.PHONY: default nothing
-default: build-solver ;
+.PHONY: nothing
 nothing: ;
 
 .PHONY: all build build-all
@@ -103,7 +136,7 @@ build: build-solver
 .PHONY: clean clean-all
 clean-all:
 	@echo Removing all build folders!
-	@rm -rfv $(ROOT)/builds | grep "directory" ; true
+	@rm -rfv $(ROOT)/builds $(ROOT)/bin $(ROOT)/html | grep "directory" ; true
 
 # Some stuff used for code beautification
 include .make/beautify-settings.mk

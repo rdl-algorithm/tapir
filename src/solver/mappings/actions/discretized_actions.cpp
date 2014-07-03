@@ -1,4 +1,8 @@
-#include "discretized_actions.hpp"
+/** @file discretized_actions.cpp
+ *
+ * Contains the implementations of the classes for discretized action mappings.
+ */
+#include "solver/mappings/actions/discretized_actions.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -16,28 +20,23 @@
 #include "solver/abstract-problem/Action.hpp"
 #include "solver/abstract-problem/DiscretizedPoint.hpp"
 
-#include "ActionMapping.hpp"
-#include "ActionMappingEntry.hpp"
-#include "ActionPool.hpp"
+#include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionMappingEntry.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
 
 namespace solver {
 /* ---------------------- DiscretizedActionPool ---------------------- */
-DiscretizedActionPool::DiscretizedActionPool(Model *model) :
-        model_(model) {
-}
 std::unique_ptr<ActionMapping> DiscretizedActionPool::createActionMapping(BeliefNode *node) {
-    return std::make_unique<DiscretizedActionMap>(node, this,
-            createBinSequence(node->getHistoricalData()));
+    return std::make_unique<DiscretizedActionMap>(node, this, createBinSequence(node));
 }
 
 /* ---------------------- DiscretizedActionMap ---------------------- */
 DiscretizedActionMap::DiscretizedActionMap(BeliefNode *owner, DiscretizedActionPool *pool,
         std::vector<long> binSequence) :
         ActionMapping(owner),
-                model_(pool->model_),
                 pool_(pool),
                 numberOfBins_(pool_->getNumberOfBins()),
-                entries_(numberOfBins_),
+                entries_(std::make_unique<DiscretizedActionMapEntry[]>(numberOfBins_)),
                 nChildren_(0),
                 numberOfVisitedEntries_(0),
                 binSequence_(binSequence.begin(), binSequence.end()),
@@ -65,10 +64,6 @@ ActionNode* DiscretizedActionMap::getActionNode(Action const &action) const {
 }
 ActionNode* DiscretizedActionMap::createActionNode(Action const &action) {
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
-//    if (code != *binIterator_) {
-//        debug::show_message("WARNING: Trying actions out of order!?");
-//    }
-
     DiscretizedActionMapEntry &entry = entries_[code];
 
     std::unique_ptr<ActionNode> actionNode = std::make_unique<ActionNode>(&entry);
@@ -88,7 +83,8 @@ long DiscretizedActionMap::getNumberOfVisitedEntries() const {
 }
 std::vector<ActionMappingEntry const *> DiscretizedActionMap::getVisitedEntries() const {
     std::vector<ActionMappingEntry const *> returnEntries;
-    for (DiscretizedActionMapEntry const &entry : entries_) {
+    for (int i = 0; i < numberOfBins_; i++) {
+        DiscretizedActionMapEntry const &entry = entries_[i];
         if (entry.visitCount_ > 0) {
             if (!entry.isLegal_) {
                 debug::show_message("WARNING: Illegal entry with nonzero visit count!");
@@ -121,7 +117,6 @@ long DiscretizedActionMap::getTotalVisitCount() const {
 }
 
 /* ------------------- DiscretizedActionMapEntry ------------------- */
-/** Returns the mapping this entry belongs to. */
 ActionMapping *DiscretizedActionMapEntry::getMapping() const {
     return map_;
 }
@@ -140,14 +135,17 @@ double DiscretizedActionMapEntry::getTotalQValue() const {
 double DiscretizedActionMapEntry::getMeanQValue() const {
     return meanQValue_;
 }
-long DiscretizedActionMapEntry::getBinNumber() const {
-    return binNumber_;
-}
 bool DiscretizedActionMapEntry::isLegal() const {
     return isLegal_;
 }
 
-bool DiscretizedActionMapEntry::updateValue(long deltaNVisits, double deltaTotalQ) {
+
+long DiscretizedActionMapEntry::getBinNumber() const {
+    return binNumber_;
+}
+
+
+bool DiscretizedActionMapEntry::update(long deltaNVisits, double deltaTotalQ) {
     if (deltaNVisits == 0 && deltaTotalQ == 0) {
         return false;
     }
@@ -211,7 +209,7 @@ void DiscretizedActionMapEntry::setLegal(bool legal) {
 /* ------------------- DiscretizedActionTextSerializer ------------------- */
 void DiscretizedActionTextSerializer::saveActionPool(
         ActionPool const &/*actionPool*/, std::ostream &/*os*/) {
-    // Do nothing - the model can create a new one.
+    // Do nothing - the model can create a new one!
 }
 std::unique_ptr<ActionPool> DiscretizedActionTextSerializer::loadActionPool(
         std::istream &/*is*/) {
@@ -221,8 +219,7 @@ std::unique_ptr<ActionPool> DiscretizedActionTextSerializer::loadActionPool(
 
 void DiscretizedActionTextSerializer::saveActionMapping(
         ActionMapping const &map, std::ostream &os) {
-    DiscretizedActionMap const &discMap = (
-            static_cast<DiscretizedActionMap const &>(map));
+    DiscretizedActionMap const &discMap = static_cast<DiscretizedActionMap const &>(map);
     os << discMap.getNumberOfVisitedEntries() << " visited actions with ";
     os << discMap.getNChildren() << " children; ";
     os << discMap.getTotalVisitCount() << " visits" << std::endl;
@@ -237,7 +234,8 @@ void DiscretizedActionTextSerializer::saveActionMapping(
     os << ")" << std::endl;
     std::multimap<std::pair<double, double>, DiscretizedActionMapEntry const *> entriesByValue;
     long visitedCount = 0;
-    for (DiscretizedActionMapEntry const &entry : discMap.entries_) {
+    for (int i = 0; i < discMap.numberOfBins_; i++) {
+        DiscretizedActionMapEntry const &entry = discMap.entries_[i];
         if (entry.visitCount_ > 0) {
             visitedCount++;
         }

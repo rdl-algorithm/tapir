@@ -1,4 +1,4 @@
-/** file: BeliefTree.cpp
+/** @file BeliefTree.cpp
  *
  * Contains the implementation of BeliefTree.
  */

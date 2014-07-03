@@ -4,11 +4,8 @@
 /.settings
 /EMPTY_HEADER.hpp
 
-# Local configuration
-/local.cmake
-
-# Other libraries
-/knitro
+# Automatically generated documentation
+docs/generated
 
 # Binaries
 /builds

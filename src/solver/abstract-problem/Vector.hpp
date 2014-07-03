@@ -1,4 +1,4 @@
-/** file: Vector.hpp
+/** @file Vector.hpp
  *
  * An abstract extension of the Point class for points that can be easily be represented as
  * real vectors.
@@ -31,7 +31,7 @@ public:
     Vector() = default;
     virtual ~Vector() = default;
 
-    /* Returns this vector in the form of an std::vector<double>.
+    /** Returns this vector in the form of an std::vector<double>.
      *
      * This allows for vector-like functionality; we don't implement it directly as we are being
      * storage-agnostic here.

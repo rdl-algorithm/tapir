@@ -1,4 +1,4 @@
-/** file: ActionNode.cpp
+/** @file ActionNode.cpp
  *
  * Contains the implementation of ActionNode.
  */

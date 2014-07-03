@@ -1,4 +1,4 @@
-/** file: Solver.cpp
+/** @file Solver.cpp
  *
  * Contains the implementation of the Solver class.
  */
@@ -280,7 +280,7 @@ bool Solver::isAffected(BeliefNode const *node) {
 void Solver::applyChanges() {
     std::unordered_set<HistorySequence *> affectedSequences;
     for (StateInfo *stateInfo : statePool_->getAffectedStates()) {
-        if (changes::has_flag(stateInfo->changeFlags_, ChangeFlags::DELETED)) {
+        if (changes::has_flags(stateInfo->changeFlags_, ChangeFlags::DELETED)) {
             // Deletion implies the prior transition must be invalid.
             stateInfo->changeFlags_ |= ChangeFlags::TRANSITION_BEFORE;
         }
@@ -307,14 +307,14 @@ void Solver::applyChanges() {
                 allFlags &= ~ChangeFlags::HEURISTIC;
 
                 // If a state at the change root is deleted, just delete the whole sequence.
-                if (changes::has_flag(allFlags, ChangeFlags::DELETED)) {
+                if (changes::has_flags(allFlags, ChangeFlags::DELETED)) {
                     hasChanged = true;
                     sequence->setChangeFlags(0, ChangeFlags::DELETED);
                 }
             }
 
             // TRANSITION_BEFORE => TRANSITION for previous entry.
-            if (changes::has_flag(allFlags, ChangeFlags::TRANSITION_BEFORE)) {
+            if (changes::has_flags(allFlags, ChangeFlags::TRANSITION_BEFORE)) {
                 allFlags &= ~ChangeFlags::TRANSITION_BEFORE;
                 if (entryId > 0) {
                     hasChanged = true;
@@ -323,7 +323,7 @@ void Solver::applyChanges() {
             }
 
             // OBSERVATION_BEFORE => OBSERVATION for previous entry.
-            if (changes::has_flag(allFlags, ChangeFlags::OBSERVATION_BEFORE)) {
+            if (changes::has_flags(allFlags, ChangeFlags::OBSERVATION_BEFORE)) {
                 allFlags &= ~ChangeFlags::OBSERVATION_BEFORE;
                 if (entryId > 0) {
                     hasChanged = true;
@@ -332,7 +332,7 @@ void Solver::applyChanges() {
             }
 
             // Heuristic changes only apply if it's the last entry in the sequence.
-            if(changes::has_flag(allFlags, ChangeFlags::HEURISTIC)) {
+            if(changes::has_flags(allFlags, ChangeFlags::HEURISTIC)) {
                 allFlags &= ~ChangeFlags::HEURISTIC;
                 if (entry->action_ == nullptr) {
                     hasChanged = true;
@@ -363,7 +363,7 @@ void Solver::applyChanges() {
     std::unordered_set<HistorySequence *>::iterator it = affectedSequences.begin();
     while (it != affectedSequences.end()) {
         HistorySequence *sequence = *it;
-        if (changes::has_flag(sequence->getFirstEntry()->changeFlags_, ChangeFlags::DELETED)) {
+        if (changes::has_flags(sequence->getFirstEntry()->changeFlags_, ChangeFlags::DELETED)) {
             it = affectedSequences.erase(it);
             // Now we undo the sequence, and delete it entirely.
             updateSequence(sequence, -1);
@@ -395,8 +395,9 @@ void Solver::applyChanges() {
         cout << "Using search on " << affectedSequences.size() << " histories!" << endl;
     }
 
+    // Extend and backup each sequence.
     for (HistorySequence *sequence : affectedSequences) {
-        searchStrategy_->extendSequence(sequence, options_->maximumDepth, true);
+        searchStrategy_->extendAndBackup(sequence, options_->maximumDepth);
     }
 
     // Backup all the way to the root to keep the tree consistent.
@@ -486,9 +487,11 @@ void Solver::updateSequence(HistorySequence *sequence, int sgn, long firstEntryI
         ActionMappingEntry *entry = mapping->getEntry(*(*it)->getAction());
         // Update the action value and visit count.
         entry->update(sgn, sgn * deltaTotalQ);
-        // Update the observation visit count.
-        entry->getActionNode()->getMapping()->updateVisitCount(*(*it)->getObservation(), sgn);
 
+        // Update the observation visit count.
+        ObservationMappingEntry *obsEntry = (
+                entry->getActionNode()->getMapping()->getEntry(*(*it)->getObservation()));
+        obsEntry->updateVisitCount(sgn);
 
         // If we've gone past the source node, we don't need to update further.
         // Backpropagation may need to go further, but we can simply defer it.
@@ -537,10 +540,14 @@ void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation
         return;
     }
 
-    ActionMapping *actionMap = node->getMapping();
-    actionMap->getActionNode(action)->getMapping()->updateVisitCount(observation, deltaNVisits);
+    // Retrieve the associated ActionMappingEntry.
+    ActionMappingEntry *entry = node->getMapping()->getEntry(action);
 
-    if (actionMap->update(action, deltaNVisits, deltaTotalQ)) {
+    // Update the visit count for the observation.
+    entry->getActionNode()->getMapping()->getEntry(observation)->updateVisitCount(deltaNVisits);
+
+    // Update the action.
+    if (entry->update(deltaNVisits, deltaTotalQ)) {
         addNodeToBackup(node);
     }
 }
@@ -643,11 +650,16 @@ void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
     }
 
     // Extend and backup sequence.
-    searchStrategy_->extendSequence(sequence, maximumDepth, true);
+    searchStrategy_->extendAndBackup(sequence, maximumDepth);
 }
 
 /* ------------------ Private deferred backup methods. ------------------- */
 void Solver::addNodeToBackup(BeliefNode *node) {
     nodesToBackup_[node->getDepth()].insert(node);
+}
+
+void Solver::removeNodeToBackup(BeliefNode *node) {
+    auto nodeSet = nodesToBackup_[node->getDepth()];
+    nodeSet.erase(nodeSet.find(node));
 }
 } /* namespace solver */

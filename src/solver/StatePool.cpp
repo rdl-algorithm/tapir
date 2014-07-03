@@ -1,4 +1,4 @@
-/** file: StatePool.cpp
+/** @file StatePool.cpp
  *
  * Contains the implementation of the  StatePool class.
  */

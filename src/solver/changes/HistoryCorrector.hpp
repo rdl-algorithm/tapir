@@ -1,3 +1,7 @@
+/** @file HistoryCorrector.hpp
+ *
+ * Defines an abstract base class for correcting history sequences.
+ */
 #ifndef SOLVER_HISTORYCORRECTOR_HPP_
 #define SOLVER_HISTORYCORRECTOR_HPP_
 
@@ -11,14 +15,32 @@ namespace solver {
 class HistorySequence;
 class Model;
 
+/** An abstract base class for correcting history sequences that have been affected by changes.
+ *
+ * The core virtual method is reviseSequence(), which should modify the given history sequence
+ * in-place.
+ *
+ * This class also allows for distinct handling of history sequences in batches - the default
+ * reviseHistories() simply calls reviseSequence() on each individual sequence, but it can be
+ * overridden for a different approach.
+ */
 class HistoryCorrector {
 public:
+    /** Constructs a new HistoryCorrector, which will be associated with the given Solver. */
     HistoryCorrector(Solver *solver) :
         solver_(solver) {
     }
     virtual ~HistoryCorrector() = default;
     _NO_COPY_OR_MOVE(HistoryCorrector);
 
+    /** Revises all of the history sequences in the given set.
+     *
+     * Any sequences left in the set after this method finishes are considered incomplete, and will
+     * be continued via the solver's default search algorithm.
+     *
+     * By default this method simply calls reviseSequence() on each sequence, but it can be
+     * overridden to take a custom approach to dealing with all of the sequences.
+     */
     virtual void reviseHistories(
             std::unordered_set<HistorySequence *> &affectedSequences) {
         for (auto it = affectedSequences. begin(); it != affectedSequences.end(); ) {

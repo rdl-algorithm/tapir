@@ -1,4 +1,4 @@
-/** file: RolloutHeuristic.hpp
+/** @file RolloutHeuristic.hpp
  *
  * Defines a simple heuristic that uses a rollout-based approach to estimate the value at the end
  * of a history sequence.

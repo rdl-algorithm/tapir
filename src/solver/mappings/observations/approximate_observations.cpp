@@ -1,4 +1,11 @@
-#include "approximate_observations.hpp"
+/** @file approximate_observations.cpp
+ *
+ * Contains the implementations of the classes for approximate observation mappings.
+ */
+#include "solver/mappings/observations/approximate_observations.hpp"
+
+
+#include "global.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -12,10 +19,8 @@
 #include "solver/abstract-problem/Model.hpp"
 #include "solver/abstract-problem/Observation.hpp"
 
-#include "ObservationPool.hpp"
-#include "ObservationMapping.hpp"
-
-#include "global.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace solver {
 /* --------------------- ApproximateObservationPool --------------------- */
@@ -37,11 +42,11 @@ ApproximateObservationMap::ApproximateObservationMap(ActionNode *owner, double m
 }
 
 BeliefNode* ApproximateObservationMap::getBelief(Observation const &obs) const {
-    ApproximateObservationMapEntry const *entry = getApproxEntry(obs);
+    ObservationMappingEntry const *entry = getEntry(obs);
     if (entry == nullptr) {
         return nullptr;
     }
-    return entry->childNode_.get();
+    return entry->getBeliefNode();
 }
 BeliefNode* ApproximateObservationMap::createBelief(const Observation& obs) {
     std::unique_ptr<ApproximateObservationMapEntry> entry = (
@@ -53,30 +58,16 @@ BeliefNode* ApproximateObservationMap::createBelief(const Observation& obs) {
     entries_.push_back(std::move(entry));
     return node;
 }
-
 long ApproximateObservationMap::getNChildren() const {
     return entries_.size();
 }
+
 ObservationMappingEntry *ApproximateObservationMap::getEntry(Observation const &obs) {
-    return getApproxEntry(obs);
+    ApproximateObservationMap const * constThis = const_cast<ApproximateObservationMap const *>(this);
+    ObservationMappingEntry const *result = constThis->getEntry(obs);
+    return const_cast<ObservationMappingEntry *>(result);
 }
 ObservationMappingEntry const *ApproximateObservationMap::getEntry(Observation const &obs) const {
-    return getApproxEntry(obs);
-}
-std::vector<ObservationMappingEntry const *> ApproximateObservationMap::getAllEntries() const {
-    std::vector<ObservationMappingEntry const *> returnEntries;
-    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
-        returnEntries.push_back(entry.get());
-    }
-    return returnEntries;
-}
-
-long ApproximateObservationMap::getTotalVisitCount() const {
-    return totalVisitCount_;
-}
-
-ApproximateObservationMapEntry const *ApproximateObservationMap::getApproxEntry(
-        Observation const &obs) const {
     double shortestDistance = maxDistance_;
     ApproximateObservationMapEntry const *bestEntry = nullptr;
     for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
@@ -88,11 +79,16 @@ ApproximateObservationMapEntry const *ApproximateObservationMap::getApproxEntry(
     }
     return bestEntry;
 }
-ApproximateObservationMapEntry *ApproximateObservationMap::getApproxEntry(
-        Observation const &obs) {
-    ApproximateObservationMap const * constThis = const_cast<ApproximateObservationMap const *>(this);
-    ApproximateObservationMapEntry const *result = constThis->getApproxEntry(obs);
-    return const_cast<ApproximateObservationMapEntry *>(result);
+std::vector<ObservationMappingEntry const *> ApproximateObservationMap::getAllEntries() const {
+    std::vector<ObservationMappingEntry const *> returnEntries;
+    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
+        returnEntries.push_back(entry.get());
+    }
+    return returnEntries;
+}
+
+long ApproximateObservationMap::getTotalVisitCount() const {
+    return totalVisitCount_;
 }
 
 /* ----------------- ApproximateObservationMapEntry ----------------- */

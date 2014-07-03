@@ -82,18 +82,6 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockS
             preferredVisitCount_(options_->preferredVisitCount),
             mdpSolver_(nullptr) {
 
-//    cout << "HistoryEntry: " << sizeof(solver::HistoryEntry) << endl;
-//    cout << "HistoryEntry*: " << sizeof(solver::HistoryEntry*) << endl;
-//    cout << "State: " << sizeof(RockSampleState) << endl;
-//    cout << "Action: " << sizeof(RockSampleAction) << endl;
-//    cout << "Observation: " << sizeof(RockSampleObservation) << endl;
-//    int overhead = 0;
-//    overhead += sizeof(solver::HistoryEntry);
-//    overhead += sizeof(solver::HistoryEntry*) * 4;
-//    overhead += sizeof(RockSampleAction);
-//    overhead += sizeof(RockSampleObservation);
-//    cout << "OVERHEAD PER ENTRY: " << overhead << endl;
-
     if (searchCategory_ > heuristicType_) {
         searchCategory_ = heuristicType_;
     }
@@ -131,14 +119,6 @@ RockSampleModel::RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockS
         cout << "Environment:" << endl;
         drawEnv(cout);
         cout << endl;
-//
-//        cout << "Distances to the goal:" << endl;
-//        drawDistances(goalDistances_, std::cout);
-//        cout << endl;
-//
-//        cout << "Distances to rock #2:" << endl;
-//        drawDistances(rockDistances_[2], std::cout);
-//        cout << endl;
     }
 }
 
@@ -246,7 +226,7 @@ std::unique_ptr<solver::State> RockSampleModel::sampleAnInitState() {
 //    });
 }
 
-std::unique_ptr<solver::State> RockSampleModel::sampleStateUniform() {
+std::unique_ptr<solver::State> RockSampleModel::sampleStateUninformed() {
     while (true) {
         GridPosition position = samplePosition();
         // States that are on top of an obstacle are completely invalid.
@@ -660,7 +640,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
         solver::Observation const &obs, long nParticles) {
     std::vector<std::unique_ptr<solver::State>> particles;
     while ((long) particles.size() < nParticles) {
-        std::unique_ptr<solver::State> state = sampleStateUniform();
+        std::unique_ptr<solver::State> state = sampleStateUninformed();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {
             particles.push_back(std::move(result.nextState));
@@ -822,7 +802,8 @@ std::unique_ptr<RockSampleAction> RockSampleModel::getRandomAction(std::vector<l
 }
 
 std::unique_ptr<solver::Action> RockSampleModel::getRolloutAction(
-        solver::HistoricalData const *data, solver::State const */*state*/) {
+        solver::HistoryEntry const */*entry*/, solver::State const */*state*/,
+        solver::HistoricalData const *data) {
     if (rolloutCategory_ == RSActionCategory::ALL) {
         return getRandomAction();
     } else if (rolloutCategory_ == RSActionCategory::LEGAL) {

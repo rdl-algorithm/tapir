@@ -11,9 +11,7 @@
 #include "solver/abstract-problem/DiscretizedPoint.hpp"             // for DiscretizedPoint
 
 namespace rocksample {
-typedef uint8_t ActionTypeIntType;
-
-enum class ActionType : ActionTypeIntType {
+enum class ActionType : uint8_t {
     NORTH = 0,
     EAST = 1,
     SOUTH = 2,
@@ -43,7 +41,7 @@ inline std::ostream &operator<<(std::ostream &os, ActionType const actionType) {
         os << "SAMPLE";
         break;
     default:
-        os << "ERROR-" << static_cast<ActionTypeIntType>(actionType);
+        os << "ERROR-" << static_cast<long>(actionType);
         break;
     }
     return os;
@@ -63,7 +61,7 @@ class RockSampleAction : public solver::DiscretizedPoint {
     long getBinNumber() const override;
 
     ActionType getActionType() const;
-    uint8_t getRockNo() const;
+    long getRockNo() const;
   private:
     ActionType actionType_;
     uint8_t rockNo_;

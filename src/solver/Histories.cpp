@@ -1,4 +1,4 @@
-/** file: Histories.cpp
+/** @file Histories.cpp
  *
  * Contains the implementation of the Histories class
  */

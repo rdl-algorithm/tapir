@@ -1,4 +1,4 @@
-/** file: RolloutHeuristic.cpp
+/** @file RolloutHeuristic.cpp
  *
  * Contains the implementation of the RolloutHeuristic class.
  */

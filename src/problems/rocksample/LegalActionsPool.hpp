@@ -22,7 +22,7 @@ class LegalActionsPool: public solver::EnumeratedActionPool {
     virtual ~LegalActionsPool() = default;
     _NO_COPY_OR_MOVE(LegalActionsPool);
 
-    virtual std::vector<long> createBinSequence(solver::HistoricalData const *data) override;
+    virtual std::vector<long> createBinSequence(solver::BeliefNode *node) override;
 
     /* Custom implementation of createActionMapping to keep track of our mappings. */
     virtual std::unique_ptr<solver::ActionMapping> createActionMapping(

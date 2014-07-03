@@ -1,3 +1,14 @@
+/** @file ActionMapping.hpp
+ *
+ * Contains the abstract base class ActionMapping.
+ *
+ * In essence, this class defines, for a single belief node, the mapping of actions to
+ * (belief, action) edges in the belief tree - each of these is represented by an
+ * ActionMappingEntry.
+ *
+ * The purpose of this abstract class is to allow different actions to be grouped together in
+ * customizable ways.
+ */
 #ifndef SOLVER_ACTIONMAPPING_HPP_
 #define SOLVER_ACTIONMAPPING_HPP_
 
@@ -12,8 +23,15 @@ class ActionMappingEntry;
 class ActionNode;
 class BeliefNode;
 
+/** An abstract base class that defines a mapping of the actions of a belief to (belief, action)
+ * edges in the belief tree; these edges are represented by the ActionMappingEntry class.
+ *
+ * Each of these edges must also store the statistics for that edge - most notably, the visit
+ * count and estimated Q-value.
+ */
 class ActionMapping {
 public:
+    /** Creates a new ActionMapping, which will be owned by the given belief node. */
     ActionMapping(BeliefNode *owner) :
         owner_(owner) {
     }
@@ -27,51 +45,52 @@ public:
     }
 
     /* -------------- Creation and retrieval of nodes. ---------------- */
-    /** Retrieves the action node (if any) corresponding to this action. */
+    /** Retrieves the action node (if any) corresponding to the given action. */
     virtual ActionNode *getActionNode(Action const &action) const = 0;
     /** Creates a new action node for the given action. */
     virtual ActionNode *createActionNode(Action const &action) = 0;
-    /** Returns the number of child nodes associated with this mapping. */
+    /** Returns the number of child action nodes owned by this mapping. */
     virtual long getNChildren() const = 0;
 
     /* -------------- Retrieval of mapping entries. ---------------- */
-    /** Returns the number of entries in this mapping with a nonzero visit
-     * count (some of these may not have an associated action node, so this
-     * is different to the number of child nodes).
+    /** Returns the number of entries in this mapping with a nonzero visit count.
+     *
+     * This is different to the the number of child nodes, because sometimes there will be child
+     * nodes with zero visit counts due to deleted entries, and sometimes there will be nonzero
+     * visit counts without an associated action node due to initialization with nonzero values.
      */
     virtual long getNumberOfVisitedEntries() const = 0;
-    /** Returns all of the visited entries in this mapping - some may have
-     * null action nodes if the visit counts were initialized to nonzero
-     * values.
+    /** Returns a vector of all of the visited entries in this mapping.
+     *
+     * Some of those entries might have null action nodes if the visit counts were initialized
+     * with nonzero values.
      */
     virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const = 0;
 
-    /** Returns the mapping entry (if any) associated with the given action. */
+    /** Returns the mapping entry associated with the given action, or nullptr if there is none. */
     virtual ActionMappingEntry *getEntry(Action const &action) = 0;
-    /** Returns the mapping entry (if any) associated with the given action. */
+
+    /** Returns the mapping entry associated with the given action, or nullptr if there is none.
+     *
+     * This version returns a pointer-to-const, which is useful if you want to enforce
+     * immutability.
+     */
     virtual ActionMappingEntry const *getEntry(Action const &action) const = 0;
 
     /* ------------------ Methods for unvisited actions ------------------- */
-    /** Returns the next action to be tried for this node, or nullptr if there are no more. */
+    /** Returns the next unvisited action to be tried for this node, or nullptr if there are no
+     * more unvisited actions (that are legal).
+     */
     virtual std::unique_ptr<Action> getNextActionToTry() = 0;
 
     /* -------------- Retrieval of general statistics. ---------------- */
-    /** Returns the total number of times children have been visited. */
+    /** Returns the total number of times children of this mapping have been visited. */
     virtual long getTotalVisitCount() const = 0;
 
-    /* --------------- Methods for updating the values ----------------- */
-    /** Updates the given action, by adding the given number of visits and the
-     * given change in the total q-value.
-     *
-     * Returns true if and only if the q value of the action changed.
-     */
-    virtual bool update(Action const &action, long deltaNVisits, double deltaTotalQ) {
-        return getEntry(action)->update(deltaNVisits, deltaTotalQ);
-    }
 private:
+    /** The belief node that owns this mapping. */
     BeliefNode *owner_;
 };
-
 } /* namespace solver */
 
 #endif /* SOLVER_ACTIONMAPPING_HPP_ */

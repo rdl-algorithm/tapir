@@ -12,7 +12,7 @@
 #include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/search/search_interface.hpp"
-#include "solver/search/exp3.hpp"
+#include "solver/search/MultipleStrategiesExp3.hpp"
 #include "solver/search/steppers/ucb_search.hpp"
 #include "solver/search/steppers/default_rollout.hpp"
 #include "solver/search/steppers/nn_rollout.hpp"

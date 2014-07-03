@@ -1,4 +1,4 @@
-/** file: estimators.cpp
+/** @file estimators.cpp
  *
  * Provides implementations of some core estimation strategies.
  */

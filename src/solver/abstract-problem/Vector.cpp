@@ -1,4 +1,4 @@
-/** file: Vector.cpp
+/** @file Vector.cpp
  *
  * Provides default implementations for some basic methods of the vector class in terms of the
  * asVector() method.

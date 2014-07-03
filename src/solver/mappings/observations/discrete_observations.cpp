@@ -1,4 +1,8 @@
-#include "discrete_observations.hpp"
+/** @file discrete_observations.cpp
+ *
+ * Contains the implementations of the classes for discrete observation mappings.
+ */
+#include "solver/mappings/observations/discrete_observations.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -7,16 +11,16 @@
 #include <sstream>
 #include <vector>
 
+#include "global.hpp"
+
 #include "solver/BeliefNode.hpp"
 #include "solver/BeliefTree.hpp"
 #include "solver/abstract-problem/Model.hpp"
 
 #include "solver/abstract-problem/Observation.hpp"
 
-#include "ObservationPool.hpp"
-#include "ObservationMapping.hpp"
-
-#include "global.hpp"
+#include "solver/mappings/observations/ObservationPool.hpp"
+#include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace solver {
 /* --------------------- DiscreteObservationPool --------------------- */
@@ -39,10 +43,9 @@ BeliefNode* DiscreteObservationMap::getBelief(Observation const &obs) const {
         return entry->getBeliefNode();
     }
 }
-
 BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
     std::unique_ptr<DiscreteObservationMapEntry> entry = (
-            std::make_unique<DiscreteObservationMapEntry>());
+          std::make_unique<DiscreteObservationMapEntry>());
     entry->map_ = this;
     entry->observation_ = obs.copy();
     entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
@@ -51,10 +54,10 @@ BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
     childMap_.emplace(obs.copy(), std::move(entry));
     return node;
 }
-
 long DiscreteObservationMap::getNChildren() const {
     return childMap_.size();
 }
+
 ObservationMappingEntry *DiscreteObservationMap::getEntry(Observation const &obs) {
     try {
         return childMap_.at(obs.copy()).get();

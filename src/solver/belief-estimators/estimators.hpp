@@ -1,4 +1,4 @@
-/** file: estimators.hpp
+/** @file estimators.hpp
  *
  * Defines an interface for how backpropagation will be handled; this is done by providing a custom
  * way to estimate the value of a belief based on the q-values of its actions.

@@ -1,4 +1,4 @@
-/** file: BeliefNode.hpp
+/** @file BeliefNode.hpp
  *
  * Contains the BeliefNode class, which represents a single belief node within the belief tree.
  *

@@ -1,4 +1,4 @@
-/** file: StateInfo.hpp
+/** @file StateInfo.hpp
  *
  * Contains the StateInfo class, which is a wrapper for an individual state of the PODMP.
  *

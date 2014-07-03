@@ -1,10 +1,6 @@
 # ----------------------------------------------------------------------
 # Configuration of code cleaners.
 # ----------------------------------------------------------------------
-BEAUTIFY_EXCLUDES := ./src/problems/shared/ProgramOptions.hpp
-BEAUTIFY_EXCLUDES += ./src/problems/rocksample/RockSampleOptions.hpp
-BEAUTIFY_EXCLUDES += ./src/problems/tag/TagOptions.hpp
-BEAUTIFY_EXCLUDES += ./src/problems/nav2d/UnderwaterNavOptions.hpp
 BEAUTIFY_CFG := $(ROOT)/.make/uncrustify.cfg
 BEAUTIFY_CMD := uncrustify -c $(BEAUTIFY_CFG)
 BEAUTIFY_FLAGS := --no-backup

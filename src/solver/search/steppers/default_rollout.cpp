@@ -1,3 +1,8 @@
+/** @file default_rollout.cpp
+ *
+ * Contains the implementation for a basic rollout strategy, which queries the model for a
+ * history-based rollout action at every time step.
+ */
 #include "solver/search/steppers/default_rollout.hpp"
 
 #include "solver/BeliefNode.hpp"
@@ -11,6 +16,30 @@
 #include "solver/mappings/actions/ActionMapping.hpp"
 
 namespace solver {
+/* ------------------------- DefaultRolloutGenerator ------------------------- */
+DefaultRolloutGenerator::DefaultRolloutGenerator(SearchStatus &status,
+        Solver *solver, long maxNSteps) :
+            StepGenerator(status),
+            model_(solver->getModel()),
+            maxNSteps_(maxNSteps),
+            currentNSteps_(0) {
+    status_ = SearchStatus::INITIAL;
+}
+
+Model::StepResult DefaultRolloutGenerator::getStep(HistoryEntry const *entry, State const *state,
+        HistoricalData const *data) {
+    // If we've hit the step limit, we don't generate any more steps.
+    if (currentNSteps_ >= maxNSteps_) {
+        status_ = SearchStatus::OUT_OF_STEPS;
+        return Model::StepResult { };
+    }
+
+    // Otherwise, we generate a new step and return it.
+    currentNSteps_++;
+    std::unique_ptr<Action> action = model_->getRolloutAction(entry, state, data);
+    return model_->generateStep(*state, *action);
+}
+
 /* ------------------------- DefaultRolloutFactory ------------------------- */
 DefaultRolloutFactory::DefaultRolloutFactory(Solver *solver, long maxNSteps) :
             solver_(solver),
@@ -22,28 +51,4 @@ std::unique_ptr<StepGenerator> DefaultRolloutFactory::createGenerator(SearchStat
     return std::make_unique<DefaultRolloutGenerator>(status, solver_, maxNSteps_);
 }
 
-/* ------------------------- DefaultRolloutGenerator ------------------------- */
-DefaultRolloutGenerator::DefaultRolloutGenerator(SearchStatus &status,
-        Solver *solver, long maxNSteps) :
-            StepGenerator(status),
-            model_(solver->getModel()),
-            maxNSteps_(maxNSteps),
-            currentNSteps_(0) {
-    status_ = SearchStatus::INITIAL;
-}
-
-Model::StepResult DefaultRolloutGenerator::getStep(HistoryEntry const */*entry*/, State const *state,
-        HistoricalData const *data) {
-    if (currentNSteps_ >= maxNSteps_) {
-        // This stage is over.
-        status_ = SearchStatus::OUT_OF_STEPS;
-        return Model::StepResult { };
-    }
-
-    currentNSteps_++;
-    std::unique_ptr<Action> action = model_->getRolloutAction(data, state);
-
-    // Generate the step and return it.
-    return model_->generateStep(*state, *action);
-}
 } /* namespace solver */

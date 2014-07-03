@@ -1,4 +1,4 @@
-/** file: Simulator.hpp
+/** @file Simulator.hpp
  *
  * Contains the Simulator class, which runs simulations to test the performance of ABT.
  */

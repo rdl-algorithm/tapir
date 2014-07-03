@@ -1,4 +1,4 @@
-/** file: DiscretizedPoint.cpp
+/** @file DiscretizedPoint.cpp
  *
  * Contains the implementation of the DiscretizedPoint class.
  */

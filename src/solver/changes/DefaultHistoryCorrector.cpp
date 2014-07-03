@@ -1,4 +1,8 @@
-#include "DefaultHistoryCorrector.hpp"
+/** @file DefaultHistoryCorrector.cpp
+ *
+ * Contains the implementation of the DefaultHistoryCorrector class.
+ */
+#include "solver/changes/DefaultHistoryCorrector.hpp"
 
 #include <memory>
 
@@ -16,7 +20,6 @@
 #include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace solver {
-
 DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, Heuristic heuristic) :
             HistoryCorrector(solver),
             heuristic_(heuristic) {
@@ -54,12 +57,12 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         }
 
         // Deleted states should never occur in the update phase.
-        if (changes::has_flag(entry->changeFlags_, ChangeFlags::DELETED)) {
+        if (changes::has_flags(entry->changeFlags_, ChangeFlags::DELETED)) {
             debug::show_message("ERROR: deleted state in updateSequence.");
         }
 
         HistoryEntry *nextEntry = (historyIterator + 1)->get();
-        if (changes::has_flag(entry->changeFlags_, ChangeFlags::TRANSITION)) {
+        if (changes::has_flags(entry->changeFlags_, ChangeFlags::TRANSITION)) {
 
             // Check for illegal actions.
             ActionMappingEntry *mappingEntry = actualCurrentNode->getMapping()->getEntry(
@@ -87,7 +90,7 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
             }
         }
 
-        if (changes::has_flag(entry->changeFlags_, ChangeFlags::REWARD)) {
+        if (changes::has_flags(entry->changeFlags_, ChangeFlags::REWARD)) {
             double oldReward = entry->immediateReward_;
             entry->immediateReward_ = getModel()->generateReward(*state,
                     *entry->action_, entry->transitionParameters_.get(), nextEntry->getState());
@@ -101,7 +104,7 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
 
         }
 
-        if (changes::has_flag(entry->changeFlags_, ChangeFlags::OBSERVATION)) {
+        if (changes::has_flags(entry->changeFlags_, ChangeFlags::OBSERVATION)) {
             std::unique_ptr<Observation> newObservation = (getModel()->generateObservation(
                     state, *entry->action_, entry->transitionParameters_.get(),
                     *nextEntry->getState()));
@@ -143,7 +146,7 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
     if (entry->action_ == nullptr) {
         // We hit the last entry in the sequence => handle it as a special case.
 
-        if (changes::has_flag(entry->changeFlags_, ChangeFlags::HEURISTIC)) {
+        if (changes::has_flags(entry->changeFlags_, ChangeFlags::HEURISTIC)) {
             // We only have to deal with changes to the heuristic value if we've flagged it.
             double oldValue = entry->immediateReward_;
             if (hitTerminalState) {

@@ -15,21 +15,22 @@ LegalActionsPool::LegalActionsPool(RockSampleModel *model) :
         mappings_() {
 }
 
-std::vector<long> LegalActionsPool::createBinSequence(solver::HistoricalData const *data) {
+std::vector<long> LegalActionsPool::createBinSequence(solver::BeliefNode *node) {
+    solver::HistoricalData const *data = node->getHistoricalData();
     RockSampleModel::RSActionCategory category = model_->getSearchActionCategory();
     if (category == RockSampleModel::RSActionCategory::LEGAL) {
         std::vector<long> bins = static_cast<PositionData const *>(data)->generateLegalActions();
         std::shuffle(bins.begin(), bins.end(), *model_->getRandomGenerator());
         return std::move(bins);
     } else {
-        return EnumeratedActionPool::createBinSequence(data);
+        return EnumeratedActionPool::createBinSequence(node);
     }
 }
 
 std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping(
         solver::BeliefNode *node) {
     std::unique_ptr<solver::ActionMapping> mapping = (
-            DiscretizedActionPool::createActionMapping(node));
+          DiscretizedActionPool::createActionMapping(node));
 
     PositionData const &data = static_cast<PositionData const &>(*node->getHistoricalData());
 

@@ -1,4 +1,4 @@
-/** file: HistorySequence.cpp
+/** @file HistorySequence.cpp
  *
  * Contains the implementation of the HistorySequence class.
  */
