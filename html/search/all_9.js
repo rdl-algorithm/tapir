@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['i',['i',['../structGridPosition.html#a173ebd4e03d9181da2c92489230df4b4',1,'GridPosition']]],
   ['idtype',['IdType',['../classsolver_1_1HistoryEntry.html#adc89f7778ef47ae7b07f9093eadf73b7',1,'solver::HistoryEntry']]],
   ['illegalmovepenalty',['illegalMovePenalty',['../structrocksample_1_1RockSampleOptions.html#ab104c7c3f66d9dd38a205604f574d70c',1,'rocksample::RockSampleOptions']]],
   ['improvepolicy',['improvePolicy',['../classsolver_1_1Solver.html#abfa749ac436dcdebe3ba3ad26f4e2502',1,'solver::Solver']]],

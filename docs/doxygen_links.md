@@ -7,7 +7,7 @@
 [Action]: @ref solver::Action
 [Model]: @ref solver::Model
 [ModelChange]: @ref solver::ModelChange
-[Heuristic]: @ref solver::Heuristic
+[HeuristicFunction]: @ref solver::HeuristicFunction
 [Observation]: @ref solver::Observation
 [Options]: @ref solver::Options
 [State]: @ref solver::State

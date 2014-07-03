@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['defaulthistorycorrector',['DefaultHistoryCorrector',['../classsolver_1_1DefaultHistoryCorrector.html#a5c95199701cede41fca3d971e20f721b',1,'solver::DefaultHistoryCorrector']]],
+  ['defaulthistorycorrector',['DefaultHistoryCorrector',['../classsolver_1_1DefaultHistoryCorrector.html#a952ce3084fbc18eb16b12d4922b22716',1,'solver::DefaultHistoryCorrector']]],
   ['defaultrolloutfactory',['DefaultRolloutFactory',['../classsolver_1_1DefaultRolloutFactory.html#a9edf3d46ed26a92120479b5b7484fffc',1,'solver::DefaultRolloutFactory']]],
   ['defaultrolloutgenerator',['DefaultRolloutGenerator',['../classsolver_1_1DefaultRolloutGenerator.html#a2a3f9c904d18a8fead74ed66d66fd8cc',1,'solver::DefaultRolloutGenerator']]],
   ['discreteobservationmap',['DiscreteObservationMap',['../classsolver_1_1DiscreteObservationMap.html#aa3cbfd7674adceae78d52f886ec83401',1,'solver::DiscreteObservationMap']]],

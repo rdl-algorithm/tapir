@@ -21,7 +21,7 @@
 #include "solver/abstract-problem/Action.hpp"
 #include "solver/abstract-problem/Model.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "solver/search/SearchStatus.hpp"
 
@@ -183,7 +183,7 @@ public:
      * will use the given StepGeneratorFactory and the given heuristic.
      */
     BasicSearchStrategy(Solver *solver, std::unique_ptr<StepGeneratorFactory> factory,
-            Heuristic heuristic);
+            HeuristicFunction heuristic);
     virtual ~BasicSearchStrategy() = default;
     _NO_COPY_OR_MOVE(BasicSearchStrategy);
 
@@ -195,7 +195,7 @@ private:
     /** The factory to use for generating sequence steps. */
     std::unique_ptr<StepGeneratorFactory> factory_;
     /** The heuristic to use to evalulate non-terminal states at the end of a sequence. */
-    Heuristic heuristic_;
+    HeuristicFunction heuristic_;
 };
 
 } /* namespace solver */

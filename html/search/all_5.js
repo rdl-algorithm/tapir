@@ -22,6 +22,7 @@ var searchData=
   ['estimationstrategy',['EstimationStrategy',['../classsolver_1_1EstimationStrategy.html',1,'solver']]],
   ['estimators_2ecpp',['estimators.cpp',['../estimators_8cpp.html',1,'']]],
   ['estimators_2ehpp',['estimators.hpp',['../estimators_8hpp.html',1,'']]],
+  ['euclideandistanceto',['euclideanDistanceTo',['../structGridPosition.html#a1db4056fb8273916a4476e4aff6d4326',1,'GridPosition']]],
   ['exitreward',['exitReward',['../structrocksample_1_1RockSampleOptions.html#a98122373784f41d768a56d7c38ad7736',1,'rocksample::RockSampleOptions']]],
   ['exp3parser',['Exp3Parser',['../classshared_1_1Exp3Parser.html',1,'shared']]],
   ['extendandbackup',['extendAndBackup',['../classsolver_1_1MultipleStrategiesExp3.html#adfece810a0ae8f3e6e833a8e8749fdca',1,'solver::MultipleStrategiesExp3::extendAndBackup()'],['../classsolver_1_1SearchStrategy.html#a8895fe84435dfc138a1e7bf1d96862e8',1,'solver::SearchStrategy::extendAndBackup()'],['../classsolver_1_1BasicSearchStrategy.html#a0c2e25328eb601b4f17064d8de9492f5',1,'solver::BasicSearchStrategy::extendAndBackup()']]]

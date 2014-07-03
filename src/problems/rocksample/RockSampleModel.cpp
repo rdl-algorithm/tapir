@@ -451,7 +451,7 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
         cout << "Applying model changes..." << endl;
     }
 
-    solver::Heuristic heuristic = getHeuristicFunction();
+    solver::HeuristicFunction heuristic = getHeuristicFunction();
     std::vector<double> allHeuristicValues;
     if (pool != nullptr) {
         long nStates = pool->getNumberOfStates();

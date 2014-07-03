@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['heuristic_2ehpp',['Heuristic.hpp',['../Heuristic_8hpp.html',1,'']]],
+  ['heuristicfunction_2ehpp',['HeuristicFunction.hpp',['../HeuristicFunction_8hpp.html',1,'']]],
   ['historicaldata_2ehpp',['HistoricalData.hpp',['../HistoricalData_8hpp.html',1,'']]],
   ['histories_2ecpp',['Histories.cpp',['../Histories_8cpp.html',1,'']]],
   ['histories_2ehpp',['Histories.hpp',['../Histories_8hpp.html',1,'']]],

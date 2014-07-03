@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['visitcount_5f',['visitCount_',['../classsolver_1_1DiscretizedActionMapEntry.html#ad09933be7208e8d93378413431e073c2',1,'solver::DiscretizedActionMapEntry']]]
+  ['usepreferredinit',['usePreferredInit',['../structrocksample_1_1RockSampleOptions.html#a9079a6cde811a7d8180123c1219952bb',1,'rocksample::RockSampleOptions']]]
 ];

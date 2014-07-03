@@ -100,7 +100,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="TextSerializer_8hpp.html">solver/serialization/TextSerializer.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;problems/shared/GridPosition.hpp&quot;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="GridPosition_8hpp.html">problems/shared/GridPosition.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">namespace </span>rocksample {</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">class </span>RockSampleAction;</div>
@@ -143,7 +143,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1Point_html"><div class="ttname"><a href="classsolver_1_1Point.html">solver::Point</a></div><div class="ttdoc">Represents a point within a certain set, in the sense of point-set topology. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00030">Point.hpp:30</a></div></div>
 <div class="ttc" id="classrocksample_1_1PositionDataTextSerializer_html_abed5ee1dcb0a8f370991a98560bf65ca"><div class="ttname"><a href="classrocksample_1_1PositionDataTextSerializer.html#abed5ee1dcb0a8f370991a98560bf65ca">rocksample::PositionDataTextSerializer::loadHistoricalData</a></div><div class="ttdeci">std::unique_ptr&lt; solver::HistoricalData &gt; loadHistoricalData(std::istream &amp;is) override</div><div class="ttdoc">Loads history-derived information about a belief. </div><div class="ttdef"><b>Definition:</b> <a href="position__history_8cpp_source.html#l00070">position_history.cpp:70</a></div></div>
 <div class="ttc" id="classrocksample_1_1PositionData_html_a64bd18df74b15d9712018ff7fed60688"><div class="ttname"><a href="classrocksample_1_1PositionData.html#a64bd18df74b15d9712018ff7fed60688">rocksample::PositionData::createChild</a></div><div class="ttdeci">std::unique_ptr&lt; solver::HistoricalData &gt; createChild(solver::Action const &amp;action, solver::Observation const &amp;observation) const override</div><div class="ttdoc">Generates a new child HistoricalData for a new belief node, based on the action taken and observation...</div><div class="ttdef"><b>Definition:</b> <a href="position__history_8cpp_source.html#l00022">position_history.cpp:22</a></div></div>
-<div class="ttc" id="structGridPosition_html"><div class="ttname"><a href="structGridPosition.html">GridPosition</a></div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00011">GridPosition.hpp:11</a></div></div>
+<div class="ttc" id="structGridPosition_html"><div class="ttname"><a href="structGridPosition.html">GridPosition</a></div><div class="ttdoc">Represents a position within a 2-D grid, using a zero-based row and column index. ...</div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00021">GridPosition.hpp:21</a></div></div>
+<div class="ttc" id="GridPosition_8hpp_html"><div class="ttname"><a href="GridPosition_8hpp.html">GridPosition.hpp</a></div><div class="ttdoc">Defines a handy struct to represent 2-D grid indices, in the form of (i, j) == (row, column), as well as some useful methods for dealing with them. </div></div>
 <div class="ttc" id="HistoricalData_8hpp_html"><div class="ttname"><a href="HistoricalData_8hpp.html">HistoricalData.hpp</a></div><div class="ttdoc">Defines an abstract base class for storing history-based heuristic information within a belief node...</div></div>
 <div class="ttc" id="defs_8hpp_html_a61671c8dd4803bc1d9b5baca2eb52d70"><div class="ttname"><a href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a></div><div class="ttdeci">#define _NO_COPY_OR_MOVE(ClassName)</div><div class="ttdoc">A macro used to delete all copy- and move-constructors and -assignment operators. ...</div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00009">defs.hpp:9</a></div></div>
 <div class="ttc" id="TextSerializer_8hpp_html"><div class="ttname"><a href="TextSerializer_8hpp.html">TextSerializer.hpp</a></div><div class="ttdoc">Defines the TextSerializer, which provides a basic Serializer implementation that uses a human-readab...</div></div>
@@ -151,7 +152,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 20:13:02 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

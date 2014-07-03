@@ -15,7 +15,7 @@
 
 namespace solver {
 RolloutHeuristic::RolloutHeuristic(Model *model, std::unique_ptr<StepGeneratorFactory> factory,
-        Heuristic heuristic) :
+        HeuristicFunction heuristic) :
         model_(model),
         factory_(std::move(factory)),
         heuristic_(heuristic) {
@@ -48,7 +48,7 @@ double RolloutHeuristic::getHeuristicValue(HistoryEntry const *entry,
     return value;
 }
 
-Heuristic RolloutHeuristic::asFunction() {
+HeuristicFunction RolloutHeuristic::asFunction() {
     using namespace std::placeholders;
     return std::bind(&RolloutHeuristic::getHeuristicValue, this, _1, _2, _3);
 }

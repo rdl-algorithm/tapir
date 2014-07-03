@@ -5,7 +5,7 @@ var searchData=
   ['default_5frollout_2ehpp',['default_rollout.hpp',['../default__rollout_8hpp.html',1,'']]],
   ['defaultheuristicparser',['DefaultHeuristicParser',['../classshared_1_1DefaultHeuristicParser.html',1,'shared']]],
   ['defaulthistorycorrector',['DefaultHistoryCorrector',['../classsolver_1_1DefaultHistoryCorrector.html',1,'solver']]],
-  ['defaulthistorycorrector',['DefaultHistoryCorrector',['../classsolver_1_1DefaultHistoryCorrector.html#a5c95199701cede41fca3d971e20f721b',1,'solver::DefaultHistoryCorrector']]],
+  ['defaulthistorycorrector',['DefaultHistoryCorrector',['../classsolver_1_1DefaultHistoryCorrector.html#a952ce3084fbc18eb16b12d4922b22716',1,'solver::DefaultHistoryCorrector']]],
   ['defaulthistorycorrector_2ecpp',['DefaultHistoryCorrector.cpp',['../DefaultHistoryCorrector_8cpp.html',1,'']]],
   ['defaulthistorycorrector_2ehpp',['DefaultHistoryCorrector.hpp',['../DefaultHistoryCorrector_8hpp.html',1,'']]],
   ['defaultrolloutfactory',['DefaultRolloutFactory',['../classsolver_1_1DefaultRolloutFactory.html',1,'solver']]],

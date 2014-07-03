@@ -28,7 +28,7 @@
 #include "solver/abstract-problem/Options.hpp"              // for Options
 #include "solver/abstract-problem/TransitionParameters.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 namespace solver {
 class ActionPool;
@@ -254,7 +254,7 @@ public:
      *
      * By default, this is simply a function that returns zero for every state.
      */
-    virtual Heuristic getHeuristicFunction();
+    virtual HeuristicFunction getHeuristicFunction();
 
     /** Returns a rollout action to be use, which can be based on the current state, the current
      * belief, and/or the history.

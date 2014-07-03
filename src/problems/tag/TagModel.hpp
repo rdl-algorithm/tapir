@@ -42,13 +42,13 @@ struct TagChange : public solver::ModelChange {
     long j1 = 0;
 };
 
-class TagUBParser : public shared::Parser<solver::Heuristic> {
+class TagUBParser : public shared::Parser<solver::HeuristicFunction> {
 public:
     TagUBParser(TagModel *model);
     virtual ~TagUBParser() = default;
     _NO_COPY_OR_MOVE(TagUBParser);
 
-    virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
+    virtual solver::HeuristicFunction parse(solver::Solver *solver, std::vector<std::string> args);
 private:
     TagModel *model_;
 };

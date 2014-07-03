@@ -33,7 +33,7 @@ var searchData=
   ['getestimationstrategy',['getEstimationStrategy',['../classsolver_1_1Solver.html#a3a6f7a47af49cec0a8ce8669c28f9be5',1,'solver::Solver']]],
   ['getfirst',['getFirst',['../classabt_1_1LinkedHashSet.html#a416c5425a8a312dbfd63f5525dce0d82',1,'abt::LinkedHashSet']]],
   ['getfirstentry',['getFirstEntry',['../classsolver_1_1HistorySequence.html#ac062a7c8aee6bdca51b947c4eee12c27',1,'solver::HistorySequence']]],
-  ['getheuristicfunction',['getHeuristicFunction',['../classshared_1_1ModelWithProgramOptions.html#af4955a7a3b8a15ee138ff0194dc8c1de',1,'shared::ModelWithProgramOptions::getHeuristicFunction()'],['../classsolver_1_1Model.html#a080de609bc622ed1b2985a9c73cca392',1,'solver::Model::getHeuristicFunction()']]],
+  ['getheuristicfunction',['getHeuristicFunction',['../classshared_1_1ModelWithProgramOptions.html#a25ce114391f7b099d906ddb90d0b38c5',1,'shared::ModelWithProgramOptions::getHeuristicFunction()'],['../classsolver_1_1Model.html#a09a73bc8bd8d983464d6717218f60ba1',1,'solver::Model::getHeuristicFunction()']]],
   ['getheuristicvalue',['getHeuristicValue',['../classsolver_1_1RolloutHeuristic.html#ae94057ffa8bbbc70f7e82c391a180816',1,'solver::RolloutHeuristic']]],
   ['gethistoricaldata',['getHistoricalData',['../classsolver_1_1BeliefNode.html#a191752dd38a9de1902cb6e1ab8b18407',1,'solver::BeliefNode']]],
   ['gethistory',['getHistory',['../classsolver_1_1Simulator.html#ab7b245210b8d0fc789a23fbafa2a22db',1,'solver::Simulator']]],
@@ -108,5 +108,6 @@ var searchData=
   ['global_2ecpp',['global.cpp',['../global_8cpp.html',1,'']]],
   ['global_2ehpp',['global.hpp',['../global_8hpp.html',1,'']]],
   ['goodrockreward',['goodRockReward',['../structrocksample_1_1RockSampleOptions.html#a0ce6b6eaf960f3be6b4b0915f4d1f6d7',1,'rocksample::RockSampleOptions']]],
-  ['gridposition',['GridPosition',['../structGridPosition.html',1,'']]]
+  ['gridposition',['GridPosition',['../structGridPosition.html',1,'GridPosition'],['../structGridPosition.html#a2757433caf32eedd3d012113f80dc515',1,'GridPosition::GridPosition()'],['../structGridPosition.html#a8d286337bb6e86b6bb2dc0f10889d27b',1,'GridPosition::GridPosition(long _i, long _j)']]],
+  ['gridposition_2ehpp',['GridPosition.hpp',['../GridPosition_8hpp.html',1,'']]]
 ];

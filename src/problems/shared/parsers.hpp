@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "solver/cached_values.hpp"
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 #include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
 
@@ -109,29 +109,29 @@ private:
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *allParsers_;
 };
 
-class DefaultHeuristicParser: public Parser<solver::Heuristic> {
+class DefaultHeuristicParser: public Parser<solver::HeuristicFunction> {
 public:
     DefaultHeuristicParser(ModelWithProgramOptions *model);
     virtual ~DefaultHeuristicParser() = default;
-    virtual solver::Heuristic parse(solver::Solver */*solver*/,
+    virtual solver::HeuristicFunction parse(solver::Solver */*solver*/,
             std::vector<std::string> args) override;
 
 private:
-    solver::Heuristic heuristic_;
+    solver::HeuristicFunction heuristic_;
 };
 
-class ZeroHeuristicParser: public Parser<solver::Heuristic> {
+class ZeroHeuristicParser: public Parser<solver::HeuristicFunction> {
 public:
     ZeroHeuristicParser() = default;
     virtual ~ZeroHeuristicParser() = default;
-    virtual solver::Heuristic parse(solver::Solver *solver,
+    virtual solver::HeuristicFunction parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
 
 class BasicSearchParser: public Parser<std::unique_ptr<solver::SearchStrategy>> {
 public:
     BasicSearchParser(ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
-            ParserSet<solver::Heuristic> *heuristicParsers, std::string heuristicString);
+            ParserSet<solver::HeuristicFunction> *heuristicParsers, std::string heuristicString);
     virtual ~BasicSearchParser() = default;
     _NO_COPY_OR_MOVE(BasicSearchParser);
 
@@ -139,7 +139,7 @@ public:
             std::vector<std::string> args) override;
 private:
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers_;
-    ParserSet<solver::Heuristic> *heuristicParsers_;
+    ParserSet<solver::HeuristicFunction> *heuristicParsers_;
     std::string heuristicString_;
 };
 

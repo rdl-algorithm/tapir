@@ -152,6 +152,11 @@ docs/generated/BUILD.md: .make/README.md docs/doxygen_links.md Makefile
 doc: docs/Doxyfile docs/generated/README.md docs/generated/BUILD.md
 	doxygen docs/Doxyfile
 
+.PHONY: clean-doc
+clean-doc:
+	@echo Removing documentation folders!
+	@rm -rfv html/ docs/generated | grep "directory" ; true
+
 # ----------------------------------------------------------------------
 # Universal grouping targets
 # ----------------------------------------------------------------------

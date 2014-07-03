@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/mappings/actions Directory Reference</title>
+<title>ABT: src/solver/abstract-problem/heuristics/HeuristicFunction.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -41,7 +41,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="files.html"><span>Files</span></a></li>
+      <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -60,6 +60,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -76,43 +82,48 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_e03472a1a988baa35cce21dde9c6bf43.html">src</a></li><li class="navelem"><a class="el" href="dir_d9cf5b876ba656d552449248d4d75ab4.html">solver</a></li><li class="navelem"><a class="el" href="dir_c173cf582418c21dda036acde12fc82f.html">mappings</a></li><li class="navelem"><a class="el" href="dir_d95de8780cd3f0f1baa5573aabdce0c9.html">actions</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_041db6ad6a3d44280e40e5af409429cb.html">solver</a></li><li class="navelem"><a class="el" href="dir_e0ee0965b7fce888cec0448575f33bdc.html">abstract-problem</a></li><li class="navelem"><a class="el" href="dir_82040a5ad1b85efb3e960b2ff287ec3c.html">heuristics</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#typedef-members">Typedefs</a>  </div>
   <div class="headertitle">
-<div class="title">actions Directory Reference</div>  </div>
+<div class="title">HeuristicFunction.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Contains a typedef for the "HeuristicFunction" type, which is represented via a function that takes pointers to a history entry, state, and/or historical data, and returns a double value.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;functional&gt;</code><br/>
+<code>#include &quot;<a class="el" href="global_8hpp_source.html">global.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="State_8hpp_source.html">solver/abstract-problem/State.hpp</a>&quot;</code><br/>
+</div>
+<p><a href="HeuristicFunction_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="files"></a>
-Files</h2></td></tr>
-<tr class="memitem:ActionMapping_8hpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ActionMapping_8hpp.html">ActionMapping.hpp</a> <a href="ActionMapping_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:ActionMapping_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contains the abstract base class ActionMapping. <br/></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacesolver"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesolver.html">solver</a></td></tr>
+<tr class="memdesc:namespacesolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">A namespace to hold all of the various classes used by the solver - particularly the main <a class="el" href="classsolver_1_1Solver.html" title="The core class of the ABT algorithm. ">Solver</a> class, of course. <br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ActionMappingEntry_8hpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ActionMappingEntry_8hpp.html">ActionMappingEntry.hpp</a> <a href="ActionMappingEntry_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:ActionMappingEntry_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines the ActionMappingEntry interface class,. <br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ActionPool_8hpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ActionPool_8hpp.html">ActionPool.hpp</a> <a href="ActionPool_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:ActionPool_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines the ActionPool interface, which allows customization of how the mapping for each individual belief node is set up. <br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:discretized__actions_8cpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="discretized__actions_8cpp.html">discretized_actions.cpp</a> <a href="discretized__actions_8cpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:discretized__actions_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contains the implementations of the classes for discretized action mappings. <br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:discretized__actions_8hpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="discretized__actions_8hpp.html">discretized_actions.hpp</a> <a href="discretized__actions_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:discretized__actions_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides a default implementation for an action mapping that uses a set of discretized actions, i.e. <br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:enumerated__actions_8cpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enumerated__actions_8cpp.html">enumerated_actions.cpp</a> <a href="enumerated__actions_8cpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:enumerated__actions_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contains an implementation for the action mapping interfaces in terms of an enumerated set of actions, which is done via a simple implementation of the abstract class DiscretizedActionPool. <br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:enumerated__actions_8hpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enumerated__actions_8hpp.html">enumerated_actions.hpp</a> <a href="enumerated__actions_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:enumerated__actions_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides a default implementation for the action mapping interfaces in terms of an enumerated set of actions. <br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a2652743b2b118d001615cc27ed0ce636"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; double(HistoryEntry <br class="typebreak"/>
+const *, State const <br class="typebreak"/>
+*, HistoricalData const *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a></td></tr>
+<tr class="memdesc:a2652743b2b118d001615cc27ed0ce636"><td class="mdescLeft">&#160;</td><td class="mdescRight">A typedef for the HeuristicFunction type.  <a href="#a2652743b2b118d001615cc27ed0ce636">More...</a><br/></td></tr>
+<tr class="separator:a2652743b2b118d001615cc27ed0ce636"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains a typedef for the "HeuristicFunction" type, which is represented via a function that takes pointers to a history entry, state, and/or historical data, and returns a double value. </p>
+
+<p>Definition in file <a class="el" href="HeuristicFunction_8hpp_source.html">HeuristicFunction.hpp</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:34:33 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 20:13:02 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

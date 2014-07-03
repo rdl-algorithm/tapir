@@ -7,7 +7,7 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/Solver.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "solver/belief-estimators/estimators.hpp"
 
@@ -102,11 +102,11 @@ DefaultHeuristicParser::DefaultHeuristicParser(ModelWithProgramOptions *model) :
         return model->getDefaultHeuristicValue(entry, state, data);
     };
 }
-solver::Heuristic DefaultHeuristicParser::parse(
+solver::HeuristicFunction DefaultHeuristicParser::parse(
         solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
     return heuristic_;
 }
-solver::Heuristic ZeroHeuristicParser::parse(
+solver::HeuristicFunction ZeroHeuristicParser::parse(
         solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
     return [] (solver::HistoryEntry const *, solver::State const *,
             solver::HistoricalData const *) {
@@ -116,7 +116,7 @@ solver::Heuristic ZeroHeuristicParser::parse(
 
 BasicSearchParser::BasicSearchParser(
         ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
-        ParserSet<solver::Heuristic> *heuristicParsers, std::string heuristicString) :
+        ParserSet<solver::HeuristicFunction> *heuristicParsers, std::string heuristicString) :
             generatorParsers_(generatorParsers),
             heuristicParsers_(heuristicParsers),
             heuristicString_(heuristicString) {

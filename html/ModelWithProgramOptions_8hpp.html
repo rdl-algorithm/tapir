@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/search/action-choosers Directory Reference</title>
+<title>ABT: src/problems/shared/ModelWithProgramOptions.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -41,7 +41,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="files.html"><span>Files</span></a></li>
+      <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -60,6 +60,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -76,28 +82,53 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_e03472a1a988baa35cce21dde9c6bf43.html">src</a></li><li class="navelem"><a class="el" href="dir_d9cf5b876ba656d552449248d4d75ab4.html">solver</a></li><li class="navelem"><a class="el" href="dir_a442228268dd909f3c7bbf07b50a4cdb.html">search</a></li><li class="navelem"><a class="el" href="dir_bab4670ec0420ed02eb9f4a6bf133914.html">action-choosers</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_ee269017dc86a19705f7227ce435229f.html">problems</a></li><li class="navelem"><a class="el" href="dir_a7ca09c1982d87fc9065302b9fbdb299.html">shared</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#namespaces">Namespaces</a>  </div>
   <div class="headertitle">
-<div class="title">action-choosers Directory Reference</div>  </div>
+<div class="title">ModelWithProgramOptions.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Offers a Model class with extra functionality, allowing a text-based interface for selecting different search strategies.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;memory&gt;</code><br/>
+<code>#include &lt;string&gt;</code><br/>
+<code>#include &quot;<a class="el" href="global_8hpp_source.html">global.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="Model_8hpp_source.html">solver/abstract-problem/Model.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="HeuristicFunction_8hpp_source.html">solver/abstract-problem/heuristics/HeuristicFunction.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="estimators_8hpp_source.html">solver/belief-estimators/estimators.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="search__interface_8hpp_source.html">solver/search/search_interface.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="DefaultHistoryCorrector_8hpp_source.html">solver/changes/DefaultHistoryCorrector.hpp</a>&quot;</code><br/>
+<code>#include &quot;problems/shared/parsers.hpp&quot;</code><br/>
+<code>#include &quot;problems/shared/SharedOptions.hpp&quot;</code><br/>
+</div>
+<p><a href="ModelWithProgramOptions_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="files"></a>
-Files</h2></td></tr>
-<tr class="memitem:choosers_8cpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="choosers_8cpp.html">choosers.cpp</a> <a href="choosers_8cpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:choosers_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contains implementations of basic action selection functions. <br/></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ModelWithProgramOptions.html">shared::ModelWithProgramOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A partial implementation of Model allowing for text-based parsing of various advanced search options.  <a href="classshared_1_1ModelWithProgramOptions.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:choosers_8hpp"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="choosers_8hpp.html">choosers.hpp</a> <a href="choosers_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:choosers_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines some useful basic functions for selecting an action from a belief node. <br/></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespaceshared"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceshared.html">shared</a></td></tr>
+<tr class="memdesc:namespaceshared"><td class="mdescLeft">&#160;</td><td class="mdescRight">A namespace for useful functionality that is shared by various different problems. <br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Offers a Model class with extra functionality, allowing a text-based interface for selecting different search strategies. </p>
+
+<p>Definition in file <a class="el" href="ModelWithProgramOptions_8hpp_source.html">ModelWithProgramOptions.hpp</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:34:33 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 20:13:02 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -1,10 +1,10 @@
-/** @file Heuristic.hpp
+/** @file HeuristicFunction.hpp
  *
- * Contains a typedef for the "Heuristic" type, which is represented via a function that takes
- * pointers to a history entry, state, and/or historical data, and returns a double value.
+ * Contains a typedef for the "HeuristicFunction" type, which is represented via a function that
+ * takes pointers to a history entry, state, and/or historical data, and returns a double value.
  */
-#ifndef SOLVER_HEURISTICS_HPP_
-#define SOLVER_HEURISTICS_HPP_
+#ifndef SOLVER_HEURISTICFUNCTION_HPP_
+#define SOLVER_HEURISTICFUNCTION_HPP_
 
 #include <functional>
 
@@ -16,7 +16,7 @@ namespace solver {
 class HistoricalData;
 class HistoryEntry;
 
-/** A typedef for the Heuristic type.
+/** A typedef for the HeuristicFunction type.
  *
  * In order to allow for different types of heuristics, this heuristic takes three different
  * arguments via pointers. It is not necessary to use any or all of these arguments - you can
@@ -29,8 +29,9 @@ class HistoryEntry;
  * - Access to historical data allows simpler incorporation of history-based information into the
  *      heuristic value.
  */
-typedef std::function<double(HistoryEntry const *, State const *, HistoricalData const *)> Heuristic;
+typedef std::function<double(HistoryEntry const *,
+		State const *, HistoricalData const *)> HeuristicFunction;
 
 } /* namespace solver */
 
-#endif /* SOLVER_HEURISTICS_HPP_ */
+#endif /* SOLVER_HEURISTICFUNCTION_HPP_ */

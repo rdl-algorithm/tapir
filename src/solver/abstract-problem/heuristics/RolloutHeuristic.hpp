@@ -10,7 +10,7 @@
 
 #include "global.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 #include "solver/search/search_interface.hpp"
 
 namespace solver {
@@ -33,7 +33,7 @@ public:
     /** Constructs a new rollout-based heuristic for the given model, and using the given
      * factory to generate new */
     RolloutHeuristic(Model *model, std::unique_ptr<StepGeneratorFactory> factory,
-            Heuristic heuristic);
+            HeuristicFunction heuristic);
     ~RolloutHeuristic() = default;
     _NO_COPY_OR_MOVE(RolloutHeuristic);
 
@@ -41,12 +41,12 @@ public:
     double getHeuristicValue(HistoryEntry const *entry,
             State const *state, HistoricalData const *data);
 
-    /** Returns this heuristic as an actual Heuristic. */
-    Heuristic asFunction();
+    /** Returns this heuristic as an actual HeuristicFunction. */
+    HeuristicFunction asFunction();
 private:
     Model *model_;
     std::unique_ptr<StepGeneratorFactory> factory_;
-    Heuristic heuristic_;
+    HeuristicFunction heuristic_;
 };
 } /* namespace solver */
 

@@ -20,7 +20,7 @@
 #include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace solver {
-DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, Heuristic heuristic) :
+DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, HeuristicFunction heuristic) :
             HistoryCorrector(solver),
             heuristic_(heuristic) {
 }

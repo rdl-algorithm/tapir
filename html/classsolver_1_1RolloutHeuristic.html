@@ -103,16 +103,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a475ad98b0156afa1d06a8719bf1a785e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a475ad98b0156afa1d06a8719bf1a785e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1RolloutHeuristic.html#a475ad98b0156afa1d06a8719bf1a785e">RolloutHeuristic</a> (<a class="el" href="classsolver_1_1Model.html">Model</a> *model, std::unique_ptr&lt; <a class="el" href="classsolver_1_1StepGeneratorFactory.html">StepGeneratorFactory</a> &gt; factory, <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a> heuristic)</td></tr>
-<tr class="memdesc:a475ad98b0156afa1d06a8719bf1a785e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new rollout-based heuristic for the given model, and using the given factory to generate new. <br/></td></tr>
-<tr class="separator:a475ad98b0156afa1d06a8719bf1a785e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cd1f03f198ce8d9f599eff1348be1b4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5cd1f03f198ce8d9f599eff1348be1b4"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1RolloutHeuristic.html#a5cd1f03f198ce8d9f599eff1348be1b4">RolloutHeuristic</a> (<a class="el" href="classsolver_1_1Model.html">Model</a> *model, std::unique_ptr&lt; <a class="el" href="classsolver_1_1StepGeneratorFactory.html">StepGeneratorFactory</a> &gt; factory, <a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a> heuristic)</td></tr>
+<tr class="memdesc:a5cd1f03f198ce8d9f599eff1348be1b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new rollout-based heuristic for the given model, and using the given factory to generate new. <br/></td></tr>
+<tr class="separator:a5cd1f03f198ce8d9f599eff1348be1b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae94057ffa8bbbc70f7e82c391a180816"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1RolloutHeuristic.html#ae94057ffa8bbbc70f7e82c391a180816">getHeuristicValue</a> (<a class="el" href="classsolver_1_1HistoryEntry.html">HistoryEntry</a> const *entry, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a> const *state, <a class="el" href="classsolver_1_1HistoricalData.html">HistoricalData</a> const *data)</td></tr>
 <tr class="memdesc:ae94057ffa8bbbc70f7e82c391a180816"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uses a rollout to generate a heuristic value for the given entry, state and data.  <a href="#ae94057ffa8bbbc70f7e82c391a180816">More...</a><br/></td></tr>
 <tr class="separator:ae94057ffa8bbbc70f7e82c391a180816"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4867213cc0dbfc5969530bf02b81651f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1RolloutHeuristic.html#a4867213cc0dbfc5969530bf02b81651f">asFunction</a> ()</td></tr>
-<tr class="memdesc:a4867213cc0dbfc5969530bf02b81651f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns this heuristic as an actual Heuristic.  <a href="#a4867213cc0dbfc5969530bf02b81651f">More...</a><br/></td></tr>
-<tr class="separator:a4867213cc0dbfc5969530bf02b81651f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4884990ed4f348a12ef916de0ae28f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1RolloutHeuristic.html#ac4884990ed4f348a12ef916de0ae28f4">asFunction</a> ()</td></tr>
+<tr class="memdesc:ac4884990ed4f348a12ef916de0ae28f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns this heuristic as an actual HeuristicFunction.  <a href="#ac4884990ed4f348a12ef916de0ae28f4">More...</a><br/></td></tr>
+<tr class="separator:ac4884990ed4f348a12ef916de0ae28f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A simple heuristic that uses a rollout to estimate the value of a history. </p>
@@ -122,12 +122,12 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="RolloutHeuristic_8hpp_source.html#l00031">31</a> of file <a class="el" href="RolloutHeuristic_8hpp_source.html">RolloutHeuristic.hpp</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a4867213cc0dbfc5969530bf02b81651f"></a>
+<a class="anchor" id="ac4884990ed4f348a12ef916de0ae28f4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a> solver::RolloutHeuristic::asFunction </td>
+          <td class="memname"><a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a> solver::RolloutHeuristic::asFunction </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -135,7 +135,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Returns this heuristic as an actual Heuristic. </p>
+<p>Returns this heuristic as an actual HeuristicFunction. </p>
 
 <p>Definition at line <a class="el" href="RolloutHeuristic_8cpp_source.html#l00051">51</a> of file <a class="el" href="RolloutHeuristic_8cpp_source.html">RolloutHeuristic.cpp</a>.</p>
 
@@ -184,7 +184,7 @@ Public Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 3 2014 20:13:02 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

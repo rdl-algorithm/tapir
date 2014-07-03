@@ -162,8 +162,8 @@ Custom implementations for the two particle filtering methods (
 ) can be written if better handling of particle depletion is needed. Also of
 key importance (although not mandatory) is a heuristic function, which is
 specified by [Model::getHeuristicFunction] - this uses a functional programming
-interface, and should return a [Heuristic]. By default, the heuristic function
-is simply one that always returns zero.
+interface, and should return a [HeuristicFunction].
+By default, the heuristic function is simply one that always returns zero.
 
 If you wish the model to handle changes, see
 [the section on changes](#implementing-changes)
@@ -335,7 +335,7 @@ individual problem are given in:
 [Action]: src/solver/abstract-problem/Action.hpp
 [Model]: src/solver/abstract-problem/Model.hpp
 [ModelChange]: src/solver/abstract-problem/ModelChange.hpp
-[Heuristic]: src/solver/abstract-problem/Heuristic.hpp
+[HeuristicFunction]: src/solver/abstract-problem/HeuristicFunction.hpp
 [Observation]: src/solver/abstract-problem/Observation.hpp
 [Options]: src/solver/abstract-problem/Options.hpp
 [State]: src/solver/abstract-problem/State.hpp

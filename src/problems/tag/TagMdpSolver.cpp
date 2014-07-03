@@ -9,7 +9,7 @@
 
 #include "problems/shared/parsers.hpp"
 #include "problems/shared/policy_iteration.hpp"
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "TagModel.hpp"
 #include "TagState.hpp"
@@ -188,7 +188,7 @@ TagMdpParser::TagMdpParser(TagModel *model) :
         model_(model) {
 }
 
-solver::Heuristic TagMdpParser::parse(solver::Solver */*solver*/,
+solver::HeuristicFunction TagMdpParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
     if (model_->getMdpSolver() == nullptr) {
         model_->makeMdpSolver();
