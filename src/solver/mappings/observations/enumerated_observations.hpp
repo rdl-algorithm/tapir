@@ -78,10 +78,12 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     virtual BeliefNode *createBelief(Observation const &obs) override;
     virtual long getNChildren() const override;
 
-    /* -------------- Retrieval of mapping entries. ---------------- */
+    /* -------------- Management of mapping entries. ---------------- */
     virtual ObservationMappingEntry *getEntry(Observation const &obs) override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
     virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
+
+    virtual void deleteEntry(ObservationMappingEntry const *entry) override;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     virtual long getTotalVisitCount() const override;

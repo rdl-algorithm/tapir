@@ -62,6 +62,10 @@ public:
      */
     virtual std::vector<ObservationMappingEntry const *> getAllEntries() const = 0;
 
+    /** Deletes the given entry from this mapping, as well as the entire corresponding subtree.
+     */
+    virtual void deleteEntry(ObservationMappingEntry const *entry) = 0;
+
     /* ------------- Methods for accessing visit counts. --------------- */
     /** Returns the total visit count among all observations. */
     virtual long getTotalVisitCount() const = 0;

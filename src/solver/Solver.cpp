@@ -211,6 +211,18 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
     return nextNode;
 }
 
+void Solver::pruneOtherBraches(BeliefNode *node, Action const &action, Observation const &obs) {
+
+}
+
+void Solver::pruneBranch(BeliefNode *root) {
+    for (HistoryEntry *entry : root->particles_) {
+        histories_->deleteSequence(entry->owningSequence_);
+    }
+    root->getParentEntry();
+    node->getMapping()->getActionNode(action)->getChild();
+}
+
 /* ------------------- Change handling methods ------------------- */
 BeliefNode *Solver::getChangeRoot() const {
     return changeRoot_;

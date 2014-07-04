@@ -60,6 +60,7 @@ public:
      * visit counts without an associated action node due to initialization with nonzero values.
      */
     virtual long getNumberOfVisitedEntries() const = 0;
+
     /** Returns a vector of all of the visited entries in this mapping.
      *
      * Some of those entries might have null action nodes if the visit counts were initialized

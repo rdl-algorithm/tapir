@@ -72,7 +72,7 @@ ObservationMappingEntry *EnumeratedObservationMap::getEntry(Observation const &o
     long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
     return &entries_[code];
 }
-ObservationMappingEntry const*EnumeratedObservationMap::getEntry(Observation const &obs) const {
+ObservationMappingEntry const *EnumeratedObservationMap::getEntry(Observation const &obs) const {
     long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
     return &entries_[code];
 }
@@ -84,6 +84,10 @@ std::vector<ObservationMappingEntry const *> EnumeratedObservationMap::getAllEnt
         }
     }
     return returnEntries;
+}
+
+virtual void EnumeratedObservationMap::deleteEntry(ObservationMappingEntry const *entry) {
+    static_cast<EnumeratedObservationMapEntry const &>(*entry).childNode_ = nullptr;
 }
 
 long EnumeratedObservationMap::getTotalVisitCount() const {

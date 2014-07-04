@@ -106,12 +106,29 @@ public:
      */
     void improvePolicy(BeliefNode *startNode = nullptr,
             long numberOfHistories = -1, long maximumDepth = -1, double timeout = -1);
+
     /** Replenishes the particle count in the child node, ensuring that it
      * has at least the given number of particles
      * (-1 => default == model.getMinParticleCount())
      */
     BeliefNode *replenishChild(BeliefNode *currNode, Action const &action, Observation const &obs,
             long minParticleCount = -1);
+
+
+    /** Prunes all branches in the tree from the given node, except those following the given
+     * action and observation.
+     *
+     * NOTE: The Q(s, a) values in this node will *not* be updated to reflect the deleted
+     * history sequences.
+     */
+    void pruneOtherBraches(BeliefNode *node, Action const &action, Observation const &obs);
+
+    /** Removes the given branch from the tree.
+     *
+     * NOTE: The Q(s, a) values in the above nodes will *not* be updated to reflect the deleted
+     * history sequences.
+     */
+    void pruneBrach(BeliefNode *root);
 
     /* ------------------- Change handling methods ------------------- */
     /** Returns the current root node for changes. */
