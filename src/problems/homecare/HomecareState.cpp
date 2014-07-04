@@ -66,6 +66,8 @@ void HomecareState::print(std::ostream &os) const {
     os << "ROBOT: " << robotPos_ << " TARGET: " << targetPos_;
     if (call_) {
         os << " CALLING!";
+    } else {
+        os << " NOT CALLING";
     }
 }
 

@@ -175,12 +175,18 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     /** Generates vector of valid cells target can move to*/
     std::vector<GridPosition> validMovedTargetPositions(
             GridPosition const &targetPos);
-    /** Generates a proper distribution for next target positions. */
+    /** Generates distribution after taking action */
+    std::unordered_map<GridPosition, double> getNextRobotPositionDistribution(
+            GridPosition const &robotPos, ActionType action);
     std::unordered_map<GridPosition, double> getNextTargetPositionDistribution(
             GridPosition const &targetPos, bool call);
+    std::unordered_map<bool, double> getNextCallDistribution(
+            GridPosition const &robotPos, GridPosition const &targetPos, bool call);
+
 
     /** Moves the robot/target. */
-    GridPosition sampleMovedRobotPosition(GridPosition const &targetPos, ActionType action);
+    std::pair<GridPosition, bool> sampleMovedRobotPosition(
+            GridPosition const &robotPos, ActionType action);
     GridPosition sampleMovedTargetPosition(GridPosition const &targetPos);
 
     /** Gets the expected coordinates after taking the given action;
@@ -189,6 +195,10 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     std::pair<GridPosition, bool> getMovedPos(GridPosition const &position, ActionType action);
     /** Returns true iff the given GridPosition form a valid position. */
     bool isValid(GridPosition const &pos);
+    /** E.g. returns NORTH if given NORTH_EAST */
+    ActionType shiftAntiClockwise(ActionType action);
+    /** E.g. returns NORTH_EAST if given NORTH */
+    ActionType shiftClockwise(ActionType action);
 
     bool updateCall(GridPosition robotPos, GridPosition targetPos, bool call);
 

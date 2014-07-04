@@ -161,7 +161,8 @@ void HomecareModel::initialize() {
                     pathCell = HomecarePathCell::EMPTY;
             } 
             pathMap_[p.i][p.j] = pathCell;
-            if (pathCell != HomecarePathCell::EMPTY) {
+            if (pathCell != HomecarePathCell::EMPTY && 
+            		pathCell != HomecarePathCell::WALL) {
                 pCells_.push_back(p);
             }
             
@@ -228,7 +229,8 @@ std::unique_ptr<solver::State> HomecareModel::sampleAnInitState() {
 std::unique_ptr<solver::State> HomecareModel::sampleStateUninformed() {
     GridPosition robotPos = randomNotWallCell();
     GridPosition targetPos = randomPCell();
-    return std::make_unique<HomecareState>(robotPos, targetPos, false);
+    bool call = std::bernoulli_distribution(callProbability_)(*getRandomGenerator());
+    return std::make_unique<HomecareState>(robotPos, targetPos, call);
 }
 
 bool HomecareModel::isTerminal(solver::State const &state) {
@@ -251,7 +253,14 @@ std::pair<std::unique_ptr<HomecareState>, bool> HomecareModel::makeNextState(
     }
     GridPosition newRobotPos;
     bool wasValid;
-    std::tie(newRobotPos, wasValid) = getMovedPos(robotPos, homecareAction.getActionType());
+    ActionType actionType = homecareAction.getActionType();
+    if (actionType == ActionType::WAIT) {
+    	newRobotPos = robotPos;
+    	wasValid = true;
+	} else {
+	    std::tie(newRobotPos, wasValid) = sampleMovedRobotPosition(
+	            robotPos, homecareAction.getActionType());
+	}
     bool newCall = updateCall(newRobotPos, newTargetPos, call);
     return std::make_pair(std::make_unique<HomecareState>(
         newRobotPos, newTargetPos, newCall), wasValid);
@@ -298,6 +307,44 @@ std::vector<GridPosition> HomecareModel::validMovedTargetPositions(
     return positions;
 }
 
+std::unordered_map<GridPosition, double> HomecareModel::getNextRobotPositionDistribution(
+        GridPosition const &robotPos, ActionType action) {
+    std::unordered_map<GridPosition, double> distribution; 
+
+    // No change in position for WAIT action
+    if (action == ActionType::WAIT) {
+    	distribution[robotPos] = 1.0;
+    	return distribution;
+    }
+
+    // Add position for no deviation
+    GridPosition noDevPos;
+    bool valid;
+    std::tie(noDevPos, valid) = getMovedPos(robotPos, action);
+    if (!valid) {
+    	noDevPos = robotPos;
+    }
+    distribution[noDevPos] = moveAccuracy_;
+
+    // Add positions for deviations
+    ActionType clockwise = shiftClockwise(action);
+    ActionType aClockwise = shiftAntiClockwise(action);
+    GridPosition devPos1, devPos2;
+    std::tie(devPos1, valid) = getMovedPos(robotPos, clockwise);
+    if (!valid) {
+    	distribution[robotPos] += 0.5 * (1 - moveAccuracy_);
+    } else {
+    	distribution[devPos1] = 0.5 * (1 - moveAccuracy_);
+    }
+    std::tie(devPos2, valid) = getMovedPos(robotPos, aClockwise);
+    if (!valid) {
+    	distribution[robotPos] += 0.5 * (1 - moveAccuracy_);
+    } else {
+    	distribution[devPos2] = 0.5 * (1 - moveAccuracy_);
+    }
+    return distribution;
+}
+
 /** Generates a proper distribution for next target positions. */
 std::unordered_map<GridPosition, double> HomecareModel::getNextTargetPositionDistribution(
         GridPosition const &targetPos, bool call) {
@@ -324,6 +371,34 @@ std::unordered_map<GridPosition, double> HomecareModel::getNextTargetPositionDis
     return std::move(distribution);
 }
 
+std::unordered_map<bool, double> HomecareModel::getNextCallDistribution(
+        GridPosition const &robotPos, GridPosition const &targetPos, bool call) {
+	std::unordered_map<bool, double> distribution;
+	if (call && robotPos == targetPos) {
+		distribution[false] = 1.0;
+	} else if (call) {
+		distribution[false] = 1.0 - continueCallProbability_;
+		distribution[true] = continueCallProbability_;
+	} else {
+		distribution[false] = 1.0 - callProbability_;
+		distribution[true] = callProbability_;
+	}
+	return distribution;
+}
+
+std::pair<GridPosition, bool> HomecareModel::sampleMovedRobotPosition(
+        GridPosition const &robotPos, ActionType action) {
+    if (std::bernoulli_distribution(moveAccuracy_)(*getRandomGenerator())) {
+        return getMovedPos(robotPos, action);
+    }
+    if (std::bernoulli_distribution(0.5)(*getRandomGenerator())) {
+        action = shiftAntiClockwise(action);
+    } else {
+        action = shiftClockwise(action);
+    }
+    return getMovedPos(robotPos, action);
+}
+
 GridPosition HomecareModel::sampleMovedTargetPosition(GridPosition const &targetPos) {
     if (std::bernoulli_distribution(targetStayProbability_)(
             *getRandomGenerator())) {
@@ -338,40 +413,41 @@ std::pair<GridPosition, bool> HomecareModel::getMovedPos(GridPosition const &pos
         ActionType action) {
     GridPosition movedPos = position;
     switch (action) {
-    case ActionType::NORTH:
-        movedPos.i -= 1;
-        break;
-    case ActionType::NORTH_EAST:
-        movedPos.i -= 1;
-        movedPos.j += 1;
-        break;
-    case ActionType::EAST:
-        movedPos.j += 1;
-        break;
-    case ActionType::SOUTH_EAST:
-        movedPos.i += 1;
-        movedPos.j += 1;
-        break;
-    case ActionType::SOUTH:
-        movedPos.i += 1;
-        break;
-    case ActionType::SOUTH_WEST:
-        movedPos.i += 1;
-        movedPos.j -= 1;
-    case ActionType::WEST:
-        movedPos.j -= 1;
-        break;
-    case ActionType::NORTH_WEST:
-        movedPos.i -= 1;
-        movedPos.j -= 1;
-        break;
-    case ActionType::WAIT:
-        break;
-    default:
-        std::ostringstream message;
-        message << "Invalid action: " << (long) action;
-        debug::show_message(message.str());
-        break;
+	    case ActionType::NORTH:
+	        movedPos.i -= 1;
+	        break;
+	    case ActionType::NORTH_EAST:
+	        movedPos.i -= 1;
+	        movedPos.j += 1;
+	        break;
+	    case ActionType::EAST:
+	        movedPos.j += 1;
+	        break;
+	    case ActionType::SOUTH_EAST:
+	        movedPos.i += 1;
+	        movedPos.j += 1;
+	        break;
+	    case ActionType::SOUTH:
+	        movedPos.i += 1;
+	        break;
+	    case ActionType::SOUTH_WEST:
+	        movedPos.i += 1;
+	        movedPos.j -= 1;
+	        break;
+	    case ActionType::WEST:
+	        movedPos.j -= 1;
+	        break;
+	    case ActionType::NORTH_WEST:
+	        movedPos.i -= 1;
+	        movedPos.j -= 1;
+	        break;
+	    case ActionType::WAIT:
+	        break;
+	    default:
+	        std::ostringstream message;
+	        message << "Invalid action: " << (long) action;
+	        debug::show_message(message.str());
+	        break;
     }
     bool wasValid = isValid(movedPos);
     if (!wasValid) {
@@ -383,6 +459,22 @@ std::pair<GridPosition, bool> HomecareModel::getMovedPos(GridPosition const &pos
 bool HomecareModel::isValid(GridPosition const &position) {
     return (position.i >= 0 && position.i < nRows_ && position.j >= 0
             && position.j < nCols_ && pathMap_[position.i][position.j] != HomecarePathCell::WALL);
+}
+
+ActionType HomecareModel::shiftAntiClockwise(ActionType action) {
+	int result = (int) action - 1;
+	if (result < 0) {
+		result = 7;
+	}
+	return (ActionType) result;
+}
+
+ActionType HomecareModel::shiftClockwise(ActionType action) {
+	int result = (int) action + 1;
+	if (result > 7) {
+		result = 0;
+	}
+	return (ActionType) result;
 }
 
 bool HomecareModel::updateCall(GridPosition robotPos, GridPosition targetPos, bool call) {
@@ -529,6 +621,7 @@ void HomecareModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange
         for (long i = homecareChange.i0; i <= homecareChange.i1; i++) {
             for (long j = homecareChange.j0; j <= homecareChange.j1; j++) {
                 typeMap_[i][j] = newCellType;
+                wCells_.push_back(GridPosition(i, j));
             }
         }
 
@@ -594,21 +687,40 @@ std::vector<std::unique_ptr<solver::State>> HomecareModel::generateParticles(
     for (solver::State const *state : previousParticles) {
         HomecareState const *homecareState = static_cast<HomecareState const *>(state);
         GridPosition oldRobotPos(homecareState->getRobotPos());
+
+        // Get probability distribution for robot moves
+        std::unordered_map<GridPosition, double> robotPosDistribution = (
+                getNextRobotPositionDistribution(oldRobotPos, actionType));
+
         // Ignore states that do not match knowledge of the robot's position.
-        if (newRobotPos != getMovedPos(oldRobotPos, actionType).first) {
+        bool matchFound = false;
+        for (auto const &entry : robotPosDistribution) {
+        	if (newRobotPos == entry.first) {
+        		matchFound = true;
+        		break;
+        	}
+        }
+        if (!matchFound) {
             continue;
         }
 
-        // Get the probability distribution for target moves.
-        bool call = homecareState->getCall();
+        // Generate new particles
+        bool oldCall = homecareState->getCall();
         GridPosition oldTargetPos(homecareState->getTargetPos());
         std::unordered_map<GridPosition, double> targetPosDistribution = (
-                getNextTargetPositionDistribution(oldTargetPos, call));
-
-        for (auto const &entry : targetPosDistribution) {
-            HomecareState newState(newRobotPos, entry.first, false);
-            weights[newState] += entry.second;
-            weightTotal += entry.second;
+                getNextTargetPositionDistribution(oldTargetPos, oldCall));
+        for (auto const &robotEntry : robotPosDistribution) {
+		    for (auto const &targetEntry : targetPosDistribution) {
+		    	GridPosition newRobotPos = robotEntry.first;
+		    	GridPosition newTargetPos = targetEntry.first;
+		    	std::unordered_map<bool, double> callDistribution = (
+        				getNextCallDistribution(newRobotPos, newTargetPos, oldCall));
+			    for (auto const &callEntry : callDistribution) {
+			    	HomecareState newState(newRobotPos, newTargetPos, callEntry.first);
+		            weights[newState] += robotEntry.second * targetEntry.second * callEntry.second;
+		            weightTotal += robotEntry.second * targetEntry.second * callEntry.second;
+		        }
+	        }
         }
     }
     double scale = nParticles / weightTotal;
