@@ -1,3 +1,8 @@
+/** @file parsers.hpp
+ *
+ * Provides some convenient functionality for parsing heuristics, search strategies and
+ *
+ */
 #ifndef SHARED_PARSERS_HPP_
 #define SHARED_PARSERS_HPP_
 
