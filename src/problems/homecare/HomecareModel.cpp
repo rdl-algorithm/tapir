@@ -537,7 +537,7 @@ int HomecareModel::sampleObservationRegion(HomecareState const &state) {
 double HomecareModel::generateReward(solver::State const &state,
         solver::Action const &action,
         solver::TransitionParameters const */*tp*/,
-        solver::State const */*nextState*/) {
+        solver::State const *nextState) {
     double reward = 0;
     ActionType aType = static_cast<HomecareAction const &>(action).getActionType();
     if (aType == ActionType::NORTH || aType == ActionType::EAST ||
@@ -546,9 +546,10 @@ double HomecareModel::generateReward(solver::State const &state,
     } else if (aType != ActionType::WAIT) {
         reward -= diaMoveCost_;
     }
-    HomecareState const &homecareState = static_cast<HomecareState const &>(state);
-    if (homecareState.getCall()) {
-        if (homecareState.getRobotPos() == homecareState.getTargetPos()) {
+    if (nextState) {
+        HomecareState const &s = static_cast<HomecareState const &>(state);
+        HomecareState const *ns = static_cast<HomecareState const *>(nextState);
+        if (s.getCall() && ns->getRobotPos() == ns->getTargetPos()) {
             reward += helpReward_;
         }
     }
@@ -575,7 +576,7 @@ solver::Model::StepResult HomecareModel::generateStep(solver::State const &state
     std::unique_ptr<HomecareState> nextState = makeNextState(state, action).first;
 
     result.observation = makeObservation(action, *nextState);
-    result.reward = generateReward(state, action, nullptr, nullptr);
+    result.reward = generateReward(state, action, nullptr, nextState.get());
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);
     return result;
@@ -711,12 +712,10 @@ std::vector<std::unique_ptr<solver::State>> HomecareModel::generateParticles(
                 getNextTargetPositionDistribution(oldTargetPos, oldCall));
         for (auto const &robotEntry : robotPosDistribution) {
 		    for (auto const &targetEntry : targetPosDistribution) {
-		    	GridPosition newRobotPos = robotEntry.first;
-		    	GridPosition newTargetPos = targetEntry.first;
 		    	std::unordered_map<bool, double> callDistribution = (
-        				getNextCallDistribution(newRobotPos, newTargetPos, oldCall));
+        				getNextCallDistribution(robotEntry.first, targetEntry.first, oldCall));
 			    for (auto const &callEntry : callDistribution) {
-			    	HomecareState newState(newRobotPos, newTargetPos, callEntry.first);
+			    	HomecareState newState(robotEntry.first, targetEntry.first, callEntry.first);
 		            weights[newState] += robotEntry.second * targetEntry.second * callEntry.second;
 		            weightTotal += robotEntry.second * targetEntry.second * callEntry.second;
 		        }
@@ -907,7 +906,9 @@ double HomecareModel::getDefaultHeuristicValue(solver::HistoryEntry const */*ent
     double nSteps = dist / targetStayProbability_;
     double finalDiscount = std::pow(options_->discountFactor, nSteps);
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
-    qVal += finalDiscount * helpReward_;
+    if (homecareState.getCall()) {
+        qVal += finalDiscount * helpReward_;
+    }
     return qVal;
 }
 

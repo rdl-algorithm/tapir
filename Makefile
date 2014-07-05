@@ -29,7 +29,7 @@ CXX  := g++
 # Compiler flags
 # ----------------------------------------------------------------------
 # Preprocessor flags.
-override INCDIRS     += -I$(ROOT)/src -I$(ROOT)/src/options
+override INCDIRS     += -I /home/joshua/eigen -I$(ROOT)/src -I$(ROOT)/src/options
 
 override CPPFLAGS    += $(INCDIRS)
 ifeq ($(CFG),debug)
@@ -159,3 +159,10 @@ ifdef REDIRECT
 # If not, check for a global target.
 # $(PATH_$(REDIRECT))/% : % ;
 endif
+
+# ----------------------------------------------------------------------
+# ROS catkin_make system
+# ----------------------------------------------------------------------
+.PHONY: ros
+ros:
+	cd ../..;catkin_make;

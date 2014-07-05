@@ -108,7 +108,7 @@ class TrackerModel: public shared::ModelWithProgramOptions {
     // Other virtual methods
     std::unique_ptr<solver::State> sampleAnInitState() override;
     /** Generates an untrackerged state uniformly at random. */
-    std::unique_ptr<solver::State> sampleStateUniform() override;
+    std::unique_ptr<solver::State> sampleStateUninformed() override;
     bool isTerminal(solver::State const &state) override;
 
     /* -------------------- Black box dynamics ---------------------- */

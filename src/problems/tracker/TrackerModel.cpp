@@ -115,10 +115,10 @@ void TrackerModel::setPolicyZones(std::vector<GridPosition> zones, int currZone,
 
 /* --------------- The model interface proper ----------------- */
 std::unique_ptr<solver::State> TrackerModel::sampleAnInitState() {
-    return sampleStateUniform();
+    return sampleStateUninformed();
 }
 
-std::unique_ptr<solver::State> TrackerModel::sampleStateUniform() {
+std::unique_ptr<solver::State> TrackerModel::sampleStateUninformed() {
 
     // Known robot position
     int robotYaw = getCurrYaw45();
@@ -550,7 +550,7 @@ std::vector<std::unique_ptr<solver::State>> TrackerModel::generateParticles(
     ActionType actionType = (static_cast<TrackerAction const &>(action).getActionType());
     GridPosition newRobotPos(observation.getRobotPos());
     while ((long)newParticles.size() < nParticles) {
-        std::unique_ptr<solver::State> state = sampleStateUniform();
+        std::unique_ptr<solver::State> state = sampleStateUninformed();
         solver::Model::StepResult result = generateStep(*state, action);
         if (obs == *result.observation) {
             newParticles.push_back(std::move(result.nextState));

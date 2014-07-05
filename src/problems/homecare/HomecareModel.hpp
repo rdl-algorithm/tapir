@@ -101,7 +101,7 @@ class HomecareModel: public shared::ModelWithProgramOptions {
                 solver::State const &state,
                 solver::Action const &action,
                 solver::TransitionParameters const */*tp*/,
-                solver::State const */*nextState*/) override;
+                solver::State const *nextState) override;
     virtual Model::StepResult generateStep(solver::State const &state,
             solver::Action const &action) override;
 

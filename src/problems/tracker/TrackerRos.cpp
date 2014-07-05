@@ -147,8 +147,8 @@ int main(int argc, char **argv)
 
 	/**************** ABT init ***********************/
 
-    std::string trackerPath = ros::package::getPath("abt") + "/src/problems/tracker/";
-    std::string cfgPath = trackerPath + "tests/default.cfg";
+    std::string abtPath = ros::package::getPath("abt");
+    std::string cfgPath = abtPath + "/cfg/tracker/default.cfg";
 	std::unique_ptr<options::OptionParser> parser = TrackerOptions::makeParser(false);
 	TrackerOptions trackerOptions;
 	parser->setOptions(&trackerOptions);

@@ -6,7 +6,6 @@
 #include "problems/shared/SharedOptions.hpp"
 
 namespace tracker {
-
 struct TrackerOptions : public shared::SharedOptions {
     TrackerOptions() = default;
     virtual ~TrackerOptions() = default;
@@ -26,32 +25,18 @@ struct TrackerOptions : public shared::SharedOptions {
     double visibleReward = 0.0;
 
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
-        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating);
+        std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
+                "cfg/tracker/default.cfg");
         addTrackerOptions(parser.get());
         return std::move(parser);
     }
 
     static void addTrackerOptions(options::OptionParser *parser) {
         parser->addOption<double>("problem", "moveCost", &TrackerOptions::moveCost);
-        parser->addValueArg<double>("problem", "moveCost", &TrackerOptions::moveCost,
-                "", "move", "cost per move", "real");
-
         parser->addOption<double>("problem", "waitCost", &TrackerOptions::waitCost);
-        parser->addValueArg<double>("problem", "waitCost", &TrackerOptions::waitCost,
-                "", "wait", "cost for waiting instead of moving", "real");
-
         parser->addOption<double>("problem", "obstructCost", &TrackerOptions::obstructCost);
-        parser->addValueArg<double>("problem", "obstructCost", &TrackerOptions::obstructCost,
-                "", "obstruct", "cost for getting in human's way", "real");
-
         parser->addOption<double>("problem", "collideCost", &TrackerOptions::collideCost);
-        parser->addValueArg<double>("problem", "collideCost", &TrackerOptions::collideCost,
-                "", "collide", "cost for collision with obstacle ", "real");
-
         parser->addOption<double>("problem", "visibleReward", &TrackerOptions::visibleReward);
-        parser->addValueArg<double>("problem", "visibleReward", &TrackerOptions::visibleReward,
-                "", "visible", "Reward for having target visible", "real");
-
     }
 };
 } /* namespace tracker */

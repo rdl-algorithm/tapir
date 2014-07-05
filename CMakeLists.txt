@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(abt)
 
 # Set make arguments
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" ) 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I /home/joshua/eigen -std=c++11 -frounding-math" ) 
 
 ## Use Boost 1.48.0 from source, different to my system's default version
 ##set(BOOST_ROOT "~/boost_1_48_0")
@@ -45,15 +45,14 @@ generate_messages(
 
 ## Declare a catkin package
 catkin_package(
-	INCLUDE_DIRS src src/options
+	INCLUDE_DIRS src src/options src/problems/shared/ros
 	LIBRARIES ${PROJECT_NAME}
 	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs tf message_runtime laser_geometry)
 
-include_directories(include src src/options ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} include)
+include_directories(src src/options src/problems/shared/ros ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_library(AbtSolver
 	src/global.cpp
-	src/VrepHelper.cpp
 	src/solver/ActionNode.cpp
 	src/solver/Agent.cpp
 	src/solver/BeliefNode.cpp
@@ -74,13 +73,12 @@ add_library(AbtSolver
 	src/solver/indexing/FlaggingVisitor.cpp
 	src/solver/indexing/RTree.cpp
 	src/solver/indexing/SpatialIndexVisitor.cpp
-	src/solver/mappings/actions/ActionMappingEntry.cpp
 	src/solver/mappings/actions/discretized_actions.cpp
 	src/solver/mappings/actions/enumerated_actions.cpp
 	src/solver/mappings/observations/approximate_observations.cpp
 	src/solver/mappings/observations/discrete_observations.cpp
 	src/solver/mappings/observations/enumerated_observations.cpp
-	src/solver/search/exp3.cpp
+	src/solver/search/MultipleStrategiesExp3.cpp
 	src/solver/search/search_interface.cpp
 	src/solver/search/action-choosers/choosers.cpp
 	src/solver/search/steppers/default_rollout.cpp
@@ -95,10 +93,14 @@ add_library(AbtSolver
 	src/problems/shared/geometry/RTree.cpp
 	src/problems/shared/geometry/utilities.cpp
 	src/problems/shared/geometry/Vector2D.cpp
-	##src/problems/shared/policy_iteration.cpp
+	src/problems/shared/policy_iteration.cpp
 )
 
-add_dependencies(AbtSolver abt_generate_messages_cpp)
+add_library(AbtRos
+	src/problems/shared/ros/VrepHelper.cpp
+)
+
+add_dependencies(AbtRos abt_generate_messages_cpp)
 
 add_library(AbtTracker
 	src/problems/tracker/TrackerAction.cpp
@@ -108,24 +110,24 @@ add_library(AbtTracker
 	src/problems/tracker/TrackerTextSerializer.cpp
 )
 
-##add_library(AbtTag
-##	src/problems/tag/TagAction.cpp
-##	src/problems/tag/TagMdpSolver.cpp
-##	src/problems/tag/TagModel.cpp
-##	src/problems/tag/TagObservation.cpp
-##	src/problems/tag/TagState.cpp
-##	src/problems/tag/TagTextSerializer.cpp
-##)
+add_library(AbtTag
+	src/problems/tag/TagAction.cpp
+	src/problems/tag/TagMdpSolver.cpp
+	src/problems/tag/TagModel.cpp
+	src/problems/tag/TagObservation.cpp
+	src/problems/tag/TagState.cpp
+	src/problems/tag/TagTextSerializer.cpp
+)
 
 target_link_libraries(AbtSolver spatialindex ${catkin_LIBRARIES})
 
 add_executable(tracker_node src/problems/tracker/TrackerRos.cpp)
-target_link_libraries(tracker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} AbtTracker AbtSolver )
+target_link_libraries(tracker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} AbtTracker AbtSolver AbtRos)
 add_dependencies(tracker_node abt_generate_messages_cpp)
 
-##add_executable(tag_node src/problems/tag/TagVrep.cpp)
-##target_link_libraries(tag_node ${catkin_LIBRARIES} AbtTag AbtSolver )
-##add_dependencies(tracker_node abt_generate_messages_cpp)
+add_executable(tag_node src/problems/tag/ros/TagVrep.cpp)
+target_link_libraries(tag_node ${catkin_LIBRARIES} AbtTag AbtSolver AbtRos)
+add_dependencies(tracker_node abt_generate_messages_cpp)
 
-add_executable(scan_to_pcl_node src/ScanToPcl.cpp)
+add_executable(scan_to_pcl_node src/problems/shared/ros/ScanToPcl.cpp)
 target_link_libraries(scan_to_pcl_node ${catkin_LIBRARIES})

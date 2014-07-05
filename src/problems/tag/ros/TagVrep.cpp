@@ -18,11 +18,11 @@
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/simulate.hpp"
 
-#include "TagAction.hpp"
-#include "TagObservation.hpp"
-#include "TagOptions.hpp"
-#include "TagState.hpp"
-#include "TagModel.hpp"
+#include "problems/tag/TagAction.hpp"
+#include "problems/tag/TagObservation.hpp"
+#include "problems/tag/TagOptions.hpp"
+#include "problems/tag/TagState.hpp"
+#include "problems/tag/TagModel.hpp"
 
 using std::cout;
 using std::endl;
@@ -105,14 +105,14 @@ int main(int argc, char **argv)
     ros::Subscriber selectSub = node.subscribe("selected_cells", 1, selectCallback);
 
 	/**************** ABT init ***********************/
-    std::string tagPath = ros::package::getPath("abt") + "/src/problems/tag/";
-    std::string argMapPath = tagPath + "tests/maps/map.txt";
-    std::string cfgPath = tagPath + "tests/default.cfg";
+    std::string abtPath = ros::package::getPath("abt");
+    std::string cfgPath = abtPath + "/cfg/tag/default.cfg";
     std::unique_ptr<options::OptionParser> parser = TagOptions::makeParser(true);
 	TagOptions tagOptions;
     parser->setOptions(&tagOptions);
     parser->parseCfgFile(cfgPath);
     parser->finalize();
+    tagOptions.mapPath = abtPath + "/" + tagOptions.mapPath;
 
     if (tagOptions.seed == 0) {
         tagOptions.seed = std::time(nullptr);
