@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/search/MultipleStrategiesExp3.cpp Source File</title>
+<title>TAPIR: src/solver/search/MultipleStrategiesExp3.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -198,9 +198,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        }</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        <span class="comment">// Try using a strategy.</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        <span class="keywordtype">double</span> startTime = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        <span class="keywordtype">double</span> startTime = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        <a class="code" href="namespacesolver.html#a90d23a48e78856760cf1c30c8fc5b029">SearchStatus</a> status = info-&gt;<a class="code" href="structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#aa880cd775847a4aa6a0e1c75e7025aba">strategy</a>-&gt;extendAndBackup(sequence, maximumDepth);</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keywordtype">double</span> timeUsed = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - startTime;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keywordtype">double</span> timeUsed = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - startTime;</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="comment">// If the strategy initialized successfully, we backup, update weights, and we&#39;re done.</span></div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="keywordflow">if</span> (status != SearchStatus::UNINITIALIZED) {</div>
@@ -237,10 +237,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1HistoryEntry_html_a3a5e629d6e4f46c043d2a97dd750a959"><div class="ttname"><a href="classsolver_1_1HistoryEntry.html#a3a5e629d6e4f46c043d2a97dd750a959">solver::HistoryEntry::getAssociatedBeliefNode</a></div><div class="ttdeci">BeliefNode * getAssociatedBeliefNode() const </div><div class="ttdoc">Returns the belief node associated with this history entry. </div><div class="ttdef"><b>Definition:</b> <a href="HistoryEntry_8cpp_source.html#l00057">HistoryEntry.cpp:57</a></div></div>
 <div class="ttc" id="structsolver_1_1Options_html_a6806eb978e58ff79696d35e61bb040ff"><div class="ttname"><a href="structsolver_1_1Options.html#a6806eb978e58ff79696d35e61bb040ff">solver::Options::maxVal</a></div><div class="ttdeci">double maxVal</div><div class="ttdoc">A default upper bound on the value function. </div><div class="ttdef"><b>Definition:</b> <a href="Options_8hpp_source.html#l00033">Options.hpp:33</a></div></div>
 <div class="ttc" id="classsolver_1_1MultipleStrategiesExp3_html_aebbb594e5511a93fbbec520e7c433c8f"><div class="ttname"><a href="classsolver_1_1MultipleStrategiesExp3.html#aebbb594e5511a93fbbec520e7c433c8f">solver::MultipleStrategiesExp3::MultipleStrategiesExp3</a></div><div class="ttdeci">MultipleStrategiesExp3(Solver *solver, double strategyExplorationCoefficient, std::vector&lt; std::unique_ptr&lt; SearchStrategy &gt;&gt; strategies)</div><div class="ttdoc">Constructs a new combination of multiple strategies, using EXP3. </div><div class="ttdef"><b>Definition:</b> <a href="MultipleStrategiesExp3_8cpp_source.html#l00016">MultipleStrategiesExp3.cpp:16</a></div></div>
-<div class="ttc" id="namespaceabt_html_a6118b840f6a387c7d3861c251b769c13"><div class="ttname"><a href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a></div><div class="ttdeci">double clock_ms()</div><div class="ttdoc">Returns the time (in ms) since the program started running. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00040">global.hpp:40</a></div></div>
 <div class="ttc" id="structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo_html_a76987419152d708988b77ec78f1723db"><div class="ttname"><a href="structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#a76987419152d708988b77ec78f1723db">solver::MultipleStrategiesExp3::StrategyInfo::weight</a></div><div class="ttdeci">double weight</div><div class="ttdoc">The current weight of this strategy; this is combined with other factors to give the probability...</div><div class="ttdef"><b>Definition:</b> <a href="MultipleStrategiesExp3_8hpp_source.html#l00042">MultipleStrategiesExp3.hpp:42</a></div></div>
 <div class="ttc" id="classsolver_1_1Solver_html"><div class="ttname"><a href="classsolver_1_1Solver.html">solver::Solver</a></div><div class="ttdoc">The core class of the ABT algorithm. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8hpp_source.html#l00065">Solver.hpp:65</a></div></div>
 <div class="ttc" id="structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo_html_a0f14808695fe186d5b1730b18b8fbc65"><div class="ttname"><a href="structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#a0f14808695fe186d5b1730b18b8fbc65">solver::MultipleStrategiesExp3::StrategyInfo::strategyNo</a></div><div class="ttdeci">long strategyNo</div><div class="ttdoc">The ID number of the strategy (0, 1, 2, ...). </div><div class="ttdef"><b>Definition:</b> <a href="MultipleStrategiesExp3_8hpp_source.html#l00034">MultipleStrategiesExp3.hpp:34</a></div></div>
+<div class="ttc" id="namespacetapir_html_a2625fbd617a2b89a3bd3d957c12890d7"><div class="ttname"><a href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a></div><div class="ttdeci">double clock_ms()</div><div class="ttdoc">Returns the time (in ms) since the program started running. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00040">global.hpp:40</a></div></div>
 <div class="ttc" id="structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo_html_aa880cd775847a4aa6a0e1c75e7025aba"><div class="ttname"><a href="structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#aa880cd775847a4aa6a0e1c75e7025aba">solver::MultipleStrategiesExp3::StrategyInfo::strategy</a></div><div class="ttdeci">std::unique_ptr&lt; SearchStrategy &gt; strategy</div><div class="ttdoc">The strategy itself. </div><div class="ttdef"><b>Definition:</b> <a href="MultipleStrategiesExp3_8hpp_source.html#l00036">MultipleStrategiesExp3.hpp:36</a></div></div>
 <div class="ttc" id="classsolver_1_1BeliefNode_html"><div class="ttname"><a href="classsolver_1_1BeliefNode.html">solver::BeliefNode</a></div><div class="ttdoc">Represents a single node in a belief tree. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefNode_8hpp_source.html#l00054">BeliefNode.hpp:54</a></div></div>
 <div class="ttc" id="classsolver_1_1Model_html_a7d9177e4ab34e4d512f0a5b8ac9a822a"><div class="ttname"><a href="classsolver_1_1Model.html#a7d9177e4ab34e4d512f0a5b8ac9a822a">solver::Model::getOptions</a></div><div class="ttdeci">Options const * getOptions() const </div><div class="ttdoc">Returns the configuration options for this model. </div><div class="ttdef"><b>Definition:</b> <a href="Model_8cpp_source.html#l00053">Model.cpp:53</a></div></div>
@@ -250,7 +250,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

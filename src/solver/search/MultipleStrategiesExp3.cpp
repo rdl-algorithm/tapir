@@ -110,9 +110,9 @@ SearchStatus MultipleStrategiesExp3::extendAndBackup(HistorySequence *sequence, 
         }
 
         // Try using a strategy.
-        double startTime = abt::clock_ms();
+        double startTime = tapir::clock_ms();
         SearchStatus status = info->strategy->extendAndBackup(sequence, maximumDepth);
-        double timeUsed = abt::clock_ms() - startTime;
+        double timeUsed = tapir::clock_ms() - startTime;
 
         // If the strategy initialized successfully, we backup, update weights, and we're done.
         if (status != SearchStatus::UNINITIALIZED) {

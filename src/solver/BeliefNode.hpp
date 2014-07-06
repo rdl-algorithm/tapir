@@ -169,7 +169,7 @@ private:
     /** The smart history-based data, to be used for history-based policies. */
     std::unique_ptr<HistoricalData> data_;
     /** The set of particles belonging to this node. */
-    abt::RandomAccessSet<HistoryEntry *> particles_;
+    tapir::RandomAccessSet<HistoryEntry *> particles_;
     /** The number of sequences that start at this node. */
     long nStartingSequences_;
 

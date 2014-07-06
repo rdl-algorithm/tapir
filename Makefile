@@ -130,26 +130,26 @@ MKDIR_RECIPE   = @mkdir -p $@
 # ----------------------------------------------------------------------
 
 # Directory dependency
-docs/generated/README.md docs/generated/BUILD.md: docs/generated
+docs/generated/Overview.md docs/generated/Build_System.md: docs/generated
 docs/generated:
 	$(MKDIR_RECIPE)
 
-# Adapt the README.md so it works nicely with Doxygen.
-docs/generated/README.md: README.md docs/doxygen_links.md Makefile
-	@echo "# ABT Documentation {#mainpage}\n" > $@
-	@cat README.md docs/doxygen_links.md >> $@
-	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#abt}\2/mg' $@
+# Adapt Overview.md so it works nicely with Doxygen.
+docs/generated/Overview.md: docs/Overview.md docs/doxygen_links.md Makefile
+	@echo "# Detailed TAPIR Documentation {#mainpage}\n" > $@
+	@cat docs/Overview.md docs/doxygen_links.md >> $@
+	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#tapir}\2/mg' $@
 	@perl -0pi -e 's/^(.*)(\n-+)$$/\1 {#\L\1}\2/mg' $@
 	@perl -0pi -e 's/^([#]{2,}\s+)(.*)$$/\1\2 {#\L\2}/mg' $@
 	@perl -pi -e 's/({#.*})/($$res = $$1) =~ s\/ \/-\/g,$$res/eg' $@
 
 # Do the same thing for the build system README
-docs/generated/BUILD.md: .make/README.md docs/doxygen_links.md Makefile
+docs/generated/Build_System.md: .make/README.md docs/doxygen_links.md Makefile
 	@cat .make/README.md docs/doxygen_links.md > $@
 
 # Now a command to generate the documentation.
 .PHONY: doc
-doc: docs/Doxyfile docs/generated/README.md docs/generated/BUILD.md
+doc: docs/Doxyfile docs/generated/Overview.md docs/generated/Build_System.md
 	doxygen docs/Doxyfile
 
 .PHONY: clean-doc

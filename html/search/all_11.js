@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['randomaccessset',['RandomAccessSet',['../classabt_1_1RandomAccessSet.html',1,'abt']]],
-  ['randomaccessset',['RandomAccessSet',['../classabt_1_1RandomAccessSet.html#a346fef16783d239d8fe432ff3aae62e4',1,'abt::RandomAccessSet::RandomAccessSet()'],['../classabt_1_1RandomAccessSet.html#ac0d3373c4ff02d20b19b6ec0a681b23c',1,'abt::RandomAccessSet::RandomAccessSet(std::initializer_list&lt; Element &gt; elements)']]],
+  ['randomaccessset',['RandomAccessSet',['../classtapir_1_1RandomAccessSet.html',1,'tapir']]],
+  ['randomaccessset',['RandomAccessSet',['../classtapir_1_1RandomAccessSet.html#a49ccc89d469c46cc60c074dd8e20c967',1,'tapir::RandomAccessSet::RandomAccessSet()'],['../classtapir_1_1RandomAccessSet.html#a94bcd6d303d58d9f3060a396cf87ce76',1,'tapir::RandomAccessSet::RandomAccessSet(std::initializer_list&lt; Element &gt; elements)']]],
   ['randomaccessset_2ehpp',['RandomAccessSet.hpp',['../RandomAccessSet_8hpp.html',1,'']]],
-  ['randomaccessset_3c_20solver_3a_3ahistoryentry_20_2a_20_3e',['RandomAccessSet&lt; solver::HistoryEntry * &gt;',['../classabt_1_1RandomAccessSet.html',1,'abt']]],
+  ['randomaccessset_3c_20solver_3a_3ahistoryentry_20_2a_20_3e',['RandomAccessSet&lt; solver::HistoryEntry * &gt;',['../classtapir_1_1RandomAccessSet.html',1,'tapir']]],
   ['randomgenerator',['RandomGenerator',['../global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a',1,'global.hpp']]],
   ['recalculatevalue',['recalculateValue',['../classsolver_1_1BeliefNode.html#a96bf8f8fac1f0a8a4003dd4f1fb3b850',1,'solver::BeliefNode']]],
   ['rectangle2d',['Rectangle2D',['../classgeometry_1_1Rectangle2D.html',1,'geometry']]],
@@ -11,7 +11,7 @@ var searchData=
   ['registergeneratorparser',['registerGeneratorParser',['../classshared_1_1ModelWithProgramOptions.html#a698dd68f057ff397ff459852b09261bc',1,'shared::ModelWithProgramOptions']]],
   ['registerheuristicparser',['registerHeuristicParser',['../classshared_1_1ModelWithProgramOptions.html#abd562dcb89aa52bb961da596d87e5298',1,'shared::ModelWithProgramOptions']]],
   ['registersearchparser',['registerSearchParser',['../classshared_1_1ModelWithProgramOptions.html#a77f231aedb7621488862639be958168b',1,'shared::ModelWithProgramOptions']]],
-  ['remove',['remove',['../classabt_1_1LinkedHashSet.html#add609857ab0f99af3d24e22a4d20fe87',1,'abt::LinkedHashSet::remove()'],['../classabt_1_1RandomAccessSet.html#a8c8b6fe10b38ba7a5e645e32a10c335e',1,'abt::RandomAccessSet::remove()']]],
+  ['remove',['remove',['../classtapir_1_1LinkedHashSet.html#a498f45cb29c4b059d23b32a2ae49dd90',1,'tapir::LinkedHashSet::remove()'],['../classtapir_1_1RandomAccessSet.html#af2b96f178b5cd95dfdbe234b447b1a75',1,'tapir::RandomAccessSet::remove()']]],
   ['removecachedvalue',['removeCachedValue',['../classsolver_1_1BeliefNode.html#af71330c2e821c9f6c3068ea384f915b0',1,'solver::BeliefNode']]],
   ['removemapping',['removeMapping',['../classrocksample_1_1LegalActionsPool.html#a00b492906793ae873cf4987a162e0e81',1,'rocksample::LegalActionsPool']]],
   ['removestateinfo',['removeStateInfo',['../classsolver_1_1RTree.html#ad628b0052b96dc858b9ef08860ac6c46',1,'solver::RTree::removeStateInfo()'],['../classsolver_1_1StateIndex.html#a201d7b6c079995f8f6d787e34ffd9092',1,'solver::StateIndex::removeStateInfo()']]],

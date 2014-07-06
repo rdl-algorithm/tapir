@@ -44,11 +44,11 @@ bool TagState::equals(solver::State const &otherState) const {
 
 std::size_t TagState::hash() const {
     std::size_t hashValue = 0;
-    abt::hash_combine(hashValue, robotPos_.i);
-    abt::hash_combine(hashValue, robotPos_.j);
-    abt::hash_combine(hashValue, opponentPos_.i);
-    abt::hash_combine(hashValue, opponentPos_.j);
-    abt::hash_combine(hashValue, isTagged_);
+    tapir::hash_combine(hashValue, robotPos_.i);
+    tapir::hash_combine(hashValue, robotPos_.j);
+    tapir::hash_combine(hashValue, opponentPos_.i);
+    tapir::hash_combine(hashValue, opponentPos_.j);
+    tapir::hash_combine(hashValue, isTagged_);
     return hashValue;
 }
 

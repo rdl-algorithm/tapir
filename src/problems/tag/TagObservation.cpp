@@ -40,9 +40,9 @@ bool TagObservation::equals(
 
 std::size_t TagObservation::hash() const {
     std::size_t hashValue = 0;
-    abt::hash_combine(hashValue, position_.i);
-    abt::hash_combine(hashValue, position_.j);
-    abt::hash_combine(hashValue, seesOpponent_);
+    tapir::hash_combine(hashValue, position_.i);
+    tapir::hash_combine(hashValue, position_.j);
+    tapir::hash_combine(hashValue, seesOpponent_);
     return hashValue;
 }
 

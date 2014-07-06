@@ -4,7 +4,7 @@ var searchData=
   ['cachedvalue',['CachedValue',['../classsolver_1_1CachedValue.html',1,'solver']]],
   ['cachedvalue',['CachedValue',['../classsolver_1_1CachedValue.html#a5595ef076766fb16db2fd3b41aa72aed',1,'solver::CachedValue']]],
   ['cachedvalue_3c_20double_20_3e',['CachedValue&lt; double &gt;',['../classsolver_1_1CachedValue.html',1,'solver']]],
-  ['change_5fdirectory',['change_directory',['../namespaceabt.html#a8c3b782da4d2ca71698cacbd07b00d90',1,'abt']]],
+  ['change_5fdirectory',['change_directory',['../namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4',1,'tapir']]],
   ['changeflags',['ChangeFlags',['../namespacesolver.html#acd9b0cb1f5550117e5e65bbc472fbbc9',1,'solver']]],
   ['changeflags_2ehpp',['ChangeFlags.hpp',['../ChangeFlags_8hpp.html',1,'']]],
   ['changeflagsinttype',['ChangeFlagsIntType',['../namespacesolver.html#a5d5ea34fa2e8adb7093e4d5bfba39bfd',1,'solver']]],
@@ -13,10 +13,10 @@ var searchData=
   ['childnode_5f',['childNode_',['../classsolver_1_1DiscretizedActionMapEntry.html#ad73e2dbc7bc8221608f68846317fb500',1,'solver::DiscretizedActionMapEntry']]],
   ['choosers_2ecpp',['choosers.cpp',['../choosers_8cpp.html',1,'']]],
   ['choosers_2ehpp',['choosers.hpp',['../choosers_8hpp.html',1,'']]],
-  ['clear',['clear',['../classabt_1_1LinkedHashSet.html#a2cbc9b7d2e9d5f7f7e87db78f95e3ca3',1,'abt::LinkedHashSet::clear()'],['../classabt_1_1RandomAccessSet.html#a2276113a619083b888e2d221adc30ded',1,'abt::RandomAccessSet::clear()']]],
-  ['clock_5fms',['clock_ms',['../namespaceabt.html#a6118b840f6a387c7d3861c251b769c13',1,'abt']]],
+  ['clear',['clear',['../classtapir_1_1LinkedHashSet.html#ae4625d5ca017eb2fdbc58f14504a64a6',1,'tapir::LinkedHashSet::clear()'],['../classtapir_1_1RandomAccessSet.html#a1a0b050fc89b5d823da0bbe386bc5051',1,'tapir::RandomAccessSet::clear()']]],
+  ['clock_5fms',['clock_ms',['../namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7',1,'tapir']]],
   ['configpath',['configPath',['../structshared_1_1SharedOptions.html#ae68eadb1f1025b01f0d315d1055d60af',1,'shared::SharedOptions']]],
-  ['contains',['contains',['../classabt_1_1LinkedHashSet.html#a1fdad82bccd06753889ca031f15363b1',1,'abt::LinkedHashSet::contains()'],['../classabt_1_1RandomAccessSet.html#ae596ce9d7a2a705d5ff199ee77fc5d73',1,'abt::RandomAccessSet::contains()']]],
+  ['contains',['contains',['../classtapir_1_1LinkedHashSet.html#a2322fba5322fe317a243ea3dc87cbd86',1,'tapir::LinkedHashSet::contains()'],['../classtapir_1_1RandomAccessSet.html#a394aad2736cbc498b1a3efea251d54a7',1,'tapir::RandomAccessSet::contains()']]],
   ['copy',['copy',['../classrocksample_1_1RockSampleAction.html#acaad12422c1ae8aa8f8f810a97fdb128',1,'rocksample::RockSampleAction::copy()'],['../classrocksample_1_1RockSampleObservation.html#af7185fbdca960232fea50fca63cf3601',1,'rocksample::RockSampleObservation::copy()'],['../classrocksample_1_1RockSampleState.html#a0c96bf57d346a4ba9acfa6c51ca95047',1,'rocksample::RockSampleState::copy()'],['../classgeometry_1_1Point2D.html#a54e9253da40ff2f1b739699fa3820d87',1,'geometry::Point2D::copy()'],['../classgeometry_1_1Vector2D.html#a713eea65ff50dc26f0e7230675a57543',1,'geometry::Vector2D::copy()'],['../classtag_1_1TagAction.html#af231221e8b882195c18ea08da9a62ad1',1,'tag::TagAction::copy()'],['../classtag_1_1TagObservation.html#aaa1e56c2abda1ad4f5311177dcb88946',1,'tag::TagObservation::copy()'],['../classtag_1_1TagState.html#a9b06dec128221f2e4a6b712000356cd9',1,'tag::TagState::copy()'],['../classsolver_1_1Point.html#a1d14e193b8a2401b2687b6235ec7d476',1,'solver::Point::copy()']]],
   ['createactionmapping',['createActionMapping',['../classrocksample_1_1LegalActionsPool.html#a4189c64770900f9b8dda72ee7aa343d4',1,'rocksample::LegalActionsPool::createActionMapping()'],['../classrocksample_1_1PreferredActionsPool.html#a0c00db13c55c60c6412f814f5be50b18',1,'rocksample::PreferredActionsPool::createActionMapping()'],['../classsolver_1_1ActionPool.html#a9fbf8b2f2916395cfce842d645a10512',1,'solver::ActionPool::createActionMapping()'],['../classsolver_1_1DiscretizedActionPool.html#a174632f4f2ad2d1a3d1e3b330b185908',1,'solver::DiscretizedActionPool::createActionMapping()']]],
   ['createactionnode',['createActionNode',['../classsolver_1_1ActionMapping.html#a619cf4c7945368f951929f8a8f39b8fe',1,'solver::ActionMapping::createActionNode()'],['../classsolver_1_1DiscretizedActionMap.html#ad1ad269b760ae3f94eaae5f467b66d4b',1,'solver::DiscretizedActionMap::createActionNode()']]],
@@ -35,6 +35,5 @@ var searchData=
   ['createsearchstrategy',['createSearchStrategy',['../classshared_1_1ModelWithProgramOptions.html#a87a62ae1676eb8c4d7186dda8fa4a97f',1,'shared::ModelWithProgramOptions::createSearchStrategy()'],['../classsolver_1_1Model.html#a9255f8536dc82bdbbf22e9d2f8b20da9',1,'solver::Model::createSearchStrategy()']]],
   ['createserializer',['createSerializer',['../classrocksample_1_1RockSampleModel.html#a827e08611510470f8a8b0023deeae460',1,'rocksample::RockSampleModel::createSerializer()'],['../classtag_1_1TagModel.html#ae11259dc1b4cf3426459ffd1d6885a84',1,'tag::TagModel::createSerializer()'],['../classsolver_1_1Model.html#af2a047dea9be5fd302e30456dc13e490',1,'solver::Model::createSerializer()']]],
   ['createstateindex',['createStateIndex',['../classsolver_1_1Model.html#aa9099de4b2b73a8b55a916a5ba827401',1,'solver::Model']]],
-  ['custom_20non_2drecursive_20make_20system',['Custom non-recursive Make system',['../md_docs_generated_BUILD.html',1,'']]],
-  ['code_20structure_20and_20examples',['Code structure and examples',['../md_docs_Overview.html',1,'']]]
+  ['custom_20non_2drecursive_20make_20system',['Custom non-recursive Make system',['../md_docs_generated_Build_System.html',1,'']]]
 ];

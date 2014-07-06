@@ -140,7 +140,7 @@ class DiscretizedActionMap: public solver::ActionMapping {
     long numberOfVisitedEntries_;
 
     /** The sequence of bins to be visited. */
-    abt::LinkedHashSet<long> binSequence_;
+    tapir::LinkedHashSet<long> binSequence_;
 
     /** The total of the visit counts of all of the individual entries. */
     long totalVisitCount_;

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/shared/geometry/Vector2D.cpp Source File</title>
+<title>TAPIR: src/problems/shared/geometry/Vector2D.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -153,8 +153,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
 <div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classgeometry_1_1Vector2D.html#ad6ced4a4ca815b2d975b7fb2479bf147">   62</a></span>&#160;std::size_t Vector2D::hash()<span class="keyword"> const </span>{</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    std::size_t hashValue = 0;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <a class="code" href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a>(hashValue, x_);</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <a class="code" href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a>(hashValue, y_);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <a class="code" href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a>(hashValue, x_);</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <a class="code" href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a>(hashValue, y_);</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordflow">return</span> hashValue;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
@@ -211,13 +211,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classgeometry_1_1Vector2D_html"><div class="ttname"><a href="classgeometry_1_1Vector2D.html">geometry::Vector2D</a></div><div class="ttdef"><b>Definition:</b> <a href="Vector2D_8hpp_source.html#l00015">Vector2D.hpp:15</a></div></div>
 <div class="ttc" id="classgeometry_1_1Point2D_html"><div class="ttname"><a href="classgeometry_1_1Point2D.html">geometry::Point2D</a></div><div class="ttdef"><b>Definition:</b> <a href="Point2D_8hpp_source.html#l00014">Point2D.hpp:14</a></div></div>
 <div class="ttc" id="Point_8hpp_html"><div class="ttname"><a href="Point_8hpp.html">Point.hpp</a></div><div class="ttdoc">Defines the abstract Point class. </div></div>
-<div class="ttc" id="namespaceabt_html_a4bbe799c215ab038b99345ab8a1367c1"><div class="ttname"><a href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a></div><div class="ttdeci">void hash_combine(std::size_t &amp;seed, T const &amp;v)</div><div class="ttdoc">A template method to combine hash values - from boost::hash_combine. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00046">global.hpp:46</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="namespacetapir_html_a2f4b2c3f812d016297bf0adf85c21008"><div class="ttname"><a href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a></div><div class="ttdeci">void hash_combine(std::size_t &amp;seed, T const &amp;v)</div><div class="ttdoc">A template method to combine hash values - from boost::hash_combine. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00046">global.hpp:46</a></div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
 <div class="ttc" id="Vector_8hpp_html"><div class="ttname"><a href="Vector_8hpp.html">Vector.hpp</a></div><div class="ttdoc">An abstract extension of the Point class for points that can be easily be represented as real vectors...</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

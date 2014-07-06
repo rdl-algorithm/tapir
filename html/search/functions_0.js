@@ -2,7 +2,7 @@ var searchData=
 [
   ['actionmapping',['ActionMapping',['../classsolver_1_1ActionMapping.html#ab83c959685072d8e8fd1326c15d978b9',1,'solver::ActionMapping']]],
   ['actionnode',['ActionNode',['../classsolver_1_1ActionNode.html#a137cb01104d4bb41befe7fa91597e8b6',1,'solver::ActionNode::ActionNode()'],['../classsolver_1_1ActionNode.html#af6acb8cec2b4ba279332b18e0d9222c6',1,'solver::ActionNode::ActionNode(ActionMappingEntry *parentEntry)']]],
-  ['add',['add',['../classabt_1_1LinkedHashSet.html#a2fb349304f262d7da51d9b960b4b5f50',1,'abt::LinkedHashSet::add()'],['../classabt_1_1RandomAccessSet.html#a614203405f1c27c578e2ed550e648a65',1,'abt::RandomAccessSet::add()']]],
+  ['add',['add',['../classtapir_1_1LinkedHashSet.html#adf37fa02dc39d5934e30478164519d30',1,'tapir::LinkedHashSet::add()'],['../classtapir_1_1RandomAccessSet.html#a9560321d6d151a6cb61694a9eac3e1db',1,'tapir::RandomAccessSet::add()']]],
   ['addabtoptions',['addABTOptions',['../structshared_1_1SharedOptions.html#af43f1cd137d81ca6cef1bf03ee0f7f96',1,'shared::SharedOptions']]],
   ['addalias',['addAlias',['../classoptions_1_1BaseOption.html#a3767ec7ada22b53b97e54705182ca170',1,'options::BaseOption']]],
   ['addcachedvalue',['addCachedValue',['../classsolver_1_1BeliefNode.html#a81772b0a726598e3345f28616c20b7b9',1,'solver::BeliefNode']]],

@@ -11,9 +11,9 @@ MEMBERS_solver            = $(ALL_OBJS_solver) $(OBJS_global)
 
 # The output file for the library.
 ifeq ($(CFG),shared)
-	LIB_solver               := $(BUILDDIR)/libabt.so
+	LIB_solver               := $(BUILDDIR)/libtapir.so
 else
-	LIB_solver               := $(BUILDDIR)/libabt.a
+	LIB_solver               := $(BUILDDIR)/libtapir.a
 endif
 OUTPUTS_TO_CLEAN_solver  += $(LIB_solver)
 

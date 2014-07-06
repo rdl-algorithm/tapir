@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/Simulator.cpp Source File</title>
+<title>TAPIR: src/solver/Simulator.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -231,22 +231,22 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        <span class="keywordflow">if</span> (options_-&gt;<a class="code" href="structsolver_1_1Options.html#a452f875a60416233ea0d05b43cdb3333">hasVerboseOutput</a>) {</div>
 <div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;            cout &lt;&lt; <span class="stringliteral">&quot;Model changing.&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        }</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="keywordtype">double</span> changingTimeStart = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="keywordtype">double</span> changingTimeStart = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
 <div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        <span class="comment">// Apply all the changes!</span></div>
 <div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;        <span class="keywordtype">bool</span> noError = <a class="code" href="classsolver_1_1Simulator.html#a7767c349272593d8a5a2cc088a813447">handleChanges</a>(iter-&gt;second, hasDynamicChanges_);</div>
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;        <span class="keywordflow">if</span> (!noError) {</div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        }</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        <span class="keywordtype">double</span> changingTime = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - changingTimeStart;</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        <span class="keywordtype">double</span> changingTime = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - changingTimeStart;</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keywordflow">if</span> (options_-&gt;<a class="code" href="structsolver_1_1Options.html#a452f875a60416233ea0d05b43cdb3333">hasVerboseOutput</a>) {</div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            cout &lt;&lt; <span class="stringliteral">&quot;Changes complete&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;            cout &lt;&lt; <span class="stringliteral">&quot;Total of &quot;</span> &lt;&lt; changingTime &lt;&lt; <span class="stringliteral">&quot; ms used for changes.&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;        }</div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    }</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    <span class="keywordtype">double</span> impSolTimeStart = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    <span class="keywordtype">double</span> impSolTimeStart = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
 <div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    solver_-&gt;<a class="code" href="classsolver_1_1Solver.html#abfa749ac436dcdebe3ba3ad26f4e2502">improvePolicy</a>(currentBelief);</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    totalImprovementTime_ += (<a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - impSolTimeStart);</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    totalImprovementTime_ += (<a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - impSolTimeStart);</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;</div>
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    <span class="keywordflow">if</span> (options_-&gt;<a class="code" href="structsolver_1_1Options.html#a452f875a60416233ea0d05b43cdb3333">hasVerboseOutput</a>) {</div>
 <div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;        std::stringstream newStream;</div>
@@ -287,9 +287,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    }</div>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;</div>
 <div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    <span class="comment">// Replenish the particles.</span></div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    <span class="keywordtype">double</span> replenishTimeStart = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    <span class="keywordtype">double</span> replenishTimeStart = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    solver_-&gt;<a class="code" href="classsolver_1_1Solver.html#af79b50ae47b5913ccd41360ee3b63b27">replenishChild</a>(currentBelief, *result.<a class="code" href="structsolver_1_1Model_1_1StepResult.html#a6acc1544e3e7a0ca51937a2371d75476">action</a>, *result.<a class="code" href="structsolver_1_1Model_1_1StepResult.html#af4461c0adbf587c63d7dde7614cea172">observation</a>);</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    totalReplenishingTime_ += <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - replenishTimeStart;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    totalReplenishingTime_ += <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - replenishTimeStart;</div>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;</div>
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;    <span class="comment">// Update the agent&#39;s belief.</span></div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    agent_-&gt;updateBelief(*result.<a class="code" href="structsolver_1_1Model_1_1StepResult.html#a6acc1544e3e7a0ca51937a2371d75476">action</a>, *result.<a class="code" href="structsolver_1_1Model_1_1StepResult.html#af4461c0adbf587c63d7dde7614cea172">observation</a>);</div>
@@ -297,9 +297,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;</div>
 <div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    <span class="comment">// If we&#39;re pruning on every step, we do it now.</span></div>
 <div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    <span class="keywordflow">if</span> (options_-&gt;<a class="code" href="structsolver_1_1Options.html#a0cf2fdfbed36e6447d46afd98f651e43">pruneEveryStep</a>) {</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keywordtype">double</span> pruningTimeStart = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keywordtype">double</span> pruningTimeStart = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        <span class="keywordtype">long</span> nSequencesDeleted = solver_-&gt;<a class="code" href="classsolver_1_1Solver.html#ab1589a68c69377d020a21baa57a4ab9f">pruneSiblings</a>(currentBelief);</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        <span class="keywordtype">long</span> pruningTime = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - pruningTimeStart;</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        <span class="keywordtype">long</span> pruningTime = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - pruningTimeStart;</div>
 <div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;        totalPruningTime_ += pruningTime;</div>
 <div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;        cout &lt;&lt; <span class="stringliteral">&quot;Pruned &quot;</span> &lt;&lt; nSequencesDeleted &lt;&lt; <span class="stringliteral">&quot; sequences in &quot;</span> &lt;&lt; pruningTime &lt;&lt; <span class="stringliteral">&quot;ms.&quot;</span>;</div>
 <div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;    }</div>
@@ -336,9 +336,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;</div>
 <div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    model_-&gt;applyChanges(changes, <span class="keyword">nullptr</span>);</div>
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;</div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">double</span> startTime = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">double</span> startTime = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    solverModel_-&gt;<a class="code" href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818">applyChanges</a>(changes, solver_);</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    totalChangingTime_ += <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - startTime;</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    totalChangingTime_ += <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - startTime;</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;</div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    <span class="comment">// If the current state is deleted, the simulation is broken!</span></div>
 <div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;    <a class="code" href="classsolver_1_1StateInfo.html">StateInfo</a> <span class="keyword">const</span> *lastInfo = actualHistory_-&gt;getLastEntry()-&gt;getStateInfo();</div>
@@ -362,9 +362,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    }</div>
 <div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;</div>
 <div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;    <span class="comment">// Finally we apply the changes.</span></div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    startTime = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    startTime = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
 <div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;    solver_-&gt;<a class="code" href="classsolver_1_1Solver.html#afb464bf9281f8f1657e9a43b16dde054">applyChanges</a>();</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    totalChangingTime_ += <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - startTime;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    totalChangingTime_ += <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - startTime;</div>
 <div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;}</div>
 <div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;</div>
@@ -408,7 +408,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="Serializer_8hpp_html"><div class="ttname"><a href="Serializer_8hpp.html">Serializer.hpp</a></div><div class="ttdoc">Defines Serializer, an abstract base class for serialization of an ABT solver instance. </div></div>
 <div class="ttc" id="structsolver_1_1Model_1_1StepResult_html_aeb37730b22213531d3cce7ed48cee151"><div class="ttname"><a href="structsolver_1_1Model_1_1StepResult.html#aeb37730b22213531d3cce7ed48cee151">solver::Model::StepResult::transitionParameters</a></div><div class="ttdeci">std::unique_ptr&lt; TransitionParameters &gt; transitionParameters</div><div class="ttdoc">The transition parameters, if any, describing the transition. </div><div class="ttdef"><b>Definition:</b> <a href="Model_8hpp_source.html#l00129">Model.hpp:129</a></div></div>
 <div class="ttc" id="classsolver_1_1Simulator_html_a79d40ca40083f09d5c1e0d73398ddf5c"><div class="ttname"><a href="classsolver_1_1Simulator.html#a79d40ca40083f09d5c1e0d73398ddf5c">solver::Simulator::getStepCount</a></div><div class="ttdeci">long getStepCount() const </div><div class="ttdoc">Returns the number of steps taken in this simulation. </div><div class="ttdef"><b>Definition:</b> <a href="Simulator_8cpp_source.html#l00070">Simulator.cpp:70</a></div></div>
-<div class="ttc" id="namespaceabt_html_a6118b840f6a387c7d3861c251b769c13"><div class="ttname"><a href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a></div><div class="ttdeci">double clock_ms()</div><div class="ttdoc">Returns the time (in ms) since the program started running. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00040">global.hpp:40</a></div></div>
 <div class="ttc" id="classsolver_1_1Simulator_html_af0d7c04c46df0cdafe5f361d5f471a0e"><div class="ttname"><a href="classsolver_1_1Simulator.html#af0d7c04c46df0cdafe5f361d5f471a0e">solver::Simulator::Simulator</a></div><div class="ttdeci">Simulator(std::unique_ptr&lt; Model &gt; model, Solver *solver, bool hasDynamicChanges)</div><div class="ttdoc">Constructs a new simulator. </div><div class="ttdef"><b>Definition:</b> <a href="Simulator_8cpp_source.html#l00028">Simulator.cpp:28</a></div></div>
 <div class="ttc" id="structsolver_1_1Model_1_1StepResult_html_a340305be8331e8f6a82a610837ec3719"><div class="ttname"><a href="structsolver_1_1Model_1_1StepResult.html#a340305be8331e8f6a82a610837ec3719">solver::Model::StepResult::nextState</a></div><div class="ttdeci">std::unique_ptr&lt; State &gt; nextState</div><div class="ttdoc">The next state. </div><div class="ttdef"><b>Definition:</b> <a href="Model_8hpp_source.html#l00135">Model.hpp:135</a></div></div>
 <div class="ttc" id="classsolver_1_1Simulator_html_aa15efbbc99c4118d6d0c5106b9a17b63"><div class="ttname"><a href="classsolver_1_1Simulator.html#aa15efbbc99c4118d6d0c5106b9a17b63">solver::Simulator::getSolver</a></div><div class="ttdeci">Solver * getSolver() const </div><div class="ttdoc">Returns the solver being tested by this simulator. </div><div class="ttdef"><b>Definition:</b> <a href="Simulator_8cpp_source.html#l00056">Simulator.cpp:56</a></div></div>
@@ -419,6 +418,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1StateInfo_html"><div class="ttname"><a href="classsolver_1_1StateInfo.html">solver::StateInfo</a></div><div class="ttdoc">A wrapper for a POMDP state. </div><div class="ttdef"><b>Definition:</b> <a href="StateInfo_8hpp_source.html#l00029">StateInfo.hpp:29</a></div></div>
 <div class="ttc" id="classsolver_1_1BeliefNode_html_a32a39db08ddf9e4bfd577aee93019c02"><div class="ttname"><a href="classsolver_1_1BeliefNode.html#a32a39db08ddf9e4bfd577aee93019c02">solver::BeliefNode::getNumberOfParticles</a></div><div class="ttdeci">long getNumberOfParticles() const </div><div class="ttdoc">Returns the number of particles in this node. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefNode_8cpp_source.html#l00098">BeliefNode.cpp:98</a></div></div>
 <div class="ttc" id="classsolver_1_1Model_html_aaccf7e6bae8558086cf276017c9a9818"><div class="ttname"><a href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818">solver::Model::applyChanges</a></div><div class="ttdeci">virtual void applyChanges(std::vector&lt; std::unique_ptr&lt; ModelChange &gt;&gt; const &amp;changes, Solver *solver)</div><div class="ttdoc">Applies a number of changes to the model, and (if provided) to the given solver. </div><div class="ttdef"><b>Definition:</b> <a href="Model_8cpp_source.html#l00095">Model.cpp:95</a></div></div>
+<div class="ttc" id="namespacetapir_html_a2625fbd617a2b89a3bd3d957c12890d7"><div class="ttname"><a href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a></div><div class="ttdeci">double clock_ms()</div><div class="ttdoc">Returns the time (in ms) since the program started running. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00040">global.hpp:40</a></div></div>
 <div class="ttc" id="classsolver_1_1Simulator_html_a6251eb9bb86e5f8e6e6a27d537fa5d81"><div class="ttname"><a href="classsolver_1_1Simulator.html#a6251eb9bb86e5f8e6e6a27d537fa5d81">solver::Simulator::getTotalChangingTime</a></div><div class="ttdeci">double getTotalChangingTime() const </div><div class="ttdoc">Returns the total time spent on changes to the solver&#39;s model and policy. </div><div class="ttdef"><b>Definition:</b> <a href="Simulator_8cpp_source.html#l00073">Simulator.cpp:73</a></div></div>
 <div class="ttc" id="classsolver_1_1Simulator_html_a13adc37ac54ae1784f794a5e45cbfddc"><div class="ttname"><a href="classsolver_1_1Simulator.html#a13adc37ac54ae1784f794a5e45cbfddc">solver::Simulator::getTotalReplenishingTime</a></div><div class="ttdeci">double getTotalReplenishingTime() const </div><div class="ttdoc">Returns the total time spent replenishing particles. </div><div class="ttdef"><b>Definition:</b> <a href="Simulator_8cpp_source.html#l00076">Simulator.cpp:76</a></div></div>
 <div class="ttc" id="classsolver_1_1Solver_html_ab1589a68c69377d020a21baa57a4ab9f"><div class="ttname"><a href="classsolver_1_1Solver.html#ab1589a68c69377d020a21baa57a4ab9f">solver::Solver::pruneSiblings</a></div><div class="ttdeci">long pruneSiblings(BeliefNode *node)</div><div class="ttdoc">Prunes all sibling nodes of the given node in the tree, i.e. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8cpp_source.html#l00214">Solver.cpp:214</a></div></div>
@@ -439,7 +439,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

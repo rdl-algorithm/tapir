@@ -120,7 +120,7 @@ void Solver::initializeEmpty() {
 /* ------------------- Policy mutators ------------------- */
 void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long maximumDepth,
         double timeout) {
-    double startTime = abt::clock_ms();
+    double startTime = tapir::clock_ms();
     if (numberOfHistories < 0) {
         numberOfHistories = options_->historiesPerStep;
     }
@@ -150,7 +150,7 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
 
     long actualNumHistories = multipleSearches(startNode,  sampler, maximumDepth, numberOfHistories,
             startTime + timeout);
-    double totalTimeTaken = abt::clock_ms() - startTime;
+    double totalTimeTaken = tapir::clock_ms() - startTime;
     if (options_->hasVerboseOutput) {
         cout << actualNumHistories << " histories in " << totalTimeTaken << "ms." << endl;
     }
@@ -468,12 +468,12 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
         actionValues.emplace(entry->getMeanQValue(), entry);
     }
     for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
-        abt::print_double(it->first, os, 8, 2, std::ios_base::fixed | std::ios_base::showpos);
+        tapir::print_double(it->first, os, 8, 2, std::ios_base::fixed | std::ios_base::showpos);
         os << ": ";
         std::ostringstream sstr;
         sstr << *it->second->getAction();
-        abt::print_with_width(sstr.str(), os, 17);
-        abt::print_with_width(it->second->getVisitCount(), os, 8);
+        tapir::print_with_width(sstr.str(), os, 17);
+        tapir::print_with_width(it->second->getVisitCount(), os, 8);
         os << endl;
     }
 }
@@ -670,7 +670,7 @@ long Solver::multipleSearches(BeliefNode *startNode, std::function<StateInfo *()
             break;
         }
         // If we've gone past the termination time, stop searching.
-        if (hasTimeout && abt::clock_ms() >= endTime) {
+        if (hasTimeout && tapir::clock_ms() >= endTime) {
             break;
         }
         singleSearch(startNode, sampler(), maximumDepth);

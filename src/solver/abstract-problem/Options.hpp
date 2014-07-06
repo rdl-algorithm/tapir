@@ -48,7 +48,7 @@ struct Options : options::BaseOptions {
     /** The maximum allowable depth in the search tree. */
     long maximumDepth = 100;
 
-    /* ----------------------- ABT output modes ------------------- */
+    /* ----------------------- TAPIR output modes ------------------- */
     /** True iff color output is allowed. */
     bool hasColorOutput = false;
     /** True iff verbose output is enabled. */

@@ -35,19 +35,18 @@ int stest(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(false);
 
     OptionsType options;
-    std::string workingDir = abt::get_current_directory();
+    std::string workingDir = tapir::get_current_directory();
     try {
         parser->setOptions(&options);
         parser->parseCmdLine(argc, argv);
-        parser->parseCmdLine(argc, argv);
         if (!options.baseConfigPath.empty()) {
-            abt::change_directory(options.baseConfigPath);
+            tapir::change_directory(options.baseConfigPath);
         }
         if (!options.configPath.empty()) {
             parser->parseCfgFile(options.configPath);
         }
         if (!options.baseConfigPath.empty()) {
-            abt::change_directory(workingDir);
+            tapir::change_directory(workingDir);
         }
         parser->finalize();
     } catch (options::OptionParsingException const &e) {
@@ -66,12 +65,12 @@ int stest(int argc, char const *argv[]) {
 
     RandomGenerator randGen;
     if (!options.baseConfigPath.empty()) {
-        abt::change_directory(options.baseConfigPath);
+        tapir::change_directory(options.baseConfigPath);
     }
     std::unique_ptr<ModelType> newModel = std::make_unique<ModelType>(&randGen,
             std::make_unique<OptionsType>(options));
     if (!options.baseConfigPath.empty()) {
-        abt::change_directory(workingDir);
+        tapir::change_directory(workingDir);
     }
     solver::Solver solver(std::move(newModel));
     solver.getSerializer()->load(inFile);

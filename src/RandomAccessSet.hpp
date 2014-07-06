@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace abt {
+namespace tapir {
 /** RandomAccessSet
  *
  * Represents a set of elements:
@@ -108,6 +108,6 @@ class RandomAccessSet {
     /** A vector to store the elements. */
     std::vector<Element> elementList_;
 };
-} /* namespace abt */
+} /* namespace tapir */
 
 #endif /* SOLVER_RANDOMACCESSSET_HPP_ */

@@ -10,7 +10,7 @@
 #include <list>
 #include <unordered_map>
 
-namespace abt {
+namespace tapir {
 /** LinkedHashSet
  *
  * Represents a set of elements which maintains iteration in the order of insertion.
@@ -101,6 +101,6 @@ class LinkedHashSet {
     /** A linked list to store the elements in order. */
     std::list<Element> elementList_;
 };
-} /* namespace abt */
+} /* namespace tapir */
 
 #endif /* SOLVER_LINKEDHASHSET_HPP_ */

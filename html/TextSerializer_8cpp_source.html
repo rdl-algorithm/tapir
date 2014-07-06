@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/serialization/TextSerializer.cpp Source File</title>
+<title>TAPIR: src/solver/serialization/TextSerializer.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -143,7 +143,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    std::map&lt;long, std::vector&lt;std::unique_ptr&lt;ModelChange&gt;&gt;&gt; changes;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    std::string line;</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordflow">while</span> (std::getline(is, line)) {</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        abt::trim(line);</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        tapir::trim(line);</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordflow">if</span> (line.empty()) {</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            <span class="keywordflow">continue</span>;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        }</div>
@@ -243,13 +243,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00155"></a><span class="lineno"><a class="line" href="classsolver_1_1TextSerializer.html#a5db4d475d255500dfe23059b9da8b9cb">  155</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="classsolver_1_1TextSerializer.html#a1cf07991a2a90fd237806f28ad2e6cf0">TextSerializer::save</a>(<a class="code" href="classsolver_1_1HistoryEntry.html">HistoryEntry</a> <span class="keyword">const</span> &amp;entry, std::ostream &amp;os) {</div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    os &lt;&lt; <span class="stringliteral">&quot;HistoryEntry &lt; &quot;</span>;</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    os &lt;&lt; entry.owningSequence_-&gt;id_ &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; entry.entryId_ &lt;&lt; <span class="stringliteral">&quot; &gt;: (S&quot;</span>;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    <a class="code" href="namespaceabt.html#ad884e79d6bd470328b81ff6a27f57a08">abt::print_with_width</a>(entry.stateInfo_-&gt;id_, os, 6,</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    <a class="code" href="namespacetapir.html#a77fbaa584969e170cad776c53b33212e">tapir::print_with_width</a>(entry.stateInfo_-&gt;id_, os, 6,</div>
 <div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;            std::ios_base::left);</div>
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    os &lt;&lt; <span class="stringliteral">&quot; &quot;</span>;</div>
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    std::stringstream sstr;</div>
 <div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    <a class="code" href="classsolver_1_1Serializer.html#acafdfae10700daa56b0eb4bc26c4fb64">saveAction</a>(entry.action_.get(), sstr);</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    <a class="code" href="namespaceabt.html#ad884e79d6bd470328b81ff6a27f57a08">abt::print_with_width</a>(sstr.str(), os,</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    <a class="code" href="namespacetapir.html#a77fbaa584969e170cad776c53b33212e">tapir::print_with_width</a>(sstr.str(), os,</div>
 <div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;            <a class="code" href="classsolver_1_1TextSerializer.html#a6050b9760506d805cf7553d6d1821052">getActionColumnWidth</a>(),</div>
 <div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;            std::ios_base::left);</div>
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;</div>
@@ -257,7 +257,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;    sstr.clear();</div>
 <div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    sstr.str(<span class="stringliteral">&quot;&quot;</span>);</div>
 <div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    <a class="code" href="classsolver_1_1TextSerializer.html#a360cb108e1d23966e7c5bf2a70d830fe">saveTransitionParameters</a>(entry.transitionParameters_.get(), sstr);</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    <a class="code" href="namespaceabt.html#ad884e79d6bd470328b81ff6a27f57a08">abt::print_with_width</a>(sstr.str(), os,</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    <a class="code" href="namespacetapir.html#a77fbaa584969e170cad776c53b33212e">tapir::print_with_width</a>(sstr.str(), os,</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;            <a class="code" href="classsolver_1_1TextSerializer.html#a3e5972a83beb1b7e0b82a0d3d6adc34f">getTPColumnWidth</a>(),</div>
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;            std::ios_base::left);</div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;</div>
@@ -265,12 +265,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    sstr.clear();</div>
 <div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    sstr.str(<span class="stringliteral">&quot;&quot;</span>);</div>
 <div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <a class="code" href="classsolver_1_1Serializer.html#a45cdd00e0bf4413e536be34bdbe1be5c">saveObservation</a>(entry.observation_.get(), sstr);</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <a class="code" href="namespaceabt.html#ad884e79d6bd470328b81ff6a27f57a08">abt::print_with_width</a>(sstr.str(), os,</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <a class="code" href="namespacetapir.html#a77fbaa584969e170cad776c53b33212e">tapir::print_with_width</a>(sstr.str(), os,</div>
 <div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;            <a class="code" href="classsolver_1_1TextSerializer.html#aa50bc3a900dca092676b9118a22d8d72">getObservationColumnWidth</a>(),</div>
 <div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;            std::ios_base::left);</div>
 <div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;</div>
 <div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    os &lt;&lt; <span class="stringliteral">&quot; r:&quot;</span>;</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    <a class="code" href="namespaceabt.html#a0390b5ab871ede92d6f53af7babbf3ee">abt::print_double</a>(entry.immediateReward_, os, 6, 2,</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    <a class="code" href="namespacetapir.html#af7e9ee7bee335eaccae2429b4fbfa575">tapir::print_double</a>(entry.immediateReward_, os, 6, 2,</div>
 <div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;            std::ios_base::fixed | std::ios_base::showpos</div>
 <div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;                    | std::ios_base::left);</div>
 <div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;</div>
@@ -508,7 +508,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="ModelChange_8hpp_html"><div class="ttname"><a href="ModelChange_8hpp.html">ModelChange.hpp</a></div><div class="ttdoc">Defines an interface for storing changes to a model; this also defines a class for a sequence of mode...</div></div>
 <div class="ttc" id="classsolver_1_1Histories_html"><div class="ttname"><a href="classsolver_1_1Histories.html">solver::Histories</a></div><div class="ttdoc">Owns a collection of history sequences. </div><div class="ttdef"><b>Definition:</b> <a href="Histories_8hpp_source.html#l00032">Histories.hpp:32</a></div></div>
 <div class="ttc" id="classsolver_1_1StateInfo_html_a893ff74fd1de7a02e2fc57d6342adcb8"><div class="ttname"><a href="classsolver_1_1StateInfo.html#a893ff74fd1de7a02e2fc57d6342adcb8">solver::StateInfo::getState</a></div><div class="ttdeci">State const * getState() const </div><div class="ttdoc">Returns the state held by this StateInfo. </div><div class="ttdef"><b>Definition:</b> <a href="StateInfo_8cpp_source.html#l00045">StateInfo.cpp:45</a></div></div>
-<div class="ttc" id="namespaceabt_html_ad884e79d6bd470328b81ff6a27f57a08"><div class="ttname"><a href="namespaceabt.html#ad884e79d6bd470328b81ff6a27f57a08">abt::print_with_width</a></div><div class="ttdeci">void print_with_width(T value, std::ostream &amp;os, int width, std::ios_base::fmtflags flags=std::ios_base::fixed)</div><div class="ttdoc">A simple method to print a value with a fixed width. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00070">global.hpp:70</a></div></div>
 <div class="ttc" id="HistoryEntry_8hpp_html"><div class="ttname"><a href="HistoryEntry_8hpp.html">HistoryEntry.hpp</a></div><div class="ttdoc">Contains the HistoryEntry class, which represents a single entry in a history sequence. </div></div>
 <div class="ttc" id="classsolver_1_1TextSerializer_html_a75ed0b3eb852feecec894669a3d3d23f"><div class="ttname"><a href="classsolver_1_1TextSerializer.html#a75ed0b3eb852feecec894669a3d3d23f">solver::TextSerializer::saveHistoricalData</a></div><div class="ttdeci">virtual void saveHistoricalData(HistoricalData const *data, std::ostream &amp;os) override</div><div class="ttdoc">Saves history-derived information about a belief. </div><div class="ttdef"><b>Definition:</b> <a href="TextSerializer_8cpp_source.html#l00096">TextSerializer.cpp:96</a></div></div>
 <div class="ttc" id="classsolver_1_1TextSerializer_html_ae4ee3401c8c321121d25df57886fd19d"><div class="ttname"><a href="classsolver_1_1TextSerializer.html#ae4ee3401c8c321121d25df57886fd19d">solver::TextSerializer::NUM_PARTICLES_PER_LINE</a></div><div class="ttdeci">static const int NUM_PARTICLES_PER_LINE</div><div class="ttdoc">The number of particles to display in each line of text. </div><div class="ttdef"><b>Definition:</b> <a href="TextSerializer_8hpp_source.html#l00098">TextSerializer.hpp:98</a></div></div>
@@ -517,7 +516,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1BeliefNode_html_a627ed0331c9937d6b544600cec0bfad8"><div class="ttname"><a href="classsolver_1_1BeliefNode.html#a627ed0331c9937d6b544600cec0bfad8">solver::BeliefNode::getMapping</a></div><div class="ttdeci">ActionMapping * getMapping() const </div><div class="ttdoc">Returns the action mapping for this node. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefNode_8cpp_source.html#l00113">BeliefNode.cpp:113</a></div></div>
 <div class="ttc" id="Histories_8hpp_html"><div class="ttname"><a href="Histories_8hpp.html">Histories.hpp</a></div><div class="ttdoc">Contains the Histories class, which represents a collection of history sequences. ...</div></div>
 <div class="ttc" id="classsolver_1_1TextSerializer_html_aa50bc3a900dca092676b9118a22d8d72"><div class="ttname"><a href="classsolver_1_1TextSerializer.html#aa50bc3a900dca092676b9118a22d8d72">solver::TextSerializer::getObservationColumnWidth</a></div><div class="ttdeci">virtual int getObservationColumnWidth()</div><div class="ttdoc">The minimum column width to use for serializing observations. </div><div class="ttdef"><b>Definition:</b> <a href="TextSerializer_8cpp_source.html#l00392">TextSerializer.cpp:392</a></div></div>
-<div class="ttc" id="namespaceabt_html_a0390b5ab871ede92d6f53af7babbf3ee"><div class="ttname"><a href="namespaceabt.html#a0390b5ab871ede92d6f53af7babbf3ee">abt::print_double</a></div><div class="ttdeci">void print_double(double value, std::ostream &amp;os, int width=10, int precision=7, std::ios_base::fmtflags flags=std::ios_base::fixed, std::ostream::char_type fillCh= ' ')</div><div class="ttdoc">A method to print a floating point value, with various options. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00080">global.hpp:80</a></div></div>
 <div class="ttc" id="classsolver_1_1StatePool_html"><div class="ttname"><a href="classsolver_1_1StatePool.html">solver::StatePool</a></div><div class="ttdoc">A class to hold all of the states encountered by the ABT algorithm. </div><div class="ttdef"><b>Definition:</b> <a href="StatePool_8hpp_source.html#l00046">StatePool.hpp:46</a></div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_a664dff91eccc79090f657211988ff12a"><div class="ttname"><a href="classsolver_1_1Serializer.html#a664dff91eccc79090f657211988ff12a">solver::Serializer::saveObservationMapping</a></div><div class="ttdeci">virtual void saveObservationMapping(ObservationMapping const &amp;map, std::ostream &amp;os)=0</div><div class="ttdoc">Saves a mapping of observations to belief nodes. </div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_a07d3d5720022f79d4ddad7108458456b"><div class="ttname"><a href="classsolver_1_1Serializer.html#a07d3d5720022f79d4ddad7108458456b">solver::Serializer::saveActionMapping</a></div><div class="ttdeci">virtual void saveActionMapping(ActionMapping const &amp;map, std::ostream &amp;os)=0</div><div class="ttdoc">Saves a mapping of actions to action nodes. </div></div>
@@ -539,12 +537,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1Serializer_html_a2c147e139775dac836f3e7f874d1ef93"><div class="ttname"><a href="classsolver_1_1Serializer.html#a2c147e139775dac836f3e7f874d1ef93">solver::Serializer::loadAction</a></div><div class="ttdeci">virtual std::unique_ptr&lt; Action &gt; loadAction(std::istream &amp;is)=0</div><div class="ttdoc">Loads an Action. </div></div>
 <div class="ttc" id="classsolver_1_1BeliefNode_html"><div class="ttname"><a href="classsolver_1_1BeliefNode.html">solver::BeliefNode</a></div><div class="ttdoc">Represents a single node in a belief tree. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefNode_8hpp_source.html#l00054">BeliefNode.hpp:54</a></div></div>
 <div class="ttc" id="classsolver_1_1BeliefNode_html_a96bf8f8fac1f0a8a4003dd4f1fb3b850"><div class="ttname"><a href="classsolver_1_1BeliefNode.html#a96bf8f8fac1f0a8a4003dd4f1fb3b850">solver::BeliefNode::recalculateValue</a></div><div class="ttdeci">void recalculateValue()</div><div class="ttdoc">Recalculates the cached value for this belief node. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefNode_8cpp_source.html#l00174">BeliefNode.cpp:174</a></div></div>
+<div class="ttc" id="namespacetapir_html_a77fbaa584969e170cad776c53b33212e"><div class="ttname"><a href="namespacetapir.html#a77fbaa584969e170cad776c53b33212e">tapir::print_with_width</a></div><div class="ttdeci">void print_with_width(T value, std::ostream &amp;os, int width, std::ios_base::fmtflags flags=std::ios_base::fixed)</div><div class="ttdoc">A simple method to print a value with a fixed width. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00070">global.hpp:70</a></div></div>
 <div class="ttc" id="classsolver_1_1HistorySequence_html_ab5b87a7a05a3aa83bfcfcc260ec80f72"><div class="ttname"><a href="classsolver_1_1HistorySequence.html#ab5b87a7a05a3aa83bfcfcc260ec80f72">solver::HistorySequence::getEntry</a></div><div class="ttdeci">HistoryEntry * getEntry(HistoryEntry::IdType entryId) const </div><div class="ttdoc">Returns the history entry in this sequence with the given ID. </div><div class="ttdef"><b>Definition:</b> <a href="HistorySequence_8cpp_source.html#l00049">HistorySequence.cpp:49</a></div></div>
 <div class="ttc" id="classsolver_1_1TextSerializer_html_a1549b4df782de62ebc6688ca4efd8f82"><div class="ttname"><a href="classsolver_1_1TextSerializer.html#a1549b4df782de62ebc6688ca4efd8f82">solver::TextSerializer::saveChangeSequence</a></div><div class="ttdeci">virtual void saveChangeSequence(ChangeSequence const &amp;sequence, std::ostream &amp;os) override</div><div class="ttdoc">Saves a sequence of model changes. </div><div class="ttdef"><b>Definition:</b> <a href="TextSerializer_8cpp_source.html#l00043">TextSerializer.cpp:43</a></div></div>
 <div class="ttc" id="classsolver_1_1TextSerializer_html_a29ec4c209966de9db6c235c1ad6a9414"><div class="ttname"><a href="classsolver_1_1TextSerializer.html#a29ec4c209966de9db6c235c1ad6a9414">solver::TextSerializer::loadModelChange</a></div><div class="ttdeci">virtual std::unique_ptr&lt; ModelChange &gt; loadModelChange(std::istream &amp;is) override</div><div class="ttdoc">Loads a single ModelChange. </div><div class="ttdef"><b>Definition:</b> <a href="TextSerializer_8cpp_source.html#l00081">TextSerializer.cpp:81</a></div></div>
 <div class="ttc" id="StateInfo_8hpp_html"><div class="ttname"><a href="StateInfo_8hpp.html">StateInfo.hpp</a></div><div class="ttdoc">Contains the StateInfo class, which is a wrapper for an individual state of the PODMP. </div></div>
 <div class="ttc" id="classsolver_1_1BeliefTree_html_a209a666a99499caba260ed244a3c7058"><div class="ttname"><a href="classsolver_1_1BeliefTree.html#a209a666a99499caba260ed244a3c7058">solver::BeliefTree::getNumberOfNodes</a></div><div class="ttdeci">long getNumberOfNodes() const </div><div class="ttdoc">Returns the number of belief nodes. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefTree_8cpp_source.html#l00048">BeliefTree.cpp:48</a></div></div>
 <div class="ttc" id="estimators_8hpp_html"><div class="ttname"><a href="estimators_8hpp.html">estimators.hpp</a></div><div class="ttdoc">Defines an interface for how backpropagation will be handled; this is done by providing a custom way ...</div></div>
+<div class="ttc" id="namespacetapir_html_af7e9ee7bee335eaccae2429b4fbfa575"><div class="ttname"><a href="namespacetapir.html#af7e9ee7bee335eaccae2429b4fbfa575">tapir::print_double</a></div><div class="ttdeci">void print_double(double value, std::ostream &amp;os, int width=10, int precision=7, std::ios_base::fmtflags flags=std::ios_base::fixed, std::ostream::char_type fillCh= ' ')</div><div class="ttdoc">A method to print a floating point value, with various options. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00080">global.hpp:80</a></div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_acafdfae10700daa56b0eb4bc26c4fb64"><div class="ttname"><a href="classsolver_1_1Serializer.html#acafdfae10700daa56b0eb4bc26c4fb64">solver::Serializer::saveAction</a></div><div class="ttdeci">virtual void saveAction(Action const *action, std::ostream &amp;os)=0</div><div class="ttdoc">Saves an Action. </div></div>
 <div class="ttc" id="ObservationMapping_8hpp_html"><div class="ttname"><a href="ObservationMapping_8hpp.html">ObservationMapping.hpp</a></div><div class="ttdoc">Contains the abstract base class ObservationMapping. </div></div>
 <div class="ttc" id="TextSerializer_8hpp_html"><div class="ttname"><a href="TextSerializer_8hpp.html">TextSerializer.hpp</a></div><div class="ttdoc">Defines the TextSerializer, which provides a basic Serializer implementation that uses a human-readab...</div></div>
@@ -554,7 +554,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

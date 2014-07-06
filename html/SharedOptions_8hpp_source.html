@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/shared/SharedOptions.hpp Source File</title>
+<title>TAPIR: src/problems/shared/SharedOptions.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -130,7 +130,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="structshared_1_1SharedOptions.html#a5275dd949e8060018cc28dc2e36e7a87">   68</a></span>&#160;    <span class="keyword">static</span> std::unique_ptr&lt;options::OptionParser&gt; <a class="code" href="structshared_1_1SharedOptions.html#a5275dd949e8060018cc28dc2e36e7a87">makeParser</a>(<span class="keywordtype">bool</span> simulating,</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;            std::string defaultBaseConfigPath) {</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        std::unique_ptr&lt;options::OptionParser&gt; parser = std::make_unique&lt;options::OptionParser&gt;(</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                <span class="stringliteral">&quot;ABT command line interface&quot;</span>);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                <span class="stringliteral">&quot;TAPIR command line interface&quot;</span>);</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <a class="code" href="structshared_1_1SharedOptions.html#adcc800e925d4d99639cb9034ecc93436">addGenericOptions</a>(parser.get(), defaultBaseConfigPath);</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <a class="code" href="structshared_1_1SharedOptions.html#aa132efe1df35aef6e1befde23ca29ecf">addSimulationOptions</a>(parser.get(), simulating);</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <a class="code" href="structshared_1_1SharedOptions.html#af43f1cd137d81ca6cef1bf03ee0f7f96">addABTOptions</a>(parser.get());</div>
@@ -301,7 +301,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

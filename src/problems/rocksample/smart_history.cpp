@@ -165,7 +165,7 @@ void PositionAndRockData::print(std::ostream &os) const {
     os << "Position: " << position_ << std::endl;
     os << "Chances of goodness: ";
     for (RockData const &rockData : allRockData_) {
-        abt::print_double(rockData.chanceGood, os, 6, 4);
+        tapir::print_double(rockData.chanceGood, os, 6, 4);
         os << " ";
     }
     os << std::endl;
@@ -180,7 +180,7 @@ void PositionAndRockDataTextSerializer::saveHistoricalData(solver::HistoricalDat
     os << "Position: " << prData.position_ << std::endl;
     for (RockData const &rockData : prData.allRockData_) {
         os << "p = ";
-        abt::print_double(rockData.chanceGood, os, 7, 5);
+        tapir::print_double(rockData.chanceGood, os, 7, 5);
         os << " from " << rockData.checkCount << " checks ( ";
         os << std::showpos << rockData.goodnessCount << std::noshowpos;
         os << " )" << std::endl;

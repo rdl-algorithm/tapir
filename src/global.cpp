@@ -9,7 +9,7 @@
 
 #include "solver/abstract-problem/Point.hpp"
 
-namespace abt {
+namespace tapir {
 std::string get_current_directory() {
     char *buffer = getcwd(nullptr, 0);
     if (buffer == nullptr) {
@@ -29,7 +29,7 @@ void change_directory(std::string &dir) {
         std::exit(3);
     }
 }
-} /* namespace abt */
+} /* namespace tapir */
 
 
 namespace debug {

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/tag/TagObservation.cpp Source File</title>
+<title>TAPIR: src/problems/tag/TagObservation.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -132,9 +132,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
 <div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classtag_1_1TagObservation.html#a2ae515c7fd3d686e3330640eff1b58b4">   41</a></span>&#160;std::size_t <a class="code" href="classtag_1_1TagObservation.html#a2ae515c7fd3d686e3330640eff1b58b4">TagObservation::hash</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    std::size_t hashValue = 0;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <a class="code" href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a>(hashValue, position_.<a class="code" href="structGridPosition.html#a173ebd4e03d9181da2c92489230df4b4">i</a>);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <a class="code" href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a>(hashValue, position_.<a class="code" href="structGridPosition.html#a84ad7896947cc9d539726dc74147f470">j</a>);</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <a class="code" href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a>(hashValue, seesOpponent_);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <a class="code" href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a>(hashValue, position_.<a class="code" href="structGridPosition.html#a173ebd4e03d9181da2c92489230df4b4">i</a>);</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <a class="code" href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a>(hashValue, position_.<a class="code" href="structGridPosition.html#a84ad7896947cc9d539726dc74147f470">j</a>);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <a class="code" href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a>(hashValue, seesOpponent_);</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordflow">return</span> hashValue;</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;}</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
@@ -158,6 +158,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">/* namespace tag */</span></div>
 <div class="ttc" id="Observation_8hpp_html"><div class="ttname"><a href="Observation_8hpp.html">Observation.hpp</a></div><div class="ttdoc">Defines the Observation interface; currently this is the same as Point, so this is just a straight ty...</div></div>
 <div class="ttc" id="structGridPosition_html_a84ad7896947cc9d539726dc74147f470"><div class="ttname"><a href="structGridPosition.html#a84ad7896947cc9d539726dc74147f470">GridPosition::j</a></div><div class="ttdeci">long j</div><div class="ttdoc">The column number, starting from 0 for the leftmost column. </div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00025">GridPosition.hpp:25</a></div></div>
+<div class="ttc" id="namespacetapir_html_a2f4b2c3f812d016297bf0adf85c21008"><div class="ttname"><a href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a></div><div class="ttdeci">void hash_combine(std::size_t &amp;seed, T const &amp;v)</div><div class="ttdoc">A template method to combine hash values - from boost::hash_combine. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00046">global.hpp:46</a></div></div>
 <div class="ttc" id="classtag_1_1TagObservation_html_a42722da2c79d369b6e03d179b0024627"><div class="ttname"><a href="classtag_1_1TagObservation.html#a42722da2c79d369b6e03d179b0024627">tag::TagObservation::print</a></div><div class="ttdeci">void print(std::ostream &amp;os) const override</div><div class="ttdoc">Prints this point in a human-readable way [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="TagObservation_8cpp_source.html#l00049">TagObservation.cpp:49</a></div></div>
 <div class="ttc" id="classsolver_1_1Point_html"><div class="ttname"><a href="classsolver_1_1Point.html">solver::Point</a></div><div class="ttdoc">Represents a point within a certain set, in the sense of point-set topology. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00030">Point.hpp:30</a></div></div>
 <div class="ttc" id="classtag_1_1TagObservation_html_a74eff8e675996b63ea890b6edde7935e"><div class="ttname"><a href="classtag_1_1TagObservation.html#a74eff8e675996b63ea890b6edde7935e">tag::TagObservation::distanceTo</a></div><div class="ttdeci">double distanceTo(solver::Observation const &amp;otherObs) const override</div><div class="ttdoc">Returns the distance from this point to the given point [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="TagObservation_8cpp_source.html#l00027">TagObservation.cpp:27</a></div></div>
@@ -165,15 +166,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classtag_1_1TagObservation_html_a2ae515c7fd3d686e3330640eff1b58b4"><div class="ttname"><a href="classtag_1_1TagObservation.html#a2ae515c7fd3d686e3330640eff1b58b4">tag::TagObservation::hash</a></div><div class="ttdeci">std::size_t hash() const override</div><div class="ttdoc">Returns a hash value for this point - should be consistent with equals() </div><div class="ttdef"><b>Definition:</b> <a href="TagObservation_8cpp_source.html#l00041">TagObservation.cpp:41</a></div></div>
 <div class="ttc" id="GridPosition_8hpp_html"><div class="ttname"><a href="GridPosition_8hpp.html">GridPosition.hpp</a></div><div class="ttdoc">Defines a handy struct to represent 2-D grid indices, in the form of (i, j) == (row, column), as well as some useful methods for dealing with them. </div></div>
 <div class="ttc" id="classtag_1_1TagObservation_html_a232f519a3cc124f8e6bd62fafbc42726"><div class="ttname"><a href="classtag_1_1TagObservation.html#a232f519a3cc124f8e6bd62fafbc42726">tag::TagObservation::equals</a></div><div class="ttdeci">bool equals(solver::Observation const &amp;otherObs) const override</div><div class="ttdoc">Returns true iff this point is equal to the the given point. </div><div class="ttdef"><b>Definition:</b> <a href="TagObservation_8cpp_source.html#l00034">TagObservation.cpp:34</a></div></div>
-<div class="ttc" id="namespaceabt_html_a4bbe799c215ab038b99345ab8a1367c1"><div class="ttname"><a href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a></div><div class="ttdeci">void hash_combine(std::size_t &amp;seed, T const &amp;v)</div><div class="ttdoc">A template method to combine hash values - from boost::hash_combine. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00046">global.hpp:46</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
 <div class="ttc" id="classtag_1_1TagObservation_html"><div class="ttname"><a href="classtag_1_1TagObservation.html">tag::TagObservation</a></div><div class="ttdef"><b>Definition:</b> <a href="TagObservation_8hpp_source.html#l00018">TagObservation.hpp:18</a></div></div>
 <div class="ttc" id="structGridPosition_html_a173ebd4e03d9181da2c92489230df4b4"><div class="ttname"><a href="structGridPosition.html#a173ebd4e03d9181da2c92489230df4b4">GridPosition::i</a></div><div class="ttdeci">long i</div><div class="ttdoc">The row number, starting from 0 for the topmost row. </div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00023">GridPosition.hpp:23</a></div></div>
 <div class="ttc" id="classtag_1_1TagObservation_html_aaa1e56c2abda1ad4f5311177dcb88946"><div class="ttname"><a href="classtag_1_1TagObservation.html#aaa1e56c2abda1ad4f5311177dcb88946">tag::TagObservation::copy</a></div><div class="ttdeci">std::unique_ptr&lt; solver::Observation &gt; copy() const override</div><div class="ttdoc">You must provide a copy() method for any subclass. </div><div class="ttdef"><b>Definition:</b> <a href="TagObservation_8cpp_source.html#l00023">TagObservation.cpp:23</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

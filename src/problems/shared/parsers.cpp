@@ -33,7 +33,7 @@ std::vector<std::string> split_function(std::string text) {
     }
 
     std::string function = text.substr(0, i0);
-    abt::trim(function);
+    tapir::trim(function);
     std::vector<std::string> argsVector;
     argsVector.push_back(function);
 
@@ -53,7 +53,7 @@ std::vector<std::string> split_function(std::string text) {
         if (*charIter == ',' && parenCount == 0) {
             if (prevIter != charIter) {
                 std::string s(prevIter, charIter);
-                abt::trim(s);
+                tapir::trim(s);
                 argsVector.push_back(s);
             }
             prevIter = charIter + 1;
@@ -61,7 +61,7 @@ std::vector<std::string> split_function(std::string text) {
     }
     if (prevIter != argsString.end()) {
         std::string s(prevIter, argsString.end());
-        abt::trim(s);
+        tapir::trim(s);
         argsVector.push_back(s);
     }
     return argsVector;

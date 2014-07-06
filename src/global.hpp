@@ -1,6 +1,6 @@
 /** @file global.hpp
  *
- * Contains some key definitions used throughout the ABT code.
+ * Contains some key definitions used throughout the TAPIR code.
  */
 #ifndef GLOBAL_HPP_
 #define GLOBAL_HPP_
@@ -26,10 +26,10 @@ typedef std::default_random_engine RandomGenerator;
 
 
 
-/** A global utility namespace; holds some global functions that are used throughout the ABT code,
+/** A global utility namespace; holds some global functions that are used throughout the TAPIR code,
  * as well as some basic data structures.
  */
-namespace abt {
+namespace tapir {
 /** A function to return the current working directory. */
 std::string get_current_directory();
 /** A function to change the current working directory. */
@@ -91,7 +91,7 @@ inline void print_double(double value, std::ostream &os, int width = 10,
     os.width(oldWidth);
     os.precision(oldPrecision);
 }
-} /* namespace abt */
+} /* namespace tapir */
 
 
 /** A namespace for global functions that serve useful debugging purposes. */

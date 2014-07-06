@@ -50,7 +50,7 @@ LINKER_DEPS_$(n) := $(LIB_$(n)) $$(LIB_solver)
 
 LINKER_ARGS_$(n) += $(LIB_$(n))
 ifeq ($(CFG),shared)
-LINKER_ARGS_$(n) += -Lbuilds/shared -Wl;-rpath=$(ABS_ROOT)/builds/shared -labt
+LINKER_ARGS_$(n) += -Lbuilds/shared -Wl;-rpath=$(ABS_ROOT)/builds/shared -ltapir
 else
 LINKER_ARGS_$(n) += $$(LIB_solver)
 endif

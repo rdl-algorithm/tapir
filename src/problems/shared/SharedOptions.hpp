@@ -68,7 +68,7 @@ struct SharedOptions: public solver::Options {
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating,
             std::string defaultBaseConfigPath) {
         std::unique_ptr<options::OptionParser> parser = std::make_unique<options::OptionParser>(
-                "ABT command line interface");
+                "TAPIR command line interface");
         addGenericOptions(parser.get(), defaultBaseConfigPath);
         addSimulationOptions(parser.get(), simulating);
         addABTOptions(parser.get());

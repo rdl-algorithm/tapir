@@ -53,8 +53,8 @@ template<> struct hash<GridPosition> {
     /** Returns the hash value for the given GridPosition. */
     std::size_t operator()(GridPosition const &pos) const {
         std::size_t hashValue = 0;
-        abt::hash_combine(hashValue, pos.i);
-        abt::hash_combine(hashValue, pos.j);
+        tapir::hash_combine(hashValue, pos.i);
+        tapir::hash_combine(hashValue, pos.j);
         return hashValue;
     }
 };
