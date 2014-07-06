@@ -1,3 +1,8 @@
+/** @file parsers.cpp
+ *
+ * Provides implementations for the parsing of various ABT parameters, allowing for additional
+ * customization at runtime instead of compile-time.
+ */
 #include "parsers.hpp"
 
 #include <iostream>

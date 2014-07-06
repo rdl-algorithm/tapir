@@ -1,3 +1,8 @@
+/** @file SharedOptions.hpp
+ *
+ * Defines the SharedOptions class, which comes with additional configuration options that apply
+ * to many problems.
+ */
 #ifndef SHAREDOPTIONS_HPP_
 #define SHAREDOPTIONS_HPP_
 
@@ -6,6 +11,12 @@
 #include "solver/abstract-problem/Options.hpp"
 
 namespace shared {
+/** An expanded Options class, which comes with some additional settings that are shared by many
+ * of the individual example problems.
+ *
+ * These extra configuration options allow for extra configuration at runtime instead of
+ * compile-time.
+ */
 struct SharedOptions: public solver::Options {
     SharedOptions() = default;
     virtual ~SharedOptions() = default;
@@ -41,16 +52,17 @@ struct SharedOptions: public solver::Options {
     /* ---------- ABT settings: advanced customization  ---------- */
     /** The heuristic used for searches. */
     std::string searchHeuristic = "";
-    /* The search strategy to use. */
+    /** The search strategy to use. */
     std::string searchStrategy = "";
-    /* The function to estimate the value of a belief. */
+    /** The function to estimate the value of a belief. */
     std::string estimator = "";
-    /* The maximum distance between observations to group together; only applicable if
+    /** The maximum distance between observations to group together; only applicable if
      * approximate observations are in use. */
     double maxObservationDistance = 0.0;
 
-
-
+    /** Makes a parser which can parse options from config files, or from the command line,
+     * into a SharedOptions instance.
+     */
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating,
             std::string defaultConfigPath) {
         std::unique_ptr<options::OptionParser> parser = std::make_unique<options::OptionParser>(
@@ -62,6 +74,9 @@ struct SharedOptions: public solver::Options {
         return std::move(parser);
     }
 
+    /** Adds generic options for this SharedOptions instance to the given parser, using the
+     * given default configuration file path.
+     */
     static void addGenericOptions(options::OptionParser *parser, std::string defaultConfigPath) {
         parser->addOptionWithDefault<std::string>("", "cfg", &SharedOptions::configPath,
                 defaultConfigPath);
@@ -94,6 +109,9 @@ struct SharedOptions: public solver::Options {
                         "don't use verbose output", false);
     }
 
+    /** Adds simulation-related options for this SharedOptions instance to the given parser;
+     * some of these options will be mandatory if simulating, or optional if not simulating.
+     */
     static void addSimulationOptions(options::OptionParser *parser, bool simulating) {
         parser->addOptionWithDefault<std::string>("", "log", &SharedOptions::logPath, "log.log");
 
@@ -154,6 +172,7 @@ struct SharedOptions: public solver::Options {
         }
     }
 
+    /** Adds core ABT options for this SharedOptions instance to the given parser. */
     static void addABTOptions(options::OptionParser *parser) {
         parser->addOption<unsigned long>("ABT", "historiesPerStep", &Options::historiesPerStep);
         parser->addValueArg<unsigned long>("ABT", "historiesPerStep", &Options::historiesPerStep,
@@ -175,6 +194,7 @@ struct SharedOptions: public solver::Options {
                 &SharedOptions::maxObservationDistance, 0.0);
     }
 
+    /** Adds the discountFactor option to the given parser. */
     static void addProblemOptions(options::OptionParser *parser) {
         parser->addOption<double>("problem", "discountFactor", &Options::discountFactor);
         parser->addValueArg<double>("problem", "discountFactor", &Options::discountFactor,

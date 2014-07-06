@@ -99,7 +99,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="global_8hpp.html">global.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;problems/shared/parsers.hpp&quot;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="parsers_8hpp.html">problems/shared/parsers.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="HeuristicFunction_8hpp.html">solver/abstract-problem/heuristics/HeuristicFunction.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
@@ -137,10 +137,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* TAG_MDPSOLVER_HPP_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="classtag_1_1TagModel_html"><div class="ttname"><a href="classtag_1_1TagModel.html">tag::TagModel</a></div><div class="ttdef"><b>Definition:</b> <a href="TagModel_8hpp_source.html#l00056">TagModel.hpp:56</a></div></div>
-<div class="ttc" id="classshared_1_1Parser_html"><div class="ttname"><a href="classshared_1_1Parser.html">shared::Parser</a></div><div class="ttdef"><b>Definition:</b> <a href="parsers_8hpp_source.html#l00012">parsers.hpp:12</a></div></div>
+<div class="ttc" id="parsers_8hpp_html"><div class="ttname"><a href="parsers_8hpp.html">parsers.hpp</a></div><div class="ttdoc">Provides some convenient functionality for parsing heuristics, search strategies and estimators for b...</div></div>
+<div class="ttc" id="classshared_1_1Parser_html"><div class="ttname"><a href="classshared_1_1Parser.html">shared::Parser</a></div><div class="ttdoc">A class to parse strings into arbitrary constructs for the Solver to use. </div><div class="ttdef"><b>Definition:</b> <a href="parsers_8hpp_source.html#l00029">parsers.hpp:29</a></div></div>
 <div class="ttc" id="HeuristicFunction_8hpp_html"><div class="ttname"><a href="HeuristicFunction_8hpp.html">HeuristicFunction.hpp</a></div><div class="ttdoc">Contains a typedef for the &quot;HeuristicFunction&quot; type, which is represented via a function that takes p...</div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html">tag::TagMdpSolver</a></div><div class="ttdoc">Solves an MDP version of Tag. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8hpp_source.html#l00020">TagMdpSolver.hpp:20</a></div></div>
-<div class="ttc" id="classtag_1_1TagMdpParser_html_a8d89b984005a6af9b2fbd665eae28394"><div class="ttname"><a href="classtag_1_1TagMdpParser.html#a8d89b984005a6af9b2fbd665eae28394">tag::TagMdpParser::parse</a></div><div class="ttdeci">virtual solver::HeuristicFunction parse(solver::Solver *solver, std::vector&lt; std::string &gt; args)</div><div class="ttdoc">Creates a new strategy from a vector of strings representing its arguments. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00191">TagMdpSolver.cpp:191</a></div></div>
+<div class="ttc" id="classtag_1_1TagMdpParser_html_a8d89b984005a6af9b2fbd665eae28394"><div class="ttname"><a href="classtag_1_1TagMdpParser.html#a8d89b984005a6af9b2fbd665eae28394">tag::TagMdpParser::parse</a></div><div class="ttdeci">virtual solver::HeuristicFunction parse(solver::Solver *solver, std::vector&lt; std::string &gt; args)</div><div class="ttdoc">Creates a new strategy from a vector of arguments (as strings). </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00191">TagMdpSolver.cpp:191</a></div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html_a1831bbe43ec5c3cf09e778c2d7084933"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html#a1831bbe43ec5c3cf09e778c2d7084933">tag::TagMdpSolver::solve</a></div><div class="ttdeci">void solve()</div><div class="ttdoc">Solves the MDP. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00024">TagMdpSolver.cpp:24</a></div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html_a83092f178fcd9c905a6ea15d7a6cb34e"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html#a83092f178fcd9c905a6ea15d7a6cb34e">tag::TagMdpSolver::getQValue</a></div><div class="ttdeci">double getQValue(TagState const &amp;state) const </div><div class="ttdoc">Calculates the exact value for the given state. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00170">TagMdpSolver.cpp:170</a></div></div>
 <div class="ttc" id="classtag_1_1TagState_html"><div class="ttname"><a href="classtag_1_1TagState.html">tag::TagState</a></div><div class="ttdef"><b>Definition:</b> <a href="TagState_8hpp_source.html#l00015">TagState.hpp:15</a></div></div>
@@ -152,7 +153,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 18:18:30 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 19:24:59 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

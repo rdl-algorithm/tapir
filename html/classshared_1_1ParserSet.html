@@ -95,20 +95,29 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">shared::ParserSet&lt; TargetType &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A class to hold a set of parsers of the same type, each of which will have an associated string identifier.  
+ <a href="classshared_1_1ParserSet.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a8e0e70415ae00393f00b3938ba956277"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ParserSet.html#a8e0e70415ae00393f00b3938ba956277">ParserSet</a> ()</td></tr>
+<tr class="memdesc:a8e0e70415ae00393f00b3938ba956277"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new, empty set of parsers.  <a href="#a8e0e70415ae00393f00b3938ba956277">More...</a><br/></td></tr>
+<tr class="separator:a8e0e70415ae00393f00b3938ba956277"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c0cc5c51efc703be69a81bbe6e44967"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ParserSet.html#a0c0cc5c51efc703be69a81bbe6e44967">addParser</a> (std::string name, std::unique_ptr&lt; <a class="el" href="classshared_1_1Parser.html">Parser</a>&lt; TargetType &gt;&gt; parser)</td></tr>
-<tr class="memdesc:a0c0cc5c51efc703be69a81bbe6e44967"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the given parser.  <a href="#a0c0cc5c51efc703be69a81bbe6e44967">More...</a><br/></td></tr>
+<tr class="memdesc:a0c0cc5c51efc703be69a81bbe6e44967"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the given parser to this set.  <a href="#a0c0cc5c51efc703be69a81bbe6e44967">More...</a><br/></td></tr>
 <tr class="separator:a0c0cc5c51efc703be69a81bbe6e44967"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac22537be26bf3fc054e770d94f82fdbe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac22537be26bf3fc054e770d94f82fdbe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setDefaultParser</b> (std::unique_ptr&lt; <a class="el" href="classshared_1_1Parser.html">Parser</a>&lt; TargetType &gt;&gt; parser)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ParserSet.html#ac22537be26bf3fc054e770d94f82fdbe">setDefaultParser</a> (std::unique_ptr&lt; <a class="el" href="classshared_1_1Parser.html">Parser</a>&lt; TargetType &gt;&gt; parser)</td></tr>
+<tr class="memdesc:ac22537be26bf3fc054e770d94f82fdbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the default parser for this set - this one will be used if the desired parser cannot be found. <br/></td></tr>
 <tr class="separator:ac22537be26bf3fc054e770d94f82fdbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02b0b17288b8c93b86915f314c01ea58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classshared_1_1Parser.html">Parser</a>&lt; TargetType &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ParserSet.html#a02b0b17288b8c93b86915f314c01ea58">getParser</a> (std::string name)</td></tr>
 <tr class="memdesc:a02b0b17288b8c93b86915f314c01ea58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the parser associated with the strategy of the given name.  <a href="#a02b0b17288b8c93b86915f314c01ea58">More...</a><br/></td></tr>
 <tr class="separator:a02b0b17288b8c93b86915f314c01ea58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab24afa243e3c93e6cafaa29f76490494"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab24afa243e3c93e6cafaa29f76490494"></a>
-TargetType&#160;</td><td class="memItemRight" valign="bottom"><b>parse</b> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *solver, std::vector&lt; std::string &gt; argsVector)</td></tr>
+<tr class="memitem:ab24afa243e3c93e6cafaa29f76490494"><td class="memItemLeft" align="right" valign="top">TargetType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ParserSet.html#ab24afa243e3c93e6cafaa29f76490494">parse</a> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *solver, std::vector&lt; std::string &gt; argsVector)</td></tr>
+<tr class="memdesc:ab24afa243e3c93e6cafaa29f76490494"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a target object parsed from the given vector of strings.  <a href="#ab24afa243e3c93e6cafaa29f76490494">More...</a><br/></td></tr>
 <tr class="separator:ab24afa243e3c93e6cafaa29f76490494"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e589e4a63c059c1bfee6f9ada3a411d"><td class="memItemLeft" align="right" valign="top">TargetType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ParserSet.html#a0e589e4a63c059c1bfee6f9ada3a411d">parse</a> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *solver, std::string targetString)</td></tr>
 <tr class="memdesc:a0e589e4a63c059c1bfee6f9ada3a411d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a new target object parsed from the given string.  <a href="#a0e589e4a63c059c1bfee6f9ada3a411d">More...</a><br/></td></tr>
@@ -118,9 +127,40 @@ TargetType&#160;</td><td class="memItemRight" valign="bottom"><b>parse</b> (<a c
 <div class="textblock"><h3>template&lt;typename TargetType&gt;<br/>
 class shared::ParserSet&lt; TargetType &gt;</h3>
 
+<p>A class to hold a set of parsers of the same type, each of which will have an associated string identifier. </p>
 
-<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00018">18</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00042">42</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a8e0e70415ae00393f00b3938ba956277"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename TargetType&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classshared_1_1ParserSet.html">shared::ParserSet</a>&lt; TargetType &gt;::<a class="el" href="classshared_1_1ParserSet.html">ParserSet</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a new, empty set of parsers. </p>
+
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00045">45</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a0c0cc5c51efc703be69a81bbe6e44967"></a>
 <div class="memitem">
 <div class="memproto">
@@ -155,9 +195,9 @@ template&lt;typename TargetType&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Adds the given parser. </p>
+<p>Adds the given parser to this set. </p>
 
-<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00027">27</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00052">52</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
 
 </div>
 </div>
@@ -187,7 +227,48 @@ template&lt;typename TargetType&gt; </div>
 
 <p>Returns the parser associated with the strategy of the given name. </p>
 
-<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00036">36</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00064">64</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab24afa243e3c93e6cafaa29f76490494"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename TargetType&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TargetType <a class="el" href="classshared_1_1ParserSet.html">shared::ParserSet</a>&lt; TargetType &gt;::parse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *&#160;</td>
+          <td class="paramname"><em>solver</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::string &gt;&#160;</td>
+          <td class="paramname"><em>argsVector</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a target object parsed from the given vector of strings. </p>
+<p>The first element of the vector will be taken as the parser type, or, if the type is not found and a default parser has been set, the default parser will be used. </p>
+
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00073">73</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
 
 </div>
 </div>
@@ -227,7 +308,7 @@ template&lt;typename TargetType&gt; </div>
 
 <p>Returns a new target object parsed from the given string. </p>
 
-<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00058">58</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00091">91</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
 
 </div>
 </div>
@@ -237,7 +318,7 @@ template&lt;typename TargetType&gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 18:18:31 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 19:25:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

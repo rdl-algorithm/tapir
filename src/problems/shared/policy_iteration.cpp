@@ -1,3 +1,7 @@
+/** @file policy_iteration.cpp
+ *
+ * Contains a basic implementation of policy iteration for MDPs.
+ */
 #include "policy_iteration.hpp"
 
 #include <iostream>
@@ -99,7 +103,7 @@ long PolicyIterator::solve() {
     return numIterations;
 }
 
-Policy PolicyIterator::getCurrentPolicy() {
+Policy PolicyIterator::getBestPolicy() {
     return policy_;
 }
 

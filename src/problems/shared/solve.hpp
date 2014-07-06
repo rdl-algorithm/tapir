@@ -1,3 +1,8 @@
+/** @file solve.hpp
+ *
+ * Contains a generic function for pre-calculating an initial policy, which can be used to form the
+ * main method of a problem-specific "solve" executable.
+ */
 #ifndef SOLVE_HPP_
 #define SOLVE_HPP_
 
@@ -20,6 +25,9 @@
 using std::cout;
 using std::endl;
 
+/** A template method to calculate an initial policy for the given model and options classes, and
+ * then save the policy to a file.
+ */
 template<typename ModelType, typename OptionsType>
 int solve(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(false);

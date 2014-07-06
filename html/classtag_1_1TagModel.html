@@ -190,8 +190,8 @@ virtual std::vector<br class="typebreak"/>
 <tr class="memitem:a3950e8a4df86b9bebd131337c396572d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtag_1_1TagModel.html#a3950e8a4df86b9bebd131337c396572d">drawSimulationState</a> (<a class="el" href="classsolver_1_1BeliefNode.html">solver::BeliefNode</a> const *belief, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">solver::State</a> const &amp;state, std::ostream &amp;os) override</td></tr>
 <tr class="memdesc:a3950e8a4df86b9bebd131337c396572d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws the current belief and/or the actual current state in the context of the overall map onto the given output stream.  <a href="#a3950e8a4df86b9bebd131337c396572d">More...</a><br/></td></tr>
 <tr class="separator:a3950e8a4df86b9bebd131337c396572d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a585af8903fe05abf48d4c4031248b78f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a585af8903fe05abf48d4c4031248b78f"></a>
-virtual double&#160;</td><td class="memItemRight" valign="bottom"><b>getDefaultHeuristicValue</b> (<a class="el" href="classsolver_1_1HistoryEntry.html">solver::HistoryEntry</a> const *entry, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">solver::State</a> const *state, <a class="el" href="classsolver_1_1HistoricalData.html">solver::HistoricalData</a> const *data) override</td></tr>
+<tr class="memitem:a585af8903fe05abf48d4c4031248b78f"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtag_1_1TagModel.html#a585af8903fe05abf48d4c4031248b78f">getDefaultHeuristicValue</a> (<a class="el" href="classsolver_1_1HistoryEntry.html">solver::HistoryEntry</a> const *entry, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">solver::State</a> const *state, <a class="el" href="classsolver_1_1HistoricalData.html">solver::HistoricalData</a> const *data) override</td></tr>
+<tr class="memdesc:a585af8903fe05abf48d4c4031248b78f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A simpler interface to define a default heuristic function for a subclass.  <a href="#a585af8903fe05abf48d4c4031248b78f">More...</a><br/></td></tr>
 <tr class="separator:a585af8903fe05abf48d4c4031248b78f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7c491167b3ca2f58fc68404ebcc061a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa7c491167b3ca2f58fc68404ebcc061a"></a>
 virtual double&#160;</td><td class="memItemRight" valign="bottom"><b>getUpperBoundHeuristicValue</b> (<a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">solver::State</a> const &amp;state)</td></tr>
@@ -223,8 +223,8 @@ virtual std::vector<br class="typebreak"/>
 <tr class="memitem:a77f231aedb7621488862639be958168b inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ModelWithProgramOptions.html#a77f231aedb7621488862639be958168b">registerSearchParser</a> (std::string name, std::unique_ptr&lt; <a class="el" href="classshared_1_1Parser.html">Parser</a>&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1SearchStrategy.html">solver::SearchStrategy</a> &gt;&gt; &gt; parser)</td></tr>
 <tr class="memdesc:a77f231aedb7621488862639be958168b inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associates the given parser for search strategies with the given name string, allowing it to be parsed at runtime.  <a href="#a77f231aedb7621488862639be958168b">More...</a><br/></td></tr>
 <tr class="separator:a77f231aedb7621488862639be958168b inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5272a8d764373f3aaafd08234ea0d7e inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac5272a8d764373f3aaafd08234ea0d7e"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>registerEstimationParser</b> (std::string name, std::unique_ptr&lt; <a class="el" href="classshared_1_1Parser.html">Parser</a>&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1EstimationStrategy.html">solver::EstimationStrategy</a> &gt;&gt; &gt; parser)</td></tr>
+<tr class="memitem:ac5272a8d764373f3aaafd08234ea0d7e inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ModelWithProgramOptions.html#ac5272a8d764373f3aaafd08234ea0d7e">registerEstimationParser</a> (std::string name, std::unique_ptr&lt; <a class="el" href="classshared_1_1Parser.html">Parser</a>&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1EstimationStrategy.html">solver::EstimationStrategy</a> &gt;&gt; &gt; parser)</td></tr>
+<tr class="memdesc:ac5272a8d764373f3aaafd08234ea0d7e inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associates the given parser for estimation strategies with the given name string, allowing it to be parsed at runtime.  <a href="#ac5272a8d764373f3aaafd08234ea0d7e">More...</a><br/></td></tr>
 <tr class="separator:ac5272a8d764373f3aaafd08234ea0d7e inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87a62ae1676eb8c4d7186dda8fa4a97f inherit pub_methods_classshared_1_1ModelWithProgramOptions"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr<br class="typebreak"/>
 &lt; <a class="el" href="classsolver_1_1SearchStrategy.html">solver::SearchStrategy</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1ModelWithProgramOptions.html#a87a62ae1676eb8c4d7186dda8fa4a97f">createSearchStrategy</a> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *solver) override</td></tr>
@@ -785,6 +785,53 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TagMdpSolver</b></td
 
 </div>
 </div>
+<a class="anchor" id="a585af8903fe05abf48d4c4031248b78f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double tag::TagModel::getDefaultHeuristicValue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1HistoryEntry.html">solver::HistoryEntry</a> const *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">solver::State</a> const *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1HistoricalData.html">solver::HistoricalData</a> const *&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A simpler interface to define a default heuristic function for a subclass. </p>
+<p>If you set options_-&gt;sharedHeuristic to "default()" this is the heuristic function that will be used. </p>
+
+<p>Reimplemented from <a class="el" href="classshared_1_1ModelWithProgramOptions.html#a3f3a5f5cbe10860068ff1ac888b036ae">shared::ModelWithProgramOptions</a>.</p>
+
+<p>Definition at line <a class="el" href="TagModel_8cpp_source.html#l00604">604</a> of file <a class="el" href="TagModel_8cpp_source.html">TagModel.cpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a0d602d814bd050bad1821db8168b0627"></a>
 <div class="memitem">
 <div class="memproto">
@@ -934,7 +981,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TagMdpSolver</b></td
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 18:18:32 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 19:25:01 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -84,7 +84,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>mdp</b></li><li class="navelem"><a class="el" href="classmdp_1_1PolicyIterator.html">PolicyIterator</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespacemdp.html">mdp</a></li><li class="navelem"><a class="el" href="classmdp_1_1PolicyIterator.html">PolicyIterator</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -95,36 +95,146 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">mdp::PolicyIterator Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A class to handle basic MDP policy iteration.  
+ <a href="classmdp_1_1PolicyIterator.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="policy__iteration_8hpp_source.html">policy_iteration.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6842ede3b4282cf35c4e7cbf73bf66af"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6842ede3b4282cf35c4e7cbf73bf66af"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>PolicyIterator</b> (Policy initialPolicy, double discountFactor, int numStates, int numActions, std::function&lt; std::vector&lt; State &gt;(State, Action)&gt; possibleNextStates, std::function&lt; double(State, Action, State)&gt; transitionProbability, std::function&lt; double(State, Action, State)&gt; reward)</td></tr>
+<tr class="memitem:a6842ede3b4282cf35c4e7cbf73bf66af"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmdp_1_1PolicyIterator.html#a6842ede3b4282cf35c4e7cbf73bf66af">PolicyIterator</a> (<a class="el" href="namespacemdp.html#a0db428ee8ecc3a44d03d2a61991d7c15">Policy</a> initialPolicy, double discountFactor, int numStates, int numActions, std::function&lt; std::vector&lt; <a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a> &gt;(<a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>, <a class="el" href="namespacemdp.html#adc47d93753c0848dd5b7aef4e715960b">Action</a>)&gt; possibleNextStates, std::function&lt; double(<a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>, <a class="el" href="namespacemdp.html#adc47d93753c0848dd5b7aef4e715960b">Action</a>, <a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>)&gt; transitionProbability, std::function&lt; double(<a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>, <a class="el" href="namespacemdp.html#adc47d93753c0848dd5b7aef4e715960b">Action</a>, <a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>)&gt; reward)</td></tr>
+<tr class="memdesc:a6842ede3b4282cf35c4e7cbf73bf66af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classmdp_1_1PolicyIterator.html" title="A class to handle basic MDP policy iteration. ">PolicyIterator</a> which will start with the given initial policy.  <a href="#a6842ede3b4282cf35c4e7cbf73bf66af">More...</a><br/></td></tr>
 <tr class="separator:a6842ede3b4282cf35c4e7cbf73bf66af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac20821d48c53b7fe5102a5f0c6bf2f9d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac20821d48c53b7fe5102a5f0c6bf2f9d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>fixValue</b> (State state, double value)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmdp_1_1PolicyIterator.html#ac20821d48c53b7fe5102a5f0c6bf2f9d">fixValue</a> (<a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a> state, double value)</td></tr>
+<tr class="memdesc:ac20821d48c53b7fe5102a5f0c6bf2f9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the value of the given state as a fixed quantity - this is used to set reward values for terminal states, if any exist. <br/></td></tr>
 <tr class="separator:ac20821d48c53b7fe5102a5f0c6bf2f9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b2b4348aa3541a8cfb1ee71fdb2d6e7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2b2b4348aa3541a8cfb1ee71fdb2d6e7"></a>
-long&#160;</td><td class="memItemRight" valign="bottom"><b>solve</b> ()</td></tr>
+long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmdp_1_1PolicyIterator.html#a2b2b4348aa3541a8cfb1ee71fdb2d6e7">solve</a> ()</td></tr>
+<tr class="memdesc:a2b2b4348aa3541a8cfb1ee71fdb2d6e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves the MDP via policy iteration and returns the number of policy iteration steps taken in attempting to solve the problem. <br/></td></tr>
 <tr class="separator:a2b2b4348aa3541a8cfb1ee71fdb2d6e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a335ba046a2e3c1c2f6901e20419d69f1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a335ba046a2e3c1c2f6901e20419d69f1"></a>
-Policy&#160;</td><td class="memItemRight" valign="bottom"><b>getCurrentPolicy</b> ()</td></tr>
-<tr class="separator:a335ba046a2e3c1c2f6901e20419d69f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0584ce712960257c5c128c23ba2cef47"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0584ce712960257c5c128c23ba2cef47"></a>
-std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getCurrentValues</b> ()</td></tr>
+<tr class="memitem:a8fa9a3d9ab06d387fcaf8210b09e0f42"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemdp.html#a0db428ee8ecc3a44d03d2a61991d7c15">Policy</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmdp_1_1PolicyIterator.html#a8fa9a3d9ab06d387fcaf8210b09e0f42">getBestPolicy</a> ()</td></tr>
+<tr class="memdesc:a8fa9a3d9ab06d387fcaf8210b09e0f42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the best policy calculated so far.  <a href="#a8fa9a3d9ab06d387fcaf8210b09e0f42">More...</a><br/></td></tr>
+<tr class="separator:a8fa9a3d9ab06d387fcaf8210b09e0f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0584ce712960257c5c128c23ba2cef47"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmdp_1_1PolicyIterator.html#a0584ce712960257c5c128c23ba2cef47">getCurrentValues</a> ()</td></tr>
+<tr class="memdesc:a0584ce712960257c5c128c23ba2cef47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the value function via a vector of calculated values.  <a href="#a0584ce712960257c5c128c23ba2cef47">More...</a><br/></td></tr>
 <tr class="separator:a0584ce712960257c5c128c23ba2cef47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="policy__iteration_8hpp_source.html#l00017">17</a> of file <a class="el" href="policy__iteration_8hpp_source.html">policy_iteration.hpp</a>.</p>
-</div><hr/>The documentation for this class was generated from the following files:<ul>
+<div class="textblock"><p>A class to handle basic MDP policy iteration. </p>
+
+<p>Definition at line <a class="el" href="policy__iteration_8hpp_source.html#l00031">31</a> of file <a class="el" href="policy__iteration_8hpp_source.html">policy_iteration.hpp</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a6842ede3b4282cf35c4e7cbf73bf66af"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">mdp::PolicyIterator::PolicyIterator </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemdp.html#a0db428ee8ecc3a44d03d2a61991d7c15">Policy</a>&#160;</td>
+          <td class="paramname"><em>initialPolicy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>discountFactor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>numStates</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>numActions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; std::vector&lt; <a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a> &gt;(<a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>, <a class="el" href="namespacemdp.html#adc47d93753c0848dd5b7aef4e715960b">Action</a>)&gt;&#160;</td>
+          <td class="paramname"><em>possibleNextStates</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; double(<a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>, <a class="el" href="namespacemdp.html#adc47d93753c0848dd5b7aef4e715960b">Action</a>, <a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>)&gt;&#160;</td>
+          <td class="paramname"><em>transitionProbability</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; double(<a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>, <a class="el" href="namespacemdp.html#adc47d93753c0848dd5b7aef4e715960b">Action</a>, <a class="el" href="namespacemdp.html#a3c7b9cd9f9e0f82b897cbd9b57ac859f">State</a>)&gt;&#160;</td>
+          <td class="paramname"><em>reward</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a new <a class="el" href="classmdp_1_1PolicyIterator.html" title="A class to handle basic MDP policy iteration. ">PolicyIterator</a> which will start with the given initial policy. </p>
+<p>The MDP is represented by the given discount factor and the given numbers of states and actions; the functions possibleNextStates and transitionProbability represent the conditional probability of transition to the next state given the state and action, while the reward function encodes the reward for each transition.</p>
+<p>The solver simply calculates the value function at each step by solving the system of equations V (I - gamma * T) = R, where R and T will depend on the policy for the current step. </p>
+
+<p>Definition at line <a class="el" href="policy__iteration_8cpp_source.html#l00010">10</a> of file <a class="el" href="policy__iteration_8cpp_source.html">policy_iteration.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a8fa9a3d9ab06d387fcaf8210b09e0f42"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemdp.html#a0db428ee8ecc3a44d03d2a61991d7c15">Policy</a> mdp::PolicyIterator::getBestPolicy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the best policy calculated so far. </p>
+
+<p>Definition at line <a class="el" href="policy__iteration_8cpp_source.html#l00106">106</a> of file <a class="el" href="policy__iteration_8cpp_source.html">policy_iteration.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0584ce712960257c5c128c23ba2cef47"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; mdp::PolicyIterator::getCurrentValues </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the value function via a vector of calculated values. </p>
+
+<p>Definition at line <a class="el" href="policy__iteration_8cpp_source.html#l00110">110</a> of file <a class="el" href="policy__iteration_8cpp_source.html">policy_iteration.cpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/problems/shared/<a class="el" href="policy__iteration_8hpp_source.html">policy_iteration.hpp</a></li>
 <li>src/problems/shared/<a class="el" href="policy__iteration_8cpp_source.html">policy_iteration.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 18:18:31 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 19:25:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

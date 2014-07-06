@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['randomgenerator',['RandomGenerator',['../global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a',1,'global.hpp']]]
+  ['policy',['Policy',['../namespacemdp.html#a0db428ee8ecc3a44d03d2a61991d7c15',1,'mdp']]]
 ];

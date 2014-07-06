@@ -2,6 +2,7 @@ var searchData=
 [
   ['randomaccessset',['RandomAccessSet',['../classabt_1_1RandomAccessSet.html#a346fef16783d239d8fe432ff3aae62e4',1,'abt::RandomAccessSet::RandomAccessSet()'],['../classabt_1_1RandomAccessSet.html#ac0d3373c4ff02d20b19b6ec0a681b23c',1,'abt::RandomAccessSet::RandomAccessSet(std::initializer_list&lt; Element &gt; elements)']]],
   ['recalculatevalue',['recalculateValue',['../classsolver_1_1BeliefNode.html#a96bf8f8fac1f0a8a4003dd4f1fb3b850',1,'solver::BeliefNode']]],
+  ['registerestimationparser',['registerEstimationParser',['../classshared_1_1ModelWithProgramOptions.html#ac5272a8d764373f3aaafd08234ea0d7e',1,'shared::ModelWithProgramOptions']]],
   ['registergeneratorparser',['registerGeneratorParser',['../classshared_1_1ModelWithProgramOptions.html#a698dd68f057ff397ff459852b09261bc',1,'shared::ModelWithProgramOptions']]],
   ['registerheuristicparser',['registerHeuristicParser',['../classshared_1_1ModelWithProgramOptions.html#abd562dcb89aa52bb961da596d87e5298',1,'shared::ModelWithProgramOptions']]],
   ['registersearchparser',['registerSearchParser',['../classshared_1_1ModelWithProgramOptions.html#a77f231aedb7621488862639be958168b',1,'shared::ModelWithProgramOptions']]],

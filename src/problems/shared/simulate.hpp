@@ -1,3 +1,8 @@
+/** @file simulate.hpp
+ *
+ * Contains a generic function for running ABT simulations, which can be used to form the main
+ * method of a problem-specific "simulate" executable.
+ */
 #ifndef SIMULATE_HPP_
 #define SIMULATE_HPP_
 
@@ -30,6 +35,7 @@
 using std::cout;
 using std::endl;
 
+/** A template method to run a simulation for the given model and options classes. */
 template<typename ModelType, typename OptionsType>
 int simulate(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
