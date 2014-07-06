@@ -181,9 +181,9 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) 
     return std::make_unique<DefaultHistoryCorrector>(solver, getHeuristicFunction());
 }
 
-std::unique_ptr<ObservationPool> Model::createObservationPool(Solver */*solver*/) {
+std::unique_ptr<ObservationPool> Model::createObservationPool(Solver *solver) {
     // Create a DiscreteObservationPool
-    return std::make_unique<DiscreteObservationPool>();
+    return std::make_unique<DiscreteObservationPool>(solver);
 }
 
 std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {

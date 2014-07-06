@@ -141,6 +141,13 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Solver.html#af79b50ae47b5913ccd41360ee3b63b27">replenishChild</a> (<a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *currNode, <a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> const &amp;action, <a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs, long minParticleCount=-1)</td></tr>
 <tr class="memdesc:af79b50ae47b5913ccd41360ee3b63b27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replenishes the particle count in the child node, ensuring that it has at least the given number of particles (-1 =&gt; default == model.getMinParticleCount()) <br/></td></tr>
 <tr class="separator:af79b50ae47b5913ccd41360ee3b63b27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1589a68c69377d020a21baa57a4ab9f"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Solver.html#ab1589a68c69377d020a21baa57a4ab9f">pruneSiblings</a> (<a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *node)</td></tr>
+<tr class="memdesc:ab1589a68c69377d020a21baa57a4ab9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prunes all sibling nodes of the given node in the tree, i.e.  <a href="#ab1589a68c69377d020a21baa57a4ab9f">More...</a><br/></td></tr>
+<tr class="separator:ab1589a68c69377d020a21baa57a4ab9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d3d25de08aa63241e0ccd1e3358f16d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1d3d25de08aa63241e0ccd1e3358f16d"></a>
+long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Solver.html#a1d3d25de08aa63241e0ccd1e3358f16d">pruneSubtree</a> (<a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *root)</td></tr>
+<tr class="memdesc:a1d3d25de08aa63241e0ccd1e3358f16d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prunes the subtree rooted at the given node, deleting all of the histories and all of the nodes in this subtree. <br/></td></tr>
+<tr class="separator:a1d3d25de08aa63241e0ccd1e3358f16d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d681b8119d51eb09e6b1420d018eec2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Solver.html#a8d681b8119d51eb09e6b1420d018eec2">getChangeRoot</a> () const </td></tr>
 <tr class="memdesc:a8d681b8119d51eb09e6b1420d018eec2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current root node for changes.  <a href="#a8d681b8119d51eb09e6b1420d018eec2">More...</a><br/></td></tr>
 <tr class="separator:a8d681b8119d51eb09e6b1420d018eec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -240,7 +247,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 <p>Applies any model changes that have been marked within the state pool. </p>
 <p>Changes are only applied at belief nodes that are descended from the change root, or at all belief nodes if the change root is nullptr. </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00280">280</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00329">329</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -259,7 +266,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Completes any deferred backup operations. </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00437">437</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00489">489</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -297,7 +304,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the current root node for changes. </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00215">215</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00267">267</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -511,7 +518,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns true iff there are any incomplete deferred backup operations. </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00433">433</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00485">485</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -541,7 +548,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Shows a belief node in a nice, readable way. </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00408">408</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00460">460</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -561,7 +568,28 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Prints a compact representation of the entire tree. </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00429">429</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00481">481</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab1589a68c69377d020a21baa57a4ab9f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long solver::Solver::pruneSiblings </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td>
+          <td class="paramname"><em>node</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Prunes all sibling nodes of the given node in the tree, i.e. </p>
+<p>all nodes that have the same parent belief node, but take a different action and observation. </p>
+
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00214">214</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -582,7 +610,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 <p>Sets the root node for the changes. </p>
 <p>nullptr = all nodes. </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00219">219</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00271">271</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -620,7 +648,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 <p>deltaTotalQ - change in heuristic value at this belief node.</p>
 <p>deltaNContinuations - change in number of visits to this node that continue onwards (and hence can be estimated using the q-value this node). </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00519">519</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00571">571</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -670,7 +698,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 <p>Q(b, a) will change, but the updating of the estimated value of the belief will be deferred.</p>
 <p>deltaTotalQ - change in total reward due to immediate rewards deltaNVisits - number of new visits (usually +1, 0, or -1) </p>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00535">535</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00587">587</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -717,7 +745,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 <li>Use propagateQChanges = false to defer backpropagation and only use the immediate values when updating. This is useful for batched backups as it saves on the cost of recalculating the estimate of the value of the belief. </li>
 </ul>
 
-<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00465">465</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
+<p>Definition at line <a class="el" href="Solver_8cpp_source.html#l00517">517</a> of file <a class="el" href="Solver_8cpp_source.html">Solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -728,7 +756,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 20:13:03 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 18:18:32 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -115,20 +115,15 @@ public:
             long minParticleCount = -1);
 
 
-    /** Prunes all branches in the tree from the given node, except those following the given
-     * action and observation.
-     *
-     * NOTE: The Q(s, a) values in this node will *not* be updated to reflect the deleted
-     * history sequences.
+    /** Prunes all sibling nodes of the given node in the tree, i.e. all nodes that have the same
+     * parent belief node, but take a different action and observation.
      */
-    void pruneOtherBraches(BeliefNode *node, Action const &action, Observation const &obs);
+    long pruneSiblings(BeliefNode *node);
 
-    /** Removes the given branch from the tree.
-     *
-     * NOTE: The Q(s, a) values in the above nodes will *not* be updated to reflect the deleted
-     * history sequences.
+    /** Prunes the subtree rooted at the given node, deleting all of the histories and all of
+     * the nodes in this subtree.
      */
-    void pruneBrach(BeliefNode *root);
+    long pruneSubtree(BeliefNode *root);
 
     /* ------------------- Change handling methods ------------------- */
     /** Returns the current root node for changes. */
@@ -235,17 +230,17 @@ private:
     /** The serializer to be used with this solver. */
     std::unique_ptr<Serializer> serializer_;
 
+    /** The pool of actions (used to generate action mappings) */
+    std::unique_ptr<ActionPool> actionPool_;
+    /** The pool of observations (used to generate observation mappings) */
+    std::unique_ptr<ObservationPool> observationPool_;
+
     /** The pool of states. */
     std::unique_ptr<StatePool> statePool_;
     /** The full collection of simulated histories. */
     std::unique_ptr<Histories> histories_;
     /** The tree that stores the policy */
     std::unique_ptr<BeliefTree> policy_;
-
-    /** The pool of actions (used to generate action mappings) */
-    std::unique_ptr<ActionPool> actionPool_;
-    /** The pool of observations (used to generate observation mappings) */
-    std::unique_ptr<ObservationPool> observationPool_;
 
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;

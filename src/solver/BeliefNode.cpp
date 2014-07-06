@@ -17,6 +17,7 @@
 #include "solver/cached_values.hpp"
 
 #include "solver/ActionNode.hpp"               // for ActionNode
+#include "solver/BeliefTree.hpp"
 #include "solver/HistoryEntry.hpp"             // for HistoryEntry
 #include "solver/Solver.hpp"                   // for Solver
 
@@ -25,21 +26,25 @@
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/State.hpp"                    // for State
 
+#include "solver/belief-estimators/estimators.hpp"
+
 #include "solver/search/action-choosers/choosers.hpp"
 
 #include "solver/mappings/actions/ActionMapping.hpp"
+#include "solver/mappings/actions/ActionPool.hpp"
 #include "solver/mappings/observations/ObservationMapping.hpp"
 #include "solver/mappings/observations/ObservationPool.hpp"
 
 namespace solver {
-BeliefNode::BeliefNode() :
-            BeliefNode(-1, nullptr) {
+BeliefNode::BeliefNode(Solver *solver) :
+            BeliefNode(-1, nullptr, solver) {
 }
-BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry) :
-            BeliefNode(-1, parentEntry) {
+BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry, Solver *solver) :
+            BeliefNode(-1, parentEntry, solver) {
 }
 
-BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
+BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry, Solver *solver) :
+            solver_(solver),
             id_(id),
             depth_(-1),
             parentEntry_(parentEntry),
@@ -49,15 +54,21 @@ BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry) :
             actionMap_(nullptr),
             cachedValues_(),
             valueEstimator_(nullptr) {
+
+    // Correctly calculate the depth based on the parent node.
     if (parentEntry_ == nullptr) {
         depth_ = 0;
     } else {
         depth_ = getParentBelief()->getDepth() + 1;
     }
+
+    // Add this node to the index in the tree.
+    solver_->getPolicy()->addNode(this);
 }
 
-// Do-nothing destructor
+// The destructor must remove the node from the solver's index.
 BeliefNode::~BeliefNode() {
+    solver_->getPolicy()->removeNode(this);
 }
 
 /* ----------------- Useful calculations ------------------- */
@@ -164,6 +175,28 @@ void BeliefNode::recalculateValue() {
     valueEstimator_->updateCache();
 }
 
+/* -------------------- Core tree-related methods  ---------------------- */
+BeliefNode *BeliefNode::createOrGetChild(Action const &action,
+        Observation const &obs) {
+    ActionNode *actionNode = actionMap_->getActionNode(action);
+    if (actionNode == nullptr) {
+        actionNode = actionMap_->createActionNode(action);
+        actionNode->setMapping(solver_->getObservationPool()->createObservationMapping(actionNode));
+    }
+    BeliefNode *childNode;
+    bool isNew;
+    std::tie(childNode, isNew) = actionNode->createOrGetChild(solver_, obs);
+    if (isNew) {
+        // If we've created a new node, we also need to create some of its key elements.
+        if (data_ != nullptr) {
+            childNode->setHistoricalData(data_->createChild(action, obs));
+        }
+        childNode->setMapping(solver_->getActionPool()->createActionMapping(childNode));
+        solver_->getEstimationStrategy()->setValueEstimator(solver_, childNode);
+    }
+    return childNode;
+}
+
 /* ============================ PRIVATE ============================ */
 
 /* -------------- Particle management / sampling ---------------- */
@@ -187,16 +220,5 @@ void BeliefNode::setMapping(std::unique_ptr<ActionMapping> mapping) {
 }
 void BeliefNode::setHistoricalData(std::unique_ptr<HistoricalData> data) {
     data_ = std::move(data);
-}
-
-/* -------------------- Tree-related methods  ---------------------- */
-std::pair<BeliefNode *, bool> BeliefNode::createOrGetChild(Solver *solver, Action const &action,
-        Observation const &obs) {
-    ActionNode *actionNode = actionMap_->getActionNode(action);
-    if (actionNode == nullptr) {
-        actionNode = actionMap_->createActionNode(action);
-        actionNode->setMapping(solver->getObservationPool()->createObservationMapping(actionNode));
-    }
-    return actionNode->createOrGetChild(solver, obs);
 }
 } /* namespace solver */

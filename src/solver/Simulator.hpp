@@ -73,6 +73,8 @@ public:
      * histories.
      */
     double getTotalImprovementTime() const;
+    /** Returns the total time spent on pruning the tree. */
+    double getTotalPruningTime() const;
 
     /** Sets a sequence of changes to be used for this simulation. */
     void setChangeSequence(ChangeSequence sequence);
@@ -133,6 +135,8 @@ private:
     double totalReplenishingTime_;
     /** The total time spent on improving the policy, via new histories. */
     double totalImprovementTime_;
+    /** The total time spent on pruning the tree. */
+    double totalPruningTime_;
 };
 } /* namespace solver */
 

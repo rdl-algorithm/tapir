@@ -280,12 +280,6 @@ void TextSerializer::save(ActionNode const &node, std::ostream &os) {
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
     node.setMapping(loadObservationMapping(&node, is));
-    for (ObservationMappingEntry const *entry : node.getMapping()->getAllEntries()) {
-        BeliefNode *childNode = entry->getBeliefNode();
-        if (childNode != nullptr) {
-            getSolver()->getPolicy()->addNode(childNode);
-        }
-    }
 }
 
 void TextSerializer::save(BeliefNode const &node, std::ostream &os) {

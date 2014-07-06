@@ -7,6 +7,7 @@ var searchData=
   ['registersearchparser',['registerSearchParser',['../classshared_1_1ModelWithProgramOptions.html#a77f231aedb7621488862639be958168b',1,'shared::ModelWithProgramOptions']]],
   ['remove',['remove',['../classabt_1_1LinkedHashSet.html#add609857ab0f99af3d24e22a4d20fe87',1,'abt::LinkedHashSet::remove()'],['../classabt_1_1RandomAccessSet.html#a8c8b6fe10b38ba7a5e645e32a10c335e',1,'abt::RandomAccessSet::remove()']]],
   ['removecachedvalue',['removeCachedValue',['../classsolver_1_1BeliefNode.html#af71330c2e821c9f6c3068ea384f915b0',1,'solver::BeliefNode']]],
+  ['removemapping',['removeMapping',['../classrocksample_1_1LegalActionsPool.html#a00b492906793ae873cf4987a162e0e81',1,'rocksample::LegalActionsPool']]],
   ['removestateinfo',['removeStateInfo',['../classsolver_1_1RTree.html#ad628b0052b96dc858b9ef08860ac6c46',1,'solver::RTree::removeStateInfo()'],['../classsolver_1_1StateIndex.html#a201d7b6c079995f8f6d787e34ffd9092',1,'solver::StateIndex::removeStateInfo()']]],
   ['replenishchild',['replenishChild',['../classsolver_1_1Solver.html#af79b50ae47b5913ccd41360ee3b63b27',1,'solver::Solver']]],
   ['reset',['reset',['../classoptions_1_1BaseOption.html#aa1dec8140f41524cd2fa721b675081dd',1,'options::BaseOption::reset()'],['../classoptions_1_1Option.html#a1fc5446484f50e08db71ea4fef21f74c',1,'options::Option::reset()'],['../classsolver_1_1RTree.html#aa59d4c1c712637990611c421fbedfa30',1,'solver::RTree::reset()'],['../classsolver_1_1StateIndex.html#ae0b240d2c73b6715f3d1cf22c0cc78cd',1,'solver::StateIndex::reset()']]],

@@ -114,9 +114,9 @@ Inheritance diagram for solver::DiscreteObservationMap:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa3cbfd7674adceae78d52f886ec83401"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#aa3cbfd7674adceae78d52f886ec83401">DiscreteObservationMap</a> (<a class="el" href="classsolver_1_1ActionNode.html">ActionNode</a> *owner)</td></tr>
-<tr class="memdesc:aa3cbfd7674adceae78d52f886ec83401"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new, empty discrete observation map for the given <a class="el" href="classsolver_1_1ActionNode.html" title="The base level interface used by the solver to store the results of taking a specific action from a s...">ActionNode</a>.  <a href="#aa3cbfd7674adceae78d52f886ec83401">More...</a><br/></td></tr>
-<tr class="separator:aa3cbfd7674adceae78d52f886ec83401"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee6d6383136796bbdf8581636327b16c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#aee6d6383136796bbdf8581636327b16c">DiscreteObservationMap</a> (<a class="el" href="classsolver_1_1ActionNode.html">ActionNode</a> *owner, <a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver)</td></tr>
+<tr class="memdesc:aee6d6383136796bbdf8581636327b16c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new, empty discrete observation map for the given <a class="el" href="classsolver_1_1ActionNode.html" title="The base level interface used by the solver to store the results of taking a specific action from a s...">ActionNode</a>.  <a href="#aee6d6383136796bbdf8581636327b16c">More...</a><br/></td></tr>
+<tr class="separator:aee6d6383136796bbdf8581636327b16c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f9610f8c199fdf52214f245d8f41f99"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7f9610f8c199fdf52214f245d8f41f99"></a>
 virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#a7f9610f8c199fdf52214f245d8f41f99">getBelief</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) const override</td></tr>
 <tr class="memdesc:a7f9610f8c199fdf52214f245d8f41f99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the belief node (if any) corresponding to this observation. <br/></td></tr>
@@ -128,6 +128,14 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <tr class="memitem:a8e88e703005bfbe172f7eb0c0ee55de6"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#a8e88e703005bfbe172f7eb0c0ee55de6">getNChildren</a> () const override</td></tr>
 <tr class="memdesc:a8e88e703005bfbe172f7eb0c0ee55de6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of child nodes associated with this mapping.  <a href="#a8e88e703005bfbe172f7eb0c0ee55de6">More...</a><br/></td></tr>
 <tr class="separator:a8e88e703005bfbe172f7eb0c0ee55de6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb07201cefc26856d5ab8ee51ad779b9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#aeb07201cefc26856d5ab8ee51ad779b9">deleteChild</a> (<a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *entry) override</td></tr>
+<tr class="memdesc:aeb07201cefc26856d5ab8ee51ad779b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes the given entry from this mapping, as well as the entire corresponding subtree.  <a href="#aeb07201cefc26856d5ab8ee51ad779b9">More...</a><br/></td></tr>
+<tr class="separator:aeb07201cefc26856d5ab8ee51ad779b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79e1f1c1f57a75ffaad625ee1336395b"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
+&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
+const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#a79e1f1c1f57a75ffaad625ee1336395b">getChildEntries</a> () const override</td></tr>
+<tr class="memdesc:a79e1f1c1f57a75ffaad625ee1336395b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all the entries in this mapping that have an associated child node.  <a href="#a79e1f1c1f57a75ffaad625ee1336395b">More...</a><br/></td></tr>
+<tr class="separator:a79e1f1c1f57a75ffaad625ee1336395b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20f8970f3d524933ab0ea4d1971ae104"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#a20f8970f3d524933ab0ea4d1971ae104">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) override</td></tr>
 <tr class="memdesc:a20f8970f3d524933ab0ea4d1971ae104"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#a20f8970f3d524933ab0ea4d1971ae104">More...</a><br/></td></tr>
 <tr class="separator:a20f8970f3d524933ab0ea4d1971ae104"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,12 +143,6 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#a24652118479112b9318281f29aba959f">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) const override</td></tr>
 <tr class="memdesc:a24652118479112b9318281f29aba959f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#a24652118479112b9318281f29aba959f">More...</a><br/></td></tr>
 <tr class="separator:a24652118479112b9318281f29aba959f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa99d40eaab89b06160616196c0de91d4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa99d40eaab89b06160616196c0de91d4"></a>
-virtual std::vector<br class="typebreak"/>
-&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
-const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#aa99d40eaab89b06160616196c0de91d4">getAllEntries</a> () const override</td></tr>
-<tr class="memdesc:aa99d40eaab89b06160616196c0de91d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all entries in this mapping - but only those that have an associated child node. <br/></td></tr>
-<tr class="separator:aa99d40eaab89b06160616196c0de91d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa92d6ed04d3cffe3c4fa2a85001a3c50"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscreteObservationMap.html#aa92d6ed04d3cffe3c4fa2a85001a3c50">getTotalVisitCount</a> () const override</td></tr>
 <tr class="memdesc:aa92d6ed04d3cffe3c4fa2a85001a3c50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the total visit count among all observations.  <a href="#aa92d6ed04d3cffe3c4fa2a85001a3c50">More...</a><br/></td></tr>
 <tr class="separator:aa92d6ed04d3cffe3c4fa2a85001a3c50"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -165,9 +167,9 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscreteObservationT
 <div class="textblock"><p>A concrete class implementing <a class="el" href="classsolver_1_1ObservationMapping.html" title="An abstract base class that defines a mapping of observations to subsequent beliefs in the belief tre...">ObservationMapping</a> for a discrete set of observations. </p>
 <p>The mapping entries are stored in a hash table (std::unordered_set), which maps each observation to its associated entry in the mapping, or nullptr if there is no entry yet. </p>
 
-<p>Definition at line <a class="el" href="discrete__observations_8hpp_source.html#l00050">50</a> of file <a class="el" href="discrete__observations_8hpp_source.html">discrete_observations.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discrete__observations_8hpp_source.html#l00054">54</a> of file <a class="el" href="discrete__observations_8hpp_source.html">discrete_observations.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="aa3cbfd7674adceae78d52f886ec83401"></a>
+<a class="anchor" id="aee6d6383136796bbdf8581636327b16c"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -175,19 +177,88 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscreteObservationT
           <td class="memname">solver::DiscreteObservationMap::DiscreteObservationMap </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classsolver_1_1ActionNode.html">ActionNode</a> *&#160;</td>
-          <td class="paramname"><em>owner</em></td><td>)</td>
+          <td class="paramname"><em>owner</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1Solver.html">Solver</a> *&#160;</td>
+          <td class="paramname"><em>solver</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Creates a new, empty discrete observation map for the given <a class="el" href="classsolver_1_1ActionNode.html" title="The base level interface used by the solver to store the results of taking a specific action from a s...">ActionNode</a>. </p>
 
-<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00032">32</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00036">36</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="aeb07201cefc26856d5ab8ee51ad779b9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void solver::DiscreteObservationMap::deleteChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td>
+          <td class="paramname"><em>entry</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deletes the given entry from this mapping, as well as the entire corresponding subtree. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a016671bb9c29519a9d10e7cf26d84448">solver::ObservationMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00066">66</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a79e1f1c1f57a75ffaad625ee1336395b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const * &gt; solver::DiscreteObservationMap::getChildEntries </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a vector of all the entries in this mapping that have an associated child node. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a5eec48f29a7394969338f2c23d9a1b72">solver::ObservationMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00071">71</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a20f8970f3d524933ab0ea4d1971ae104"></a>
 <div class="memitem">
 <div class="memproto">
@@ -214,7 +285,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscreteObservationT
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a59708551552e4576105d2b9678537f65">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00061">61</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00078">78</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -244,7 +315,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscreteObservationT
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a1b3ca0a99269d6aa16060c2764275de0">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00068">68</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00085">85</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -273,7 +344,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscreteObservationT
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#ac825fe1c22bc548fc0d01ea32e1960a7">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00057">57</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00062">62</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -302,7 +373,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscreteObservationT
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#adf34fb3eaad12ff31182c42352431124">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00083">83</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discrete__observations_8cpp_source.html#l00093">93</a> of file <a class="el" href="discrete__observations_8cpp_source.html">discrete_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -313,7 +384,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscreteObservationT
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 20:13:03 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 18:18:31 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

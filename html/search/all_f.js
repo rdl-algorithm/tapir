@@ -35,5 +35,8 @@ var searchData=
   ['printaliases',['printAliases',['../classoptions_1_1BaseOption.html#a99fe22cfea873d7ac547d04d252d3ca5',1,'options::BaseOption']]],
   ['printbelief',['printBelief',['../classsolver_1_1Solver.html#a73859ae20b424a7ca83c52ee08294fc7',1,'solver::Solver']]],
   ['printtree',['printTree',['../classsolver_1_1Solver.html#a23d76ba7c37947da4c5b285a7abfc0d8',1,'solver::Solver']]],
-  ['probability',['probability',['../structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#a4345b906cd979b264af4b41679e7cfe4',1,'solver::MultipleStrategiesExp3::StrategyInfo']]]
+  ['probability',['probability',['../structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#a4345b906cd979b264af4b41679e7cfe4',1,'solver::MultipleStrategiesExp3::StrategyInfo']]],
+  ['pruneeverystep',['pruneEveryStep',['../structsolver_1_1Options.html#a0cf2fdfbed36e6447d46afd98f651e43',1,'solver::Options']]],
+  ['prunesiblings',['pruneSiblings',['../classsolver_1_1Solver.html#ab1589a68c69377d020a21baa57a4ab9f',1,'solver::Solver']]],
+  ['prunesubtree',['pruneSubtree',['../classsolver_1_1Solver.html#a1d3d25de08aa63241e0ccd1e3358f16d',1,'solver::Solver']]]
 ];

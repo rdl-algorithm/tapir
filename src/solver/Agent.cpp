@@ -26,6 +26,6 @@ BeliefNode *Agent::getCurrentBelief() const {
 }
 
 void Agent::updateBelief(Action const &action, Observation const &observation) {
-    currentBelief_ = solver_->getPolicy()->createOrGetChild(currentBelief_, action, observation);
+    currentBelief_ = currentBelief_->createOrGetChild(action, observation);
 }
 } /* namespace solver */

@@ -40,7 +40,8 @@ Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver, bool hasDynam
         actualHistory_(std::make_unique<HistorySequence>()),
         totalChangingTime_(0.0),
         totalReplenishingTime_(0.0),
-        totalImprovementTime_(0.0) {
+        totalImprovementTime_(0.0),
+        totalPruningTime_(0.0) {
     std::unique_ptr<State> initialState = model_->sampleAnInitState();
     StateInfo *initInfo = solver_->getStatePool()->createOrGetInfo(*initialState);
     HistoryEntry *newEntry = actualHistory_->addEntry();
@@ -77,6 +78,9 @@ double Simulator::getTotalReplenishingTime() const {
 }
 double Simulator::getTotalImprovementTime() const {
     return totalImprovementTime_;
+}
+double Simulator::getTotalPruningTime() const {
+    return totalPruningTime_;
 }
 
 
@@ -193,11 +197,23 @@ bool Simulator::stepSimulation() {
         cout << totalDiscountedReward_ << endl;
     }
 
+    // Replenish the particles.
     double replenishTimeStart = abt::clock_ms();
     solver_->replenishChild(currentBelief, *result.action, *result.observation);
     totalReplenishingTime_ += abt::clock_ms() - replenishTimeStart;
+
+    // Update the agent's belief.
     agent_->updateBelief(*result.action, *result.observation);
     currentBelief = agent_->getCurrentBelief();
+
+    // If we're pruning on every step, we do it now.
+    if (options_->pruneEveryStep) {
+        double pruningTimeStart = abt::clock_ms();
+        long nSequencesDeleted = solver_->pruneSiblings(currentBelief);
+        long pruningTime = abt::clock_ms() - pruningTimeStart;
+        totalPruningTime_ += pruningTime;
+        cout << "Pruned " << nSequencesDeleted << " sequences in " << pruningTime << "ms.";
+    }
 
     currentEntry->action_ = std::move(result.action);
     currentEntry->observation_ = std::move(result.observation);

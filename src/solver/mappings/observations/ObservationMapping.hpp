@@ -44,7 +44,7 @@ public:
         return owner_;
     }
 
-    /* -------------- Creation and retrieval of nodes. ---------------- */
+    /* -------------- Access to and management of child nodes. ---------------- */
     /** Retrieves the belief node (if any) corresponding to this observation */
     virtual BeliefNode *getBelief(Observation const &obs) const = 0;
     /** Creates a new belief node for the given observation */
@@ -52,19 +52,17 @@ public:
     /** Returns the number of child nodes associated with this mapping. */
     virtual long getNChildren() const = 0;
 
+    /** Deletes the given entry from this mapping, as well as the entire corresponding subtree. */
+    virtual void deleteChild(ObservationMappingEntry const *entry) = 0;
+
     /* -------------- Retrieval of mapping entries. ---------------- */
+    /** Returns a vector of all the entries in this mapping that have an associated child node. */
+    virtual std::vector<ObservationMappingEntry const *> getChildEntries() const = 0;
+
     /** Returns the mapping entry associated with the given observation. */
     virtual ObservationMappingEntry *getEntry(Observation const &obs) = 0;
     /** Returns the mapping entry associated with the given observation. */
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const = 0;
-    /** Returns a vector of all entries in this mapping - but only those that have an associated
-     * child node.
-     */
-    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const = 0;
-
-    /** Deletes the given entry from this mapping, as well as the entire corresponding subtree.
-     */
-    virtual void deleteEntry(ObservationMappingEntry const *entry) = 0;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     /** Returns the total visit count among all observations. */

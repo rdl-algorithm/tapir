@@ -141,6 +141,8 @@ int simulate(int argc, char const *argv[]) {
         cout << simulator.getTotalImprovementTime() << "ms" << endl;
         cout << "Time spent replenishing particles: ";
         cout << simulator.getTotalReplenishingTime() << "ms" << endl;
+        cout << "Time spent pruning: ";
+        cout << simulator.getTotalPruningTime() << "ms" << endl;
         cout << "Total time taken: " << totT << "ms" << endl;
         if (options.savePolicy) {
             // Write the final policy to a file.

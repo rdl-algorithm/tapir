@@ -10,7 +10,7 @@ var searchData=
   ['basicsearchstrategy',['BasicSearchStrategy',['../classsolver_1_1BasicSearchStrategy.html',1,'solver']]],
   ['basicsearchstrategy',['BasicSearchStrategy',['../classsolver_1_1BasicSearchStrategy.html#ae69b7b6ad04428544db543f4acb63efe',1,'solver::BasicSearchStrategy']]],
   ['begin',['begin',['../classabt_1_1LinkedHashSet.html#aff1e343ea4956b95342ed95ab2d35611',1,'abt::LinkedHashSet::begin()'],['../classabt_1_1RandomAccessSet.html#abffba0c960669e9424bdbf630be2eeae',1,'abt::RandomAccessSet::begin()']]],
-  ['beliefnode',['BeliefNode',['../classsolver_1_1BeliefNode.html#ac5aa6925bbe65cee706f09cc21dd6b9f',1,'solver::BeliefNode::BeliefNode()'],['../classsolver_1_1BeliefNode.html#a51cc24fca72c53e2a30a6359f8797442',1,'solver::BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry)'],['../classsolver_1_1BeliefNode.html#a8f79ad7d9b00205786b5a9bd79505ff2',1,'solver::BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry)']]],
+  ['beliefnode',['BeliefNode',['../classsolver_1_1BeliefNode.html#a26dc881b9fd781a9608323ee5d4bb385',1,'solver::BeliefNode::BeliefNode(Solver *solver)'],['../classsolver_1_1BeliefNode.html#a88d89e4c3131d288cbc972a016df36a1',1,'solver::BeliefNode::BeliefNode(ObservationMappingEntry *parentEntry, Solver *solver)'],['../classsolver_1_1BeliefNode.html#a7a4fef2e06fa973c54f95ed3b5417a0c',1,'solver::BeliefNode::BeliefNode(long id, ObservationMappingEntry *parentEntry, Solver *solver)']]],
   ['beliefnode',['BeliefNode',['../classsolver_1_1BeliefNode.html',1,'solver']]],
   ['beliefnode_2ecpp',['BeliefNode.cpp',['../BeliefNode_8cpp.html',1,'']]],
   ['beliefnode_2ehpp',['BeliefNode.hpp',['../BeliefNode_8hpp.html',1,'']]],

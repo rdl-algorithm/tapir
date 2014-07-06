@@ -84,10 +84,14 @@ struct SharedOptions: public solver::Options {
         parser->addOptionWithDefault("", "color", &SharedOptions::hasColorOutput, false);
         parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "c", "color",
                 "use color output", true);
+        parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "", "no-color",
+                        "don't use color output", false);
 
         parser->addOptionWithDefault("", "verbose", &SharedOptions::hasVerboseOutput, false);
         parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "v", "verbose",
                         "use verbose output", true);
+        parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "", "no-verbose",
+                        "don't use verbose output", false);
     }
 
     static void addSimulationOptions(options::OptionParser *parser, bool simulating) {
@@ -102,9 +106,12 @@ struct SharedOptions: public solver::Options {
             parser->addOptionWithDefault<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps, 200);
             parser->addOptionWithDefault<unsigned long>("ABT", "minParticleCount",
                     &Options::minParticleCount, 5000);
+            parser->addOptionWithDefault<bool>("ABT", "pruneEveryStep",
+                                &Options::pruneEveryStep, true);
         } else {
             parser->addOption<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps);
             parser->addOption<unsigned long>("ABT", "minParticleCount", &Options::minParticleCount);
+            parser->addOption<bool>("ABT", "pruneEveryStep", &Options::pruneEveryStep);
         }
 
         parser->addOptionWithDefault<long>("simulation", "nRuns", &SharedOptions::nRuns, 1);
@@ -130,6 +137,14 @@ struct SharedOptions: public solver::Options {
                     &Options::minParticleCount, "z", "min-particles", "Minimum allowable particles"
                             " per belief during simulation - if the count drops below this value,"
                             " extra particles will be resampled via a particle filter.", "int");
+            parser->addSwitchArg("ABT", "pruneEveryStep",
+                    &Options::pruneEveryStep, "", "prune", "Prune after every step"
+                            " of the simulation.", true);
+            parser->addSwitchArg("ABT", "pruneEveryStep",
+                    &Options::pruneEveryStep, "", "no-prune", "Don't prune after every step"
+                            " of the simulation.", false);
+
+
             parser->addValueArg<long>("simulation", "nRuns", &SharedOptions::nRuns,
                                 "r", "runs", "Number of runs", "int");
 

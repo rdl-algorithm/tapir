@@ -109,7 +109,11 @@ class DiscretizedActionMap: public solver::ActionMapping {
     virtual ActionNode *createActionNode(Action const &action) override;
     virtual long getNChildren() const override;
 
+    virtual void deleteChild(ActionMappingEntry const *entry) override;
+
     /* -------------- Retrieval of mapping entries. ---------------- */
+    virtual std::vector<ActionMappingEntry const *> getChildEntries() const override;
+
     virtual long getNumberOfVisitedEntries() const override;
     virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const override;
     virtual ActionMappingEntry *getEntry(Action const &action) override;
@@ -201,6 +205,9 @@ class DiscretizedActionTextSerializer: virtual public solver::Serializer {
             std::ostream &os) override;
     virtual std::unique_ptr<ActionMapping> loadActionMapping(BeliefNode *node,
             std::istream &is) override;
+
+    /** Loads the data from the input stream into the given DiscretizedActionMap. */
+    virtual void loadActionMapping(DiscretizedActionMap &discMap, std::istream &is);
 };
 } /* namespace solver */
 

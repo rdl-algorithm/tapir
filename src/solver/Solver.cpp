@@ -61,11 +61,11 @@ Solver::Solver(std::unique_ptr<Model> model) :
             model_(std::move(model)),
             options_(model_->getOptions()),
             serializer_(model_->createSerializer(this)),
+            actionPool_(nullptr),
+            observationPool_(nullptr),
             statePool_(nullptr),
             histories_(nullptr),
             policy_(nullptr),
-            actionPool_(nullptr),
-            observationPool_(nullptr),
             historyCorrector_(nullptr),
             searchStrategy_(nullptr),
             estimationStrategy_(nullptr),
@@ -161,7 +161,7 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
     if (minParticleCount < 0) {
         minParticleCount = options_->minParticleCount;
     }
-    BeliefNode *nextNode = policy_->createOrGetChild(currNode, action, obs);
+    BeliefNode *nextNode = currNode->createOrGetChild(action, obs);
     long particleCount = nextNode->getNumberOfParticles();
     long deficit = minParticleCount - particleCount;
     if (deficit <= 0) {
@@ -211,16 +211,56 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
     return nextNode;
 }
 
-void Solver::pruneOtherBraches(BeliefNode *node, Action const &action, Observation const &obs) {
+long Solver::pruneSiblings(BeliefNode *node) {
+    ObservationMappingEntry *entry = node->getParentEntry();
+    if (entry == nullptr) {
+        return 0;
+    }
 
+    long nSequencesDeleted = 0;
+
+    // Prune siblings that share an action, but not an observation.
+    ObservationMapping *obsMap = entry->getMapping();
+    for (ObservationMappingEntry const *sibling : obsMap->getChildEntries()) {
+        if (sibling != entry) {
+            nSequencesDeleted += pruneSubtree(sibling->getBeliefNode());
+        }
+    }
+
+    ActionMappingEntry *actionEntry = obsMap->getOwner()->getParentEntry();
+    ActionMapping *actionMapping = actionEntry->getMapping();
+    for (ActionMappingEntry const *actionSibling : actionEntry->getMapping()->getChildEntries()) {
+        if (actionSibling != actionEntry) {
+            ObservationMapping *siblingObsMap = actionSibling->getActionNode()->getMapping();
+            for (ObservationMappingEntry const *obsSibling : siblingObsMap->getChildEntries()) {
+                nSequencesDeleted += pruneSubtree(obsSibling->getBeliefNode());
+            }
+            // Now delete the action mapping entry.
+            actionMapping->deleteChild(actionSibling);
+        }
+    }
+
+    // Backup the parent node so the value estimate remains OK.
+    doBackup();
+
+    return nSequencesDeleted;
 }
 
-void Solver::pruneBranch(BeliefNode *root) {
+long Solver::pruneSubtree(BeliefNode *root) {
+    // Delete all history sequences going into this subtree.
+    long nSequencesDeleted = 0;
     for (HistoryEntry *entry : root->particles_) {
         histories_->deleteSequence(entry->owningSequence_);
+        nSequencesDeleted++;
     }
-    root->getParentEntry();
-    node->getMapping()->getActionNode(action)->getChild();
+
+    ObservationMappingEntry *entry = root->getParentEntry();
+    if (entry != nullptr) {
+        addNodeToBackup(root->getParentBelief());
+        entry->getMapping()->deleteChild(entry);
+    }
+
+    return nSequencesDeleted;
 }
 
 /* ------------------- Change handling methods ------------------- */
@@ -229,10 +269,7 @@ BeliefNode *Solver::getChangeRoot() const {
 }
 
 void Solver::setChangeRoot(BeliefNode *changeRoot) {
-    if (changeRoot_ != changeRoot) {
-        changeRoot_ = changeRoot;
-        isAffectedMap_.clear();
-    }
+    changeRoot_ = changeRoot;
 }
 
 bool Solver::isAffected(BeliefNode const *node) {
@@ -414,6 +451,9 @@ void Solver::applyChanges() {
 
     // Backup all the way to the root to keep the tree consistent.
     doBackup();
+
+    // Clear the map of affected nodes, to make sure it doesn't keep nodes that may be deleted.
+    isAffectedMap_.clear();
 }
 
 /* ------------------ Display methods  ------------------- */
@@ -573,6 +613,7 @@ void Solver::initialize() {
     statePool_ = std::make_unique<StatePool>(model_->createStateIndex());
     histories_ = std::make_unique<Histories>();
     policy_ = std::make_unique<BeliefTree>(this);
+    policy_->reset();
 
     // Serializable model-specific customizations
     actionPool_ = nullptr;

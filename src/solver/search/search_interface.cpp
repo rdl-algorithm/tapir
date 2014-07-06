@@ -130,8 +130,8 @@ SearchStatus BasicSearchStrategy::extendAndBackup(HistorySequence *sequence, lon
         currentEntry->observation_ = std::move(result.observation);
 
         // Create the child belief node, and set the current node to be that node.
-        BeliefNode *nextNode = solver_->getPolicy()->createOrGetChild(currentNode,
-                *currentEntry->action_, *currentEntry->observation_);
+        BeliefNode *nextNode = currentNode->createOrGetChild(*currentEntry->action_,
+                *currentEntry->observation_);
         currentNode = nextNode;
 
         // Now we create a new history entry and step the history forward.

@@ -44,7 +44,7 @@ public:
         return owner_;
     }
 
-    /* -------------- Creation and retrieval of nodes. ---------------- */
+    /* -------------- Access to and management of child nodes. ---------------- */
     /** Retrieves the action node (if any) corresponding to the given action. */
     virtual ActionNode *getActionNode(Action const &action) const = 0;
     /** Creates a new action node for the given action. */
@@ -52,7 +52,14 @@ public:
     /** Returns the number of child action nodes owned by this mapping. */
     virtual long getNChildren() const = 0;
 
+    /** Deletes the child in the given entry, as well as the entire corresponding subtree. */
+    virtual void deleteChild(ActionMappingEntry const *entry) = 0;
+
     /* -------------- Retrieval of mapping entries. ---------------- */
+    /** Returns all entries in this mapping that have a child node associated with them. */
+    virtual std::vector<ActionMappingEntry const *> getChildEntries() const = 0;
+
+
     /** Returns the number of entries in this mapping with a nonzero visit count.
      *
      * This is different to the the number of child nodes, because sometimes there will be child

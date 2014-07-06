@@ -23,9 +23,8 @@
 namespace solver {
 BeliefTree::BeliefTree(Solver *solver) :
     solver_(solver),
-    root_(nullptr),
-    allNodes_() {
-	reset();
+    allNodes_(),
+    root_(nullptr) {
 }
 
 // Do nothing!
@@ -53,24 +52,6 @@ std::vector<BeliefNode *> BeliefTree::getNodes() const {
     return allNodes_;
 }
 
-/* ------------------- Creation of new nodes in the tree ------------------- */
-BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
-        Action const &action, Observation const &obs) {
-    bool isNew;
-    BeliefNode *childNode;
-    std::tie(childNode, isNew) = node->createOrGetChild(solver_, action, obs);
-    if (isNew) {
-        addNode(childNode);
-        HistoricalData *data = node->getHistoricalData();
-        if (data != nullptr) {
-            childNode->setHistoricalData(data->createChild(action, obs));
-        }
-        childNode->setMapping(solver_->getActionPool()->createActionMapping(childNode));
-        solver_->getEstimationStrategy()->setValueEstimator(solver_, childNode);
-    }
-    return childNode;
-}
-
 /* ============================ PRIVATE ============================ */
 
 
@@ -78,7 +59,7 @@ BeliefNode *BeliefTree::createOrGetChild(BeliefNode *node,
 void BeliefTree::addNode(BeliefNode *node) {
     long id = node->id_;
     if (id < 0) {
-        // Negative ID => allocate a new one.
+        // Negative ID => add it to the back of the vector.
         id = allNodes_.size();
         node->id_ = id;
         allNodes_.push_back(nullptr);
@@ -89,14 +70,37 @@ void BeliefTree::addNode(BeliefNode *node) {
     allNodes_[id] = node;
 }
 
+void BeliefTree::removeNode(BeliefNode *node) {
+    long id = node->id_;
+
+    long lastNodeId = allNodes_.size() - 1;
+
+    if (id < 0 || id > lastNodeId) {
+        debug::show_message("ERROR: Node ID is out of bounds.");
+        return;
+    }
+    if (allNodes_[id] != node) {
+        debug::show_message("ERROR: Node ID does not match index.");
+        return;
+    }
+
+    // Now remove the node from the index.
+    if (id < lastNodeId) {
+        BeliefNode *lastNode = allNodes_[lastNodeId];
+        lastNode->id_ = id;
+        allNodes_[id] = lastNode;
+    }
+    allNodes_.pop_back();
+}
+
 /* ------------------- Tree modification ------------------- */
 BeliefNode *BeliefTree::reset() {
     allNodes_.clear();
-    root_ = std::make_unique<BeliefNode>();
+    root_ = std::make_unique<BeliefNode>(solver_);
     BeliefNode *rootPtr = root_.get();
-    addNode(rootPtr);
     return rootPtr;
 }
+
 void BeliefTree::initializeRoot() {
     root_->setHistoricalData(solver_->getModel()->createRootHistoricalData());
     root_->setMapping(solver_->getActionPool()->createActionMapping(root_.get()));

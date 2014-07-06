@@ -41,7 +41,8 @@ class EnumeratedObservationPool: public solver::ObservationPool {
     /** Creates a new EnumeratedObservationPool with the given set of observations, in the given
      * order.
      */
-    EnumeratedObservationPool(std::vector<std::unique_ptr<DiscretizedPoint>> observations);
+    EnumeratedObservationPool(Solver *solver,
+            std::vector<std::unique_ptr<DiscretizedPoint>> observations);
     virtual ~EnumeratedObservationPool() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationPool);
 
@@ -49,6 +50,8 @@ class EnumeratedObservationPool: public solver::ObservationPool {
     virtual std::unique_ptr<ObservationMapping> createObservationMapping(ActionNode *owner) override;
 
   private:
+    /** The solver. */
+    Solver *solver_;
     /** All of the observations in their enumerated order. */
     std::vector<std::unique_ptr<DiscretizedPoint>> observations_;
 };
@@ -66,29 +69,33 @@ class EnumeratedObservationMap: public solver::ObservationMapping {
     /** Creates a new EnumeratedObservationMap, which will be owned by the given ActionNode, and
      * whose observations will be defined by the given vector of observations.
      */
-    EnumeratedObservationMap(ActionNode *owner,
+    EnumeratedObservationMap(ActionNode *owner, Solver *solver,
             std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations);
 
     // Default destructor; copying and moving disallowed!
     virtual ~EnumeratedObservationMap() = default;
     _NO_COPY_OR_MOVE(EnumeratedObservationMap);
 
-    /* -------------- Creation and retrieval of nodes. ---------------- */
+    /* -------------- Access to and management of child nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
     virtual long getNChildren() const override;
 
-    /* -------------- Management of mapping entries. ---------------- */
+    virtual void deleteChild(ObservationMappingEntry const *entry) override;
+
+    /* -------------- Retrieval of mapping entries. ---------------- */
+    virtual std::vector<ObservationMappingEntry const *> getChildEntries() const override;
     virtual ObservationMappingEntry *getEntry(Observation const &obs) override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
-    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
 
-    virtual void deleteEntry(ObservationMappingEntry const *entry) override;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     virtual long getTotalVisitCount() const override;
 
   private:
+    /** The solver. */
+    Solver *solver_;
+
     /** A reference back to the vector of observations in the pool. */
     std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations_;
 

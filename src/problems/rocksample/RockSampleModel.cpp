@@ -858,8 +858,8 @@ std::vector<std::unique_ptr<solver::DiscretizedPoint>> RockSampleModel::getAllOb
     return allObservations_;
 }
 std::unique_ptr<solver::ObservationPool> RockSampleModel::createObservationPool(
-        solver::Solver */*solver*/) {
-    return std::make_unique<solver::EnumeratedObservationPool>(getAllObservationsInOrder());
+        solver::Solver *solver) {
+    return std::make_unique<solver::EnumeratedObservationPool>(solver, getAllObservationsInOrder());
 }
 
 std::unique_ptr<solver::Serializer> RockSampleModel::createSerializer(solver::Solver *solver) {

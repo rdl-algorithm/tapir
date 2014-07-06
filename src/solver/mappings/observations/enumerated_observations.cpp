@@ -23,21 +23,23 @@
 
 namespace solver {
 /* --------------------- EnumeratedObservationPool --------------------- */
-EnumeratedObservationPool::EnumeratedObservationPool(
+EnumeratedObservationPool::EnumeratedObservationPool(Solver *solver,
         std::vector<std::unique_ptr<DiscretizedPoint>> observations) :
+                solver_(solver),
                 observations_(std::move(observations)) {
 }
 
 std::unique_ptr<ObservationMapping>
     EnumeratedObservationPool::createObservationMapping(ActionNode *owner) {
-    return std::make_unique<EnumeratedObservationMap>(owner, observations_);
+    return std::make_unique<EnumeratedObservationMap>(owner, solver_, observations_);
 }
 
 
 /* ---------------------- EnumeratedObservationMap ---------------------- */
-EnumeratedObservationMap::EnumeratedObservationMap(ActionNode *owner,
+EnumeratedObservationMap::EnumeratedObservationMap(ActionNode *owner, Solver *solver,
         std::vector<std::unique_ptr<DiscretizedPoint>> const &allObservations) :
                 ObservationMapping(owner),
+                solver_(solver),
                 allObservations_(allObservations),
                 nObservations_(allObservations.size()),
                 entries_(std::make_unique<EnumeratedObservationMapEntry[]>(nObservations_)),
@@ -60,7 +62,7 @@ BeliefNode* EnumeratedObservationMap::createBelief(
         const Observation& obs) {
     long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
     EnumeratedObservationMapEntry &entry = entries_[code];
-    entry.childNode_ = std::make_unique<BeliefNode>(&entry);
+    entry.childNode_ = std::make_unique<BeliefNode>(&entry, solver_);
     nChildren_++;
     return entry.getBeliefNode();
 }
@@ -68,15 +70,14 @@ long EnumeratedObservationMap::getNChildren() const {
     return nChildren_;
 }
 
-ObservationMappingEntry *EnumeratedObservationMap::getEntry(Observation const &obs) {
-    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
-    return &entries_[code];
+void EnumeratedObservationMap::deleteChild(ObservationMappingEntry const *entry) {
+    totalVisitCount_ -= entry->getVisitCount(); // Negate the visit count.
+    // Now delete the child node.
+    const_cast<EnumeratedObservationMapEntry &>(
+            static_cast<EnumeratedObservationMapEntry const &>(*entry)).childNode_ = nullptr;
 }
-ObservationMappingEntry const *EnumeratedObservationMap::getEntry(Observation const &obs) const {
-    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
-    return &entries_[code];
-}
-std::vector<ObservationMappingEntry const *> EnumeratedObservationMap::getAllEntries() const {
+
+std::vector<ObservationMappingEntry const *> EnumeratedObservationMap::getChildEntries() const {
     std::vector<ObservationMappingEntry const *> returnEntries;
     for (int i = 0; i < nObservations_; i++) {
         if (entries_[i].childNode_ != nullptr) {
@@ -85,9 +86,13 @@ std::vector<ObservationMappingEntry const *> EnumeratedObservationMap::getAllEnt
     }
     return returnEntries;
 }
-
-virtual void EnumeratedObservationMap::deleteEntry(ObservationMappingEntry const *entry) {
-    static_cast<EnumeratedObservationMapEntry const &>(*entry).childNode_ = nullptr;
+ObservationMappingEntry *EnumeratedObservationMap::getEntry(Observation const &obs) {
+    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
+    return &entries_[code];
+}
+ObservationMappingEntry const *EnumeratedObservationMap::getEntry(Observation const &obs) const {
+    long code = static_cast<DiscretizedPoint const &>(obs).getBinNumber();
+    return &entries_[code];
 }
 
 long EnumeratedObservationMap::getTotalVisitCount() const {
@@ -176,7 +181,7 @@ getSolver()->getObservationPool()->createObservationMapping(owner));
         // Create the child node for the entry and set its visit count.
         long code = static_cast<DiscretizedPoint const &>(*obs).getBinNumber();
         EnumeratedObservationMapEntry &entry = enumMap.entries_[code];
-        entry.childNode_ = std::make_unique<BeliefNode>(childId, &entry);
+        entry.childNode_ = std::make_unique<BeliefNode>(childId, &entry, getSolver());
         enumMap.nChildren_++;
         entry.visitCount_ = visitCount;
     }
