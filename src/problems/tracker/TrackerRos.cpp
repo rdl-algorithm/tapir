@@ -222,6 +222,9 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 
+        cout << "Step: " << stepNumber << endl;
+        stepNumber++;
+
 		// Get latest tf data (robot's current position)
 		/*
 		try {
@@ -319,7 +322,7 @@ int main(int argc, char **argv)
 		cout << "Improving policy" << endl;
 		solver::BeliefNode *currentBelief = agent.getCurrentBelief();
         double timeout = 2000;
-		solver.improvePolicy(currentBelief,-1,-1,timeout);
+		solver.improvePolicy(currentBelief);
 
         // Publish belief on target's position. This will be visualised in VREP
         cout << "Publishing belief to ROS" << endl;
@@ -335,15 +338,20 @@ int main(int argc, char **argv)
             }
         }
         // Send message. Format is x,y,normalised proportion
+        // Proportion = -1 for obstacles
         std::stringstream ss;
         for (std::size_t i = 0; i < targetPosBelief.size(); i++) {
             for (std::size_t j = 0; j <targetPosBelief[i].size(); j++) {
-                if (targetPosBelief[i][j] == 0)
-                    continue;
                 Point p = gridToPoint(GridPosition(i, j));
-                ss << (float) p.x << ",";
-                ss << (float) p.y << ",";
-                ss << targetPosBelief[i][j]/maxProportion << " ";
+                if (envMap[i][j] == TrackerModel::TrackerCellType::WALL) {
+                    ss << (float) p.x << ",";
+                    ss << (float) p.y << ",";
+                    ss << -1 << " ";
+                } else if (targetPosBelief[i][j] != 0) {
+                    ss << (float) p.x << ",";
+                    ss << (float) p.y << ",";
+                    ss << targetPosBelief[i][j]/maxProportion << " ";
+                }
             }
         }
         std_msgs::String stringMsg;
@@ -446,7 +454,6 @@ int main(int argc, char **argv)
         // Update agent's current belief
 		agent.updateBelief(*action, observation);
 		
-		stepNumber++;
 		ros::spinOnce();
 		loopRate.sleep();
 		
