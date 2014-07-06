@@ -107,6 +107,14 @@ public:
             std::unique_ptr<Parser<std::unique_ptr<solver::SearchStrategy>> > parser) {
         searchParsers_.addParser(name, std::move(parser));
     }
+
+    /** Associates the given parser for estimation strategies with the given name string,
+     * allowing it to be parsed at runtime.
+     *
+     * The default behavior is simply to estimate by using the mean of all the histories through
+     * that belief, and this works pretty well in general, but it should be possible to improve
+     * upon this by using more intelligent approaches.
+     */
     virtual void registerEstimationParser(std::string name,
             std::unique_ptr<Parser<std::unique_ptr<solver::EstimationStrategy>> > parser) {
         estimationParsers_.addParser(name, std::move(parser));
@@ -130,17 +138,32 @@ public:
     virtual solver::HeuristicFunction getHeuristicFunction() final override {
         return heuristicParsers_.parse(nullptr, options_->searchHeuristic);
     }
+
+    /** A simpler interface to define a default heuristic function for a subclass.
+     *
+     * If you set options_->sharedHeuristic to "default()" this is the heuristic function that will
+     * be used.
+     */
     virtual double getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
             solver::State const */*state*/, solver::HistoricalData const */*data*/) {
         return 0;
     }
 
 private:
+    /** A pointer to the options object stored by this instance.
+     *
+     * This is really the same as Model::options_, but in this case we know it's a SharedOptions
+     * because we've enforced that via the constructor of ModelWithProgramOptions.
+     */
     SharedOptions const *options_;
 
+    /** The generator parsers. */
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> generatorParsers_;
+    /** The HeuristicFunction parsers. */
     ParserSet<solver::HeuristicFunction> heuristicParsers_;
+    /** The parsers for SearchStrategy instances. */
     ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
+    /** The parsers for EstimationStrategy instances. */
     ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
 };
 } /* namespace shared */
