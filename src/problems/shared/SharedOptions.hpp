@@ -22,7 +22,9 @@ struct SharedOptions: public solver::Options {
     virtual ~SharedOptions() = default;
 
     /* ---------------------- Generic settings  ------------------ */
-    /** The path to the configuration file. */
+    /** The base config path - the path of the configuration files will be relative to this path. */
+    std::string baseConfigPath = "";
+    /** The path to the configuration file (relative to baseConfigPath). */
     std::string configPath = "";
     /** The path to the policy file. */
     std::string policyPath = "";
@@ -46,7 +48,7 @@ struct SharedOptions: public solver::Options {
     bool hasChanges = false;
     /** True iff the changes are dynamic. */
     bool areDynamic = false;
-    /** The path to the change file. */
+    /** The path to the change file (relative to baseConfigPath) */
     std::string changesPath = "";
 
     /* ---------- ABT settings: advanced customization  ---------- */
@@ -64,10 +66,10 @@ struct SharedOptions: public solver::Options {
      * into a SharedOptions instance.
      */
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating,
-            std::string defaultConfigPath) {
+            std::string defaultBaseConfigPath) {
         std::unique_ptr<options::OptionParser> parser = std::make_unique<options::OptionParser>(
                 "ABT command line interface");
-        addGenericOptions(parser.get(), defaultConfigPath);
+        addGenericOptions(parser.get(), defaultBaseConfigPath);
         addSimulationOptions(parser.get(), simulating);
         addABTOptions(parser.get());
         addProblemOptions(parser.get());
@@ -77,11 +79,16 @@ struct SharedOptions: public solver::Options {
     /** Adds generic options for this SharedOptions instance to the given parser, using the
      * given default configuration file path.
      */
-    static void addGenericOptions(options::OptionParser *parser, std::string defaultConfigPath) {
+    static void addGenericOptions(options::OptionParser *parser, std::string defaultBaseConfigPath) {
+        parser->addOptionWithDefault<std::string>("", "baseConfigPath",
+                &SharedOptions::baseConfigPath, defaultBaseConfigPath);
+        parser->addValueArg("", "baseConfigPath", &SharedOptions::baseConfigPath, "b", "base-path",
+                "the base config path", "path");
+
         parser->addOptionWithDefault<std::string>("", "cfg", &SharedOptions::configPath,
-                defaultConfigPath);
-        parser->addValueArg("", "cfg", &SharedOptions::configPath, "f", "cfg", "config file path",
-                "path");
+                "default.cfg");
+        parser->addValueArg("", "cfg", &SharedOptions::configPath, "f", "cfg",
+                "config file path (relative to the base config path)", "path");
 
         parser->addOptionWithDefault<std::string>("", "policy", &SharedOptions::policyPath,
                 "pol.pol");
@@ -148,7 +155,8 @@ struct SharedOptions: public solver::Options {
                     " to the past or to alternate futures).", true);
 
             parser->addValueArg("changes", "changesPath", &SharedOptions::changesPath,
-                    "g", "changes-path", "path to file with runtime changes", "path");
+                    "g", "changes-path",
+                    "path to file with runtime changes (relative to the base config path)", "path");
             parser->addValueArg<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps,
                     "n", "steps", "Maximum number of steps to simulate", "int");
             parser->addValueArg<unsigned long>("ABT", "minParticleCount",

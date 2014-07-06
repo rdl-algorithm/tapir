@@ -4,6 +4,7 @@ var searchData=
   ['cachedvalue',['CachedValue',['../classsolver_1_1CachedValue.html',1,'solver']]],
   ['cachedvalue',['CachedValue',['../classsolver_1_1CachedValue.html#a5595ef076766fb16db2fd3b41aa72aed',1,'solver::CachedValue']]],
   ['cachedvalue_3c_20double_20_3e',['CachedValue&lt; double &gt;',['../classsolver_1_1CachedValue.html',1,'solver']]],
+  ['change_5fdirectory',['change_directory',['../namespaceabt.html#a8c3b782da4d2ca71698cacbd07b00d90',1,'abt']]],
   ['changeflags',['ChangeFlags',['../namespacesolver.html#acd9b0cb1f5550117e5e65bbc472fbbc9',1,'solver']]],
   ['changeflags_2ehpp',['ChangeFlags.hpp',['../ChangeFlags_8hpp.html',1,'']]],
   ['changeflagsinttype',['ChangeFlagsIntType',['../namespacesolver.html#a5d5ea34fa2e8adb7093e4d5bfba39bfd',1,'solver']]],
@@ -34,5 +35,6 @@ var searchData=
   ['createsearchstrategy',['createSearchStrategy',['../classshared_1_1ModelWithProgramOptions.html#a87a62ae1676eb8c4d7186dda8fa4a97f',1,'shared::ModelWithProgramOptions::createSearchStrategy()'],['../classsolver_1_1Model.html#a9255f8536dc82bdbbf22e9d2f8b20da9',1,'solver::Model::createSearchStrategy()']]],
   ['createserializer',['createSerializer',['../classrocksample_1_1RockSampleModel.html#a827e08611510470f8a8b0023deeae460',1,'rocksample::RockSampleModel::createSerializer()'],['../classtag_1_1TagModel.html#ae11259dc1b4cf3426459ffd1d6885a84',1,'tag::TagModel::createSerializer()'],['../classsolver_1_1Model.html#af2a047dea9be5fd302e30456dc13e490',1,'solver::Model::createSerializer()']]],
   ['createstateindex',['createStateIndex',['../classsolver_1_1Model.html#aa9099de4b2b73a8b55a916a5ba827401',1,'solver::Model']]],
-  ['custom_20non_2drecursive_20make_20system',['Custom non-recursive Make system',['../md_docs_generated_BUILD.html',1,'']]]
+  ['custom_20non_2drecursive_20make_20system',['Custom non-recursive Make system',['../md_docs_generated_BUILD.html',1,'']]],
+  ['code_20structure_20and_20examples',['Code structure and examples',['../md_docs_Overview.html',1,'']]]
 ];

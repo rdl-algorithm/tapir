@@ -41,11 +41,18 @@ int simulate(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
 
     OptionsType options;
+    std::string workingDir = abt::get_current_directory();
     try {
         parser->setOptions(&options);
         parser->parseCmdLine(argc, argv);
+        if (!options.baseConfigPath.empty()) {
+            abt::change_directory(options.baseConfigPath);
+        }
         if (!options.configPath.empty()) {
             parser->parseCfgFile(options.configPath);
+        }
+        if (!options.baseConfigPath.empty()) {
+            abt::change_directory(workingDir);
         }
         parser->finalize();
     } catch (options::OptionParsingException const &e) {
@@ -98,6 +105,9 @@ int simulate(int argc, char const *argv[]) {
         // Advance it forward a long way to avoid correlation between the solver and simulator.
         solverGen.discard(10000);
 
+        if (!options.baseConfigPath.empty()) {
+            abt::change_directory(options.baseConfigPath);
+        }
         std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&solverGen,
                 std::make_unique<OptionsType>(options));;
         solver::Solver solver(std::move(solverModel));
@@ -110,6 +120,10 @@ int simulate(int argc, char const *argv[]) {
         if (options.hasChanges) {
             simulator.loadChangeSequence(options.changesPath);
         }
+        if (!options.baseConfigPath.empty()) {
+            abt::change_directory(workingDir);
+        }
+
         simulator.setMaxStepCount(options.nSimulationSteps);
         cout << "Running..." << endl;
 

@@ -5,6 +5,7 @@
 #ifndef GLOBAL_HPP_
 #define GLOBAL_HPP_
 
+#include <unistd.h>
 #include <cctype>
 #include <ctime>
 
@@ -29,6 +30,12 @@ typedef std::default_random_engine RandomGenerator;
  * as well as some basic data structures.
  */
 namespace abt {
+/** A function to return the current working directory. */
+std::string get_current_directory();
+/** A function to change the current working directory. */
+void change_directory(std::string &dir);
+
+
 /** Returns the time (in ms) since the program started running. */
 inline double clock_ms() {
     return std::clock() * 1000.0 / CLOCKS_PER_SEC;

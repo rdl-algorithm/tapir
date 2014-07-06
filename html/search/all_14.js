@@ -1,15 +1,20 @@
 var searchData=
 [
-  ['vector',['Vector',['../classsolver_1_1Vector.html',1,'solver']]],
-  ['vector_2ecpp',['Vector.cpp',['../Vector_8cpp.html',1,'']]],
-  ['vector_2ehpp',['Vector.hpp',['../Vector_8hpp.html',1,'']]],
-  ['vector2d',['Vector2D',['../classgeometry_1_1Vector2D.html',1,'geometry']]],
-  ['vectorstate',['VectorState',['../namespacesolver.html#a221357f38a1ef1eaefd1232214b283c5',1,'solver']]],
-  ['vectorstate_2ehpp',['VectorState.hpp',['../VectorState_8hpp.html',1,'']]],
-  ['visit',['visit',['../classoptions_1_1VisitingArg.html#a947e57c63d1c1d931960ae456e36045d',1,'options::VisitingArg::visit()'],['../classsolver_1_1FlaggingVisitor.html#ae7d6238a39a98e9079b3d326f6dc3706',1,'solver::FlaggingVisitor::visit()'],['../classsolver_1_1SpatialIndexVisitor.html#a77413e28cb15a6c3ef4968452f32dfa0',1,'solver::SpatialIndexVisitor::visit()']]],
-  ['visitcount_5f',['visitCount_',['../classsolver_1_1DiscretizedActionMapEntry.html#ad09933be7208e8d93378413431e073c2',1,'solver::DiscretizedActionMapEntry']]],
-  ['visitdata',['visitData',['../classsolver_1_1SpatialIndexVisitor.html#a1b748f75b03ff1f299e09674aed9768f',1,'solver::SpatialIndexVisitor::visitData(const SpatialIndex::IData &amp;data) override'],['../classsolver_1_1SpatialIndexVisitor.html#a7d67ccde23caf42c8babc77dfd6aac5b',1,'solver::SpatialIndexVisitor::visitData(std::vector&lt; const SpatialIndex::IData * &gt; &amp;v) override']]],
-  ['visitingarg',['VisitingArg',['../classoptions_1_1VisitingArg.html',1,'options']]],
-  ['visitingarg',['VisitingArg',['../classoptions_1_1VisitingArg.html#a9c418f6878b482958df2ce66db0fc4b5',1,'options::VisitingArg']]],
-  ['visitnode',['visitNode',['../classsolver_1_1SpatialIndexVisitor.html#ae84f22d4de6a59868e20c95920194e50',1,'solver::SpatialIndexVisitor']]]
+  ['ucb_5fsearch_2ecpp',['ucb_search.cpp',['../ucb__search_8cpp.html',1,'']]],
+  ['ucb_5fsearch_2ehpp',['ucb_search.hpp',['../ucb__search_8hpp.html',1,'']]],
+  ['ucbparser',['UcbParser',['../classshared_1_1UcbParser.html',1,'shared']]],
+  ['ucbstepgenerator',['UcbStepGenerator',['../classsolver_1_1UcbStepGenerator.html',1,'solver']]],
+  ['ucbstepgenerator',['UcbStepGenerator',['../classsolver_1_1UcbStepGenerator.html#ab08f386b29bc04a6ccbef60fa0826878',1,'solver::UcbStepGenerator']]],
+  ['ucbstepgeneratorfactory',['UcbStepGeneratorFactory',['../classsolver_1_1UcbStepGeneratorFactory.html',1,'solver']]],
+  ['ucbstepgeneratorfactory',['UcbStepGeneratorFactory',['../classsolver_1_1UcbStepGeneratorFactory.html#aeb4e14790db7c02fe18568b3c3fd4ecf',1,'solver::UcbStepGeneratorFactory']]],
+  ['update',['update',['../classsolver_1_1ActionMappingEntry.html#a11b78849800b518adf98fa2cc6032a6c',1,'solver::ActionMappingEntry::update()'],['../classsolver_1_1DiscretizedActionMapEntry.html#ae803a3a89d2b86f312b3247fa55f08d1',1,'solver::DiscretizedActionMapEntry::update()']]],
+  ['updatebelief',['updateBelief',['../classsolver_1_1Agent.html#abe991d71e97d2524ae41595483fef1bd',1,'solver::Agent']]],
+  ['updatecache',['updateCache',['../classsolver_1_1CachedValue.html#adc68066be76bdd893263b4cb691489ae',1,'solver::CachedValue']]],
+  ['updateestimate',['updateEstimate',['../classsolver_1_1Solver.html#add90d7e11086ee0b33ccd4bc4baf6f5c',1,'solver::Solver']]],
+  ['updateimmediate',['updateImmediate',['../classsolver_1_1Solver.html#aee103096256360328119d2307f11e8ca',1,'solver::Solver']]],
+  ['updatesequence',['updateSequence',['../classsolver_1_1Solver.html#af87eae95a421765b10aad6dafc11cb2e',1,'solver::Solver']]],
+  ['updatestrategyweights',['updateStrategyWeights',['../classsolver_1_1MultipleStrategiesExp3.html#a2a8cb18171e415cec98d70087538ba14',1,'solver::MultipleStrategiesExp3']]],
+  ['updatevisitcount',['updateVisitCount',['../classsolver_1_1ApproximateObservationMapEntry.html#ae64234dcfbbaaed753bcf7c36a0330d7',1,'solver::ApproximateObservationMapEntry::updateVisitCount()'],['../classsolver_1_1DiscreteObservationMapEntry.html#aeb3f9066c1b37e3557a8f2359c87c094',1,'solver::DiscreteObservationMapEntry::updateVisitCount()'],['../classsolver_1_1EnumeratedObservationMapEntry.html#a47a7bc33c558ac4a16eb374cb21d7986',1,'solver::EnumeratedObservationMapEntry::updateVisitCount()'],['../classsolver_1_1ObservationMappingEntry.html#a8847e8302b4d606ce08302b8da8d1f81',1,'solver::ObservationMappingEntry::updateVisitCount()']]],
+  ['usepreferredinit',['usePreferredInit',['../structrocksample_1_1RockSampleOptions.html#a9079a6cde811a7d8180123c1219952bb',1,'rocksample::RockSampleOptions']]],
+  ['usingpreferredinit',['usingPreferredInit',['../classrocksample_1_1RockSampleModel.html#a77963b04dca402d49399ef066a213d31',1,'rocksample::RockSampleModel']]]
 ];

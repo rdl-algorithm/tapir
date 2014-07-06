@@ -30,7 +30,7 @@ CXX  := g++
 # Preprocessor flags.
 override INCDIRS     += -I$(ROOT)/src -I$(ROOT)/src/options
 
-override CPPFLAGS    += $(INCDIRS)
+override CPPFLAGS    += -DROOT_PATH=$(ABS_ROOT) $(INCDIRS)
 ifeq ($(CFG),debug)
   override CPPFLAGS  += -DDEBUG
 endif

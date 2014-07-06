@@ -27,5 +27,6 @@ var searchData=
   ['exitreward',['exitReward',['../structrocksample_1_1RockSampleOptions.html#a98122373784f41d768a56d7c38ad7736',1,'rocksample::RockSampleOptions']]],
   ['exp3parser',['Exp3Parser',['../classshared_1_1Exp3Parser.html#a5b35b6e1c2b9b127daa4b5f8dbf121a2',1,'shared::Exp3Parser']]],
   ['exp3parser',['Exp3Parser',['../classshared_1_1Exp3Parser.html',1,'shared']]],
+  ['expand_5fand_5fquote',['EXPAND_AND_QUOTE',['../defs_8hpp.html#aa1383d86e1b2c4442514026fd7ce2307',1,'defs.hpp']]],
   ['extendandbackup',['extendAndBackup',['../classsolver_1_1MultipleStrategiesExp3.html#adfece810a0ae8f3e6e833a8e8749fdca',1,'solver::MultipleStrategiesExp3::extendAndBackup()'],['../classsolver_1_1SearchStrategy.html#a8895fe84435dfc138a1e7bf1d96862e8',1,'solver::SearchStrategy::extendAndBackup()'],['../classsolver_1_1BasicSearchStrategy.html#a0c2e25328eb601b4f17064d8de9492f5',1,'solver::BasicSearchStrategy::extendAndBackup()']]]
 ];

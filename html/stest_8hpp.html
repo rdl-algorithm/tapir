@@ -95,7 +95,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <p>Contains a generic function for testing the policy serialization for a problem; this can be used to form the main method of a problem-specific "stest" executable.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;fstream&gt;</code><br/>
+<div class="textblock"><code>#include &lt;unistd.h&gt;</code><br/>
+<code>#include &lt;fstream&gt;</code><br/>
 <code>#include &lt;iostream&gt;</code><br/>
 <code>#include &lt;memory&gt;</code><br/>
 <code>#include &lt;string&gt;</code><br/>
@@ -151,14 +152,14 @@ template&lt;typename ModelType , typename OptionsType &gt; </div>
 <p>A template method to run a test of the serialization for the given model and options classes. </p>
 <p>This is done by loading the policy from one policy file and writing it to another (this will be the same as the given policy path, but with the number "2" on the end. The two policy files can then be compared by a simple "diff". </p>
 
-<p>Definition at line <a class="el" href="stest_8hpp_source.html#l00032">32</a> of file <a class="el" href="stest_8hpp_source.html">stest.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stest_8hpp_source.html#l00034">34</a> of file <a class="el" href="stest_8hpp_source.html">stest.hpp</a>.</p>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 6 2014 19:25:00 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

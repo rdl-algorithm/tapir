@@ -19,7 +19,7 @@ var searchData=
   ['addalias',['addAlias',['../classoptions_1_1BaseOption.html#a3767ec7ada22b53b97e54705182ca170',1,'options::BaseOption']]],
   ['addcachedvalue',['addCachedValue',['../classsolver_1_1BeliefNode.html#a81772b0a726598e3345f28616c20b7b9',1,'solver::BeliefNode']]],
   ['addcmdalias',['addCmdAlias',['../classoptions_1_1OptionParser.html#ae5c0d316d43d5e7d1e8502d592a20eba',1,'options::OptionParser']]],
-  ['addgenericoptions',['addGenericOptions',['../structshared_1_1SharedOptions.html#a96443ac805549cd561274b30ffb81284',1,'shared::SharedOptions']]],
+  ['addgenericoptions',['addGenericOptions',['../structshared_1_1SharedOptions.html#adcc800e925d4d99639cb9034ecc93436',1,'shared::SharedOptions']]],
   ['addmapping',['addMapping',['../classrocksample_1_1LegalActionsPool.html#aff30c07369ebfb852f6791b314657fb5',1,'rocksample::LegalActionsPool']]],
   ['addoption',['addOption',['../classoptions_1_1OptionParser.html#a88fcd9eaa0ea096f30c4be04463914d1',1,'options::OptionParser']]],
   ['addoptionwithdefault',['addOptionWithDefault',['../classoptions_1_1OptionParser.html#acf824bc6fc51ed9d64726bcb21dcf92e',1,'options::OptionParser']]],
