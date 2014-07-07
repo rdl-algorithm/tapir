@@ -33,7 +33,7 @@ struct TagOptions : public shared::SharedOptions {
      */
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
         std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
-                EXPAND_AND_QUOTE(ROOT_PATH) "/cfg/tag");
+                EXPAND_AND_QUOTE(ROOT_PATH) "/problems/tag");
         addTagOptions(parser.get());
         return std::move(parser);
     }

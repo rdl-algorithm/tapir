@@ -11,10 +11,10 @@ ifndef CFG
 endif
 
 # Default build target.
-DEFAULT_TARGET := solver
+DEFAULT_TARGET := all
 
 BUILDDIR := $(ROOT)/builds/$(CFG)
-BINDIR   := $(ROOT)/bin
+PROBLEMS_DIR := $(ROOT)/problems
 
 # ----------------------------------------------------------------------
 # Compiler & linker
@@ -129,6 +129,9 @@ MKDIR_RECIPE   = @mkdir -p $@
 # Documentation targets
 # ----------------------------------------------------------------------
 
+DOC_OUTPUT_DIRS := $(ROOT)/docs/html $(ROOT)/docs/generated
+
+
 # Directory dependency
 docs/generated/Overview.md docs/generated/Build_System.md: docs/generated
 docs/generated:
@@ -155,7 +158,7 @@ doc: docs/Doxyfile docs/generated/Overview.md docs/generated/Build_System.md
 .PHONY: clean-doc
 clean-doc:
 	@echo Removing documentation folders!
-	@rm -rfv html/ docs/generated | grep "directory" ; true
+	@rm -rfv $(DOC_OUTPUT_DIRS) | grep "directory" ; true
 
 # ----------------------------------------------------------------------
 # Universal grouping targets
@@ -172,8 +175,7 @@ nothing: ;
 all: build-all
 build: build-solver
 
-# A list of all the directories for generated output.
-ALL_DERIVED_DIRS := $(ROOT)/builds $(ROOT)/bin $(ROOT)/html $(ROOT)/docs/generated
+ALL_DERIVED_DIRS = $(ROOT)/builds $(DOC_OUTPUT_DIRS)
 
 # clean-all is a straight-up "rm -rf" - it doesn't check for "junk files".
 .PHONY: clean-all

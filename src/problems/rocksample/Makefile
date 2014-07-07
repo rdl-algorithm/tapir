@@ -1,5 +1,5 @@
 MODULE_NAME = rocksample
-TARGET_NAMES := solve simulate stest
+TARGET_NAMES := solve simulate
 
 ifdef HAS_ROOT_MAKEFILE
 

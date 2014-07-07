@@ -1,10 +1,13 @@
 include .make/template.mk
 
 TARGET_NAMES_$(n) := $(TARGET_NAMES)
+ifdef STEST
+	TARGET_NAMES_$(n) += stest
+endif
 
-BINDIR_$(n)       := $(BINDIR)/basic/$(n)
+PROBLEM_$(n)  := $(PROBLEMS_DIR)/$(n)
 _BIN_BUILD_$(n)   := $(OBJDIR_$(n))/%
-_BIN_OUTPUT_$(n)  := $(BINDIR_$(n))/%
+_BIN_OUTPUT_$(n)  := $(PROBLEM_$(n))/%
 
 # ----------------------------------------------------------------------
 # Directories, file patterns, and directory dependencies
@@ -19,9 +22,9 @@ OBJS_NTGT_$(n)        := $(filter-out $(OBJS_TGT_$(n)),$(OBJS_$(n)))
 
 # Directory prerequsites
 $(TGTS_BUILD_$(n)): | $(OBJDIR_$(n))
-$(TGTS_OUTPUT_$(n)): | $(BINDIR_$(n))
+$(TGTS_OUTPUT_$(n)): | $(PROBLEM_$(n))
 
-$(BINDIR_$(n)):
+$(PROBLEM_$(n)):
 	$(MKDIR_RECIPE)
 
 # ----------------------------------------------------------------------

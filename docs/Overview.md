@@ -96,8 +96,11 @@ or by setting
 
     DEFAULT_CFG:=debug
 
-in the [root Makefile][Makefile]. Each configuration sends its output into a
-different directory, which will be "builds/$(CFG)".
+in the [root Makefile][Makefile]. Each configuration sends intermediate 
+compilation outputs into a different directory, which will be "builds/$(CFG)".
+This makes it easy to switch between different builds, as the "make" command
+simply needs to copy the previously-made executables from the relevant build
+folder.
 
 For additional documentation on the build system, see the
 [build system README][.make/README.md].
@@ -114,9 +117,8 @@ If you want to run the example problems, you should first compile those
 problems, as per the [previous section](#configuration-and-building).
 Each problem should generate two core executables - "solve" for initial offline
 policy generation, and "simulate" for online simulation.
-After building, these executables are placed into the directory bin/basic;
-in order to use the default configuration settings, the executables must be run
-from the main project folder.
+After building, these executables are placed into the directory "problems", with
+a subdirectory for each individual problem.
 
 Each problem will have its own setings, which can be configured in one of two
 ways - via command line parameters, or via configuration files. Any parameters
@@ -124,8 +126,8 @@ passed via command line will override the settings in the file. For a quick
 summary of the command-line parameters available, run the executable with an
 argument of "--help" for the usage information. More advanced settings are
 available via config files; default versions of the configuration files are
-located in the directory "cfg" - for example, see
-[cfg/tag/default.cfg][Tag_config].
+located in the directory "problems" - for example, see
+[problems/tag/default.cfg][Tag_config].
 The actual settings that are available in each config file are defined by
 subclasses of the base [Options] class, e.g. [TagOptions] specifies all of
 the options that can be configured for Tag.
@@ -447,7 +449,7 @@ individual problem are given in:
 [SharedOptions]: ../src/problems/shared/SharedOptions.hpp
 
 
-[Tag_config]: ../cfg/tag/default.cfg
+[Tag_config]: ../problems/tag/default.cfg
 [TagOptions]: ../src/problems/tag/TagOptions.hpp
 [TagModel]: ../src/problems/tag/TagModel.cpp
 [TagState]: ../src/problems/tag/TagState.cpp

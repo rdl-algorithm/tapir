@@ -45,13 +45,14 @@ where N is the number of threads you want to use - 8 is a good choice on many
 CPUs.
 
 This will create the executables for a command-line interface for each of
-the example problems - these are created in /bin/basic/[problem-name],
-and also in /src/problems/[problem-name] for convenience.
+the example problems - these are created in problems/[problem-name],
+and also in src/problems/[problem-name] for convenience while editing the
+source files.
 
 After compiling, you can try the following commands to try solving the example
 problem Tag:
 
-    cd bin/basic/tag
+    cd problems/tag
     ./solve
     ./simulate
 
@@ -59,7 +60,8 @@ For a more detailed description of the Tag POMDP, see
 http://www.cs.cmu.edu/~ggordon/jpineau-ggordon-thrun.ijcai03.pdf
 
 The command "solve" uses use the parameters set in a problem-specific
-configuration file, which for Tag is, by default, [here](cfg/tag/default.cfg).
+configuration file, which for Tag is, by default,
+[here](problems/tag/default.cfg).
 The purpose of "solve" is to output a policy, which by default will be
 written to the file "pol.pol" in the current working directory.
 
@@ -73,18 +75,18 @@ the policy can be dynamically generated on every step.
 To change the configuration settings, edit the default configuration
 files, or copy them and make your own version, e.g.
 
-    cd cfg/tag
+    cd problems/tag
     cp default.cfg my_tag_settings.cfg
 
 Now you can edit my_tag_settings.cfg to change the settings. To use
 with a different configuration file, use the command-line argument
 --cfg, e.g.
 
-    cd bin/basic/tag
+    cd problems/tag
     ./solve --cfg my_tag_settings.cfg
 
 Note that "solve" is still searching for configuration settings in
-the folder "cfg/tag" - you can change this by using the argument
+the folder "problems/tag" - you can change this by using the argument
 --base-path <path>.
 
 Some of the core settings can also be set via command-line arguments;
@@ -127,8 +129,8 @@ To create a new POMDP model and use it with the the command-line interface,
 your new problem.
 5. Add your problem to the CHILD_FOLDERS variable in the
 [problems Makefile](src/problems/Makefile)
-6. Create a new subdirectory in [the config folder](cfg) for your problem, and
-add any required configuration files there.
+6. Create a new subdirectory in [the config folder](problems) for your problem,
+and add any required configuration files there.
 7. Compile your code via "make [problem-name]", or simply by running "make" from
 your new subfolder of src/problems, e.g.
     cd src/problems/tag
@@ -144,8 +146,8 @@ in building the code.
 - [.make](.make) - contains template Makefile code which is included by
 the Makefiles in many of the subdirectories. This is the core of the build
 system, which is described in the [Build System README](.make/README.md).
-- [cfg](cfg) - contains problem-specific configuration settings for each of the
-example problems.
+- [problems](problems) - contains problem-specific configuration settings, and
+is also the default output directory for all of the problem executables.
 - [docs](docs) - contains [the detailed overview](docs/Overview.md), as well as
 Doxygen settings in order to generate [HTML documentation](html/index.html).
 - [html](html) - the output folder for HTML documentation
