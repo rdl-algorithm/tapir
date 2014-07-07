@@ -50,7 +50,7 @@ int stest(int argc, char const *argv[]) {
         }
         parser->finalize();
     } catch (options::OptionParsingException const &e) {
-        std::cerr << e.what();
+        std::cerr << e.what() << std::endl;
         return 2;
     }
 

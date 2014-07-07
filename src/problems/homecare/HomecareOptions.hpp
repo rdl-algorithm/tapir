@@ -1,3 +1,8 @@
+/** @file HomecareOptions.hpp
+ *
+ * Defines the HomecareOptions class, which specifies the configuration settings available for the
+ * Homecare problem.
+ */
 #ifndef HOMECAREOPTIONS_HPP_
 #define HOMECAREOPTIONS_HPP_
 
@@ -6,12 +11,13 @@
 #include "problems/shared/SharedOptions.hpp"
 
 namespace homecare {
+/** A class defining the configuration settings for the Homecare problem. */
 struct HomecareOptions : public shared::SharedOptions {
     HomecareOptions() = default;
     virtual ~HomecareOptions() = default;
 
     /* -------- Settings specific to the Homecare POMDP -------- */
-    /** Path to the map file. */
+    /** Path to the map files (relative to SharedOptions::baseConfigPath) */
     std::string pathMapFilename = "";
     std::string typeMapFilename = "";
     /** The penalty for each movement. */
@@ -31,13 +37,17 @@ struct HomecareOptions : public shared::SharedOptions {
     /** The probability target will still need help if it currently does */
     double continueCallProbability = 0.0;
 
+    /** Constructs an OptionParser instance that will parse configuration settings for the Homecare
+     * problem into an instance of HomecareOptions.
+     */
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
         std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
-                EXPAND_AND_QUOTE(ROOT_PATH) "/cfg/homecare");
+                EXPAND_AND_QUOTE(ROOT_PATH) "/problems/homecare");
         addHomecareOptions(parser.get());
         return std::move(parser);
     }
 
+    /** Adds the core configuration settings for the Homecare problem to the given parser. */
     static void addHomecareOptions(options::OptionParser *parser) {
         parser->addOption<std::string>("problem", "pathMapFilename", &HomecareOptions::pathMapFilename);
         parser->addOption<std::string>("problem", "typeMapFilename", &HomecareOptions::typeMapFilename);

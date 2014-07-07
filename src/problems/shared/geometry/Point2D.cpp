@@ -1,16 +1,20 @@
-#include "Point2D.hpp"
+/** @file Point2D.cpp
+ *
+ * Contains implementations for the methods of the Point2D class.
+ */
+#include "problems/shared/geometry/Point2D.hpp"
 
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "global.hpp"
+
 #include "solver/abstract-problem/Point.hpp"
 #include "solver/abstract-problem/Vector.hpp"
 
-#include "Vector2D.hpp"
-
-#include "global.hpp"
+#include "problems/shared/geometry/Vector2D.hpp"
 
 namespace geometry {
 Point2D::Point2D() :

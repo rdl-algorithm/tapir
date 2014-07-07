@@ -1,3 +1,7 @@
+/** @file HomecareObservation.hpp
+ *
+ * Defines the HomecareObservation class, which represents an observation in the Homecare POMDP.
+ */
 #ifndef HOMECARE_OBSERVATION_HPP_
 #define HOMECARE_OBSERVATION_HPP_
 
@@ -30,8 +34,12 @@ class HomecareObservation : public solver::Point {
     std::size_t hash() const override;
     void print(std::ostream &os) const override;
 
+    /** Returns the position the robot has observed itself in. */
     GridPosition getRobotPos() const;
-    GridPosition getTargetPos() const;  // (-1, -1) if unknown
+    /** Returns position of opponent if within 1 cell from robot, 
+     *   otherwise returns (-1, -1) 
+     */
+    GridPosition getTargetPos() const;
     int getTargetRegion() const;
     bool getCall() const;
 

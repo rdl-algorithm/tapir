@@ -22,11 +22,6 @@ class Solver;
 } /* namespace solver */
 
 namespace tag {
-TagTextSerializer::TagTextSerializer(solver::Solver *solver) :
-    solver::Serializer(solver) {
-}
-
-/* ------------------ Saving change sequences -------------------- */
 void saveVector(std::vector<long> values, std::ostream &os) {
     os << "(";
     for (auto it = values.begin(); it != values.end(); it++) {
@@ -37,14 +32,7 @@ void saveVector(std::vector<long> values, std::ostream &os) {
     }
     os << ")";
 }
-void TagTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
-    TagChange const &tagChange = static_cast<TagChange const &>(change);
-    os << tagChange.changeType;
-    os << ": ";
-    saveVector(std::vector<long> {tagChange.i0, tagChange.j0}, os);
-    os << " ";
-    saveVector(std::vector<long> {tagChange.i1, tagChange.j1}, os);
-}
+
 std::vector<long> loadVector(std::istream &is) {
     std::vector<long> values;
     std::string tmpStr;
@@ -57,6 +45,20 @@ std::vector<long> loadVector(std::istream &is) {
         values.push_back(value);
     }
     return values;
+}
+
+TagTextSerializer::TagTextSerializer(solver::Solver *solver) :
+    solver::Serializer(solver) {
+}
+
+/* ------------------ Saving change sequences -------------------- */
+void TagTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
+    TagChange const &tagChange = static_cast<TagChange const &>(change);
+    os << tagChange.changeType;
+    os << ": ";
+    saveVector(std::vector<long> {tagChange.i0, tagChange.j0}, os);
+    os << " ";
+    saveVector(std::vector<long> {tagChange.i1, tagChange.j1}, os);
 }
 std::unique_ptr<solver::ModelChange> TagTextSerializer::loadModelChange(std::istream &is) {
     std::unique_ptr<TagChange> change = std::make_unique<TagChange>();

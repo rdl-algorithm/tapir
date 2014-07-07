@@ -1,4 +1,8 @@
-#include "Vector2D.hpp"
+/** @file Vector2D.cpp
+ *
+ * Contains the implementation for the methods of the Vector2D class.
+ */
+#include "problems/shared/geometry/Vector2D.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -8,13 +12,13 @@
 #include <string>
 #include <vector>
 
-#include "Point2D.hpp"
+#include "global.hpp"
 
 #include "solver/abstract-problem/Point.hpp"
 #include "solver/abstract-problem/Vector.hpp"
 
-#include "utilities.hpp"
-#include "global.hpp"
+#include "problems/shared/geometry/Point2D.hpp"
+#include "problems/shared/geometry/utilities.hpp"
 
 namespace geometry {
 Vector2D::Vector2D() :

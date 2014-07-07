@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(abt)
 
 # Set make arguments
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I /home/joshua/eigen -std=c++11 -frounding-math" ) 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" ) 
 
 ## Use Boost 1.48.0 from source, different to my system's default version
 ##set(BOOST_ROOT "~/boost_1_48_0")

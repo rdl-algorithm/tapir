@@ -1,3 +1,7 @@
+/** @file HomecareModel.cpp
+ *
+ * Contains the implementations for the core functionality of the Homecare POMDP.
+ */
 #include "HomecareModel.hpp"
 
 #include <cmath>                        // for floor, pow
@@ -489,8 +493,7 @@ bool HomecareModel::updateCall(GridPosition robotPos, GridPosition targetPos, bo
     }
 }
 
-std::unique_ptr<solver::Observation> HomecareModel::makeObservation(
-        solver::Action const & /*action*/, HomecareState const &nextState) {
+std::unique_ptr<solver::Observation> HomecareModel::makeObservation(HomecareState const &nextState) {
     GridPosition robotPos = nextState.getRobotPos();
     GridPosition targetPos(-1, -1);
     if (nextState.getTargetPos().euclideanDistanceTo(robotPos) < 1.5) {
@@ -563,10 +566,10 @@ std::unique_ptr<solver::State> HomecareModel::generateNextState(
 }
 
 std::unique_ptr<solver::Observation> HomecareModel::generateObservation(
-        solver::State const */*state*/, solver::Action const &action,
+        solver::State const */*state*/, solver::Action const &/*action*/,
         solver::TransitionParameters const */*tp*/,
         solver::State const &nextState) {
-    return makeObservation(action, static_cast<HomecareState const &>(nextState));
+    return makeObservation(static_cast<HomecareState const &>(nextState));
 }
 
 solver::Model::StepResult HomecareModel::generateStep(solver::State const &state,
@@ -575,7 +578,7 @@ solver::Model::StepResult HomecareModel::generateStep(solver::State const &state
     result.action = action.copy();
     std::unique_ptr<HomecareState> nextState = makeNextState(state, action).first;
 
-    result.observation = makeObservation(action, *nextState);
+    result.observation = makeObservation(*nextState);
     result.reward = generateReward(state, action, nullptr, nextState.get());
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);

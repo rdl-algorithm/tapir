@@ -1,4 +1,8 @@
-#include "RTree.hpp"
+/** @file geometry/RTree.cpp
+ *
+ * Contains the implementation for the geometry::RTree class.
+ */
+#include "problems/shared/geometry/RTree.hpp"
 
 #include <memory>
 

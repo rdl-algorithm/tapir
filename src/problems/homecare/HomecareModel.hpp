@@ -1,3 +1,7 @@
+/** @file HomecareModel.hpp
+ *
+ * Contains HomecareModel, which implements the core Model interface for the Homecare POMDP.
+ */
 #ifndef HOMECAREMODEL_HPP_
 #define HOMECAREMODEL_HPP_
 
@@ -28,29 +32,48 @@ namespace solver {
 class StatePool;
 } /* namespace solver */
 
+/** A namespace to hold the various classes used for the Homecare POMDP model. */
 namespace homecare {
 class HomecareObervation;
 class HomecareState;
 
 /** Represents a change in the Homecare model. */
 struct HomecareChange : public solver::ModelChange {
+    /** The change type for this change:
+     * - "Add W" to add new "washroom" zone, area where target has higher probability
+     *   of not moving      
+     */
     std::string changeType = "";
+    /** The first row number where the change applies. */
     long i0 = 0;
+    /** The last row number where the change applies. */
     long i1 = 0;
+    /** The first column number where the change applies. */
     long j0 = 0;
+    /** The last column number where the change applies. */
     long j1 = 0;
 };
 
+/** The implementation of the Model interface for the Homecare POMDP.
+ *
+ * See this paper http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf
+ * for a description of the Homecare problem.
+ *
+ * This class inherits from shared::ModelWithProgramOptions in order to use custom text-parsing
+ * functionality to select many of the core ABT parameters, allowing the configuration options
+ * to be changed easily via the configuration interface without having to recompile the code.
+ */
 class HomecareModel: public shared::ModelWithProgramOptions {
     friend class HomecareObservation;
 
   public:
+    /** Constructs a new HomecareModel instance with the given random number engine, and the given set
+     * of configuration options.
+     */
     HomecareModel(RandomGenerator *randGen, std::unique_ptr<HomecareOptions> options);
+
     ~HomecareModel() = default;
-    HomecareModel(HomecareModel const &) = delete;
-    HomecareModel(HomecareModel &&) = delete;
-    HomecareModel &operator=(HomecareModel const &) = delete;
-    HomecareModel &operator=(HomecareModel &&) = delete;
+    _NO_COPY_OR_MOVE(HomecareModel);
 
     enum class HomecarePathCell : int {
         EMPTY = 0,
@@ -73,17 +96,17 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     };
 
     /* ---------- Custom getters for extra functionality  ---------- */
+    /** Returns the number of rows in the map for this HomecareModel instance. */
     long getNRows() const {
         return nRows_;
     }
+    /** Returns the number of columns in the map for this HomecareModel instance. */
     long getNCols() const {
         return nCols_;
     }
 
     /* --------------- The model interface proper ----------------- */
-    // Other virtual methods
     std::unique_ptr<solver::State> sampleAnInitState() override;
-    /** Generates a state uniformly at random. */
     std::unique_ptr<solver::State> sampleStateUninformed() override;
     bool isTerminal(solver::State const &state) override;
 
@@ -139,6 +162,9 @@ class HomecareModel: public shared::ModelWithProgramOptions {
                 solver::State const *state, solver::HistoricalData const *data) override;
 
     /* ------- Customization of more complex solver functionality  --------- */
+    /** Returns all of the actions available for the Homecare POMDP, in the order of their enumeration
+     * (as specified by homecare::ActionType).
+     */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
     virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver) override;
 
@@ -148,7 +174,7 @@ class HomecareModel: public shared::ModelWithProgramOptions {
 
     /** Read map text from file */
     std::vector<std::string> readMapText(std::string filename);
-    /** Initialises the required data structures and variables */
+    /** Initialises the required data structures and variables for this model. */
     void initialize();
 
     /** Generates random cell. */
@@ -193,7 +219,9 @@ class HomecareModel: public shared::ModelWithProgramOptions {
      *  this may result in invalid coordinates.
      */
     std::pair<GridPosition, bool> getMovedPos(GridPosition const &position, ActionType action);
-    /** Returns true iff the given GridPosition form a valid position. */
+    /** Returns true iff the given GridPosition represents a valid square that an agent could be
+     * in - that is, the square must be empty, and within the bounds of the map.
+     */
     bool isValid(GridPosition const &pos);
     /** E.g. returns NORTH if given NORTH_EAST */
     ActionType shiftAntiClockwise(ActionType action);
@@ -239,7 +267,7 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     std::vector<GridPosition> sCells_;
     std::vector<GridPosition> pCells_;
 
-    // General problem parameters
+    /** The number of possible actions in the Homecare POMDP. */
     long nActions_;
 
 };

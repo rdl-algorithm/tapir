@@ -1,3 +1,7 @@
+/** @file HomecareAction.cpp
+ *
+ * Contains the implementations for the methods of the HomecareAction class.
+ */
 #include "HomecareAction.hpp"
 
 #include <cstddef>                      // for size_t
@@ -8,6 +12,7 @@
 #include <vector>                       // for vector, operator==, _Bit_const_iterator, _Bit_iterator_base, hash, vector<>::const_iterator
 
 #include "global.hpp"
+
 #include "problems/shared/GridPosition.hpp"  // for GridPosition, operator==, operator<<
 #include "solver/abstract-problem/State.hpp"             // for State
 

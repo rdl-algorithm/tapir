@@ -1,3 +1,8 @@
+/** @file HomecareAction.hpp
+ *
+ * Defines the HomecareAction class, which represents an action for the Homecare problem, and also the
+ * ActionType enumeration, which enumerates the different types of actions for Homecare.
+ */
 #ifndef HOMECARE_ACTION_HPP_
 #define HOMECARE_ACTION_HPP_
 
@@ -10,6 +15,8 @@
 #include "solver/abstract-problem/DiscretizedPoint.hpp"             // for DiscretizedPoint
 
 namespace homecare {
+
+/** An enumeration of all the available actions in the Homecare PODMP. */
 enum class ActionType : long {
     NORTH = 0,
     NORTH_EAST = 1,
@@ -22,10 +29,18 @@ enum class ActionType : long {
     WAIT = 8,
 };
 
+/** A class representing an action in the Homecare POMDP.
+ *
+ * This class also implements solver::DiscretizedPoint so that the solver can use a simplistic
+ * enumerated action mapping approach (EnumeratedActionPool) to store the available actions from
+ * each belief node.
+ */
 class HomecareAction : public solver::DiscretizedPoint {
     friend class HomecareTextSerializer;
   public:
+    /** Constructs a new action from the given ActionType. */
     HomecareAction(ActionType actionType);
+    /** Constructs a new action from the given integer code. */
     HomecareAction(long code);
 
     virtual ~HomecareAction() = default;
@@ -36,8 +51,10 @@ class HomecareAction : public solver::DiscretizedPoint {
     void print(std::ostream &os) const override;
 
     long getBinNumber() const override;
+    /** Returns the ActionType of this action. */
     ActionType getActionType() const;
   private:
+    /** The ActionType for this action in the Homecare POMDP. */
     ActionType actionType_;
 };
 } /* namespace homecare */

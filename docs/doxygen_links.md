@@ -80,7 +80,7 @@
 [SharedOptions]: @ref shared::SharedOptions
 
 
-[Tag_config]: @ref tag/default.cfg
+[Tag_config]: @ref problems/tag/default.cfg
 [TagOptions]: @ref tag::TagOptions
 [TagModel]: @ref tag::TagModel
 [TagState]: @ref tag::TagState

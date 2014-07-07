@@ -41,7 +41,7 @@ struct RockSampleOptions : public shared::SharedOptions {
 
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
         std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
-                EXPAND_AND_QUOTE(ROOT_PATH) "/cfg/rocksample");
+                EXPAND_AND_QUOTE(ROOT_PATH) "/problems/rocksample");
         addRocksampleOptions(parser.get());
         addHeuristicOptions(parser.get());
         return std::move(parser);
@@ -50,7 +50,7 @@ struct RockSampleOptions : public shared::SharedOptions {
     static void addRocksampleOptions(options::OptionParser *parser) {
         parser->addOption<std::string>("problem", "mapPath", &RockSampleOptions::mapPath);
         parser->addValueArg<std::string>("problem", "mapPath", &RockSampleOptions::mapPath,
-                "m", "map", "the path to the map file (relative to the base config path)", "path");
+                "", "map", "the path to the map file (relative to the base config path)", "path");
 
         parser->addOption<double>("problem", "goodRockReward", &RockSampleOptions::goodRockReward);
         parser->addOption<double>("problem", "badRockPenalty", &RockSampleOptions::badRockPenalty);

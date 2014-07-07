@@ -22,11 +22,7 @@ class Solver;
 } /* namespace solver */
 
 namespace homecare {
-HomecareTextSerializer::HomecareTextSerializer(solver::Solver *solver) :
-    solver::Serializer(solver) {
-}
 
-/* ------------------ Saving change sequences -------------------- */
 void saveVector(std::vector<long> values, std::ostream &os) {
     os << "(";
     for (auto it = values.begin(); it != values.end(); it++) {
@@ -37,14 +33,7 @@ void saveVector(std::vector<long> values, std::ostream &os) {
     }
     os << ")";
 }
-void HomecareTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
-    HomecareChange const &homecareChange = static_cast<HomecareChange const &>(change);
-    os << homecareChange.changeType;
-    os << ": ";
-    saveVector(std::vector<long> {homecareChange.i0, homecareChange.j0}, os);
-    os << " ";
-    saveVector(std::vector<long> {homecareChange.i1, homecareChange.j1}, os);
-}
+
 std::vector<long> loadVector(std::istream &is) {
     std::vector<long> values;
     std::string tmpStr;
@@ -58,6 +47,21 @@ std::vector<long> loadVector(std::istream &is) {
     }
     return values;
 }
+
+HomecareTextSerializer::HomecareTextSerializer(solver::Solver *solver) :
+    solver::Serializer(solver) {
+}
+
+/* ------------------ Saving change sequences -------------------- */
+void HomecareTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
+    HomecareChange const &homecareChange = static_cast<HomecareChange const &>(change);
+    os << homecareChange.changeType;
+    os << ": ";
+    saveVector(std::vector<long> {homecareChange.i0, homecareChange.j0}, os);
+    os << " ";
+    saveVector(std::vector<long> {homecareChange.i1, homecareChange.j1}, os);
+}
+
 std::unique_ptr<solver::ModelChange> HomecareTextSerializer::loadModelChange(std::istream &is) {
     std::unique_ptr<HomecareChange> change = std::make_unique<HomecareChange>();
     std::getline(is, change->changeType, ':');

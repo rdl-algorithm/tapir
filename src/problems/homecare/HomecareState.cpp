@@ -1,3 +1,7 @@
+/** @file HomecareState.cpp
+ *
+ * Contains the implementation for the methods of HomecareState.
+ */
 #include "HomecareState.hpp"
 
 #include <cstddef>                      // for size_t

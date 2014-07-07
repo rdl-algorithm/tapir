@@ -82,17 +82,17 @@ struct SharedOptions: public solver::Options {
     static void addGenericOptions(options::OptionParser *parser, std::string defaultBaseConfigPath) {
         parser->addOptionWithDefault<std::string>("", "baseConfigPath",
                 &SharedOptions::baseConfigPath, defaultBaseConfigPath);
-        parser->addValueArg("", "baseConfigPath", &SharedOptions::baseConfigPath, "b", "base-path",
+        parser->addValueArg("", "baseConfigPath", &SharedOptions::baseConfigPath, "", "base-path",
                 "the base config path", "path");
 
         parser->addOptionWithDefault<std::string>("", "cfg", &SharedOptions::configPath,
                 "default.cfg");
-        parser->addValueArg("", "cfg", &SharedOptions::configPath, "f", "cfg",
+        parser->addValueArg("", "cfg", &SharedOptions::configPath, "", "cfg",
                 "config file path (relative to the base config path)", "path");
 
         parser->addOptionWithDefault<std::string>("", "policy", &SharedOptions::policyPath,
                 "pol.pol");
-        parser->addValueArg("", "policy", &SharedOptions::policyPath, "p", "policy",
+        parser->addValueArg("", "policy", &SharedOptions::policyPath, "", "policy",
                 "policy file path (output)", "path");
 
         parser->addOptionWithDefault<unsigned long>("", "seed", &SharedOptions::seed, 0);
@@ -100,20 +100,16 @@ struct SharedOptions: public solver::Options {
                 "RNG seed; 0=>current time", "ulong");
 
         parser->addOptionWithDefault<unsigned long>("", "state", &SharedOptions::rngState, 0);
-        parser->addValueArg("", "state", &SharedOptions::rngState, "t", "state",
+        parser->addValueArg("", "state", &SharedOptions::rngState, "", "state",
                 "RNG state", "ulong");
 
         parser->addOptionWithDefault("", "color", &SharedOptions::hasColorOutput, false);
-        parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "c", "color",
+        parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "", "color",
                 "use color output", true);
-        parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "", "no-color",
-                        "don't use color output", false);
 
         parser->addOptionWithDefault("", "verbose", &SharedOptions::hasVerboseOutput, false);
         parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "v", "verbose",
                         "use verbose output", true);
-        parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "", "no-verbose",
-                        "don't use verbose output", false);
     }
 
     /** Adds simulation-related options for this SharedOptions instance to the given parser;
@@ -144,23 +140,23 @@ struct SharedOptions: public solver::Options {
 
         if (simulating) {
             // These command line options are for simulation only.
-            parser->addValueArg("", "log", &SharedOptions::logPath, "l", "log",
+            parser->addValueArg("", "log", &SharedOptions::logPath, "", "log",
                     "file to log changes to", "path");
 
-            parser->addSwitchArg("changes", "hasChanges", &SharedOptions::hasChanges, "u",
-                    "has-changes", "Set the POMDP model to load changes at runtime", true);
+            parser->addSwitchArg("changes", "hasChanges", &SharedOptions::hasChanges, "",
+                    "do-changes", "Set the POMDP model to load changes at runtime", true);
 
-            parser->addSwitchArg("changes", "areDynamic", &SharedOptions::areDynamic, "d",
+            parser->addSwitchArg("changes", "areDynamic", &SharedOptions::areDynamic, "",
                     "dynamic", "Sets the changes to be dynamic, i.e. apply only to the future, not"
                     " to the past or to alternate futures).", true);
 
             parser->addValueArg("changes", "changesPath", &SharedOptions::changesPath,
-                    "g", "changes-path",
+                    "", "changes",
                     "path to file with runtime changes (relative to the base config path)", "path");
             parser->addValueArg<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps,
                     "n", "steps", "Maximum number of steps to simulate", "int");
             parser->addValueArg<unsigned long>("ABT", "minParticleCount",
-                    &Options::minParticleCount, "z", "min-particles", "Minimum allowable particles"
+                    &Options::minParticleCount, "", "min-particles", "Minimum allowable particles"
                             " per belief during simulation - if the count drops below this value,"
                             " extra particles will be resampled via a particle filter.", "int");
             parser->addSwitchArg("ABT", "pruneEveryStep",
@@ -189,11 +185,9 @@ struct SharedOptions: public solver::Options {
 
         parser->addOptionWithDefault<double>("ABT", "stepTimeout", &Options::stepTimeout, 0.0);
         parser->addValueArg<double>("ABT", "stepTimeout", &Options::stepTimeout,
-                "x", "timeout", "step timeout in milliseconds; 0=>no timeout", "real");
+                "t", "timeout", "step timeout in milliseconds; 0=>no timeout", "real");
 
         parser->addOption<long>("ABT", "maximumDepth", &Options::maximumDepth);
-        parser->addValueArg<long>("ABT", "maximumDepth", &Options::maximumDepth, "", "depth-limit",
-                "Maximum depth to go down the tree", "int");
 
         parser->addOption<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic);
         parser->addOption<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy);
@@ -206,7 +200,7 @@ struct SharedOptions: public solver::Options {
     static void addProblemOptions(options::OptionParser *parser) {
         parser->addOption<double>("problem", "discountFactor", &Options::discountFactor);
         parser->addValueArg<double>("problem", "discountFactor", &Options::discountFactor,
-                "", "discount-factor", "the POMDP discount factor", "real");
+                "d", "discount-factor", "the POMDP discount factor", "real");
     }
 };
 } /* namespace shared */
