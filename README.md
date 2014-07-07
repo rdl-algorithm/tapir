@@ -1,44 +1,40 @@
-Installation:
--------------
+Quick Start (ROS and V-REP Interface)
+-------------------------------------
 
-**V-REP**  
-http://www.coppeliarobotics.com/downloads.html 
+TAPIR provides interface with ROS and V-REP, and has been tested on Ubuntu 12.04, [ROS Hydro](http://wiki.ros.org/hydro/Installation), and [V-REP](http://www.coppeliarobotics.com/downloads.html) V3.1.2. 
 
-**ROS-Hydro**  
-http://wiki.ros.org/hydro/Installation
+**Additional System requirements:** 
+- **Octomap** - ros-hydro-octomap, ros-hydro-octomap-ros, ros-hydro-octomap-rviz-plugins, ros-hydro-octomap-server 
 
-Note: You can change the location of the boost source to use by editing the CMakeLists.txt inside the abt folder.  
+**Compilation:**
 
-**Other System Requirements:**  
-- **GNU C++ compiler** (>= 4.8) or equivalent - "g++" or "g++-4.8"
-- **libspatialindex** (>= 1.7.0) - "libspatialindex-dev"
-- **Octomap** - ros-hydro-octomap, ros-hydro-octomap-ros, ros-hydro-octomap-rviz-plugins, ros-hydro-octomap-server
-
-**Make a ROS Catkin workspace**  
-
-First make the workspace:
-
+To develop code with ROS, the code must be compiled using ROS's catkin build system. 
+First, source the ROS Hydro environment: 
 ```
-mkdir ~/tracker_thesis_ws
-cd ~/tracker_thesis_ws
+source /opt/ros/hydro/setup.bash
+```
+The code must be placed in a catkin workspace. To create a new one: 
+```
+mkdir ~/tapir_ws
+cd ~/tapir_ws
 mkdir src
 catkin_make
 ```
-
-Now git clone ABT (abt_ros branch):  
-
+Now move the TAPIR code into the src folder, so that the directory looks like tapir_ws/src/abt. 
+Then compile the code by running:
 ```
-cd src
-git clone https://github.com/hannakur/abt.git -b abt_ros
-cd ..
 catkin_make
 ```
 
-Running:
---------
+**Running:** 
 
+Source the workspace environment:
+```
+cd ~/tapir_ws
+source devel/setup.bash
+```
+Currently ROS interfaces exist only for the Tag and Tracker problem. To solve the Tag problem: 
 Start a roscore:  
-
 ```
 roscore  
 ```
@@ -50,32 +46,28 @@ First cd into your V-REP directory, then:
 ./vrep.sh
 ```
 
-Once V-REP has finished loading, open and start the tag.ttt scenario  
-
-Finally, start the tag node in another terminal: 
-
+Once V-REP has finished loading, open and start the tag.ttt scenario located in abt/vrep-scenarios. 
+Finally, start the tag node in another terminal (you will need to source the workspace environment again): 
 ```
+cd ~/tapir_ws
+source devel/setup.bash
 rosrun abt tag_node
 ```
-The obstacles should then be generated and the simulation will begin. 
-
-
-Other:  
-------
+The obstacles should then be generated in V-REP and the simulation will begin. To remove obstacles, select them by left-clicking on them. Multiple obstacles can be selected with the CTRL key. Obstacles can also be added by selecting empty cells. 
 
 **Note about g++ on Ubuntu 12.04**  
+
 Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:
 
 ```
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt-get update
 sudo apt-get install g++-4.8
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 60
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 40
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 60
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 40
 ```
 
-Here, 4.6 priority is set to 60, higher than 4.8. To swap to 4.8 use:
-
+Here, 4.8 priority is set to 60, higher than 4.6. To swap to 4.6 use:
 ```
 sudo update-alternatives --config g++
 ```
