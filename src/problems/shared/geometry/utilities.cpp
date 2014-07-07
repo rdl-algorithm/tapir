@@ -1,3 +1,7 @@
+/** @file utilities.cpp
+ *
+ * Contains implementations of utility functions for geometric calculations.
+ */
 #include "utilities.hpp"
 
 #include <cmath>

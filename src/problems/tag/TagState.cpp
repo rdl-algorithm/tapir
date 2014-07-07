@@ -1,3 +1,7 @@
+/** @file TagState.cpp
+ *
+ * Contains the implementation for the methods of TagState.
+ */
 #include "TagState.hpp"
 
 #include <cstddef>                      // for size_t

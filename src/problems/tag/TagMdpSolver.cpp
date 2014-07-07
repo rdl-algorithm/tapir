@@ -1,3 +1,7 @@
+/** @file TagMdpSolver.cpp
+ *
+ * Contains the implementations for TagMdpSolver and TagMdpParser.
+ */
 #include "TagMdpSolver.hpp"
 
 #include <iostream>
@@ -167,7 +171,7 @@ void TagMdpSolver::solve() {
     }
 }
 
-double TagMdpSolver::getQValue(TagState const &state) const {
+double TagMdpSolver::getValue(TagState const &state) const {
     if (state.isTagged()) {
         return 0; // Terminal; the reward is applied on the previous timestep.
     }
@@ -196,7 +200,7 @@ solver::HeuristicFunction TagMdpParser::parse(solver::Solver */*solver*/,
     return [this] (solver::HistoryEntry const *, solver::State const *state,
             solver::HistoricalData const *) {
         TagMdpSolver *solver = model_->getMdpSolver();
-        return solver->getQValue(static_cast<TagState const &>(*state));
+        return solver->getValue(static_cast<TagState const &>(*state));
     };
 }
 } /* namespace tag */

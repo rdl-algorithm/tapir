@@ -1,7 +1,11 @@
-#include "Rectangle2D.hpp"
+/** @file Rectangle2D.cpp
+ *
+ * Contains the implementations for the methods of the Rectangle2D class.
+ */
+#include "problems/shared/geometry/Rectangle2D.hpp"
 
-#include "Point2D.hpp"
-#include "Vector2D.hpp"
+#include "problems/shared/geometry/Point2D.hpp"
+#include "problems/shared/geometry/Vector2D.hpp"
 
 #include <sstream>
 #include <string>

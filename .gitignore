@@ -5,6 +5,7 @@
 /EMPTY_HEADER.hpp
 
 # Automatically generated documentation
+docs/html
 docs/generated
 
 # Binaries

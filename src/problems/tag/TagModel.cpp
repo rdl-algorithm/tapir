@@ -1,3 +1,7 @@
+/** @file TagModel.cpp
+ *
+ * Contains the implementations for the core functionality of the Tag POMDP.
+ */
 #include "TagModel.hpp"
 
 #include <cmath>                        // for floor, pow
@@ -71,7 +75,9 @@ TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options
     options_->minVal = -failedTagPenalty_ / 1 - options_->discountFactor;
     options_->maxVal = tagReward_;
 
+    // Register the upper bound heuristic parser.
     registerHeuristicParser("upper", std::make_unique<TagUBParser>(this));
+    // Register the exact MDP heuristic parser.
     registerHeuristicParser("exactMdp", std::make_unique<TagMdpParser>(this));
 
     // Read the map from the file.
@@ -269,8 +275,7 @@ bool TagModel::isValid(GridPosition const &position) {
             && position.j < nCols_ && envMap_[position.i][position.j] != TagCellType::WALL);
 }
 
-std::unique_ptr<solver::Observation> TagModel::makeObservation(
-        solver::Action const & /*action*/, TagState const &nextState) {
+std::unique_ptr<solver::Observation> TagModel::makeObservation(TagState const &nextState) {
     return std::make_unique<TagObservation>(nextState.getRobotPosition(),
             nextState.getRobotPosition() == nextState.getOpponentPosition());
 }
@@ -299,10 +304,10 @@ std::unique_ptr<solver::State> TagModel::generateNextState(
 }
 
 std::unique_ptr<solver::Observation> TagModel::generateObservation(
-        solver::State const */*state*/, solver::Action const &action,
+        solver::State const */*state*/, solver::Action const &/*action*/,
         solver::TransitionParameters const */*tp*/,
         solver::State const &nextState) {
-    return makeObservation(action, static_cast<TagState const &>(nextState));
+    return makeObservation(static_cast<TagState const &>(nextState));
 }
 
 solver::Model::StepResult TagModel::generateStep(solver::State const &state,
@@ -311,7 +316,7 @@ solver::Model::StepResult TagModel::generateStep(solver::State const &state,
     result.action = action.copy();
     std::unique_ptr<TagState> nextState = makeNextState(state, action).first;
 
-    result.observation = makeObservation(action, *nextState);
+    result.observation = makeObservation(*nextState);
     result.reward = generateReward(state, action, nullptr, nullptr);
     result.isTerminal = isTerminal(*nextState);
     result.nextState = std::move(nextState);
