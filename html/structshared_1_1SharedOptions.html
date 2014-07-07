@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: shared::SharedOptions Struct Reference</title>
+<title>TAPIR: shared::SharedOptions Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -96,6 +96,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">shared::SharedOptions Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>An expanded Options class, which comes with some additional settings that are shared by many of the individual example problems.  
+ <a href="structshared_1_1SharedOptions.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for shared::SharedOptions:</div>
 <div class="dyncontent">
@@ -111,27 +116,33 @@ Inheritance diagram for shared::SharedOptions:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a65341325d6ccbede7e4650c6f2701bcc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a65341325d6ccbede7e4650c6f2701bcc"></a>
+<tr class="memitem:a5275dd949e8060018cc28dc2e36e7a87"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5275dd949e8060018cc28dc2e36e7a87"></a>
 static std::unique_ptr<br class="typebreak"/>
-&lt; <a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>makeParser</b> (bool simulating, std::string defaultConfigPath)</td></tr>
-<tr class="separator:a65341325d6ccbede7e4650c6f2701bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a96443ac805549cd561274b30ffb81284"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a96443ac805549cd561274b30ffb81284"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>addGenericOptions</b> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser, std::string defaultConfigPath)</td></tr>
-<tr class="separator:a96443ac805549cd561274b30ffb81284"><td class="memSeparator" colspan="2">&#160;</td></tr>
+&lt; <a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#a5275dd949e8060018cc28dc2e36e7a87">makeParser</a> (bool simulating, std::string defaultBaseConfigPath)</td></tr>
+<tr class="memdesc:a5275dd949e8060018cc28dc2e36e7a87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes a parser which can parse options from config files, or from the command line, into a <a class="el" href="structshared_1_1SharedOptions.html" title="An expanded Options class, which comes with some additional settings that are shared by many of the i...">SharedOptions</a> instance. <br/></td></tr>
+<tr class="separator:a5275dd949e8060018cc28dc2e36e7a87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcc800e925d4d99639cb9034ecc93436"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adcc800e925d4d99639cb9034ecc93436"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#adcc800e925d4d99639cb9034ecc93436">addGenericOptions</a> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser, std::string defaultBaseConfigPath)</td></tr>
+<tr class="memdesc:adcc800e925d4d99639cb9034ecc93436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds generic options for this <a class="el" href="structshared_1_1SharedOptions.html" title="An expanded Options class, which comes with some additional settings that are shared by many of the i...">SharedOptions</a> instance to the given parser, using the given default configuration file path. <br/></td></tr>
+<tr class="separator:adcc800e925d4d99639cb9034ecc93436"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa132efe1df35aef6e1befde23ca29ecf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa132efe1df35aef6e1befde23ca29ecf"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>addSimulationOptions</b> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser, bool simulating)</td></tr>
+static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#aa132efe1df35aef6e1befde23ca29ecf">addSimulationOptions</a> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser, bool simulating)</td></tr>
+<tr class="memdesc:aa132efe1df35aef6e1befde23ca29ecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds simulation-related options for this <a class="el" href="structshared_1_1SharedOptions.html" title="An expanded Options class, which comes with some additional settings that are shared by many of the i...">SharedOptions</a> instance to the given parser; some of these options will be mandatory if simulating, or optional if not simulating. <br/></td></tr>
 <tr class="separator:aa132efe1df35aef6e1befde23ca29ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af43f1cd137d81ca6cef1bf03ee0f7f96"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af43f1cd137d81ca6cef1bf03ee0f7f96"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>addABTOptions</b> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser)</td></tr>
+<tr class="memitem:af43f1cd137d81ca6cef1bf03ee0f7f96"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#af43f1cd137d81ca6cef1bf03ee0f7f96">addABTOptions</a> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser)</td></tr>
+<tr class="memdesc:af43f1cd137d81ca6cef1bf03ee0f7f96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds core ABT options for this <a class="el" href="structshared_1_1SharedOptions.html" title="An expanded Options class, which comes with some additional settings that are shared by many of the i...">SharedOptions</a> instance to the given parser.  <a href="#af43f1cd137d81ca6cef1bf03ee0f7f96">More...</a><br/></td></tr>
 <tr class="separator:af43f1cd137d81ca6cef1bf03ee0f7f96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6fcc1897781e4563ff86cf9d7a948aa3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6fcc1897781e4563ff86cf9d7a948aa3"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>addProblemOptions</b> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser)</td></tr>
+<tr class="memitem:a6fcc1897781e4563ff86cf9d7a948aa3"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#a6fcc1897781e4563ff86cf9d7a948aa3">addProblemOptions</a> (<a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser)</td></tr>
+<tr class="memdesc:a6fcc1897781e4563ff86cf9d7a948aa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the discountFactor option to the given parser.  <a href="#a6fcc1897781e4563ff86cf9d7a948aa3">More...</a><br/></td></tr>
 <tr class="separator:a6fcc1897781e4563ff86cf9d7a948aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:ac24c807225f575a7224ccbe681394ac0"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#ac24c807225f575a7224ccbe681394ac0">baseConfigPath</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:ac24c807225f575a7224ccbe681394ac0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The base config path - the path of the configuration files will be relative to this path.  <a href="#ac24c807225f575a7224ccbe681394ac0">More...</a><br/></td></tr>
+<tr class="separator:ac24c807225f575a7224ccbe681394ac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae68eadb1f1025b01f0d315d1055d60af"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#ae68eadb1f1025b01f0d315d1055d60af">configPath</a> = &quot;&quot;</td></tr>
-<tr class="memdesc:ae68eadb1f1025b01f0d315d1055d60af"><td class="mdescLeft">&#160;</td><td class="mdescRight">The path to the configuration file.  <a href="#ae68eadb1f1025b01f0d315d1055d60af">More...</a><br/></td></tr>
+<tr class="memdesc:ae68eadb1f1025b01f0d315d1055d60af"><td class="mdescLeft">&#160;</td><td class="mdescRight">The path to the configuration file (relative to baseConfigPath).  <a href="#ae68eadb1f1025b01f0d315d1055d60af">More...</a><br/></td></tr>
 <tr class="separator:ae68eadb1f1025b01f0d315d1055d60af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed230a5b0fa62ff527d199972bbe04ef"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#aed230a5b0fa62ff527d199972bbe04ef">policyPath</a> = &quot;&quot;</td></tr>
 <tr class="memdesc:aed230a5b0fa62ff527d199972bbe04ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">The path to the policy file.  <a href="#aed230a5b0fa62ff527d199972bbe04ef">More...</a><br/></td></tr>
@@ -160,20 +171,21 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ae64859c47531a991dbf292efe0ceeb0f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#ae64859c47531a991dbf292efe0ceeb0f">areDynamic</a> = false</td></tr>
 <tr class="memdesc:ae64859c47531a991dbf292efe0ceeb0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">True iff the changes are dynamic.  <a href="#ae64859c47531a991dbf292efe0ceeb0f">More...</a><br/></td></tr>
 <tr class="separator:ae64859c47531a991dbf292efe0ceeb0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf23f9907c6e0e57f258bb5d8cb92ebf"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#acf23f9907c6e0e57f258bb5d8cb92ebf">changesPath</a> = &quot;&quot;</td></tr>
-<tr class="memdesc:acf23f9907c6e0e57f258bb5d8cb92ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">The path to the change file.  <a href="#acf23f9907c6e0e57f258bb5d8cb92ebf">More...</a><br/></td></tr>
+<tr class="memitem:acf23f9907c6e0e57f258bb5d8cb92ebf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acf23f9907c6e0e57f258bb5d8cb92ebf"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#acf23f9907c6e0e57f258bb5d8cb92ebf">changesPath</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:acf23f9907c6e0e57f258bb5d8cb92ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">The path to the change file (relative to baseConfigPath) <br/></td></tr>
 <tr class="separator:acf23f9907c6e0e57f258bb5d8cb92ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acbffaa1c6ac3280e6d6f6e12787f680a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#acbffaa1c6ac3280e6d6f6e12787f680a">searchHeuristic</a> = &quot;&quot;</td></tr>
 <tr class="memdesc:acbffaa1c6ac3280e6d6f6e12787f680a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The heuristic used for searches.  <a href="#acbffaa1c6ac3280e6d6f6e12787f680a">More...</a><br/></td></tr>
 <tr class="separator:acbffaa1c6ac3280e6d6f6e12787f680a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68cb2e9c7b7e8039d1108ced9addd55d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a68cb2e9c7b7e8039d1108ced9addd55d"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>searchStrategy</b> = &quot;&quot;</td></tr>
+<tr class="memitem:a68cb2e9c7b7e8039d1108ced9addd55d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#a68cb2e9c7b7e8039d1108ced9addd55d">searchStrategy</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a68cb2e9c7b7e8039d1108ced9addd55d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The search strategy to use.  <a href="#a68cb2e9c7b7e8039d1108ced9addd55d">More...</a><br/></td></tr>
 <tr class="separator:a68cb2e9c7b7e8039d1108ced9addd55d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ecde500c069cb594459c95bec95b032"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8ecde500c069cb594459c95bec95b032"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>estimator</b> = &quot;&quot;</td></tr>
+<tr class="memitem:a8ecde500c069cb594459c95bec95b032"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#a8ecde500c069cb594459c95bec95b032">estimator</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a8ecde500c069cb594459c95bec95b032"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function to estimate the value of a belief.  <a href="#a8ecde500c069cb594459c95bec95b032">More...</a><br/></td></tr>
 <tr class="separator:a8ecde500c069cb594459c95bec95b032"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c873f8380004558e4a0f741e3ab02bc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0c873f8380004558e4a0f741e3ab02bc"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDistance</b> = 0.0</td></tr>
+<tr class="memitem:a0c873f8380004558e4a0f741e3ab02bc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structshared_1_1SharedOptions.html#a0c873f8380004558e4a0f741e3ab02bc">maxObservationDistance</a> = 0.0</td></tr>
+<tr class="memdesc:a0c873f8380004558e4a0f741e3ab02bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum distance between observations to group together; only applicable if approximate observations are in use.  <a href="#a0c873f8380004558e4a0f741e3ab02bc">More...</a><br/></td></tr>
 <tr class="separator:a0c873f8380004558e4a0f741e3ab02bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_structsolver_1_1Options"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_structsolver_1_1Options')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="structsolver_1_1Options.html">solver::Options</a></td></tr>
 <tr class="memitem:a03872680ab1ff2b338c94a82cb2850f0 inherit pub_attribs_structsolver_1_1Options"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsolver_1_1Options.html#a03872680ab1ff2b338c94a82cb2850f0">numberOfStateVariables</a> = -1</td></tr>
@@ -188,6 +200,9 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 <tr class="memitem:a3c9e50bb47ebb7ccb8b715544432e875 inherit pub_attribs_structsolver_1_1Options"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsolver_1_1Options.html#a3c9e50bb47ebb7ccb8b715544432e875">discountFactor</a> = 1.0</td></tr>
 <tr class="memdesc:a3c9e50bb47ebb7ccb8b715544432e875 inherit pub_attribs_structsolver_1_1Options"><td class="mdescLeft">&#160;</td><td class="mdescRight">The discount factor of the PODMP.  <a href="#a3c9e50bb47ebb7ccb8b715544432e875">More...</a><br/></td></tr>
 <tr class="separator:a3c9e50bb47ebb7ccb8b715544432e875 inherit pub_attribs_structsolver_1_1Options"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cf2fdfbed36e6447d46afd98f651e43 inherit pub_attribs_structsolver_1_1Options"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsolver_1_1Options.html#a0cf2fdfbed36e6447d46afd98f651e43">pruneEveryStep</a> = false</td></tr>
+<tr class="memdesc:a0cf2fdfbed36e6447d46afd98f651e43 inherit pub_attribs_structsolver_1_1Options"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to prune the tree on every simulation step.  <a href="#a0cf2fdfbed36e6447d46afd98f651e43">More...</a><br/></td></tr>
+<tr class="separator:a0cf2fdfbed36e6447d46afd98f651e43 inherit pub_attribs_structsolver_1_1Options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24bb406e708b1fde2829f4ff0e7efd1b inherit pub_attribs_structsolver_1_1Options"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsolver_1_1Options.html#a24bb406e708b1fde2829f4ff0e7efd1b">minParticleCount</a> = 1000</td></tr>
 <tr class="memdesc:a24bb406e708b1fde2829f4ff0e7efd1b inherit pub_attribs_structsolver_1_1Options"><td class="mdescLeft">&#160;</td><td class="mdescRight">The minimum number of particles to maintain in the active belief node.  <a href="#a24bb406e708b1fde2829f4ff0e7efd1b">More...</a><br/></td></tr>
 <tr class="separator:a24bb406e708b1fde2829f4ff0e7efd1b inherit pub_attribs_structsolver_1_1Options"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -208,9 +223,68 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 <tr class="separator:a452f875a60416233ea0d05b43cdb3333 inherit pub_attribs_structsolver_1_1Options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00009">9</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
-</div><h2 class="groupheader">Member Data Documentation</h2>
+<div class="textblock"><p>An expanded Options class, which comes with some additional settings that are shared by many of the individual example problems. </p>
+<p>These extra configuration options allow for extra configuration at runtime instead of compile-time. </p>
+
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00020">20</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="af43f1cd137d81ca6cef1bf03ee0f7f96"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void shared::SharedOptions::addABTOptions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *&#160;</td>
+          <td class="paramname"><em>parser</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds core ABT options for this <a class="el" href="structshared_1_1SharedOptions.html" title="An expanded Options class, which comes with some additional settings that are shared by many of the i...">SharedOptions</a> instance to the given parser. </p>
+
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00184">184</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a6fcc1897781e4563ff86cf9d7a948aa3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void shared::SharedOptions::addProblemOptions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *&#160;</td>
+          <td class="paramname"><em>parser</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds the discountFactor option to the given parser. </p>
+
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00206">206</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
 <a class="anchor" id="ae64859c47531a991dbf292efe0ceeb0f"></a>
 <div class="memitem">
 <div class="memproto">
@@ -223,23 +297,23 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>True iff the changes are dynamic. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00037">37</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00050">50</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="acf23f9907c6e0e57f258bb5d8cb92ebf"></a>
+<a class="anchor" id="ac24c807225f575a7224ccbe681394ac0"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::string shared::SharedOptions::changesPath = &quot;&quot;</td>
+          <td class="memname">std::string shared::SharedOptions::baseConfigPath = &quot;&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>The path to the change file. </p>
+<p>The base config path - the path of the configuration files will be relative to this path. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00039">39</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00026">26</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -253,9 +327,25 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
       </table>
 </div><div class="memdoc">
 
-<p>The path to the configuration file. </p>
+<p>The path to the configuration file (relative to baseConfigPath). </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00015">15</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00028">28</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a8ecde500c069cb594459c95bec95b032"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string shared::SharedOptions::estimator = &quot;&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The function to estimate the value of a belief. </p>
+
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00060">60</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -271,7 +361,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>True iff there are pre-planned model changed during the simulation. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00035">35</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00048">48</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -287,7 +377,23 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>The path to the log file. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00025">25</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00038">38</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0c873f8380004558e4a0f741e3ab02bc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double shared::SharedOptions::maxObservationDistance = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The maximum distance between observations to group together; only applicable if approximate observations are in use. </p>
+
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00063">63</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -303,7 +409,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>The number of simulations to run. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00029">29</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00042">42</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -319,7 +425,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>The maximum number of steps to simulate per run. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00027">27</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00040">40</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -335,7 +441,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>The path to the policy file. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00017">17</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00030">30</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -351,7 +457,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>A custom state to load for RNG. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00021">21</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00034">34</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -367,7 +473,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>True iff we should save the resulting policy at the end of each simulation. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00031">31</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00044">44</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -383,7 +489,23 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>The heuristic used for searches. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00043">43</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00056">56</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a68cb2e9c7b7e8039d1108ced9addd55d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string shared::SharedOptions::searchStrategy = &quot;&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The search strategy to use. </p>
+
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00058">58</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -399,7 +521,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 
 <p>The seed value to use for the RNG. </p>
 
-<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00019">19</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="SharedOptions_8hpp_source.html#l00032">32</a> of file <a class="el" href="SharedOptions_8hpp_source.html">SharedOptions.hpp</a>.</p>
 
 </div>
 </div>
@@ -409,7 +531,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>maxObservationDista
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

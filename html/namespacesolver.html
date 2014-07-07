@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver Namespace Reference</title>
+<title>TAPIR: solver Namespace Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -310,11 +310,11 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a4d49455281fc7c00cded44247277bb94"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classsolver_1_1Point.html">Point</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a></td></tr>
 <tr class="memdesc:a4d49455281fc7c00cded44247277bb94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Currently Action has no requirements over and above <a class="el" href="classsolver_1_1Point.html" title="Represents a point within a certain set, in the sense of point-set topology. ">Point</a>, so this is just a typedef.  <a href="#a4d49455281fc7c00cded44247277bb94">More...</a><br/></td></tr>
 <tr class="separator:a4d49455281fc7c00cded44247277bb94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9e1b50ecb46556312c91f9349be3966"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; double(<a class="el" href="classsolver_1_1HistoryEntry.html">HistoryEntry</a> <br class="typebreak"/>
+<tr class="memitem:a2652743b2b118d001615cc27ed0ce636"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; double(<a class="el" href="classsolver_1_1HistoryEntry.html">HistoryEntry</a> <br class="typebreak"/>
 const *, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a> const <br class="typebreak"/>
-*, <a class="el" href="classsolver_1_1HistoricalData.html">HistoricalData</a> const *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a></td></tr>
-<tr class="memdesc:ab9e1b50ecb46556312c91f9349be3966"><td class="mdescLeft">&#160;</td><td class="mdescRight">A typedef for the Heuristic type.  <a href="#ab9e1b50ecb46556312c91f9349be3966">More...</a><br/></td></tr>
-<tr class="separator:ab9e1b50ecb46556312c91f9349be3966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+*, <a class="el" href="classsolver_1_1HistoricalData.html">HistoricalData</a> const *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a></td></tr>
+<tr class="memdesc:a2652743b2b118d001615cc27ed0ce636"><td class="mdescLeft">&#160;</td><td class="mdescRight">A typedef for the HeuristicFunction type.  <a href="#a2652743b2b118d001615cc27ed0ce636">More...</a><br/></td></tr>
+<tr class="separator:a2652743b2b118d001615cc27ed0ce636"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d2e7dd4c23d16406fc77644ba357386"><td class="memItemLeft" align="right" valign="top">typedef std::map&lt; long, <br class="typebreak"/>
 std::vector&lt; std::unique_ptr<br class="typebreak"/>
 &lt; <a class="el" href="classsolver_1_1ModelChange.html">ModelChange</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesolver.html#a1d2e7dd4c23d16406fc77644ba357386">ChangeSequence</a></td></tr>
@@ -452,17 +452,17 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab9e1b50ecb46556312c91f9349be3966"></a>
+<a class="anchor" id="a2652743b2b118d001615cc27ed0ce636"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef std::function&lt;double(<a class="el" href="classsolver_1_1HistoryEntry.html">HistoryEntry</a> const *, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a> const *, <a class="el" href="classsolver_1_1HistoricalData.html">HistoricalData</a> const *)&gt; <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a></td>
+          <td class="memname">typedef std::function&lt;double(<a class="el" href="classsolver_1_1HistoryEntry.html">HistoryEntry</a> const *, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a> const *, <a class="el" href="classsolver_1_1HistoricalData.html">HistoricalData</a> const *)&gt; <a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>A typedef for the Heuristic type. </p>
+<p>A typedef for the HeuristicFunction type. </p>
 <p>In order to allow for different types of heuristics, this heuristic takes three different arguments via pointers. It is not necessary to use any or all of these arguments - you can base a heuristic on whichever one you wish to.</p>
 <ul>
 <li>Access to the history entry allows for heuristics based on the actual belief node, as the history entry keeps a pointer to the associated belief.</li>
@@ -470,7 +470,7 @@ Functions</h2></td></tr>
 <li>Access to historical data allows simpler incorporation of history-based information into the heuristic value. </li>
 </ul>
 
-<p>Definition at line <a class="el" href="Heuristic_8hpp_source.html#l00017">17</a> of file <a class="el" href="Heuristic_8hpp_source.html">Heuristic.hpp</a>.</p>
+<p>Definition at line <a class="el" href="HeuristicFunction_8hpp_source.html#l00017">17</a> of file <a class="el" href="HeuristicFunction_8hpp_source.html">HeuristicFunction.hpp</a>.</p>
 
 </div>
 </div>
@@ -914,7 +914,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

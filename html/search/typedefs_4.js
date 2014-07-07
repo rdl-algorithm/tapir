@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['heuristic',['Heuristic',['../namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966',1,'solver']]]
+  ['heuristicfunction',['HeuristicFunction',['../namespacesolver.html#a2652743b2b118d001615cc27ed0ce636',1,'solver']]]
 ];

@@ -59,16 +59,18 @@ public:
     friend class Solver;
     friend class TextSerializer;
 
-    /** Constructs a new belief node with no ID, and no parent entry. */
-    BeliefNode();
-    /** Constructs a new belief node with no ID (-1),
-     * and with the given mapping entry as its parent.
+    /** Constructs a new belief node with no ID, and no parent entry, that will belong to the
+     * given solver.
      */
-    BeliefNode(ObservationMappingEntry *parentEntry);
-    /** Constructs a new belief node with the given ID,
-     * and with the given mapping entry as its parent.
+    BeliefNode(Solver *solver);
+    /** Constructs a new belief node with no ID (-1), with the given mapping entry as
+     * its parent, and which will belong to the given solver.
      */
-    BeliefNode(long id, ObservationMappingEntry *parentEntry);
+    BeliefNode(ObservationMappingEntry *parentEntry, Solver *solver);
+    /** Constructs a new belief node with the given ID,with the given mapping entry as its parent,
+     * and which will belong to the given solver.
+     */
+    BeliefNode(long id, ObservationMappingEntry *parentEntry, Solver *solver);
 
     // Default destructor; copying and moving disallowed!
     ~BeliefNode();
@@ -129,6 +131,17 @@ public:
     /** Recalculates the cached value for this belief node. */
     void recalculateValue();
 
+
+    /* -------------------- Core tree-related methods  ---------------------- */
+    /** Adds a child for the given action and observation, or returns a pre-existing one if it
+     * already existed.
+     *
+     * The belief node will also be added to the flattened node vector of the policy tree, as
+     * this is done by the BeliefNode constructor.
+     */
+    BeliefNode *createOrGetChild(Action const &action, Observation const &obs);
+
+
 private:
     /* -------------- Particle management / sampling ---------------- */
     /** Adds the given history entry to this belief node. */
@@ -142,19 +155,10 @@ private:
     /** Sets the history-derived information for this node. */
     void setHistoricalData(std::unique_ptr<HistoricalData> data);
 
-    /* -------------------- Tree-related methods  ---------------------- */
-    /** Adds a child for the given action and observation;
-     * returns the child node, and a boolean which is true iff a new node was
-     * actually created.
-     *
-     * NOTE: This method doesn't add this belief node to the node vector in the belief tree;
-     * this method should always be called via BeliefTree::createOrGetChild rather than
-     * being called directly.
-     */
-    std::pair<BeliefNode *, bool> createOrGetChild(Solver *solver, Action const &action,
-            Observation const &obs);
-
 private:
+    /** The solver that this belief node belongs to. */
+    Solver *solver_;
+
     /** The ID of this node. */
     long id_;
     /** The depth of this node in the tree. */
@@ -165,7 +169,7 @@ private:
     /** The smart history-based data, to be used for history-based policies. */
     std::unique_ptr<HistoricalData> data_;
     /** The set of particles belonging to this node. */
-    abt::RandomAccessSet<HistoryEntry *> particles_;
+    tapir::RandomAccessSet<HistoryEntry *> particles_;
     /** The number of sequences that start at this node. */
     long nStartingSequences_;
 

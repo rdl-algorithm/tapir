@@ -45,13 +45,15 @@ class ApproximateObservationPool: public solver::ObservationPool {
     /** Creates a new observation pool; the individual mappings created will group together
      * observations based on the given radius value.
      */
-    ApproximateObservationPool(double maxDistance);
+    ApproximateObservationPool(Solver *solver, double maxDistance);
     virtual ~ApproximateObservationPool() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationPool);
 
     virtual std::unique_ptr<ObservationMapping> createObservationMapping(ActionNode *owner) override;
 
   private:
+    /** The solver. */
+    Solver *solver_;
     /** The maximum radius for observations to be grouped together. */
     double maxDistance_;
 };
@@ -75,24 +77,29 @@ class ApproximateObservationMap: public solver::ObservationMapping {
     /** Creates a new ApproximateObservationMap which will be owned by the given ActionNode, and
      * for which the maximum distance for an entry to "match" is the given distance.
      */
-    ApproximateObservationMap(ActionNode *owner, double maxDistance);
+    ApproximateObservationMap(ActionNode *owner, Solver *solver, double maxDistance);
     virtual ~ApproximateObservationMap() = default;
     _NO_COPY_OR_MOVE(ApproximateObservationMap);
 
-    /* -------------- Creation and retrieval of nodes. ---------------- */
+    /* -------------- Access to and management of child nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
     virtual long getNChildren() const override;
 
+    virtual void deleteChild(ObservationMappingEntry const *entry) override;
+
     /* -------------- Retrieval of mapping entries. ---------------- */
+    virtual std::vector<ObservationMappingEntry const *> getChildEntries() const override;
     virtual ObservationMappingEntry *getEntry(Observation const &obs) override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
-    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
 
     /* --------------- Methods for accessing visit counts. ----------------- */
     virtual long getTotalVisitCount() const override;
 
   private:
+    /** The solver. */
+    Solver *solver_;
+
     /** The maximum distance for an observation to count as part of an entry. */
     double maxDistance_;
     /** The vector of entries for this mapping. */

@@ -44,11 +44,11 @@ bool HomecareState::equals(solver::State const &otherState) const {
 
 std::size_t HomecareState::hash() const {
     std::size_t hashValue = 0;
-    abt::hash_combine(hashValue, robotPos_.i);
-    abt::hash_combine(hashValue, robotPos_.j);
-    abt::hash_combine(hashValue, targetPos_.i);
-    abt::hash_combine(hashValue, targetPos_.j);
-    abt::hash_combine(hashValue, call_);
+    tapir::hash_combine(hashValue, robotPos_.i);
+    tapir::hash_combine(hashValue, robotPos_.j);
+    tapir::hash_combine(hashValue, targetPos_.i);
+    tapir::hash_combine(hashValue, targetPos_.j);
+    tapir::hash_combine(hashValue, call_);
     return hashValue;
 }
 

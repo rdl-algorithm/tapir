@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::Model Class Reference</title>
+<title>TAPIR: solver::Model Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -107,7 +107,7 @@ Inheritance diagram for solver::Model:</div>
  <div class="center">
   <img src="classsolver_1_1Model.png" usemap="#solver::Model_map" alt=""/>
   <map id="solver::Model_map" name="solver::Model_map">
-<area href="classshared_1_1ModelWithProgramOptions.html" alt="shared::ModelWithProgramOptions" shape="rect" coords="108,56,315,80"/>
+<area href="classshared_1_1ModelWithProgramOptions.html" title="A partial implementation of Model allowing for text-based parsing of various advanced search options..." alt="shared::ModelWithProgramOptions" shape="rect" coords="108,56,315,80"/>
 <area href="classrocksample_1_1RockSampleModel.html" alt="rocksample::RockSampleModel" shape="rect" coords="0,112,207,136"/>
 <area href="classtag_1_1TagModel.html" alt="tag::TagModel" shape="rect" coords="217,112,424,136"/>
 </map>
@@ -176,9 +176,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a48bfb5cef2839f7e20f670e37f0b643b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Model.html#a48bfb5cef2839f7e20f670e37f0b643b">drawSimulationState</a> (<a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> const *belief, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a> const &amp;state, std::ostream &amp;os)</td></tr>
 <tr class="memdesc:a48bfb5cef2839f7e20f670e37f0b643b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws the current belief and/or the actual current state in the context of the overall map onto the given output stream.  <a href="#a48bfb5cef2839f7e20f670e37f0b643b">More...</a><br/></td></tr>
 <tr class="separator:a48bfb5cef2839f7e20f670e37f0b643b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a080de609bc622ed1b2985a9c73cca392"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Model.html#a080de609bc622ed1b2985a9c73cca392">getHeuristicFunction</a> ()</td></tr>
-<tr class="memdesc:a080de609bc622ed1b2985a9c73cca392"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the function that approximates the value of a history entry based on the history and/or an estimate using a single state.  <a href="#a080de609bc622ed1b2985a9c73cca392">More...</a><br/></td></tr>
-<tr class="separator:a080de609bc622ed1b2985a9c73cca392"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09a73bc8bd8d983464d6717218f60ba1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Model.html#a09a73bc8bd8d983464d6717218f60ba1">getHeuristicFunction</a> ()</td></tr>
+<tr class="memdesc:a09a73bc8bd8d983464d6717218f60ba1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the function that approximates the value of a history entry based on the history and/or an estimate using a single state.  <a href="#a09a73bc8bd8d983464d6717218f60ba1">More...</a><br/></td></tr>
+<tr class="separator:a09a73bc8bd8d983464d6717218f60ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a458b46cd30555b7cca121f383831a2af"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr&lt; <a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1Model.html#a458b46cd30555b7cca121f383831a2af">getRolloutAction</a> (<a class="el" href="classsolver_1_1HistoryEntry.html">HistoryEntry</a> const *entry, <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a> const *state, <a class="el" href="classsolver_1_1HistoricalData.html">HistoricalData</a> const *data)</td></tr>
 <tr class="memdesc:a458b46cd30555b7cca121f383831a2af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a rollout action to be use, which can be based on the current state, the current belief, and/or the history.  <a href="#a458b46cd30555b7cca121f383831a2af">More...</a><br/></td></tr>
 <tr class="separator:a458b46cd30555b7cca121f383831a2af"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -224,7 +224,7 @@ Public Member Functions</h2></td></tr>
 <li><a class="el" href="classsolver_1_1Model.html#ac935e5b653acc3a19dd5bc963bf4a14d" title="Generates a full StepResult, including the next state, an observation, and the reward, as well as any transition parameters used. ">generateStep()</a> - the key method representing the generative model; basically, it does (s, a) =&gt; (o, r, s')</li>
 <li><a class="el" href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818" title="Applies a number of changes to the model, and (if provided) to the given solver. ">applyChanges()</a> - applies changes to the model, and interfaces with the <a class="el" href="classsolver_1_1Solver.html" title="The core class of the ABT algorithm. ">Solver</a> in order to determine how the policy is affected by the model changes.</li>
 <li><a class="el" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b" title="Generates new state particles based on the state particles of the previous node, as well as on the ac...">generateParticles()</a> - these two methods define an explicit particle filtering approach, which allows the ABT algorithm to replenish its particles if the simple act of generating histories has not generated a sufficient number of particles for the current belief. The default implementation is quite general, but also relatively slow as it uses rejection sampling. Custom implementations should be provided for efficiency.</li>
-<li><a class="el" href="classsolver_1_1Model.html#a080de609bc622ed1b2985a9c73cca392" title="Returns the function that approximates the value of a history entry based on the history and/or an es...">getHeuristicFunction()</a> - this defines a heuristic function that will be applied to the end of a history sequence that did not reach a terminal state. By default this is simply a function that returns zero.</li>
+<li><a class="el" href="classsolver_1_1Model.html#a09a73bc8bd8d983464d6717218f60ba1" title="Returns the function that approximates the value of a history entry based on the history and/or an es...">getHeuristicFunction()</a> - this defines a heuristic function that will be applied to the end of a history sequence that did not reach a terminal state. By default this is simply a function that returns zero.</li>
 <li><a class="el" href="classsolver_1_1Model.html#a153e447124946743272c156ee40e7024" title="Creates an ActionPool, which manages actions and creates ActionMappings, for the given solver...">createActionPool()</a> - this defines the way in which actions are mapped out inside the policy tree, and also which actions the ABT solver will attempt, and in which order.</li>
 </ul>
 <p>For the purposes of more subtle generation, ABT allows for a more incremental approach to the generative model. In particular, we introduce optional "transition parameters", which can serve the following key purposes:</p>
@@ -991,7 +991,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a080de609bc622ed1b2985a9c73cca392"></a>
+<a class="anchor" id="a09a73bc8bd8d983464d6717218f60ba1"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -999,7 +999,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a> solver::Model::getHeuristicFunction </td>
+          <td class="memname"><a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a> solver::Model::getHeuristicFunction </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1016,7 +1016,7 @@ Public Member Functions</h2></td></tr>
 <p>The default implementation simply returns zero.</p>
 <p>By default, this is simply a function that returns zero for every state.</p>
 
-<p>Reimplemented in <a class="el" href="classshared_1_1ModelWithProgramOptions.html#af4955a7a3b8a15ee138ff0194dc8c1de">shared::ModelWithProgramOptions</a>.</p>
+<p>Reimplemented in <a class="el" href="classshared_1_1ModelWithProgramOptions.html#a25ce114391f7b099d906ddb90d0b38c5">shared::ModelWithProgramOptions</a>.</p>
 
 <p>Definition at line <a class="el" href="Model_8cpp_source.html#l00160">160</a> of file <a class="el" href="Model_8cpp_source.html">Model.cpp</a>.</p>
 
@@ -1218,7 +1218,7 @@ Public Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

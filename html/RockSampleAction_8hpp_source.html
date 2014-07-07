@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/rocksample/RockSampleAction.hpp Source File</title>
+<title>TAPIR: src/problems/rocksample/RockSampleAction.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -112,7 +112,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    CHECK = 5</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;};</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">inline</span> std::ostream &amp;<a class="code" href="namespacesolver.html#ab380d1baf631d2b6e81729344c1b45d2">operator&lt;&lt;</a>(std::ostream &amp;os, ActionType <span class="keyword">const</span> actionType) {</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">inline</span> std::ostream &amp;<a class="code" href="GridPosition_8hpp.html#acfb102b5ba4a6673eda2aaaf458d0b46">operator&lt;&lt;</a>(std::ostream &amp;os, ActionType <span class="keyword">const</span> actionType) {</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keywordflow">switch</span> (actionType) {</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordflow">case</span> ActionType::CHECK:</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        os &lt;&lt; <span class="stringliteral">&quot;CHECK-&quot;</span>;</div>
@@ -168,14 +168,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1DiscretizedPoint_html"><div class="ttname"><a href="classsolver_1_1DiscretizedPoint.html">solver::DiscretizedPoint</a></div><div class="ttdoc">Represents a point within a discretized space. </div><div class="ttdef"><b>Definition:</b> <a href="DiscretizedPoint_8hpp_source.html#l00032">DiscretizedPoint.hpp:32</a></div></div>
 <div class="ttc" id="classrocksample_1_1RockSampleAction_html_acaad12422c1ae8aa8f8f810a97fdb128"><div class="ttname"><a href="classrocksample_1_1RockSampleAction.html#acaad12422c1ae8aa8f8f810a97fdb128">rocksample::RockSampleAction::copy</a></div><div class="ttdeci">std::unique_ptr&lt; solver::Action &gt; copy() const override</div><div class="ttdoc">You must provide a copy() method for any subclass. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleAction_8cpp_source.html#l00026">RockSampleAction.cpp:26</a></div></div>
 <div class="ttc" id="classsolver_1_1Point_html"><div class="ttname"><a href="classsolver_1_1Point.html">solver::Point</a></div><div class="ttdoc">Represents a point within a certain set, in the sense of point-set topology. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00030">Point.hpp:30</a></div></div>
-<div class="ttc" id="namespacesolver_html_ab380d1baf631d2b6e81729344c1b45d2"><div class="ttname"><a href="namespacesolver.html#ab380d1baf631d2b6e81729344c1b45d2">solver::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, HistoricalData const &amp;data)</div><div class="ttdoc">Uses the virtual print method to output HistoricalData to a stream. </div><div class="ttdef"><b>Definition:</b> <a href="HistoricalData_8hpp_source.html#l00037">HistoricalData.hpp:37</a></div></div>
 <div class="ttc" id="classrocksample_1_1RockSampleTextSerializer_html"><div class="ttname"><a href="classrocksample_1_1RockSampleTextSerializer.html">rocksample::RockSampleTextSerializer</a></div><div class="ttdef"><b>Definition:</b> <a href="RockSampleTextSerializer_8hpp_source.html#l00026">RockSampleTextSerializer.hpp:26</a></div></div>
+<div class="ttc" id="GridPosition_8hpp_html_acfb102b5ba4a6673eda2aaaf458d0b46"><div class="ttname"><a href="GridPosition_8hpp.html#acfb102b5ba4a6673eda2aaaf458d0b46">operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, GridPosition const &amp;obj)</div><div class="ttdoc">A handy insertion operator for printing grid positions. </div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00064">GridPosition.hpp:64</a></div></div>
 <div class="ttc" id="Action_8hpp_html"><div class="ttname"><a href="Action_8hpp.html">Action.hpp</a></div><div class="ttdoc">Defines the Action interface; currently this is the same as Point, so this is just a straight typedef...</div></div>
 <div class="ttc" id="classrocksample_1_1RockSampleAction_html_a79d9868a785278b5ca6d21ff89ddaad0"><div class="ttname"><a href="classrocksample_1_1RockSampleAction.html#a79d9868a785278b5ca6d21ff89ddaad0">rocksample::RockSampleAction::getBinNumber</a></div><div class="ttdeci">long getBinNumber() const override</div><div class="ttdoc">Returns the bin number associated with this point. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleAction_8cpp_source.html#l00041">RockSampleAction.cpp:41</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

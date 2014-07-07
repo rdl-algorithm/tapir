@@ -17,7 +17,7 @@
 #include "solver/abstract-problem/State.hpp"                    // for State
 #include "solver/abstract-problem/Observation.hpp"              // for Observation
 #include "solver/abstract-problem/TransitionParameters.hpp"
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "solver/belief-estimators/estimators.hpp"
 
@@ -157,7 +157,7 @@ void Model::drawSimulationState(BeliefNode const */*belief*/, State const &/*sta
 
 /* ---------------------- Basic customizations  ---------------------- */
 /** The default implementation simply returns zero. */
-Heuristic Model::getHeuristicFunction() {
+HeuristicFunction Model::getHeuristicFunction() {
     return [] (solver::HistoryEntry const *, solver::State const *,
             solver::HistoricalData const *) {
         return 0;
@@ -181,9 +181,9 @@ std::unique_ptr<HistoryCorrector> Model::createHistoryCorrector(Solver *solver) 
     return std::make_unique<DefaultHistoryCorrector>(solver, getHeuristicFunction());
 }
 
-std::unique_ptr<ObservationPool> Model::createObservationPool(Solver */*solver*/) {
+std::unique_ptr<ObservationPool> Model::createObservationPool(Solver *solver) {
     // Create a DiscreteObservationPool
-    return std::make_unique<DiscreteObservationPool>();
+    return std::make_unique<DiscreteObservationPool>(solver);
 }
 
 std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {

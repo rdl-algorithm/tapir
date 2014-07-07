@@ -11,7 +11,8 @@ _BIN_OUTPUT_$(n)  := $(BINDIR_$(n))/%
 # ----------------------------------------------------------------------
 TGTS_BUILD_$(n)       := $(patsubst %,$(_BIN_BUILD_$(n)),$(TARGET_NAMES_$(n)))
 TGTS_OUTPUT_$(n)      := $(patsubst %,$(_BIN_OUTPUT_$(n)),$(TARGET_NAMES_$(n)))
-OUTPUTS_TO_CLEAN_$(n) += $(TGTS_BUILD_$(n)) $(TGTS_OUTPUT_$(n))
+TGTS_SRCDIR_$(n)      := $(patsubst %,$(SRCDIR_$(n))/%,$(TARGET_NAMES_$(n)))
+OUTPUTS_TO_CLEAN_$(n) += $(TGTS_BUILD_$(n)) $(TGTS_OUTPUT_$(n)) $(TGTS_SRCDIR_$(n))
 
 OBJS_TGT_$(n)         := $(patsubst $(_BIN_BUILD_$(n)),$(_O_$(n)),$(TGTS_$(n)))
 OBJS_NTGT_$(n)        := $(filter-out $(OBJS_TGT_$(n)),$(OBJS_$(n)))
@@ -19,6 +20,7 @@ OBJS_NTGT_$(n)        := $(filter-out $(OBJS_TGT_$(n)),$(OBJS_$(n)))
 # Directory prerequsites
 $(TGTS_BUILD_$(n)): | $(OBJDIR_$(n))
 $(TGTS_OUTPUT_$(n)): | $(BINDIR_$(n))
+
 $(BINDIR_$(n)):
 	$(MKDIR_RECIPE)
 
@@ -48,7 +50,7 @@ LINKER_DEPS_$(n) := $(LIB_$(n)) $$(LIB_solver)
 
 LINKER_ARGS_$(n) += $(LIB_$(n))
 ifeq ($(CFG),shared)
-LINKER_ARGS_$(n) += -Lbuilds/shared -Wl;-rpath=$(ABS_ROOT)/builds/shared -labt
+LINKER_ARGS_$(n) += -Lbuilds/shared -Wl;-rpath=$(ABS_ROOT)/builds/shared -ltapir
 else
 LINKER_ARGS_$(n) += $$(LIB_solver)
 endif
@@ -66,8 +68,11 @@ endef
 $(eval $(problem_build_template))
 
 # Executables will be copied to the "bin" folder for convenience
-build-$(n): $(TGTS_OUTPUT_$(n))
+build-$(n): $(TGTS_OUTPUT_$(n)) $(TGTS_SRCDIR_$(n))
 
-.PHONY: $(TGTS_OUTPUT_$(n))
+.PHONY: $(TGTS_OUTPUT_$(n)) $(TGTS_SRCDIR_$(n))
 $(TGTS_OUTPUT_$(n)): $(_BIN_OUTPUT_$(n)): $(_BIN_BUILD_$(n))
+	cp $< $@
+
+$(TGTS_SRCDIR_$(n)): $(SRCDIR_$(n))/%: $(_BIN_BUILD_$(n))
 	cp $< $@

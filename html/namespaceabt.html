@@ -104,6 +104,12 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a93a110c92f7e67377d779750ce4bf363"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceabt.html#a93a110c92f7e67377d779750ce4bf363">get_current_directory</a> ()</td></tr>
+<tr class="memdesc:a93a110c92f7e67377d779750ce4bf363"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function to return the current working directory.  <a href="#a93a110c92f7e67377d779750ce4bf363">More...</a><br/></td></tr>
+<tr class="separator:a93a110c92f7e67377d779750ce4bf363"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c3b782da4d2ca71698cacbd07b00d90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceabt.html#a8c3b782da4d2ca71698cacbd07b00d90">change_directory</a> (std::string &amp;dir)</td></tr>
+<tr class="memdesc:a8c3b782da4d2ca71698cacbd07b00d90"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function to change the current working directory.  <a href="#a8c3b782da4d2ca71698cacbd07b00d90">More...</a><br/></td></tr>
+<tr class="separator:a8c3b782da4d2ca71698cacbd07b00d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6118b840f6a387c7d3861c251b769c13"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">clock_ms</a> ()</td></tr>
 <tr class="memdesc:a6118b840f6a387c7d3861c251b769c13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the time (in ms) since the program started running.  <a href="#a6118b840f6a387c7d3861c251b769c13">More...</a><br/></td></tr>
 <tr class="separator:a6118b840f6a387c7d3861c251b769c13"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -123,6 +129,26 @@ template&lt;class T &gt; </td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A global utility namespace; holds some global functions that are used throughout the ABT code, as well as some basic data structures. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a8c3b782da4d2ca71698cacbd07b00d90"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void abt::change_directory </td>
+          <td>(</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>dir</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A function to change the current working directory. </p>
+
+<p>Definition at line <a class="el" href="global_8cpp_source.html#l00024">24</a> of file <a class="el" href="global_8cpp_source.html">global.cpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a6118b840f6a387c7d3861c251b769c13"></a>
 <div class="memitem">
 <div class="memproto">
@@ -146,7 +172,26 @@ template&lt;class T &gt; </td></tr>
 
 <p>Returns the time (in ms) since the program started running. </p>
 
-<p>Definition at line <a class="el" href="global_8hpp_source.html#l00033">33</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
+<p>Definition at line <a class="el" href="global_8hpp_source.html#l00040">40</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a93a110c92f7e67377d779750ce4bf363"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string abt::get_current_directory </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A function to return the current working directory. </p>
+
+<p>Definition at line <a class="el" href="global_8cpp_source.html#l00013">13</a> of file <a class="el" href="global_8cpp_source.html">global.cpp</a>.</p>
 
 </div>
 </div>
@@ -208,7 +253,7 @@ template&lt;class T &gt; </td></tr>
 
 <p>A method to print a floating point value, with various options. </p>
 
-<p>Definition at line <a class="el" href="global_8hpp_source.html#l00073">73</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
+<p>Definition at line <a class="el" href="global_8hpp_source.html#l00080">80</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
 
 </div>
 </div>
@@ -252,14 +297,14 @@ template&lt;typename T &gt; </div>
 
 <p>A simple method to print a value with a fixed width. </p>
 
-<p>Definition at line <a class="el" href="global_8hpp_source.html#l00063">63</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
+<p>Definition at line <a class="el" href="global_8hpp_source.html#l00070">70</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 6 2014 21:54:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

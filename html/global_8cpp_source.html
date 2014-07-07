@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/global.cpp Source File</title>
+<title>TAPIR: src/global.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -98,26 +98,51 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="Point_8hpp.html">solver/abstract-problem/Point.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
-<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="namespacedebug.html">   12</a></span>&#160;<span class="keyword">namespace </span>debug {</div>
-<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">   13</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">show_message</a>(std::string message, <span class="keywordtype">bool</span> print, <span class="keywordtype">bool</span> bp_branch) {</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    <span class="keywordflow">if</span> (print) {</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        std::cerr &lt;&lt; message &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    }</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    <span class="keywordflow">if</span> (bp_branch) {</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;        std::cerr &lt;&lt; <span class="stringliteral">&quot;&quot;</span>;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    }</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;}</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">template</span> std::string to_string&lt;solver::Point &amp;&gt;(<a class="code" href="classsolver_1_1Point.html">solver::Point</a> &amp;);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;} <span class="comment">/* namespace debug */</span></div>
-<div class="ttc" id="namespacedebug_html_a4d94f34283096cd9981f709dd2429f3c"><div class="ttname"><a href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">debug::show_message</a></div><div class="ttdeci">void show_message(std::string message, bool print, bool bp_branch)</div><div class="ttdoc">Global debug method to display an error / warning message. </div><div class="ttdef"><b>Definition:</b> <a href="global_8cpp_source.html#l00013">global.cpp:13</a></div></div>
+<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="namespacetapir.html">   12</a></span>&#160;<span class="keyword">namespace </span>tapir {</div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="namespacetapir.html#af3403f75e03ee19c633e6d97de8a0e33">   13</a></span>&#160;std::string <a class="code" href="namespacetapir.html#af3403f75e03ee19c633e6d97de8a0e33">get_current_directory</a>() {</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    <span class="keywordtype">char</span> *buffer = getcwd(<span class="keyword">nullptr</span>, 0);</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keywordflow">if</span> (buffer == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        <a class="code" href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">debug::show_message</a>(<span class="stringliteral">&quot;ERROR: Failed to get current path.&quot;</span>);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        std::exit(4);</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    }</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    std::string dir(buffer);</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    free(buffer);</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="keywordflow">return</span> dir;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;}</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4">   24</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4">change_directory</a>(std::string &amp;dir) {</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordflow">if</span> (chdir(dir.c_str())) {</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        std::ostringstream oss;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        oss &lt;&lt; <span class="stringliteral">&quot;ERROR: Failed to change path to &quot;</span> &lt;&lt; dir;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        <a class="code" href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">debug::show_message</a>(oss.str());</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        std::exit(3);</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    }</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;}</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;} <span class="comment">/* namespace tapir */</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="namespacedebug.html">   35</a></span>&#160;<span class="keyword">namespace </span>debug {</div>
+<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">   36</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">show_message</a>(std::string message, <span class="keywordtype">bool</span> print, <span class="keywordtype">bool</span> bp_branch) {</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordflow">if</span> (print) {</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        std::cerr &lt;&lt; message &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    }</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordflow">if</span> (bp_branch) {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        std::cerr &lt;&lt; <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    }</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">template</span> std::string to_string&lt;solver::Point &amp;&gt;(<a class="code" href="classsolver_1_1Point.html">solver::Point</a> &amp;);</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;} <span class="comment">/* namespace debug */</span></div>
+<div class="ttc" id="namespacetapir_html_af3403f75e03ee19c633e6d97de8a0e33"><div class="ttname"><a href="namespacetapir.html#af3403f75e03ee19c633e6d97de8a0e33">tapir::get_current_directory</a></div><div class="ttdeci">std::string get_current_directory()</div><div class="ttdoc">A function to return the current working directory. </div><div class="ttdef"><b>Definition:</b> <a href="global_8cpp_source.html#l00013">global.cpp:13</a></div></div>
+<div class="ttc" id="namespacedebug_html_a4d94f34283096cd9981f709dd2429f3c"><div class="ttname"><a href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">debug::show_message</a></div><div class="ttdeci">void show_message(std::string message, bool print, bool bp_branch)</div><div class="ttdoc">Global debug method to display an error / warning message. </div><div class="ttdef"><b>Definition:</b> <a href="global_8cpp_source.html#l00036">global.cpp:36</a></div></div>
 <div class="ttc" id="Point_8hpp_html"><div class="ttname"><a href="Point_8hpp.html">Point.hpp</a></div><div class="ttdoc">Defines the abstract Point class. </div></div>
 <div class="ttc" id="classsolver_1_1Point_html"><div class="ttname"><a href="classsolver_1_1Point.html">solver::Point</a></div><div class="ttdoc">Represents a point within a certain set, in the sense of point-set topology. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00030">Point.hpp:30</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
+<div class="ttc" id="namespacetapir_html_a342dfa979e553c4cff9846ee6da861d4"><div class="ttname"><a href="namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4">tapir::change_directory</a></div><div class="ttdeci">void change_directory(std::string &amp;dir)</div><div class="ttdoc">A function to change the current working directory. </div><div class="ttdef"><b>Definition:</b> <a href="global_8cpp_source.html#l00024">global.cpp:24</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

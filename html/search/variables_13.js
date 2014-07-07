@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['weight',['weight',['../structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#a76987419152d708988b77ec78f1723db',1,'solver::MultipleStrategiesExp3::StrategyInfo']]]
+  ['visitcount_5f',['visitCount_',['../classsolver_1_1DiscretizedActionMapEntry.html#ad09933be7208e8d93378413431e073c2',1,'solver::DiscretizedActionMapEntry']]]
 ];

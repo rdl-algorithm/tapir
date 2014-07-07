@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::ObservationMapping Class Reference</title>
+<title>TAPIR: solver::ObservationMapping Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -131,6 +131,14 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <tr class="memitem:ac825fe1c22bc548fc0d01ea32e1960a7"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ObservationMapping.html#ac825fe1c22bc548fc0d01ea32e1960a7">getNChildren</a> () const =0</td></tr>
 <tr class="memdesc:ac825fe1c22bc548fc0d01ea32e1960a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of child nodes associated with this mapping.  <a href="#ac825fe1c22bc548fc0d01ea32e1960a7">More...</a><br/></td></tr>
 <tr class="separator:ac825fe1c22bc548fc0d01ea32e1960a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a016671bb9c29519a9d10e7cf26d84448"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ObservationMapping.html#a016671bb9c29519a9d10e7cf26d84448">deleteChild</a> (<a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *entry)=0</td></tr>
+<tr class="memdesc:a016671bb9c29519a9d10e7cf26d84448"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes the given entry from this mapping, as well as the entire corresponding subtree.  <a href="#a016671bb9c29519a9d10e7cf26d84448">More...</a><br/></td></tr>
+<tr class="separator:a016671bb9c29519a9d10e7cf26d84448"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5eec48f29a7394969338f2c23d9a1b72"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
+&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
+const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ObservationMapping.html#a5eec48f29a7394969338f2c23d9a1b72">getChildEntries</a> () const =0</td></tr>
+<tr class="memdesc:a5eec48f29a7394969338f2c23d9a1b72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all the entries in this mapping that have an associated child node.  <a href="#a5eec48f29a7394969338f2c23d9a1b72">More...</a><br/></td></tr>
+<tr class="separator:a5eec48f29a7394969338f2c23d9a1b72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59708551552e4576105d2b9678537f65"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ObservationMapping.html#a59708551552e4576105d2b9678537f65">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs)=0</td></tr>
 <tr class="memdesc:a59708551552e4576105d2b9678537f65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#a59708551552e4576105d2b9678537f65">More...</a><br/></td></tr>
 <tr class="separator:a59708551552e4576105d2b9678537f65"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,12 +146,6 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ObservationMapping.html#a1b3ca0a99269d6aa16060c2764275de0">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) const =0</td></tr>
 <tr class="memdesc:a1b3ca0a99269d6aa16060c2764275de0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#a1b3ca0a99269d6aa16060c2764275de0">More...</a><br/></td></tr>
 <tr class="separator:a1b3ca0a99269d6aa16060c2764275de0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd48ac37feef109262bf23f3677f58ce"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd48ac37feef109262bf23f3677f58ce"></a>
-virtual std::vector<br class="typebreak"/>
-&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
-const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ObservationMapping.html#acd48ac37feef109262bf23f3677f58ce">getAllEntries</a> () const =0</td></tr>
-<tr class="memdesc:acd48ac37feef109262bf23f3677f58ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all entries in this mapping - but only those that have an associated child node. <br/></td></tr>
-<tr class="separator:acd48ac37feef109262bf23f3677f58ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf34fb3eaad12ff31182c42352431124"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ObservationMapping.html#adf34fb3eaad12ff31182c42352431124">getTotalVisitCount</a> () const =0</td></tr>
 <tr class="memdesc:adf34fb3eaad12ff31182c42352431124"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the total visit count among all observations.  <a href="#adf34fb3eaad12ff31182c42352431124">More...</a><br/></td></tr>
 <tr class="separator:adf34fb3eaad12ff31182c42352431124"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -183,6 +185,61 @@ const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a016671bb9c29519a9d10e7cf26d84448"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void solver::ObservationMapping::deleteChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td>
+          <td class="paramname"><em>entry</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deletes the given entry from this mapping, as well as the entire corresponding subtree. </p>
+
+<p>Implemented in <a class="el" href="classsolver_1_1ApproximateObservationMap.html#abe18be127c90da325635c4c4a7a4b824">solver::ApproximateObservationMap</a>, <a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a1323888c43e10f0f1ed6dedc9ee62112">solver::EnumeratedObservationMap</a>, and <a class="el" href="classsolver_1_1DiscreteObservationMap.html#aeb07201cefc26856d5ab8ee51ad779b9">solver::DiscreteObservationMap</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a5eec48f29a7394969338f2c23d9a1b72"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::vector&lt;<a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&gt; solver::ObservationMapping::getChildEntries </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a vector of all the entries in this mapping that have an associated child node. </p>
+
+<p>Implemented in <a class="el" href="classsolver_1_1ApproximateObservationMap.html#aa465159f900af77eba5b897088fcacd8">solver::ApproximateObservationMap</a>, <a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a43aee06e95fd2e4acad65655a7409925">solver::EnumeratedObservationMap</a>, and <a class="el" href="classsolver_1_1DiscreteObservationMap.html#a79e1f1c1f57a75ffaad625ee1336395b">solver::DiscreteObservationMap</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a59708551552e4576105d2b9678537f65"></a>
 <div class="memitem">
 <div class="memproto">
@@ -326,7 +383,7 @@ const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

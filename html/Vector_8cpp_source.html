@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/abstract-problem/Vector.cpp Source File</title>
+<title>TAPIR: src/solver/abstract-problem/Vector.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -135,7 +135,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    std::size_t hashValue = 0;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keywordflow">for</span> (std::vector&lt;double&gt;::iterator i1 = v1.begin(); i1 &lt; v1.end(); i1++) {</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <a class="code" href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a>(hashValue, *i1);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <a class="code" href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a>(hashValue, *i1);</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    }</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">return</span> hashValue;</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
@@ -157,18 +157,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;} <span class="comment">/* namespace solver */</span></div>
 <div class="ttc" id="classsolver_1_1Vector_html_aa73f5d5a69549ce3e3f4bfd44e71b96c"><div class="ttname"><a href="classsolver_1_1Vector.html#aa73f5d5a69549ce3e3f4bfd44e71b96c">solver::Vector::equals</a></div><div class="ttdeci">virtual bool equals(Point const &amp;otherPoint) const override</div><div class="ttdoc">Returns true iff this point is equal to the the given point. </div><div class="ttdef"><b>Definition:</b> <a href="Vector_8cpp_source.html#l00030">Vector.cpp:30</a></div></div>
 <div class="ttc" id="classsolver_1_1Vector_html_a409a4c0eabf2adf6b0c9ec2bc017349b"><div class="ttname"><a href="classsolver_1_1Vector.html#a409a4c0eabf2adf6b0c9ec2bc017349b">solver::Vector::print</a></div><div class="ttdeci">virtual void print(std::ostream &amp;os) const override</div><div class="ttdoc">Prints this point in a human-readable way [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="Vector_8cpp_source.html#l00056">Vector.cpp:56</a></div></div>
+<div class="ttc" id="namespacetapir_html_a2f4b2c3f812d016297bf0adf85c21008"><div class="ttname"><a href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a></div><div class="ttdeci">void hash_combine(std::size_t &amp;seed, T const &amp;v)</div><div class="ttdoc">A template method to combine hash values - from boost::hash_combine. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00046">global.hpp:46</a></div></div>
 <div class="ttc" id="classsolver_1_1Point_html"><div class="ttname"><a href="classsolver_1_1Point.html">solver::Point</a></div><div class="ttdoc">Represents a point within a certain set, in the sense of point-set topology. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00030">Point.hpp:30</a></div></div>
 <div class="ttc" id="classsolver_1_1Vector_html"><div class="ttname"><a href="classsolver_1_1Vector.html">solver::Vector</a></div><div class="ttdoc">An abstract class for states that can easily be represented as real vectors. </div><div class="ttdef"><b>Definition:</b> <a href="Vector_8hpp_source.html#l00029">Vector.hpp:29</a></div></div>
 <div class="ttc" id="classsolver_1_1Vector_html_a66a51dedfc2032726c9eb37c0bdbd0a0"><div class="ttname"><a href="classsolver_1_1Vector.html#a66a51dedfc2032726c9eb37c0bdbd0a0">solver::Vector::asVector</a></div><div class="ttdeci">virtual std::vector&lt; double &gt; asVector() const =0</div><div class="ttdoc">Returns this vector in the form of an std::vector&lt;double&gt;. </div></div>
 <div class="ttc" id="classsolver_1_1Vector_html_aaa3e70435ded46d9e51d9c4bd7ecf03d"><div class="ttname"><a href="classsolver_1_1Vector.html#aaa3e70435ded46d9e51d9c4bd7ecf03d">solver::Vector::hash</a></div><div class="ttdeci">virtual std::size_t hash() const override</div><div class="ttdoc">Returns a hash value for this point - should be consistent with equals() </div><div class="ttdef"><b>Definition:</b> <a href="Vector_8cpp_source.html#l00045">Vector.cpp:45</a></div></div>
-<div class="ttc" id="namespaceabt_html_a4bbe799c215ab038b99345ab8a1367c1"><div class="ttname"><a href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a></div><div class="ttdeci">void hash_combine(std::size_t &amp;seed, T const &amp;v)</div><div class="ttdoc">A template method to combine hash values - from boost::hash_combine. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00039">global.hpp:39</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
 <div class="ttc" id="Vector_8hpp_html"><div class="ttname"><a href="Vector_8hpp.html">Vector.hpp</a></div><div class="ttdoc">An abstract extension of the Point class for points that can be easily be represented as real vectors...</div></div>
 <div class="ttc" id="classsolver_1_1Vector_html_a4eb89655aa5661937f9523f518672e72"><div class="ttname"><a href="classsolver_1_1Vector.html#a4eb89655aa5661937f9523f518672e72">solver::Vector::distanceTo</a></div><div class="ttdeci">virtual double distanceTo(Point const &amp;otherPoint) const override</div><div class="ttdoc">Returns the distance from this point to the given point [optional]. </div><div class="ttdef"><b>Definition:</b> <a href="Vector_8cpp_source.html#l00017">Vector.cpp:17</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

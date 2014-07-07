@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/tag/TagMdpSolver.cpp Source File</title>
+<title>TAPIR: src/problems/tag/TagMdpSolver.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -99,9 +99,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="global_8hpp.html">global.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;problems/shared/parsers.hpp&quot;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;problems/shared/policy_iteration.hpp&quot;</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="Heuristic_8hpp.html">solver/abstract-problem/heuristics/Heuristic.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="parsers_8hpp.html">problems/shared/parsers.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="policy__iteration_8hpp.html">problems/shared/policy_iteration.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="HeuristicFunction_8hpp.html">solver/abstract-problem/heuristics/HeuristicFunction.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;TagModel.hpp&quot;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;TagState.hpp&quot;</span></div>
@@ -137,7 +137,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="comment">// An initial policy</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    mdp::Policy policy;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <a class="code" href="namespacemdp.html#a0db428ee8ecc3a44d03d2a61991d7c15">mdp::Policy</a> policy;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="comment">// Enumerated vector of all states.</span></div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    std::vector&lt;TagState&gt; allStates;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="comment">// Mapping from each state to its assigned index.</span></div>
@@ -244,7 +244,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;            allStates.size() + 1, allActions.size(),</div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            possibleNextStates, transitionProbability, reward);</div>
 <div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    iterator.fixValue(allStates.size(), 0.0);</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    iterator.<a class="code" href="classmdp_1_1PolicyIterator.html#ac20821d48c53b7fe5102a5f0c6bf2f9d">fixValue</a>(allStates.size(), 0.0);</div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    <span class="keywordtype">long</span> numSteps = iterator.solve();</div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    std::vector&lt;double&gt; stateValues = iterator.getCurrentValues();</div>
@@ -280,7 +280,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;        model_(model) {</div>
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;}</div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;</div>
-<div class="line"><a name="l00191"></a><span class="lineno"><a class="line" href="classtag_1_1TagMdpParser.html#af0f473e66cd4bc0a8193e40f5cc7e66e">  191</a></span>&#160;<a class="code" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a> <a class="code" href="classtag_1_1TagMdpParser.html#af0f473e66cd4bc0a8193e40f5cc7e66e">TagMdpParser::parse</a>(<a class="code" href="classsolver_1_1Solver.html">solver::Solver</a> *<span class="comment">/*solver*/</span>,</div>
+<div class="line"><a name="l00191"></a><span class="lineno"><a class="line" href="classtag_1_1TagMdpParser.html#a8d89b984005a6af9b2fbd665eae28394">  191</a></span>&#160;<a class="code" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a> <a class="code" href="classtag_1_1TagMdpParser.html#a8d89b984005a6af9b2fbd665eae28394">TagMdpParser::parse</a>(<a class="code" href="classsolver_1_1Solver.html">solver::Solver</a> *<span class="comment">/*solver*/</span>,</div>
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        std::vector&lt;std::string&gt; <span class="comment">/*args*/</span>) {</div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    <span class="keywordflow">if</span> (model_-&gt;<a class="code" href="classtag_1_1TagModel.html#a0d602d814bd050bad1821db8168b0627">getMdpSolver</a>() == <span class="keyword">nullptr</span>) {</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        model_-&gt;<a class="code" href="classtag_1_1TagModel.html#acf4d936b36bbeee915951ddacbd606d2">makeMdpSolver</a>();</div>
@@ -294,27 +294,31 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;} <span class="comment">/* namespace tag */</span></div>
 <div class="ttc" id="classtag_1_1TagModel_html"><div class="ttname"><a href="classtag_1_1TagModel.html">tag::TagModel</a></div><div class="ttdef"><b>Definition:</b> <a href="TagModel_8hpp_source.html#l00056">TagModel.hpp:56</a></div></div>
 <div class="ttc" id="classsolver_1_1HistoryEntry_html"><div class="ttname"><a href="classsolver_1_1HistoryEntry.html">solver::HistoryEntry</a></div><div class="ttdoc">Represents a single entry in a sequence. </div><div class="ttdef"><b>Definition:</b> <a href="HistoryEntry_8hpp_source.html#l00047">HistoryEntry.hpp:47</a></div></div>
-<div class="ttc" id="classtag_1_1TagMdpParser_html_af0f473e66cd4bc0a8193e40f5cc7e66e"><div class="ttname"><a href="classtag_1_1TagMdpParser.html#af0f473e66cd4bc0a8193e40f5cc7e66e">tag::TagMdpParser::parse</a></div><div class="ttdeci">virtual solver::Heuristic parse(solver::Solver *solver, std::vector&lt; std::string &gt; args)</div><div class="ttdoc">Creates a new strategy from a vector of strings representing its arguments. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00191">TagMdpSolver.cpp:191</a></div></div>
+<div class="ttc" id="classmdp_1_1PolicyIterator_html_ac20821d48c53b7fe5102a5f0c6bf2f9d"><div class="ttname"><a href="classmdp_1_1PolicyIterator.html#ac20821d48c53b7fe5102a5f0c6bf2f9d">mdp::PolicyIterator::fixValue</a></div><div class="ttdeci">void fixValue(State state, double value)</div><div class="ttdoc">Sets the value of the given state as a fixed quantity - this is used to set reward values for termina...</div><div class="ttdef"><b>Definition:</b> <a href="policy__iteration_8cpp_source.html#l00027">policy_iteration.cpp:27</a></div></div>
 <div class="ttc" id="structsolver_1_1Options_html_a3c9e50bb47ebb7ccb8b715544432e875"><div class="ttname"><a href="structsolver_1_1Options.html#a3c9e50bb47ebb7ccb8b715544432e875">solver::Options::discountFactor</a></div><div class="ttdeci">double discountFactor</div><div class="ttdoc">The discount factor of the PODMP. </div><div class="ttdef"><b>Definition:</b> <a href="Options_8hpp_source.html#l00037">Options.hpp:37</a></div></div>
+<div class="ttc" id="parsers_8hpp_html"><div class="ttname"><a href="parsers_8hpp.html">parsers.hpp</a></div><div class="ttdoc">Provides some convenient functionality for parsing heuristics, search strategies and estimators for b...</div></div>
 <div class="ttc" id="classsolver_1_1Point_html"><div class="ttname"><a href="classsolver_1_1Point.html">solver::Point</a></div><div class="ttdoc">Represents a point within a certain set, in the sense of point-set topology. </div><div class="ttdef"><b>Definition:</b> <a href="Point_8hpp_source.html#l00030">Point.hpp:30</a></div></div>
 <div class="ttc" id="classtag_1_1TagModel_html_a0d602d814bd050bad1821db8168b0627"><div class="ttname"><a href="classtag_1_1TagModel.html#a0d602d814bd050bad1821db8168b0627">tag::TagModel::getMdpSolver</a></div><div class="ttdeci">TagMdpSolver * getMdpSolver()</div><div class="ttdoc">Returns the MDP solver for this model. </div><div class="ttdef"><b>Definition:</b> <a href="TagModel_8hpp_source.html#l00088">TagModel.hpp:88</a></div></div>
-<div class="ttc" id="classmdp_1_1PolicyIterator_html"><div class="ttname"><a href="classmdp_1_1PolicyIterator.html">mdp::PolicyIterator</a></div><div class="ttdef"><b>Definition:</b> <a href="policy__iteration_8hpp_source.html#l00017">policy_iteration.hpp:17</a></div></div>
+<div class="ttc" id="classmdp_1_1PolicyIterator_html"><div class="ttname"><a href="classmdp_1_1PolicyIterator.html">mdp::PolicyIterator</a></div><div class="ttdoc">A class to handle basic MDP policy iteration. </div><div class="ttdef"><b>Definition:</b> <a href="policy__iteration_8hpp_source.html#l00031">policy_iteration.hpp:31</a></div></div>
+<div class="ttc" id="HeuristicFunction_8hpp_html"><div class="ttname"><a href="HeuristicFunction_8hpp.html">HeuristicFunction.hpp</a></div><div class="ttdoc">Contains a typedef for the &quot;HeuristicFunction&quot; type, which is represented via a function that takes p...</div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html">tag::TagMdpSolver</a></div><div class="ttdoc">Solves an MDP version of Tag. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8hpp_source.html#l00020">TagMdpSolver.hpp:20</a></div></div>
+<div class="ttc" id="classtag_1_1TagMdpParser_html_a8d89b984005a6af9b2fbd665eae28394"><div class="ttname"><a href="classtag_1_1TagMdpParser.html#a8d89b984005a6af9b2fbd665eae28394">tag::TagMdpParser::parse</a></div><div class="ttdeci">virtual solver::HeuristicFunction parse(solver::Solver *solver, std::vector&lt; std::string &gt; args)</div><div class="ttdoc">Creates a new strategy from a vector of arguments (as strings). </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00191">TagMdpSolver.cpp:191</a></div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html_a1831bbe43ec5c3cf09e778c2d7084933"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html#a1831bbe43ec5c3cf09e778c2d7084933">tag::TagMdpSolver::solve</a></div><div class="ttdeci">void solve()</div><div class="ttdoc">Solves the MDP. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00024">TagMdpSolver.cpp:24</a></div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html_a83092f178fcd9c905a6ea15d7a6cb34e"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html#a83092f178fcd9c905a6ea15d7a6cb34e">tag::TagMdpSolver::getQValue</a></div><div class="ttdeci">double getQValue(TagState const &amp;state) const </div><div class="ttdoc">Calculates the exact value for the given state. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00170">TagMdpSolver.cpp:170</a></div></div>
-<div class="ttc" id="structsolver_1_1Options_html_a452f875a60416233ea0d05b43cdb3333"><div class="ttname"><a href="structsolver_1_1Options.html#a452f875a60416233ea0d05b43cdb3333">solver::Options::hasVerboseOutput</a></div><div class="ttdeci">bool hasVerboseOutput</div><div class="ttdoc">True iff verbose output is enabled. </div><div class="ttdef"><b>Definition:</b> <a href="Options_8hpp_source.html#l00053">Options.hpp:53</a></div></div>
+<div class="ttc" id="namespacemdp_html_a0db428ee8ecc3a44d03d2a61991d7c15"><div class="ttname"><a href="namespacemdp.html#a0db428ee8ecc3a44d03d2a61991d7c15">mdp::Policy</a></div><div class="ttdeci">std::vector&lt; Action &gt; Policy</div><div class="ttdoc">A policy is represented as a vector, where the state is an index into the vector, and the action for ...</div><div class="ttdef"><b>Definition:</b> <a href="policy__iteration_8hpp_source.html#l00028">policy_iteration.hpp:28</a></div></div>
+<div class="ttc" id="structsolver_1_1Options_html_a452f875a60416233ea0d05b43cdb3333"><div class="ttname"><a href="structsolver_1_1Options.html#a452f875a60416233ea0d05b43cdb3333">solver::Options::hasVerboseOutput</a></div><div class="ttdeci">bool hasVerboseOutput</div><div class="ttdoc">True iff verbose output is enabled. </div><div class="ttdef"><b>Definition:</b> <a href="Options_8hpp_source.html#l00055">Options.hpp:55</a></div></div>
 <div class="ttc" id="classtag_1_1TagState_html"><div class="ttname"><a href="classtag_1_1TagState.html">tag::TagState</a></div><div class="ttdef"><b>Definition:</b> <a href="TagState_8hpp_source.html#l00015">TagState.hpp:15</a></div></div>
 <div class="ttc" id="classsolver_1_1Solver_html"><div class="ttname"><a href="classsolver_1_1Solver.html">solver::Solver</a></div><div class="ttdoc">The core class of the ABT algorithm. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8hpp_source.html#l00065">Solver.hpp:65</a></div></div>
-<div class="ttc" id="namespacesolver_html_ab9e1b50ecb46556312c91f9349be3966"><div class="ttname"><a href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a></div><div class="ttdeci">std::function&lt; double(HistoryEntry const *, State const *, HistoricalData const *)&gt; Heuristic</div><div class="ttdoc">A typedef for the Heuristic type. </div><div class="ttdef"><b>Definition:</b> <a href="Heuristic_8hpp_source.html#l00017">Heuristic.hpp:17</a></div></div>
-<div class="ttc" id="structGridPosition_html"><div class="ttname"><a href="structGridPosition.html">GridPosition</a></div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00011">GridPosition.hpp:11</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
-<div class="ttc" id="Heuristic_8hpp_html"><div class="ttname"><a href="Heuristic_8hpp.html">Heuristic.hpp</a></div><div class="ttdoc">Contains a typedef for the &quot;Heuristic&quot; type, which is represented via a function that takes pointers ...</div></div>
+<div class="ttc" id="structGridPosition_html"><div class="ttname"><a href="structGridPosition.html">GridPosition</a></div><div class="ttdoc">Represents a position within a 2-D grid, using a zero-based row and column index. ...</div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00021">GridPosition.hpp:21</a></div></div>
+<div class="ttc" id="namespacesolver_html_a2652743b2b118d001615cc27ed0ce636"><div class="ttname"><a href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a></div><div class="ttdeci">std::function&lt; double(HistoryEntry const *, State const *, HistoricalData const *)&gt; HeuristicFunction</div><div class="ttdoc">A typedef for the HeuristicFunction type. </div><div class="ttdef"><b>Definition:</b> <a href="HeuristicFunction_8hpp_source.html#l00017">HeuristicFunction.hpp:17</a></div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
+<div class="ttc" id="policy__iteration_8hpp_html"><div class="ttname"><a href="policy__iteration_8hpp.html">policy_iteration.hpp</a></div><div class="ttdoc">Contains the PolicyIterator class, which provides a basic implementation of MDP policy iteration; the...</div></div>
 <div class="ttc" id="classtag_1_1TagModel_html_acf4d936b36bbeee915951ddacbd606d2"><div class="ttname"><a href="classtag_1_1TagModel.html#acf4d936b36bbeee915951ddacbd606d2">tag::TagModel::makeMdpSolver</a></div><div class="ttdeci">void makeMdpSolver()</div><div class="ttdoc">Sets up the MDP solver for this model. </div><div class="ttdef"><b>Definition:</b> <a href="TagModel_8hpp_source.html#l00083">TagModel.hpp:83</a></div></div>
 <div class="ttc" id="classsolver_1_1HistoricalData_html"><div class="ttname"><a href="classsolver_1_1HistoricalData.html">solver::HistoricalData</a></div><div class="ttdoc">An abstract base class for history-based heuristic info; each HistoricalData will be owned by a singl...</div><div class="ttdef"><b>Definition:</b> <a href="HistoricalData_8hpp_source.html#l00021">HistoricalData.hpp:21</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

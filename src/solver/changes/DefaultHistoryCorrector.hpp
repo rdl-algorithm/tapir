@@ -8,7 +8,7 @@
 
 #include "solver/changes/HistoryCorrector.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 namespace solver {
 class HistorySequence;
@@ -23,7 +23,7 @@ public:
      * The given heuristic will be used to estimate the value at the end of any sequence that
      * ends with a non-terminal state.
      */
-    DefaultHistoryCorrector(Solver *solver, Heuristic heuristic);
+    DefaultHistoryCorrector(Solver *solver, HeuristicFunction heuristic);
     virtual ~DefaultHistoryCorrector() = default;
     _NO_COPY_OR_MOVE(DefaultHistoryCorrector);
 
@@ -32,7 +32,7 @@ public:
      */
     virtual bool reviseSequence(HistorySequence *sequence) override;
 private:
-    Heuristic heuristic_;
+    HeuristicFunction heuristic_;
 };
 
 } /* namespace solver */

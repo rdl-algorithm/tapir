@@ -29,6 +29,7 @@ std::vector<long> LegalActionsPool::createBinSequence(solver::BeliefNode *node) 
 
 std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping(
         solver::BeliefNode *node) {
+    return std::make_unique<LegalActionsMap>(node, this, createBinSequence(node));
     std::unique_ptr<solver::ActionMapping> mapping = (
           DiscretizedActionPool::createActionMapping(node));
 
@@ -45,6 +46,10 @@ void LegalActionsPool::addMapping(GridPosition position, solver::DiscretizedActi
     mappings_[position].insert(map);
 }
 
+void LegalActionsPool::removeMapping(GridPosition position, solver::DiscretizedActionMap *map) {
+    mappings_[position].erase(mappings_[position].find(map));
+}
+
 void LegalActionsPool::setLegal(bool isLegal, GridPosition position,
         RockSampleAction const &action, solver::Solver *solver) {
     for (solver::DiscretizedActionMap *discMap : mappings_[position]) {
@@ -55,16 +60,26 @@ void LegalActionsPool::setLegal(bool isLegal, GridPosition position,
     }
 }
 
+/* ------------------- LegalActionsMap ------------------- */
+LegalActionsMap::LegalActionsMap(solver::BeliefNode *owner, LegalActionsPool *pool,
+        std::vector<long> binSequence) :
+        solver::DiscretizedActionMap(owner, pool, binSequence) {
+    PositionData const &data = static_cast<PositionData const &>(*owner->getHistoricalData());
+    pool->addMapping(data.getPosition(), this);
+}
+
+LegalActionsMap::~LegalActionsMap() {
+    PositionData const &data = static_cast<PositionData const &>(*getOwner()->getHistoricalData());
+    static_cast<LegalActionsPool &>(*pool_).removeMapping(data.getPosition(), this);
+}
+
 /* ------------------- LegalActionsPoolTextSerializer ------------------- */
 std::unique_ptr<solver::ActionMapping>
 LegalActionsPoolTextSerializer::loadActionMapping(solver::BeliefNode *owner, std::istream &is) {
-    std::unique_ptr<solver::ActionMapping> mapping = (
-            DiscretizedActionTextSerializer::loadActionMapping(owner, is));
-    solver::DiscretizedActionMap *map = static_cast<solver::DiscretizedActionMap *>(mapping.get());
-    LegalActionsPool &pool = static_cast<LegalActionsPool &>(*getSolver()->getActionPool());
-    GridPosition position = static_cast<PositionData &>(*owner->getHistoricalData()).getPosition();
-    pool.addMapping(position, map);
-
-    return std::move(mapping);
+    std::unique_ptr<LegalActionsMap> map = std::make_unique<LegalActionsMap>(owner,
+            static_cast<LegalActionsPool *>(getSolver()->getActionPool()),
+            std::vector<long> { });
+    DiscretizedActionTextSerializer::loadActionMapping(*map, is);
+    return std::move(map);
 }
 } /* namespace rocksample */

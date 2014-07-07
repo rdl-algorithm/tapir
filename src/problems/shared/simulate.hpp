@@ -1,3 +1,8 @@
+/** @file simulate.hpp
+ *
+ * Contains a generic function for running ABT simulations, which can be used to form the main
+ * method of a problem-specific "simulate" executable.
+ */
 #ifndef SIMULATE_HPP_
 #define SIMULATE_HPP_
 
@@ -30,16 +35,24 @@
 using std::cout;
 using std::endl;
 
+/** A template method to run a simulation for the given model and options classes. */
 template<typename ModelType, typename OptionsType>
 int simulate(int argc, char const *argv[]) {
     std::unique_ptr<options::OptionParser> parser = OptionsType::makeParser(true);
 
     OptionsType options;
+    std::string workingDir = tapir::get_current_directory();
     try {
         parser->setOptions(&options);
         parser->parseCmdLine(argc, argv);
+        if (!options.baseConfigPath.empty()) {
+            tapir::change_directory(options.baseConfigPath);
+        }
         if (!options.configPath.empty()) {
             parser->parseCfgFile(options.configPath);
+        }
+        if (!options.baseConfigPath.empty()) {
+            tapir::change_directory(workingDir);
         }
         parser->finalize();
     } catch (options::OptionParsingException const &e) {
@@ -92,6 +105,9 @@ int simulate(int argc, char const *argv[]) {
         // Advance it forward a long way to avoid correlation between the solver and simulator.
         solverGen.discard(10000);
 
+        if (!options.baseConfigPath.empty()) {
+            tapir::change_directory(options.baseConfigPath);
+        }
         std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&solverGen,
                 std::make_unique<OptionsType>(options));;
         solver::Solver solver(std::move(solverModel));
@@ -104,12 +120,16 @@ int simulate(int argc, char const *argv[]) {
         if (options.hasChanges) {
             simulator.loadChangeSequence(options.changesPath);
         }
+        if (!options.baseConfigPath.empty()) {
+            tapir::change_directory(workingDir);
+        }
+
         simulator.setMaxStepCount(options.nSimulationSteps);
         cout << "Running..." << endl;
 
-        double tStart = abt::clock_ms();
+        double tStart = tapir::clock_ms();
         double reward = simulator.runSimulation();
-        double totT = abt::clock_ms() - tStart;
+        double totT = tapir::clock_ms() - tStart;
         long actualNSteps = simulator.getStepCount();
 
         totalReward += reward;
@@ -141,6 +161,8 @@ int simulate(int argc, char const *argv[]) {
         cout << simulator.getTotalImprovementTime() << "ms" << endl;
         cout << "Time spent replenishing particles: ";
         cout << simulator.getTotalReplenishingTime() << "ms" << endl;
+        cout << "Time spent pruning: ";
+        cout << simulator.getTotalPruningTime() << "ms" << endl;
         cout << "Total time taken: " << totT << "ms" << endl;
         if (options.savePolicy) {
             // Write the final policy to a file.

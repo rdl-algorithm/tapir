@@ -1,13 +1,12 @@
 var searchData=
 [
-  ['nchildren_5f',['nChildren_',['../classsolver_1_1DiscretizedActionMap.html#ab4448a7ff5ffc0fcd22086200559993f',1,'solver::DiscretizedActionMap']]],
-  ['neighbor',['neighbor',['../structsolver_1_1NnData.html#a412c20190811862fadb6ab883044fd5f',1,'solver::NnData']]],
-  ['nextstate',['nextState',['../structsolver_1_1Model_1_1StepResult.html#a340305be8331e8f6a82a610837ec3719',1,'solver::Model::StepResult']]],
-  ['nruns',['nRuns',['../structshared_1_1SharedOptions.html#a421a890936aeae971c381b5cda4ccb1a',1,'shared::SharedOptions']]],
-  ['nsimulationsteps',['nSimulationSteps',['../structshared_1_1SharedOptions.html#a423aa4db9a39b5cf3e929ff3433ce692',1,'shared::SharedOptions']]],
-  ['num_5fparticles_5fper_5fline',['NUM_PARTICLES_PER_LINE',['../classsolver_1_1TextSerializer.html#ae4ee3401c8c321121d25df57886fd19d',1,'solver::TextSerializer']]],
-  ['numberofbins_5f',['numberOfBins_',['../classsolver_1_1DiscretizedActionMap.html#adbb5c4d4156b9dd9656164632ca85340',1,'solver::DiscretizedActionMap']]],
-  ['numberofstatevariables',['numberOfStateVariables',['../structsolver_1_1Options.html#a03872680ab1ff2b338c94a82cb2850f0',1,'solver::Options']]],
-  ['numberoftimesused',['numberOfTimesUsed',['../structsolver_1_1MultipleStrategiesExp3_1_1StrategyInfo.html#a449c112d4119da69d3e2bc8660dce84e',1,'solver::MultipleStrategiesExp3::StrategyInfo']]],
-  ['numberofvisitedentries_5f',['numberOfVisitedEntries_',['../classsolver_1_1DiscretizedActionMap.html#a37a0dee924060f696539d58069564517',1,'solver::DiscretizedActionMap']]]
+  ['map_5f',['map_',['../classsolver_1_1DiscretizedActionMapEntry.html#ab57f951168f9ac3cb1d5a359e591c326',1,'solver::DiscretizedActionMapEntry']]],
+  ['mappath',['mapPath',['../structrocksample_1_1RockSampleOptions.html#a4d382ef7fc0718062520cd00394dda0d',1,'rocksample::RockSampleOptions::mapPath()'],['../structtag_1_1TagOptions.html#ad30f02f594f140f2055999e8d74f56ee',1,'tag::TagOptions::mapPath()']]],
+  ['maximumdepth',['maximumDepth',['../structsolver_1_1Options.html#a50b6335643a258efd358f7e38eab1ec2',1,'solver::Options']]],
+  ['maxobservationdistance',['maxObservationDistance',['../structshared_1_1SharedOptions.html#a0c873f8380004558e4a0f741e3ab02bc',1,'shared::SharedOptions']]],
+  ['maxval',['maxVal',['../structsolver_1_1Options.html#a6806eb978e58ff79696d35e61bb040ff',1,'solver::Options']]],
+  ['meanqvalue_5f',['meanQValue_',['../classsolver_1_1DiscretizedActionMapEntry.html#a5283071bba8fe42614115cb32877f10e',1,'solver::DiscretizedActionMapEntry']]],
+  ['minparticlecount',['minParticleCount',['../structsolver_1_1Options.html#a24bb406e708b1fde2829f4ff0e7efd1b',1,'solver::Options']]],
+  ['minval',['minVal',['../structsolver_1_1Options.html#ab33fbbd4b17094c5a4ff80d924f52807',1,'solver::Options']]],
+  ['movecost',['moveCost',['../structtag_1_1TagOptions.html#a92b7f6fac3bf0b4cb6a14a9e3911bd05',1,'tag::TagOptions']]]
 ];

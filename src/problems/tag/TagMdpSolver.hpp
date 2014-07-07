@@ -9,7 +9,7 @@
 
 #include "problems/shared/parsers.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "TagState.hpp"
 
@@ -34,13 +34,13 @@ private:
     std::unordered_map<TagState, double> valueMap_;
 };
 
-class TagMdpParser : public shared::Parser<solver::Heuristic> {
+class TagMdpParser : public shared::Parser<solver::HeuristicFunction> {
 public:
     TagMdpParser(TagModel *model);
     virtual ~TagMdpParser() = default;
     _NO_COPY_OR_MOVE(TagMdpParser);
 
-    virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
+    virtual solver::HeuristicFunction parse(solver::Solver *solver, std::vector<std::string> args);
 private:
     TagModel *model_;
 };

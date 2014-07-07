@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/mappings/actions/ActionMapping.hpp Source File</title>
+<title>TAPIR: src/solver/mappings/actions/ActionMapping.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -118,31 +118,37 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordflow">return</span> owner_;</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="comment">/* -------------- Creation and retrieval of nodes. ---------------- */</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="comment">/* -------------- Access to and management of child nodes. ---------------- */</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classsolver_1_1ActionNode.html">ActionNode</a> *<a class="code" href="classsolver_1_1ActionMapping.html#a3d2d8d4a71233ca96e0cab1f4c12105e">getActionNode</a>(<a class="code" href="classsolver_1_1Point.html">Action</a> <span class="keyword">const</span> &amp;action) <span class="keyword">const</span> = 0;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classsolver_1_1ActionNode.html">ActionNode</a> *<a class="code" href="classsolver_1_1ActionMapping.html#a619cf4c7945368f951929f8a8f39b8fe">createActionNode</a>(<a class="code" href="classsolver_1_1Point.html">Action</a> <span class="keyword">const</span> &amp;action) = 0;</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">long</span> <a class="code" href="classsolver_1_1ActionMapping.html#a69403f0dabb91e3b526a68b24f396b4d">getNChildren</a>() <span class="keyword">const</span> = 0;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="comment">/* -------------- Retrieval of mapping entries. ---------------- */</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">long</span> <a class="code" href="classsolver_1_1ActionMapping.html#ac766cc9080125f34f159ec5937182dcd">getNumberOfVisitedEntries</a>() <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keyword">virtual</span> std::vector&lt;ActionMappingEntry const *&gt; <a class="code" href="classsolver_1_1ActionMapping.html#a8cc7d90a585f07a41ed0a5fe245b00d7">getVisitedEntries</a>() <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> *<a class="code" href="classsolver_1_1ActionMapping.html#a9de12f0eb48800db09b33a8af73c8ba5">getEntry</a>(<a class="code" href="classsolver_1_1Point.html">Action</a> <span class="keyword">const</span> &amp;action) = 0;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> <span class="keyword">const</span> *<a class="code" href="classsolver_1_1ActionMapping.html#a9de12f0eb48800db09b33a8af73c8ba5">getEntry</a>(<a class="code" href="classsolver_1_1Point.html">Action</a> <span class="keyword">const</span> &amp;action) <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    <span class="comment">/* ------------------ Methods for unvisited actions ------------------- */</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keyword">virtual</span> std::unique_ptr&lt;Action&gt; <a class="code" href="classsolver_1_1ActionMapping.html#aae4246fd955d59ec925b839867a8463d">getNextActionToTry</a>() = 0;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="comment">/* -------------- Retrieval of general statistics. ---------------- */</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">long</span> <a class="code" href="classsolver_1_1ActionMapping.html#acc3e52e072b1e0536100033b0bd7bc28">getTotalVisitCount</a>() <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <a class="code" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *owner_;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;};</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;} <span class="comment">/* namespace solver */</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SOLVER_ACTIONMAPPING_HPP_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classsolver_1_1ActionMapping.html#a56e65ecc7ea8ee491aa5d92ba0b3c891">deleteChild</a>(<a class="code" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> <span class="keyword">const</span> *entry) = 0;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="comment">/* -------------- Retrieval of mapping entries. ---------------- */</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">virtual</span> std::vector&lt;ActionMappingEntry const *&gt; <a class="code" href="classsolver_1_1ActionMapping.html#a07dca0276c9b1e845ba9f6501b92f47d">getChildEntries</a>() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">long</span> <a class="code" href="classsolver_1_1ActionMapping.html#ac766cc9080125f34f159ec5937182dcd">getNumberOfVisitedEntries</a>() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keyword">virtual</span> std::vector&lt;ActionMappingEntry const *&gt; <a class="code" href="classsolver_1_1ActionMapping.html#a8cc7d90a585f07a41ed0a5fe245b00d7">getVisitedEntries</a>() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> *<a class="code" href="classsolver_1_1ActionMapping.html#a9de12f0eb48800db09b33a8af73c8ba5">getEntry</a>(<a class="code" href="classsolver_1_1Point.html">Action</a> <span class="keyword">const</span> &amp;action) = 0;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> <span class="keyword">const</span> *<a class="code" href="classsolver_1_1ActionMapping.html#a9de12f0eb48800db09b33a8af73c8ba5">getEntry</a>(<a class="code" href="classsolver_1_1Point.html">Action</a> <span class="keyword">const</span> &amp;action) <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="comment">/* ------------------ Methods for unvisited actions ------------------- */</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keyword">virtual</span> std::unique_ptr&lt;Action&gt; <a class="code" href="classsolver_1_1ActionMapping.html#aae4246fd955d59ec925b839867a8463d">getNextActionToTry</a>() = 0;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="comment">/* -------------- Retrieval of general statistics. ---------------- */</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">long</span> <a class="code" href="classsolver_1_1ActionMapping.html#acc3e52e072b1e0536100033b0bd7bc28">getTotalVisitCount</a>() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <a class="code" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *owner_;</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;};</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;} <span class="comment">/* namespace solver */</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SOLVER_ACTIONMAPPING_HPP_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_ab83c959685072d8e8fd1326c15d978b9"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#ab83c959685072d8e8fd1326c15d978b9">solver::ActionMapping::ActionMapping</a></div><div class="ttdeci">ActionMapping(BeliefNode *owner)</div><div class="ttdoc">Creates a new ActionMapping, which will be owned by the given belief node. </div><div class="ttdef"><b>Definition:</b> <a href="ActionMapping_8hpp_source.html#l00035">ActionMapping.hpp:35</a></div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_a8cc7d90a585f07a41ed0a5fe245b00d7"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#a8cc7d90a585f07a41ed0a5fe245b00d7">solver::ActionMapping::getVisitedEntries</a></div><div class="ttdeci">virtual std::vector&lt; ActionMappingEntry const * &gt; getVisitedEntries() const =0</div><div class="ttdoc">Returns a vector of all of the visited entries in this mapping. </div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_ac766cc9080125f34f159ec5937182dcd"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#ac766cc9080125f34f159ec5937182dcd">solver::ActionMapping::getNumberOfVisitedEntries</a></div><div class="ttdeci">virtual long getNumberOfVisitedEntries() const =0</div><div class="ttdoc">Returns the number of entries in this mapping with a nonzero visit count. </div></div>
@@ -153,19 +159,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1ActionMappingEntry_html"><div class="ttname"><a href="classsolver_1_1ActionMappingEntry.html">solver::ActionMappingEntry</a></div><div class="ttdoc">An interface that represents a (belief, action) edge in the belief tree. </div><div class="ttdef"><b>Definition:</b> <a href="ActionMappingEntry_8hpp_source.html#l00025">ActionMappingEntry.hpp:25</a></div></div>
 <div class="ttc" id="Action_8hpp_html"><div class="ttname"><a href="Action_8hpp.html">Action.hpp</a></div><div class="ttdoc">Defines the Action interface; currently this is the same as Point, so this is just a straight typedef...</div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_a619cf4c7945368f951929f8a8f39b8fe"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#a619cf4c7945368f951929f8a8f39b8fe">solver::ActionMapping::createActionNode</a></div><div class="ttdeci">virtual ActionNode * createActionNode(Action const &amp;action)=0</div><div class="ttdoc">Creates a new action node for the given action. </div></div>
+<div class="ttc" id="classsolver_1_1ActionMapping_html_a07dca0276c9b1e845ba9f6501b92f47d"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#a07dca0276c9b1e845ba9f6501b92f47d">solver::ActionMapping::getChildEntries</a></div><div class="ttdeci">virtual std::vector&lt; ActionMappingEntry const * &gt; getChildEntries() const =0</div><div class="ttdoc">Returns all entries in this mapping that have a child node associated with them. </div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_acc3e52e072b1e0536100033b0bd7bc28"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#acc3e52e072b1e0536100033b0bd7bc28">solver::ActionMapping::getTotalVisitCount</a></div><div class="ttdeci">virtual long getTotalVisitCount() const =0</div><div class="ttdoc">Returns the total number of times children of this mapping have been visited. </div></div>
 <div class="ttc" id="classsolver_1_1ActionNode_html"><div class="ttname"><a href="classsolver_1_1ActionNode.html">solver::ActionNode</a></div><div class="ttdoc">The base level interface used by the solver to store the results of taking a specific action from a s...</div><div class="ttdef"><b>Definition:</b> <a href="ActionNode_8hpp_source.html#l00036">ActionNode.hpp:36</a></div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_af2e165cef4f55e61be8881c1fe875db4"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#af2e165cef4f55e61be8881c1fe875db4">solver::ActionMapping::getOwner</a></div><div class="ttdeci">BeliefNode * getOwner() const </div><div class="ttdoc">Returns the belief node that owns this mapping. </div><div class="ttdef"><b>Definition:</b> <a href="ActionMapping_8hpp_source.html#l00043">ActionMapping.hpp:43</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
 <div class="ttc" id="classsolver_1_1BeliefNode_html"><div class="ttname"><a href="classsolver_1_1BeliefNode.html">solver::BeliefNode</a></div><div class="ttdoc">Represents a single node in a belief tree. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefNode_8hpp_source.html#l00054">BeliefNode.hpp:54</a></div></div>
+<div class="ttc" id="classsolver_1_1ActionMapping_html_a56e65ecc7ea8ee491aa5d92ba0b3c891"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#a56e65ecc7ea8ee491aa5d92ba0b3c891">solver::ActionMapping::deleteChild</a></div><div class="ttdeci">virtual void deleteChild(ActionMappingEntry const *entry)=0</div><div class="ttdoc">Deletes the child in the given entry, as well as the entire corresponding subtree. </div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html"><div class="ttname"><a href="classsolver_1_1ActionMapping.html">solver::ActionMapping</a></div><div class="ttdoc">An abstract base class that defines a mapping of the actions of a belief to (belief, action) edges in the belief tree; these edges are represented by the ActionMappingEntry class. </div><div class="ttdef"><b>Definition:</b> <a href="ActionMapping_8hpp_source.html#l00032">ActionMapping.hpp:32</a></div></div>
-<div class="ttc" id="defs_8hpp_html_a61671c8dd4803bc1d9b5baca2eb52d70"><div class="ttname"><a href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a></div><div class="ttdeci">#define _NO_COPY_OR_MOVE(ClassName)</div><div class="ttdoc">A macro used to delete all copy- and move-constructors and -assignment operators. ...</div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00009">defs.hpp:9</a></div></div>
+<div class="ttc" id="defs_8hpp_html_a61671c8dd4803bc1d9b5baca2eb52d70"><div class="ttname"><a href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a></div><div class="ttdeci">#define _NO_COPY_OR_MOVE(ClassName)</div><div class="ttdoc">A macro used to delete all copy- and move-constructors and -assignment operators. ...</div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00015">defs.hpp:15</a></div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_a3d2d8d4a71233ca96e0cab1f4c12105e"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#a3d2d8d4a71233ca96e0cab1f4c12105e">solver::ActionMapping::getActionNode</a></div><div class="ttdeci">virtual ActionNode * getActionNode(Action const &amp;action) const =0</div><div class="ttdoc">Retrieves the action node (if any) corresponding to the given action. </div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html_a69403f0dabb91e3b526a68b24f396b4d"><div class="ttname"><a href="classsolver_1_1ActionMapping.html#a69403f0dabb91e3b526a68b24f396b4d">solver::ActionMapping::getNChildren</a></div><div class="ttdeci">virtual long getNChildren() const =0</div><div class="ttdoc">Returns the number of child action nodes owned by this mapping. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

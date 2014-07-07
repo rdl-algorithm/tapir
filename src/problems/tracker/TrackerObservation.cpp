@@ -42,10 +42,10 @@ bool TrackerObservation::equals(
 
 std::size_t TrackerObservation::hash() const {
     std::size_t hashValue = 0;
-    abt::hash_combine(hashValue, robotPos_.i);
-    abt::hash_combine(hashValue, robotPos_.j);
-    abt::hash_combine(hashValue, robotYaw_);
-    abt::hash_combine(hashValue, seesTarget_);
+    tapir::hash_combine(hashValue, robotPos_.i);
+    tapir::hash_combine(hashValue, robotPos_.j);
+    tapir::hash_combine(hashValue, robotYaw_);
+    tapir::hash_combine(hashValue, seesTarget_);
     return hashValue;
 }
 

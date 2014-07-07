@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/shared/solve.hpp Source File</title>
+<title>TAPIR: src/problems/shared/solve.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -90,98 +90,114 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">solve.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef SOLVE_HPP_</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define SOLVE_HPP_</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;fstream&gt;</span>                      <span class="comment">// for operator&lt;&lt;, endl, ostream, ofstream, basic_ostream, basic_ostream&lt;&gt;::__ostream_type</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;iostream&gt;</span>                     <span class="comment">// for cout</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span>                       <span class="comment">// for unique_ptr</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span>                       <span class="comment">// for string</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;utility&gt;</span>                      <span class="comment">// for move                // IWYU pragma: keep</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="global_8hpp.html">global.hpp</a>&quot;</span>                     <span class="comment">// for RandomGenerator, make_unique</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="Serializer_8hpp.html">solver/serialization/Serializer.hpp</a>&quot;</span>        <span class="comment">// for Serializer</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="Solver_8hpp.html">solver/Solver.hpp</a>&quot;</span>            <span class="comment">// for Solver</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="option__parser_8hpp.html">options/option_parser.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#ifdef GOOGLE_PROFILER</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &lt;google/profiler.h&gt;</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">using</span> std::cout;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">using</span> std::endl;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> ModelType, <span class="keyword">typename</span> OptionsType&gt;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keywordtype">int</span> solve(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> <span class="keyword">const</span> *argv[]) {</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    std::unique_ptr&lt;options::OptionParser&gt; parser = OptionsType::makeParser(<span class="keyword">false</span>);</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    OptionsType options;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        parser-&gt;setOptions(&amp;options);</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        parser-&gt;parseCmdLine(argc, argv);</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        <span class="keywordflow">if</span> (!options.configPath.empty()) {</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;            parser-&gt;parseCfgFile(options.configPath);</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        }</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        parser-&gt;finalize();</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    } <span class="keywordflow">catch</span> (<a class="code" href="classoptions_1_1OptionParsingException.html">options::OptionParsingException</a> <span class="keyword">const</span> &amp;e) {</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        std::cerr &lt;&lt; e.<a class="code" href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf">what</a>();</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        <span class="keywordflow">return</span> 2;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    }</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordflow">if</span> (options.seed == 0) {</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        options.seed = std::time(<span class="keyword">nullptr</span>);</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    }</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;Seed: &quot;</span> &lt;&lt; options.seed &lt;&lt; endl;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <a class="code" href="global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a">RandomGenerator</a> randGen;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    randGen.seed(options.seed);</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    randGen.discard(10);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    std::unique_ptr&lt;ModelType&gt; newModel = std::make_unique&lt;ModelType&gt;(&amp;randGen,</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            std::make_unique&lt;OptionsType&gt;(options));</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <a class="code" href="classsolver_1_1Solver.html">solver::Solver</a> solver(std::move(newModel));</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    solver.initializeEmpty();</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">double</span> totT;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordtype">double</span> tStart;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    tStart = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>();</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#ifdef GOOGLE_PROFILER</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor"></span>    ProfilerStart(<span class="stringliteral">&quot;solve.prof&quot;</span>);</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    solver.improvePolicy();</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#ifdef GOOGLE_PROFILER</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor"></span>    ProfilerStop();</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    totT = <a class="code" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a>() - tStart;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;Total solving time: &quot;</span> &lt;&lt; totT &lt;&lt; <span class="stringliteral">&quot;ms&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;Saving to file...&quot;</span>;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    cout.flush();</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    std::ofstream outFile(options.policyPath);</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    solver.getSerializer()-&gt;save(outFile);</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    outFile.close();</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;    Done.&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;}</div>
+<a href="solve_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#ifndef SOLVE_HPP_</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define SOLVE_HPP_</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;fstream&gt;</span>                      <span class="comment">// for operator&lt;&lt;, endl, ostream, ofstream, basic_ostream, basic_ostream&lt;&gt;::__ostream_type</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;iostream&gt;</span>                     <span class="comment">// for cout</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span>                       <span class="comment">// for unique_ptr</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span>                       <span class="comment">// for string</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;utility&gt;</span>                      <span class="comment">// for move                // IWYU pragma: keep</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="global_8hpp.html">global.hpp</a>&quot;</span>                     <span class="comment">// for RandomGenerator, make_unique</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="Serializer_8hpp.html">solver/serialization/Serializer.hpp</a>&quot;</span>        <span class="comment">// for Serializer</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="Solver_8hpp.html">solver/Solver.hpp</a>&quot;</span>            <span class="comment">// for Solver</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="option__parser_8hpp.html">options/option_parser.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#ifdef GOOGLE_PROFILER</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &lt;google/profiler.h&gt;</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">using</span> std::cout;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">using</span> std::endl;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> ModelType, <span class="keyword">typename</span> OptionsType&gt;</div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="solve_8hpp.html#a5b595b1c5d785f08932cbbb4279dfa80">   32</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="solve_8hpp.html#a5b595b1c5d785f08932cbbb4279dfa80">solve</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> <span class="keyword">const</span> *argv[]) {</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    std::unique_ptr&lt;options::OptionParser&gt; parser = OptionsType::makeParser(<span class="keyword">false</span>);</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    OptionsType options;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    std::string workingDir = <a class="code" href="namespacetapir.html#af3403f75e03ee19c633e6d97de8a0e33">tapir::get_current_directory</a>();</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        parser-&gt;setOptions(&amp;options);</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        parser-&gt;parseCmdLine(argc, argv);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keywordflow">if</span> (!options.baseConfigPath.empty()) {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            <a class="code" href="namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4">tapir::change_directory</a>(options.baseConfigPath);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        }</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keywordflow">if</span> (!options.configPath.empty()) {</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            parser-&gt;parseCfgFile(options.configPath);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        }</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        parser-&gt;finalize();</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    } <span class="keywordflow">catch</span> (<a class="code" href="classoptions_1_1OptionParsingException.html">options::OptionParsingException</a> <span class="keyword">const</span> &amp;e) {</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        std::cerr &lt;&lt; e.<a class="code" href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf">what</a>();</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keywordflow">return</span> 2;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    }</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">if</span> (options.seed == 0) {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        options.seed = std::time(<span class="keyword">nullptr</span>);</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;Seed: &quot;</span> &lt;&lt; options.seed &lt;&lt; endl;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a">RandomGenerator</a> randGen;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    randGen.seed(options.seed);</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    randGen.discard(10);</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    std::unique_ptr&lt;ModelType&gt; newModel = std::make_unique&lt;ModelType&gt;(&amp;randGen,</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            std::make_unique&lt;OptionsType&gt;(options));</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordflow">if</span> (!options.baseConfigPath.empty()) {</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <a class="code" href="namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4">tapir::change_directory</a>(workingDir);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    }</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <a class="code" href="classsolver_1_1Solver.html">solver::Solver</a> solver(std::move(newModel));</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    solver.<a class="code" href="classsolver_1_1Solver.html#aea8bc1ef45e632fd93ed8090659b14c5">initializeEmpty</a>();</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keywordtype">double</span> totT;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">double</span> tStart;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    tStart = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>();</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#ifdef GOOGLE_PROFILER</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor"></span>    ProfilerStart(<span class="stringliteral">&quot;solve.prof&quot;</span>);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    solver.<a class="code" href="classsolver_1_1Solver.html#abfa749ac436dcdebe3ba3ad26f4e2502">improvePolicy</a>();</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SOLVE_HPP_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="preprocessor">#ifdef GOOGLE_PROFILER</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="preprocessor"></span>    ProfilerStop();</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    totT = <a class="code" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a>() - tStart;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;Total solving time: &quot;</span> &lt;&lt; totT &lt;&lt; <span class="stringliteral">&quot;ms&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;Saving to file...&quot;</span>;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    cout.flush();</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    std::ofstream outFile(options.policyPath);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    solver.<a class="code" href="classsolver_1_1Solver.html#ab127c746660a25adaf0261fdffe4ca76">getSerializer</a>()-&gt;<a class="code" href="classsolver_1_1Serializer.html#ad6d37d9d4e826a23bd6dda7253604b79">save</a>(outFile);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    outFile.close();</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    cout &lt;&lt; <span class="stringliteral">&quot;    Done.&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;}</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* SOLVE_HPP_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="namespacetapir_html_af3403f75e03ee19c633e6d97de8a0e33"><div class="ttname"><a href="namespacetapir.html#af3403f75e03ee19c633e6d97de8a0e33">tapir::get_current_directory</a></div><div class="ttdeci">std::string get_current_directory()</div><div class="ttdoc">A function to return the current working directory. </div><div class="ttdef"><b>Definition:</b> <a href="global_8cpp_source.html#l00013">global.cpp:13</a></div></div>
 <div class="ttc" id="option__parser_8hpp_html"><div class="ttname"><a href="option__parser_8hpp.html">option_parser.hpp</a></div><div class="ttdoc">A basic option parser that is able to parse configuration settings from both the command line...</div></div>
 <div class="ttc" id="Solver_8hpp_html"><div class="ttname"><a href="Solver_8hpp.html">Solver.hpp</a></div><div class="ttdoc">Contains the Solver class, which is the core ABT solver class. </div></div>
-<div class="ttc" id="global_8hpp_html_a080b7731c061f9bafcf79d5e2f0c388a"><div class="ttname"><a href="global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a">RandomGenerator</a></div><div class="ttdeci">std::default_random_engine RandomGenerator</div><div class="ttdoc">The RNG engine to use throughout the code. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00024">global.hpp:24</a></div></div>
+<div class="ttc" id="classsolver_1_1Solver_html_ab127c746660a25adaf0261fdffe4ca76"><div class="ttname"><a href="classsolver_1_1Solver.html#ab127c746660a25adaf0261fdffe4ca76">solver::Solver::getSerializer</a></div><div class="ttdeci">Serializer * getSerializer() const </div><div class="ttdoc">Returns the serializer for this solver. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8cpp_source.html#l00103">Solver.cpp:103</a></div></div>
+<div class="ttc" id="global_8hpp_html_a080b7731c061f9bafcf79d5e2f0c388a"><div class="ttname"><a href="global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a">RandomGenerator</a></div><div class="ttdeci">std::default_random_engine RandomGenerator</div><div class="ttdoc">The RNG engine to use throughout the code. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00025">global.hpp:25</a></div></div>
+<div class="ttc" id="classsolver_1_1Solver_html_aea8bc1ef45e632fd93ed8090659b14c5"><div class="ttname"><a href="classsolver_1_1Solver.html#aea8bc1ef45e632fd93ed8090659b14c5">solver::Solver::initializeEmpty</a></div><div class="ttdeci">void initializeEmpty()</div><div class="ttdoc">Full initialization - resets all data structures. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8cpp_source.html#l00108">Solver.cpp:108</a></div></div>
+<div class="ttc" id="solve_8hpp_html_a5b595b1c5d785f08932cbbb4279dfa80"><div class="ttname"><a href="solve_8hpp.html#a5b595b1c5d785f08932cbbb4279dfa80">solve</a></div><div class="ttdeci">int solve(int argc, char const *argv[])</div><div class="ttdoc">A template method to calculate an initial policy for the given model and options classes, and then save the policy to a file. </div><div class="ttdef"><b>Definition:</b> <a href="solve_8hpp_source.html#l00032">solve.hpp:32</a></div></div>
 <div class="ttc" id="classoptions_1_1OptionParsingException_html_a3b04f141ca817c33da0e7e090a5cbdbf"><div class="ttname"><a href="classoptions_1_1OptionParsingException.html#a3b04f141ca817c33da0e7e090a5cbdbf">options::OptionParsingException::what</a></div><div class="ttdeci">virtual char const * what() const </div><div class="ttdoc">what() is the standard way for an exception to communicate an error message. </div><div class="ttdef"><b>Definition:</b> <a href="option__parser_8hpp_source.html#l00062">option_parser.hpp:62</a></div></div>
+<div class="ttc" id="classsolver_1_1Solver_html_abfa749ac436dcdebe3ba3ad26f4e2502"><div class="ttname"><a href="classsolver_1_1Solver.html#abfa749ac436dcdebe3ba3ad26f4e2502">solver::Solver::improvePolicy</a></div><div class="ttdeci">void improvePolicy(BeliefNode *startNode=nullptr, long numberOfHistories=-1, long maximumDepth=-1, double timeout=-1)</div><div class="ttdoc">Improves the policy by generating the given number of histories from the given belief node; nullptr =...</div><div class="ttdef"><b>Definition:</b> <a href="Solver_8cpp_source.html#l00121">Solver.cpp:121</a></div></div>
 <div class="ttc" id="Serializer_8hpp_html"><div class="ttname"><a href="Serializer_8hpp.html">Serializer.hpp</a></div><div class="ttdoc">Defines Serializer, an abstract base class for serialization of an ABT solver instance. </div></div>
-<div class="ttc" id="namespaceabt_html_a6118b840f6a387c7d3861c251b769c13"><div class="ttname"><a href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a></div><div class="ttdeci">double clock_ms()</div><div class="ttdoc">Returns the time (in ms) since the program started running. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00033">global.hpp:33</a></div></div>
 <div class="ttc" id="classsolver_1_1Solver_html"><div class="ttname"><a href="classsolver_1_1Solver.html">solver::Solver</a></div><div class="ttdoc">The core class of the ABT algorithm. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8hpp_source.html#l00065">Solver.hpp:65</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="classsolver_1_1Serializer_html_ad6d37d9d4e826a23bd6dda7253604b79"><div class="ttname"><a href="classsolver_1_1Serializer.html#ad6d37d9d4e826a23bd6dda7253604b79">solver::Serializer::save</a></div><div class="ttdeci">virtual void save(std::ostream &amp;os)</div><div class="ttdoc">Saves (serializes) the full state of the associated ABT solver to the given output stream...</div><div class="ttdef"><b>Definition:</b> <a href="Serializer_8hpp_source.html#l00077">Serializer.hpp:77</a></div></div>
+<div class="ttc" id="namespacetapir_html_a2625fbd617a2b89a3bd3d957c12890d7"><div class="ttname"><a href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a></div><div class="ttdeci">double clock_ms()</div><div class="ttdoc">Returns the time (in ms) since the program started running. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00040">global.hpp:40</a></div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
+<div class="ttc" id="namespacetapir_html_a342dfa979e553c4cff9846ee6da861d4"><div class="ttname"><a href="namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4">tapir::change_directory</a></div><div class="ttdeci">void change_directory(std::string &amp;dir)</div><div class="ttdoc">A function to change the current working directory. </div><div class="ttdef"><b>Definition:</b> <a href="global_8cpp_source.html#l00024">global.cpp:24</a></div></div>
 <div class="ttc" id="classoptions_1_1OptionParsingException_html"><div class="ttname"><a href="classoptions_1_1OptionParsingException.html">options::OptionParsingException</a></div><div class="ttdoc">A simple exception class, thrown when there is something wrong with the input. </div><div class="ttdef"><b>Definition:</b> <a href="option__parser_8hpp_source.html#l00057">option_parser.hpp:57</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

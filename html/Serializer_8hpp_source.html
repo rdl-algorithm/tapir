@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/solver/serialization/Serializer.hpp Source File</title>
+<title>TAPIR: src/solver/serialization/Serializer.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -290,13 +290,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classsolver_1_1ObservationMapping_html"><div class="ttname"><a href="classsolver_1_1ObservationMapping.html">solver::ObservationMapping</a></div><div class="ttdoc">An abstract base class that defines a mapping of observations to subsequent beliefs in the belief tre...</div><div class="ttdef"><b>Definition:</b> <a href="ObservationMapping_8hpp_source.html#l00032">ObservationMapping.hpp:32</a></div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_ab196ed980849d84f123be590bfe022fa"><div class="ttname"><a href="classsolver_1_1Serializer.html#ab196ed980849d84f123be590bfe022fa">solver::Serializer::loadActionMapping</a></div><div class="ttdeci">virtual std::unique_ptr&lt; ActionMapping &gt; loadActionMapping(BeliefNode *node, std::istream &amp;is)=0</div><div class="ttdoc">Loads a mapping of actions to action nodes for the given belief. </div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_a2c147e139775dac836f3e7f874d1ef93"><div class="ttname"><a href="classsolver_1_1Serializer.html#a2c147e139775dac836f3e7f874d1ef93">solver::Serializer::loadAction</a></div><div class="ttdeci">virtual std::unique_ptr&lt; Action &gt; loadAction(std::istream &amp;is)=0</div><div class="ttdoc">Loads an Action. </div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_ad95f9f66a9eb6961dc9d274a2baa049c"><div class="ttname"><a href="classsolver_1_1Serializer.html#ad95f9f66a9eb6961dc9d274a2baa049c">solver::Serializer::~Serializer</a></div><div class="ttdeci">virtual ~Serializer()=default</div><div class="ttdoc">Default destructor. </div></div>
 <div class="ttc" id="classsolver_1_1BeliefNode_html"><div class="ttname"><a href="classsolver_1_1BeliefNode.html">solver::BeliefNode</a></div><div class="ttdoc">Represents a single node in a belief tree. </div><div class="ttdef"><b>Definition:</b> <a href="BeliefNode_8hpp_source.html#l00054">BeliefNode.hpp:54</a></div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_a0854f115a7ebfeff74bc38e89c5be399"><div class="ttname"><a href="classsolver_1_1Serializer.html#a0854f115a7ebfeff74bc38e89c5be399">solver::Serializer::Serializer</a></div><div class="ttdeci">Serializer(Solver *solver)</div><div class="ttdoc">Constructs a serializer for the given solver. </div><div class="ttdef"><b>Definition:</b> <a href="Serializer_8hpp_source.html#l00047">Serializer.hpp:47</a></div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_aee032d9018430f9efc168bcec13fc8d5"><div class="ttname"><a href="classsolver_1_1Serializer.html#aee032d9018430f9efc168bcec13fc8d5">solver::Serializer::setSolver</a></div><div class="ttdeci">void setSolver(Solver *solver)</div><div class="ttdoc">Sets the associated solver of this Serializer to be the given solver. </div><div class="ttdef"><b>Definition:</b> <a href="Serializer_8hpp_source.html#l00052">Serializer.hpp:52</a></div></div>
 <div class="ttc" id="classsolver_1_1ActionMapping_html"><div class="ttname"><a href="classsolver_1_1ActionMapping.html">solver::ActionMapping</a></div><div class="ttdoc">An abstract base class that defines a mapping of the actions of a belief to (belief, action) edges in the belief tree; these edges are represented by the ActionMappingEntry class. </div><div class="ttdef"><b>Definition:</b> <a href="ActionMapping_8hpp_source.html#l00032">ActionMapping.hpp:32</a></div></div>
-<div class="ttc" id="defs_8hpp_html_a61671c8dd4803bc1d9b5baca2eb52d70"><div class="ttname"><a href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a></div><div class="ttdeci">#define _NO_COPY_OR_MOVE(ClassName)</div><div class="ttdoc">A macro used to delete all copy- and move-constructors and -assignment operators. ...</div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00009">defs.hpp:9</a></div></div>
+<div class="ttc" id="defs_8hpp_html_a61671c8dd4803bc1d9b5baca2eb52d70"><div class="ttname"><a href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a></div><div class="ttdeci">#define _NO_COPY_OR_MOVE(ClassName)</div><div class="ttdoc">A macro used to delete all copy- and move-constructors and -assignment operators. ...</div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00015">defs.hpp:15</a></div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_a3ca11a99c0fd468f1741836c6a1b667d"><div class="ttname"><a href="classsolver_1_1Serializer.html#a3ca11a99c0fd468f1741836c6a1b667d">solver::Serializer::saveTransitionParameters</a></div><div class="ttdeci">virtual void saveTransitionParameters(TransitionParameters const *tp, std::ostream &amp;os)=0</div><div class="ttdoc">Saves TransitionParameters. </div></div>
 <div class="ttc" id="classsolver_1_1Serializer_html_ab724e36359045d16271a27bf63b15c09"><div class="ttname"><a href="classsolver_1_1Serializer.html#ab724e36359045d16271a27bf63b15c09">solver::Serializer::loadTransitionParameters</a></div><div class="ttdeci">virtual std::unique_ptr&lt; TransitionParameters &gt; loadTransitionParameters(std::istream &amp;is)=0</div><div class="ttdoc">Loads TransitionParameters. </div></div>
 <div class="ttc" id="classsolver_1_1ObservationPool_html"><div class="ttname"><a href="classsolver_1_1ObservationPool.html">solver::ObservationPool</a></div><div class="ttdoc">An interface class which is a factory for creating observation mappings. </div><div class="ttdef"><b>Definition:</b> <a href="ObservationPool_8hpp_source.html#l00025">ObservationPool.hpp:25</a></div></div>
@@ -308,7 +308,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

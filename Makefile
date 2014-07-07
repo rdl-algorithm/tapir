@@ -4,15 +4,14 @@ ABS_ROOT := $(abspath $(ROOT))
 
 HAS_ROOT_MAKEFILE := true
 
-# Build configurations
+# Defaul build configuration
 DEFAULT_CFG := release
-
 ifndef CFG
   CFG := $(DEFAULT_CFG)
 endif
 
-$(info Configuration: $(CFG))
-$(info )
+# Default build target.
+DEFAULT_TARGET := solver
 
 BUILDDIR := $(ROOT)/builds/$(CFG)
 BINDIR   := $(ROOT)/bin
@@ -31,7 +30,7 @@ CXX  := g++
 # Preprocessor flags.
 override INCDIRS     += -I /home/joshua/eigen -I$(ROOT)/src -I$(ROOT)/src/options
 
-override CPPFLAGS    += $(INCDIRS)
+override CPPFLAGS    += -DROOT_PATH=$(ABS_ROOT) $(INCDIRS)
 ifeq ($(CFG),debug)
   override CPPFLAGS  += -DDEBUG
 endif
@@ -95,33 +94,68 @@ override LIBDIRS += -L/usr/lib/x86_64-linux-gnu/
 override LDFLAGS += $(LIBDIRS)
 
 # ----------------------------------------------------------------------
-# General-purpose recipes
+# Redirection handling.
 # ----------------------------------------------------------------------
-CXX_RECIPE     = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $(1) -o $@
-CC_RECIPE      = $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c $(1) -o $@
-LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
-MKDIR_RECIPE   = @mkdir -p $@
+ifdef REDIRECT
+ifeq ($(MAKECMDGOALS),)
+MAKECMDGOALS := $(REDIRECT)
+endif
+# Try a straight-up redirect.
+.PHONY: $(MAKECMDGOALS) call-root
+$(MAKECMDGOALS): call-root ;
+call-root:
+	@$(MAKE) --no-print-directory $(MAKECMDGOALS) REDIRECT= REDIRECTED_FROM=$(REDIRECT)
+else
+# If we're not redirecting, everything works as per normal...
 
 .PHONY: default
-default: build-solver ;
+default: $(DEFAULT_TARGET) ;
+
+
+# ----------------------------------------------------------------------
+# General-purpose recipes
+# ----------------------------------------------------------------------
+# The reciple for .cpp files - called via $(call arg)
+CXX_RECIPE     = $(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -c $(1) -o $@
+# The recipe for .c files - called via $(call arg)
+CC_RECIPE      = $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c $(1) -o $@
+# The recipe for .o files - called via $(call arg)
+LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
+
+# The recipe for directories; doesn't need to be $(call)-ed.
+MKDIR_RECIPE   = @mkdir -p $@
 
 # ----------------------------------------------------------------------
 # Documentation targets
 # ----------------------------------------------------------------------
-docs/generated/README.md: README.md docs/doxygen_links.md Makefile
-	@echo "# ABT Documentation {#mainpage}\n" > $@
-	@cat README.md docs/doxygen_links.md >> $@
-	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#abt}\2/mg' $@
+
+# Directory dependency
+docs/generated/Overview.md docs/generated/Build_System.md: docs/generated
+docs/generated:
+	$(MKDIR_RECIPE)
+
+# Adapt Overview.md so it works nicely with Doxygen.
+docs/generated/Overview.md: docs/Overview.md docs/doxygen_links.md Makefile
+	@echo "# Detailed TAPIR Documentation {#mainpage}\n" > $@
+	@cat docs/Overview.md docs/doxygen_links.md >> $@
+	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#tapir}\2/mg' $@
 	@perl -0pi -e 's/^(.*)(\n-+)$$/\1 {#\L\1}\2/mg' $@
 	@perl -0pi -e 's/^([#]{2,}\s+)(.*)$$/\1\2 {#\L\2}/mg' $@
 	@perl -pi -e 's/({#.*})/($$res = $$1) =~ s\/ \/-\/g,$$res/eg' $@
 
-docs/generated/BUILD.md: .make/README.md docs/doxygen_links.md Makefile
+# Do the same thing for the build system README
+docs/generated/Build_System.md: .make/README.md docs/doxygen_links.md Makefile
 	@cat .make/README.md docs/doxygen_links.md > $@
 
+# Now a command to generate the documentation.
 .PHONY: doc
-doc: docs/Doxyfile docs/generated/README.md docs/generated/BUILD.md
+doc: docs/Doxyfile docs/generated/Overview.md docs/generated/Build_System.md
 	doxygen docs/Doxyfile
+
+.PHONY: clean-doc
+clean-doc:
+	@echo Removing documentation folders!
+	@rm -rfv html/ docs/generated | grep "directory" ; true
 
 # ----------------------------------------------------------------------
 # Universal grouping targets
@@ -129,35 +163,52 @@ doc: docs/Doxyfile docs/generated/README.md docs/generated/BUILD.md
 .PHONY: nothing
 nothing: ;
 
-.PHONY: all build build-all
+# build-all is a special target - every sub-target should add itself as
+# a prerequisite for build-all
+.PHONY: build-all
+
+# Include some shorthand targets for "build-all" and "build-solver"
+.PHONY: all build
 all: build-all
 build: build-solver
 
-.PHONY: clean clean-all
+# A list of all the directories for generated output.
+ALL_DERIVED_DIRS := $(ROOT)/builds $(ROOT)/bin $(ROOT)/html $(ROOT)/docs/generated
+
+# clean-all is a straight-up "rm -rf" - it doesn't check for "junk files".
+.PHONY: clean-all
 clean-all:
-	@echo Removing all build folders!
-	@rm -rfv $(ROOT)/builds $(ROOT)/bin $(ROOT)/html | grep "directory" ; true
+	@echo Removing all derived folders!
+	@rm -rfv $(ALL_DERIVED_DIRS) | grep "directory" ; true
+
+# clean only cleans actual targets.
+.PHONY: clean
 
 # Some stuff used for code beautification
 include .make/beautify-settings.mk
 
 # Turn on secondary expansion for cross-referencing!
 .SECONDEXPANSION:
+
 # Start including other makefiles.
 dir := $(ROOT)/src
 include .make/stack.mk
 
-# ----------------------------------------------------------------------
-# Redirection handling.
-# ----------------------------------------------------------------------
-ifdef REDIRECT
-# If the target wasn't found, check the global targets.
-%-$(REDIRECT): % ;
 
-# If the target can't be found, check local targets.
-# %-$(REDIRECT): $(PATH_$(REDIRECT))/% ;
-# If not, check for a global target.
-# $(PATH_$(REDIRECT))/% : % ;
+# After we're done
+ifdef REDIRECTED_FROM
+$(info Redirected from: $(PATH_$(REDIRECTED_FROM)))
+endif
+
+# Print out our build configuration
+ifeq ($(MAKECMDGOALS),)
+$(info Building $(DEFAULT_TARGET))
+else
+$(info Building $(MAKECMDGOALS))
+endif
+$(info CFG=$(CFG))
+$(info )
+
 endif
 
 # ----------------------------------------------------------------------

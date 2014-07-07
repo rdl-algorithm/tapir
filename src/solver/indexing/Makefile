@@ -6,6 +6,8 @@ include .make/template.mk
 include .make/build.mk
 
 else
-ROOT = ROOT = ../../..
-include $(ROOT)/.make/redirect.mk
+REDIRECT=$(MODULE_NAME)
+.PHONY: $(MAKECMDGOALS) call-upwards
+$(MAKECMDGOALS) call-upwards:
+	@$(MAKE) --no-print-directory -C .. $(MAKECMDGOALS) REDIRECT=$(REDIRECT)
 endif

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/tag/TagMdpSolver.hpp Source File</title>
+<title>TAPIR: src/problems/tag/TagMdpSolver.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -99,9 +99,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="global_8hpp.html">global.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;problems/shared/parsers.hpp&quot;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="parsers_8hpp.html">problems/shared/parsers.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="Heuristic_8hpp.html">solver/abstract-problem/heuristics/Heuristic.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="HeuristicFunction_8hpp.html">solver/abstract-problem/heuristics/HeuristicFunction.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;TagState.hpp&quot;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
@@ -123,13 +123,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    std::unordered_map&lt;TagState, double&gt; valueMap_;</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;};</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
-<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classtag_1_1TagMdpParser.html">   37</a></span>&#160;<span class="keyword">class </span><a class="code" href="classtag_1_1TagMdpParser.html">TagMdpParser</a> : <span class="keyword">public</span> <a class="code" href="classshared_1_1Parser.html">shared::Parser</a>&lt;solver::Heuristic&gt; {</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classtag_1_1TagMdpParser.html">   37</a></span>&#160;<span class="keyword">class </span><a class="code" href="classtag_1_1TagMdpParser.html">TagMdpParser</a> : <span class="keyword">public</span> <a class="code" href="classshared_1_1Parser.html">shared::Parser</a>&lt;solver::HeuristicFunction&gt; {</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="classtag_1_1TagMdpParser.html">TagMdpParser</a>(<a class="code" href="classtag_1_1TagModel.html">TagModel</a> *model);</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classtag_1_1TagMdpParser.html">TagMdpParser</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="code" href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a>(<a class="code" href="classtag_1_1TagMdpParser.html">TagMdpParser</a>);</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a> <a class="code" href="classtag_1_1TagMdpParser.html#af0f473e66cd4bc0a8193e40f5cc7e66e">parse</a>(<a class="code" href="classsolver_1_1Solver.html">solver::Solver</a> *solver, std::vector&lt;std::string&gt; args);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a> <a class="code" href="classtag_1_1TagMdpParser.html#a8d89b984005a6af9b2fbd665eae28394">parse</a>(<a class="code" href="classsolver_1_1Solver.html">solver::Solver</a> *solver, std::vector&lt;std::string&gt; args);</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keyword">private</span>:</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <a class="code" href="classtag_1_1TagModel.html">TagModel</a> *model_;</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;};</div>
@@ -137,22 +137,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* TAG_MDPSOLVER_HPP_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="classtag_1_1TagModel_html"><div class="ttname"><a href="classtag_1_1TagModel.html">tag::TagModel</a></div><div class="ttdef"><b>Definition:</b> <a href="TagModel_8hpp_source.html#l00056">TagModel.hpp:56</a></div></div>
-<div class="ttc" id="classtag_1_1TagMdpParser_html_af0f473e66cd4bc0a8193e40f5cc7e66e"><div class="ttname"><a href="classtag_1_1TagMdpParser.html#af0f473e66cd4bc0a8193e40f5cc7e66e">tag::TagMdpParser::parse</a></div><div class="ttdeci">virtual solver::Heuristic parse(solver::Solver *solver, std::vector&lt; std::string &gt; args)</div><div class="ttdoc">Creates a new strategy from a vector of strings representing its arguments. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00191">TagMdpSolver.cpp:191</a></div></div>
-<div class="ttc" id="classshared_1_1Parser_html"><div class="ttname"><a href="classshared_1_1Parser.html">shared::Parser</a></div><div class="ttdef"><b>Definition:</b> <a href="parsers_8hpp_source.html#l00012">parsers.hpp:12</a></div></div>
+<div class="ttc" id="parsers_8hpp_html"><div class="ttname"><a href="parsers_8hpp.html">parsers.hpp</a></div><div class="ttdoc">Provides some convenient functionality for parsing heuristics, search strategies and estimators for b...</div></div>
+<div class="ttc" id="classshared_1_1Parser_html"><div class="ttname"><a href="classshared_1_1Parser.html">shared::Parser</a></div><div class="ttdoc">A class to parse strings into arbitrary constructs for the Solver to use. </div><div class="ttdef"><b>Definition:</b> <a href="parsers_8hpp_source.html#l00029">parsers.hpp:29</a></div></div>
+<div class="ttc" id="HeuristicFunction_8hpp_html"><div class="ttname"><a href="HeuristicFunction_8hpp.html">HeuristicFunction.hpp</a></div><div class="ttdoc">Contains a typedef for the &quot;HeuristicFunction&quot; type, which is represented via a function that takes p...</div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html">tag::TagMdpSolver</a></div><div class="ttdoc">Solves an MDP version of Tag. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8hpp_source.html#l00020">TagMdpSolver.hpp:20</a></div></div>
+<div class="ttc" id="classtag_1_1TagMdpParser_html_a8d89b984005a6af9b2fbd665eae28394"><div class="ttname"><a href="classtag_1_1TagMdpParser.html#a8d89b984005a6af9b2fbd665eae28394">tag::TagMdpParser::parse</a></div><div class="ttdeci">virtual solver::HeuristicFunction parse(solver::Solver *solver, std::vector&lt; std::string &gt; args)</div><div class="ttdoc">Creates a new strategy from a vector of arguments (as strings). </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00191">TagMdpSolver.cpp:191</a></div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html_a1831bbe43ec5c3cf09e778c2d7084933"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html#a1831bbe43ec5c3cf09e778c2d7084933">tag::TagMdpSolver::solve</a></div><div class="ttdeci">void solve()</div><div class="ttdoc">Solves the MDP. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00024">TagMdpSolver.cpp:24</a></div></div>
 <div class="ttc" id="classtag_1_1TagMdpSolver_html_a83092f178fcd9c905a6ea15d7a6cb34e"><div class="ttname"><a href="classtag_1_1TagMdpSolver.html#a83092f178fcd9c905a6ea15d7a6cb34e">tag::TagMdpSolver::getQValue</a></div><div class="ttdeci">double getQValue(TagState const &amp;state) const </div><div class="ttdoc">Calculates the exact value for the given state. </div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8cpp_source.html#l00170">TagMdpSolver.cpp:170</a></div></div>
 <div class="ttc" id="classtag_1_1TagState_html"><div class="ttname"><a href="classtag_1_1TagState.html">tag::TagState</a></div><div class="ttdef"><b>Definition:</b> <a href="TagState_8hpp_source.html#l00015">TagState.hpp:15</a></div></div>
 <div class="ttc" id="classsolver_1_1Solver_html"><div class="ttname"><a href="classsolver_1_1Solver.html">solver::Solver</a></div><div class="ttdoc">The core class of the ABT algorithm. </div><div class="ttdef"><b>Definition:</b> <a href="Solver_8hpp_source.html#l00065">Solver.hpp:65</a></div></div>
 <div class="ttc" id="classtag_1_1TagMdpParser_html"><div class="ttname"><a href="classtag_1_1TagMdpParser.html">tag::TagMdpParser</a></div><div class="ttdef"><b>Definition:</b> <a href="TagMdpSolver_8hpp_source.html#l00037">TagMdpSolver.hpp:37</a></div></div>
-<div class="ttc" id="namespacesolver_html_ab9e1b50ecb46556312c91f9349be3966"><div class="ttname"><a href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a></div><div class="ttdeci">std::function&lt; double(HistoryEntry const *, State const *, HistoricalData const *)&gt; Heuristic</div><div class="ttdoc">A typedef for the Heuristic type. </div><div class="ttdef"><b>Definition:</b> <a href="Heuristic_8hpp_source.html#l00017">Heuristic.hpp:17</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
-<div class="ttc" id="defs_8hpp_html_a61671c8dd4803bc1d9b5baca2eb52d70"><div class="ttname"><a href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a></div><div class="ttdeci">#define _NO_COPY_OR_MOVE(ClassName)</div><div class="ttdoc">A macro used to delete all copy- and move-constructors and -assignment operators. ...</div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00009">defs.hpp:9</a></div></div>
-<div class="ttc" id="Heuristic_8hpp_html"><div class="ttname"><a href="Heuristic_8hpp.html">Heuristic.hpp</a></div><div class="ttdoc">Contains a typedef for the &quot;Heuristic&quot; type, which is represented via a function that takes pointers ...</div></div>
+<div class="ttc" id="namespacesolver_html_a2652743b2b118d001615cc27ed0ce636"><div class="ttname"><a href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a></div><div class="ttdeci">std::function&lt; double(HistoryEntry const *, State const *, HistoricalData const *)&gt; HeuristicFunction</div><div class="ttdoc">A typedef for the HeuristicFunction type. </div><div class="ttdef"><b>Definition:</b> <a href="HeuristicFunction_8hpp_source.html#l00017">HeuristicFunction.hpp:17</a></div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
+<div class="ttc" id="defs_8hpp_html_a61671c8dd4803bc1d9b5baca2eb52d70"><div class="ttname"><a href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a></div><div class="ttdeci">#define _NO_COPY_OR_MOVE(ClassName)</div><div class="ttdoc">A macro used to delete all copy- and move-constructors and -assignment operators. ...</div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00015">defs.hpp:15</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

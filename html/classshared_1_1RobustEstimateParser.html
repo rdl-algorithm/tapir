@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: shared::RobustEstimateParser Class Reference</title>
+<title>TAPIR: shared::RobustEstimateParser Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -95,6 +95,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">shared::RobustEstimateParser Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A parser that estimates the value of a belief node based on the action with the highest visit count from that node.  
+ <a href="classshared_1_1RobustEstimateParser.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for shared::RobustEstimateParser:</div>
 <div class="dyncontent">
@@ -107,23 +112,64 @@ Inheritance diagram for shared::RobustEstimateParser:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae94f54d6498f4edbcd6e2fdbfe152cb0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae94f54d6498f4edbcd6e2fdbfe152cb0"></a>
-virtual std::unique_ptr<br class="typebreak"/>
+<tr class="memitem:ae94f54d6498f4edbcd6e2fdbfe152cb0"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr<br class="typebreak"/>
 &lt; <a class="el" href="classsolver_1_1EstimationStrategy.html">solver::EstimationStrategy</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1RobustEstimateParser.html#ae94f54d6498f4edbcd6e2fdbfe152cb0">parse</a> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *solver, std::vector&lt; std::string &gt; args) override</td></tr>
-<tr class="memdesc:ae94f54d6498f4edbcd6e2fdbfe152cb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new strategy from a vector of strings representing its arguments. <br/></td></tr>
+<tr class="memdesc:ae94f54d6498f4edbcd6e2fdbfe152cb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new strategy from a vector of arguments (as strings).  <a href="#ae94f54d6498f4edbcd6e2fdbfe152cb0">More...</a><br/></td></tr>
 <tr class="separator:ae94f54d6498f4edbcd6e2fdbfe152cb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00174">174</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
-</div><hr/>The documentation for this class was generated from the following files:<ul>
+<div class="textblock"><p>A parser that estimates the value of a belief node based on the action with the highest visit count from that node. </p>
+
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00248">248</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="ae94f54d6498f4edbcd6e2fdbfe152cb0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="classsolver_1_1EstimationStrategy.html">solver::EstimationStrategy</a> &gt; shared::RobustEstimateParser::parse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *&#160;</td>
+          <td class="paramname"><em>solver</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::string &gt;&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a new strategy from a vector of arguments (as strings). </p>
+
+<p>Implements <a class="el" href="classshared_1_1Parser.html#a7c51eda67dd14c3a0647cb2defd351f8">shared::Parser&lt; std::unique_ptr&lt; solver::EstimationStrategy &gt; &gt;</a>.</p>
+
+<p>Definition at line <a class="el" href="parsers_8cpp_source.html#l00173">173</a> of file <a class="el" href="parsers_8cpp_source.html">parsers.cpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/problems/shared/<a class="el" href="parsers_8hpp_source.html">parsers.hpp</a></li>
 <li>src/problems/shared/<a class="el" href="parsers_8cpp_source.html">parsers.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

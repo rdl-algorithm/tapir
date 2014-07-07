@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/shared/geometry/Rectangle2D.hpp Source File</title>
+<title>TAPIR: src/problems/shared/geometry/Rectangle2D.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -124,12 +124,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordtype">double</span> area_;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;};</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">inline</span> std::ostream &amp;<a class="code" href="namespacesolver.html#ab380d1baf631d2b6e81729344c1b45d2">operator&lt;&lt;</a>(std::ostream &amp;os, <a class="code" href="classgeometry_1_1Rectangle2D.html">Rectangle2D</a> <span class="keyword">const</span> &amp;rect) {</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">inline</span> std::ostream &amp;<a class="code" href="GridPosition_8hpp.html#acfb102b5ba4a6673eda2aaaf458d0b46">operator&lt;&lt;</a>(std::ostream &amp;os, <a class="code" href="classgeometry_1_1Rectangle2D.html">Rectangle2D</a> <span class="keyword">const</span> &amp;rect) {</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    rect.print(os);</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordflow">return</span> os;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">inline</span> std::istream &amp;operator&gt;&gt;(std::istream &amp;is, Rectangle2D &amp;rect) {</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">inline</span> std::istream &amp;<a class="code" href="GridPosition_8hpp.html#aa50fd78377fa65c23fcae744d491adfb">operator&gt;&gt;</a>(std::istream &amp;is, Rectangle2D &amp;rect) {</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    rect.loadFrom(is);</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordflow">return</span> is;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div>
@@ -139,13 +139,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* GEOMETRY_RECTANGLE2D_HPP_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="classgeometry_1_1Rectangle2D_html"><div class="ttname"><a href="classgeometry_1_1Rectangle2D.html">geometry::Rectangle2D</a></div><div class="ttdef"><b>Definition:</b> <a href="Rectangle2D_8hpp_source.html#l00010">Rectangle2D.hpp:10</a></div></div>
 <div class="ttc" id="classgeometry_1_1Point2D_html"><div class="ttname"><a href="classgeometry_1_1Point2D.html">geometry::Point2D</a></div><div class="ttdef"><b>Definition:</b> <a href="Point2D_8hpp_source.html#l00014">Point2D.hpp:14</a></div></div>
-<div class="ttc" id="global_8hpp_html_a080b7731c061f9bafcf79d5e2f0c388a"><div class="ttname"><a href="global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a">RandomGenerator</a></div><div class="ttdeci">std::default_random_engine RandomGenerator</div><div class="ttdoc">The RNG engine to use throughout the code. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00024">global.hpp:24</a></div></div>
-<div class="ttc" id="namespacesolver_html_ab380d1baf631d2b6e81729344c1b45d2"><div class="ttname"><a href="namespacesolver.html#ab380d1baf631d2b6e81729344c1b45d2">solver::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, HistoricalData const &amp;data)</div><div class="ttdoc">Uses the virtual print method to output HistoricalData to a stream. </div><div class="ttdef"><b>Definition:</b> <a href="HistoricalData_8hpp_source.html#l00037">HistoricalData.hpp:37</a></div></div>
-<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the ABT code. </div></div>
+<div class="ttc" id="global_8hpp_html_a080b7731c061f9bafcf79d5e2f0c388a"><div class="ttname"><a href="global_8hpp.html#a080b7731c061f9bafcf79d5e2f0c388a">RandomGenerator</a></div><div class="ttdeci">std::default_random_engine RandomGenerator</div><div class="ttdoc">The RNG engine to use throughout the code. </div><div class="ttdef"><b>Definition:</b> <a href="global_8hpp_source.html#l00025">global.hpp:25</a></div></div>
+<div class="ttc" id="GridPosition_8hpp_html_acfb102b5ba4a6673eda2aaaf458d0b46"><div class="ttname"><a href="GridPosition_8hpp.html#acfb102b5ba4a6673eda2aaaf458d0b46">operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, GridPosition const &amp;obj)</div><div class="ttdoc">A handy insertion operator for printing grid positions. </div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00064">GridPosition.hpp:64</a></div></div>
+<div class="ttc" id="GridPosition_8hpp_html_aa50fd78377fa65c23fcae744d491adfb"><div class="ttname"><a href="GridPosition_8hpp.html#aa50fd78377fa65c23fcae744d491adfb">operator&gt;&gt;</a></div><div class="ttdeci">std::istream &amp; operator&gt;&gt;(std::istream &amp;is, GridPosition &amp;obj)</div><div class="ttdoc">A handy extraction operator for reading GridPositions from a file. </div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00070">GridPosition.hpp:70</a></div></div>
+<div class="ttc" id="global_8hpp_html"><div class="ttname"><a href="global_8hpp.html">global.hpp</a></div><div class="ttdoc">Contains some key definitions used throughout the TAPIR code. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: rocksample::LegalActionsPool Class Reference</title>
+<title>TAPIR: rocksample::LegalActionsPool Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -122,6 +122,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aff30c07369ebfb852f6791b314657fb5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrocksample_1_1LegalActionsPool.html#aff30c07369ebfb852f6791b314657fb5">addMapping</a> (<a class="el" href="structGridPosition.html">GridPosition</a> position, <a class="el" href="classsolver_1_1DiscretizedActionMap.html">solver::DiscretizedActionMap</a> *map)</td></tr>
 <tr class="memdesc:aff30c07369ebfb852f6791b314657fb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a mapping to the saved entries for a given grid position.  <a href="#aff30c07369ebfb852f6791b314657fb5">More...</a><br/></td></tr>
 <tr class="separator:aff30c07369ebfb852f6791b314657fb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00b492906793ae873cf4987a162e0e81"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrocksample_1_1LegalActionsPool.html#a00b492906793ae873cf4987a162e0e81">removeMapping</a> (<a class="el" href="structGridPosition.html">GridPosition</a> position, <a class="el" href="classsolver_1_1DiscretizedActionMap.html">solver::DiscretizedActionMap</a> *map)</td></tr>
+<tr class="memdesc:a00b492906793ae873cf4987a162e0e81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a mapping from the saved entries for a given grid position.  <a href="#a00b492906793ae873cf4987a162e0e81">More...</a><br/></td></tr>
+<tr class="separator:a00b492906793ae873cf4987a162e0e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02369fa75b8983f889b480ae8c443a06"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a02369fa75b8983f889b480ae8c443a06"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setLegal</b> (bool isLegal, <a class="el" href="structGridPosition.html">GridPosition</a> position, <a class="el" href="classrocksample_1_1RockSampleAction.html">RockSampleAction</a> const &amp;action, <a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *solver)</td></tr>
 <tr class="separator:a02369fa75b8983f889b480ae8c443a06"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,7 +178,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setLegal</b> 
 
 <p>Adds a mapping to the saved entries for a given grid position. </p>
 
-<p>Definition at line <a class="el" href="LegalActionsPool_8cpp_source.html#l00044">44</a> of file <a class="el" href="LegalActionsPool_8cpp_source.html">LegalActionsPool.cpp</a>.</p>
+<p>Definition at line <a class="el" href="LegalActionsPool_8cpp_source.html#l00045">45</a> of file <a class="el" href="LegalActionsPool_8cpp_source.html">LegalActionsPool.cpp</a>.</p>
 
 </div>
 </div>
@@ -240,6 +243,44 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setLegal</b> 
 
 </div>
 </div>
+<a class="anchor" id="a00b492906793ae873cf4987a162e0e81"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rocksample::LegalActionsPool::removeMapping </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structGridPosition.html">GridPosition</a>&#160;</td>
+          <td class="paramname"><em>position</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1DiscretizedActionMap.html">solver::DiscretizedActionMap</a> *&#160;</td>
+          <td class="paramname"><em>map</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Removes a mapping from the saved entries for a given grid position. </p>
+
+<p>Definition at line <a class="el" href="LegalActionsPool_8cpp_source.html#l00049">49</a> of file <a class="el" href="LegalActionsPool_8cpp_source.html">LegalActionsPool.cpp</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/problems/rocksample/<a class="el" href="LegalActionsPool_8hpp_source.html">LegalActionsPool.hpp</a></li>
 <li>src/problems/rocksample/<a class="el" href="LegalActionsPool_8cpp_source.html">LegalActionsPool.cpp</a></li>
@@ -247,7 +288,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setLegal</b> 
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

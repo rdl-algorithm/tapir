@@ -20,7 +20,7 @@
 #include "solver/mappings/observations/ObservationMapping.hpp"
 
 namespace solver {
-DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, Heuristic heuristic) :
+DefaultHistoryCorrector::DefaultHistoryCorrector(Solver *solver, HeuristicFunction heuristic) :
             HistoryCorrector(solver),
             heuristic_(heuristic) {
 }
@@ -128,8 +128,8 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
         // Update our iteration variables.
         if (divergingEntryId != -1) {
             // Diverged => create a new node.
-            actualCurrentNode = getSolver()->getPolicy()->createOrGetChild(actualCurrentNode,
-                    *entry->getAction(), *entry->getObservation());
+            actualCurrentNode = actualCurrentNode->createOrGetChild(*entry->getAction(),
+                    *entry->getObservation());
             historyIterator++;
             entry = historyIterator->get();
             entry->registerNode(actualCurrentNode);
@@ -194,8 +194,8 @@ bool DefaultHistoryCorrector::reviseSequence(HistorySequence *sequence) {
     if (divergingEntryId != -1) {
         // Update the node pointers for the rest of the sequence.
         while (entry->getAction() != nullptr) {
-            actualCurrentNode = getSolver()->getPolicy()->createOrGetChild(actualCurrentNode,
-                    *entry->getAction(), *entry->getObservation());
+            actualCurrentNode = actualCurrentNode->createOrGetChild(*entry->getAction(),
+                    *entry->getObservation());
             historyIterator++;
             entry = historyIterator->get();
             entry->registerNode(actualCurrentNode);

@@ -55,7 +55,7 @@ ChangeSequence TextSerializer::loadChangeSequence(
     std::map<long, std::vector<std::unique_ptr<ModelChange>>> changes;
     std::string line;
     while (std::getline(is, line)) {
-        abt::trim(line);
+        tapir::trim(line);
         if (line.empty()) {
             continue;
         }
@@ -155,13 +155,13 @@ void TextSerializer::load(StatePool &pool, std::istream &is) {
 void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     os << "HistoryEntry < ";
     os << entry.owningSequence_->id_ << " " << entry.entryId_ << " >: (S";
-    abt::print_with_width(entry.stateInfo_->id_, os, 6,
+    tapir::print_with_width(entry.stateInfo_->id_, os, 6,
             std::ios_base::left);
 
     os << " ";
     std::stringstream sstr;
     saveAction(entry.action_.get(), sstr);
-    abt::print_with_width(sstr.str(), os,
+    tapir::print_with_width(sstr.str(), os,
             getActionColumnWidth(),
             std::ios_base::left);
 
@@ -169,7 +169,7 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     sstr.clear();
     sstr.str("");
     saveTransitionParameters(entry.transitionParameters_.get(), sstr);
-    abt::print_with_width(sstr.str(), os,
+    tapir::print_with_width(sstr.str(), os,
             getTPColumnWidth(),
             std::ios_base::left);
 
@@ -177,12 +177,12 @@ void TextSerializer::save(HistoryEntry const &entry, std::ostream &os) {
     sstr.clear();
     sstr.str("");
     saveObservation(entry.observation_.get(), sstr);
-    abt::print_with_width(sstr.str(), os,
+    tapir::print_with_width(sstr.str(), os,
             getObservationColumnWidth(),
             std::ios_base::left);
 
     os << " r:";
-    abt::print_double(entry.immediateReward_, os, 6, 2,
+    tapir::print_double(entry.immediateReward_, os, 6, 2,
             std::ios_base::fixed | std::ios_base::showpos
                     | std::ios_base::left);
 
@@ -280,12 +280,6 @@ void TextSerializer::save(ActionNode const &node, std::ostream &os) {
 
 void TextSerializer::load(ActionNode &node, std::istream &is) {
     node.setMapping(loadObservationMapping(&node, is));
-    for (ObservationMappingEntry const *entry : node.getMapping()->getAllEntries()) {
-        BeliefNode *childNode = entry->getBeliefNode();
-        if (childNode != nullptr) {
-            getSolver()->getPolicy()->addNode(childNode);
-        }
-    }
 }
 
 void TextSerializer::save(BeliefNode const &node, std::ostream &os) {

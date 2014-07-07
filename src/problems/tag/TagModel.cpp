@@ -47,7 +47,7 @@ namespace tag {
 TagUBParser::TagUBParser(TagModel *model) :
         model_(model) {
 }
-solver::Heuristic TagUBParser::parse(solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
+solver::HeuristicFunction TagUBParser::parse(solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
     return [this] (solver::HistoryEntry const *, solver::State const *state,
             solver::HistoricalData const *) {
         return model_->getUpperBoundHeuristicValue(*state);
@@ -327,7 +327,7 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
         pool = solver->getStatePool();
     }
 
-    solver::Heuristic heuristic = getHeuristicFunction();
+    solver::HeuristicFunction heuristic = getHeuristicFunction();
     std::vector<double> allHeuristicValues;
     if (pool != nullptr) {
         long nStates = pool->getNumberOfStates();

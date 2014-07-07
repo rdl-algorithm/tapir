@@ -24,7 +24,7 @@ struct TagOptions : public shared::SharedOptions {
 
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
         std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
-                "cfg/tag/default.cfg");
+                EXPAND_AND_QUOTE(ROOT_PATH) "/cfg/tag");
         addTagOptions(parser.get());
         return std::move(parser);
     }
@@ -32,7 +32,7 @@ struct TagOptions : public shared::SharedOptions {
     static void addTagOptions(options::OptionParser *parser) {
         parser->addOption<std::string>("problem", "mapPath", &TagOptions::mapPath);
         parser->addValueArg<std::string>("problem", "mapPath", &TagOptions::mapPath,
-                "m", "map", "the path to the map file", "path");
+                "m", "map", "the path to the map file (relative to the base config path)", "path");
 
         parser->addOption<double>("problem", "moveCost", &TagOptions::moveCost);
         parser->addOption<double>("problem", "tagReward", &TagOptions::tagReward);

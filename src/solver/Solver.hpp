@@ -106,12 +106,24 @@ public:
      */
     void improvePolicy(BeliefNode *startNode = nullptr,
             long numberOfHistories = -1, long maximumDepth = -1, double timeout = -1);
+
     /** Replenishes the particle count in the child node, ensuring that it
      * has at least the given number of particles
      * (-1 => default == model.getMinParticleCount())
      */
     BeliefNode *replenishChild(BeliefNode *currNode, Action const &action, Observation const &obs,
             long minParticleCount = -1);
+
+
+    /** Prunes all sibling nodes of the given node in the tree, i.e. all nodes that have the same
+     * parent belief node, but take a different action and observation.
+     */
+    long pruneSiblings(BeliefNode *node);
+
+    /** Prunes the subtree rooted at the given node, deleting all of the histories and all of
+     * the nodes in this subtree.
+     */
+    long pruneSubtree(BeliefNode *root);
 
     /* ------------------- Change handling methods ------------------- */
     /** Returns the current root node for changes. */
@@ -218,17 +230,17 @@ private:
     /** The serializer to be used with this solver. */
     std::unique_ptr<Serializer> serializer_;
 
+    /** The pool of actions (used to generate action mappings) */
+    std::unique_ptr<ActionPool> actionPool_;
+    /** The pool of observations (used to generate observation mappings) */
+    std::unique_ptr<ObservationPool> observationPool_;
+
     /** The pool of states. */
     std::unique_ptr<StatePool> statePool_;
     /** The full collection of simulated histories. */
     std::unique_ptr<Histories> histories_;
     /** The tree that stores the policy */
     std::unique_ptr<BeliefTree> policy_;
-
-    /** The pool of actions (used to generate action mappings) */
-    std::unique_ptr<ActionPool> actionPool_;
-    /** The pool of observations (used to generate observation mappings) */
-    std::unique_ptr<ObservationPool> observationPool_;
 
     /** The history corrector. */
     std::unique_ptr<HistoryCorrector> historyCorrector_;

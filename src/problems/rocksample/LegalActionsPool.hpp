@@ -30,6 +30,8 @@ class LegalActionsPool: public solver::EnumeratedActionPool {
 
     /** Adds a mapping to the saved entries for a given grid position. */
     virtual void addMapping(GridPosition position, solver::DiscretizedActionMap *map);
+    /** Removes a mapping from the saved entries for a given grid position. */
+    virtual void removeMapping(GridPosition position, solver::DiscretizedActionMap *map);
 
     /* Sets the legality of the given action from the current position.
      *
@@ -40,6 +42,12 @@ class LegalActionsPool: public solver::EnumeratedActionPool {
   private:
     RockSampleModel *model_;
     std::unordered_map<GridPosition, std::unordered_set<solver::DiscretizedActionMap *>> mappings_;
+};
+
+class LegalActionsMap : public solver::DiscretizedActionMap {
+public:
+    LegalActionsMap(solver::BeliefNode *owner, LegalActionsPool *pool, std::vector<long> binSequence);
+    ~LegalActionsMap();
 };
 
 class LegalActionsPoolTextSerializer: virtual public solver::DiscretizedActionTextSerializer {

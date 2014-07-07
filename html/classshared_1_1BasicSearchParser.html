@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: shared::BasicSearchParser Class Reference</title>
+<title>TAPIR: shared::BasicSearchParser Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -95,6 +95,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">shared::BasicSearchParser Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>The default parser for search strategies.  
+ <a href="classshared_1_1BasicSearchParser.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for shared::BasicSearchParser:</div>
 <div class="dyncontent">
@@ -107,26 +112,69 @@ Inheritance diagram for shared::BasicSearchParser:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a922128010e861625cd1e6a28bc1c8ea8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a922128010e861625cd1e6a28bc1c8ea8"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>BasicSearchParser</b> (<a class="el" href="classshared_1_1ParserSet.html">ParserSet</a>&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1StepGeneratorFactory.html">solver::StepGeneratorFactory</a> &gt;&gt; *generatorParsers, <a class="el" href="classshared_1_1ParserSet.html">ParserSet</a>&lt; <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a> &gt; *heuristicParsers, std::string heuristicString)</td></tr>
-<tr class="separator:a922128010e861625cd1e6a28bc1c8ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afabe3a7da3ff0b72dcf368413e73e2ce"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afabe3a7da3ff0b72dcf368413e73e2ce"></a>
-virtual std::unique_ptr<br class="typebreak"/>
+<tr class="memitem:a1126a28bf80b49928049e74fba774596"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1126a28bf80b49928049e74fba774596"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1BasicSearchParser.html#a1126a28bf80b49928049e74fba774596">BasicSearchParser</a> (<a class="el" href="classshared_1_1ParserSet.html">ParserSet</a>&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1StepGeneratorFactory.html">solver::StepGeneratorFactory</a> &gt;&gt; *generatorParsers, <a class="el" href="classshared_1_1ParserSet.html">ParserSet</a>&lt; <a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a> &gt; *heuristicParsers, std::string heuristicString)</td></tr>
+<tr class="memdesc:a1126a28bf80b49928049e74fba774596"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new parser for basic search strategies, which will use the given set of parsers for StepGeneratorFactory instances and the given set of heuristic parsers, using heuristicString as the default heuristic. <br/></td></tr>
+<tr class="separator:a1126a28bf80b49928049e74fba774596"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afabe3a7da3ff0b72dcf368413e73e2ce"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr<br class="typebreak"/>
 &lt; <a class="el" href="classsolver_1_1SearchStrategy.html">solver::SearchStrategy</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1BasicSearchParser.html#afabe3a7da3ff0b72dcf368413e73e2ce">parse</a> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *solver, std::vector&lt; std::string &gt; args) override</td></tr>
-<tr class="memdesc:afabe3a7da3ff0b72dcf368413e73e2ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new strategy from a vector of strings representing its arguments. <br/></td></tr>
+<tr class="memdesc:afabe3a7da3ff0b72dcf368413e73e2ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new strategy from a vector of arguments (as strings).  <a href="#afabe3a7da3ff0b72dcf368413e73e2ce">More...</a><br/></td></tr>
 <tr class="separator:afabe3a7da3ff0b72dcf368413e73e2ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00131">131</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
-</div><hr/>The documentation for this class was generated from the following files:<ul>
+<div class="textblock"><p>The default parser for search strategies. </p>
+<p>The strategy can be expressed as "stepper", in which case the standard heuristic function will be used, or it can also be expressed as "basic(stepper, heuristic)", which allows for a choice between different heuristics as compared to other strategies. </p>
+
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00185">185</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="afabe3a7da3ff0b72dcf368413e73e2ce"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="classsolver_1_1SearchStrategy.html">solver::SearchStrategy</a> &gt; shared::BasicSearchParser::parse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *&#160;</td>
+          <td class="paramname"><em>solver</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::string &gt;&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a new strategy from a vector of arguments (as strings). </p>
+
+<p>Implements <a class="el" href="classshared_1_1Parser.html#a7c51eda67dd14c3a0647cb2defd351f8">shared::Parser&lt; std::unique_ptr&lt; solver::SearchStrategy &gt; &gt;</a>.</p>
+
+<p>Definition at line <a class="el" href="parsers_8cpp_source.html#l00130">130</a> of file <a class="el" href="parsers_8cpp_source.html">parsers.cpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/problems/shared/<a class="el" href="parsers_8hpp_source.html">parsers.hpp</a></li>
 <li>src/problems/shared/<a class="el" href="parsers_8cpp_source.html">parsers.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

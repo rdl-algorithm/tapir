@@ -11,7 +11,7 @@
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/parsers.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 namespace rocksample {
 class RockSampleModel;
@@ -51,13 +51,13 @@ private:
     std::map<std::pair<int, int>, double> valueMap_;
 };
 
-class RockSampleMdpParser : public shared::Parser<solver::Heuristic> {
+class RockSampleMdpParser : public shared::Parser<solver::HeuristicFunction> {
 public:
     RockSampleMdpParser(RockSampleModel *model);
     virtual ~RockSampleMdpParser() = default;
     _NO_COPY_OR_MOVE(RockSampleMdpParser);
 
-    virtual solver::Heuristic parse(solver::Solver *solver, std::vector<std::string> args);
+    virtual solver::HeuristicFunction parse(solver::Solver *solver, std::vector<std::string> args);
 private:
     RockSampleModel *model_;
 };

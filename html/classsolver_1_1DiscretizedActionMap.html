@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::DiscretizedActionMap Class Reference</title>
+<title>TAPIR: solver::DiscretizedActionMap Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -108,7 +108,8 @@ Inheritance diagram for solver::DiscretizedActionMap:</div>
  <div class="center">
   <img src="classsolver_1_1DiscretizedActionMap.png" usemap="#solver::DiscretizedActionMap_map" alt=""/>
   <map id="solver::DiscretizedActionMap_map" name="solver::DiscretizedActionMap_map">
-<area href="classsolver_1_1ActionMapping.html" title="An abstract base class that defines a mapping of the actions of a belief to (belief, action) edges in the belief tree; these edges are represented by the ActionMappingEntry class. " alt="solver::ActionMapping" shape="rect" coords="0,0,177,24"/>
+<area href="classsolver_1_1ActionMapping.html" title="An abstract base class that defines a mapping of the actions of a belief to (belief, action) edges in the belief tree; these edges are represented by the ActionMappingEntry class. " alt="solver::ActionMapping" shape="rect" coords="0,0,180,24"/>
+<area href="classrocksample_1_1LegalActionsMap.html" alt="rocksample::LegalActionsMap" shape="rect" coords="0,112,180,136"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -126,6 +127,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c0855c6c55eaacfc6caba7ce95b4e04"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#a3c0855c6c55eaacfc6caba7ce95b4e04">getNChildren</a> () const override</td></tr>
 <tr class="memdesc:a3c0855c6c55eaacfc6caba7ce95b4e04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of child action nodes owned by this mapping.  <a href="#a3c0855c6c55eaacfc6caba7ce95b4e04">More...</a><br/></td></tr>
 <tr class="separator:a3c0855c6c55eaacfc6caba7ce95b4e04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a188fb19ab7486c3d4970fe6adc608af3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#a188fb19ab7486c3d4970fe6adc608af3">deleteChild</a> (<a class="el" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> const *entry) override</td></tr>
+<tr class="memdesc:a188fb19ab7486c3d4970fe6adc608af3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes the child in the given entry, as well as the entire corresponding subtree.  <a href="#a188fb19ab7486c3d4970fe6adc608af3">More...</a><br/></td></tr>
+<tr class="separator:a188fb19ab7486c3d4970fe6adc608af3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a510c9a510e5db0cc134c7ef867e5b7cf"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
+&lt; <a class="el" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#a510c9a510e5db0cc134c7ef867e5b7cf">getChildEntries</a> () const override</td></tr>
+<tr class="memdesc:a510c9a510e5db0cc134c7ef867e5b7cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns all entries in this mapping that have a child node associated with them.  <a href="#a510c9a510e5db0cc134c7ef867e5b7cf">More...</a><br/></td></tr>
+<tr class="separator:a510c9a510e5db0cc134c7ef867e5b7cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d381fa8a58104b7bb22814d5fe3d4a3"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#a9d381fa8a58104b7bb22814d5fe3d4a3">getNumberOfVisitedEntries</a> () const override</td></tr>
 <tr class="memdesc:a9d381fa8a58104b7bb22814d5fe3d4a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of entries in this mapping with a nonzero visit count.  <a href="#a9d381fa8a58104b7bb22814d5fe3d4a3">More...</a><br/></td></tr>
 <tr class="separator:a9d381fa8a58104b7bb22814d5fe3d4a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -171,9 +179,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a37a0dee924060f696539d58069564517"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#a37a0dee924060f696539d58069564517">numberOfVisitedEntries_</a></td></tr>
 <tr class="memdesc:a37a0dee924060f696539d58069564517"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of entries with nonzero visit counts.  <a href="#a37a0dee924060f696539d58069564517">More...</a><br/></td></tr>
 <tr class="separator:a37a0dee924060f696539d58069564517"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af77292cfb1c26129e655f8e5fa3d9b54"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classabt_1_1LinkedHashSet.html">abt::LinkedHashSet</a>&lt; long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#af77292cfb1c26129e655f8e5fa3d9b54">binSequence_</a></td></tr>
-<tr class="memdesc:af77292cfb1c26129e655f8e5fa3d9b54"><td class="mdescLeft">&#160;</td><td class="mdescRight">The sequence of bins to be visited.  <a href="#af77292cfb1c26129e655f8e5fa3d9b54">More...</a><br/></td></tr>
-<tr class="separator:af77292cfb1c26129e655f8e5fa3d9b54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae33eb2b351159b67f814386ddcb3ad0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtapir_1_1LinkedHashSet.html">tapir::LinkedHashSet</a>&lt; long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#aae33eb2b351159b67f814386ddcb3ad0">binSequence_</a></td></tr>
+<tr class="memdesc:aae33eb2b351159b67f814386ddcb3ad0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The sequence of bins to be visited.  <a href="#aae33eb2b351159b67f814386ddcb3ad0">More...</a><br/></td></tr>
+<tr class="separator:aae33eb2b351159b67f814386ddcb3ad0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a068795549c4404c32f22170cd202d64e"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DiscretizedActionMap.html#a068795549c4404c32f22170cd202d64e">totalVisitCount_</a></td></tr>
 <tr class="memdesc:a068795549c4404c32f22170cd202d64e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The total of the visit counts of all of the individual entries.  <a href="#a068795549c4404c32f22170cd202d64e">More...</a><br/></td></tr>
 <tr class="separator:a068795549c4404c32f22170cd202d64e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -261,6 +269,36 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 </div>
 </div>
+<a class="anchor" id="a188fb19ab7486c3d4970fe6adc608af3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void solver::DiscretizedActionMap::deleteChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> const *&#160;</td>
+          <td class="paramname"><em>entry</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deletes the child in the given entry, as well as the entire corresponding subtree. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#a56e65ecc7ea8ee491aa5d92ba0b3c891">solver::ActionMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00080">80</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a69c56c8b5f5ec3becc61b6112e938d47"></a>
 <div class="memitem">
 <div class="memproto">
@@ -291,6 +329,35 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 </div>
 </div>
+<a class="anchor" id="a510c9a510e5db0cc134c7ef867e5b7cf"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="classsolver_1_1ActionMappingEntry.html">ActionMappingEntry</a> const * &gt; solver::DiscretizedActionMap::getChildEntries </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns all entries in this mapping that have a child node associated with them. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#a07dca0276c9b1e845ba9f6501b92f47d">solver::ActionMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00092">92</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="adb0cdd47945c40066d50de3d109dcde7"></a>
 <div class="memitem">
 <div class="memproto">
@@ -317,7 +384,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#a9de12f0eb48800db09b33a8af73c8ba5">solver::ActionMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00097">97</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00118">118</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
 
 </div>
 </div>
@@ -348,7 +415,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#a530ea902ed34f6ec1a88ad6752186679">solver::ActionMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00101">101</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00122">122</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
 
 </div>
 </div>
@@ -406,7 +473,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#aae4246fd955d59ec925b839867a8463d">solver::ActionMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00106">106</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00128">128</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
 
 </div>
 </div>
@@ -436,7 +503,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#ac766cc9080125f34f159ec5937182dcd">solver::ActionMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00081">81</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00102">102</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
 
 </div>
 </div>
@@ -465,7 +532,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#acc3e52e072b1e0536100033b0bd7bc28">solver::ActionMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00115">115</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00137">137</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
 
 </div>
 </div>
@@ -495,12 +562,12 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>Implements <a class="el" href="classsolver_1_1ActionMapping.html#a8cc7d90a585f07a41ed0a5fe245b00d7">solver::ActionMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00084">84</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8cpp_source.html#l00105">105</a> of file <a class="el" href="discretized__actions_8cpp_source.html">discretized_actions.cpp</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a class="anchor" id="af77292cfb1c26129e655f8e5fa3d9b54"></a>
+<a class="anchor" id="aae33eb2b351159b67f814386ddcb3ad0"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -508,7 +575,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classabt_1_1LinkedHashSet.html">abt::LinkedHashSet</a>&lt;long&gt; solver::DiscretizedActionMap::binSequence_</td>
+          <td class="memname"><a class="el" href="classtapir_1_1LinkedHashSet.html">tapir::LinkedHashSet</a>&lt;long&gt; solver::DiscretizedActionMap::binSequence_</td>
         </tr>
       </table>
   </td>
@@ -520,7 +587,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>The sequence of bins to be visited. </p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00139">139</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00143">143</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
 
 </div>
 </div>
@@ -544,7 +611,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>The array of mapping entries - the bin number corresponds to the position in the array. </p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00132">132</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00136">136</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
 
 </div>
 </div>
@@ -568,7 +635,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>The number of action node children that have been created. </p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00134">134</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00138">138</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
 
 </div>
 </div>
@@ -592,7 +659,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>The number of bins in the mapping; equal to the number of entries in the array. </p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00130">130</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00134">134</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
 
 </div>
 </div>
@@ -616,7 +683,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>The number of entries with nonzero visit counts. </p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00136">136</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00140">140</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
 
 </div>
 </div>
@@ -640,7 +707,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>The pool associated with this mapping. </p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00127">127</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00131">131</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
 
 </div>
 </div>
@@ -664,7 +731,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 
 <p>The total of the visit counts of all of the individual entries. </p>
 
-<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00142">142</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
+<p>Definition at line <a class="el" href="discretized__actions_8hpp_source.html#l00146">146</a> of file <a class="el" href="discretized__actions_8hpp_source.html">discretized_actions.hpp</a>.</p>
 
 </div>
 </div>
@@ -675,7 +742,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DiscretizedActionMap
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

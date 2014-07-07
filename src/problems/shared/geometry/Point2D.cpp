@@ -41,8 +41,8 @@ bool Point2D::equals(const Point& otherPoint) const {
 
 std::size_t Point2D::hash() const {
     std::size_t hashValue = 0;
-    abt::hash_combine(hashValue, x_);
-    abt::hash_combine(hashValue, y_);
+    tapir::hash_combine(hashValue, x_);
+    tapir::hash_combine(hashValue, y_);
     return hashValue;
 }
 

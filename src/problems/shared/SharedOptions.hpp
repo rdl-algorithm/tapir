@@ -1,3 +1,8 @@
+/** @file SharedOptions.hpp
+ *
+ * Defines the SharedOptions class, which comes with additional configuration options that apply
+ * to many problems.
+ */
 #ifndef SHAREDOPTIONS_HPP_
 #define SHAREDOPTIONS_HPP_
 
@@ -6,12 +11,20 @@
 #include "solver/abstract-problem/Options.hpp"
 
 namespace shared {
+/** An expanded Options class, which comes with some additional settings that are shared by many
+ * of the individual example problems.
+ *
+ * These extra configuration options allow for extra configuration at runtime instead of
+ * compile-time.
+ */
 struct SharedOptions: public solver::Options {
     SharedOptions() = default;
     virtual ~SharedOptions() = default;
 
     /* ---------------------- Generic settings  ------------------ */
-    /** The path to the configuration file. */
+    /** The base config path - the path of the configuration files will be relative to this path. */
+    std::string baseConfigPath = "";
+    /** The path to the configuration file (relative to baseConfigPath). */
     std::string configPath = "";
     /** The path to the policy file. */
     std::string policyPath = "";
@@ -35,38 +48,47 @@ struct SharedOptions: public solver::Options {
     bool hasChanges = false;
     /** True iff the changes are dynamic. */
     bool areDynamic = false;
-    /** The path to the change file. */
+    /** The path to the change file (relative to baseConfigPath) */
     std::string changesPath = "";
 
     /* ---------- ABT settings: advanced customization  ---------- */
     /** The heuristic used for searches. */
     std::string searchHeuristic = "";
-    /* The search strategy to use. */
+    /** The search strategy to use. */
     std::string searchStrategy = "";
-    /* The function to estimate the value of a belief. */
+    /** The function to estimate the value of a belief. */
     std::string estimator = "";
-    /* The maximum distance between observations to group together; only applicable if
+    /** The maximum distance between observations to group together; only applicable if
      * approximate observations are in use. */
     double maxObservationDistance = 0.0;
 
-
-
+    /** Makes a parser which can parse options from config files, or from the command line,
+     * into a SharedOptions instance.
+     */
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating,
-            std::string defaultConfigPath) {
+            std::string defaultBaseConfigPath) {
         std::unique_ptr<options::OptionParser> parser = std::make_unique<options::OptionParser>(
-                "ABT command line interface");
-        addGenericOptions(parser.get(), defaultConfigPath);
+                "TAPIR command line interface");
+        addGenericOptions(parser.get(), defaultBaseConfigPath);
         addSimulationOptions(parser.get(), simulating);
         addABTOptions(parser.get());
         addProblemOptions(parser.get());
         return std::move(parser);
     }
 
-    static void addGenericOptions(options::OptionParser *parser, std::string defaultConfigPath) {
+    /** Adds generic options for this SharedOptions instance to the given parser, using the
+     * given default configuration file path.
+     */
+    static void addGenericOptions(options::OptionParser *parser, std::string defaultBaseConfigPath) {
+        parser->addOptionWithDefault<std::string>("", "baseConfigPath",
+                &SharedOptions::baseConfigPath, defaultBaseConfigPath);
+        parser->addValueArg("", "baseConfigPath", &SharedOptions::baseConfigPath, "b", "base-path",
+                "the base config path", "path");
+
         parser->addOptionWithDefault<std::string>("", "cfg", &SharedOptions::configPath,
-                defaultConfigPath);
-        parser->addValueArg("", "cfg", &SharedOptions::configPath, "f", "cfg", "config file path",
-                "path");
+                "default.cfg");
+        parser->addValueArg("", "cfg", &SharedOptions::configPath, "f", "cfg",
+                "config file path (relative to the base config path)", "path");
 
         parser->addOptionWithDefault<std::string>("", "policy", &SharedOptions::policyPath,
                 "pol.pol");
@@ -84,12 +106,19 @@ struct SharedOptions: public solver::Options {
         parser->addOptionWithDefault("", "color", &SharedOptions::hasColorOutput, false);
         parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "c", "color",
                 "use color output", true);
+        parser->addSwitchArg("", "color", &SharedOptions::hasColorOutput, "", "no-color",
+                        "don't use color output", false);
 
         parser->addOptionWithDefault("", "verbose", &SharedOptions::hasVerboseOutput, false);
         parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "v", "verbose",
                         "use verbose output", true);
+        parser->addSwitchArg("", "verbose", &SharedOptions::hasVerboseOutput, "", "no-verbose",
+                        "don't use verbose output", false);
     }
 
+    /** Adds simulation-related options for this SharedOptions instance to the given parser;
+     * some of these options will be mandatory if simulating, or optional if not simulating.
+     */
     static void addSimulationOptions(options::OptionParser *parser, bool simulating) {
         parser->addOptionWithDefault<std::string>("", "log", &SharedOptions::logPath, "log.log");
 
@@ -102,9 +131,12 @@ struct SharedOptions: public solver::Options {
             parser->addOptionWithDefault<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps, 200);
             parser->addOptionWithDefault<unsigned long>("ABT", "minParticleCount",
                     &Options::minParticleCount, 5000);
+            parser->addOptionWithDefault<bool>("ABT", "pruneEveryStep",
+                                &Options::pruneEveryStep, true);
         } else {
             parser->addOption<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps);
             parser->addOption<unsigned long>("ABT", "minParticleCount", &Options::minParticleCount);
+            parser->addOption<bool>("ABT", "pruneEveryStep", &Options::pruneEveryStep);
         }
 
         parser->addOptionWithDefault<long>("simulation", "nRuns", &SharedOptions::nRuns, 1);
@@ -123,13 +155,22 @@ struct SharedOptions: public solver::Options {
                     " to the past or to alternate futures).", true);
 
             parser->addValueArg("changes", "changesPath", &SharedOptions::changesPath,
-                    "g", "changes-path", "path to file with runtime changes", "path");
+                    "g", "changes-path",
+                    "path to file with runtime changes (relative to the base config path)", "path");
             parser->addValueArg<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps,
                     "n", "steps", "Maximum number of steps to simulate", "int");
             parser->addValueArg<unsigned long>("ABT", "minParticleCount",
                     &Options::minParticleCount, "z", "min-particles", "Minimum allowable particles"
                             " per belief during simulation - if the count drops below this value,"
                             " extra particles will be resampled via a particle filter.", "int");
+            parser->addSwitchArg("ABT", "pruneEveryStep",
+                    &Options::pruneEveryStep, "", "prune", "Prune after every step"
+                            " of the simulation.", true);
+            parser->addSwitchArg("ABT", "pruneEveryStep",
+                    &Options::pruneEveryStep, "", "no-prune", "Don't prune after every step"
+                            " of the simulation.", false);
+
+
             parser->addValueArg<long>("simulation", "nRuns", &SharedOptions::nRuns,
                                 "r", "runs", "Number of runs", "int");
 
@@ -139,6 +180,7 @@ struct SharedOptions: public solver::Options {
         }
     }
 
+    /** Adds core ABT options for this SharedOptions instance to the given parser. */
     static void addABTOptions(options::OptionParser *parser) {
         parser->addOption<unsigned long>("ABT", "historiesPerStep", &Options::historiesPerStep);
         parser->addValueArg<unsigned long>("ABT", "historiesPerStep", &Options::historiesPerStep,
@@ -160,6 +202,7 @@ struct SharedOptions: public solver::Options {
                 &SharedOptions::maxObservationDistance, 0.0);
     }
 
+    /** Adds the discountFactor option to the given parser. */
     static void addProblemOptions(options::OptionParser *parser) {
         parser->addOption<double>("problem", "discountFactor", &Options::discountFactor);
         parser->addValueArg<double>("problem", "discountFactor", &Options::discountFactor,

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::BeliefTree Class Reference</title>
+<title>TAPIR: solver::BeliefTree Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -119,15 +119,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a627166207b6fc95d68be095a91f41920"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefTree.html#a627166207b6fc95d68be095a91f41920">getNodes</a> () const </td></tr>
 <tr class="memdesc:a627166207b6fc95d68be095a91f41920"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a vector of all belief nodes within the policy.  <a href="#a627166207b6fc95d68be095a91f41920">More...</a><br/></td></tr>
 <tr class="separator:a627166207b6fc95d68be095a91f41920"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4be72f13760b5e9c9db9473da420f05e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefTree.html#a4be72f13760b5e9c9db9473da420f05e">createOrGetChild</a> (<a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *node, <a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> const &amp;action, <a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs)</td></tr>
-<tr class="memdesc:a4be72f13760b5e9c9db9473da420f05e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a child belief node to the given belief node; this node will be added to the flattened node list if and only if it is actually new.  <a href="#a4be72f13760b5e9c9db9473da420f05e">More...</a><br/></td></tr>
-<tr class="separator:a4be72f13760b5e9c9db9473da420f05e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
 Friends</h2></td></tr>
 <tr class="memitem:aed9a9e482e8f2e524fb3f511b05d7b0d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed9a9e482e8f2e524fb3f511b05d7b0d"></a>
 class&#160;</td><td class="memItemRight" valign="bottom"><b>Agent</b></td></tr>
 <tr class="separator:aed9a9e482e8f2e524fb3f511b05d7b0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd77cf916bae4170c0bd7c375fcb5a7f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abd77cf916bae4170c0bd7c375fcb5a7f"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>BeliefNode</b></td></tr>
+<tr class="separator:abd77cf916bae4170c0bd7c375fcb5a7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ca4aaf1748c1b1206c21809364ea084"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3ca4aaf1748c1b1206c21809364ea084"></a>
 class&#160;</td><td class="memItemRight" valign="bottom"><b>HistorySequence</b></td></tr>
 <tr class="separator:a3ca4aaf1748c1b1206c21809364ea084"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -166,43 +166,6 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a4be72f13760b5e9c9db9473da420f05e"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> * solver::BeliefTree::createOrGetChild </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td>
-          <td class="paramname"><em>node</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> const &amp;&#160;</td>
-          <td class="paramname"><em>action</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;&#160;</td>
-          <td class="paramname"><em>obs</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Adds a child belief node to the given belief node; this node will be added to the flattened node list if and only if it is actually new. </p>
-<p>Use this method with care! </p>
-
-<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00057">57</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="ac332bc9218363086f37abedbeb58804b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -219,7 +182,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Retrieves the node with the given ID. </p>
 
-<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00039">39</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00038">38</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
 
 </div>
 </div>
@@ -238,7 +201,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Retrieves a vector of all belief nodes within the policy. </p>
 
-<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00052">52</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00051">51</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
 
 </div>
 </div>
@@ -257,7 +220,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the number of belief nodes. </p>
 
-<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00049">49</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00048">48</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
 
 </div>
 </div>
@@ -276,7 +239,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the root node. </p>
 
-<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00036">36</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefTree_8cpp_source.html#l00035">35</a> of file <a class="el" href="BeliefTree_8cpp_source.html">BeliefTree.cpp</a>.</p>
 
 </div>
 </div>
@@ -287,7 +250,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

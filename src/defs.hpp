@@ -5,6 +5,12 @@
 #ifndef DEFS_HPP_
 #define DEFS_HPP_
 
+/** A macro for quoting strings. */
+#define QUOTE(str) #str
+/** A macro that quotes properly, by first expanding other macros, and then quoting that. */
+#define EXPAND_AND_QUOTE(str) QUOTE(str)
+
+
 /** A macro used to delete all copy- and move-constructors and -assignment operators */
 #define _NO_COPY_OR_MOVE(ClassName) \
     ClassName(ClassName const &) = delete; \

@@ -24,13 +24,18 @@
 
 namespace solver {
 /* --------------------- DiscreteObservationPool --------------------- */
+DiscreteObservationPool::DiscreteObservationPool(Solver *solver) :
+    solver_(solver) {
+}
+
 std::unique_ptr<ObservationMapping> DiscreteObservationPool::createObservationMapping(ActionNode *owner) {
-    return std::make_unique<DiscreteObservationMap>(owner);
+    return std::make_unique<DiscreteObservationMap>(owner, solver_);
 }
 
 /* ---------------------- DiscreteObservationMap ---------------------- */
-DiscreteObservationMap::DiscreteObservationMap(ActionNode *owner) :
+DiscreteObservationMap::DiscreteObservationMap(ActionNode *owner, Solver *solver) :
         ObservationMapping(owner),
+        solver_(solver),
         childMap_(),
         totalVisitCount_(0) {
 }
@@ -48,7 +53,7 @@ BeliefNode* DiscreteObservationMap::createBelief(const Observation& obs) {
           std::make_unique<DiscreteObservationMapEntry>());
     entry->map_ = this;
     entry->observation_ = obs.copy();
-    entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
+    entry->childNode_ = std::make_unique<BeliefNode>(entry.get(), solver_);
     BeliefNode *node = entry->childNode_.get();
 
     childMap_.emplace(obs.copy(), std::move(entry));
@@ -58,6 +63,18 @@ long DiscreteObservationMap::getNChildren() const {
     return childMap_.size();
 }
 
+void DiscreteObservationMap::deleteChild(ObservationMappingEntry const *entry) {
+    totalVisitCount_ -= entry->getVisitCount(); // Negate the visit count.
+    childMap_.erase(childMap_.find(entry->getObservation())); // Now delete the entry altogether.
+}
+
+std::vector<ObservationMappingEntry const *> DiscreteObservationMap::getChildEntries() const {
+    std::vector<ObservationMappingEntry const *> returnEntries;
+    for (ChildMap::value_type const &mapEntry : childMap_) {
+        returnEntries.push_back(mapEntry.second.get());
+    }
+    return returnEntries;
+}
 ObservationMappingEntry *DiscreteObservationMap::getEntry(Observation const &obs) {
     try {
         return childMap_.at(obs.copy()).get();
@@ -71,13 +88,6 @@ ObservationMappingEntry const *DiscreteObservationMap::getEntry(Observation cons
     } catch (const std::out_of_range &oor) {
         return nullptr;
     }
-}
-std::vector<ObservationMappingEntry const *> DiscreteObservationMap::getAllEntries() const {
-    std::vector<ObservationMappingEntry const *> returnEntries;
-    for (ChildMap::value_type const &mapEntry : childMap_) {
-        returnEntries.push_back(mapEntry.second.get());
-    }
-    return returnEntries;
 }
 
 long DiscreteObservationMap::getTotalVisitCount() const {
@@ -169,7 +179,7 @@ std::unique_ptr<ObservationMapping> DiscreteObservationTextSerializer::loadObser
                     std::make_unique<DiscreteObservationMapEntry>());
         entry->map_ = &discMap;
         entry->observation_ = std::move(obs);
-        entry->childNode_ = std::make_unique<BeliefNode>(childId, entry.get());
+        entry->childNode_ = std::make_unique<BeliefNode>(childId, entry.get(), getSolver());
         entry->visitCount_ = visitCount;
 
         // Add the entry to the map

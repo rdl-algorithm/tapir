@@ -40,7 +40,8 @@ Simulator::Simulator(std::unique_ptr<Model> model, Solver *solver, bool hasDynam
         actualHistory_(std::make_unique<HistorySequence>()),
         totalChangingTime_(0.0),
         totalReplenishingTime_(0.0),
-        totalImprovementTime_(0.0) {
+        totalImprovementTime_(0.0),
+        totalPruningTime_(0.0) {
     std::unique_ptr<State> initialState = model_->sampleAnInitState();
     StateInfo *initInfo = solver_->getStatePool()->createOrGetInfo(*initialState);
     HistoryEntry *newEntry = actualHistory_->addEntry();
@@ -77,6 +78,9 @@ double Simulator::getTotalReplenishingTime() const {
 }
 double Simulator::getTotalImprovementTime() const {
     return totalImprovementTime_;
+}
+double Simulator::getTotalPruningTime() const {
+    return totalPruningTime_;
 }
 
 
@@ -138,22 +142,22 @@ bool Simulator::stepSimulation() {
         if (options_->hasVerboseOutput) {
             cout << "Model changing." << endl;
         }
-        double changingTimeStart = abt::clock_ms();
+        double changingTimeStart = tapir::clock_ms();
         // Apply all the changes!
         bool noError = handleChanges(iter->second, hasDynamicChanges_);
         if (!noError) {
             return false;
         }
-        double changingTime = abt::clock_ms() - changingTimeStart;
+        double changingTime = tapir::clock_ms() - changingTimeStart;
         if (options_->hasVerboseOutput) {
             cout << "Changes complete" << endl;
             cout << "Total of " << changingTime << " ms used for changes." << endl;
         }
     }
 
-    double impSolTimeStart = abt::clock_ms();
+    double impSolTimeStart = tapir::clock_ms();
     solver_->improvePolicy(currentBelief);
-    totalImprovementTime_ += (abt::clock_ms() - impSolTimeStart);
+    totalImprovementTime_ += (tapir::clock_ms() - impSolTimeStart);
 
     if (options_->hasVerboseOutput) {
         std::stringstream newStream;
@@ -193,11 +197,23 @@ bool Simulator::stepSimulation() {
         cout << totalDiscountedReward_ << endl;
     }
 
-    double replenishTimeStart = abt::clock_ms();
+    // Replenish the particles.
+    double replenishTimeStart = tapir::clock_ms();
     solver_->replenishChild(currentBelief, *result.action, *result.observation);
-    totalReplenishingTime_ += abt::clock_ms() - replenishTimeStart;
+    totalReplenishingTime_ += tapir::clock_ms() - replenishTimeStart;
+
+    // Update the agent's belief.
     agent_->updateBelief(*result.action, *result.observation);
     currentBelief = agent_->getCurrentBelief();
+
+    // If we're pruning on every step, we do it now.
+    if (options_->pruneEveryStep) {
+        double pruningTimeStart = tapir::clock_ms();
+        long nSequencesDeleted = solver_->pruneSiblings(currentBelief);
+        long pruningTime = tapir::clock_ms() - pruningTimeStart;
+        totalPruningTime_ += pruningTime;
+        cout << "Pruned " << nSequencesDeleted << " sequences in " << pruningTime << "ms.";
+    }
 
     currentEntry->action_ = std::move(result.action);
     currentEntry->observation_ = std::move(result.observation);
@@ -231,9 +247,9 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
 
     model_->applyChanges(changes, nullptr);
 
-    double startTime = abt::clock_ms();
+    double startTime = tapir::clock_ms();
     solverModel_->applyChanges(changes, solver_);
-    totalChangingTime_ += abt::clock_ms() - startTime;
+    totalChangingTime_ += tapir::clock_ms() - startTime;
 
     // If the current state is deleted, the simulation is broken!
     StateInfo const *lastInfo = actualHistory_->getLastEntry()->getStateInfo();
@@ -257,9 +273,9 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
     }
 
     // Finally we apply the changes.
-    startTime = abt::clock_ms();
+    startTime = tapir::clock_ms();
     solver_->applyChanges();
-    totalChangingTime_ += abt::clock_ms() - startTime;
+    totalChangingTime_ += tapir::clock_ms() - startTime;
     return true;
 }
 

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::ApproximateObservationMap Class Reference</title>
+<title>TAPIR: solver::ApproximateObservationMap Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -113,10 +113,10 @@ Inheritance diagram for solver::ApproximateObservationMap:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab3c108537c219db4706f62ac9984e87d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab3c108537c219db4706f62ac9984e87d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#ab3c108537c219db4706f62ac9984e87d">ApproximateObservationMap</a> (<a class="el" href="classsolver_1_1ActionNode.html">ActionNode</a> *owner, double maxDistance)</td></tr>
-<tr class="memdesc:ab3c108537c219db4706f62ac9984e87d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classsolver_1_1ApproximateObservationMap.html" title="A concrete class implementing ObservationMapping for a continuous set of observations. ">ApproximateObservationMap</a> which will be owned by the given <a class="el" href="classsolver_1_1ActionNode.html" title="The base level interface used by the solver to store the results of taking a specific action from a s...">ActionNode</a>, and for which the maximum distance for an entry to "match" is the given distance. <br/></td></tr>
-<tr class="separator:ab3c108537c219db4706f62ac9984e87d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7668fb42c40b1bb99470548f2f9b1278"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7668fb42c40b1bb99470548f2f9b1278"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#a7668fb42c40b1bb99470548f2f9b1278">ApproximateObservationMap</a> (<a class="el" href="classsolver_1_1ActionNode.html">ActionNode</a> *owner, <a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver, double maxDistance)</td></tr>
+<tr class="memdesc:a7668fb42c40b1bb99470548f2f9b1278"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classsolver_1_1ApproximateObservationMap.html" title="A concrete class implementing ObservationMapping for a continuous set of observations. ">ApproximateObservationMap</a> which will be owned by the given <a class="el" href="classsolver_1_1ActionNode.html" title="The base level interface used by the solver to store the results of taking a specific action from a s...">ActionNode</a>, and for which the maximum distance for an entry to "match" is the given distance. <br/></td></tr>
+<tr class="separator:a7668fb42c40b1bb99470548f2f9b1278"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02fdd8f5f3b28d7dcc059a5ea9bb00ec"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a02fdd8f5f3b28d7dcc059a5ea9bb00ec"></a>
 virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#a02fdd8f5f3b28d7dcc059a5ea9bb00ec">getBelief</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) const override</td></tr>
 <tr class="memdesc:a02fdd8f5f3b28d7dcc059a5ea9bb00ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the belief node (if any) corresponding to this observation. <br/></td></tr>
@@ -128,6 +128,14 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <tr class="memitem:ac08f8b1b03f5db52b68276a843ebe3bc"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#ac08f8b1b03f5db52b68276a843ebe3bc">getNChildren</a> () const override</td></tr>
 <tr class="memdesc:ac08f8b1b03f5db52b68276a843ebe3bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of child nodes associated with this mapping.  <a href="#ac08f8b1b03f5db52b68276a843ebe3bc">More...</a><br/></td></tr>
 <tr class="separator:ac08f8b1b03f5db52b68276a843ebe3bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe18be127c90da325635c4c4a7a4b824"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#abe18be127c90da325635c4c4a7a4b824">deleteChild</a> (<a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *entry) override</td></tr>
+<tr class="memdesc:abe18be127c90da325635c4c4a7a4b824"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes the given entry from this mapping, as well as the entire corresponding subtree.  <a href="#abe18be127c90da325635c4c4a7a4b824">More...</a><br/></td></tr>
+<tr class="separator:abe18be127c90da325635c4c4a7a4b824"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa465159f900af77eba5b897088fcacd8"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
+&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
+const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#aa465159f900af77eba5b897088fcacd8">getChildEntries</a> () const override</td></tr>
+<tr class="memdesc:aa465159f900af77eba5b897088fcacd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all the entries in this mapping that have an associated child node.  <a href="#aa465159f900af77eba5b897088fcacd8">More...</a><br/></td></tr>
+<tr class="separator:aa465159f900af77eba5b897088fcacd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5d92563c36f7a18ade318e593f02fa3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#aa5d92563c36f7a18ade318e593f02fa3">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) override</td></tr>
 <tr class="memdesc:aa5d92563c36f7a18ade318e593f02fa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#aa5d92563c36f7a18ade318e593f02fa3">More...</a><br/></td></tr>
 <tr class="separator:aa5d92563c36f7a18ade318e593f02fa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,12 +143,6 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#a48a5eaa1ce7eb184d5bc7fee2f5688c0">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) const override</td></tr>
 <tr class="memdesc:a48a5eaa1ce7eb184d5bc7fee2f5688c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#a48a5eaa1ce7eb184d5bc7fee2f5688c0">More...</a><br/></td></tr>
 <tr class="separator:a48a5eaa1ce7eb184d5bc7fee2f5688c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99ac042f473e437516000dbd7169fb54"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a99ac042f473e437516000dbd7169fb54"></a>
-virtual std::vector<br class="typebreak"/>
-&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
-const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#a99ac042f473e437516000dbd7169fb54">getAllEntries</a> () const override</td></tr>
-<tr class="memdesc:a99ac042f473e437516000dbd7169fb54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all entries in this mapping - but only those that have an associated child node. <br/></td></tr>
-<tr class="separator:a99ac042f473e437516000dbd7169fb54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7357834cac0bdcfaa187ad777788b593"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1ApproximateObservationMap.html#a7357834cac0bdcfaa187ad777788b593">getTotalVisitCount</a> () const override</td></tr>
 <tr class="memdesc:a7357834cac0bdcfaa187ad777788b593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the total visit count among all observations.  <a href="#a7357834cac0bdcfaa187ad777788b593">More...</a><br/></td></tr>
 <tr class="separator:a7357834cac0bdcfaa187ad777788b593"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -167,8 +169,67 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>ApproximateObservati
 <p>In effect, each entry is a sphere in the observation space, which is centered at the first observation used to make that entry, and has a radius of the given maximum distance.</p>
 <p>Note that this is sensitive to the order in which the entries are stored, because there may be more than one entry that meets the distance criterion for a given observation. </p>
 
-<p>Definition at line <a class="el" href="approximate__observations_8hpp_source.html#l00070">70</a> of file <a class="el" href="approximate__observations_8hpp_source.html">approximate_observations.hpp</a>.</p>
+<p>Definition at line <a class="el" href="approximate__observations_8hpp_source.html#l00072">72</a> of file <a class="el" href="approximate__observations_8hpp_source.html">approximate_observations.hpp</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="abe18be127c90da325635c4c4a7a4b824"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void solver::ApproximateObservationMap::deleteChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td>
+          <td class="paramname"><em>entry</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deletes the given entry from this mapping, as well as the entire corresponding subtree. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a016671bb9c29519a9d10e7cf26d84448">solver::ObservationMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00068">68</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa465159f900af77eba5b897088fcacd8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const * &gt; solver::ApproximateObservationMap::getChildEntries </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a vector of all the entries in this mapping that have an associated child node. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a5eec48f29a7394969338f2c23d9a1b72">solver::ObservationMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00083">83</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="aa5d92563c36f7a18ade318e593f02fa3"></a>
 <div class="memitem">
 <div class="memproto">
@@ -195,7 +256,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>ApproximateObservati
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a59708551552e4576105d2b9678537f65">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00065">65</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00090">90</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -225,7 +286,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>ApproximateObservati
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a1b3ca0a99269d6aa16060c2764275de0">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00070">70</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00095">95</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -254,7 +315,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>ApproximateObservati
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#ac825fe1c22bc548fc0d01ea32e1960a7">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00061">61</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00064">64</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -283,7 +344,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>ApproximateObservati
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#adf34fb3eaad12ff31182c42352431124">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00090">90</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="approximate__observations_8cpp_source.html#l00108">108</a> of file <a class="el" href="approximate__observations_8cpp_source.html">approximate_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -294,7 +355,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>ApproximateObservati
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

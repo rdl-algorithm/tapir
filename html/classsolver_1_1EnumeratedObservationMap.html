@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::EnumeratedObservationMap Class Reference</title>
+<title>TAPIR: solver::EnumeratedObservationMap Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -113,10 +113,10 @@ Inheritance diagram for solver::EnumeratedObservationMap:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6c99e2c14785e5a70163644f547153ef"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6c99e2c14785e5a70163644f547153ef"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a6c99e2c14785e5a70163644f547153ef">EnumeratedObservationMap</a> (<a class="el" href="classsolver_1_1ActionNode.html">ActionNode</a> *owner, std::vector&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1DiscretizedPoint.html">DiscretizedPoint</a> &gt;&gt; const &amp;allObservations)</td></tr>
-<tr class="memdesc:a6c99e2c14785e5a70163644f547153ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classsolver_1_1EnumeratedObservationMap.html" title="A concrete class implementing ObservationMapping for an enumerated set of observations. ">EnumeratedObservationMap</a>, which will be owned by the given <a class="el" href="classsolver_1_1ActionNode.html" title="The base level interface used by the solver to store the results of taking a specific action from a s...">ActionNode</a>, and whose observations will be defined by the given vector of observations. <br/></td></tr>
-<tr class="separator:a6c99e2c14785e5a70163644f547153ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec78257abfb875a872261207f102d669"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aec78257abfb875a872261207f102d669"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#aec78257abfb875a872261207f102d669">EnumeratedObservationMap</a> (<a class="el" href="classsolver_1_1ActionNode.html">ActionNode</a> *owner, <a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver, std::vector&lt; std::unique_ptr&lt; <a class="el" href="classsolver_1_1DiscretizedPoint.html">DiscretizedPoint</a> &gt;&gt; const &amp;allObservations)</td></tr>
+<tr class="memdesc:aec78257abfb875a872261207f102d669"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classsolver_1_1EnumeratedObservationMap.html" title="A concrete class implementing ObservationMapping for an enumerated set of observations. ">EnumeratedObservationMap</a>, which will be owned by the given <a class="el" href="classsolver_1_1ActionNode.html" title="The base level interface used by the solver to store the results of taking a specific action from a s...">ActionNode</a>, and whose observations will be defined by the given vector of observations. <br/></td></tr>
+<tr class="separator:aec78257abfb875a872261207f102d669"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55d5f1ad8bbc67c523fb19b09606ce61"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a55d5f1ad8bbc67c523fb19b09606ce61"></a>
 virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a55d5f1ad8bbc67c523fb19b09606ce61">getBelief</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) const override</td></tr>
 <tr class="memdesc:a55d5f1ad8bbc67c523fb19b09606ce61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the belief node (if any) corresponding to this observation. <br/></td></tr>
@@ -128,6 +128,14 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <tr class="memitem:a681709b60dd157a711bdc5bad2dcfa46"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a681709b60dd157a711bdc5bad2dcfa46">getNChildren</a> () const override</td></tr>
 <tr class="memdesc:a681709b60dd157a711bdc5bad2dcfa46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of child nodes associated with this mapping.  <a href="#a681709b60dd157a711bdc5bad2dcfa46">More...</a><br/></td></tr>
 <tr class="separator:a681709b60dd157a711bdc5bad2dcfa46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1323888c43e10f0f1ed6dedc9ee62112"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a1323888c43e10f0f1ed6dedc9ee62112">deleteChild</a> (<a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *entry) override</td></tr>
+<tr class="memdesc:a1323888c43e10f0f1ed6dedc9ee62112"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes the given entry from this mapping, as well as the entire corresponding subtree.  <a href="#a1323888c43e10f0f1ed6dedc9ee62112">More...</a><br/></td></tr>
+<tr class="separator:a1323888c43e10f0f1ed6dedc9ee62112"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43aee06e95fd2e4acad65655a7409925"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
+&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
+const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a43aee06e95fd2e4acad65655a7409925">getChildEntries</a> () const override</td></tr>
+<tr class="memdesc:a43aee06e95fd2e4acad65655a7409925"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all the entries in this mapping that have an associated child node.  <a href="#a43aee06e95fd2e4acad65655a7409925">More...</a><br/></td></tr>
+<tr class="separator:a43aee06e95fd2e4acad65655a7409925"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa029fc313a2478db992ac41a4ef3fec"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#afa029fc313a2478db992ac41a4ef3fec">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) override</td></tr>
 <tr class="memdesc:afa029fc313a2478db992ac41a4ef3fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#afa029fc313a2478db992ac41a4ef3fec">More...</a><br/></td></tr>
 <tr class="separator:afa029fc313a2478db992ac41a4ef3fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,12 +143,6 @@ virtual <a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#16
 <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#ab1569894d226f3b134a3ecc7a7875532">getEntry</a> (<a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs) const override</td></tr>
 <tr class="memdesc:ab1569894d226f3b134a3ecc7a7875532"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mapping entry associated with the given observation.  <a href="#ab1569894d226f3b134a3ecc7a7875532">More...</a><br/></td></tr>
 <tr class="separator:ab1569894d226f3b134a3ecc7a7875532"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0654c5142841e8109c3de10f9d211ecb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0654c5142841e8109c3de10f9d211ecb"></a>
-virtual std::vector<br class="typebreak"/>
-&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> <br class="typebreak"/>
-const * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#a0654c5142841e8109c3de10f9d211ecb">getAllEntries</a> () const override</td></tr>
-<tr class="memdesc:a0654c5142841e8109c3de10f9d211ecb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of all entries in this mapping - but only those that have an associated child node. <br/></td></tr>
-<tr class="separator:a0654c5142841e8109c3de10f9d211ecb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addce989635da306724a1a2db0b5d0b51"><td class="memItemLeft" align="right" valign="top">virtual long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1EnumeratedObservationMap.html#addce989635da306724a1a2db0b5d0b51">getTotalVisitCount</a> () const override</td></tr>
 <tr class="memdesc:addce989635da306724a1a2db0b5d0b51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the total visit count among all observations.  <a href="#addce989635da306724a1a2db0b5d0b51">More...</a><br/></td></tr>
 <tr class="separator:addce989635da306724a1a2db0b5d0b51"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -165,8 +167,67 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>EnumeratedObservatio
 <div class="textblock"><p>A concrete class implementing <a class="el" href="classsolver_1_1ObservationMapping.html" title="An abstract base class that defines a mapping of observations to subsequent beliefs in the belief tre...">ObservationMapping</a> for an enumerated set of observations. </p>
 <p>This class stores its mapping entries in an array, whose size is determined at runtime based on the number of entries in the observation vector of the <a class="el" href="classsolver_1_1EnumeratedObservationPool.html" title="An implementation of the ObservationPool interface that is based on an enumerated set of observations...">EnumeratedObservationPool</a>. </p>
 
-<p>Definition at line <a class="el" href="enumerated__observations_8hpp_source.html#l00061">61</a> of file <a class="el" href="enumerated__observations_8hpp_source.html">enumerated_observations.hpp</a>.</p>
+<p>Definition at line <a class="el" href="enumerated__observations_8hpp_source.html#l00064">64</a> of file <a class="el" href="enumerated__observations_8hpp_source.html">enumerated_observations.hpp</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a1323888c43e10f0f1ed6dedc9ee62112"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void solver::EnumeratedObservationMap::deleteChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const *&#160;</td>
+          <td class="paramname"><em>entry</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deletes the given entry from this mapping, as well as the entire corresponding subtree. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a016671bb9c29519a9d10e7cf26d84448">solver::ObservationMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00073">73</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a43aee06e95fd2e4acad65655a7409925"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> const * &gt; solver::EnumeratedObservationMap::getChildEntries </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a vector of all the entries in this mapping that have an associated child node. </p>
+
+<p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a5eec48f29a7394969338f2c23d9a1b72">solver::ObservationMapping</a>.</p>
+
+<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00080">80</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="afa029fc313a2478db992ac41a4ef3fec"></a>
 <div class="memitem">
 <div class="memproto">
@@ -193,7 +254,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>EnumeratedObservatio
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a59708551552e4576105d2b9678537f65">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00071">71</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00089">89</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -223,7 +284,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>EnumeratedObservatio
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#a1b3ca0a99269d6aa16060c2764275de0">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00075">75</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00093">93</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -252,7 +313,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>EnumeratedObservatio
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#ac825fe1c22bc548fc0d01ea32e1960a7">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00067">67</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00069">69</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -281,7 +342,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>EnumeratedObservatio
 
 <p>Implements <a class="el" href="classsolver_1_1ObservationMapping.html#adf34fb3eaad12ff31182c42352431124">solver::ObservationMapping</a>.</p>
 
-<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00089">89</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
+<p>Definition at line <a class="el" href="enumerated__observations_8cpp_source.html#l00098">98</a> of file <a class="el" href="enumerated__observations_8cpp_source.html">enumerated_observations.cpp</a>.</p>
 
 </div>
 </div>
@@ -292,7 +353,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>EnumeratedObservatio
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

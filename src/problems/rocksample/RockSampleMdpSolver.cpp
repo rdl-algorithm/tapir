@@ -129,7 +129,7 @@ RockSampleMdpParser::RockSampleMdpParser(RockSampleModel *model) :
         model_(model) {
 }
 
-solver::Heuristic RockSampleMdpParser::parse(solver::Solver */*solver*/,
+solver::HeuristicFunction RockSampleMdpParser::parse(solver::Solver */*solver*/,
         std::vector<std::string> /*args*/) {
     if (model_->getMdpSolver() == nullptr) {
         model_->makeMdpSolver();

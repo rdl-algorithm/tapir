@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::BeliefNode Class Reference</title>
+<title>TAPIR: solver::BeliefNode Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -104,17 +104,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac5aa6925bbe65cee706f09cc21dd6b9f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#ac5aa6925bbe65cee706f09cc21dd6b9f">BeliefNode</a> ()</td></tr>
-<tr class="memdesc:ac5aa6925bbe65cee706f09cc21dd6b9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new belief node with no ID, and no parent entry.  <a href="#ac5aa6925bbe65cee706f09cc21dd6b9f">More...</a><br/></td></tr>
-<tr class="separator:ac5aa6925bbe65cee706f09cc21dd6b9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51cc24fca72c53e2a30a6359f8797442"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a51cc24fca72c53e2a30a6359f8797442"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#a51cc24fca72c53e2a30a6359f8797442">BeliefNode</a> (<a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *parentEntry)</td></tr>
-<tr class="memdesc:a51cc24fca72c53e2a30a6359f8797442"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new belief node with no ID (-1), and with the given mapping entry as its parent. <br/></td></tr>
-<tr class="separator:a51cc24fca72c53e2a30a6359f8797442"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f79ad7d9b00205786b5a9bd79505ff2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8f79ad7d9b00205786b5a9bd79505ff2"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#a8f79ad7d9b00205786b5a9bd79505ff2">BeliefNode</a> (long id, <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *parentEntry)</td></tr>
-<tr class="memdesc:a8f79ad7d9b00205786b5a9bd79505ff2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new belief node with the given ID, and with the given mapping entry as its parent. <br/></td></tr>
-<tr class="separator:a8f79ad7d9b00205786b5a9bd79505ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26dc881b9fd781a9608323ee5d4bb385"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26dc881b9fd781a9608323ee5d4bb385"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#a26dc881b9fd781a9608323ee5d4bb385">BeliefNode</a> (<a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver)</td></tr>
+<tr class="memdesc:a26dc881b9fd781a9608323ee5d4bb385"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new belief node with no ID, and no parent entry, that will belong to the given solver. <br/></td></tr>
+<tr class="separator:a26dc881b9fd781a9608323ee5d4bb385"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88d89e4c3131d288cbc972a016df36a1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a88d89e4c3131d288cbc972a016df36a1"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#a88d89e4c3131d288cbc972a016df36a1">BeliefNode</a> (<a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *parentEntry, <a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver)</td></tr>
+<tr class="memdesc:a88d89e4c3131d288cbc972a016df36a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new belief node with no ID (-1), with the given mapping entry as its parent, and which will belong to the given solver. <br/></td></tr>
+<tr class="separator:a88d89e4c3131d288cbc972a016df36a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a4fef2e06fa973c54f95ed3b5417a0c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7a4fef2e06fa973c54f95ed3b5417a0c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#a7a4fef2e06fa973c54f95ed3b5417a0c">BeliefNode</a> (long id, <a class="el" href="classsolver_1_1ObservationMappingEntry.html">ObservationMappingEntry</a> *parentEntry, <a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver)</td></tr>
+<tr class="memdesc:a7a4fef2e06fa973c54f95ed3b5417a0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new belief node with the given ID,with the given mapping entry as its parent, and which will belong to the given solver. <br/></td></tr>
+<tr class="separator:a7a4fef2e06fa973c54f95ed3b5417a0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a562cbc60cb3f381e4b1dcbb89592994e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a562cbc60cb3f381e4b1dcbb89592994e"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#a562cbc60cb3f381e4b1dcbb89592994e">distL1Independent</a> (<a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *b) const </td></tr>
 <tr class="memdesc:a562cbc60cb3f381e4b1dcbb89592994e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the distance between this belief node and another by calculating the average pairwise distance between the individual particles. <br/></td></tr>
@@ -178,6 +179,9 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 <tr class="memitem:a96bf8f8fac1f0a8a4003dd4f1fb3b850"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#a96bf8f8fac1f0a8a4003dd4f1fb3b850">recalculateValue</a> ()</td></tr>
 <tr class="memdesc:a96bf8f8fac1f0a8a4003dd4f1fb3b850"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recalculates the cached value for this belief node.  <a href="#a96bf8f8fac1f0a8a4003dd4f1fb3b850">More...</a><br/></td></tr>
 <tr class="separator:a96bf8f8fac1f0a8a4003dd4f1fb3b850"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0ead9c5d7bd122d829253b32797ee5b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1BeliefNode.html#af0ead9c5d7bd122d829253b32797ee5b">createOrGetChild</a> (<a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> const &amp;action, <a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;obs)</td></tr>
+<tr class="memdesc:af0ead9c5d7bd122d829253b32797ee5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a child for the given action and observation, or returns a pre-existing one if it already existed.  <a href="#af0ead9c5d7bd122d829253b32797ee5b">More...</a><br/></td></tr>
+<tr class="separator:af0ead9c5d7bd122d829253b32797ee5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
 Friends</h2></td></tr>
@@ -205,27 +209,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 <p>This caching is also particularly useful for incremental updates - the cached value can be compared to its new value after recalculation, and then the change in value can be easily backpropagated. </p>
 
 <p>Definition at line <a class="el" href="BeliefNode_8hpp_source.html#l00054">54</a> of file <a class="el" href="BeliefNode_8hpp_source.html">BeliefNode.hpp</a>.</p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ac5aa6925bbe65cee706f09cc21dd6b9f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">solver::BeliefNode::BeliefNode </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Constructs a new belief node with no ID, and no parent entry. </p>
-
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00035">35</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a81772b0a726598e3345f28616c20b7b9"></a>
 <div class="memitem">
 <div class="memproto">
@@ -242,7 +226,38 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Adds a value to be cached by this belief node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00144">144</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00155">155</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="af0ead9c5d7bd122d829253b32797ee5b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classsolver_1_1BeliefNode.html">BeliefNode</a> * solver::BeliefNode::createOrGetChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a> const &amp;&#160;</td>
+          <td class="paramname"><em>action</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a> const &amp;&#160;</td>
+          <td class="paramname"><em>obs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds a child for the given action and observation, or returns a pre-existing one if it already existed. </p>
+<p>The belief node will also be added to the flattened node vector of the policy tree, as this is done by the <a class="el" href="classsolver_1_1BeliefNode.html" title="Represents a single node in a belief tree. ">BeliefNode</a> constructor. </p>
+
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00179">179</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -261,7 +276,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the depth of this node in the tree (0 = root). </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00084">84</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00095">95</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -280,7 +295,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the history-derived information for this node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00114">114</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00125">125</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -299,7 +314,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the id of this node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00081">81</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00092">92</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -318,7 +333,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the last action taken before this belief. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00129">129</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00140">140</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -337,7 +352,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the last observation received before this belief. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00123">123</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00134">134</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -356,7 +371,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the action mapping for this node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00102">102</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00113">113</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -375,7 +390,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the number of particles in this node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00087">87</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00098">98</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -394,7 +409,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the number of sequences starting from this node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00090">90</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00101">101</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -413,7 +428,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the parent action node of this belief. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00108">108</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00119">119</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -432,7 +447,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the parent belief of this belief. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00117">117</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00128">128</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -451,7 +466,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the parent entry for this node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00105">105</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00116">116</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -470,7 +485,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns the recommended action to take from this node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00157">157</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00168">168</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -489,7 +504,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Returns a vector containing all of the states contained in node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00093">93</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00104">104</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -508,7 +523,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Recalculates the cached value for this belief node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00163">163</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00174">174</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -528,7 +543,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Removes a value cached by this belief node. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00149">149</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00160">160</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -548,7 +563,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 
 <p>Sets the way in which the value for this belief node will be calculated. </p>
 
-<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00154">154</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="BeliefNode_8cpp_source.html#l00165">165</a> of file <a class="el" href="BeliefNode_8cpp_source.html">BeliefNode.cpp</a>.</p>
 
 </div>
 </div>
@@ -559,7 +574,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TextSerializer</b></
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

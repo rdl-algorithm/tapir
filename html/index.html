@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: Main Page</title>
+<title>TAPIR: Main Page</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -77,13 +77,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div class="header">
   <div class="headertitle">
-<div class="title">ABT Documentation</div>  </div>
+<div class="title">TAPIR Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
-<ul><li class="level1"><a href="#abt">abt - Adaptive Belief Tree </a><ul><li class="level2"><a href="#introduction">Introduction </a></li>
-<li class="level2"><a href="#code-structure-and-examples">Code structure and examples </a></li>
-<li class="level2"><a href="#system-requirements">System Requirements </a></li>
+<ul><li class="level1"><a href="#tapir">Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR) </a><ul><li class="level2"><a href="#system-requirements">System Requirements </a></li>
+<li class="level2"><a href="#example-problems">Example problems </a></li>
 <li class="level2"><a href="#configuration-and-building">Configuration and Building </a></li>
 <li class="level2"><a href="#usage">Usage </a></li>
 <li class="level2"><a href="#implementing-a-new-pomdp-model">Implementing a new POMDP model </a><ul><li class="level3"><a href="#model">Model</a></li>
@@ -101,34 +100,55 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 </ul>
 </div>
-<div class="textblock"><h1><a class="anchor" id="abt"></a>
-abt - Adaptive Belief Tree </h1>
-<h2><a class="anchor" id="introduction"></a>
-Introduction </h2>
-<p>An online POMDP solver capable of adapting to modifications to the POMDP model without the need to reconstruct the policy from scratch. The solver uses informed sampling methods to generate a sampled belief tree, which embodies the current policy, while also keeping track of all of the sampled trajectories in order to allow for efficient updates in response to changes to the POMDP model.</p>
-<h2><a class="anchor" id="code-structure-and-examples"></a>
-Code structure and examples </h2>
-<p>The core solver code is located in src/solver, while several example problems are given in src/problems:</p>
-<ul>
-<li><a class="el" href="dir_7fd0f5f213bcbde0c602c6d58d54ed57.html">Tag</a></li>
-<li><a class="el" href="dir_5c43e7e6616020857693cbaff300da49.html">RockSample</a></li>
-</ul>
+<div class="textblock"><h1><a class="anchor" id="tapir"></a>
+Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR) </h1>
+<p>TAPIR is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm [1]. ABT is an online POMDP solver capable of adapting to modifications to the POMDP model without the need to reconstruct the policy from scratch.</p>
+<p>[1] H. Kurniawati and V. Yadav. An Online POMDP Solver for Uncertainty Planning in Dynamic Environment. Proc. Int. Symp. on Robotics Research. 2013. <a href="http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf">http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf</a></p>
+<p>For bug reports and suggestions, please email <a href="#" onclick="location.href='mai'+'lto:'+'rdl'+'.a'+'lgo'+'ri'+'thm'+'@i'+'tee'+'.u'+'q.e'+'du'+'.au'; return false;">rdl.a<span style="display: none;">.nosp@m.</span>lgor<span style="display: none;">.nosp@m.</span>ithm@<span style="display: none;">.nosp@m.</span>itee<span style="display: none;">.nosp@m.</span>.uq.e<span style="display: none;">.nosp@m.</span>du.a<span style="display: none;">.nosp@m.</span>u</a></p>
+<p>For information on updates, please visit <a href="http://robotics.itee.uq.edu.au/~tapir">http://robotics.itee.uq.edu.au/~tapir</a></p>
 <h2><a class="anchor" id="system-requirements"></a>
 System Requirements </h2>
-<p>The code is written primarily for Linux environments, although it should also build OK in Windows.</p>
-<p>Building and running the C++ source code requires the following, which should all be available via a package manager; Debian/Ubuntu package names are given below.</p>
+<p>Operating systems:</p>
 <ul>
-<li><a href="https://gcc.gnu.org">GNU C++ compiler</a> (&gt;= 4.8) or equivalent - "g++" or "g++-4.8"</li>
-<li><a href="http://libspatialindex.github.io">libspatialindex</a> (&gt;= 1.7.0) - "libspatialindex-dev"</li>
-<li><a href="http://eigen.tuxfamily.org">Eigen 3</a> (&gt;= 3.2.0) - "libeigen3-dev"</li>
+<li>Linux</li>
+<li>Windows (untested)</li>
+</ul>
+<p>Building and running the C++ source code requires:</p>
+<ul>
+<li><a href="https://gcc.gnu.org">GNU C++ compiler</a> (&gt;= 4.8) or equivalent</li>
+<li><a href="http://libspatialindex.github.io">libspatialindex</a> (&gt;= 1.7.0) Debian/Ubuntu package name: "libspatialindex-dev"</li>
+<li><a href="http://eigen.tuxfamily.org">Eigen 3</a> (&gt;= 3.2.0) Debian/Ubuntu package name: "libeigen3-dev"</li>
+</ul>
+<h2><a class="anchor" id="example-problems"></a>
+Example problems </h2>
+<p>The core solver code is located in <a class="el" href="dir_041db6ad6a3d44280e40e5af409429cb.html">src/solver</a>, while several example problems are given in [src/problems]:</p>
+<ul>
+<li>Tag (<a class="el" href="dir_7fd0f5f213bcbde0c602c6d58d54ed57.html">src/problems/tag</a>) - see <a href="http://www.cs.cmu.edu/~ggordon/jpineau-ggordon-thrun.ijcai03.pdf">here</a> for a problem description.</li>
+<li>RockSample (<a class="el" href="dir_5c43e7e6616020857693cbaff300da49.html">src/problems/rocksample</a>) - see <a href="http://arxiv.org/ftp/arxiv/papers/1207/1207.4166.pdf">here</a> for a problem description.</li>
 </ul>
 <h2><a class="anchor" id="configuration-and-building"></a>
 Configuration and Building </h2>
-<p>This project uses a custom GNU Make build system, which is documented in further detail in <a class="el" href="md_docs_generated_BUILD.html">this README</a>; the dependencies are cleanly generated and make can easily be run in parallel (e.g. make -j8). The code should build OK without any special configuration, but if need be the core build settings ca be changed via the <a href="../Makefile">root Makefile</a>.</p>
-<p>To build the core solver, simply use the command "make solver" - this will build the solver as a static library in builds/release/libabt.a. Alternatively, the solver can also be built as a shared library - use the command "make solver CFG=shared", and the library file will be output to builds/shared/libabt.so.</p>
-<p>The supplied code also comes with several example problems, as mentioned previously. To build the code with all of the example problems, simply use the command "make all" from the root directory. Alternatively, you can build only a specific problem by specifying that problem as a target (e.g. "make tag"), or by running the make command from within that problem's source folder.</p>
-<p>Different build configurations are available via the "CFG" variable in the Makefile, which can be set from the command line, e.g. "make CFG=shared", which, as previously mentioned, builds the solver as a shared library rather than via static linking. For debugging output, use "make CFG=debug", or change "DEFAULT_CFG:=debug" in the <a href="../Makefile">root Makefile</a>. Each configuration sends its output into a different directory, which will be "builds/$(CFG)".</p>
-<p>For additional documentation on the build system, see the <a class="el" href="md_docs_generated_BUILD.html">build system README</a>.</p>
+<p>This project uses a custom GNU Make build system, which is documented in further detail in <a class="el" href="md_docs_generated_Build_System.html">this README</a>; the dependencies are cleanly managed and make can easily be run in parallel, i.e. </p>
+<pre class="fragment">make -jN
+</pre><p>where N is the number of threads you want to use; 8 is good for many CPUs. The code should build OK without any special configuration, but if need be the core build settings can be changed via the <a href="../Makefile">root Makefile</a>.</p>
+<p>To build the core solver, simply use the command </p>
+<pre class="fragment">make solver
+</pre><p>This will build the solver as a static library in builds/release/libtapir.a. Alternatively, the solver can also be built as a shared library - use the command </p>
+<pre class="fragment">make solver CFG=shared
+</pre><p>and a shared library file will be output to builds/shared/libtapir.so</p>
+<p>The supplied code also comes with several example problems, as mentioned previously. To build the code with all of the example problems, simply use the command </p>
+<pre class="fragment">make all
+</pre><p>Alternatively, you can build only a specific problem by specifying that problem as a target. For example, </p>
+<pre class="fragment">make tag -j4 CFG=shared
+</pre><p>would use 4 threads to compile; that command would build the solver as a shared library, and also build the Tag problem to dynamically link against the shared library file. Alternatively, you can also compile a problem by running make from within that problem's source folder, e.g. </p>
+<pre class="fragment">cd src/problems/tag
+make
+</pre><p>Different build configurations are available via the "CFG" variable in the Makefile, which can be set from the command line; for example, debugging output can be generated by using </p>
+<pre class="fragment">make CFG=debug
+</pre><p>or by setting </p>
+<pre class="fragment">DEFAULT_CFG:=debug
+</pre><p>in the <a href="../Makefile">root Makefile</a>. Each configuration sends its output into a different directory, which will be "builds/$(CFG)".</p>
+<p>For additional documentation on the build system, see the <a class="el" href="md_docs_generated_Build_System.html">build system README</a>.</p>
 <h2><a class="anchor" id="usage"></a>
 Usage </h2>
 <p>First of all, the solver can be used for your own purposes in library form; simply build it as either a static or dynamic library (as per the <a href="#configuration-and-building">previous section</a>) and then link against it.</p>
@@ -156,16 +176,16 @@ Implementing a new POMDP model </h2>
 <li><a class="el" href="classsolver_1_1Model.html#afaefbb5cafd6984d16d0e7972e96befd">Model::isTerminal</a> specifies which states will be considered terminal - the method should return true for those states, and false for others.</li>
 </ul>
 <p>As for S, A, and O, the states, actions, and observations should implement their respective abstract classes <a class="el" href="namespacesolver.html#a46d2c881ad1e2c4057e34efc1344fbf5">State</a>, <a class="el" href="namespacesolver.html#a4d49455281fc7c00cded44247277bb94">Action</a>, and <a class="el" href="namespacesolver.html#a8daf06feba3570a40cd98d779ba03f0f">Observation</a>. That said, it is important to note that the sets of states and observations are actually implicitly defined via the black-box sampling methods - <a class="el" href="classsolver_1_1Model.html#a2e62295cded9ac6e59ac46bbe98ba70c">Model::sampleAnInitState</a> should return a state within S, and <a class="el" href="classsolver_1_1Model.html#ac935e5b653acc3a19dd5bc963bf4a14d">Model::generateStep</a> should return states and observations that are within S and O respectively. However, since the solver itself needs to select actions, actions require more explicit treatment by the ABT algorithm. This is done via the <a class="el" href="classsolver_1_1ActionPool.html">ActionPool</a> interface and the method <a class="el" href="classsolver_1_1Model.html#a153e447124946743272c156ee40e7024">Model::createActionPool</a>; see the <a href="#actionpool">section below</a> for some additional details.</p>
-<p>See below for a more detailed description of the core functionality needed in order to make a new problem for the ABT code.</p>
+<p>See below for a more detailed description of the core functionality needed in order to make a new problem for TAPIR.</p>
 <h3><a class="anchor" id="model"></a>
 Model</h3>
 <p>As previously mentioned, the <a class="el" href="classsolver_1_1Model.html">Model</a> class is the core interface for the specification of a POMDP model; see <a class="el" href="classtag_1_1TagModel.html">TagModel</a> for a concrete example. An implementation of <a class="el" href="classsolver_1_1Model.html">Model</a> must, at the very least, implement all of the pure virtual methods in the abstract base class. These include the aforementioned core methods <a class="el" href="classsolver_1_1Model.html#a2e62295cded9ac6e59ac46bbe98ba70c">Model::sampleAnInitState</a>, <a class="el" href="classsolver_1_1Model.html#ac935e5b653acc3a19dd5bc963bf4a14d">Model::generateStep</a>, and <a class="el" href="classsolver_1_1Model.html#afaefbb5cafd6984d16d0e7972e96befd">Model::isTerminal</a>, as specified previously. A <a class="el" href="classsolver_1_1Model.html">Model</a> instance will also possess an <a class="el" href="structsolver_1_1Options.html">Options</a> instance, which specifies various ABT and POMDP parameters.</p>
-<p>In addition to the these three core methods, and <a class="el" href="classsolver_1_1Model.html#a153e447124946743272c156ee40e7024">Model::createActionPool</a> (see <a href="#actionpool">this section</a> for further details), a Model must also implement <a class="el" href="classsolver_1_1Model.html#a7c3fd2691ae717aa5cdf61fe32269f5c">Model::sampleStateUninformed</a>, which should generate states according to an uninformed prior (as opposed to from the initial belief); this is used by the default implementation for the <a class="el" href="classsolver_1_1Model.html#a0dc0aa58463c5da7385824e08a242dc5">uninformed generateParticles</a> method. Custom implementations for the two particle filtering methods ( <a class="el" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b">informed</a> and <a class="el" href="classsolver_1_1Model.html#a0dc0aa58463c5da7385824e08a242dc5">uninformed</a> ) can be written if better handling of particle depletion is needed. Also of key importance (although not mandatory) is a heuristic function, which is specified by <a class="el" href="classsolver_1_1Model.html#a080de609bc622ed1b2985a9c73cca392">Model::getHeuristicFunction</a> - this uses a functional programming interface, and should return a <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a>. By default, the heuristic function is simply one that always returns zero.</p>
+<p>In addition to the these three core methods, and <a class="el" href="classsolver_1_1Model.html#a153e447124946743272c156ee40e7024">Model::createActionPool</a> (see <a href="#actionpool">this section</a> for further details), a Model must also implement <a class="el" href="classsolver_1_1Model.html#a7c3fd2691ae717aa5cdf61fe32269f5c">Model::sampleStateUninformed</a>, which should generate states according to an uninformed prior (as opposed to from the initial belief); this is used by the default implementation for the <a class="el" href="classsolver_1_1Model.html#a0dc0aa58463c5da7385824e08a242dc5">uninformed generateParticles</a> method. Custom implementations for the two particle filtering methods ( <a class="el" href="classsolver_1_1Model.html#a40bf7b0167216caaa37dbc5e79273a8b">informed</a> and <a class="el" href="classsolver_1_1Model.html#a0dc0aa58463c5da7385824e08a242dc5">uninformed</a> ) can be written if better handling of particle depletion is needed. Also of key importance (although not mandatory) is a heuristic function, which is specified by <a class="el" href="classsolver_1_1Model.html#a09a73bc8bd8d983464d6717218f60ba1">Model::getHeuristicFunction</a> - this uses a functional programming interface, and should return a <a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a>. By default, the heuristic function is simply one that always returns zero.</p>
 <p>If you wish the model to handle changes, see <a href="#implementing-changes">the section on changes</a> below; in short, doing so requires implementations for several other methods, most notably <a class="el" href="classsolver_1_1Model.html#aaccf7e6bae8558086cf276017c9a9818">Model::applyChanges</a>.</p>
 <p>A convenient subclass of <a class="el" href="classsolver_1_1Model.html">Model</a> is <a class="el" href="classshared_1_1ModelWithProgramOptions.html">ModelWithProgramOptions</a>, which uses additional options from <a class="el" href="structshared_1_1SharedOptions.html">SharedOptions</a> to provide some extra configuration settings, including text-based parsing in order to select different search strategies.</p>
 <h3><a class="anchor" id="options"></a>
 Options</h3>
-<p>Each <a class="el" href="classsolver_1_1Model.html">Model</a> instance should possess an <a class="el" href="structsolver_1_1Options.html">Options</a> instance, which specifies the various configuration settings to use for that problem, and for ABT to use when solving that problem. The base <a class="el" href="structsolver_1_1Options.html">Options</a> class has several parameters for ABT settings, but with respect to specifying a POMDP there are two crucial values that must be specified:</p>
+<p>Each <a class="el" href="classsolver_1_1Model.html">Model</a> instance should possess an <a class="el" href="structsolver_1_1Options.html">Options</a> instance, which specifies the various configuration settings to use for that problem, and for TAPIR to use when solving that problem. The base <a class="el" href="structsolver_1_1Options.html">Options</a> class has several parameters for ABT settings, but with respect to specifying a POMDP there are two crucial values that must be specified:</p>
 <ul>
 <li><a class="el" href="structsolver_1_1Options.html#a3c9e50bb47ebb7ccb8b715544432e875">Options::discountFactor</a> - the POMDP discount factor.</li>
 <li><a class="el" href="structsolver_1_1Options.html#a03872680ab1ff2b338c94a82cb2850f0">Options::numberOfStateVariables</a> - the number of state variables used to define a state of the POMDP.</li>
@@ -226,13 +246,13 @@ Implementing changes </h2>
 Generating binaries for a new POMDP model </h2>
 <p>For additional convenience, template methods to generate binaries for an individual problem are given in:</p>
 <ul>
-<li><a class="el" href="solve_8hpp_source.html">solve.hpp</a> &mdash; initial offline policy generation; see <a class="el" href="tag_2solve_8cpp_source.html">solve.cpp for Tag</a> for a usage example.</li>
-<li><a class="el" href="simulate_8hpp_source.html">simulate.hpp</a> &mdash; simulation with online POMDP solution; see <a class="el" href="tag_2simulate_8cpp_source.html">simulate.cpp for Tag</a> for a usage example. </li>
+<li><a class="el" href="solve_8hpp.html">solve.hpp</a> &mdash; initial offline policy generation; see <a class="el" href="tag_2solve_8cpp_source.html">solve.cpp for Tag</a> for a usage example.</li>
+<li><a class="el" href="simulate_8hpp.html">simulate.hpp</a> &mdash; simulation with online POMDP solution; see <a class="el" href="tag_2simulate_8cpp_source.html">simulate.cpp for Tag</a> for a usage example. </li>
 </ul>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

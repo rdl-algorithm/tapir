@@ -37,6 +37,8 @@ struct Options : options::BaseOptions {
     double discountFactor = 1.0;
 
     /* ------------------------- ABT settings --------------------- */
+    /** Whether to prune the tree on every simulation step. */
+    bool pruneEveryStep = false;
     /** The minimum number of particles to maintain in the active belief node. */
     unsigned long minParticleCount = 1000;
     /** The number of new histories to generate on each search step. */
@@ -46,7 +48,7 @@ struct Options : options::BaseOptions {
     /** The maximum allowable depth in the search tree. */
     long maximumDepth = 100;
 
-    /* ----------------------- ABT output modes ------------------- */
+    /* ----------------------- TAPIR output modes ------------------- */
     /** True iff color output is allowed. */
     bool hasColorOutput = false;
     /** True iff verbose output is enabled. */

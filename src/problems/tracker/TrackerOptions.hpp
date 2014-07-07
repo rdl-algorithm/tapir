@@ -26,7 +26,7 @@ struct TrackerOptions : public shared::SharedOptions {
 
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
         std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
-                "cfg/tracker/default.cfg");
+                EXPAND_AND_QUOTE(ROOT_PATH) "/cfg/tracker");
         addTrackerOptions(parser.get());
         return std::move(parser);
     }

@@ -33,7 +33,7 @@ struct HomecareOptions : public shared::SharedOptions {
 
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
         std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
-                "cfg/homecare/default.cfg");
+                EXPAND_AND_QUOTE(ROOT_PATH) "/cfg/homecare");
         addHomecareOptions(parser.get());
         return std::move(parser);
     }

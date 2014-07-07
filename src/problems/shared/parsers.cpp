@@ -1,3 +1,8 @@
+/** @file parsers.cpp
+ *
+ * Provides implementations for the parsing of various ABT parameters, allowing for additional
+ * customization at runtime instead of compile-time.
+ */
 #include "parsers.hpp"
 
 #include <iostream>
@@ -7,7 +12,7 @@
 #include "solver/BeliefNode.hpp"
 #include "solver/Solver.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "solver/belief-estimators/estimators.hpp"
 
@@ -28,7 +33,7 @@ std::vector<std::string> split_function(std::string text) {
     }
 
     std::string function = text.substr(0, i0);
-    abt::trim(function);
+    tapir::trim(function);
     std::vector<std::string> argsVector;
     argsVector.push_back(function);
 
@@ -48,7 +53,7 @@ std::vector<std::string> split_function(std::string text) {
         if (*charIter == ',' && parenCount == 0) {
             if (prevIter != charIter) {
                 std::string s(prevIter, charIter);
-                abt::trim(s);
+                tapir::trim(s);
                 argsVector.push_back(s);
             }
             prevIter = charIter + 1;
@@ -56,7 +61,7 @@ std::vector<std::string> split_function(std::string text) {
     }
     if (prevIter != argsString.end()) {
         std::string s(prevIter, argsString.end());
-        abt::trim(s);
+        tapir::trim(s);
         argsVector.push_back(s);
     }
     return argsVector;
@@ -102,11 +107,11 @@ DefaultHeuristicParser::DefaultHeuristicParser(ModelWithProgramOptions *model) :
         return model->getDefaultHeuristicValue(entry, state, data);
     };
 }
-solver::Heuristic DefaultHeuristicParser::parse(
+solver::HeuristicFunction DefaultHeuristicParser::parse(
         solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
     return heuristic_;
 }
-solver::Heuristic ZeroHeuristicParser::parse(
+solver::HeuristicFunction ZeroHeuristicParser::parse(
         solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
     return [] (solver::HistoryEntry const *, solver::State const *,
             solver::HistoricalData const *) {
@@ -116,7 +121,7 @@ solver::Heuristic ZeroHeuristicParser::parse(
 
 BasicSearchParser::BasicSearchParser(
         ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> *generatorParsers,
-        ParserSet<solver::Heuristic> *heuristicParsers, std::string heuristicString) :
+        ParserSet<solver::HeuristicFunction> *heuristicParsers, std::string heuristicString) :
             generatorParsers_(generatorParsers),
             heuristicParsers_(heuristicParsers),
             heuristicString_(heuristicString) {

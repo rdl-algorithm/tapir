@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/defs.hpp File Reference</title>
+<title>TAPIR: src/defs.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -114,6 +114,12 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
+<tr class="memitem:adaa95eaa79342095032b43f9394c0860"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="defs_8hpp.html#adaa95eaa79342095032b43f9394c0860">QUOTE</a>(str)&#160;&#160;&#160;#str</td></tr>
+<tr class="memdesc:adaa95eaa79342095032b43f9394c0860"><td class="mdescLeft">&#160;</td><td class="mdescRight">A macro for quoting strings.  <a href="#adaa95eaa79342095032b43f9394c0860">More...</a><br/></td></tr>
+<tr class="separator:adaa95eaa79342095032b43f9394c0860"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1383d86e1b2c4442514026fd7ce2307"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="defs_8hpp.html#aa1383d86e1b2c4442514026fd7ce2307">EXPAND_AND_QUOTE</a>(str)&#160;&#160;&#160;<a class="el" href="defs_8hpp.html#adaa95eaa79342095032b43f9394c0860">QUOTE</a>(str)</td></tr>
+<tr class="memdesc:aa1383d86e1b2c4442514026fd7ce2307"><td class="mdescLeft">&#160;</td><td class="mdescRight">A macro that quotes properly, by first expanding other macros, and then quoting that.  <a href="#aa1383d86e1b2c4442514026fd7ce2307">More...</a><br/></td></tr>
+<tr class="separator:aa1383d86e1b2c4442514026fd7ce2307"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61671c8dd4803bc1d9b5baca2eb52d70"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="defs_8hpp.html#a61671c8dd4803bc1d9b5baca2eb52d70">_NO_COPY_OR_MOVE</a>(ClassName)</td></tr>
 <tr class="memdesc:a61671c8dd4803bc1d9b5baca2eb52d70"><td class="mdescLeft">&#160;</td><td class="mdescRight">A macro used to delete all copy- and move-constructors and -assignment operators.  <a href="#a61671c8dd4803bc1d9b5baca2eb52d70">More...</a><br/></td></tr>
 <tr class="separator:a61671c8dd4803bc1d9b5baca2eb52d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,7 +159,7 @@ Functions</h2></td></tr>
 
 <p>We use an inclusion guard to make sure this definition is only included once. </p>
 
-<p>Definition at line <a class="el" href="defs_8hpp_source.html#l00019">19</a> of file <a class="el" href="defs_8hpp_source.html">defs.hpp</a>.</p>
+<p>Definition at line <a class="el" href="defs_8hpp_source.html#l00025">25</a> of file <a class="el" href="defs_8hpp_source.html">defs.hpp</a>.</p>
 
 </div>
 </div>
@@ -177,6 +183,46 @@ Functions</h2></td></tr>
 </div><!-- fragment -->
 <p>A macro used to delete all copy- and move-constructors and -assignment operators. </p>
 
+<p>Definition at line <a class="el" href="defs_8hpp_source.html#l00015">15</a> of file <a class="el" href="defs_8hpp_source.html">defs.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa1383d86e1b2c4442514026fd7ce2307"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define EXPAND_AND_QUOTE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">str</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="defs_8hpp.html#adaa95eaa79342095032b43f9394c0860">QUOTE</a>(str)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A macro that quotes properly, by first expanding other macros, and then quoting that. </p>
+
+<p>Definition at line <a class="el" href="defs_8hpp_source.html#l00011">11</a> of file <a class="el" href="defs_8hpp_source.html">defs.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adaa95eaa79342095032b43f9394c0860"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define QUOTE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">str</td><td>)</td>
+          <td>&#160;&#160;&#160;#str</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A macro for quoting strings. </p>
+
 <p>Definition at line <a class="el" href="defs_8hpp_source.html#l00009">9</a> of file <a class="el" href="defs_8hpp_source.html">defs.hpp</a>.</p>
 
 </div>
@@ -184,7 +230,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

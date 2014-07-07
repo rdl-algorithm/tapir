@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::DefaultHistoryCorrector Class Reference</title>
+<title>TAPIR: solver::DefaultHistoryCorrector Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -112,9 +112,9 @@ Inheritance diagram for solver::DefaultHistoryCorrector:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5c95199701cede41fca3d971e20f721b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DefaultHistoryCorrector.html#a5c95199701cede41fca3d971e20f721b">DefaultHistoryCorrector</a> (<a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver, <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a> heuristic)</td></tr>
-<tr class="memdesc:a5c95199701cede41fca3d971e20f721b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new <a class="el" href="classsolver_1_1DefaultHistoryCorrector.html" title="A default HistoryCorrector implementation which should work quite well regardless of the specific pro...">DefaultHistoryCorrector</a>, which will be associated with the given <a class="el" href="classsolver_1_1Solver.html" title="The core class of the ABT algorithm. ">Solver</a>.  <a href="#a5c95199701cede41fca3d971e20f721b">More...</a><br/></td></tr>
-<tr class="separator:a5c95199701cede41fca3d971e20f721b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a952ce3084fbc18eb16b12d4922b22716"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DefaultHistoryCorrector.html#a952ce3084fbc18eb16b12d4922b22716">DefaultHistoryCorrector</a> (<a class="el" href="classsolver_1_1Solver.html">Solver</a> *solver, <a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a> heuristic)</td></tr>
+<tr class="memdesc:a952ce3084fbc18eb16b12d4922b22716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new <a class="el" href="classsolver_1_1DefaultHistoryCorrector.html" title="A default HistoryCorrector implementation which should work quite well regardless of the specific pro...">DefaultHistoryCorrector</a>, which will be associated with the given <a class="el" href="classsolver_1_1Solver.html" title="The core class of the ABT algorithm. ">Solver</a>.  <a href="#a952ce3084fbc18eb16b12d4922b22716">More...</a><br/></td></tr>
+<tr class="separator:a952ce3084fbc18eb16b12d4922b22716"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae85d76e17c21a008e1d9ef7bf22c9d17"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae85d76e17c21a008e1d9ef7bf22c9d17"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsolver_1_1DefaultHistoryCorrector.html#ae85d76e17c21a008e1d9ef7bf22c9d17">reviseSequence</a> (<a class="el" href="classsolver_1_1HistorySequence.html">HistorySequence</a> *sequence) override</td></tr>
 <tr class="memdesc:ae85d76e17c21a008e1d9ef7bf22c9d17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Revises the given history sequence; returns false if the sequence previously took an illegal action and hence requires continuation via the default search algorithm. <br/></td></tr>
@@ -138,7 +138,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 
 <p>Definition at line <a class="el" href="DefaultHistoryCorrector_8hpp_source.html#l00019">19</a> of file <a class="el" href="DefaultHistoryCorrector_8hpp_source.html">DefaultHistoryCorrector.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a5c95199701cede41fca3d971e20f721b"></a>
+<a class="anchor" id="a952ce3084fbc18eb16b12d4922b22716"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -151,7 +151,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">Heuristic</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">HeuristicFunction</a>&#160;</td>
           <td class="paramname"><em>heuristic</em>&#160;</td>
         </tr>
         <tr>
@@ -176,7 +176,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

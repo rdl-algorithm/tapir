@@ -1,11 +1,13 @@
 MODULE_NAME = rocksample
+TARGET_NAMES := solve simulate stest
 
 ifdef HAS_ROOT_MAKEFILE
 
-TARGET_NAMES := solve simulate stest
 include .make/problem-template.mk
 
 else
-ROOT = ../../..
-include $(ROOT)/.make/redirect.mk
+REDIRECT=$(MODULE_NAME)
+.PHONY: $(MAKECMDGOALS) call-upwards
+$(MAKECMDGOALS) call-upwards:
+	@$(MAKE) --no-print-directory -C .. $(MAKECMDGOALS) REDIRECT=$(REDIRECT)
 endif

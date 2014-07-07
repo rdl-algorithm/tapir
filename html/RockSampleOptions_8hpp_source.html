@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/rocksample/RockSampleOptions.hpp Source File</title>
+<title>TAPIR: src/problems/rocksample/RockSampleOptions.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -95,7 +95,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span>                       <span class="comment">// for string</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &quot;problems/shared/SharedOptions.hpp&quot;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="SharedOptions_8hpp.html">problems/shared/SharedOptions.hpp</a>&quot;</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span>rocksample {</div>
 <div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="structrocksample_1_1RockSampleOptions.html">    9</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structrocksample_1_1RockSampleOptions.html">RockSampleOptions</a> : <span class="keyword">public</span> <a class="code" href="structshared_1_1SharedOptions.html">shared::SharedOptions</a> {</div>
@@ -121,7 +121,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">static</span> std::unique_ptr&lt;options::OptionParser&gt; makeParser(<span class="keywordtype">bool</span> simulating) {</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        std::unique_ptr&lt;options::OptionParser&gt; parser = SharedOptions::makeParser(simulating,</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                <span class="stringliteral">&quot;cfg/rocksample/default.cfg&quot;</span>);</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                <a class="code" href="defs_8hpp.html#aa1383d86e1b2c4442514026fd7ce2307">EXPAND_AND_QUOTE</a>(ROOT_PATH) <span class="stringliteral">&quot;/cfg/rocksample&quot;</span>);</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        addRocksampleOptions(parser.get());</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        addHeuristicOptions(parser.get());</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keywordflow">return</span> std::move(parser);</div>
@@ -130,7 +130,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> addRocksampleOptions(<a class="code" href="classoptions_1_1OptionParser.html">options::OptionParser</a> *parser) {</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        parser-&gt;<a class="code" href="classoptions_1_1OptionParser.html#a88fcd9eaa0ea096f30c4be04463914d1">addOption</a>&lt;std::string&gt;(<span class="stringliteral">&quot;problem&quot;</span>, <span class="stringliteral">&quot;mapPath&quot;</span>, &amp;<a class="code" href="structrocksample_1_1RockSampleOptions.html#a4d382ef7fc0718062520cd00394dda0d">RockSampleOptions::mapPath</a>);</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        parser-&gt;<a class="code" href="classoptions_1_1OptionParser.html#a6b6ec18fddd03b47db51e14ab7a0cc9e">addValueArg</a>&lt;std::string&gt;(<span class="stringliteral">&quot;problem&quot;</span>, <span class="stringliteral">&quot;mapPath&quot;</span>, &amp;<a class="code" href="structrocksample_1_1RockSampleOptions.html#a4d382ef7fc0718062520cd00394dda0d">RockSampleOptions::mapPath</a>,</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <span class="stringliteral">&quot;m&quot;</span>, <span class="stringliteral">&quot;map&quot;</span>, <span class="stringliteral">&quot;the path to the map file&quot;</span>, <span class="stringliteral">&quot;path&quot;</span>);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <span class="stringliteral">&quot;m&quot;</span>, <span class="stringliteral">&quot;map&quot;</span>, <span class="stringliteral">&quot;the path to the map file (relative to the base config path)&quot;</span>, <span class="stringliteral">&quot;path&quot;</span>);</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        parser-&gt;<a class="code" href="classoptions_1_1OptionParser.html#a88fcd9eaa0ea096f30c4be04463914d1">addOption</a>&lt;<span class="keywordtype">double</span>&gt;(<span class="stringliteral">&quot;problem&quot;</span>, <span class="stringliteral">&quot;goodRockReward&quot;</span>, &amp;<a class="code" href="structrocksample_1_1RockSampleOptions.html#a0ce6b6eaf960f3be6b4b0915f4d1f6d7">RockSampleOptions::goodRockReward</a>);</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        parser-&gt;<a class="code" href="classoptions_1_1OptionParser.html#a88fcd9eaa0ea096f30c4be04463914d1">addOption</a>&lt;<span class="keywordtype">double</span>&gt;(<span class="stringliteral">&quot;problem&quot;</span>, <span class="stringliteral">&quot;badRockPenalty&quot;</span>, &amp;<a class="code" href="structrocksample_1_1RockSampleOptions.html#ad270727caae4fe4a89f284c8314a4a4f">RockSampleOptions::badRockPenalty</a>);</div>
@@ -155,8 +155,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* ROCKSAMPLE_OPTIONS_HPP_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html">rocksample::RockSampleOptions</a></div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00009">RockSampleOptions.hpp:9</a></div></div>
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html_a2a36cd80b9ec47412433bd1983b8a90d"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html#a2a36cd80b9ec47412433bd1983b8a90d">rocksample::RockSampleOptions::heuristicType</a></div><div class="ttdeci">std::string heuristicType</div><div class="ttdoc">The nature of the extra history-based data stored at each belief node. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00030">RockSampleOptions.hpp:30</a></div></div>
+<div class="ttc" id="SharedOptions_8hpp_html"><div class="ttname"><a href="SharedOptions_8hpp.html">SharedOptions.hpp</a></div><div class="ttdoc">Defines the SharedOptions class, which comes with additional configuration options that apply to many...</div></div>
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html_a998527827a6ce05c551a940c20943e09"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html#a998527827a6ce05c551a940c20943e09">rocksample::RockSampleOptions::searchHeuristicType</a></div><div class="ttdeci">std::string searchHeuristicType</div><div class="ttdoc">Restriction of search actions. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00032">RockSampleOptions.hpp:32</a></div></div>
-<div class="ttc" id="structshared_1_1SharedOptions_html"><div class="ttname"><a href="structshared_1_1SharedOptions.html">shared::SharedOptions</a></div><div class="ttdef"><b>Definition:</b> <a href="SharedOptions_8hpp_source.html#l00009">SharedOptions.hpp:9</a></div></div>
+<div class="ttc" id="structshared_1_1SharedOptions_html"><div class="ttname"><a href="structshared_1_1SharedOptions.html">shared::SharedOptions</a></div><div class="ttdoc">An expanded Options class, which comes with some additional settings that are shared by many of the i...</div><div class="ttdef"><b>Definition:</b> <a href="SharedOptions_8hpp_source.html#l00020">SharedOptions.hpp:20</a></div></div>
 <div class="ttc" id="classoptions_1_1OptionParser_html_acf824bc6fc51ed9d64726bcb21dcf92e"><div class="ttname"><a href="classoptions_1_1OptionParser.html#acf824bc6fc51ed9d64726bcb21dcf92e">options::OptionParser::addOptionWithDefault</a></div><div class="ttdeci">void addOptionWithDefault(std::string section, std::string name, ValueType OptionsType::*optionPtr, ValueType defaultValue)</div><div class="ttdoc">Adds a single option, with a default value, via its section, name, and a pointer-to-class-member. </div><div class="ttdef"><b>Definition:</b> <a href="option__parser_8hpp_source.html#l00382">option_parser.hpp:382</a></div></div>
 <div class="ttc" id="classoptions_1_1OptionParser_html"><div class="ttname"><a href="classoptions_1_1OptionParser.html">options::OptionParser</a></div><div class="ttdoc">The core class for parsing options. </div><div class="ttdef"><b>Definition:</b> <a href="option__parser_8hpp_source.html#l00168">option_parser.hpp:168</a></div></div>
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html_a98122373784f41d768a56d7c38ad7736"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html#a98122373784f41d768a56d7c38ad7736">rocksample::RockSampleOptions::exitReward</a></div><div class="ttdeci">double exitReward</div><div class="ttdoc">Reward for exiting the map. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00021">RockSampleOptions.hpp:21</a></div></div>
@@ -170,11 +171,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html_a2fb24edaebf784a0360ed8edbc9ea1ab"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html#a2fb24edaebf784a0360ed8edbc9ea1ab">rocksample::RockSampleOptions::preferredQValue</a></div><div class="ttdeci">double preferredQValue</div><div class="ttdoc">If a bias is used, the q-value for the preferred actions. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00038">RockSampleOptions.hpp:38</a></div></div>
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html_a4e47583dd463baa1a51512f54e0793c4"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html#a4e47583dd463baa1a51512f54e0793c4">rocksample::RockSampleOptions::rolloutHeuristicType</a></div><div class="ttdeci">std::string rolloutHeuristicType</div><div class="ttdoc">Restriction of rollout actions. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00034">RockSampleOptions.hpp:34</a></div></div>
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html_a4d382ef7fc0718062520cd00394dda0d"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html#a4d382ef7fc0718062520cd00394dda0d">rocksample::RockSampleOptions::mapPath</a></div><div class="ttdeci">std::string mapPath</div><div class="ttdoc">Path to the map file. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00015">RockSampleOptions.hpp:15</a></div></div>
+<div class="ttc" id="defs_8hpp_html_aa1383d86e1b2c4442514026fd7ce2307"><div class="ttname"><a href="defs_8hpp.html#aa1383d86e1b2c4442514026fd7ce2307">EXPAND_AND_QUOTE</a></div><div class="ttdeci">#define EXPAND_AND_QUOTE(str)</div><div class="ttdoc">A macro that quotes properly, by first expanding other macros, and then quoting that. </div><div class="ttdef"><b>Definition:</b> <a href="defs_8hpp_source.html#l00011">defs.hpp:11</a></div></div>
 <div class="ttc" id="structrocksample_1_1RockSampleOptions_html_ab104c7c3f66d9dd38a205604f574d70c"><div class="ttname"><a href="structrocksample_1_1RockSampleOptions.html#ab104c7c3f66d9dd38a205604f574d70c">rocksample::RockSampleOptions::illegalMovePenalty</a></div><div class="ttdeci">double illegalMovePenalty</div><div class="ttdoc">Penalty for an illegal move. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleOptions_8hpp_source.html#l00023">RockSampleOptions.hpp:23</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -1,13 +1,16 @@
 [TOC]
 
+[src/solver]: @ref src/solver
+[src/problems]: @ref src/problems
+[src/problems/tag]: @ref src/problems/tag
+[src/problems/rocksample]: @ref src/problems/rocksample
+
 [Solver]: @ref solver::Solver
-[Tag]: @ref src/problems/tag
-[RockSample]: @ref src/problems/rocksample
 
 [Action]: @ref solver::Action
 [Model]: @ref solver::Model
 [ModelChange]: @ref solver::ModelChange
-[Heuristic]: @ref solver::Heuristic
+[HeuristicFunction]: @ref solver::HeuristicFunction
 [Observation]: @ref solver::Observation
 [Options]: @ref solver::Options
 [State]: @ref solver::State
@@ -95,8 +98,8 @@
 [Tag_simulate.cpp]: @ref src/problems/tag/simulate.cpp
 
 
-[Build README]: docs/generated/BUILD.md
 [Makefile]: ../Makefile
+[.make/README.md]: docs/generated/Build_System.md
 
 
 [stack]: @ref stack.mk
@@ -107,3 +110,4 @@
 [Makefile]: ../Makefile
 [Makefile_src]: ../src/Makefile
 [Makefile_solver]: ../src/solver/Makefile
+

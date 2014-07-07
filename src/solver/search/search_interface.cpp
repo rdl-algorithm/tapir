@@ -17,7 +17,7 @@
 #include "solver/Solver.hpp"
 #include "solver/StatePool.hpp"
 
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "solver/search/SearchStatus.hpp"
 
@@ -71,7 +71,7 @@ std::unique_ptr<StepGenerator> StagedStepGeneratorFactory::createGenerator(Searc
 
 /* ------------------- BasicSearchStrategy --------------------- */
 BasicSearchStrategy::BasicSearchStrategy(Solver *solver,
-        std::unique_ptr<StepGeneratorFactory> factory, Heuristic heuristic) :
+        std::unique_ptr<StepGeneratorFactory> factory, HeuristicFunction heuristic) :
             solver_(solver),
             factory_(std::move(factory)),
             heuristic_(heuristic) {
@@ -130,8 +130,8 @@ SearchStatus BasicSearchStrategy::extendAndBackup(HistorySequence *sequence, lon
         currentEntry->observation_ = std::move(result.observation);
 
         // Create the child belief node, and set the current node to be that node.
-        BeliefNode *nextNode = solver_->getPolicy()->createOrGetChild(currentNode,
-                *currentEntry->action_, *currentEntry->observation_);
+        BeliefNode *nextNode = currentNode->createOrGetChild(*currentEntry->action_,
+                *currentEntry->observation_);
         currentNode = nextNode;
 
         // Now we create a new history entry and step the history forward.

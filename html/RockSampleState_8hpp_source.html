@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/problems/rocksample/RockSampleState.hpp Source File</title>
+<title>TAPIR: src/problems/rocksample/RockSampleState.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -98,7 +98,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;ostream&gt;</span>                      <span class="comment">// for ostream</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span>                       <span class="comment">// for vector</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &quot;problems/shared/GridPosition.hpp&quot;</span>  <span class="comment">// for GridPosition</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="GridPosition_8hpp.html">problems/shared/GridPosition.hpp</a>&quot;</span>  <span class="comment">// for GridPosition</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="State_8hpp.html">solver/abstract-problem/State.hpp</a>&quot;</span>             <span class="comment">// for State</span></div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="VectorState_8hpp.html">solver/abstract-problem/VectorState.hpp</a>&quot;</span>             <span class="comment">// for VectorState</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
@@ -138,12 +138,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classrocksample_1_1RockSampleTextSerializer_html"><div class="ttname"><a href="classrocksample_1_1RockSampleTextSerializer.html">rocksample::RockSampleTextSerializer</a></div><div class="ttdef"><b>Definition:</b> <a href="RockSampleTextSerializer_8hpp_source.html#l00026">RockSampleTextSerializer.hpp:26</a></div></div>
 <div class="ttc" id="classsolver_1_1Vector_html"><div class="ttname"><a href="classsolver_1_1Vector.html">solver::Vector</a></div><div class="ttdoc">An abstract class for states that can easily be represented as real vectors. </div><div class="ttdef"><b>Definition:</b> <a href="Vector_8hpp_source.html#l00029">Vector.hpp:29</a></div></div>
 <div class="ttc" id="classrocksample_1_1RockSampleState_html_a0c96bf57d346a4ba9acfa6c51ca95047"><div class="ttname"><a href="classrocksample_1_1RockSampleState.html#a0c96bf57d346a4ba9acfa6c51ca95047">rocksample::RockSampleState::copy</a></div><div class="ttdeci">std::unique_ptr&lt; solver::State &gt; copy() const override</div><div class="ttdoc">You must provide a copy() method for any subclass. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleState_8cpp_source.html#l00022">RockSampleState.cpp:22</a></div></div>
-<div class="ttc" id="structGridPosition_html"><div class="ttname"><a href="structGridPosition.html">GridPosition</a></div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00011">GridPosition.hpp:11</a></div></div>
+<div class="ttc" id="structGridPosition_html"><div class="ttname"><a href="structGridPosition.html">GridPosition</a></div><div class="ttdoc">Represents a position within a 2-D grid, using a zero-based row and column index. ...</div><div class="ttdef"><b>Definition:</b> <a href="GridPosition_8hpp_source.html#l00021">GridPosition.hpp:21</a></div></div>
+<div class="ttc" id="GridPosition_8hpp_html"><div class="ttname"><a href="GridPosition_8hpp.html">GridPosition.hpp</a></div><div class="ttdoc">Defines a handy struct to represent 2-D grid indices, in the form of (i, j) == (row, column), as well as some useful methods for dealing with them. </div></div>
 <div class="ttc" id="classrocksample_1_1RockSampleState_html_a263ee2d12c9bd8a7a75a3c1410f6526b"><div class="ttname"><a href="classrocksample_1_1RockSampleState.html#a263ee2d12c9bd8a7a75a3c1410f6526b">rocksample::RockSampleState::asVector</a></div><div class="ttdeci">std::vector&lt; double &gt; asVector() const override</div><div class="ttdoc">Returns this vector in the form of an std::vector&lt;double&gt;. </div><div class="ttdef"><b>Definition:</b> <a href="RockSampleState_8cpp_source.html#l00077">RockSampleState.cpp:77</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:09 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:34 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: solver::Options Struct Reference</title>
+<title>TAPIR: solver::Options Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -107,7 +107,7 @@ Inheritance diagram for solver::Options:</div>
   <img src="structsolver_1_1Options.png" usemap="#solver::Options_map" alt=""/>
   <map id="solver::Options_map" name="solver::Options_map">
 <area href="structoptions_1_1BaseOptions.html" title="The base option struct. " alt="options::BaseOptions" shape="rect" coords="102,0,296,24"/>
-<area href="structshared_1_1SharedOptions.html" alt="shared::SharedOptions" shape="rect" coords="102,112,296,136"/>
+<area href="structshared_1_1SharedOptions.html" title="An expanded Options class, which comes with some additional settings that are shared by many of the i..." alt="shared::SharedOptions" shape="rect" coords="102,112,296,136"/>
 <area href="structrocksample_1_1RockSampleOptions.html" alt="rocksample::RockSampleOptions" shape="rect" coords="0,168,194,192"/>
 <area href="structtag_1_1TagOptions.html" alt="tag::TagOptions" shape="rect" coords="204,168,398,192"/>
 </map>
@@ -127,6 +127,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a3c9e50bb47ebb7ccb8b715544432e875"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsolver_1_1Options.html#a3c9e50bb47ebb7ccb8b715544432e875">discountFactor</a> = 1.0</td></tr>
 <tr class="memdesc:a3c9e50bb47ebb7ccb8b715544432e875"><td class="mdescLeft">&#160;</td><td class="mdescRight">The discount factor of the PODMP.  <a href="#a3c9e50bb47ebb7ccb8b715544432e875">More...</a><br/></td></tr>
 <tr class="separator:a3c9e50bb47ebb7ccb8b715544432e875"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cf2fdfbed36e6447d46afd98f651e43"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsolver_1_1Options.html#a0cf2fdfbed36e6447d46afd98f651e43">pruneEveryStep</a> = false</td></tr>
+<tr class="memdesc:a0cf2fdfbed36e6447d46afd98f651e43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to prune the tree on every simulation step.  <a href="#a0cf2fdfbed36e6447d46afd98f651e43">More...</a><br/></td></tr>
+<tr class="separator:a0cf2fdfbed36e6447d46afd98f651e43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24bb406e708b1fde2829f4ff0e7efd1b"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsolver_1_1Options.html#a24bb406e708b1fde2829f4ff0e7efd1b">minParticleCount</a> = 1000</td></tr>
 <tr class="memdesc:a24bb406e708b1fde2829f4ff0e7efd1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The minimum number of particles to maintain in the active belief node.  <a href="#a24bb406e708b1fde2829f4ff0e7efd1b">More...</a><br/></td></tr>
 <tr class="separator:a24bb406e708b1fde2829f4ff0e7efd1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,7 +185,7 @@ Public Attributes</h2></td></tr>
 
 <p>True iff color output is allowed. </p>
 
-<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00051">51</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
+<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00053">53</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
 
 </div>
 </div>
@@ -198,7 +201,7 @@ Public Attributes</h2></td></tr>
 
 <p>True iff verbose output is enabled. </p>
 
-<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00053">53</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
+<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00055">55</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
 
 </div>
 </div>
@@ -214,7 +217,7 @@ Public Attributes</h2></td></tr>
 
 <p>The number of new histories to generate on each search step. </p>
 
-<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00043">43</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
+<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00045">45</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
 
 </div>
 </div>
@@ -230,7 +233,7 @@ Public Attributes</h2></td></tr>
 
 <p>The maximum allowable depth in the search tree. </p>
 
-<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00047">47</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
+<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00049">49</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
 
 </div>
 </div>
@@ -262,7 +265,7 @@ Public Attributes</h2></td></tr>
 
 <p>The minimum number of particles to maintain in the active belief node. </p>
 
-<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00041">41</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
+<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00043">43</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
 
 </div>
 </div>
@@ -298,6 +301,22 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0cf2fdfbed36e6447d46afd98f651e43"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool solver::Options::pruneEveryStep = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether to prune the tree on every simulation step. </p>
+
+<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00041">41</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="ade0e5eb859f5451283e5f955dceaa83b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -310,7 +329,7 @@ Public Attributes</h2></td></tr>
 
 <p>The maximum time (in milliseconds) to spend on each search step. </p>
 
-<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00045">45</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
+<p>Definition at line <a class="el" href="Options_8hpp_source.html#l00047">47</a> of file <a class="el" href="Options_8hpp_source.html">Options.hpp</a>.</p>
 
 </div>
 </div>
@@ -320,7 +339,7 @@ Public Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:11 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:36 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

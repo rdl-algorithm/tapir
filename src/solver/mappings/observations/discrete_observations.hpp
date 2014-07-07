@@ -35,11 +35,15 @@ class DiscreteObservationMapEntry;
  */
 class DiscreteObservationPool: public solver::ObservationPool {
   public:
-    DiscreteObservationPool() = default;
+    /** Creates a new DiscreteObservationPool. */
+    DiscreteObservationPool(Solver *solver);
     virtual ~DiscreteObservationPool() = default;
     _NO_COPY_OR_MOVE(DiscreteObservationPool);
 
     virtual std::unique_ptr<ObservationMapping> createObservationMapping(ActionNode *owner) override;
+  private:
+    /** The solver. */
+    Solver *solver_;
 };
 
 /** A concrete class implementing ObservationMapping for a discrete set of observations.
@@ -53,24 +57,29 @@ class DiscreteObservationMap: public solver::ObservationMapping {
     friend class DiscreteObservationTextSerializer;
 
     /** Creates a new, empty discrete observation map for the given ActionNode. */
-    DiscreteObservationMap(ActionNode *owner);
+    DiscreteObservationMap(ActionNode *owner, Solver *solver);
     virtual ~DiscreteObservationMap() = default;
     _NO_COPY_OR_MOVE(DiscreteObservationMap);
 
-    /* -------------- Creation and retrieval of nodes. ---------------- */
+    /* -------------- Access to and management of child nodes. ---------------- */
     virtual BeliefNode *getBelief(Observation const &obs) const override;
     virtual BeliefNode *createBelief(Observation const &obs) override;
     virtual long getNChildren() const override;
 
+    virtual void deleteChild(ObservationMappingEntry const *entry) override;
+
     /* -------------- Retrieval of mapping entries. ---------------- */
+    virtual std::vector<ObservationMappingEntry const *> getChildEntries() const override;
     virtual ObservationMappingEntry *getEntry(Observation const &obs) override;
     virtual ObservationMappingEntry const *getEntry(Observation const &obs) const override;
-    virtual std::vector<ObservationMappingEntry const *> getAllEntries() const override;
 
     /* ------------- Methods for accessing visit counts. --------------- */
     virtual long getTotalVisitCount() const override;
 
   private:
+    /** The solver. */
+    Solver *solver_;
+
     /** A hashing operator that works on unique_ptr<Observation> by calling the virtual hash method
      * of the observation itself.
      */

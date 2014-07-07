@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: src/global.hpp File Reference</title>
+<title>TAPIR: src/global.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -95,9 +95,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p>Contains some key definitions used throughout the ABT code.  
+<p>Contains some key definitions used throughout the TAPIR code.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;cctype&gt;</code><br/>
+<div class="textblock"><code>#include &lt;unistd.h&gt;</code><br/>
+<code>#include &lt;cctype&gt;</code><br/>
 <code>#include &lt;ctime&gt;</code><br/>
 <code>#include &lt;algorithm&gt;</code><br/>
 <code>#include &lt;functional&gt;</code><br/>
@@ -113,8 +114,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
-<tr class="memitem:namespaceabt"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceabt.html">abt</a></td></tr>
-<tr class="memdesc:namespaceabt"><td class="mdescLeft">&#160;</td><td class="mdescRight">A global utility namespace; holds some global functions that are used throughout the ABT code, as well as some basic data structures. <br/></td></tr>
+<tr class="memitem:namespacetapir"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetapir.html">tapir</a></td></tr>
+<tr class="memdesc:namespacetapir"><td class="mdescLeft">&#160;</td><td class="mdescRight">A global utility namespace; holds some global functions that are used throughout the TAPIR code, as well as some basic data structures. <br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacedebug"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacedebug.html">debug</a></td></tr>
 <tr class="memdesc:namespacedebug"><td class="mdescLeft">&#160;</td><td class="mdescRight">A namespace for global functions that serve useful debugging purposes. <br/></td></tr>
@@ -128,21 +129,27 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a6118b840f6a387c7d3861c251b769c13"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceabt.html#a6118b840f6a387c7d3861c251b769c13">abt::clock_ms</a> ()</td></tr>
-<tr class="memdesc:a6118b840f6a387c7d3861c251b769c13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the time (in ms) since the program started running.  <a href="#a6118b840f6a387c7d3861c251b769c13">More...</a><br/></td></tr>
-<tr class="separator:a6118b840f6a387c7d3861c251b769c13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bbe799c215ab038b99345ab8a1367c1"><td class="memTemplParams" colspan="2"><a class="anchor" id="a4bbe799c215ab038b99345ab8a1367c1"></a>
+<tr class="memitem:af3403f75e03ee19c633e6d97de8a0e33"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetapir.html#af3403f75e03ee19c633e6d97de8a0e33">tapir::get_current_directory</a> ()</td></tr>
+<tr class="memdesc:af3403f75e03ee19c633e6d97de8a0e33"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function to return the current working directory.  <a href="#af3403f75e03ee19c633e6d97de8a0e33">More...</a><br/></td></tr>
+<tr class="separator:af3403f75e03ee19c633e6d97de8a0e33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a342dfa979e553c4cff9846ee6da861d4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetapir.html#a342dfa979e553c4cff9846ee6da861d4">tapir::change_directory</a> (std::string &amp;dir)</td></tr>
+<tr class="memdesc:a342dfa979e553c4cff9846ee6da861d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function to change the current working directory.  <a href="#a342dfa979e553c4cff9846ee6da861d4">More...</a><br/></td></tr>
+<tr class="separator:a342dfa979e553c4cff9846ee6da861d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2625fbd617a2b89a3bd3d957c12890d7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetapir.html#a2625fbd617a2b89a3bd3d957c12890d7">tapir::clock_ms</a> ()</td></tr>
+<tr class="memdesc:a2625fbd617a2b89a3bd3d957c12890d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the time (in ms) since the program started running.  <a href="#a2625fbd617a2b89a3bd3d957c12890d7">More...</a><br/></td></tr>
+<tr class="separator:a2625fbd617a2b89a3bd3d957c12890d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f4b2c3f812d016297bf0adf85c21008"><td class="memTemplParams" colspan="2"><a class="anchor" id="a2f4b2c3f812d016297bf0adf85c21008"></a>
 template&lt;class T &gt; </td></tr>
-<tr class="memitem:a4bbe799c215ab038b99345ab8a1367c1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceabt.html#a4bbe799c215ab038b99345ab8a1367c1">abt::hash_combine</a> (std::size_t &amp;seed, T const &amp;v)</td></tr>
-<tr class="memdesc:a4bbe799c215ab038b99345ab8a1367c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">A template method to combine hash values - from boost::hash_combine. <br/></td></tr>
-<tr class="separator:a4bbe799c215ab038b99345ab8a1367c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad884e79d6bd470328b81ff6a27f57a08"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ad884e79d6bd470328b81ff6a27f57a08"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceabt.html#ad884e79d6bd470328b81ff6a27f57a08">abt::print_with_width</a> (T value, std::ostream &amp;os, int width, std::ios_base::fmtflags flags=std::ios_base::fixed)</td></tr>
-<tr class="memdesc:ad884e79d6bd470328b81ff6a27f57a08"><td class="mdescLeft">&#160;</td><td class="mdescRight">A simple method to print a value with a fixed width.  <a href="#ad884e79d6bd470328b81ff6a27f57a08">More...</a><br/></td></tr>
-<tr class="separator:ad884e79d6bd470328b81ff6a27f57a08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0390b5ab871ede92d6f53af7babbf3ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceabt.html#a0390b5ab871ede92d6f53af7babbf3ee">abt::print_double</a> (double value, std::ostream &amp;os, int width=10, int precision=7, std::ios_base::fmtflags flags=std::ios_base::fixed, std::ostream::char_type fillCh= ' ')</td></tr>
-<tr class="memdesc:a0390b5ab871ede92d6f53af7babbf3ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">A method to print a floating point value, with various options.  <a href="#a0390b5ab871ede92d6f53af7babbf3ee">More...</a><br/></td></tr>
-<tr class="separator:a0390b5ab871ede92d6f53af7babbf3ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f4b2c3f812d016297bf0adf85c21008"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacetapir.html#a2f4b2c3f812d016297bf0adf85c21008">tapir::hash_combine</a> (std::size_t &amp;seed, T const &amp;v)</td></tr>
+<tr class="memdesc:a2f4b2c3f812d016297bf0adf85c21008"><td class="mdescLeft">&#160;</td><td class="mdescRight">A template method to combine hash values - from boost::hash_combine. <br/></td></tr>
+<tr class="separator:a2f4b2c3f812d016297bf0adf85c21008"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77fbaa584969e170cad776c53b33212e"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a77fbaa584969e170cad776c53b33212e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacetapir.html#a77fbaa584969e170cad776c53b33212e">tapir::print_with_width</a> (T value, std::ostream &amp;os, int width, std::ios_base::fmtflags flags=std::ios_base::fixed)</td></tr>
+<tr class="memdesc:a77fbaa584969e170cad776c53b33212e"><td class="mdescLeft">&#160;</td><td class="mdescRight">A simple method to print a value with a fixed width.  <a href="#a77fbaa584969e170cad776c53b33212e">More...</a><br/></td></tr>
+<tr class="separator:a77fbaa584969e170cad776c53b33212e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7e9ee7bee335eaccae2429b4fbfa575"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetapir.html#af7e9ee7bee335eaccae2429b4fbfa575">tapir::print_double</a> (double value, std::ostream &amp;os, int width=10, int precision=7, std::ios_base::fmtflags flags=std::ios_base::fixed, std::ostream::char_type fillCh= ' ')</td></tr>
+<tr class="memdesc:af7e9ee7bee335eaccae2429b4fbfa575"><td class="mdescLeft">&#160;</td><td class="mdescRight">A method to print a floating point value, with various options.  <a href="#af7e9ee7bee335eaccae2429b4fbfa575">More...</a><br/></td></tr>
+<tr class="separator:af7e9ee7bee335eaccae2429b4fbfa575"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d94f34283096cd9981f709dd2429f3c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacedebug.html#a4d94f34283096cd9981f709dd2429f3c">debug::show_message</a> (std::string message, bool print=true, bool bp_branch=true)</td></tr>
 <tr class="memdesc:a4d94f34283096cd9981f709dd2429f3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Global debug method to display an error / warning message.  <a href="#a4d94f34283096cd9981f709dd2429f3c">More...</a><br/></td></tr>
 <tr class="separator:a4d94f34283096cd9981f709dd2429f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,7 +159,7 @@ template&lt;class T &gt; </td></tr>
 <tr class="separator:a677c4078fcd08fc7feebf743518eb446"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains some key definitions used throughout the ABT code. </p>
+<div class="textblock"><p>Contains some key definitions used throughout the TAPIR code. </p>
 
 <p>Definition in file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
 </div><h2 class="groupheader">Typedef Documentation</h2>
@@ -168,14 +175,14 @@ template&lt;class T &gt; </td></tr>
 
 <p>The RNG engine to use throughout the code. </p>
 
-<p>Definition at line <a class="el" href="global_8hpp_source.html#l00024">24</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
+<p>Definition at line <a class="el" href="global_8hpp_source.html#l00025">25</a> of file <a class="el" href="global_8hpp_source.html">global.hpp</a>.</p>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

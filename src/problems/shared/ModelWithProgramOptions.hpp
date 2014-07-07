@@ -1,3 +1,8 @@
+/** @file ModelWithProgramOptions.hpp
+ *
+ * Offers a Model class with extra functionality, allowing a text-based interface for selecting
+ * different search strategies.
+ */
 #ifndef SHARED_MODELWITHPROGRAMOPTIONS_HPP_
 #define SHARED_MODELWITHPROGRAMOPTIONS_HPP_
 
@@ -7,7 +12,7 @@
 #include "global.hpp"                     // for RandomGenerator
 
 #include "solver/abstract-problem/Model.hpp"             // for Model
-#include "solver/abstract-problem/heuristics/Heuristic.hpp"
+#include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 #include "solver/belief-estimators/estimators.hpp"
 #include "solver/search/search_interface.hpp"
 #include "solver/changes/DefaultHistoryCorrector.hpp"
@@ -17,8 +22,20 @@
 
 /** A namespace for useful functionality that is shared by various different problems. */
 namespace shared {
+/** A partial implementation of Model allowing for text-based parsing of various advanced search
+ * options.
+ *
+ * In particular, these three configuration settings are made available in the configuration file
+ * parser, with several options that are available by default:
+ * - SharedOptions::searchHeuristic - the heuristic function to use, e.g. "zero()"
+ * - SharedOptions::searchStrategy - the search strategy to use, e.g. "ucb(15.0)"
+ * - SharedOptions::estimator - the belief value estimator to use, e.g. "mean()"
+ */
 class ModelWithProgramOptions: public solver::Model {
 public:
+	/** Creates a new ModelWithProgramOptions with the given problem name, the given
+	 * RandomGenerator, and the given set of options.
+	 */
     ModelWithProgramOptions(std::string problemName, RandomGenerator *randGen,
             std::unique_ptr<SharedOptions> options) :
         Model(problemName, randGen, std::move(options)),
@@ -47,23 +64,64 @@ public:
     virtual ~ModelWithProgramOptions() = default;
     _NO_COPY_OR_MOVE(ModelWithProgramOptions);
 
+    /** Associates the given parser for instances of StepGeneratorFactory with the given name
+     * string, allowing it to be parsed at runtime.
+     *
+     * The created instance of StepGeneratorFactory will then serve to create StepGenerator
+     * instances that will generate search steps one by one.
+     *
+     * See ucb_search.hpp for a canonical example of one of these generators; the UCB strategy
+     * is then parsed by the UcbParser class.
+     */
     virtual void registerGeneratorParser(std::string name,
             std::unique_ptr<Parser<std::unique_ptr<solver::StepGeneratorFactory>> > parser) {
         generatorParsers_.addParser(name, std::move(parser));
     }
+
+    /** Associates the given parser for heuristic functions with the given name string, allowing
+     * it to be parsed at runtime.
+     *
+     * The parsed heuristic can then be applied to any sequence that finishes without reaching
+     * a terminal state - the reward value for the last entry in the sequence will contain the
+     * heuristic value. In particular, SearchStrategy or HistoryCorrector implementations will
+     * typically use this heuristic when they end a sequence early; that heuristic value will then
+     * be propagated back up the policy tree.
+     */
     virtual void registerHeuristicParser(std::string name,
-            std::unique_ptr<Parser<solver::Heuristic> > parser) {
+            std::unique_ptr<Parser<solver::HeuristicFunction> > parser) {
         heuristicParsers_.addParser(name, std::move(parser));
     }
+
+    /** Associates the given parser for search strategies with the given name string, allowing it
+     * to be parsed at runtime.
+     *
+     * Most typical search strategies should be implemented by wrapping a StepGeneratorFactory
+     * in an instance of BasicSearchStrategy. However, if the search strategy needs to perform
+     * extra functionality it may be necessary to make a separate instance.
+     *
+     * The EXP3-based combination of strategies (see MultipleStrategiesExp3.hpp) is one example of
+     * this - it wraps multiple strategies into one, and needs to update the statistics for the
+     * EXP3 algorithm after it finishes a search.
+     */
     virtual void registerSearchParser(std::string name,
             std::unique_ptr<Parser<std::unique_ptr<solver::SearchStrategy>> > parser) {
         searchParsers_.addParser(name, std::move(parser));
     }
+
+    /** Associates the given parser for estimation strategies with the given name string,
+     * allowing it to be parsed at runtime.
+     *
+     * The default behavior is simply to estimate by using the mean of all the histories through
+     * that belief, and this works pretty well in general, but it should be possible to improve
+     * upon this by using more intelligent approaches.
+     */
     virtual void registerEstimationParser(std::string name,
             std::unique_ptr<Parser<std::unique_ptr<solver::EstimationStrategy>> > parser) {
         estimationParsers_.addParser(name, std::move(parser));
     }
 
+
+    // Overridden methods follow
     virtual std::unique_ptr<solver::SearchStrategy> createSearchStrategy(solver::Solver *solver)
             override {
         return searchParsers_.parse(solver, options_->searchStrategy);
@@ -77,20 +135,35 @@ public:
         return std::make_unique<solver::DefaultHistoryCorrector>(solver,
                 heuristicParsers_.parse(solver, options_->searchHeuristic));
     }
-    virtual solver::Heuristic getHeuristicFunction() final override {
+    virtual solver::HeuristicFunction getHeuristicFunction() final override {
         return heuristicParsers_.parse(nullptr, options_->searchHeuristic);
     }
+
+    /** A simpler interface to define a default heuristic function for a subclass.
+     *
+     * If you set options_->sharedHeuristic to "default()" this is the heuristic function that will
+     * be used.
+     */
     virtual double getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
             solver::State const */*state*/, solver::HistoricalData const */*data*/) {
         return 0;
     }
 
 private:
+    /** A pointer to the options object stored by this instance.
+     *
+     * This is really the same as Model::options_, but in this case we know it's a SharedOptions
+     * because we've enforced that via the constructor of ModelWithProgramOptions.
+     */
     SharedOptions const *options_;
 
+    /** The generator parsers. */
     ParserSet<std::unique_ptr<solver::StepGeneratorFactory>> generatorParsers_;
-    ParserSet<solver::Heuristic> heuristicParsers_;
+    /** The HeuristicFunction parsers. */
+    ParserSet<solver::HeuristicFunction> heuristicParsers_;
+    /** The parsers for SearchStrategy instances. */
     ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
+    /** The parsers for EstimationStrategy instances. */
     ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
 };
 } /* namespace shared */

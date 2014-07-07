@@ -77,7 +77,28 @@ long DiscretizedActionMap::getNChildren() const {
     return nChildren_;
 }
 
+void DiscretizedActionMap::deleteChild(ActionMappingEntry const *entry) {
+    DiscretizedActionMapEntry &discEntry = const_cast<DiscretizedActionMapEntry &>(
+                static_cast<DiscretizedActionMapEntry const &>(*entry));
 
+    // Perform a negative update on the entry.
+    discEntry.update(-discEntry.visitCount_, -discEntry.totalQValue_);
+
+    // Now delete the child node.
+    discEntry.childNode_ = nullptr;
+}
+
+
+std::vector<ActionMappingEntry const *> DiscretizedActionMap::getChildEntries() const  {
+    std::vector<ActionMappingEntry const *> returnEntries;
+    for (int i = 0; i < numberOfBins_; i++) {
+        DiscretizedActionMapEntry const &entry = entries_[i];
+        if (entry.childNode_ != nullptr) {
+            returnEntries.push_back(&entry);
+        }
+    }
+    return returnEntries;
+}
 long DiscretizedActionMap::getNumberOfVisitedEntries() const {
     return numberOfVisitedEntries_;
 }
@@ -102,6 +123,7 @@ ActionMappingEntry const *DiscretizedActionMap::getEntry(Action const &action) c
     long code = static_cast<DiscretizedPoint const &>(action).getBinNumber();
     return &entries_[code];
 }
+
 
 std::unique_ptr<Action> DiscretizedActionMap::getNextActionToTry() {
     // No more bins to try -> no action to try.
@@ -275,15 +297,21 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
             owner,
             static_cast<DiscretizedActionPool *>(getSolver()->getActionPool()),
             std::vector<long> { });
+    loadActionMapping(*discMap, is);
+    return std::move(discMap);
+}
+
+void DiscretizedActionTextSerializer::loadActionMapping(DiscretizedActionMap &discMap,
+        std::istream &is) {
 
     std::string line;
     std::getline(is, line);
     std::string tmpStr;
     std::istringstream sstr4(line);
 
-    sstr4 >> discMap->numberOfVisitedEntries_ >> tmpStr >> tmpStr >> tmpStr;
-    sstr4 >> discMap->nChildren_ >> tmpStr;
-    sstr4 >> discMap->totalVisitCount_;
+    sstr4 >> discMap.numberOfVisitedEntries_ >> tmpStr >> tmpStr >> tmpStr;
+    sstr4 >> discMap.nChildren_ >> tmpStr;
+    sstr4 >> discMap.totalVisitCount_;
 
     std::getline(is, line);
     std::istringstream sstr(line);
@@ -296,11 +324,11 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
             std::getline(sstr2, actionString, ',');
             long code;
             std::istringstream(actionString) >> code;
-            discMap->binSequence_.add(code);
+            discMap.binSequence_.add(code);
         }
     }
 
-    for (long i = 0; i < discMap->numberOfVisitedEntries_ ; i++) {
+    for (long i = 0; i < discMap.numberOfVisitedEntries_ ; i++) {
         // The first line contains info from the mapping.
         std::getline(is, line);
         std::istringstream sstr2(line);
@@ -324,9 +352,9 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
         }
 
         // Create an entry to hold the action node.
-        DiscretizedActionMapEntry &entry = discMap->entries_[binNumber];
+        DiscretizedActionMapEntry &entry = discMap.entries_[binNumber];
         entry.binNumber_ = binNumber;
-        entry.map_ = discMap.get();
+        entry.map_ = &discMap;
         entry.meanQValue_ = meanQValue;
         entry.visitCount_ = visitCount;
         entry.totalQValue_ = totalQValue;
@@ -341,10 +369,9 @@ DiscretizedActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istre
     }
 
     // Any bins we are supposed to try must be considered legal.
-    for (long binNumber : discMap->binSequence_) {
-        discMap->entries_[binNumber].isLegal_ = true;
+    for (long binNumber : discMap.binSequence_) {
+        discMap.entries_[binNumber].isLegal_ = true;
     }
-    return std::move(discMap);
 }
 
 } /* namespace solver */

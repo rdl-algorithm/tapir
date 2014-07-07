@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>ABT: shared::DefaultHeuristicParser Class Reference</title>
+<title>TAPIR: shared::DefaultHeuristicParser Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ABT
+   <div id="projectname">TAPIR
    </div>
    <div id="projectbrief">An online approximate POMDP solver that can adapt to changes in the POMDP model.</div>
   </td>
@@ -95,37 +95,104 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">shared::DefaultHeuristicParser Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A parser for the default heuristic, which uses the virtual method <a class="el" href="classshared_1_1ModelWithProgramOptions.html#a3f3a5f5cbe10860068ff1ac888b036ae" title="A simpler interface to define a default heuristic function for a subclass. ">ModelWithProgramOptions::getDefaultHeuristicValue</a>.  
+ <a href="classshared_1_1DefaultHeuristicParser.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for shared::DefaultHeuristicParser:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="classshared_1_1DefaultHeuristicParser.png" usemap="#shared::DefaultHeuristicParser_map" alt=""/>
   <map id="shared::DefaultHeuristicParser_map" name="shared::DefaultHeuristicParser_map">
-<area href="classshared_1_1Parser.html" alt="shared::Parser&lt; solver::Heuristic &gt;" shape="rect" coords="0,0,210,24"/>
+<area href="classshared_1_1Parser.html" alt="shared::Parser&lt; solver::HeuristicFunction &gt;" shape="rect" coords="0,0,259,24"/>
 </map>
  </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a865072f927a779eaf20fce6c94fb0d9a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a865072f927a779eaf20fce6c94fb0d9a"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DefaultHeuristicParser</b> (<a class="el" href="classshared_1_1ModelWithProgramOptions.html">ModelWithProgramOptions</a> *model)</td></tr>
+<tr class="memitem:a865072f927a779eaf20fce6c94fb0d9a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1DefaultHeuristicParser.html#a865072f927a779eaf20fce6c94fb0d9a">DefaultHeuristicParser</a> (<a class="el" href="classshared_1_1ModelWithProgramOptions.html">ModelWithProgramOptions</a> *model)</td></tr>
+<tr class="memdesc:a865072f927a779eaf20fce6c94fb0d9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classshared_1_1DefaultHeuristicParser.html" title="A parser for the default heuristic, which uses the virtual method ModelWithProgramOptions::getDefault...">DefaultHeuristicParser</a> associated with the given model.  <a href="#a865072f927a779eaf20fce6c94fb0d9a">More...</a><br/></td></tr>
 <tr class="separator:a865072f927a779eaf20fce6c94fb0d9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a2627e3f35ec7d80c0fc2533812beb7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6a2627e3f35ec7d80c0fc2533812beb7"></a>
-virtual <a class="el" href="namespacesolver.html#ab9e1b50ecb46556312c91f9349be3966">solver::Heuristic</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1DefaultHeuristicParser.html#a6a2627e3f35ec7d80c0fc2533812beb7">parse</a> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *, std::vector&lt; std::string &gt; args) override</td></tr>
-<tr class="memdesc:a6a2627e3f35ec7d80c0fc2533812beb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new strategy from a vector of strings representing its arguments. <br/></td></tr>
-<tr class="separator:a6a2627e3f35ec7d80c0fc2533812beb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31248879d74f7d5b9e88ecdadd5e967c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshared_1_1DefaultHeuristicParser.html#a31248879d74f7d5b9e88ecdadd5e967c">parse</a> (<a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *, std::vector&lt; std::string &gt; args) override</td></tr>
+<tr class="memdesc:a31248879d74f7d5b9e88ecdadd5e967c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new strategy from a vector of arguments (as strings).  <a href="#a31248879d74f7d5b9e88ecdadd5e967c">More...</a><br/></td></tr>
+<tr class="separator:a31248879d74f7d5b9e88ecdadd5e967c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00112">112</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
-</div><hr/>The documentation for this class was generated from the following files:<ul>
+<div class="textblock"><p>A parser for the default heuristic, which uses the virtual method <a class="el" href="classshared_1_1ModelWithProgramOptions.html#a3f3a5f5cbe10860068ff1ac888b036ae" title="A simpler interface to define a default heuristic function for a subclass. ">ModelWithProgramOptions::getDefaultHeuristicValue</a>. </p>
+
+<p>Definition at line <a class="el" href="parsers_8hpp_source.html#l00155">155</a> of file <a class="el" href="parsers_8hpp_source.html">parsers.hpp</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a865072f927a779eaf20fce6c94fb0d9a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">shared::DefaultHeuristicParser::DefaultHeuristicParser </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshared_1_1ModelWithProgramOptions.html">ModelWithProgramOptions</a> *&#160;</td>
+          <td class="paramname"><em>model</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a new <a class="el" href="classshared_1_1DefaultHeuristicParser.html" title="A parser for the default heuristic, which uses the virtual method ModelWithProgramOptions::getDefault...">DefaultHeuristicParser</a> associated with the given model. </p>
+
+<p>Definition at line <a class="el" href="parsers_8cpp_source.html#l00103">103</a> of file <a class="el" href="parsers_8cpp_source.html">parsers.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a31248879d74f7d5b9e88ecdadd5e967c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacesolver.html#a2652743b2b118d001615cc27ed0ce636">solver::HeuristicFunction</a> shared::DefaultHeuristicParser::parse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsolver_1_1Solver.html">solver::Solver</a> *&#160;</td>
+          <td class="paramname"><em>solver</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::string &gt;&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a new strategy from a vector of arguments (as strings). </p>
+
+<p>Implements <a class="el" href="classshared_1_1Parser.html#a7c51eda67dd14c3a0647cb2defd351f8">shared::Parser&lt; solver::HeuristicFunction &gt;</a>.</p>
+
+<p>Definition at line <a class="el" href="parsers_8cpp_source.html#l00110">110</a> of file <a class="el" href="parsers_8cpp_source.html">parsers.cpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/problems/shared/<a class="el" href="parsers_8hpp_source.html">parsers.hpp</a></li>
 <li>src/problems/shared/<a class="el" href="parsers_8cpp_source.html">parsers.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 3 2014 04:49:10 for ABT by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 7 2014 00:14:35 for TAPIR by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

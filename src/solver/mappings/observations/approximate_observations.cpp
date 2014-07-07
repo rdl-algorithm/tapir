@@ -24,18 +24,21 @@
 
 namespace solver {
 /* --------------------- ApproximateObservationPool --------------------- */
-ApproximateObservationPool::ApproximateObservationPool(double maxDistance) :
+ApproximateObservationPool::ApproximateObservationPool(Solver *solver, double maxDistance) :
+        solver_(solver),
         maxDistance_(maxDistance) {
 }
 
 std::unique_ptr<ObservationMapping> ApproximateObservationPool::createObservationMapping(
         ActionNode *owner) {
-    return std::make_unique<ApproximateObservationMap>(owner, maxDistance_);
+    return std::make_unique<ApproximateObservationMap>(owner, solver_, maxDistance_);
 }
 
 /* ---------------------- ApproximateObservationMap ---------------------- */
-ApproximateObservationMap::ApproximateObservationMap(ActionNode *owner, double maxDistance) :
+ApproximateObservationMap::ApproximateObservationMap(ActionNode *owner, Solver *solver,
+        double maxDistance) :
         ObservationMapping(owner),
+        solver_(solver),
         maxDistance_(maxDistance),
         entries_(),
         totalVisitCount_(0) {
@@ -52,8 +55,8 @@ BeliefNode* ApproximateObservationMap::createBelief(const Observation& obs) {
     std::unique_ptr<ApproximateObservationMapEntry> entry = (
             std::make_unique<ApproximateObservationMapEntry>());
     entry->map_ = this;
-    entry->observation_ = obs.copy();;
-    entry->childNode_ = std::make_unique<BeliefNode>(entry.get());
+    entry->observation_ = obs.copy();
+    entry->childNode_ = std::make_unique<BeliefNode>(entry.get(), solver_);
     BeliefNode *node = entry->childNode_.get();
     entries_.push_back(std::move(entry));
     return node;
@@ -62,6 +65,28 @@ long ApproximateObservationMap::getNChildren() const {
     return entries_.size();
 }
 
+void ApproximateObservationMap::deleteChild(ObservationMappingEntry const *entry) {
+    totalVisitCount_ -= entry->getVisitCount(); // Negate the visit count
+    int lastEntryNo = entries_.size() - 1;
+    for (int i = 0; i < lastEntryNo; i++) {
+        ApproximateObservationMapEntry *otherEntry = entries_[i].get();
+        if (entry == otherEntry) {
+            // If it isn't the last entry, we put the last entry in its place.
+            entries_[i] = std::move(entries_[lastEntryNo]);
+            break;
+        }
+    }
+    // Remove the last entry.
+    entries_.pop_back();
+}
+
+std::vector<ObservationMappingEntry const *> ApproximateObservationMap::getChildEntries() const {
+    std::vector<ObservationMappingEntry const *> returnEntries;
+    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
+        returnEntries.push_back(entry.get());
+    }
+    return returnEntries;
+}
 ObservationMappingEntry *ApproximateObservationMap::getEntry(Observation const &obs) {
     ApproximateObservationMap const * constThis = const_cast<ApproximateObservationMap const *>(this);
     ObservationMappingEntry const *result = constThis->getEntry(obs);
@@ -78,13 +103,6 @@ ObservationMappingEntry const *ApproximateObservationMap::getEntry(Observation c
         }
     }
     return bestEntry;
-}
-std::vector<ObservationMappingEntry const *> ApproximateObservationMap::getAllEntries() const {
-    std::vector<ObservationMappingEntry const *> returnEntries;
-    for (std::unique_ptr<ApproximateObservationMapEntry> const &entry : entries_) {
-        returnEntries.push_back(entry.get());
-    }
-    return returnEntries;
 }
 
 long ApproximateObservationMap::getTotalVisitCount() const {
@@ -177,7 +195,7 @@ std::unique_ptr<ObservationMapping> ApproximateObservationTextSerializer::loadOb
         entry->map_ = &approxMap;
         entry->observation_ = std::move(obs);
         entry->visitCount_ = visitCount;
-        entry->childNode_ = std::make_unique<BeliefNode>(childId, entry.get());
+        entry->childNode_ = std::make_unique<BeliefNode>(childId, entry.get(), getSolver());
 
         // Add the entry to the vector.
         approxMap.entries_.push_back(std::move(entry));
