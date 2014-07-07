@@ -42,7 +42,7 @@ struct TagOptions : public shared::SharedOptions {
     static void addTagOptions(options::OptionParser *parser) {
         parser->addOption<std::string>("problem", "mapPath", &TagOptions::mapPath);
         parser->addValueArg<std::string>("problem", "mapPath", &TagOptions::mapPath,
-                "m", "map", "the path to the map file (relative to the base config path)", "path");
+                "", "map", "the path to the map file (relative to the base config path)", "path");
 
         parser->addOption<double>("problem", "moveCost", &TagOptions::moveCost);
         parser->addOption<double>("problem", "tagReward", &TagOptions::tagReward);

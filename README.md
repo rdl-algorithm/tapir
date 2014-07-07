@@ -13,6 +13,10 @@ For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au
 
 For information on updates, please visit http://robotics.itee.uq.edu.au/~tapir
 
+TAPIR Development team
+----------------------
+- Main developer: Dimitri Klimenko
+- ROS + VREP interface by: Joshua Song
 
 System Requirements
 -------------------
@@ -50,18 +54,23 @@ and also in src/problems/[problem-name] for convenience while editing the
 source files.
 
 After compiling, you can try the following commands to try solving the example
-problem Tag:
+problem RockSample, which is a well-known example POMDP:
 
-    cd problems/tag
+    cd problems/rocksample
     ./solve
     ./simulate
 
-For a more detailed description of the Tag POMDP, see
-http://www.cs.cmu.edu/~ggordon/jpineau-ggordon-thrun.ijcai03.pdf
+Alternatively, to run RockSample[11, 11], a version of RockSample with a larger
+map and much larger state space, you can use the command-line setting
+`--map maps/map-11-11.txt`, i.e.
+
+    cd problems/rocksample
+    ./solve --map maps/map-11-11.txt
+    ./simulate -map maps/map-11-11.txt
 
 The command "solve" uses use the parameters set in a problem-specific
-configuration file, which for Tag is, by default,
-[here](problems/tag/default.cfg).
+configuration file, which for RockSample is, by default,
+[here](problems/rocksample/default.cfg).
 The purpose of "solve" is to output a policy, which by default will be
 written to the file "pol.pol" in the current working directory.
 
@@ -75,22 +84,23 @@ the policy can be dynamically generated on every step.
 To change the configuration settings, edit the default configuration
 files, or copy them and make your own version, e.g.
 
-    cd problems/tag
-    cp default.cfg my_tag_settings.cfg
+    cd problems/rocksample
+    cp default.cfg my_settings.cfg
 
-Now you can edit my_tag_settings.cfg to change the settings. To use
+Now you can edit my_settings.cfg to change the settings. To use
 with a different configuration file, use the command-line argument
 --cfg, e.g.
 
-    cd problems/tag
-    ./solve --cfg my_tag_settings.cfg
+    cd problems/rocksample
+    ./solve --cfg my_settings.cfg
 
 Note that "solve" is still searching for configuration settings in
-the folder "problems/tag" - you can change this by using the argument
+the folder "problems/rocksample" - you can change this by using the argument
 --base-path <path>.
 
-Some of the core settings can also be set via command-line arguments;
-for details run
+Some of the core settings can also be set via command-line arguments. Any
+command-line options given will override the values specified in the
+configuration file. For details, run
 
     solve --help
 
@@ -133,6 +143,7 @@ your new problem.
 and add any required configuration files there.
 7. Compile your code via "make [problem-name]", or simply by running "make" from
 your new subfolder of src/problems, e.g.
+
     cd src/problems/tag
     make
 
@@ -148,6 +159,11 @@ the Makefiles in many of the subdirectories. This is the core of the build
 system, which is described in the [Build System README](.make/README.md).
 - [problems](problems) - contains problem-specific configuration settings, and
 is also the default output directory for all of the problem executables.
+    - [RockSample](problems/rocksample) - contains configuration settings for
+    RockSample. This is also the default place for the generated executables
+    for RockSample to go to.
+    - [Tag](problems/tag) - contains configuration settings for Tag; the
+    generated executables for Tag will go here.
 - [docs](docs) - contains [the detailed overview](docs/Overview.md), as well as
 Doxygen settings in order to generate [HTML documentation](html/index.html).
 - [html](html) - the output folder for HTML documentation

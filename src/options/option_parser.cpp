@@ -55,7 +55,11 @@ void OptionParser::parseCmdLine(int argc, char const *argv[]) {
 }
 
 void OptionParser::parseCfgFile(std::string path) {
-    ini_parse(path.c_str(), OptionParser::iniHandler, this);
+    if (ini_parse(path.c_str(), OptionParser::iniHandler, this) < 0) {
+        std::ostringstream message;
+        message << "ERROR: Failed to open configuration file \"" << path << '"';
+        throw OptionParsingException(message.str());
+    }
 }
 
 int OptionParser::iniHandler(void *user, char const *section, char const *name, char const *value) {
@@ -67,7 +71,7 @@ int OptionParser::iniHandler(void *user, char const *section, char const *name, 
         }
     } catch (std::out_of_range const &oor) {
         std::ostringstream message;
-        message << "ERROR: Invalid option in config @file " << section << "." << name << std::endl;
+        message << "ERROR: Invalid option in config @file " << section << "." << name;
         throw OptionParsingException(message.str());
     }
     return 1;
@@ -79,7 +83,7 @@ void OptionParser::finalize() {
             if (!entry2.second->isSet()) {
                 std::ostringstream message;
                 message << "ERROR: Missing mandatory option ";
-                message << entry.first << "." << entry2.first << std::endl;
+                message << entry.first << "." << entry2.first;
                 entry2.second->printAliases(message);
                 throw OptionParsingException(message.str());
             }
