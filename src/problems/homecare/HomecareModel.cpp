@@ -493,7 +493,8 @@ bool HomecareModel::updateCall(GridPosition robotPos, GridPosition targetPos, bo
     }
 }
 
-std::unique_ptr<solver::Observation> HomecareModel::makeObservation(HomecareState const &nextState) {
+std::unique_ptr<solver::Observation> HomecareModel::makeObservation(
+        HomecareState const &nextState) {
     GridPosition robotPos = nextState.getRobotPos();
     GridPosition targetPos(-1, -1);
     if (nextState.getTargetPos().euclideanDistanceTo(robotPos) < 1.5) {

@@ -192,8 +192,7 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     /** Generates an observation given a next state (i.e. after the action)
      * and an action.
      */
-    std::unique_ptr<solver::Observation> makeObservation(
-            solver::Action const &action, HomecareState const &nextState);
+    std::unique_ptr<solver::Observation> makeObservation(HomecareState const &nextState);
 
     /** Samples a reading from region sensors */
     int sampleObservationRegion(HomecareState const &state);
