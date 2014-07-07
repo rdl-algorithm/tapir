@@ -28,7 +28,7 @@ CXX  := g++
 # Compiler flags
 # ----------------------------------------------------------------------
 # Preprocessor flags.
-override INCDIRS     += -I /home/joshua/eigen -I$(ROOT)/src -I$(ROOT)/src/options
+override INCDIRS     += -I$(ROOT)/include -I$(ROOT)/src -I$(ROOT)/src/options
 
 override CPPFLAGS    += -DROOT_PATH=$(ABS_ROOT) $(INCDIRS)
 ifeq ($(CFG),debug)

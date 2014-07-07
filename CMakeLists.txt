@@ -45,11 +45,11 @@ generate_messages(
 
 ## Declare a catkin package
 catkin_package(
-	INCLUDE_DIRS src src/options src/problems/shared/ros
+	INCLUDE_DIRS include src src/options src/problems/shared/ros
 	LIBRARIES ${PROJECT_NAME}
 	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs tf message_runtime laser_geometry)
 
-include_directories(src src/options src/problems/shared/ros ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include src src/options src/problems/shared/ros ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_library(AbtSolver
 	src/global.cpp

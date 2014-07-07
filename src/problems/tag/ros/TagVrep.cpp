@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     parser->setOptions(&tagOptions);
     parser->parseCfgFile(cfgPath);
     parser->finalize();
-    tagOptions.mapPath = abtPath + "/" + tagOptions.mapPath;
+    tagOptions.mapPath = abtPath + "/cfg/tag/" + tagOptions.mapPath;
 
     if (tagOptions.seed == 0) {
         tagOptions.seed = std::time(nullptr);
@@ -134,9 +134,9 @@ int main(int argc, char **argv)
     // Generate policy
     double totT;
     double tStart;
-    tStart = abt::clock_ms();
+    tStart = tapir::clock_ms();
     solver.improvePolicy();
-    totT = abt::clock_ms() - tStart;
+    totT = tapir::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 
     // Initialise ABT's Simulator (not VREP!!)

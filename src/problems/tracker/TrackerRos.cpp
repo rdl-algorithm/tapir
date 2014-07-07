@@ -200,9 +200,9 @@ int main(int argc, char **argv)
     // Generate policy
     double totT;
     double tStart;
-    tStart = abt::clock_ms();
+    tStart = tapir::clock_ms();
     solver.improvePolicy();
-    totT = abt::clock_ms() - tStart;
+    totT = tapir::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 
     // Initialise Agent
