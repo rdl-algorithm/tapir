@@ -245,6 +245,22 @@ Doxygen settings in order to generate [HTML documentation](html/index.html).
         RockSample POMDP.
         - [Tag](src/problems/tag) - contains code for the Tag POMDP.
 
+## ROS-related folders
+
+Some of the files and directories are specifically used for the ROS interface,
+and hence are not needed if you are not using TAPIR with ROS. These are:
+- [CMakelists.txt](CMakeLists.txt) - This allows TAPIR to be used as a ROS
+package - it is not used by the standard build system for TAPIR.
+- [launch](launch) - This contains launch files to be used by ROS, in order
+to conveniently launch specific scenarios.
+- [msg](msg) - Describes ROS messages, which are published by ROS nodes; this
+allows a simple publish-subscribe model for one-way communication.
+- [srv](srv) - Describes ROS services, which allow communication with a
+request-reply model.
+- [vrep-scenarios](vrep-scenarios) - Contains VREP scene files for the ROS
+problems in order to produce a nice GUI.
+
+
 Acknowledgements
 ----------------
 

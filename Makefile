@@ -2,6 +2,11 @@
 ROOT := .
 ABS_ROOT := $(abspath $(ROOT))
 
+# Path to the ROS Catkin workspace to use
+ROS_SCRIPT        :=/opt/ros/indigo/setup.sh
+CATKIN_WS_DIR     := $(ABS_ROOT)/../catkin_ws
+VREP_DIR          := $(ABS_ROOT)/../vrep
+
 HAS_ROOT_MAKEFILE := true
 
 # Defaul build configuration
@@ -216,6 +221,21 @@ endif
 # ----------------------------------------------------------------------
 # ROS catkin_make system
 # ----------------------------------------------------------------------
+CATKIN_SRC_DIR := $(CATKIN_WS_DIR)/src
+ROS_ABT_DIR := $(CATKIN_SRC_DIR)/tapir
+
+$(ROS_ABT_DIR):| $(CATKIN_SRC_DIR)
+	cd $(CATKIN_SRC_DIR); ln -s $(ABS_ROOT) tapir
+
+$(CATKIN_SRC_DIR):
+	$(MKDIR_RECIPE)
+
 .PHONY: ros
-ros:
-	cd ../..;catkin_make;
+ros:| $(ROS_ABT_DIR)
+	echo $$SHELL
+	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make
+
+.PHONY: clean-ros
+clean-ros:
+	echo $$SHELL
+	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make clean
