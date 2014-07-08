@@ -45,7 +45,7 @@ struct Options : options::BaseOptions {
     unsigned long historiesPerStep = 1000;
     /** The maximum time (in milliseconds) to spend on each search step. */
     double stepTimeout = 1000;
-    /** The maximum allowable depth in the search tree. */
+    /** The maximum depth to search, relative to the current belief node. */
     long maximumDepth = 100;
 
     /* ----------------------- TAPIR output modes ------------------- */

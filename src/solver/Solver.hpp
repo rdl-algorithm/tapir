@@ -97,12 +97,14 @@ public:
     void initializeEmpty();
 
     /* ------------------- Policy mutators ------------------- */
-    /** Improves the policy by generating the given number of histories from
-     * the given belief node; nullptr => sample initial states from the model.
+    /** Improves the policy by generating the given number of histories from the given belief node.
      *
-     * numberOfHistories is the number of histories to make (-1 => default, 0 => no limit),
-     * maximumDepth is the maximum depth allowed in the tree (-1 => default),
-     * timeout is the maximum allowed time in milliseconds (-1 => default, 0 => no timeout)
+     * - startNode - the belief node to search from (nullptr => use the root and sample initial
+     * states from the model)
+     * - numberOfHistories is the number of histories to make (-1 => default, 0 => no limit),
+     * - maximumDepth is the maximum depth allowed in the tree (-1 => default), relative to the
+     * starting belief node.
+     * - timeout is the maximum allowed time in milliseconds (-1 => default, 0 => no timeout)
      */
     void improvePolicy(BeliefNode *startNode = nullptr,
             long numberOfHistories = -1, long maximumDepth = -1, double timeout = -1);
