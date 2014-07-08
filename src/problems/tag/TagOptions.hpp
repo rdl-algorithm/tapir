@@ -27,6 +27,8 @@ struct TagOptions : public shared::SharedOptions {
     double failedTagPenalty = 0.0;
     /** Probability the opponent will stay in place. */
     double opponentStayProbability = 0.0;
+    /** Path to vrep scene tag.ttt */
+    std::string vrepScenePath = "";
 
     /** Constructs an OptionParser instance that will parse configuration settings for the Tag
      * problem into an instance of TagOptions.
@@ -49,6 +51,7 @@ struct TagOptions : public shared::SharedOptions {
         parser->addOption<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty);
         parser->addOption<double>("problem", "opponentStayProbability",
                 &TagOptions::opponentStayProbability);
+        parser->addOption<std::string>("ros", "vrepScenePath", &TagOptions::vrepScenePath);
     }
 };
 } /* namespace tag */

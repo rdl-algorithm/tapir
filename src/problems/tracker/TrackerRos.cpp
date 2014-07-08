@@ -142,13 +142,13 @@ int main(int argc, char **argv)
     robotHandle = vrepHelper.getHandle("husky_footprint");
     long targetHandle = vrepHelper.getHandle("Bill_goalDummy");
 
-    // Update knowledge of current pose (used by ABT)
+    // Update knowledge of current pose (used by TAPIR)
     robotPose = vrepHelper.getPose(robotHandle);
 
-	/**************** ABT init ***********************/
+	/**************** TAPIR init ***********************/
 
-    std::string abtPath = ros::package::getPath("abt");
-    std::string cfgPath = abtPath + "/cfg/tracker/default.cfg";
+    std::string tapirPath = ros::package::getPath("tapir");
+    std::string cfgPath = tapirPath + "/problems/tracker/default.cfg";
 	std::unique_ptr<options::OptionParser> parser = TrackerOptions::makeParser(false);
 	TrackerOptions trackerOptions;
 	parser->setOptions(&trackerOptions);
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
     	zones.push_back(xyToGrid(7.5, -7.5));
     	zones.push_back(xyToGrid(-7.5, -7.5));
     	zones.push_back(xyToGrid(-7.5, 7.5));
-    	newModel->setPolicyZones(zones, startZone, 0.3);
+    	newModel->setPolicyZones(zones, startZone, 0.7);
     	vrepHelper.moveObject("Bill", 7.5, 7.5, 0);
     	vrepHelper.moveObject("Bill_goalDummy", 7.5, 7.5, 0);
     }
@@ -240,6 +240,10 @@ int main(int argc, char **argv)
     	Point pos = getCurrPos();
     	int currYaw = getCurrYaw45();
         GridPosition currCell = xyToGrid(pos.x, pos.y); 
+
+        // Publish belief on target's position. This will be visualised in VREP
+        cout << "Publishing belief to ROS" << endl;
+        std::vector<std::vector<float>> targetPosBelief = model->getTargetPosBelief(agent.getCurrentBelief());
 
     	// Get changes to octomap
         if (!octomapTree) {
@@ -323,10 +327,6 @@ int main(int argc, char **argv)
 		solver::BeliefNode *currentBelief = agent.getCurrentBelief();
         double timeout = 2000;
 		solver.improvePolicy(currentBelief);
-
-        // Publish belief on target's position. This will be visualised in VREP
-        cout << "Publishing belief to ROS" << endl;
-        std::vector<std::vector<float>> targetPosBelief = model->getTargetPosBelief(currentBelief);
 
         // Find maximum value to normalise proportion
         float maxProportion = 0;

@@ -17,5 +17,5 @@
 
 	<!-- tracker node -->
 	<param name="target_policy" value="0" />
-	<node pkg="abt" type="tracker_node" name="tracker_node" output="screen"/>
+	<node pkg="tapir" type="tracker_node" name="tracker_node" output="screen"/>
 </launch>

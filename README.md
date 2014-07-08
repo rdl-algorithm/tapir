@@ -168,6 +168,8 @@ rosrun abt tag_node
 ```
 The obstacles should then be generated in V-REP and the simulation will begin. To remove obstacles, select them by left-clicking on them. Multiple obstacles can be selected with the CTRL key. Obstacles can also be added by selecting empty cells. 
 
+Note about source code: The source code for the Tag ROS/V-REP interface can be found in src/problems/tag/ros/TagVrep.cpp In this problem, observations, target behaviour, etc. are generated internally by the TagModel, therefore the solver::Simulator class can be utilised here. This is different to the tracker problem, where target behaviour etc. is generated externally by V-REP. 
+
 **Note about g++ on Ubuntu 12.04**  
 
 Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:

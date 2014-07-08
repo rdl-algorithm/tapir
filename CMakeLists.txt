@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(abt)
+project(tapir)
 
 # Set make arguments
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" ) 
@@ -31,10 +31,11 @@ add_service_files(
   FILES
   simRosCopyPasteObjects.srv
   simRosGetObjectHandle.srv
+  simRosGetObjectPose.srv
+  simRosLoadScene.srv
   simRosSetObjectPosition.srv
   simRosStartSimulation.srv
   simRosStopSimulation.srv
-  simRosGetObjectPose.srv
 )
 
 generate_messages(
@@ -45,13 +46,13 @@ generate_messages(
 
 ## Declare a catkin package
 catkin_package(
-	INCLUDE_DIRS include src src/options src/problems/shared/ros
+	INCLUDE_DIRS src src/options src/problems/shared/ros
 	LIBRARIES ${PROJECT_NAME}
 	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs tf message_runtime laser_geometry)
 
-include_directories(include src src/options src/problems/shared/ros ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(src src/options src/problems/shared/ros ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-add_library(AbtSolver
+add_library(TapirSolver
 	src/global.cpp
 	src/solver/ActionNode.cpp
 	src/solver/Agent.cpp
@@ -96,13 +97,13 @@ add_library(AbtSolver
 	src/problems/shared/policy_iteration.cpp
 )
 
-add_library(AbtRos
+add_library(TapirRos
 	src/problems/shared/ros/VrepHelper.cpp
 )
 
-add_dependencies(AbtRos abt_generate_messages_cpp)
+add_dependencies(TapirRos tapir_generate_messages_cpp)
 
-add_library(AbtTracker
+add_library(TapirTracker
 	src/problems/tracker/TrackerAction.cpp
 	src/problems/tracker/TrackerModel.cpp
 	src/problems/tracker/TrackerObservation.cpp
@@ -110,7 +111,7 @@ add_library(AbtTracker
 	src/problems/tracker/TrackerTextSerializer.cpp
 )
 
-add_library(AbtTag
+add_library(TapirTag
 	src/problems/tag/TagAction.cpp
 	src/problems/tag/TagMdpSolver.cpp
 	src/problems/tag/TagModel.cpp
@@ -119,15 +120,15 @@ add_library(AbtTag
 	src/problems/tag/TagTextSerializer.cpp
 )
 
-target_link_libraries(AbtSolver spatialindex ${catkin_LIBRARIES})
+target_link_libraries(TapirSolver spatialindex ${catkin_LIBRARIES})
 
 add_executable(tracker_node src/problems/tracker/TrackerRos.cpp)
-target_link_libraries(tracker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} AbtTracker AbtSolver AbtRos)
-add_dependencies(tracker_node abt_generate_messages_cpp)
+target_link_libraries(tracker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} TapirTracker TapirSolver TapirRos)
+add_dependencies(tracker_node tapir_generate_messages_cpp)
 
 add_executable(tag_node src/problems/tag/ros/TagVrep.cpp)
-target_link_libraries(tag_node ${catkin_LIBRARIES} AbtTag AbtSolver AbtRos)
-add_dependencies(tracker_node abt_generate_messages_cpp)
+target_link_libraries(tag_node ${catkin_LIBRARIES} TapirTag TapirSolver TapirRos)
+add_dependencies(tag_node tapir_generate_messages_cpp)
 
 add_executable(scan_to_pcl_node src/problems/shared/ros/ScanToPcl.cpp)
 target_link_libraries(scan_to_pcl_node ${catkin_LIBRARIES})

@@ -1,0 +1,3 @@
+<launch>
+	<node pkg="abt" type="tag_node" name="tag_node" output="screen"/>
+</launch>

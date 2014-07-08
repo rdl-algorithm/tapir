@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 
-#include "abt/VrepInfo.h"
+#include "tapir/VrepInfo.h"
 
 class VrepHelper {
 
@@ -45,11 +45,14 @@ public:
 	/** Copy an object in VREP simulation. Returns handle of copied object. */
 	long copyObject(long handle);
 
-	// Get the pose of an object in VREP simulation
+	/** Get the pose of an object in VREP simulation */
 	geometry_msgs::PoseStamped getPose(long handle);
 
 	/** Returns true iff VREP simulation is not stopped */
 	bool isRunning();
+
+	/** Loads a V-REP scene (.ttt file). Returns true if success */
+	bool loadScene(std::string fileName);
 
 private:
 
@@ -60,12 +63,13 @@ private:
 	ros::ServiceClient copyClient_;
 	ros::ServiceClient moveClient_;
 	ros::ServiceClient poseClient_;
+	ros::ServiceClient loadClient_;
 	ros::Subscriber infoSub_;
 
 	bool running_;
 
 	/** Callback for /vrep/info topic */
-	void infoCallback(const abt::VrepInfo::ConstPtr& msg);
+	void infoCallback(const tapir::VrepInfo::ConstPtr& msg);
 
 };
 

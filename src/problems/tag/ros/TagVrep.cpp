@@ -104,15 +104,16 @@ int main(int argc, char **argv)
     beliefPub = node.advertise<std_msgs::String>("target_pos_belief", 1);
     ros::Subscriber selectSub = node.subscribe("selected_cells", 1, selectCallback);
 
-	/**************** ABT init ***********************/
-    std::string abtPath = ros::package::getPath("abt");
-    std::string cfgPath = abtPath + "/cfg/tag/default.cfg";
+	/**************** TAPIR init ***********************/
+    std::string tapirPath = ros::package::getPath("tapir");
+    std::string cfgPath = tapirPath + "/problems/tag/default.cfg";
     std::unique_ptr<options::OptionParser> parser = TagOptions::makeParser(true);
 	TagOptions tagOptions;
     parser->setOptions(&tagOptions);
     parser->parseCfgFile(cfgPath);
     parser->finalize();
-    tagOptions.mapPath = abtPath + "/cfg/tag/" + tagOptions.mapPath;
+    tagOptions.mapPath = tapirPath + "/problems/tag/" + tagOptions.mapPath;
+    tagOptions.vrepScenePath = tapirPath + "/problems/tag/" + tagOptions.vrepScenePath;
 
     if (tagOptions.seed == 0) {
         tagOptions.seed = std::time(nullptr);
@@ -139,7 +140,7 @@ int main(int argc, char **argv)
     totT = tapir::clock_ms() - tStart;
     cout << "Total solving time: " << totT << "ms" << endl;
 
-    // Initialise ABT's Simulator (not VREP!!)
+    // Initialise TAPIR's Simulator (not VREP!!)
     std::unique_ptr<TagModel> simulatorModel = std::make_unique<TagModel>(
         &randGen, std::make_unique<TagOptions>(tagOptions));
     solver::Simulator simulator(std::move(simulatorModel), &solver, true);
@@ -153,8 +154,25 @@ int main(int argc, char **argv)
 
     vrepHelper.setRosNode(&node);
 
-    // TODO AUTO LOAD, check for sim status before and during run
-
+    // Attempt to load and start correct scene
+    bool sceneLoaded = false;
+    while (ros::ok()) {
+        vrepHelper.stop();
+        sceneLoaded = vrepHelper.loadScene(tagOptions.vrepScenePath);
+        if (sceneLoaded) {
+            cout << "Successfully loaded V-REP scene tag.ttt" << endl;
+            break;       
+        } else {
+            cout << "V-REP scene tag.ttt isn't loaded. Retrying..." << endl;
+        }
+        ros::Duration(1).sleep();
+        ros::spinOnce();
+    }
+    if (!sceneLoaded) {
+        ROS_ERROR_STREAM("Failed to load V-REP scene");
+        return 1;
+    }
+    
     // Move robot and human to starting positions in VREP
     solver::State const &startState =  *(simulator.getCurrentState());
     TagState const &startTagState = static_cast<TagState const &>(startState);
