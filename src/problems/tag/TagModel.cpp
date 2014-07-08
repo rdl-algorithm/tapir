@@ -437,12 +437,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     ActionType actionType =
             (static_cast<TagAction const &>(action).getActionType());
 
-    struct Hash {
-        std::size_t operator()(TagState const &state) const {
-            return state.hash();
-        }
-    };
-    typedef std::unordered_map<TagState, double, Hash> WeightMap;
+    typedef std::unordered_map<TagState, double> WeightMap;
     WeightMap weights;
     double weightTotal = 0;
 
