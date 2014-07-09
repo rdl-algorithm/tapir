@@ -6,7 +6,7 @@ ABS_ROOT := $(abspath $(ROOT))
 # Automatic ROS configuration settings
 # ----------------------------------------------------------------------
 # Main ROS setup script
-ROS_SCRIPT        :=/opt/ros/hydro/setup.sh
+ROS_SCRIPT        :=/opt/ros/indigo/setup.sh
 # Directory for the Catkin workspace
 CATKIN_WS_DIR     := $(ABS_ROOT)/../catkin_ws
 # Directory in which to find V-REP
@@ -245,13 +245,9 @@ $(CATKIN_SRC_DIR):
 	$(MKDIR_RECIPE)
 
 TAG_SCRIPT := $(ROOT)/problems/tag/simulate-ros
-TRACKER_SCRIPT := $(ROOT)/problems/tracker/simulate-ros
 
 $(TAG_SCRIPT): Makefile
 	$(call ROS_SCRIPT_RECIPE,tag)
-
-$(TRACKER_SCRIPT): Makefile
-	$(call ROS_SCRIPT_RECIPE,tracker)
 
 .PHONY: indigo-ws
 indigo-ws: $(CATKIN_SRC_DIR)
@@ -259,12 +255,12 @@ indigo-ws: $(CATKIN_SRC_DIR)
 	@cd $(CATKIN_SRC_DIR); wstool update
 
 .PHONY: ros-scripts ros
-ros-scripts: $(TAG_SCRIPT) $(TRACKER_SCRIPT)
+ros-scripts: $(TAG_SCRIPT)
 ros: ros-scripts | $(ROS_ABT_DIR)
 	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make
 
 .PHONY: clean-ros-scripts clean-ros
 clean-ros-scripts:
-	@rm -f $(TAG_SCRIPT) $(TRACKER_SCRIPT)
+	@rm -f $(TAG_SCRIPT)
 clean-ros: clean-ros-scripts
 	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make clean

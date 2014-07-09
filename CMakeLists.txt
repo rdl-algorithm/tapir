@@ -9,14 +9,8 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" )
 ##find_package(Boost 1.48.0 REQUIRED)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
 	roscpp roslib std_msgs geometry_msgs tf message_generation laser_geometry)
-
-## Find OctoMap package
-find_package(octomap REQUIRED)
-include_directories(${OCTOMAP_INCLUDE_DIRS} )
-link_libraries(${OCTOMAP_LIBRARIES})
-link_directories(${OCTOMAP_LIBRARY_DIRS})
 
 ## Find PCL package
 find_package(PCL REQUIRED)
@@ -103,14 +97,6 @@ add_library(TapirRos
 
 add_dependencies(TapirRos tapir_generate_messages_cpp)
 
-add_library(TapirTracker
-	src/problems/tracker/TrackerAction.cpp
-	src/problems/tracker/TrackerModel.cpp
-	src/problems/tracker/TrackerObservation.cpp
-	src/problems/tracker/TrackerState.cpp
-	src/problems/tracker/TrackerTextSerializer.cpp
-)
-
 add_library(TapirTag
 	src/problems/tag/TagAction.cpp
 	src/problems/tag/TagMdpSolver.cpp
@@ -121,10 +107,6 @@ add_library(TapirTag
 )
 
 target_link_libraries(TapirSolver spatialindex ${catkin_LIBRARIES})
-
-add_executable(tracker_node src/problems/tracker/TrackerRos.cpp)
-target_link_libraries(tracker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} TapirTracker TapirSolver TapirRos)
-add_dependencies(tracker_node tapir_generate_messages_cpp)
 
 add_executable(tag_node src/problems/tag/ros/TagVrep.cpp)
 target_link_libraries(tag_node ${catkin_LIBRARIES} TapirTag TapirSolver TapirRos)
