@@ -5,6 +5,9 @@ ABS_ROOT := $(abspath $(ROOT))
 # ----------------------------------------------------------------------
 # Automatic ROS configuration settings
 # ----------------------------------------------------------------------
+# Custom source directory for BOOST 1.48 => required for Ubuntu 12.04!
+# Simply leave this blank if the standard OS version of boost will be OK.
+CUSTOM_BOOST_148_DIR := $(ABS_ROOT)/boost_1_48_0
 # Main ROS setup script
 ROS_SCRIPT        :=/opt/ros/hydro/setup.sh
 # Directory for the Catkin workspace
@@ -226,6 +229,7 @@ endif
 # ----------------------------------------------------------------------
 # ROS catkin_make system
 # ----------------------------------------------------------------------
+# Recipe to generate a script to run ROS
 define ROS_SCRIPT_RECIPE
 	@echo "#!/bin/sh" > $@
 	@printf 'env TAPIR_DIR="$(ABS_ROOT)" ' >> $@
@@ -235,19 +239,34 @@ define ROS_SCRIPT_RECIPE
 	@chmod +x $@
 endef
 
+# Catkin workspace directories
 CATKIN_SRC_DIR := $(CATKIN_WS_DIR)/src
 ROS_ABT_DIR := $(CATKIN_SRC_DIR)/tapir
-
 $(ROS_ABT_DIR):| $(CATKIN_SRC_DIR)
 	cd $(CATKIN_SRC_DIR); ln -s $(ABS_ROOT) tapir
-
 $(CATKIN_SRC_DIR):
 	$(MKDIR_RECIPE)
 
+# Tag script
 TAG_SCRIPT := $(ROOT)/problems/tag/simulate-ros
-
 $(TAG_SCRIPT): Makefile
 	$(call ROS_SCRIPT_RECIPE,tag)
+
+# Phony target for Boost, if a custom directory is used.
+.PHONY: boost
+ifeq ($(CUSTOM_BOOST_148_DIR),)
+# No custom Boost path => assume everything is OK
+CATKIN_MAKE := catkin_make
+boost: ;
+else
+# Custom boost path => inform catkin_make of the custom path.
+CATKIN_MAKE := env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) catkin_make
+boost: | $(CUSTOM_BOOST_148_DIR)/include ;
+# Custom directory doesn't exist => automatically get Boost!
+$(CUSTOM_BOOST_148_DIR)/include : ;
+	@env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/get_boost_148.sh
+	@env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/build_boost_148.sh
+endif
 
 .PHONY: indigo-ws
 indigo-ws: $(CATKIN_SRC_DIR)
@@ -256,11 +275,12 @@ indigo-ws: $(CATKIN_SRC_DIR)
 
 .PHONY: ros-scripts ros
 ros-scripts: $(TAG_SCRIPT)
-ros: ros-scripts | $(ROS_ABT_DIR)
-	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make
+ros: boost ros-scripts | $(ROS_ABT_DIR)
+	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && $(CATKIN_MAKE)
 
 .PHONY: clean-ros-scripts clean-ros
 clean-ros-scripts:
 	@rm -f $(TAG_SCRIPT)
 clean-ros: clean-ros-scripts
-	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make clean
+	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && $(CATKIN_MAKE) clean
+

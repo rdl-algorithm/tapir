@@ -4,9 +4,12 @@ project(tapir)
 # Set make arguments
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" ) 
 
-## Use Boost 1.48.0 from source, different to my system's default version
-##set(BOOST_ROOT "~/boost_1_48_0")
-##find_package(Boost 1.48.0 REQUIRED)
+## Use Boost 1.48.0 from source, for Ubuntu 12.04
+if (DEFINED ENV{TAPIR_BOOST_148})
+	message("-- USING CUSTOM BOOST: $ENV{TAPIR_BOOST_148}")
+	set(BOOST_ROOT "$ENV{TAPIR_BOOST_148}")
+	find_package(Boost 1.48.0 REQUIRED)	
+endif()
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS

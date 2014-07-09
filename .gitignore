@@ -4,6 +4,9 @@
 /.settings
 /EMPTY_HEADER.hpp
 
+# Boost 1.48 built from source
+boost_1_48_0
+
 # Automatically generated documentation
 docs/html
 docs/generated
