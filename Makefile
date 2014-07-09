@@ -6,7 +6,7 @@ ABS_ROOT := $(abspath $(ROOT))
 # Automatic ROS configuration settings
 # ----------------------------------------------------------------------
 # Main ROS setup script
-ROS_SCRIPT        :=/opt/ros/indigo/setup.sh
+ROS_SCRIPT        :=/opt/ros/hydro/setup.sh
 # Directory for the Catkin workspace
 CATKIN_WS_DIR     := $(ABS_ROOT)/../catkin_ws
 # Directory in which to find V-REP
