@@ -904,9 +904,9 @@ double HomecareModel::getDefaultHeuristicValue(solver::HistoryEntry const */*ent
     double nSteps = dist / targetStayProbability_;
     double finalDiscount = std::pow(options_->discountFactor, nSteps);
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
-    if (homecareState.getCall()) {
+    //if (homecareState.getCall()) {
         qVal += finalDiscount * helpReward_;
-    }
+    //}
     return qVal;
 }
 
