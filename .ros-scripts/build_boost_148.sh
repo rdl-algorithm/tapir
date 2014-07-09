@@ -1,4 +1,11 @@
 #!/bin/bash
+if [ -z "$TAPIR_BOOST_148" ]
+then
+    echo "ERROR: No target directory specified for Boost"
+    exit 1
+fi
+
+cd tapir_boost_install/boost_1_48_0
 echo "Compile Boost 1.48?"
 select yn in "Yes" "No"
 do

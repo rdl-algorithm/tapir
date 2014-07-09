@@ -5,12 +5,6 @@ then
     exit 0
 fi
 
-if [ -z "$TAPIR_BOOST_148" ]
-then
-    echo "ERROR: No target directory specified for Boost"
-    exit 1
-fi
-
 VERSION=$(lsb_release -a 2> /dev/null | grep Release | cut -d ':' -f 2)
 VERSION="${VERSION#"${VERSION%%[![:space:]]*}"}"   # remove leading whitespace characters
 VERSION="${VERSION%"${VERSION##*[![:space:]]}"}"   # remove trailing whitespace characters

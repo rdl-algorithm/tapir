@@ -6,14 +6,14 @@ ABS_ROOT := $(abspath $(ROOT))
 # Automatic ROS configuration settings
 # ----------------------------------------------------------------------
 # Custom source directory for BOOST 1.48 => required for Ubuntu 12.04!
-# Simply leave this blank if the standard OS version of boost will be OK.
-CUSTOM_BOOST_148_DIR := $(ABS_ROOT)/boost_1_48_0
+# If you have Boost installed normally, just leave this blank.
+CUSTOM_BOOST_148_DIR :=
 # Main ROS setup script
-ROS_SCRIPT        :=/opt/ros/hydro/setup.sh
+ROS_SCRIPT           := /opt/ros/hydro/setup.sh
 # Directory for the Catkin workspace
-CATKIN_WS_DIR     := $(ABS_ROOT)/../catkin_ws
+CATKIN_WS_DIR        := $(ABS_ROOT)/../catkin_ws
 # Directory in which to find V-REP
-VREP_DIR          := $(ABS_ROOT)/../vrep
+VREP_DIR             := $(ABS_ROOT)/../vrep
 
 HAS_ROOT_MAKEFILE := true
 
@@ -264,7 +264,8 @@ CATKIN_MAKE := env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) catkin_make
 boost: | $(CUSTOM_BOOST_148_DIR)/include ;
 # Custom directory doesn't exist => automatically get Boost!
 $(CUSTOM_BOOST_148_DIR)/include : ;
-	@env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/get_boost_148.sh
+	$(ABS_ROOT)/.ros-scripts/get_boost_148.sh
+	$(ABS_ROOT)/.ros-scripts/patch_boost_148.sh
 	@env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/build_boost_148.sh
 endif
 
