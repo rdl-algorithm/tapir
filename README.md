@@ -32,6 +32,19 @@ Building and running the C++ source code requires:
 - [Eigen 3](http://eigen.tuxfamily.org) (>= 3.2.0)
 	Debian/Ubuntu package name: "libeigen3-dev"
 
+## Note about g++ on Ubuntu 12.04
+Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6
+with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:
+
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo apt-get update
+    sudo apt-get install g++-4.8
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 60
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 40
+
+Here, 4.8 priority is set to 60, higher than 4.6. To swap to 4.6 use:
+
+    sudo update-alternatives --config g++
 
 Quick Start (Command-line Interface)
 ------------------------------------
@@ -114,78 +127,94 @@ to see the command-line options for either executable.
 Quick Start (ROS and V-REP Interface)
 -------------------------------------
 
-TAPIR provides interface with ROS and V-REP, and has been tested on Ubuntu 12.04, [ROS Hydro](http://wiki.ros.org/hydro/Installation), and [V-REP](http://www.coppeliarobotics.com/downloads.html) V3.1.2. 
+TAPIR provides an interface with ROS and V-REP, which has been tested on Ubuntu
+12.04 and 14.04
 
-**Additional System requirements:** 
-- **Octomap** - ros-hydro-octomap, ros-hydro-octomap-ros, ros-hydro-octomap-rviz-plugins, ros-hydro-octomap-server 
+## Additional system requirements:
+- [ROS Hydro](http://wiki.ros.org/ROS/Installation)
+Debian/Ubuntu package name: "ros-hydro-desktop-full"
+**NOTE:** on Ubuntu 14.04 you must instead use ROS Indigo, which is available
+via the package "ros-indigo-desktop-full"
+- [V-REP](http://www.coppeliarobotics.com/downloads.html) - Download this and
+extract it to the directory of your choice.
+**NOTE:** on Ubuntu 14.04 the version of the ROS plugin that ships with V-REP
+will not work out of the box - it causes a segmentation fault in V-REP!
+You will need to recompile it yourself, by following the tutorial at
+http://www.coppeliarobotics.com/helpFiles/en/rosTutorialHydro.htm
+but with one major difference:
+You will need to change line 14 of vrep_plugin/CMakeLists.txt to
 
-**Compilation:**
+    link_directories("/opt/ros/indigo/lib")
 
-To develop code with ROS, the code must be compiled using ROS's catkin build system. 
-First, source the ROS Hydro environment: 
-```
-source /opt/ros/hydro/setup.bash
-```
-The code must be placed in a catkin workspace. To create a new one: 
-```
-mkdir ~/tapir_ws
-cd ~/tapir_ws
-mkdir src
-catkin_make
-```
-Now move the TAPIR code into the src folder, so that the directory looks like tapir_ws/src/abt. 
-Then compile the code by running:
-```
-catkin_make
-```
+instead of
 
-**Running:** 
+    link_directories("/opt/ros/hydro/lib")
 
-Source the workspace environment:
-```
-cd ~/tapir_ws
-source devel/setup.bash
-```
-Currently ROS interfaces exist only for the Tag and Tracker problem. To solve the Tag problem: 
-Start a roscore:  
-```
-roscore  
-```
+## Setup and installation
+This package is designed to be used with the ROS Catkin build system, and as
+such must be compiled within a Catkin workspace.
 
-Start V-REP in another terminal: (Note, roscore must be started first, otherwise V-REP's ROS plugins will not load)  
-First cd into your V-REP directory, then:
+The [root Makefile][./Makefile] can automatically set up a workspace for you,
+and will add a symbolic link to the source directory into the workspace.
+To configure this as needed, change the settings in lines 6-8 of the root
+Makefile, i.e.
+- ROS_SCRIPT - path to the main ROS setup script; the default is
+/opt/ros/hydro/setup.sh
+- CATKIN_WS_DIR - path to the desired Catkin workspace directory; the default
+is ../catkin_ws (relative to the root tapir directory, i.e. the location of this
+README.md)
+- VREP_DIR - path to where you have extracted V-REP; the default is ../vrep
+/opt/ros/hydro/setup.sh
 
-```
-./vrep.sh
-```
+After setting these variables as desired, simply run the command
 
-Once V-REP has finished loading, open and start the tag.ttt scenario located in abt/vrep-scenarios. 
-Finally, start the tag node in another terminal (you will need to source the workspace environment again): 
-```
-cd ~/tapir_ws
-source devel/setup.bash
-rosrun abt tag_node
-```
-The obstacles should then be generated in V-REP and the simulation will begin. To remove obstacles, select them by left-clicking on them. Multiple obstacles can be selected with the CTRL key. Obstacles can also be added by selecting empty cells. 
+    make ros
 
-Note about source code: The source code for the Tag ROS/V-REP interface can be found in src/problems/tag/ros/TagVrep.cpp In this problem, observations, target behaviour, etc. are generated internally by the TagModel, therefore the solver::Simulator class can be utilised here. This is different to the tracker problem, where target behaviour etc. is generated externally by V-REP. 
+in order to compile the code for interfacing with ROS and V-REP.
 
-**Note about g++ on Ubuntu 12.04**  
+## Running
+If you compiled with `make ros`, TAPIR will automatically create a script
+to run the Tag example problem together with the ROS and V-REP interface.
+You can run this script by executing the ./simulate-ros in the tag problem
+directory, i.e.
 
-Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:
+    cd problems/tag
+    ./simulate-ros
 
-```
-sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-sudo apt-get update
-sudo apt-get install g++-4.8
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 60
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 40
-```
+This will automatically run a *roscore*, and then launch V-REP (if it is not
+already running). Note that when V-REP is launching it is important to read the
+console messages and make sure that the ROS plugin loads correctly.
+If there is an issue with loading the ROS plugin, you may need to recompile
+the plugin. Please read the V-REP ROS plugin tutorial at
+http://www.coppeliarobotics.com/helpFiles/en/rosTutorialHydro.htm
 
-Here, 4.8 priority is set to 60, higher than 4.6. To swap to 4.6 use:
-```
-sudo update-alternatives --config g++
-```
+Alternatively, if you run a *roscore* and launch V-REP manually, and have
+sourced the setup script for your Catkin workspace, i.e.
+
+    source [path/to/catkin/workspace]/devel/setup.bash
+
+you can simply run
+
+    roslaunch tapir tag.launch
+
+in order to start the Tag problem.
+
+The obstacles should then be displayed in V-REP; the simulation should start
+when you press the "Start/resume simulation" button. During the simulation you
+can also actively manipulate the environment using the mouse to left-click on
+squares in the Tag grid.
+- To remove an obstacle, left-click on a cell and wait momentarily.
+- To add an obstacle, left-click on a cell and wait momentarily.
+- You can also add or remove multiple cells at the same time by holding down
+the CTRL key while clicking on those cells.
+
+## Source code notes
+The ROS/V-REP interface for Tag can be found in
+[TagVrep.cpp](src/problems/tag/ros/TagVrep.cpp).
+This interface uses the TAPIR [Simulator](src/solver/Simulator.hpp) class
+in order to run the core simulation and generate the POMDP transitions and
+observations; this is done according to the
+[Tag problem model](src/problems/tag/TagModel.hpp).
 
 Implementing a new POMDP model
 ------------------------------
@@ -214,22 +243,23 @@ Package Structure
 
 Here's a quick overview of the contents of this package, by directory structure:
 - README.md - this README!
-- [Makefile](Makefile) - used to change most of the core settings used
+- [Makefile](./Makefile) - used to change most of the core settings used
 in building the code.
-- [.make](.make) - contains template Makefile code which is included by
+- [.make](./.make) - contains template Makefile code which is included by
 the Makefiles in many of the subdirectories. This is the core of the build
 system, which is described in the [Build System README](.make/README.md).
-- [problems](problems) - contains problem-specific configuration settings, and
+- [problems](./problems) - contains problem-specific configuration settings, and
 is also the default output directory for all of the problem executables.
     - [RockSample](problems/rocksample) - contains configuration settings for
     RockSample. This is also the default place for the generated executables
     for RockSample to go to.
     - [Tag](problems/tag) - contains configuration settings for Tag; the
     generated executables for Tag will go here.
-- [docs](docs) - contains [the detailed overview](docs/Overview.md), as well as
-Doxygen settings in order to generate [HTML documentation](html/index.html).
-- [html](html) - the output folder for HTML documentation
-- [src](src) - the source folder
+- [docs](./docs) - contains [a detailed overview](docs/Overview.md), as well
+as Doxygen settings in order to generate
+[HTML documentation](docs/html/index.html).
+    - [html](docs/html) - the output folder for HTML documentation
+- [src](./src) - the source folder
     - [solver](src/solver) - the core ABT solver source code
     - [options](src/options) - contains code for parsing configuration options.
     Most of the work is done by two libraries included in the code:
@@ -249,17 +279,16 @@ Doxygen settings in order to generate [HTML documentation](html/index.html).
 
 Some of the files and directories are specifically used for the ROS interface,
 and hence are not needed if you are not using TAPIR with ROS. These are:
-- [CMakelists.txt](CMakeLists.txt) - This allows TAPIR to be used as a ROS
+- [CMakelists.txt](./CMakeLists.txt) - This allows TAPIR to be used as a ROS
 package - it is not used by the standard build system for TAPIR.
-- [launch](launch) - This contains launch files to be used by ROS, in order
+- [launch](./launch) - This contains launch files to be used by ROS, in order
 to conveniently launch specific scenarios.
-- [msg](msg) - Describes ROS messages, which are published by ROS nodes; this
+- [msg](./msg) - Describes ROS messages, which are published by ROS nodes; this
 allows a simple publish-subscribe model for one-way communication.
-- [srv](srv) - Describes ROS services, which allow communication with a
+- [srv](./srv) - Describes ROS services, which allow communication with a
 request-reply model.
-- [vrep-scenarios](vrep-scenarios) - Contains VREP scene files for the ROS
-problems in order to produce a nice GUI.
-
+- [.ros-scripts](./.ros-scripts) - Some scripts for extra convenience in working
+with ROS.
 
 Acknowledgements
 ----------------

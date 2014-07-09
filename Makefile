@@ -2,9 +2,14 @@
 ROOT := .
 ABS_ROOT := $(abspath $(ROOT))
 
-# Path to the ROS Catkin workspace to use
-ROS_SCRIPT        :=/opt/ros/indigo/setup.sh
+# ----------------------------------------------------------------------
+# Automatic ROS configuration settings
+# ----------------------------------------------------------------------
+# Main ROS setup script
+ROS_SCRIPT        :=/opt/ros/hydro/setup.sh
+# Directory for the Catkin workspace
 CATKIN_WS_DIR     := $(ABS_ROOT)/../catkin_ws
+# Directory in which to find V-REP
 VREP_DIR          := $(ABS_ROOT)/../vrep
 
 HAS_ROOT_MAKEFILE := true
@@ -221,6 +226,15 @@ endif
 # ----------------------------------------------------------------------
 # ROS catkin_make system
 # ----------------------------------------------------------------------
+define ROS_SCRIPT_RECIPE
+	@echo "#!/bin/sh" > $@
+	@printf 'env TAPIR_DIR="$(ABS_ROOT)" ' >> $@
+	@printf 'TAPIR_WS_DIR="$(CATKIN_WS_DIR)" ' >> $@
+	@printf 'VREP_DIR="$(VREP_DIR)" ' >> $@
+	@printf '"$(ABS_ROOT)/.ros-scripts/run.sh" $(1)\n' >> $@
+	@chmod +x $@
+endef
+
 CATKIN_SRC_DIR := $(CATKIN_WS_DIR)/src
 ROS_ABT_DIR := $(CATKIN_SRC_DIR)/tapir
 
@@ -230,12 +244,27 @@ $(ROS_ABT_DIR):| $(CATKIN_SRC_DIR)
 $(CATKIN_SRC_DIR):
 	$(MKDIR_RECIPE)
 
-.PHONY: ros
-ros:| $(ROS_ABT_DIR)
-	echo $$SHELL
+TAG_SCRIPT := $(ROOT)/problems/tag/simulate-ros
+TRACKER_SCRIPT := $(ROOT)/problems/tracker/simulate-ros
+
+$(TAG_SCRIPT): Makefile
+	$(call ROS_SCRIPT_RECIPE,tag)
+
+$(TRACKER_SCRIPT): Makefile
+	$(call ROS_SCRIPT_RECIPE,tracker)
+
+.PHONY: indigo-ws
+indigo-ws: $(CATKIN_SRC_DIR)
+	@cat $(ROOT)/.ros-scripts/.rosinstall > $(CATKIN_SRC_DIR)/.rosinstall
+	@cd $(CATKIN_SRC_DIR); wstool update
+
+.PHONY: ros-scripts ros
+ros-scripts: $(TAG_SCRIPT) $(TRACKER_SCRIPT)
+ros: ros-scripts | $(ROS_ABT_DIR)
 	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make
 
-.PHONY: clean-ros
-clean-ros:
-	echo $$SHELL
+.PHONY: clean-ros-scripts clean-ros
+clean-ros-scripts:
+	@rm -f $(TAG_SCRIPT) $(TRACKER_SCRIPT)
+clean-ros: clean-ros-scripts
 	. $(ROS_SCRIPT) && cd $(CATKIN_WS_DIR) && catkin_make clean

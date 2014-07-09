@@ -1,0 +1,8 @@
+- git:
+    local-name: octomap_mapping
+    uri: https://github.com/OctoMap/octomap_mapping.git
+    version: indigo-devel
+- git: 
+    local-name: husky_description
+    uri: https://github.com/husky/husky_description.git
+    version: hydro-devel
