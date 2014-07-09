@@ -229,6 +229,7 @@ endif
 # ----------------------------------------------------------------------
 # ROS catkin_make system
 # ----------------------------------------------------------------------
+-include ros-local.make
 # Recipe to generate a script to run ROS
 define ROS_SCRIPT_RECIPE
 	@echo "#!/bin/sh" > $@
