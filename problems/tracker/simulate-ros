@@ -1,2 +1,0 @@
-#!/bin/sh
-env TAPIR_DIR="/home/uqdklime/Research/tapir" TAPIR_WS_DIR="/home/uqdklime/Research/tapir/../catkin_ws" VREP_DIR="/home/uqdklime/Research/tapir/../vrep" "/home/uqdklime/Research/tapir/.ros-scripts/run.sh" tracker

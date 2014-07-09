@@ -588,12 +588,7 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
     RockSampleAction const &a = static_cast<RockSampleAction const &>(action);
     if (a.getActionType() == ActionType::CHECK) {
         long rockNo = a.getRockNo();
-        struct Hash {
-            std::size_t operator()(RockSampleState const &state) const {
-                return state.hash();
-            }
-        };
-        typedef std::unordered_map<RockSampleState, double, Hash> WeightMap;
+        typedef std::unordered_map<RockSampleState, double> WeightMap;
         WeightMap weights;
         double weightTotal = 0;
         for (solver::State const *state : previousParticles) {

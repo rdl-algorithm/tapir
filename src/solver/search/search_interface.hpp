@@ -43,7 +43,7 @@ public:
     virtual ~SearchStrategy() = default;
     _NO_COPY_OR_MOVE(SearchStrategy);
 
-    /** Extends and backs up the given HistorySequence, up to the given maximum depth in the tree.
+    /** Extends and backs up the given HistorySequence, up to the given maximum length.
      *
      * Typically this method will be called with a new sequence with just the first entry; this is
      * essentially the same as creating a new sequence from scratch.
@@ -54,7 +54,7 @@ public:
      *
      * Backpropagation back to the root of the tree should be deferred (i.e. set aside for later).
      */
-    virtual SearchStatus extendAndBackup(HistorySequence *sequence, long maximumDepth) = 0;
+    virtual SearchStatus extendAndBackup(HistorySequence *sequence, long maximumLength) = 0;
 };
 
 /** An abstract class for generating new steps in a  history sequence, one step at a time.
@@ -188,7 +188,7 @@ public:
     _NO_COPY_OR_MOVE(BasicSearchStrategy);
 
     /** The default implementation of extendAndBackup, used by default in the ABT algorithm. */
-    virtual SearchStatus extendAndBackup(HistorySequence *sequence, long maximumDepth) override;
+    virtual SearchStatus extendAndBackup(HistorySequence *sequence, long maximumLength) override;
 private:
     /** The associated solver. */
     Solver *solver_;

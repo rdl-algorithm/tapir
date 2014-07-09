@@ -34,4 +34,17 @@ class RockSampleState : public solver::VectorState {
 };
 } /* namespace rocksample */
 
+// We define a hash function directly in the std namespace.
+namespace std {
+/** A struct in the std namespace to define a standard hash function for the
+ * RockSampleState class.
+ */
+template<> struct hash<rocksample::RockSampleState> {
+    /** Returns the hash value for the given TagState. */
+    std::size_t operator()(rocksample::RockSampleState const &state) const {
+        return state.hash();
+    }
+};
+} /* namespace std */
+
 #endif /* ROCKSAMPLESTATE_HPP_ */

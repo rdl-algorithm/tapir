@@ -23,13 +23,13 @@
 #include "solver/abstract-problem/Action.hpp"            // for Action
 #include "solver/abstract-problem/Model.hpp"             // for Model::StepResult, Model
 #include "solver/abstract-problem/Observation.hpp"       // for Observation
-#include "solver/abstract-problem/State.hpp"             // for State, State::Hash, operator<<, operator==
+#include "solver/abstract-problem/State.hpp"             // for State, operator<<, operator==
 
 #include "solver/changes/ChangeFlags.hpp"        // for ChangeFlags
 
 #include "solver/indexing/FlaggingVisitor.hpp"
 #include "solver/indexing/RTree.hpp"
-#include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, State::Hash, operator<<, operator==
+#include "solver/indexing/SpatialIndexVisitor.hpp"             // for State, operator<<, operator==
 
 #include "solver/mappings/actions/enumerated_actions.hpp"
 #include "solver/mappings/observations/discrete_observations.hpp"
@@ -437,12 +437,7 @@ std::vector<std::unique_ptr<solver::State>> TagModel::generateParticles(
     ActionType actionType =
             (static_cast<TagAction const &>(action).getActionType());
 
-    struct Hash {
-        std::size_t operator()(TagState const &state) const {
-            return state.hash();
-        }
-    };
-    typedef std::unordered_map<TagState, double, Hash> WeightMap;
+    typedef std::unordered_map<TagState, double> WeightMap;
     WeightMap weights;
     double weightTotal = 0;
 

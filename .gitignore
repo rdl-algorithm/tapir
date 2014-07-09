@@ -11,7 +11,7 @@ docs/generated
 # Binaries
 /builds
 /build
-simulate-ros.sh
+simulate-ros
 simulate
 solve
 solve-mdp
