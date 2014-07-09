@@ -5,7 +5,6 @@ then
     exit 1
 fi
 
-cd tapir_boost_install/boost_1_48_0
 echo "Compile Boost 1.48?"
 select yn in "Yes" "No"
 do
