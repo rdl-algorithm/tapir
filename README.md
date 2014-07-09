@@ -32,7 +32,7 @@ Building and running the C++ source code requires:
 - [Eigen 3](http://eigen.tuxfamily.org) (>= 3.2.0)
 	Debian/Ubuntu package name: "libeigen3-dev"
 
-## Note about g++ on Ubuntu 12.04
+### Note about g++ on Ubuntu 12.04
 Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6
 with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:
 
@@ -130,7 +130,7 @@ Quick Start (ROS and V-REP Interface)
 TAPIR provides an interface with ROS and V-REP, which has been tested on Ubuntu
 12.04 and 14.04
 
-## Additional system requirements:
+### Additional system requirements:
 - [ROS Hydro](http://wiki.ros.org/ROS/Installation)
 Debian/Ubuntu package name: "ros-hydro-desktop-full"
 **Ubuntu 12.04 NOTE:** on Ubuntu 12.04, ROS Hydro defaults to using Boost 1.46
@@ -168,7 +168,7 @@ instead of
 
     link_directories("/opt/ros/hydro/lib")
 
-## Setup and installation
+### Setup and installation
 This package is designed to be used with the ROS Catkin build system, and as
 such must be compiled within a Catkin workspace.
 
@@ -190,7 +190,7 @@ After setting these variables as desired, simply run the command
 
 in order to compile the code for interfacing with ROS and V-REP.
 
-## Running
+### Running
 If you compiled with `make ros`, TAPIR will automatically create a script
 to run the Tag example problem together with the ROS and V-REP interface.
 You can run this script by executing the ./simulate-ros in the tag problem
@@ -226,7 +226,7 @@ squares in the Tag grid.
 - You can also add or remove multiple cells at the same time by holding down
 the CTRL key while clicking on those cells.
 
-## Source code notes
+### Source code notes
 The ROS/V-REP interface for Tag can be found in
 [TagVrep.cpp](src/problems/tag/ros/TagVrep.cpp).
 This interface uses the TAPIR [Simulator](src/solver/Simulator.hpp) class
@@ -293,7 +293,7 @@ as Doxygen settings in order to generate
         RockSample POMDP.
         - [Tag](src/problems/tag) - contains code for the Tag POMDP.
 
-## ROS-related folders
+### ROS-related folders
 
 Some of the files and directories are specifically used for the ROS interface,
 and hence are not needed if you are not using TAPIR with ROS. These are:
