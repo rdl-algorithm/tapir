@@ -26,6 +26,10 @@ PositionAndRockData::PositionAndRockData(PositionAndRockData const &other) :
         allRockData_(other.allRockData_) {
 }
 
+std::unique_ptr<solver::HistoricalData> PositionAndRockData::copy() const {
+    return std::make_unique<PositionAndRockData>(*this);
+}
+
 std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
         solver::Action const &action, solver::Observation const &observation) const {
     RockSampleAction const &rsAction = static_cast<RockSampleAction const &>(action);

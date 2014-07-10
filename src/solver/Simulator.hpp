@@ -98,7 +98,7 @@ public:
      * Returns false if the changes were invalid or failed in some way.
      */
     bool handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
-            bool areDynamic = true);
+            bool areDynamic = true, bool resetTree = false);
 
 private:
     /** The simulator's model, which is used to generate the actual simulation history. */

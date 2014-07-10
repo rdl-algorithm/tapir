@@ -237,7 +237,7 @@ std::unique_ptr<solver::State> HomecareModel::sampleStateUninformed() {
     return std::make_unique<HomecareState>(robotPos, targetPos, call);
 }
 
-bool HomecareModel::isTerminal(solver::State const &state) {
+bool HomecareModel::isTerminal(solver::State const &/*state*/) {
     return false;
 }
 
@@ -743,8 +743,6 @@ std::vector<std::unique_ptr<solver::State>> HomecareModel::generateParticles(
     std::vector<std::unique_ptr<solver::State>> newParticles;
     HomecareObservation const &observation =
             (static_cast<HomecareObservation const &>(obs));
-    ActionType actionType =
-            (static_cast<HomecareAction const &>(action).getActionType());
     GridPosition newRobotPos(observation.getRobotPos());
 
     while ((long)newParticles.size() < nParticles) {

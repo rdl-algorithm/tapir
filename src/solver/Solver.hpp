@@ -116,6 +116,8 @@ public:
     BeliefNode *replenishChild(BeliefNode *currNode, Action const &action, Observation const &obs,
             long minParticleCount = -1);
 
+    /** Resets the tree, so that the given belief will be the new root. */
+    void resetTree(BeliefNode *newRoot);
 
     /** Prunes all sibling nodes of the given node in the tree, i.e. all nodes that have the same
      * parent belief node, but take a different action and observation.

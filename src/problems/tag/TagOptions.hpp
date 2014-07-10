@@ -51,7 +51,8 @@ struct TagOptions : public shared::SharedOptions {
         parser->addOption<double>("problem", "failedTagPenalty", &TagOptions::failedTagPenalty);
         parser->addOption<double>("problem", "opponentStayProbability",
                 &TagOptions::opponentStayProbability);
-        parser->addOption<std::string>("ros", "vrepScenePath", &TagOptions::vrepScenePath);
+        parser->addOptionWithDefault<std::string>("ros", "vrepScenePath",
+                &TagOptions::vrepScenePath, "");
     }
 };
 } /* namespace tag */

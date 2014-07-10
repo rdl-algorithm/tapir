@@ -15,6 +15,7 @@
 
 #include "solver/Agent.hpp"
 #include "solver/BeliefNode.hpp"
+#include "solver/BeliefTree.hpp"
 #include "solver/HistoryEntry.hpp"
 #include "solver/HistorySequence.hpp"
 #include "solver/Solver.hpp"
@@ -144,7 +145,9 @@ bool Simulator::stepSimulation() {
         }
         double changingTimeStart = tapir::clock_ms();
         // Apply all the changes!
-        bool noError = handleChanges(iter->second, hasDynamicChanges_);
+        bool noError = handleChanges(iter->second, hasDynamicChanges_, options_->resetOnChanges);
+        // Update the BeliefNode * in case there was a tree reset.
+        currentBelief = agent_->getCurrentBelief();
         if (!noError) {
             return false;
         }
@@ -236,19 +239,25 @@ bool Simulator::stepSimulation() {
 }
 
 bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &changes,
-        bool areDynamic) {
-
-    // Set the change root appropriately.
-    if (areDynamic) {
-        solver_->setChangeRoot(agent_->getCurrentBelief());
-    } else {
-        solver_->setChangeRoot(nullptr);
+        bool areDynamic, bool resetTree) {
+    if (!resetTree) {
+        // Set the change root appropriately.
+        if (areDynamic) {
+            solver_->setChangeRoot(agent_->getCurrentBelief());
+        } else {
+            solver_->setChangeRoot(nullptr);
+        }
     }
 
     model_->applyChanges(changes, nullptr);
 
     double startTime = tapir::clock_ms();
-    solverModel_->applyChanges(changes, solver_);
+    if (resetTree) {
+        solverModel_->applyChanges(changes, nullptr);
+    } else {
+        // The model only needs to inform the solver of changes if we intend to keep the policy.
+        solverModel_->applyChanges(changes, solver_);
+    }
     totalChangingTime_ += tapir::clock_ms() - startTime;
 
     // If the current state is deleted, the simulation is broken!
@@ -272,9 +281,14 @@ bool Simulator::handleChanges(std::vector<std::unique_ptr<ModelChange>> const &c
         }
     }
 
-    // Finally we apply the changes.
+    // Apply the changes, or simply reset the tree.
     startTime = tapir::clock_ms();
-    solver_->applyChanges();
+    if (resetTree) {
+        solver_->resetTree(agent_->getCurrentBelief());
+        agent_->setCurrentBelief(solver_->getPolicy()->getRoot());
+    } else {
+        solver_->applyChanges();
+    }
     totalChangingTime_ += tapir::clock_ms() - startTime;
     return true;
 }

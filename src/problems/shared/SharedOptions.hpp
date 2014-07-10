@@ -128,11 +128,14 @@ struct SharedOptions: public solver::Options {
             parser->addOptionWithDefault<unsigned long>("ABT", "minParticleCount",
                     &Options::minParticleCount, 5000);
             parser->addOptionWithDefault<bool>("ABT", "pruneEveryStep",
-                                &Options::pruneEveryStep, true);
+                                &Options::pruneEveryStep, false);
+            parser->addOptionWithDefault<bool>("ABT", "resetOnChanges",
+                                            &Options::resetOnChanges, false);
         } else {
             parser->addOption<long>("simulation", "nSteps", &SharedOptions::nSimulationSteps);
             parser->addOption<unsigned long>("ABT", "minParticleCount", &Options::minParticleCount);
             parser->addOption<bool>("ABT", "pruneEveryStep", &Options::pruneEveryStep);
+            parser->addOption<bool>("ABT", "resetOnChanges", &Options::resetOnChanges);
         }
 
         parser->addOptionWithDefault<long>("simulation", "nRuns", &SharedOptions::nRuns, 1);
@@ -162,6 +165,9 @@ struct SharedOptions: public solver::Options {
             parser->addSwitchArg("ABT", "pruneEveryStep",
                     &Options::pruneEveryStep, "", "prune", "Prune after every step"
                             " of the simulation.", true);
+            parser->addSwitchArg("ABT", "resetOnChanges",
+                    &Options::resetOnChanges, "", "reset", "Rebuild the tree from"
+                            " scratch whenever there are changes to the model", true);
             parser->addSwitchArg("ABT", "pruneEveryStep",
                     &Options::pruneEveryStep, "", "no-prune", "Don't prune after every step"
                             " of the simulation.", false);

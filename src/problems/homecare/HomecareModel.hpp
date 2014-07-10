@@ -261,8 +261,8 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     std::vector<std::vector<HomecarePathCell>> pathMap_;
     std::vector<std::vector<HomecareTypeCell>> typeMap_;
     /** Vector of special cells. */
-    std::vector<GridPosition> tCells_;
     std::vector<GridPosition> wCells_;
+    std::vector<GridPosition> tCells_;
     std::vector<GridPosition> sCells_;
     std::vector<GridPosition> pCells_;
 

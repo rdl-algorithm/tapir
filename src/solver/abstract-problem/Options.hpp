@@ -39,6 +39,8 @@ struct Options : options::BaseOptions {
     /* ------------------------- ABT settings --------------------- */
     /** Whether to prune the tree on every simulation step. */
     bool pruneEveryStep = false;
+    /** Whether to completely re-build the tree from scratch if changes occur. */
+    bool resetOnChanges = false;
     /** The minimum number of particles to maintain in the active belief node. */
     unsigned long minParticleCount = 1000;
     /** The number of new histories to generate on each search step. */

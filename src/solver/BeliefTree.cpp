@@ -95,7 +95,7 @@ void BeliefTree::removeNode(BeliefNode *node) {
 
 /* ------------------- Tree modification ------------------- */
 BeliefNode *BeliefTree::reset() {
-    allNodes_.clear();
+    root_ = nullptr;
     root_ = std::make_unique<BeliefNode>(solver_);
     BeliefNode *rootPtr = root_.get();
     return rootPtr;

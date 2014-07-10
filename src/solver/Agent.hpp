@@ -44,6 +44,8 @@ public:
     /** Returns the current belief of the agent (as a BeliefNode within the solver's belief tree). */
     BeliefNode *getCurrentBelief() const;
 
+    /** Sets the current belief of this agent to the given BeliefNode. */
+    void setCurrentBelief(BeliefNode *belief);
     /** Updates the belief of this agent based on an action and observation. */
     void updateBelief(Action const &action, Observation const &observation);
 

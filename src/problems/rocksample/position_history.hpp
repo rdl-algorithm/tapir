@@ -21,6 +21,8 @@ public:
     virtual ~PositionData() = default;
     _NO_COPY_OR_MOVE(PositionData);
 
+    std::unique_ptr<solver::HistoricalData> copy() const;
+
     std::unique_ptr<solver::HistoricalData> createChild(
             solver::Action const &action,
             solver::Observation const &observation) const override;

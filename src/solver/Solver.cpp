@@ -211,6 +211,38 @@ BeliefNode *Solver::replenishChild(BeliefNode *currNode, Action const &action,
     return nextNode;
 }
 
+void Solver::resetTree(BeliefNode *newRoot) {
+    changeRoot_ = nullptr;
+    isAffectedMap_.clear();
+    nodesToBackup_.clear();
+
+    std::vector<StateInfo *> allParticles;
+    for (HistoryEntry *entry : newRoot->particles_) {
+        allParticles.push_back(entry->stateInfo_);
+    }
+
+    std::unique_ptr<HistoricalData> data = newRoot->getHistoricalData()->copy();
+    newRoot = policy_->reset();
+    newRoot->data_ = std::move(data);
+    newRoot->setMapping(actionPool_->createActionMapping(newRoot));
+    estimationStrategy_->setValueEstimator(this, newRoot);
+    histories_->reset();
+
+    // Clear the stored history entries for each StateInfo in the pool.
+    for (std::unique_ptr<StateInfo> const &info : statePool_->statesByIndex_) {
+        info->usedInHistoryEntries_.clear();
+    }
+
+    // Now fill the re-created belief node with the particles from the old one.
+    for (StateInfo *info : allParticles) {
+        // Create a new history sequence and entry for each new particle.
+        HistorySequence *histSeq = histories_->createSequence();
+        HistoryEntry *histEntry = histSeq->addEntry();
+        histEntry->registerState(info);
+        histEntry->registerNode(newRoot);
+    }
+}
+
 long Solver::pruneSiblings(BeliefNode *node) {
     ObservationMappingEntry *entry = node->getParentEntry();
     if (entry == nullptr) {

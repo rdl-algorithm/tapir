@@ -19,6 +19,10 @@ PositionData::PositionData(RockSampleModel *model,
         position_(position) {
 }
 
+std::unique_ptr<solver::HistoricalData> PositionData::copy() const {
+    return std::make_unique<PositionData>(model_, position_);
+}
+
 std::unique_ptr<solver::HistoricalData> PositionData::createChild(
         solver::Action const &action,
         solver::Observation const &/*observation*/) const {

@@ -1,0 +1,2 @@
+t 10 : 1
+Add Obstacles: (4, 1) (4, 9)

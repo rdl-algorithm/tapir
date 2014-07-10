@@ -25,6 +25,9 @@ BeliefNode *Agent::getCurrentBelief() const {
     return currentBelief_;
 }
 
+void Agent::setCurrentBelief(BeliefNode *belief) {
+    currentBelief_ = belief;
+}
 void Agent::updateBelief(Action const &action, Observation const &observation) {
     currentBelief_ = currentBelief_->createOrGetChild(action, observation);
 }

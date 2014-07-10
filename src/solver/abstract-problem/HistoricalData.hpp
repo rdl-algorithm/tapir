@@ -23,6 +23,9 @@ public:
     HistoricalData() = default;
     virtual ~HistoricalData() = default;
 
+    /** Creates a copy of this HistoricalData instance. */
+    virtual std::unique_ptr<HistoricalData> copy() const = 0;
+
     /** Generates a new child HistoricalData for a new belief node, based on the action taken
      * and observation received in going to that child node.
      */

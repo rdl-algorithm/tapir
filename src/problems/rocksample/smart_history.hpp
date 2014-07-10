@@ -31,6 +31,8 @@ public:
     PositionAndRockData &operator=(PositionAndRockData const &other) = delete;
     PositionAndRockData &operator=(PositionAndRockData &&other) = delete;
 
+    std::unique_ptr<solver::HistoricalData> copy() const;
+
     std::unique_ptr<solver::HistoricalData> createChild(
             solver::Action const &action,
             solver::Observation const &observation) const override;
