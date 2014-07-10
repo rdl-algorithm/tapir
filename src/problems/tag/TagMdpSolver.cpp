@@ -11,8 +11,11 @@
 
 #include "global.hpp"
 
-#include "problems/shared/parsers.hpp"
+#ifdef HAS_EIGEN
 #include "problems/shared/policy_iteration.hpp"
+#endif
+
+#include "problems/shared/parsers.hpp"
 #include "solver/abstract-problem/heuristics/HeuristicFunction.hpp"
 
 #include "TagModel.hpp"
@@ -26,6 +29,10 @@ TagMdpSolver::TagMdpSolver(TagModel *model) :
 }
 
 void TagMdpSolver::solve() {
+#ifndef HAS_EIGEN
+    debug::show_message("ERROR: Can't use MDP Policy Iteration without Eigen!");
+    std::exit(15);
+#else
     if (model_->options_->hasVerboseOutput) {
         std::cout << "Solving MDP...";
         std::cout.flush();
@@ -169,6 +176,7 @@ void TagMdpSolver::solve() {
     if (model_->options_->hasVerboseOutput) {
         std::cout << "        Done; took " << numSteps << " steps." << std::endl << std::endl;
     }
+#endif
 }
 
 double TagMdpSolver::getValue(TagState const &state) const {

@@ -5,7 +5,7 @@
 /EMPTY_HEADER.hpp
 
 # Local configuration settings
-/ros-local.make
+/*local.make
 
 # Boost 1.48 built from source
 boost_1_48_0

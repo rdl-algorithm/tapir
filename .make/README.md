@@ -80,7 +80,7 @@ which are the key executables for running TAPIR on a specific problem.
 The core of this template is defining all of the dependencies for each problem.
 The default dependencies are the other object files in the same folder as
 solve.cpp and simulate.cpp, the solver archive libtapir.a / libtapir.so,
-and the external libraries libspatialindex and Eigen.
+and the external library libspatialindex.
 
 If your problem needs to be linked to additional libraries, you can specify
 this by adding those dependencies to the variable

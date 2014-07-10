@@ -3,6 +3,14 @@ ABS_ROOT := $(abspath $(ROOT))
 HAS_ROOT_MAKEFILE := true
 
 # ----------------------------------------------------------------------
+# General configuration settings
+# ----------------------------------------------------------------------
+# Eigen is optional, so you don't really need it unless you want to use
+# policy iteration to solve an MDP
+# (see src/problems/shared/policy_iteration.hpp).
+HAS_EIGEN            := false
+
+# ----------------------------------------------------------------------
 # ROS configuration settings
 # ----------------------------------------------------------------------
 # Custom source directory for BOOST 1.48 => required for Ubuntu 12.04!
@@ -14,9 +22,6 @@ ROS_SCRIPT           := /opt/ros/hydro/setup.sh
 CATKIN_WS_DIR        := $(ABS_ROOT)/../catkin_ws
 # Directory in which to find V-REP
 VREP_DIR             := $(ABS_ROOT)/../vrep
-
-# You can put local settings in ros-local.make
--include ros-local.make
 
 # ----------------------------------------------------------------------
 # Basic build settings
@@ -35,6 +40,9 @@ DEFAULT_TARGET := all
 BUILDDIR := $(ROOT)/builds/$(CFG)
 PROBLEMS_DIR := $(ROOT)/problems
 
+# You can put local settings in local.make
+-include local.make
+
 # ----------------------------------------------------------------------
 # Compiler & linker
 # ----------------------------------------------------------------------
@@ -49,6 +57,9 @@ CXX  := g++
 override INCDIRS     += -I$(ROOT)/include -I$(ROOT)/src -I$(ROOT)/src/options
 
 override CPPFLAGS    += -DROOT_PATH=$(ABS_ROOT) $(INCDIRS)
+ifeq ($(HAS_EIGEN),true)
+  override CPPFLAGS  += -DHAS_EIGEN
+endif
 ifeq ($(CFG),debug)
   override CPPFLAGS  += -DDEBUG
 endif

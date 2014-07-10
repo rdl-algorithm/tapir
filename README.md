@@ -29,8 +29,6 @@ Building and running the C++ source code requires:
 - [GNU C++ compiler](https://gcc.gnu.org) (>= 4.8) or equivalent
 - [libspatialindex](http://libspatialindex.github.io) (>= 1.7.0)
 	Debian/Ubuntu package name: "libspatialindex-dev"
-- [Eigen 3](http://eigen.tuxfamily.org) (>= 3.2.0)
-	Debian/Ubuntu package name: "libeigen3-dev"
 
 ### Note about g++ on Ubuntu 12.04
 Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6
