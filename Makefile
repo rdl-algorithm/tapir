@@ -1,9 +1,9 @@
-# Root project folder
 ROOT := .
 ABS_ROOT := $(abspath $(ROOT))
+HAS_ROOT_MAKEFILE := true
 
 # ----------------------------------------------------------------------
-# Automatic ROS configuration settings
+# ROS configuration settings
 # ----------------------------------------------------------------------
 # Custom source directory for BOOST 1.48 => required for Ubuntu 12.04!
 # If you have Boost installed normally, just leave this blank.
@@ -15,9 +15,14 @@ CATKIN_WS_DIR        := $(ABS_ROOT)/../catkin_ws
 # Directory in which to find V-REP
 VREP_DIR             := $(ABS_ROOT)/../vrep
 
-HAS_ROOT_MAKEFILE := true
+# You can put local settings in ros-local.make
+-include ros-local.make
 
-# Defaul build configuration
+# ----------------------------------------------------------------------
+# Basic build settings
+# ----------------------------------------------------------------------
+
+# Default build configuration
 DEFAULT_CFG := release
 ifndef CFG
   CFG := $(DEFAULT_CFG)
@@ -26,13 +31,13 @@ endif
 # Default build target.
 DEFAULT_TARGET := all
 
+# Output directories.
 BUILDDIR := $(ROOT)/builds/$(CFG)
 PROBLEMS_DIR := $(ROOT)/problems
 
 # ----------------------------------------------------------------------
 # Compiler & linker
 # ----------------------------------------------------------------------
-
 AR   := ar
 CC   := gcc
 CXX  := g++
@@ -101,8 +106,6 @@ endif
 # ----------------------------------------------------------------------
 # Linker flags
 # ----------------------------------------------------------------------
-
-# Library directories
 override LIBDIRS += -L/usr/lib/x86_64-linux-gnu/
 override LDFLAGS += $(LIBDIRS)
 
@@ -229,7 +232,6 @@ endif
 # ----------------------------------------------------------------------
 # ROS catkin_make system
 # ----------------------------------------------------------------------
--include ros-local.make
 # Recipe to generate a script to run ROS
 define ROS_SCRIPT_RECIPE
 	@echo "#!/bin/sh" > $@
