@@ -16,7 +16,7 @@ For information on updates, please visit http://robotics.itee.uq.edu.au/~tapir
 TAPIR Development team
 ----------------------
 - Main developer: Dimitri Klimenko
-- ROS + VREP interface by: Joshua Song
+- ROS + VREP interface: Joshua Song
 
 System Requirements
 -------------------
