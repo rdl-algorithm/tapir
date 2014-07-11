@@ -2,6 +2,8 @@
  *
  * Contains a basic implementation of policy iteration for MDPs.
  */
+#ifdef HAS_EIGEN
+
 #include "policy_iteration.hpp"
 
 #include <iostream>
@@ -111,3 +113,5 @@ std::vector<double> PolicyIterator::getCurrentValues() {
     return values_;
 }
 } /* namespace mdp */
+
+#endif /* HAS_EIGEN */

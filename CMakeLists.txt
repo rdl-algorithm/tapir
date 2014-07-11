@@ -2,13 +2,19 @@ cmake_minimum_required(VERSION 2.8.3)
 project(tapir)
 
 # Set make arguments
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" ) 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math" )
+
+# Compile with Eigen if requested.
+if (DEFINED ENV{HAS_EIGEN})
+    message("-- COMPILING WITH EIGEN!")
+    add_definitions(-DHAS_EIGEN)
+endif()
 
 ## Use Boost 1.48.0 from source, for Ubuntu 12.04
 if (DEFINED ENV{TAPIR_BOOST_148})
 	message("-- USING CUSTOM BOOST: $ENV{TAPIR_BOOST_148}")
 	set(BOOST_ROOT "$ENV{TAPIR_BOOST_148}")
-	find_package(Boost 1.48.0 REQUIRED)	
+	find_package(Boost 1.48.0 REQUIRED)
 endif()
 
 ## Find catkin and any catkin packages

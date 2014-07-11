@@ -6,6 +6,8 @@
 #ifndef POLICY_ITERATION_HPP_
 #define POLICY_ITERATION_HPP_
 
+#ifdef HAS_EIGEN
+
 #include "global.hpp"
 
 #include <functional>
@@ -103,5 +105,5 @@ private:
 
 } /* namespace mdp */
 
+#endif /* HAS_EIGEN */
 #endif /* POLICY_ITERATION_HPP_ */
-

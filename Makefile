@@ -266,22 +266,32 @@ TAG_SCRIPT := $(ROOT)/problems/tag/simulate-ros
 $(TAG_SCRIPT): Makefile
 	$(call ROS_SCRIPT_RECIPE,tag)
 
+# Environment variables to pass to catkin_make
+CATKIN_MAKE_ENVS :=
+ifeq ($(HAS_EIGEN),true)
+	CATKIN_MAKE_ENVS += HAS_EIGEN=1
+endif
+
 # Phony target for Boost, if a custom directory is used.
 .PHONY: boost
+
 ifeq ($(CUSTOM_BOOST_148_DIR),)
 # No custom Boost path => assume everything is OK
-CATKIN_MAKE := catkin_make
 boost: ;
 else
+
 # Custom boost path => inform catkin_make of the custom path.
-CATKIN_MAKE := env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) catkin_make
+CATKIN_MAKE_ENVS += TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR)
+
+# Recipe to automatically download and install boost:
 boost: | $(CUSTOM_BOOST_148_DIR)/include ;
-# Custom directory doesn't exist => automatically get Boost!
 $(CUSTOM_BOOST_148_DIR)/include : ;
 	$(ABS_ROOT)/.ros-scripts/get_boost_148.sh
 	$(ABS_ROOT)/.ros-scripts/patch_boost_148.sh
 	@env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/build_boost_148.sh
 endif
+
+CATKIN_MAKE := env $(CATKIN_MAKE_ENVS) catkin_make
 
 .PHONY: indigo-ws
 indigo-ws: $(CATKIN_SRC_DIR)

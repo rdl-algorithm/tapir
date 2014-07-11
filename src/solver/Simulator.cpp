@@ -215,7 +215,10 @@ bool Simulator::stepSimulation() {
         long nSequencesDeleted = solver_->pruneSiblings(currentBelief);
         long pruningTime = tapir::clock_ms() - pruningTimeStart;
         totalPruningTime_ += pruningTime;
-        cout << "Pruned " << nSequencesDeleted << " sequences in " << pruningTime << "ms.";
+        if (options_->hasVerboseOutput) {
+           cout << "Pruned " << nSequencesDeleted << " sequences in ";
+           cout << pruningTime << "ms." << endl;
+        }
     }
 
     currentEntry->action_ = std::move(result.action);
