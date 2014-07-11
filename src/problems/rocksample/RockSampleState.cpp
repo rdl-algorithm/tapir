@@ -1,3 +1,7 @@
+/** @file RockSampleState.cpp
+ *
+ * Contains the implementation for the methods of RockSampleState.
+ */
 #include "RockSampleState.hpp"
 
 #include <cstddef>                      // for size_t

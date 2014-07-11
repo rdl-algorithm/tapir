@@ -1,3 +1,8 @@
+/** @file RockSampleOptions.hpp
+ *
+ * Defines the RockSampleOptions class, which specifies the configuration settings available for the
+ * RockSample problem.
+ */
 #ifndef ROCKSAMPLE_OPTIONS_HPP_
 #define ROCKSAMPLE_OPTIONS_HPP_
 
@@ -6,6 +11,7 @@
 #include "problems/shared/SharedOptions.hpp"
 
 namespace rocksample {
+/** A class defining the configuration settings for the RockSample problem. */
 struct RockSampleOptions : public shared::SharedOptions {
     RockSampleOptions() = default;
     virtual ~RockSampleOptions() = default;
@@ -39,15 +45,19 @@ struct RockSampleOptions : public shared::SharedOptions {
     /** If a bias is used, the visit count for the preferred actions. */
     long preferredVisitCount = 0;
 
+    /** Constructs an OptionParser instance that will parse configuration settings for the
+     * RockSample problem into an instance of RockSampleOptions.
+     */
     static std::unique_ptr<options::OptionParser> makeParser(bool simulating) {
         std::unique_ptr<options::OptionParser> parser = SharedOptions::makeParser(simulating,
                 EXPAND_AND_QUOTE(ROOT_PATH) "/problems/rocksample");
-        addRocksampleOptions(parser.get());
+        addRockSampleOptions(parser.get());
         addHeuristicOptions(parser.get());
         return std::move(parser);
     }
 
-    static void addRocksampleOptions(options::OptionParser *parser) {
+    /** Adds the core configuration settings for the RpckSample problem to the given parser. */
+    static void addRockSampleOptions(options::OptionParser *parser) {
         parser->addOption<std::string>("problem", "mapPath", &RockSampleOptions::mapPath);
         parser->addValueArg<std::string>("problem", "mapPath", &RockSampleOptions::mapPath,
                 "", "map", "the path to the map file (relative to the base config path)", "path");
@@ -59,7 +69,9 @@ struct RockSampleOptions : public shared::SharedOptions {
         parser->addOption<double>("problem", "halfEfficiencyDistance", &RockSampleOptions::halfEfficiencyDistance);
     }
 
-
+    /** Adds configuration options specific to the management of history-based data, e.g. the
+     * fully observed state, for RockSample.
+     */
     static void addHeuristicOptions(options::OptionParser *parser) {
         parser->addOption<std::string>("heuristics", "type", &RockSampleOptions::heuristicType);
         parser->addOption<std::string>("heuristics", "search", &RockSampleOptions::searchHeuristicType);

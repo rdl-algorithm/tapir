@@ -1,3 +1,7 @@
+/** @file VrepHelper.hpp
+ *
+ * Defines VrepHelper, a utility class for basic communications with V-REP.
+ */
 #ifndef VREPHELPER_HPP_
 #define VREPHELPER_HPP_
 
@@ -7,12 +11,22 @@
 
 #include "tapir/VrepInfo.h"
 
+/** A class facilitating basic communications with V-REP.
+ *
+ * This includes loading a new scene file into V-REP, starting and stopping
+ * simulations, and querying and moving objects within the scene.
+ */
 class VrepHelper {
-
 public:
-
+    /** Constructs a new VrepHelper instance not associated with any particular ROS node. */
 	VrepHelper();
+	/** Constructs a new VrepHelper instance associated with the given ROS node. */
 	VrepHelper(ros::NodeHandle *node);
+	/** Associates this VrepHelper with the given ROS node.
+	 *
+	 * NOTE: this can only be done when the VrepHelper is not yet assoicated with a node; it
+	 * cannot be done twice!
+	 */
 	void setRosNode(ros::NodeHandle *node);
 
 	/**
@@ -55,7 +69,6 @@ public:
 	bool loadScene(std::string fileName);
 
 private:
-
 	ros::NodeHandle *node_;
 	ros::ServiceClient startClient_;
     ros::ServiceClient stopClient_;

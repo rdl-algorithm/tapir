@@ -1,3 +1,7 @@
+/** @file RockSampleMdpSolver.cpp
+ *
+ * Contains the implementations for RockSampleMdpSolver and RockSampleMdpParser.
+ */
 #include "RockSampleMdpSolver.hpp"
 
 #include <iostream>

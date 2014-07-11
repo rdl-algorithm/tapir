@@ -1,3 +1,7 @@
+/** @file TagTextSerializer.cpp
+ *
+ * Contains the implementations of the serialization methods for Tag.
+ */
 #include "TagTextSerializer.hpp"
 
 #include <iostream>                     // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, basic_istream<>::__istream_type

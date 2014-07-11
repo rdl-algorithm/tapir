@@ -1,3 +1,7 @@
+/** @file RockSampleTextSerializer.cpp
+ *
+ * Contains the implementations of the serialization methods for RockSample.
+ */
 #include "RockSampleTextSerializer.hpp"
 
 #include <iostream>                     // for operator<<, basic_ostream, basic_istream<>::__istream_type, basic_ostream<>::__ostream_type, endl
@@ -26,11 +30,6 @@ class Solver;
 } /* namespace solver */
 
 namespace rocksample {
-RockSampleTextSerializer::RockSampleTextSerializer(solver::Solver *solver) :
-        Serializer(solver) {
-}
-
-/* ------------------ Saving change sequences -------------------- */
 void saveVector(std::vector<long> values, std::ostream &os) {
     os << "(";
     for (auto it = values.begin(); it != values.end(); it++) {
@@ -40,15 +39,6 @@ void saveVector(std::vector<long> values, std::ostream &os) {
         }
     }
     os << ")";
-}
-
-void RockSampleTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
-    RockSampleChange const &rsChange = static_cast<RockSampleChange const &>(change);
-    os << rsChange.changeType;
-    os << ": ";
-    saveVector(std::vector<long> {rsChange.i0, rsChange.j0}, os);
-    os << " ";
-    saveVector(std::vector<long> {rsChange.i1, rsChange.j1}, os);
 }
 
 std::vector<long> loadVector(std::istream &is) {
@@ -64,6 +54,22 @@ std::vector<long> loadVector(std::istream &is) {
     }
     return values;
 }
+
+RockSampleTextSerializer::RockSampleTextSerializer(solver::Solver *solver) :
+        Serializer(solver) {
+}
+
+/* ------------------ Saving change sequences -------------------- */
+void RockSampleTextSerializer::saveModelChange(solver::ModelChange const &change, std::ostream &os) {
+    RockSampleChange const &rsChange = static_cast<RockSampleChange const &>(change);
+    os << rsChange.changeType;
+    os << ": ";
+    saveVector(std::vector<long> {rsChange.i0, rsChange.j0}, os);
+    os << " ";
+    saveVector(std::vector<long> {rsChange.i1, rsChange.j1}, os);
+}
+
+
 std::unique_ptr<solver::ModelChange> RockSampleTextSerializer::loadModelChange(std::istream &is) {
     std::unique_ptr<RockSampleChange> change = std::make_unique<RockSampleChange>();
     std::getline(is, change->changeType, ':');

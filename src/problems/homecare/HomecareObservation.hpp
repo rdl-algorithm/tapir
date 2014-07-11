@@ -19,9 +19,24 @@
 namespace homecare {
 class HomecareModel;
 
+/** A class representing an observation in the Homecare POMDP.
+ *
+ * This includes:
+ * - an observation of the robot's own position
+ * - an observation of the target's position (iff it is within once cell of the robot)
+ * - a noisy observation of the general region the target is in
+ * - a boolean flag representing whether or not the target is currently calling.
+ */
 class HomecareObservation : public solver::Point {
     friend class HomecareTextSerializer;
   public:
+    /** Constructs a new HomecareObservation with the given observation data, i.e:
+     * @param robotPos       The robot's observation of its own position
+     * @param targetPos      The position of the target if the robot saw it within one cell, or
+     *      (-1, -1) otherwise.
+     * @param targetRegion   The region detected by the region sensor
+     * @param call          True iff the target is currently calling.
+     */
     HomecareObservation(GridPosition robotPos, GridPosition targetPos,
         int targetRegion, bool call);
 
@@ -36,11 +51,16 @@ class HomecareObservation : public solver::Point {
 
     /** Returns the position the robot has observed itself in. */
     GridPosition getRobotPos() const;
+
     /** Returns position of opponent if within 1 cell from robot, 
      *   otherwise returns (-1, -1) 
      */
     GridPosition getTargetPos() const;
+
+    /** Returns the region the observation sensor considers the target to be in (noisy!) */
     int getTargetRegion() const;
+
+    /** Returns true iff the robot observed the target calling (this is accurate). */
     bool getCall() const;
 
   private:

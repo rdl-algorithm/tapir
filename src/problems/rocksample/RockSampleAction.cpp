@@ -1,3 +1,7 @@
+/** @file RockSampleAction.cpp
+ *
+ * Contains the implementations for the methods of the RockSampleAction class.
+ */
 #include "RockSampleAction.hpp"
 
 #include <cstddef>                      // for size_t

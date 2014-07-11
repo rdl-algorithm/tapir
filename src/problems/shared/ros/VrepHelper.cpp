@@ -1,3 +1,7 @@
+/** @file VrepHelper.cpp
+ *
+ * Contains the implementation of the VrepHelper class.
+ */
 #include "VrepHelper.hpp"
 
 #include <vector>
@@ -127,7 +131,7 @@ bool VrepHelper::loadScene(std::string fileName) {
     return loadSrv.response.result == 1;
 }
 
-/** Callback for /vrep/info topic */
+/** Callback for the /vrep/info topic */
 void VrepHelper::infoCallback(const tapir::VrepInfo::ConstPtr& msg) {
 
     // Set running_ true iff simulation is not stopped/paused

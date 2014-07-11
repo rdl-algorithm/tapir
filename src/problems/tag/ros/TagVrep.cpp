@@ -1,3 +1,8 @@
+/** @file TagVrep.cpp
+ *
+ * Implements the V-REP + ROS interface for Tag, including live output and live addition and
+ * deletion of obstacles.
+ */
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -30,34 +35,52 @@ using std::endl;
 using namespace tag;
 
 // ROS variables
+/** A Publisher for publishing the position of the robot. */
 ros::Publisher robotPub;
+/** A Publisher for publishing the position of the human. */
 ros::Publisher humanPub;
+/** A Publisher for publishing the full environment map. */
 ros::Publisher envMapPub;
+/** A Publisher for publishing the robot's belief about the target's position. */
 ros::Publisher beliefPub;
 
+/** An instance of VrepHelper class to facilitate basic communications with V-REP, including
+ * starting and stopping the simulation, and moving the robot and human to their initial positions.
+ */
 VrepHelper vrepHelper;
+
+/** A vector to hold changes that will be passed to the model. */
 std::vector<std::unique_ptr<solver::ModelChange>> changes;
 
-double cellSize = 1;  // metres
+/** The width of a single grid cell, in metres. */
+double cellSize = 1;
 
 namespace tag {
-
+/** A simple implementation of a 2-D point. */
 struct Point {
+    /** The x-coordinate of this point. */
     double x;
+    /** The y-coordinate of this point. */
     double y;
+    /** Constructs a new point at (0, 0). */
     Point() : x(0), y(0) {
     }
+
+    /** Constructs a new point at (argX, argY). */
     Point(double argX, double argY) : x(argX), y(argY) {
     }
 
+    /** Returns the distance from this point to the other point given. */
     double dist(Point const &other) const {
         return std::sqrt(std::pow(x - other.x, 2) + std::pow(y - other.y, 2));
     }
 
+    /** Returns the squared distance from this point to the other point given. */
     double distSq(Point const &other) const {
         return std::pow(x - other.x, 2) + std::pow(y - other.y, 2);
     }
 
+    /** Returns the angle (in radians) from this point to the other point given. */
     double angle(Point const &other) const {
         return atan2(other.y - y, other.x - x);
     }
@@ -67,29 +90,37 @@ struct Point {
 
 /************** Function prototypes ****************/
 
-// Get xy from GridPosition
+/** Convert a GridPosition to an (x, y) point. */
 Point gridToPoint(const GridPosition& g);
 
-// Get GridPosition from xy
+/** Convert an (x, y) point to a GridPosition. */
 GridPosition pointToGrid(const Point& p);
 
-// Publish desired robot goal position on ROS topic
+/** Publish the desired robot position. */
 void publishRobotGoal(double goalX, double goalY);
 
-// Publish desired human goal position on ROS topic
+/** Publish the desired human position. */
 void publishHumanGoal(double goalX, double goalY);
 
-// Publish environment map as string
+/** Publish the full environment map as a string. */
 void publishEnvMap(std::vector<std::vector<TagModel::TagCellType>> const &envMap);
 
-// Publish belief about target position on VREP
+/** Publish the agent's belief about the target's position. */
 void publishBelief(std::vector<std::vector<float>> proportions);
 
-// For receiving info on which cells in VREP are selected
+/** An event listener that responds to cells selected in V-REP, allowing addition and deletion
+ * of obstacles via the V-REP interface.
+ */
 void selectCallback(const std_msgs::String::ConstPtr& msg);
 
 /********************* Main ************************/
 
+/** The main method for the Tag V-REP + ROS interface node.
+ *
+ * This method creates a solver::Simulator instance to run the basic simulation, and enables
+ * communication with V-REP to provide a GUI with real-time output, and the ability to add and
+ * remove obstacles while the simulation is running.
+ */
 int main(int argc, char **argv)
 {
 

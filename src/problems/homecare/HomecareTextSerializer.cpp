@@ -1,3 +1,7 @@
+/** @file HomecareTextSerializer.cpp
+ *
+ * Contains the implementations of the serialization methods for Homecare.
+ */
 #include "HomecareTextSerializer.hpp"
 
 #include <iostream>                     // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, basic_istream<>::__istream_type

@@ -17,8 +17,16 @@ struct HomecareOptions : public shared::SharedOptions {
     virtual ~HomecareOptions() = default;
 
     /* -------- Settings specific to the Homecare POMDP -------- */
-    /** Path to the map files (relative to SharedOptions::baseConfigPath) */
+    /** Path to the path map file (relative to SharedOptions::baseConfigPath).
+     *
+     * This file depicts the target's path and the positions of the walls.
+     */
     std::string pathMapFilename = "";
+    /** Path to the type map file (relative to SharedOptions::baseConfigPath).
+     *
+     * This file depicts the starting positions of the target and the robot, as well as the
+     * positions of the washrooms in the map.
+     */
     std::string typeMapFilename = "";
     /** The penalty for each movement. */
     double moveCost = 0.0;

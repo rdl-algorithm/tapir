@@ -1,3 +1,8 @@
+/** @file LegalActionsPool.cpp
+ *
+ * Contains the implementation of the mapping classes for dealing with legal actions in the
+ * RockSample problem.
+ */
 #include "LegalActionsPool.hpp"
 
 #include <iostream>
@@ -30,23 +35,13 @@ std::vector<long> LegalActionsPool::createBinSequence(solver::BeliefNode *node) 
 std::unique_ptr<solver::ActionMapping> LegalActionsPool::createActionMapping(
         solver::BeliefNode *node) {
     return std::make_unique<LegalActionsMap>(node, this, createBinSequence(node));
-    std::unique_ptr<solver::ActionMapping> mapping = (
-          DiscretizedActionPool::createActionMapping(node));
-
-    PositionData const &data = static_cast<PositionData const &>(*node->getHistoricalData());
-
-    solver::DiscretizedActionMap *discMap = (
-            static_cast<solver::DiscretizedActionMap *>(mapping.get()));
-    addMapping(data.getPosition(), discMap);
-
-    return std::move(mapping);
 }
 
-void LegalActionsPool::addMapping(GridPosition position, solver::DiscretizedActionMap *map) {
+void LegalActionsPool::addMapping(GridPosition position, LegalActionsMap *map) {
     mappings_[position].insert(map);
 }
 
-void LegalActionsPool::removeMapping(GridPosition position, solver::DiscretizedActionMap *map) {
+void LegalActionsPool::removeMapping(GridPosition position, LegalActionsMap *map) {
     mappings_[position].erase(mappings_[position].find(map));
 }
 

@@ -1,3 +1,7 @@
+/** @file RockSampleModel.hpp
+ *
+ * Contains RockSampleModel, which implements the core Model interface for the RockSample POMDP.
+ */
 #ifndef ROCKSAMPLE_MODEL_HPP_
 #define ROCKSAMPLE_MODEL_HPP_
 
@@ -35,32 +39,59 @@ class StatePool;
 class DiscretizedPoint;
 } /* namespace solver */
 
+/** A namespace to hold the various classes used for the RockSample POMDP model. */
 namespace rocksample {
 class RockSampleMdpSolver;
 class RockSampleState;
 class RockSampleObservation;
 
+/** Represents a change in the RockSample model. */
 struct RockSampleChange : public solver::ModelChange {
+    /** The change type for this change - this should be one of:
+     * - "Add Obstacles" - to add new obstacles to the RockSample problem.
+     * - "Remove Obstacles" - to remove existing obstacles from the RockSample problem.
+     */
     std::string changeType = "";
+    /** The first row number where the change applies. */
     long i0 = 0;
+    /** The last row number where the change applies. */
     long i1 = 0;
+    /** The first column number where the change applies. */
     long j0 = 0;
+    /** The last column number where the change applies. */
     long j1 = 0;
 };
 
+/** The implementation of the Model interface for the RockSample POMDP.
+ *
+ * See this paper http://arxiv.org/ftp/arxiv/papers/1207/1207.4166.pdf
+ * for a description of the RockSample problem.
+ *
+ * This class inherits from shared::ModelWithProgramOptions in order to use custom text-parsing
+ * functionality to select many of the core ABT parameters, allowing the configuration options
+ * to be changed easily via the configuration interface without having to recompile the code.
+ */
 class RockSampleModel : public shared::ModelWithProgramOptions {
 friend class RockSampleMdpSolver;
   public:
+    /** Constructs a new RockSampleModel instance with the given random number engine, and the
+     * given set of configuration options.
+     */
     RockSampleModel(RandomGenerator *randGen, std::unique_ptr<RockSampleOptions> options);
     ~RockSampleModel() = default;
     _NO_COPY_OR_MOVE(RockSampleModel);
 
+    /** The different levels of history-based heuristic options that can be used. */
     enum RSActionCategory : int {
+        /** The lowest level - all actions will be treated the same way. */
         ALL = 0,
+        /** Legal actions get special treatment. */
         LEGAL = 1,
+        /** Some types of actions are "preferred". */
         PREFERRED = 2
     };
 
+    /** Parses an action category (all/legal/preferred) from a string. */
     RSActionCategory parseCategory(std::string categoryString) {
         if (categoryString == "legal") {
             return RSActionCategory::LEGAL;
@@ -183,11 +214,26 @@ friend class RockSampleMdpSolver;
 
 
     /* ------------ Methods for handling particle depletion -------------- */
+    /** Generates particles for RockSample using a particle filter from the previous belief.
+      *
+      * For each previous particle, possible next states are calculated based on consistency with
+      * the given action and observation. These next states are then added to the output vector
+      * in accordance with their probability of having been generated.
+      */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action, solver::Observation const &obs,
             long nParticles,
             std::vector<solver::State const *> const &previousParticles) override;
+
+    /** Generates particles for RockSample according to an uninformed prior.
+     *
+     * This method uses the fully observed part of the state, and samples the previous rock
+     * states uniformly at random. For each sample, a single step is generated with the action,
+     * and only states consistent with the observation are kept.
+     *
+     * NOTE: If this method gets called, things are going badly wrong :(
+     */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
@@ -199,6 +245,7 @@ friend class RockSampleMdpSolver;
     /** Displays an individual cell of the map. */
     virtual void dispCell(RSCellType cellType, std::ostream &os);
     virtual void drawEnv(std::ostream &os) override;
+    /** Draws a single grid of distances to a specific rock. */
     virtual void drawDistances(std::vector<std::vector<int>> &grid, std::ostream &os);
     virtual void drawSimulationState(solver::BeliefNode const *belief,
             solver::State const &state,
@@ -214,10 +261,12 @@ friend class RockSampleMdpSolver;
 
 
     /* ------- Customization of more complex solver functionality  --------- */
+    /** Returns all of the available actions in the RockSample POMDP, in enumerated order. */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllActionsInOrder();
     virtual std::unique_ptr<solver::HistoricalData> createRootHistoricalData() override;
     virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver *solver) override;
 
+    /** Returns all of the possible observations in the RockSample POMDP, in enumerated order. */
     virtual std::vector<std::unique_ptr<solver::DiscretizedPoint>> getAllObservationsInOrder();
     virtual std::unique_ptr<solver::ObservationPool> createObservationPool(solver::Solver *solver) override;
 
@@ -279,6 +328,7 @@ friend class RockSampleMdpSolver;
     /** Encodes rocks to an integer. */
     long encodeRocks(std::vector<bool> rockStates);
 
+    /** The RockSampleOptions instance associated with this model. */
     RockSampleOptions *options_;
 
     /** The reward for sampling a good rock. */

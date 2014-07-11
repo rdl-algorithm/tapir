@@ -1,3 +1,7 @@
+/** @file position_history.cpp
+ *
+ * Contains the implementations for PositionData and PositionDataTextSerializer.
+ */
 #include "position_history.hpp"
 
 #include <iostream>

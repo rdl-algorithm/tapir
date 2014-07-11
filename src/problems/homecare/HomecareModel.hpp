@@ -75,6 +75,10 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     ~HomecareModel() = default;
     _NO_COPY_OR_MOVE(HomecareModel);
 
+    /** An enumeration for the different types of path cells for Homecare - these describe the
+     * different paths the Homecare target can take through the map, as well as the walls in the
+     * map.
+     */
     enum class HomecarePathCell : int {
         EMPTY = 0,
         UP = 1,
@@ -88,6 +92,9 @@ class HomecareModel: public shared::ModelWithProgramOptions {
         WALL = -1
     };
 
+    /** An enumeration for the key cell types for Homecare - this includes the starting positions
+     * and washrooms, which are places where the target is likely to spend more time.
+     */
     enum class HomecareTypeCell : int {
         OTHER = 0,
         TARGET_START = 1,
@@ -135,12 +142,24 @@ class HomecareModel: public shared::ModelWithProgramOptions {
 
 
     /* ------------ Methods for handling particle depletion -------------- */
+    /** Generates particles for Homecare using a particle filter from the previous belief.
+      *
+      * For each previous particle, possible next states are calculated based on consistency with
+      * the given action and observation. These next states are then added to the output vector
+      * in accordance with their probability of having been generated.
+      */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
             long nParticles,
             std::vector<solver::State const *> const &previousParticles) override;
+
+    /** Generates particles for Homecare according to an uninformed prior.
+     *
+     * Previous states are sampled uniformly at random, a single step is generated, and only states
+     * consistent with the action and observation are kept.
+     */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,

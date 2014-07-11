@@ -1,3 +1,8 @@
+/** @file PreferredActionsPool.cpp
+ *
+ * Contains the implementation of the mapping classes for dealing with preferred actions in the
+ * RockSample problem, a la POMCP's "smart" tree knowledge.
+ */
 #include "PreferredActionsPool.hpp"
 
 #include "RockSampleAction.hpp"

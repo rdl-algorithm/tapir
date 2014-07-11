@@ -1,3 +1,7 @@
+/** @file RockSampleModel.cpp
+ *
+ * Contains the implementations for the core functionality of the RockSample POMDP.
+ */
 #include "RockSampleModel.hpp"
 
 #include <cmath>                        // for pow, floor
@@ -631,12 +635,16 @@ std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
 }
 
 std::vector<std::unique_ptr<solver::State>> RockSampleModel::generateParticles(
-        solver::BeliefNode */*previousBelief*/, solver::Action const &action,
+        solver::BeliefNode *previousBelief, solver::Action const &action,
         solver::Observation const &obs, long nParticles) {
+    // Retrieve the fully observed part of the state.
+    GridPosition oldPosition = static_cast<RockSampleState const &>(
+            *previousBelief->getStates()[0]).getPosition();
+
     std::vector<std::unique_ptr<solver::State>> particles;
     while ((long) particles.size() < nParticles) {
-        std::unique_ptr<solver::State> state = sampleStateUninformed();
-        solver::Model::StepResult result = generateStep(*state, action);
+        RockSampleState oldState(oldPosition, sampleRocks());
+        solver::Model::StepResult result = generateStep(oldState, action);
         if (obs == *result.observation) {
             particles.push_back(std::move(result.nextState));
         }

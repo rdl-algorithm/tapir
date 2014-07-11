@@ -1,3 +1,7 @@
+/** @file smart_history.cpp
+ *
+ * Contains the implementations for PositionAndRockData and PositionAndRockDataTextSerializer.
+ */
 #include "smart_history.hpp"
 
 #include <iostream>
@@ -48,7 +52,7 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
         int rockNo = model_->getCellType(position_) - RockSampleModel::ROCK;
         nextData->allRockData_[rockNo].chanceGood = 0.0;
         nextData->allRockData_[rockNo].checkCount = 10;
-        nextData->allRockData_[rockNo].goodnessCount = -10;
+        nextData->allRockData_[rockNo].goodnessNumber = -10;
     } else if (rsAction.getActionType() == ActionType::CHECK) {
         int rockNo = rsAction.getRockNo();
 
@@ -65,11 +69,11 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockData::createChild(
         double likelihoodGood = rockData.chanceGood;
         double likelihoodBad = 1 - rockData.chanceGood;
         if (rsObs.isGood()) {
-            rockData.goodnessCount++;
+            rockData.goodnessNumber++;
             likelihoodGood *= probabilityCorrect;
             likelihoodBad *= probabilityIncorrect;
         } else {
-            rockData.goodnessCount--;
+            rockData.goodnessNumber--;
             likelihoodGood *= probabilityIncorrect;
             likelihoodBad *= probabilityCorrect;
         }
@@ -104,7 +108,7 @@ std::vector<long> PositionAndRockData::generatePreferredActions() const {
     // then we will sample it.
     if (rockNo >= 0 && rockNo < nRocks) {
         RockData const &rockData = allRockData_[rockNo];
-        if (rockData.chanceGood == 1.0 || rockData.goodnessCount > 0) {
+        if (rockData.chanceGood == 1.0 || rockData.goodnessNumber > 0) {
             preferredActions.push_back(static_cast<long>(ActionType::SAMPLE));
             return preferredActions;
         }
@@ -119,7 +123,7 @@ std::vector<long> PositionAndRockData::generatePreferredActions() const {
     // Check to see which rocks are worthwhile.
     for (int i = 0; i < nRocks; i++) {
         RockData const &rockData = allRockData_[i];
-        if (rockData.chanceGood != 0.0 && rockData.goodnessCount >= 0) {
+        if (rockData.chanceGood != 0.0 && rockData.goodnessNumber >= 0) {
             worthwhileRockFound = true;
             GridPosition pos = model_->getRockPosition(i);
             if (pos.i > position_.i) {
@@ -158,7 +162,7 @@ std::vector<long> PositionAndRockData::generatePreferredActions() const {
     for (int i = 0; i < nRocks; i++) {
         RockData const &rockData = allRockData_[i];
         if (rockData.chanceGood != 0.0 && rockData.chanceGood != 1.0
-                && std::abs(rockData.goodnessCount) < 2) {
+                && std::abs(rockData.goodnessNumber) < 2) {
             preferredActions.push_back(static_cast<long>(ActionType::CHECK) + i);
         }
     }
@@ -186,7 +190,7 @@ void PositionAndRockDataTextSerializer::saveHistoricalData(solver::HistoricalDat
         os << "p = ";
         tapir::print_double(rockData.chanceGood, os, 7, 5);
         os << " from " << rockData.checkCount << " checks ( ";
-        os << std::showpos << rockData.goodnessCount << std::noshowpos;
+        os << std::showpos << rockData.goodnessNumber << std::noshowpos;
         os << " )" << std::endl;
     }
     os << std::endl;
@@ -213,7 +217,7 @@ std::unique_ptr<solver::HistoricalData> PositionAndRockDataTextSerializer::loadH
 
         sstr >> tmpStr >> tmpStr >> rockData.chanceGood;
         sstr >> tmpStr >> rockData.checkCount >> tmpStr >> tmpStr;
-        sstr >> rockData.goodnessCount;
+        sstr >> rockData.goodnessNumber;
     }
 
     std::getline(is, line); // Blank line

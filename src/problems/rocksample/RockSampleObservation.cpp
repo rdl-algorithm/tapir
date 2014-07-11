@@ -1,3 +1,7 @@
+/** @file RockSampleObservation.cpp
+ *
+ * Contains the implementations for the methods of RockSampleObservation.
+ */
 #include "RockSampleObservation.hpp"
 
 #include <cstddef>                      // for size_t

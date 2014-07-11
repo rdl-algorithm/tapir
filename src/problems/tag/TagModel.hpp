@@ -171,12 +171,24 @@ class TagModel: public shared::ModelWithProgramOptions {
 
 
     /* ------------ Methods for handling particle depletion -------------- */
+    /** Generates particles for Tag using a particle filter from the previous belief.
+      *
+      * For each previous particle, possible next states are calculated based on consistency with
+      * the given action and observation. These next states are then added to the output vector
+      * in accordance with their probability of having been generated.
+      */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
             solver::Observation const &obs,
             long nParticles,
             std::vector<solver::State const *> const &previousParticles) override;
+
+    /** Generates particles for Tag according to an uninformed prior.
+     *
+     * Previous states are sampled uniformly at random, a single step is generated, and only states
+     * consistent with the action and observation are kept.
+     */
     virtual std::vector<std::unique_ptr<solver::State>> generateParticles(
             solver::BeliefNode *previousBelief,
             solver::Action const &action,
