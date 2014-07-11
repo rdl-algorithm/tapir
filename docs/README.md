@@ -55,8 +55,7 @@ and make can easily be run in parallel, i.e.
 
 where N is the number of threads you want to use; 8 is good for many CPUs.
 The code should build OK without any special configuration,
-but if need be the core build settings can be changed via the
-[root Makefile][Makefile].
+but if need be the core build settings can be changed via the root Makefile.
 
 To build the core solver, simply use the command
 
@@ -100,7 +99,7 @@ or by setting
 
     DEFAULT_CFG:=debug
 
-in the [root Makefile][Makefile]. Each configuration sends intermediate 
+in the root Makefile. Each configuration sends intermediate
 compilation outputs into a different directory, which will be "builds/$(CFG)".
 This makes it easy to switch between different builds, as the "make" command
 simply needs to copy the previously-made executables from the relevant build
@@ -471,6 +470,5 @@ individual problem are given in:
 [Tag_simulate.cpp]: ../src/problems/tag/simulate.cpp
 
 
-[Makefile]: ../Makefile
 [.make/README.md]: ../.make/README.md
 

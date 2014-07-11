@@ -98,7 +98,6 @@
 [Tag_simulate.cpp]: @ref src/problems/tag/simulate.cpp
 
 
-[Makefile]: ../Makefile
 [.make/README.md]: docs/generated/Build_System.md
 
 
@@ -106,8 +105,4 @@
 [build]: @ref build.mk
 [template]: @ref template.mk
 [problem-template]: @ref problem-template.mk
-
-[Makefile]: ../Makefile
-[Makefile_src]: ../src/Makefile
-[Makefile_solver]: ../src/solver/Makefile
 
