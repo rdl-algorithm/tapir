@@ -161,7 +161,7 @@ int main(int argc, char **argv)
         sceneLoaded = vrepHelper.loadScene(tagOptions.vrepScenePath);
         if (sceneLoaded) {
             cout << "Successfully loaded V-REP scene tag.ttt" << endl;
-            break;       
+            break;
         } else {
             cout << "V-REP scene tag.ttt isn't loaded. Retrying..." << endl;
         }
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
         ROS_ERROR_STREAM("Failed to load V-REP scene");
         return 1;
     }
-    
+
     // Move robot and human to starting positions in VREP
     solver::State const &startState =  *(simulator.getCurrentState());
     TagState const &startTagState = static_cast<TagState const &>(startState);
@@ -182,6 +182,11 @@ int main(int argc, char **argv)
     vrepHelper.moveObject("Bill_goalDummy", startHumanPos.x, startHumanPos.y, 0);
     vrepHelper.moveObject("Robot", startRobotPos.x, startRobotPos.y, 0.25);
     vrepHelper.moveObject("Robot_goalDummy", startRobotPos.x, startRobotPos.y, 0);
+
+    // Start the simulation running so that the initial state looks OK.
+    vrepHelper.start();
+    // Wait a few seconds for V-REP to catch up with the current status.
+    ros::Duration(3).sleep();
 
 	/******************* Main loop *******************/
 
@@ -208,14 +213,14 @@ int main(int argc, char **argv)
       	TagState const &tagState = static_cast<TagState const &>(state);
         Point robotPos = gridToPoint(tagState.getRobotPosition());
         Point humanPos = gridToPoint(tagState.getOpponentPosition());
-        publishRobotGoal(robotPos.x, robotPos.y);
         publishHumanGoal(humanPos.x, humanPos.y);
+        publishRobotGoal(robotPos.x, robotPos.y);
 
         if (finished) {
             cout << "Finished" << endl;
             break;
         }
-		
+
         // Publish environment map as string
         publishEnvMap(model->getEnvMap());
 

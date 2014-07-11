@@ -64,7 +64,7 @@ if $MUST_START_VREP
 then
     sleep 1
     echo "Starting V-REP..."
-    x-terminal-emulator -e sh -c "cd $VREP_DIR; ./vrep.sh -s $VREP_SCENE; sh"
+    x-terminal-emulator -e sh -c "cd $VREP_DIR; ./vrep.sh; sh"
     if [ "$1" = "tracker" ]
     then
         sleep 3

@@ -164,10 +164,10 @@ docs/generated/Overview.md docs/generated/Build_System.md: docs/generated
 docs/generated:
 	$(MKDIR_RECIPE)
 
-# Adapt Overview.md so it works nicely with Doxygen.
-docs/generated/Overview.md: docs/Overview.md docs/doxygen_links.md Makefile
+# Adapt docs/README.md so it works nicely with Doxygen.
+docs/generated/Overview.md: docs/README.md docs/doxygen_links.md Makefile
 	@echo "# Detailed TAPIR Documentation {#mainpage}\n" > $@
-	@cat docs/Overview.md docs/doxygen_links.md >> $@
+	@cat docs/README.md docs/doxygen_links.md >> $@
 	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#tapir}\2/mg' $@
 	@perl -0pi -e 's/^(.*)(\n-+)$$/\1 {#\L\1}\2/mg' $@
 	@perl -0pi -e 's/^([#]{2,}\s+)(.*)$$/\1\2 {#\L\2}/mg' $@

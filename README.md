@@ -13,10 +13,12 @@ For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au
 
 For information on updates, please visit http://robotics.itee.uq.edu.au/~tapir
 
+
 TAPIR Development Team
 ----------------------
 - Main developer: Dimitri Klimenko
 - ROS + VREP interface: Joshua Song
+
 
 System Requirements
 -------------------
@@ -43,6 +45,7 @@ g++ 4.8 and g++ 4.6:
 Here, 4.8 priority is set to 60, higher than 4.6. To swap to 4.6 use:
 
     sudo update-alternatives --config g++
+
 
 Quick Start (Command-line Interface)
 ------------------------------------
@@ -131,25 +134,30 @@ TAPIR provides an interface with ROS and V-REP, which has been tested on Ubuntu
 12.04 and 14.04
 
 ### Additional system requirements:
-- [ROS Hydro](http://wiki.ros.org/ROS/Installation)  
-Debian/Ubuntu package name: "ros-hydro-desktop-full"  
-**Ubuntu 12.04 NOTE:** on Ubuntu 12.04, ROS Hydro defaults to using Boost 1.46
-instead of Boost 1.48, and the Boost 1.48 headers are incompatible with C++11
-(as used by TAPIR). To resolve this issue, you will need to install Boost 1.48
-from source.  
-Simply set `CUSTOM_BOOST_148_DIR` in the [root Makefile](./Makefile) to the
-location of your Boost 1.48 installation, and TAPIR's ROS interface will use
-this instead of the system default 1.46.
-If you don't currently have Boost 1.48 installed, TAPIR has a script to
-automatically download and compile it. Simply set `CUSTOM_BOOST_148_DIR` to the
-desired Boost install directory, and then the command `make boost`
-will automatically install Boost 1.48 in your desired directory.  
-**Ubuntu 14.04 NOTE:** on Ubuntu 14.04 you must instead use ROS Indigo,
+- [ROS Hydro](http://wiki.ros.org/ROS/Installation) -- Debian/Ubuntu package
+    name: "ros-hydro-desktop-full
+    - **Ubuntu 12.04 NOTE:** on Ubuntu 12.04, ROS Hydro defaults to using Boost
+1.46 instead of Boost 1.48, and the Boost 1.48 headers are incompatible with
+C++11 (as used by TAPIR). To resolve this issue, you will need to install Boost
+1.48 from source.  
+The easiest way to set up Boost 1.48 for use with ROS and TAPIR is to simply
+set `CUSTOM_BOOST_148_DIR` in the [root Makefile](./Makefile) to the location
+of your Boost 1.48 installation, or, if you haven't installed it yet, the
+desired directory for it. If TAPIR doesn't find a Boost installation in the
+given directory it will automatically download Boost and install it to the
+directory you've specified (you can tell TAPIR to do this via the command
+`make boost`, which runs several scripts in the [.ros-scripts](./.ros-scripts)
+directory.  
+Please note that Boost 1.48 has a bug if compiling with GCC >= 4.7.0; a patch
+for this is automatically applied by `make boost`.
+If you wish to compile Boost 1.48 manually with GCC >= 4.7.0, you should use
+the patch provided here: https://svn.boost.org/trac/boost/ticket/6165
+    - **Ubuntu 14.04 NOTE:** on Ubuntu 14.04 you must instead use ROS Indigo,
 which is available via the package "ros-indigo-desktop-full"
 
 - [V-REP](http://www.coppeliarobotics.com/downloads.html) - Download this and
 extract it to the directory of your choice.  
-**Ubuntu 14.04 NOTE:** on Ubuntu 14.04 the version of the ROS plugin that
+    - **Ubuntu 14.04 NOTE:** on Ubuntu 14.04 the version of the ROS plugin that
 ships with V-REP will not work out of the box - it causes a segmentation fault
 in V-REP! You will need to recompile it yourself, by following the tutorial at
 http://www.coppeliarobotics.com/helpFiles/en/rosTutorialHydro.htm
@@ -163,7 +171,7 @@ instead of
 This package is designed to be used with the ROS Catkin build system, and as
 such must be compiled within a Catkin workspace.
 
-The [root Makefile][./Makefile] can automatically set up a workspace for you,
+The [root Makefile](./Makefile) can automatically set up a workspace for you,
 and will add a symbolic link to the source directory into the workspace.
 To configure this as needed, change the variables in the
 "ROS Configuration settings" section at the top of the root Makefile; the
@@ -171,11 +179,11 @@ relevant settings are:
 - CUSTOM_BOOST_148_DIR - A custom path to Boost 1.48; leave this empty if
 you just want to use your system default version of Boost.
 - ROS_SCRIPT - path to the main ROS setup script; the default is
-/opt/ros/hydro/setup.sh
+`/opt/ros/hydro/setup.sh`
 - CATKIN_WS_DIR - path to the desired Catkin workspace directory; the default
-is ../catkin_ws (relative to the root tapir directory, i.e. the location of this
-README.md)
-- VREP_DIR - path to where you have extracted V-REP; the default is ../vrep
+is `../catkin_ws` (relative to the root tapir directory, i.e. the location of
+this README.md)
+- VREP_DIR - path to where you have extracted V-REP; the default is `../vrep`
 
 After setting these variables as desired, simply run the command
 
@@ -186,20 +194,22 @@ in order to compile the code for interfacing with ROS and V-REP.
 ### Running
 If you compiled with `make ros`, TAPIR will automatically create a script
 to run the Tag example problem together with the ROS and V-REP interface.
-You can run this script by executing the ./simulate-ros in the tag problem
-directory, i.e.
+You can run this script by executing the `./simulate-ros` script in the tag
+problem directory, i.e.
 
     cd problems/tag
     ./simulate-ros
 
 This will automatically run a *roscore*, and then launch V-REP (if it is not
-already running). Note that when V-REP is launching it is important to read the
-console messages and make sure that the ROS plugin loads correctly.
+already running). Note that the roscore must already be running when you
+start V-REP, or the ROS plugin will fail to load; it is also important to read
+the console messages when V-REP is staring up in order to make sure that the ROS
+plugin loads correctly.
 If there is an issue with loading the ROS plugin, you may need to recompile
 the plugin. Please read the V-REP ROS plugin tutorial at
 http://www.coppeliarobotics.com/helpFiles/en/rosTutorialHydro.htm
 
-Alternatively, if you run a *roscore* and launch V-REP manually, and have
+Alternatively, if you run a roscore and launch V-REP manually, and have
 sourced the setup script for your Catkin workspace, i.e.
 
     source [path/to/catkin/workspace]/devel/setup.bash
@@ -210,10 +220,10 @@ you can simply run
 
 in order to start the Tag problem.
 
-The obstacles should then be displayed in V-REP; the simulation should start
-when you press the "Start/resume simulation" button. During the simulation you
+After a couple of seconds, the simulation should start automatically; it can
+also be paused at any time via the V-REP interface. During the simulation you
 can also actively manipulate the environment using the mouse to left-click on
-squares in the Tag grid.
+squares in the Tag grid:
 - To remove an obstacle, left-click on a cell and wait momentarily.
 - To add an obstacle, left-click on a cell and wait momentarily.
 - You can also add or remove multiple cells at the same time by holding down
@@ -232,17 +242,19 @@ Implementing a new POMDP model
 
 To create a new POMDP model and use it with the the command-line interface,
 
-1. Read and follow the guidelines in [the detailed overview](docs/Overview.md).
+1. Read the section on
+[implementing a new model](docs/README.md#implementing-a-new-pomdp-model)
+in the [detailed overview README](docs/README.md).
 2. Create a new subdirectory for your POMDP in
 [the problems directory](src/problems).
-3. Implement all the required classes, as per [the overview](docs/Overview.md)
+3. Implement all the required classes, as per [the overview](docs/README.md)
 4. Add a new Makefile to your problem directory - just copy
 [the Tag Makefile](src/problems/tag/Makefile) and change MODULE_NAME to match
 your new problem.
 5. Add your problem to the CHILD_DIRS variable in the
 [problems Makefile](src/problems/Makefile)
-6. Create a new subdirectory in [the config directory](problems) for your problem,
-and add any required configuration files there.
+6. Create a new subdirectory in [the config directory](problems) for your
+problem, and add any required configuration files there.
 7. Compile your code via "make [problem-name]", or simply by running "make" from
 your new subdirectory of src/problems, e.g.
 
@@ -266,7 +278,7 @@ is also the default output directory for all of the problem executables.
     for RockSample to go to.
     - [Tag](problems/tag) - contains configuration settings for Tag; the
     generated executables for Tag will go here.
-- [docs](./docs) - contains [a detailed overview](docs/Overview.md), as well
+- [docs](./docs) - contains [a detailed overview](docs/README.md), as well
 as Doxygen settings in order to generate
 [HTML documentation](docs/html/index.html).
     - [html](docs/html) - the output directory for HTML documentation

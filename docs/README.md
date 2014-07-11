@@ -14,6 +14,12 @@ For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au
 For information on updates, please visit http://robotics.itee.uq.edu.au/~tapir
 
 
+TAPIR Development Team
+----------------------
+- Main developer: Dimitri Klimenko
+- ROS + VREP interface: Joshua Song
+
+
 System Requirements
 -------------------
 
@@ -25,6 +31,20 @@ Building and running the C++ source code requires:
 - [GNU C++ compiler](https://gcc.gnu.org) (>= 4.8) or equivalent
 - [libspatialindex](http://libspatialindex.github.io) (>= 1.7.0)
 	Debian/Ubuntu package name: "libspatialindex-dev"
+
+**Ubuntu 12.04 NOTE:** Ubuntu 12.04 by default ships with g++ 4.6.
+One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both
+g++ 4.8 and g++ 4.6:
+
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo apt-get update
+    sudo apt-get install g++-4.8
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 60
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 40
+
+Here, 4.8 priority is set to 60, higher than 4.6. To swap to 4.6 use:
+
+    sudo update-alternatives --config g++
 
 
 Example problems
