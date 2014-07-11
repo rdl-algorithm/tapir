@@ -1,5 +1,5 @@
 MODULE_NAME = abstract-problem
-CHILD_FOLDERS := heuristics
+CHILD_DIRS := heuristics
 
 ifdef HAS_ROOT_MAKEFILE
 

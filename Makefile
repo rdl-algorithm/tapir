@@ -184,7 +184,7 @@ doc: docs/Doxyfile docs/generated/Overview.md docs/generated/Build_System.md
 
 .PHONY: clean-doc
 clean-doc:
-	@echo Removing documentation folders!
+	@echo Removing documentation directories!
 	@rm -rfv $(DOC_OUTPUT_DIRS) | grep "directory" ; true
 
 # ----------------------------------------------------------------------
@@ -207,7 +207,7 @@ ALL_DERIVED_DIRS = $(ROOT)/builds $(DOC_OUTPUT_DIRS)
 # clean-all is a straight-up "rm -rf" - it doesn't check for "junk files".
 .PHONY: clean-all
 clean-all:
-	@echo Removing all derived folders!
+	@echo Removing all derived directories!
 	@rm -rfv $(ALL_DERIVED_DIRS) | grep "directory" ; true
 
 # clean only cleans actual targets.

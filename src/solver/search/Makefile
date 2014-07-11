@@ -1,5 +1,5 @@
 MODULE_NAME = search
-CHILD_FOLDERS := steppers action-choosers
+CHILD_DIRS := steppers action-choosers
 
 ifdef HAS_ROOT_MAKEFILE
 

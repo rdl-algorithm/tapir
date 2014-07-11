@@ -70,7 +70,8 @@ $(TGTS_BUILD_$(n)): $(_BIN_BUILD_$(n)): $(_O_$(n)) $$(LINKER_DEPS_$(n))
 endef
 $(eval $(problem_build_template))
 
-# Executables will be copied to the "bin" folder for convenience
+# Executables will be copied to the problem directory and to the
+# problem source directory for conveniece.
 build-$(n): $(TGTS_OUTPUT_$(n)) $(TGTS_SRCDIR_$(n))
 
 .PHONY: $(TGTS_OUTPUT_$(n)) $(TGTS_SRCDIR_$(n))

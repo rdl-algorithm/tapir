@@ -2,7 +2,7 @@
 # Directories, file patterns, and directory dependencies
 # ----------------------------------------------------------------------
 
-# Folder for IWYU
+# Directory for IWYU
 IWYUDIR_$(n)  := $(ROOT)/iwyu-out/$(DIR_RELATIVE_$(n))
 
 # File patterns
@@ -18,7 +18,7 @@ _BEAUTIFY_$(n)   := $(SRCDIR_$(n))/%.beautify
 _IWYU_FORCE_$(n) := $(IWYUDIR_$(n))/%.iwyu.FORCE
 _IWYU_DOFIX_$(n) := $(IWYUDIR_$(n))/%.iwyu.DOFIX
 
-# Include the beautification folders for easy cleanup.
+# Include the beautification directories for easy cleanup.
 ALL_DIRS_$(n) += $(IWYUDIR_$(n))
 
 # Derived source variables to help identify code cleaning targets.

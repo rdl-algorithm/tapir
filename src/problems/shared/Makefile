@@ -1,5 +1,5 @@
 MODULE_NAME = shared
-CHILD_FOLDERS := geometry
+CHILD_DIRS := geometry
 
 ifdef HAS_ROOT_MAKEFILE
 

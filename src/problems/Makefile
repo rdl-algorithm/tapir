@@ -1,9 +1,9 @@
 MODULE_NAME = problems
-CHILD_FOLDERS := shared rocksample tag homecare
+CHILD_DIRS := shared rocksample tag homecare
 
 ifdef HAS_ROOT_MAKEFILE
 
-problems: $(CHILD_FOLDERS)
+problems: $(CHILD_DIRS)
 
 include .make/template.mk
 

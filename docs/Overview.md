@@ -79,7 +79,7 @@ would use 4 threads to compile; that command would build the solver as a shared
 library, and also build the Tag problem to dynamically link against the shared
 library file.
 Alternatively, you can also compile a problem by running make from within that
-problem's source folder, e.g.
+problem's source directory, e.g.
 
     cd src/problems/tag
     make
@@ -98,7 +98,7 @@ in the [root Makefile][Makefile]. Each configuration sends intermediate
 compilation outputs into a different directory, which will be "builds/$(CFG)".
 This makes it easy to switch between different builds, as the "make" command
 simply needs to copy the previously-made executables from the relevant build
-folder.
+directory.
 
 For additional documentation on the build system, see the
 [build system README][.make/README.md].

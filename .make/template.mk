@@ -5,7 +5,7 @@
 n := $(MODULE_NAME)
 DIR_RELATIVE_$(n) := $(patsubst /%,%,$(subst $(ROOT)/src,,$(d)))
 
-# Source folder
+# Source directory
 SRCDIR_$(n)   := $(d)
 
 # Source code files (automatic)

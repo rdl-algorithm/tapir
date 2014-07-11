@@ -1,5 +1,5 @@
 MODULE_NAME = global
-CHILD_FOLDERS := options solver problems
+CHILD_DIRS := options solver problems
 
 ifdef HAS_ROOT_MAKEFILE
 

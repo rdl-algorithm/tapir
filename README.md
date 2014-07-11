@@ -13,7 +13,7 @@ For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au
 
 For information on updates, please visit http://robotics.itee.uq.edu.au/~tapir
 
-TAPIR Development team
+TAPIR Development Team
 ----------------------
 - Main developer: Dimitri Klimenko
 - ROS + VREP interface: Joshua Song
@@ -30,9 +30,9 @@ Building and running the C++ source code requires:
 - [libspatialindex](http://libspatialindex.github.io) (>= 1.7.0)
 	Debian/Ubuntu package name: "libspatialindex-dev"
 
-### Note about g++ on Ubuntu 12.04
-Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6
-with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:
+**Ubuntu 12.04 NOTE:** Ubuntu 12.04 by default ships with g++ 4.6.
+One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both
+g++ 4.8 and g++ 4.6:
 
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     sudo apt-get update
@@ -64,20 +64,22 @@ the example problems - these are created in problems/[problem-name],
 and also in src/problems/[problem-name] for convenience while editing the
 source files.
 
-After compiling, you can try the following commands to try solving the example
-problem RockSample, which is a well-known example POMDP:
+After compiling, you can try the following commands to try using TAPIR on
+RockSample, which is a well-known example POMDP:
 
     cd problems/rocksample
     ./solve
     ./simulate
 
-Alternatively, to run RockSample[11, 11], a version of RockSample with a larger
-map and much larger state space, you can use the command-line setting
-`--cfg default-11-11.txt`, i.e.
+During simulation you can also use the argument `--color`, which will augment
+the verbose mode output by using colors to display the agent's belief state.
+You can also runRockSample[11, 11], a version of RockSample with a larger
+map and much larger state space, by using the command-line setting
+`--cfg default-11-11.cfg`, i.e.
 
     cd problems/rocksample
-    ./solve --cfg default-11-11.txt
-    ./simulate --cfg default-11-11.txt
+    ./solve --cfg default-11-11.cfg
+    ./simulate --cfg default-11-11.cfg
 
 The command "solve" uses use the parameters set in a problem-specific
 configuration file, which for RockSample is, by default,
@@ -106,18 +108,18 @@ with a different configuration file, use the command-line argument
     ./solve --cfg my_settings.cfg
 
 Note that "solve" is still searching for configuration settings in
-the folder "problems/rocksample" - you can change this by using the argument
+the directory "problems/rocksample" - you can change this by using the argument
 --base-path <path>.
 
 Some of the core settings can also be set via command-line arguments. Any
 command-line options given will override the values specified in the
 configuration file. For details, run
 
-    solve --help
+    ./solve --help
 
 or
 
-    simulate --help
+    ./simulate --help
 
 to see the command-line options for either executable.
 
@@ -232,17 +234,17 @@ To create a new POMDP model and use it with the the command-line interface,
 
 1. Read and follow the guidelines in [the detailed overview](docs/Overview.md).
 2. Create a new subdirectory for your POMDP in
-[the problems folder](src/problems).
+[the problems directory](src/problems).
 3. Implement all the required classes, as per [the overview](docs/Overview.md)
 4. Add a new Makefile to your problem directory - just copy
 [the Tag Makefile](src/problems/tag/Makefile) and change MODULE_NAME to match
 your new problem.
-5. Add your problem to the CHILD_FOLDERS variable in the
+5. Add your problem to the CHILD_DIRS variable in the
 [problems Makefile](src/problems/Makefile)
-6. Create a new subdirectory in [the config folder](problems) for your problem,
+6. Create a new subdirectory in [the config directory](problems) for your problem,
 and add any required configuration files there.
 7. Compile your code via "make [problem-name]", or simply by running "make" from
-your new subfolder of src/problems, e.g.
+your new subdirectory of src/problems, e.g.
 
     cd src/problems/tag
     make
@@ -267,8 +269,8 @@ is also the default output directory for all of the problem executables.
 - [docs](./docs) - contains [a detailed overview](docs/Overview.md), as well
 as Doxygen settings in order to generate
 [HTML documentation](docs/html/index.html).
-    - [html](docs/html) - the output folder for HTML documentation
-- [src](./src) - the source folder
+    - [html](docs/html) - the output directory for HTML documentation
+- [src](./src) - the source directory
     - [solver](src/solver) - the core ABT solver source code
     - [options](src/options) - contains code for parsing configuration options.
     Most of the work is done by two libraries included in the code:
@@ -284,7 +286,7 @@ as Doxygen settings in order to generate
         RockSample POMDP.
         - [Tag](src/problems/tag) - contains code for the Tag POMDP.
 
-### ROS-related folders
+### ROS-related directories
 
 Some of the files and directories are specifically used for the ROS interface,
 and hence are not needed if you are not using TAPIR with ROS. These are:

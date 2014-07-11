@@ -1,5 +1,5 @@
 MODULE_NAME = mappings
-CHILD_FOLDERS = actions observations
+CHILD_DIRS = actions observations
 
 ifdef HAS_ROOT_MAKEFILE
 

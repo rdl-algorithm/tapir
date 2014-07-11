@@ -1,5 +1,5 @@
 MODULE_NAME = options
-CHILD_FOLDERS := inih
+CHILD_DIRS := inih
 
 ifdef HAS_ROOT_MAKEFILE
 

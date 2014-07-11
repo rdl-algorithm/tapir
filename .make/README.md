@@ -17,17 +17,17 @@ The system used here adds two key conveniences to the aforementioned system:
 - Improved readability by moving standard code, especially the recursion,
 	into template files wihin the .make directory.
 	The recursion is located in [stack.mk][stack].
-- The ability to call make from any child folder and have it behave the way
-	you would expect it to if that child folder were the root.
+- The ability to call make from any child directory and have it behave the way
+	you would expect it to if that child directory were the root.
 
 General usage
 -------------
 Global configuration settings are set in the [root Makefile][Makefile],
 and then individual modules can each be configured via the Makefile in their
-own subfolder (e.g. [this][Makefile_src]).
+own subdirectory (e.g. [this][Makefile_src]).
 
-The subfolder Makefiles should work more or less like normal Makefiles,
-although it is processed relative to the root folder, which means that any paths
+The subdirectory Makefiles should work more or less like normal Makefiles,
+although it is processed relative to the root directory, which means that any paths
 should be relative to the root - the variable $(d) is provided as shorthand for
 the relative path of the current module w.r.t. the root.
 
@@ -35,14 +35,14 @@ Each module is also required to define two variables that are used for the
 recursive processing:
 - MODULE_NAME: The module name; should be a unique identifier. This is used
     for generating intermediate targets for each specific module.
-- CHILD_FOLDERS: The subdirectories that are required to be processed.
+- CHILD_DIRS: The subdirectories that are required to be processed.
 
 However, in order to mainain consistency with the rest of the build system,
 particularly with regards to build modes (release vs. debug) and with regards
 to the structure of the build output directories (e.g. builds/release
 and builds/debug), it is best to use the provided templates to automatically
 generate most of the rules. Refer to
-[the Makefile in the src folder][Makefile_src] for a simple example, or read
+[the Makefile in the src directory][Makefile_src] for a simple example, or read
 the next section for greater depth.
 
 Makefile templates
@@ -78,7 +78,7 @@ Its purpose is to defines recipes for the "solve" and "simulate" executables,
 which are the key executables for running TAPIR on a specific problem.
 
 The core of this template is defining all of the dependencies for each problem.
-The default dependencies are the other object files in the same folder as
+The default dependencies are the other object files in the same directory as
 solve.cpp and simulate.cpp, the solver archive libtapir.a / libtapir.so,
 and the external library libspatialindex.
 

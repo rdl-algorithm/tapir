@@ -1,6 +1,6 @@
 MODULE_NAME = solver
-CHILD_FOLDERS := indexing mappings serialization abstract-problem changes
-CHILD_FOLDERS += search belief-estimators
+CHILD_DIRS := indexing mappings serialization abstract-problem changes
+CHILD_DIRS += search belief-estimators
 
 ifdef HAS_ROOT_MAKEFILE
 
