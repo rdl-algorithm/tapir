@@ -179,7 +179,13 @@ void RockSampleModel::initialize() {
 }
 
 void RockSampleModel::recalculateAllDistances() {
-    recalculateDistances(goalDistances_, goalPositions_);
+    std::vector<GridPosition> realGoalPositions;
+    for (GridPosition const &pos : goalPositions_) {
+        if (envMap_[pos.i][pos.j] != OBSTACLE) {
+            realGoalPositions.push_back(pos);
+        }
+    }
+    recalculateDistances(goalDistances_, realGoalPositions);
     for (int rockNo = 0; rockNo < nRocks_; rockNo++) {
         recalculateDistances(rockDistances_[rockNo],
                 std::vector<GridPosition> {rockPositions_[rockNo]});
@@ -494,6 +500,12 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
                 if (newCellType != oldCellType) {
                     affectedCells.insert(GridPosition(i, j));
                 }
+            }
+        }
+
+        for (GridPosition const &pos : goalPositions_) {
+            if (envMap_[pos.i][pos.j] != OBSTACLE) {
+                envMap_[pos.i][pos.j] = GOAL;
             }
         }
 
