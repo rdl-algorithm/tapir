@@ -58,13 +58,13 @@ then
 fi
 
 # Start the roscore
-x-terminal-emulator -e 'sh -c roscore'
+x-terminal-emulator -e sh -c ". $WS_SETUP_SCRIPT; roscore; sh"
 
 if $MUST_START_VREP
 then
     sleep 1
     echo "Starting V-REP..."
-    x-terminal-emulator -e sh -c "cd $VREP_DIR; ./vrep.sh; sh"
+    x-terminal-emulator -e sh -c ". $WS_SETUP_SCRIPT; cd $VREP_DIR; ./vrep.sh; sh"
     if [ "$1" = "tracker" ]
     then
         sleep 3

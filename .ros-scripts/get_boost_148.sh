@@ -10,8 +10,7 @@ VERSION="${VERSION#"${VERSION%%[![:space:]]*}"}"   # remove leading whitespace c
 VERSION="${VERSION%"${VERSION##*[![:space:]]}"}"   # remove trailing whitespace characters
 if [ "$VERSION" != "12.04" ]
 then
-    echo "ERROR: If you have Ubuntu > 12.04 you shouldn't need to install Boost from source..."
-    exit 2
+    echo "WARNING: If you have Ubuntu > 12.04 you shouldn't need to install Boost from source..."
 fi
 
 mkdir tapir_boost_install
