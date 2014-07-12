@@ -151,8 +151,8 @@ TAPIR provides an interface with ROS and V-REP, tested on:
 ### Additional system requirements:
 -----------------------------------
 
-- [ROS](http://wiki.ros.org/hydro/Installation/Ubuntu). 
-We have tested with ROS Hydro on Ubuntu 12.04 and with ROS Indigo on Ubuntu 14.04. 
+- ROS.
+We have tested with [ROS Hydro](http://wiki.ros.org/hydro/Installation/Ubuntu) on Ubuntu 12.04 and with [ROS Indigo](http://wiki.ros.org/indigo/Installation/Ubuntu) on Ubuntu 14.04. 
 Some possible issues and ways around them are:
     
     - **Ubuntu 12.04 NOTE:** ROS Hydro defaults to using Boost
