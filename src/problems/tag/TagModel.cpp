@@ -70,7 +70,8 @@ TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options
             mapText_(), // will be pushed to
             envMap_(), // will be pushed to
             nActions_(5),
-            mdpSolver_(nullptr) {
+            mdpSolver_(nullptr),
+            pairwiseDistances_() {
     options_->numberOfStateVariables = 5;
     options_->minVal = -failedTagPenalty_ / 1 - options_->discountFactor;
     options_->maxVal = tagReward_;
@@ -112,6 +113,55 @@ TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options
     }
 }
 
+int TagModel::getMapDistance(GridPosition p1, GridPosition p2) {
+    return pairwiseDistances_[p1.i][p1.j][p2.i][p2.j];
+}
+
+void TagModel::calculateDistancesFrom(GridPosition position) {
+    auto &distanceGrid = pairwiseDistances_[position.i][position.j];
+    // Fill the grid with "-1", for inaccessible cells.
+    for (auto &row : distanceGrid) {
+        for (auto &cell : row) {
+            cell = -1;
+        }
+    }
+    if (envMap_[position.i][position.j] == TagCellType::WALL) {
+        return;
+    }
+
+    std::queue<GridPosition> queue;
+    // Start at 0 for the current position.
+    distanceGrid[position.i][position.j] = 0;
+    queue.push(position);
+    while (!queue.empty()) {
+        GridPosition pos = queue.front();
+        queue.pop();
+        int distance = distanceGrid[pos.i][pos.j] + 1;
+        for (ActionType direction : { ActionType::NORTH, ActionType::SOUTH, ActionType::WEST,
+                ActionType::EAST }) {
+            GridPosition nextPos;
+            bool isLegal;
+            std::tie(nextPos, isLegal) = getMovedPos(pos, direction);
+            // If it's legal and it's an improvement it needs to be queued.
+            if (isLegal) {
+                int &nextPosDistance = distanceGrid[nextPos.i][nextPos.j];
+                if (nextPosDistance == -1 || nextPosDistance > distance) {
+                    nextPosDistance = distance;
+                    queue.push(nextPos);
+                }
+            }
+        }
+    }
+}
+
+void TagModel::calculatePairwiseDistances() {
+    for (int i = 0; i < nRows_; i++) {
+        for (int j = 0; j < nCols_; j++) {
+            calculateDistancesFrom(GridPosition(i, j));
+        }
+    }
+}
+
 void TagModel::initialize() {
     GridPosition p;
     envMap_.resize(nRows_);
@@ -128,6 +178,19 @@ void TagModel::initialize() {
             envMap_[p.i][p.j] = cellType;
         }
     }
+
+    pairwiseDistances_.resize(nRows_);
+    for (auto &rowOfGrids : pairwiseDistances_) {
+        rowOfGrids.resize(nCols_);
+        for (auto &grid : pairwiseDistances_) {
+            grid.resize(nRows_);
+            for (auto &row : pairwiseDistances_) {
+                grid.resize(nCols_);
+            }
+        }
+    }
+
+    calculatePairwiseDistances();
 }
 
 GridPosition TagModel::randomEmptyCell() {
@@ -410,6 +473,8 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
         mdpSolver_->solve();
     }
 
+    calculatePairwiseDistances();
+
     // Check for heuristic changes.
     if (pool != nullptr) {
         long nStates = pool->getNumberOfStates();
@@ -609,7 +674,7 @@ double TagModel::getDefaultHeuristicValue(solver::HistoryEntry const */*entry*/,
     }
     GridPosition robotPos = tagState.getRobotPosition();
     GridPosition opponentPos = tagState.getOpponentPosition();
-    long dist = robotPos.manhattanDistanceTo(opponentPos);
+    long dist = getMapDistance(robotPos, opponentPos);
     double nSteps = dist / opponentStayProbability_;
     double finalDiscount = std::pow(options_->discountFactor, nSteps);
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
@@ -624,7 +689,7 @@ double TagModel::getUpperBoundHeuristicValue(solver::State const &state) {
     }
     GridPosition robotPos = tagState.getRobotPosition();
     GridPosition opponentPos = tagState.getOpponentPosition();
-    long dist = robotPos.manhattanDistanceTo(opponentPos);
+    long dist = getMapDistance(robotPos, opponentPos);
     double finalDiscount = std::pow(options_->discountFactor, dist);
     double qVal = -moveCost_ * (1 - finalDiscount) / (1 - options_->discountFactor);
     qVal += finalDiscount * tagReward_;

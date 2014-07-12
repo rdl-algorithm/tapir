@@ -118,6 +118,8 @@ class TagModel: public shared::ModelWithProgramOptions {
      */
     std::vector<std::vector<float>> getBeliefProportions(solver::BeliefNode const *belief);
 
+    /************************************************************/
+
     /* ---------- Custom getters for extra functionality  ---------- */
     /** Returns the number of rows in the map for this TagModel instance. */
     long getNRows() const {
@@ -140,6 +142,10 @@ class TagModel: public shared::ModelWithProgramOptions {
     TagMdpSolver *getMdpSolver() {
         return mdpSolver_.get();
     }
+
+    /** Returns the distance within the map between the two given positions. */
+    int getMapDistance(GridPosition p1, GridPosition p2);
+
 
     /* --------------- The model interface proper ----------------- */
     std::unique_ptr<solver::State> sampleAnInitState() override;
@@ -228,6 +234,11 @@ class TagModel: public shared::ModelWithProgramOptions {
     virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
   private:
+    /** Calculates the distances from the given position to all other parts of the map. */
+    void calculateDistancesFrom(GridPosition position);
+    /** Calculates all pairwise distances on the map. */
+    void calculatePairwiseDistances();
+
     /** Initialises the required data structures and variables for this model. */
     void initialize();
 
@@ -314,6 +325,9 @@ class TagModel: public shared::ModelWithProgramOptions {
 
     /** Solver for the MDP version of the problem. */
     std::unique_ptr<TagMdpSolver> mdpSolver_;
+
+    /** The pairwise distances between each pair of cells in the map. */
+    std::vector<std::vector<std::vector<std::vector<int>>>> pairwiseDistances_;
 };
 } /* namespace tag */
 
