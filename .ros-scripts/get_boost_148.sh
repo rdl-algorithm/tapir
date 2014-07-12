@@ -30,5 +30,4 @@ then
     wget "downloads.sourceforge.net/project/boost/boost/1.48.0/boost_1_48_0.tar.bz2"
 fi
 echo "Extracting Boost source code..."
-# tar jxf boost_1_48_0.tar.bz2
-# rm boost_1_48_0.tar.bz2
+tar jxf boost_1_48_0.tar.bz2
