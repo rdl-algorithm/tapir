@@ -126,6 +126,9 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
     }
     if (maximumDepth < 0) {
         maximumDepth = options_->maximumDepth;
+        if (!options_->isAbsoluteHorizon) {
+            maximumDepth += startNode->getDepth();
+        }
     }
     if (timeout < 0) {
         timeout = options_->stepTimeout;
@@ -478,7 +481,11 @@ void Solver::applyChanges() {
 
     // Extend and backup each sequence.
     for (HistorySequence *sequence : affectedSequences) {
-        searchStrategy_->extendAndBackup(sequence, options_->maximumDepth);
+        long maximumDepth = options_->maximumDepth;
+        if (options_->isAbsoluteHorizon) {
+            maximumDepth += sequence->getFirstEntry()->getAssociatedBeliefNode()->getDepth();
+        }
+        searchStrategy_->extendAndBackup(sequence, maximumDepth);
     }
 
     // Backup all the way to the root to keep the tree consistent.
@@ -716,10 +723,6 @@ long Solver::multipleSearches(BeliefNode *startNode, std::function<StateInfo *()
 }
 
 void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long maximumDepth) {
-    if (maximumDepth < 0) {
-        maximumDepth = options_->maximumDepth;
-    }
-
     HistorySequence *sequence = histories_->createSequence();
 
     HistoryEntry *firstEntry = sequence->addEntry();
@@ -730,10 +733,6 @@ void Solver::singleSearch(BeliefNode *startNode, StateInfo *startStateInfo, long
 }
 
 void Solver::continueSearch(HistorySequence *sequence, long maximumDepth) {
-    if (maximumDepth < 0) {
-        maximumDepth = options_->maximumDepth;
-    }
-
     // Extend and backup sequence.
     searchStrategy_->extendAndBackup(sequence, maximumDepth);
 }

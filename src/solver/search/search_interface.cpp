@@ -78,7 +78,7 @@ BasicSearchStrategy::BasicSearchStrategy(Solver *solver,
 }
 
 /** This is the default implementation for extending and backing up a history sequence. */
-SearchStatus BasicSearchStrategy::extendAndBackup(HistorySequence *sequence, long maximumLength) {
+SearchStatus BasicSearchStrategy::extendAndBackup(HistorySequence *sequence, long maximumDepth) {
     // We extend from the last entry in the sequence.
     HistoryEntry *firstEntry = sequence->getLastEntry();
     long firstEntryId = firstEntry->getId();
@@ -109,7 +109,7 @@ SearchStatus BasicSearchStrategy::extendAndBackup(HistorySequence *sequence, lon
     }
 
     while (true) {
-        if (currentEntry->getId() >= maximumLength) {
+        if (currentNode->getDepth() >= maximumDepth) {
             // We've hit the depth limit, so we can't generate any more steps in the sequence.
             status = SearchStatus::OUT_OF_STEPS;
             break;

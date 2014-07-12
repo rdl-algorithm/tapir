@@ -68,7 +68,7 @@ public:
      */
     virtual void updateStrategyWeights(long strategyNo, double timeUsed, double deltaRootQValue);
 
-    virtual SearchStatus extendAndBackup(HistorySequence *sequence, long maximumLength);
+    virtual SearchStatus extendAndBackup(HistorySequence *sequence, long maximumDepth);
 
 private:
     /** The associated solver. */

@@ -49,6 +49,10 @@ struct Options : options::BaseOptions {
     double stepTimeout = 1000;
     /** The maximum depth to search, relative to the current belief node. */
     long maximumDepth = 100;
+    /** True if the depth horizon is relative to the starting belief, and false if it is
+     * relative to the current belief.
+     */
+    bool isAbsoluteHorizon = false;
 
     /* ----------------------- TAPIR output modes ------------------- */
     /** True iff color output is allowed. */

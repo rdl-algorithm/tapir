@@ -194,6 +194,7 @@ struct SharedOptions: public solver::Options {
                 "t", "timeout", "step timeout in milliseconds; 0=>no timeout", "real");
 
         parser->addOption<long>("ABT", "maximumDepth", &Options::maximumDepth);
+        parser->addOption<bool>("ABT", "isAbsoluteHorizon", &Options::isAbsoluteHorizon);
 
         parser->addOption<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic);
         parser->addOption<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy);

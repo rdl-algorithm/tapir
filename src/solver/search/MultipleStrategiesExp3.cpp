@@ -94,7 +94,7 @@ void MultipleStrategiesExp3::updateStrategyWeights(long strategyNo, double timeU
     }
 }
 
-SearchStatus MultipleStrategiesExp3::extendAndBackup(HistorySequence *sequence, long maximumLength) {
+SearchStatus MultipleStrategiesExp3::extendAndBackup(HistorySequence *sequence, long maximumDepth) {
     BeliefNode *rootNode = sequence->getFirstEntry()->getAssociatedBeliefNode();
     double initialRootValue = rootNode->getCachedValue();
 
@@ -111,7 +111,7 @@ SearchStatus MultipleStrategiesExp3::extendAndBackup(HistorySequence *sequence, 
 
         // Try using a strategy.
         double startTime = tapir::clock_ms();
-        SearchStatus status = info->strategy->extendAndBackup(sequence, maximumLength);
+        SearchStatus status = info->strategy->extendAndBackup(sequence, maximumDepth);
         double timeUsed = tapir::clock_ms() - startTime;
 
         // If the strategy initialized successfully, we backup, update weights, and we're done.
