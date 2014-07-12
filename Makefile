@@ -289,9 +289,11 @@ else
 # Custom boost path => inform catkin_make of the custom path.
 CATKIN_MAKE_ENVS += TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR)
 
+BOOST_TEST = $(CUSTOM_BOOST_148_DIR)/include/boost/config.hpp
+
 # Recipe to automatically download and install boost:
-boost: | $(CUSTOM_BOOST_148_DIR)/include ;
-$(CUSTOM_BOOST_148_DIR)/include : ;
+boost: | $(BOOST_TEST)
+$(BOOST_TEST) : ;
 	$(ABS_ROOT)/.ros-scripts/get_boost_148.sh
 	$(ABS_ROOT)/.ros-scripts/patch_boost_148.sh
 	env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/build_boost_148.sh

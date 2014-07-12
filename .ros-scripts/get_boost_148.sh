@@ -1,6 +1,6 @@
 #!/bin/bash
 # If the temporary directory exists, we don't do anything.
-if [ -d tapir_boost_install ]
+if [ -f tapir_boost_install/boost_1_48_0/bootstrap.sh ]
 then
     exit 0
 fi
@@ -15,7 +15,20 @@ fi
 
 mkdir tapir_boost_install
 cd tapir_boost_install
-wget "downloads.sourceforge.net/project/boost/boost/1.48.0/boost_1_48_0.tar.bz2"
+HAS_ARCHIVE=false
+if [ -f boost_1_48_0.tar.bz2 ]
+then
+    if [ $(md5sum boost_1_48_0.tar.bz2 | cut -d " " -f 1) == "d1e9a7a7f532bb031a3c175d86688d95" ]
+    then
+        HAS_ARCHIVE=true
+    else
+        rm boost_1_48_0.tar.bz2
+    fi
+fi
+if [ $HAS_ARCHIVE = "false" ]
+then
+    wget "downloads.sourceforge.net/project/boost/boost/1.48.0/boost_1_48_0.tar.bz2"
+fi
 echo "Extracting Boost source code..."
-tar jxf boost_1_48_0.tar.bz2
-rm boost_1_48_0.tar.bz2
+# tar jxf boost_1_48_0.tar.bz2
+# rm boost_1_48_0.tar.bz2
