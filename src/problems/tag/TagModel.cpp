@@ -182,10 +182,10 @@ void TagModel::initialize() {
     pairwiseDistances_.resize(nRows_);
     for (auto &rowOfGrids : pairwiseDistances_) {
         rowOfGrids.resize(nCols_);
-        for (auto &grid : pairwiseDistances_) {
+        for (auto &grid : rowOfGrids) {
             grid.resize(nRows_);
-            for (auto &row : pairwiseDistances_) {
-                grid.resize(nCols_);
+            for (auto &row : grid) {
+                row.resize(nCols_);
             }
         }
     }
