@@ -43,6 +43,12 @@ PROBLEMS_DIR := $(ROOT)/problems
 # You can put local settings in local.make
 -include local.make
 
+# Use the shell to expand user home directories.
+CUSTOM_BOOST_148_DIR := $(shell echo $(CUSTOM_BOOST_148_DIR))
+ROS_SCRIPT := $(shell echo $(ROS_SCRIPT))
+CATKIN_WS_DIR := $(shell echo $(CATKIN_WS_DIR))
+VREP_DIR := $(shell echo $(VREP_DIR))
+
 # ----------------------------------------------------------------------
 # Compiler & linker
 # ----------------------------------------------------------------------
@@ -288,7 +294,7 @@ boost: | $(CUSTOM_BOOST_148_DIR)/include ;
 $(CUSTOM_BOOST_148_DIR)/include : ;
 	$(ABS_ROOT)/.ros-scripts/get_boost_148.sh
 	$(ABS_ROOT)/.ros-scripts/patch_boost_148.sh
-	@env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/build_boost_148.sh
+	env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/build_boost_148.sh
 endif
 
 CATKIN_MAKE := env $(CATKIN_MAKE_ENVS) catkin_make
