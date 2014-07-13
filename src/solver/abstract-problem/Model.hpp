@@ -113,6 +113,8 @@ public:
     virtual std::unique_ptr<State> sampleStateUninformed() = 0;
     /** Returns true iff the given state is terminal. */
     virtual bool isTerminal(State const &state) = 0;
+    /** Returns true iff the given state is valid. */
+    virtual bool isValid(State const &state) = 0;
 
 
     /* -------------------- Black box dynamics ---------------------- */

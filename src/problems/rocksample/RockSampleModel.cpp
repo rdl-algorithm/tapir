@@ -282,6 +282,16 @@ bool RockSampleModel::isTerminal(solver::State const &state) {
     return getCellType(pos) == GOAL;
 }
 
+bool RockSampleModel::isValid(solver::State const &state) {
+    RockSampleState const &rockSampleState = static_cast<RockSampleState const &>(state);
+    return isValid(rockSampleState.getPosition());
+}
+
+bool RockSampleModel::isValid(GridPosition position) {
+    return (position.i >= 0 && position.i < nRows_ && position.j >= 0 && position.j < nCols_
+            && getCellType(position) != RSCellType::OBSTACLE);
+}
+
 GridPosition RockSampleModel::makeAdjacentPosition(GridPosition position, ActionType actionType) {
     if (actionType == ActionType::NORTH) {
         position.i -= 1;
@@ -308,44 +318,12 @@ std::pair<GridPosition, bool> RockSampleModel::makeNextPosition(GridPosition pos
         if (rockNo < 0 || rockNo >= nRocks_) {
             isLegal = false;
         }
-    } else if (actionType == ActionType::NORTH) {
-        if (position.i > 0) {
-            position.i -= 1;
-        } else {
-            isLegal = false;
-        }
-    } else if (actionType == ActionType::EAST) {
-        if (position.j < nCols_ - 1) {
-            position.j += 1;
-        } else {
-            isLegal = false;
-        }
-    } else if (actionType == ActionType::SOUTH) {
-        if (position.i < nRows_ - 1) {
-            position.i += 1;
-        } else {
-            isLegal = false;
-        }
-    } else if (actionType == ActionType::WEST) {
-        if (position.j > 0) {
-            position.j -= 1;
-        } else {
-            isLegal = false;
-        }
     } else {
-        std::ostringstream message;
-        message << "Invalid action: " << actionType;
-        debug::show_message(message.str());
-        isLegal = false;
-    }
-
-    if (isLegal) {
-        // Moving into obstacles is invalid!
-        if (getCellType(position) == OBSTACLE) {
-            isLegal = false;
+        position = makeAdjacentPosition(position, actionType);
+        if (!isValid(position)) {
             position = oldPosition;
+            isLegal = false;
         }
-
     }
     return std::make_pair(position, isLegal);
 }

@@ -187,6 +187,7 @@ friend class RockSampleMdpSolver;
     /** Generates a state uniformly at random. */
     virtual std::unique_ptr<solver::State> sampleStateUninformed() override;
     virtual bool isTerminal(solver::State const &state) override;
+    virtual bool isValid(solver::State const &state) override;
 
 
     /* -------------------- Black box dynamics ---------------------- */
@@ -274,6 +275,9 @@ friend class RockSampleMdpSolver;
 
 
     /* ----------- Non-virtual methods for RockSampleModel ------------- */
+    /** Returns true iff the given position is a valid grid square for the robot to be in. */
+    bool isValid(GridPosition position);
+
     /** Generates an adjacent position without doing bounds checks or legality checks. */
     GridPosition makeAdjacentPosition(GridPosition position, ActionType actionType);
     /** Generates the next position for the given position and action. */

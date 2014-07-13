@@ -223,6 +223,11 @@ bool TagModel::isTerminal(solver::State const &state) {
     return static_cast<TagState const &>(state).isTagged();
 }
 
+bool TagModel::isValid(solver::State const &state) {
+    TagState const tagState = static_cast<TagState const &>(state);
+    return isValid(tagState.getOpponentPosition()) && isValid(tagState.getRobotPosition());
+}
+
 
 /* -------------------- Black box dynamics ---------------------- */
 std::pair<std::unique_ptr<TagState>, bool> TagModel::makeNextState(

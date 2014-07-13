@@ -116,6 +116,7 @@ class HomecareModel: public shared::ModelWithProgramOptions {
     std::unique_ptr<solver::State> sampleAnInitState() override;
     std::unique_ptr<solver::State> sampleStateUninformed() override;
     bool isTerminal(solver::State const &state) override;
+    bool isValid(solver::State const &state) override;
 
     /* -------------------- Black box dynamics ---------------------- */
     virtual std::unique_ptr<solver::State> generateNextState(

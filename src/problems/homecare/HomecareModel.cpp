@@ -241,6 +241,11 @@ bool HomecareModel::isTerminal(solver::State const &/*state*/) {
     return false;
 }
 
+bool HomecareModel::isValid(solver::State const &state) {
+    HomecareState const &homecareState = static_cast<HomecareState const &>(state);
+    return isValid(homecareState.getRobotPos()) && isValid(homecareState.getTargetPos());
+}
+
 
 /* -------------------- Black box dynamics ---------------------- */
 std::pair<std::unique_ptr<HomecareState>, bool> HomecareModel::makeNextState(
