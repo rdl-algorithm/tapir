@@ -1,0 +1,503 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: #737373;
+    margin: 10px 10px 10px 20px;
+}
+a {
+    color: #0069d6;
+}
+a:hover {
+    color: #0050a3;
+    text-decoration: none;
+}
+a img {
+    border: none;
+}
+p {
+    margin-bottom: 9px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #404040;
+    line-height: 36px;
+}
+h1 {
+    margin-bottom: 18px;
+    font-size: 30px;
+}
+h2 {
+    font-size: 24px;
+}
+h3 {
+    font-size: 18px;
+}
+h4 {
+    font-size: 16px;
+}
+h5 {
+    font-size: 14px;
+}
+h6 {
+    font-size: 13px;
+}
+hr {
+    margin: 0 0 19px;
+    border: 0;
+    border-bottom: 1px solid #aaa;
+}
+blockquote {
+    padding: 13px 13px 21px 15px;
+    margin-bottom: 18px;
+    font-family:georgia,serif;
+    font-style: italic;
+}
+blockquote:before {
+    content:"\201C";
+    font-size:40px;
+    margin-left:-10px;
+    font-family:georgia,serif;
+    color:#eee;
+}
+blockquote p {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 18px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+code, pre {
+    padding: 0 3px 2px;
+    font-family: Monaco, Andale Mono, Courier New, monospace;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+code {
+    background-color: #fee9cc;
+    color: rgba(0, 0, 0, 0.75);
+    padding: 1px 3px;
+    font-size: 12px;
+}
+pre {
+    display: block;
+    padding: 14px;
+    margin: 0 0 18px;
+    line-height: 16px;
+    font-size: 11px;
+    border: 1px dashed #ccc;
+    border: 1px dashed rgba(0, 0, 0, 0.15);
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+pre code {
+    background-color: #fdfdfd;
+    color:#737373;
+    font-size: 11px;
+}
+@media screen and (min-width: 768px) {
+    body {
+        width: 748px;
+        margin:10px auto;
+    }
+}
+</style>
+<title>README-MakeNewModel.html</title>
+</head>
+<body>
+<h1>Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR)</h1>
+
+<p>TAPIR is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm [1].
+ABT is an online POMDP solver capable of adapting to modifications to the POMDP
+model without the need to reconstruct the policy from scratch.</p>
+
+<p>[1] H. Kurniawati and V. Yadav. An Online POMDP Solver for Uncertainty Planning
+in Dynamic Environment. Proc. Int. Symp. on Robotics Research. 2013.
+http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf</p>
+
+<p>For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au</p>
+
+<p>For information on updates, please visit http://robotics.itee.uq.edu.au/~tapir</p>
+
+<hr />
+
+<h2>TAPIR Development Team</h2>
+
+<ul>
+<li>Main developer: Dimitri Klimenko</li>
+<li>ROS + VREP interface: Joshua Song</li>
+</ul>
+
+
+<hr />
+
+<h2>Implementing a New POMDP Model</h2>
+
+<p>At its core, implementation of a specific POMDP problem is done via an
+implementation of the <a href="../src/solver/abstract-problem/Model.hpp">Model</a> interface, which represents a black-box generative
+model of a POMDP. See <a href="../src/problems/tag/TagModel.cpp">TagModel</a> for an example implementation of this interface
+for the Tag POMDP.</p>
+
+<p>Formally, a POMDP can be specified as an 8-tuple, (S, A, O, T, Z, R, b0, γ),
+where
+&ndash; S is a set of states
+&ndash; A is a set of actions
+&ndash; O is a set of observations
+&ndash; T is the transition function, which is a conditional probability distribution</p>
+
+<pre><code>for the next state given the previous state and action,
+i.e. T(s, a, s') = p(s' | s, a)
+</code></pre>
+
+<ul>
+<li>Z is the observation function, which is a conditional probability distrubtion
+  for the observation given the action and the resulting state,
+  i.e. Z(a, o, s') = p(o | a, s')</li>
+<li>R is the reward function, which returns the expected reward for a given state
+  and action,
+  i.e. R(s, a)</li>
+<li>b0 is a probability distribution over states, which represents the agent&rsquo;s
+  initial knowledege.</li>
+<li>γ is the discount factor for the POMDP</li>
+</ul>
+
+
+<p>Since this is a black box model, many of these elements are defined implicitly
+rather than explicitly. The key requirements to specify a POMDP model are:
+&ndash; <a href="../src/solver/abstract-problem/Model.hpp#L109">Model::sampleAnInitState</a> should sample an initial state from the</p>
+
+<pre><code>initial belief, and hence implicitly defines b0
+</code></pre>
+
+<ul>
+<li><a href="../src/solver/abstract-problem/Model.hpp#L146">Model::generateStep</a> offers a simple generative model of the POMDP;
+  it takes a single state and action, and returns an observation, next state,
+  and a sampled reward value r, i.e. (s, a) => (o, r, s').
+  This forms an implicit definition of the transition, observation and reward
+  functions, T, Z, and R</li>
+<li><a href="../src/solver/abstract-problem/Options.hpp#L37">Options::discountFactor</a> defines the POMDP discount factor, γ &ndash; each
+  <a href="../src/solver/abstract-problem/Model.hpp">Model</a> will posses a unique instance of the <a href="../src/solver/abstract-problem/Options.hpp">Options</a> class (or a subclass,
+  such as <a href="../src/problems/tag/TagOptions.hpp">TagOptions</a>).</li>
+<li><a href="../src/solver/abstract-problem/Model.hpp#L115">Model::isTerminal</a> specifies which states will be considered terminal &ndash; the
+  method should return true for those states, and false for others.</li>
+</ul>
+
+
+<p>As for S, A, and O, the states, actions, and observations should implement
+their respective abstract classes <a href="../src/solver/abstract-problem/State.hpp">State</a>, <a href="../src/solver/abstract-problem/Action.hpp">Action</a>, and <a href="../src/solver/abstract-problem/Observation.hpp">Observation</a>. That
+said, it is important to note that the sets of states and observations are
+actually implicitly defined via the black-box sampling methods &ndash;
+<a href="../src/solver/abstract-problem/Model.hpp#L109">Model::sampleAnInitState</a> should return a state within S, and
+<a href="../src/solver/abstract-problem/Model.hpp#L146">Model::generateStep</a> should return states and observations that are within
+S and O respectively. However, since the solver itself needs to select actions,
+actions require more explicit treatment by the ABT algorithm. This is
+done via the <a href="../src/solver/mappings/actions/ActionPool.hpp">ActionPool</a> interface and the method <a href="../src/solver/abstract-problem/Model.hpp#L309">Model::createActionPool</a>;
+see the <a href="#actionpool">section below</a> for some additional details.</p>
+
+<p>See below for a more detailed description of the core functionality needed
+in order to make a new problem for TAPIR.</p>
+
+<h3>Model</h3>
+
+<p>As previously mentioned, the <a href="../src/solver/abstract-problem/Model.hpp">Model</a> class is the core interface for the
+specification of a POMDP model; see <a href="../src/problems/tag/TagModel.cpp">TagModel</a> for a concrete example.
+An implementation of <a href="../src/solver/abstract-problem/Model.hpp">Model</a> must, at the very least, implement all of the pure
+virtual methods in the abstract base class. These include the aforementioned
+core methods <a href="../src/solver/abstract-problem/Model.hpp#L109">Model::sampleAnInitState</a>, <a href="../src/solver/abstract-problem/Model.hpp#L146">Model::generateStep</a>, and
+<a href="../src/solver/abstract-problem/Model.hpp#L115">Model::isTerminal</a>, as specified previously. A <a href="../src/solver/abstract-problem/Model.hpp">Model</a> instance will also
+possess an <a href="../src/solver/abstract-problem/Options.hpp">Options</a> instance, which specifies various ABT and POMDP parameters.</p>
+
+<p>In addition to the these three core methods, and
+<a href="../src/solver/abstract-problem/Model.hpp#L309">Model::createActionPool</a> (see
+<a href="#actionpool">this section</a> for further details), a Model must also implement
+<a href="../src/solver/abstract-problem/Model.hpp#L113">Model::sampleStateUninformed</a>, which should generate states according to an
+uninformed prior (as opposed to from the initial belief);
+this is used by the default implementation for the
+<a href="../src/solver/abstract-problem/Model.hpp#L232">uninformed generateParticles</a> method.
+Custom implementations for the two particle filtering methods (
+<a href="../src/solver/abstract-problem/Model.hpp#L219">informed</a> and <a href="../src/solver/abstract-problem/Model.hpp#L232">uninformed</a>
+) can be written if better handling of particle depletion is needed. Also of
+key importance (although not mandatory) is a heuristic function, which is
+specified by <a href="../src/solver/abstract-problem/Model.hpp#L257">Model::getHeuristicFunction</a> &ndash; this uses a functional programming
+interface, and should return a <a href="../src/solver/abstract-problem/HeuristicFunction.hpp">HeuristicFunction</a>.
+By default, the heuristic function is simply one that always returns zero.</p>
+
+<p>If you wish the model to handle changes, see
+<a href="#implementing-changes">the section on changes</a>
+below; in short, doing so requires implementations for several other methods,
+most notably <a href="../src/solver/abstract-problem/Model.hpp#L208">Model::applyChanges</a>.</p>
+
+<p>A convenient subclass of <a href="../src/solver/abstract-problem/Model.hpp">Model</a> is <a href="../src/problems/shared/ModelWithProgramOptions.hpp">ModelWithProgramOptions</a>, which uses
+additional options from <a href="../src/problems/shared/SharedOptions.hpp">SharedOptions</a> to provide some extra configuration
+settings, including text-based parsing in order to select different search
+strategies.</p>
+
+<h3>Options</h3>
+
+<p>Each <a href="../src/solver/abstract-problem/Model.hpp">Model</a> instance should possess an <a href="../src/solver/abstract-problem/Options.hpp">Options</a> instance, which specifies
+the various configuration settings to use for that problem, and for TAPIR to
+use when solving that problem. The base <a href="../src/solver/abstract-problem/Options.hpp">Options</a> class has several parameters
+for ABT settings, but with respect to specifying a POMDP there are two crucial
+values that must be specified:
+&ndash; <a href="../src/solver/abstract-problem/Options.hpp#L37">Options::discountFactor</a> &ndash; the POMDP discount factor.
+&ndash; <a href="../src/solver/abstract-problem/Options.hpp#L29">Options::numberOfStateVariables</a> &ndash; the number of state variables used to</p>
+
+<pre><code>define a state of the POMDP.
+</code></pre>
+
+<h3>State</h3>
+
+<p>Represents a state within the state space of the problem.
+See <a href="../src/problems/tag/TagState.cpp">TagState</a> for an example.</p>
+
+<p>The core implementation requires only the following methods:
+&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L40">copy()</a> &mdash;&ndash; duplicates the state
+&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a> &mdash;&ndash; hashes the state for storage in an std::unordered_map
+&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L43">equals()</a> &mdash;&ndash; identifies equivalent states; used in conjunction with <a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a></p>
+
+<p>Also useful (though not required) are:
+&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L49">distanceTo()</a> &mdash;&ndash; defines a distance metric over the states;</p>
+
+<pre><code>the default is an infinite distance between any pair of states.
+</code></pre>
+
+<ul>
+<li><a href="../src/solver/abstract-problem/Point.hpp#L54">print()</a> &mdash;&ndash; generates a human-readable text representation
+  of the state.</li>
+</ul>
+
+
+<p>In order to be able to make changes to the policy when changes to the model
+occur, states also need to be stored within a <a href="../src/solver/indexing/StateIndex.hpp">StateIndex</a>. The default
+implementation for this is an R*-tree, which is implemented via a
+<a href="../src/solver/indexing/RTree.hpp">thin wrapper</a> around the
+<a href="http://libspatialindex.github.io/overview.html#the-rtree-package">R*-tree implementation</a>
+from
+<a href="http://libspatialindex.github.io">libspatialindex</a>.
+In order to use this implementation, the <a href="../src/solver/abstract-problem/State.hpp">State</a> needs to implement
+<a href="../src/solver/abstract-problem/VectorState.hpp">VectorState</a>. In addition to the standard <a href="../src/solver/abstract-problem/State.hpp">State</a> methods, this also requires
+the additional method <a href="../src/solver/abstract-problem/Vector.hpp#L39">asVector()</a>, which must return an
+std::vector<double> representation of the state; this vector will then be stored
+inside the <a href="../src/solver/indexing/RTree.hpp">R*-tree</a>.</p>
+
+<p>Alternatively, a custom <a href="../src/solver/indexing/StateIndex.hpp">StateIndex</a> implementation can be given by
+implementing <a href="../src/solver/indexing/StateIndex.hpp">StateIndex</a> and having <a href="../src/solver/abstract-problem/Model.hpp#L289">Model::createStateIndex</a> return an
+instance of that custom implementation.</p>
+
+<h3>Observation</h3>
+
+<p>Represents an observation within the action space of the problem.
+See <a href="../src/problems/tag/TagObservation.cpp">TagObservation</a> for an example.
+Like <a href="../src/solver/abstract-problem/State.hpp">State</a>, the <a href="../src/solver/abstract-problem/Observation.hpp">Observation</a> interface requires implementations for
+<a href="../src/solver/abstract-problem/Point.hpp#L40">copy()</a>, <a href="../src/solver/abstract-problem/Point.hpp#L43">equals()</a>, and <a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a>,
+and custom implementations can be given for <a href="../src/solver/abstract-problem/Point.hpp#L49">distanceTo()</a> and <a href="../src/solver/abstract-problem/Point.hpp#L54">print()</a></p>
+
+<h3>Action</h3>
+
+<p>Represents an action within the action space of the problem.
+See <a href="../src/problems/tag/TagAction.cpp">TagAction</a> for an example.
+Like <a href="../src/solver/abstract-problem/State.hpp">State</a>, the <a href="../src/solver/abstract-problem/Action.hpp">Action</a> interface requires implementations for
+<a href="../src/solver/abstract-problem/Point.hpp#L40">copy()</a>, <a href="../src/solver/abstract-problem/Point.hpp#L43">equals()</a>, and <a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a>,
+and custom implementations can be given for <a href="../src/solver/abstract-problem/Point.hpp#L49">distanceTo()</a> and <a href="../src/solver/abstract-problem/Point.hpp#L54">print()</a></p>
+
+<h3>ActionPool</h3>
+
+<p>In order for the ABT solver to be able to search the space of possible actions,
+it needs a way to know which actions it will need to try, and at which belief
+nodes. This is handled in a generic manner by the <a href="../src/solver/mappings/actions/ActionPool.hpp">ActionPool</a> interface &ndash; the
+<a href="../src/solver/mappings/actions/ActionPool.hpp">ActionPool</a> essentially works as a factory to generate individual instances of
+<a href="../src/solver/mappings/actions/ActionMapping.hpp">ActionMapping</a> for each belief node. When ABT is searching using the standard
+<a href="../src/solver/search/steppers/ucb_search.cpp#L27">UCB search strategy</a>, it queries the <a href="../src/solver/mappings/actions/ActionMapping.hpp">ActionMapping</a> using
+<a href="../src/solver/mappings/actions/ActionMapping.hpp#L84">ActionMapping::getNextActionToTry</a>; this essentially defines the initialization
+phase of he UCB algorithm &ndash; as long as this method returns actions
+(rather than nullptr), these actions will continue to be tried; moreover, it is
+only those actions that have been tried before that will actually be selected
+once the actual UCB algorithm is being used.</p>
+
+<p>A standard implementation of <a href="../src/solver/mappings/actions/ActionPool.hpp">ActionPool</a> that should be sufficient for most
+purposes is provided as <a href="../src/solver/mappings/actions/enumerated_actions.hpp#L37">EnumeratedActionPool</a>. This implementation assumes
+that there is a finite, and relatively small, enumerated set of global actions
+that can be taken from any state in the problem. Use of this implementation
+has two prerequsites:
+&ndash; The <a href="../src/solver/abstract-problem/Action.hpp">Action</a> class used must implement the <a href="../src/solver/abstract-problem/DiscretizedPoint.hpp">DiscretizedPoint</a> interface,</p>
+
+<pre><code>which requires that every action be able to return its associated
+index in the enumeration via the method [DiscretizedPoint::getBinNumber]
+</code></pre>
+
+<ul>
+<li>The <a href="../src/solver/mappings/actions/enumerated_actions.hpp#L37">EnumeratedActionPool</a> constructor requires, as a constructor argument,
+  a vector containing all of the actions, in the order of their enumeration.</li>
+</ul>
+
+
+<h3>Serializer</h3>
+
+<p>If you require the ability to serialize a solver policy (e.g. to save it to
+a file), you must provide an implementation of the abstract <a href="../src/solver/serialization/Serializer.hpp">Serializer</a>
+class. A basic implementation that generates human-readable text representations
+of all of the core ABT solver classes is provided by <a href="../src/solver/serialization/TextSerializer.hpp">TextSerializer</a>, but
+this implementation is only partial, because it doesn&rsquo;t come with
+implementations for the various configurable data structures. As such,
+in order to fully implement a <a href="../src/solver/serialization/Serializer.hpp">Serializer</a> for your problem, you will also need
+to implement methods to serialize a few of the core interface classes &ndash; that is,
+<a href="../src/solver/abstract-problem/State.hpp">State</a>, <a href="../src/solver/abstract-problem/Action.hpp">Action</a>, and <a href="../src/solver/abstract-problem/Observation.hpp">Observation</a>.
+Additionally, the action and observation mappings also need serialization. The
+default observation mapping is <a href="../src/solver/mappings/observations/discrete_observations.hpp#L36">DiscreteObservationPool</a>, which should suffice
+for most purposes; in order to serialize this mapping class, the serializer
+implementation should also inherit from <a href="../src/solver/mappings/observations/discrete_observations.hpp#L36">DiscreteObservationTextSerializer</a>.
+Similarly, if you use <a href="../src/solver/mappings/actions/enumerated_actions.hpp#L37">EnumeratedActionPool</a> for mapping actions, your
+serializer should inherit from <a href="../src/solver/mappings/actions/enumerated_actions.hpp#L68">EnumeratedActionTextSerializer</a>.</p>
+
+<p>To see a good example of the above, have a look at <a href="../src/problems/tag/TagTextSerializer.hpp">TagTextSerializer</a>.</p>
+
+<hr />
+
+<h2>Implementing Changes</h2>
+
+<p>It is not mandatory for a <a href="../src/solver/abstract-problem/Model.hpp">Model</a> implementation to deal with changes, but
+if you require this functionality, the following two core implementation details are the most important:</p>
+
+<ul>
+<li>A custom <a href="../src/solver/abstract-problem/ModelChange.hpp">ModelChange</a> class, e.g. <a href="../src/problems/tag/TagModel.hpp#L37">TagChange</a>. This class doesn&rsquo;t
+  have any required methods, because it&rsquo;s up to each individual
+  <a href="../src/solver/abstract-problem/Model.hpp">Model</a> implementation to determine how it deals with changes.
+  Note that if you implement <a href="../src/solver/abstract-problem/ModelChange.hpp">ModelChange</a> you will likely also need to
+  implement serialization methods, e.g.
+  <a href="../src/problems/tag/TagTextSerializer.cpp#L40">TagTextSerializer::saveModelChange</a> and
+  <a href="../src/problems/tag/TagTextSerializer.cpp#L61">TagTextSerializer::loadModelChange</a></li>
+<li>An implementation of <a href="../src/solver/abstract-problem/Model.hpp#L208">Model::applyChanges</a>, which performs two key functions:
+
+<ul>
+<li>Updating the Model&rsquo;s black box generators in response to the changes.</li>
+<li>Informing the Solver of the changes that have been applied. This is done via the <a href="../src/solver/StatePool.hpp">StatePool</a> interface, which can be used in conjunction with a custom <a href="../src/solver/indexing/StateIndex.hpp">StateIndex</a> implementation, e.g. <a href="../src/solver/indexing/RTree.hpp">RTree</a>, in order to perform more intelligent queries. See <a href="../src/problems/tag/TagModel.cpp#L323">TagModel::applyChanges</a> for an example implentation.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>The <a href="../src/solver/Solver.hpp">Solver</a> handles model changes by using a <a href="../src/solver/changes/HistoryCorrector.hpp">HistoryCorrector</a>, the default implementation of which is <a href="../src/solver/changes/DefaultHistoryCorrector.hpp">DefaultHistoryCorrector</a>, which should work OK for any custom problem. However, in order to use this implementation you must also implement these methods of <a href="../src/solver/abstract-problem/Model.hpp">Model</a>:</p>
+
+<ul>
+<li><a href="../src/solver/abstract-problem/Model.hpp#L165">Model::generateNextState</a> to generate states &ndash; an implicit definition of T(s, a, s').</li>
+<li><a href="../src/solver/abstract-problem/Model.hpp#L176">Model::generateObservation</a> to generate observations &ndash; an implicit definition of Z(a, o, s').</li>
+<li><a href="../src/solver/abstract-problem/Model.hpp#L189">Model::generateReward</a> to generate rewards &ndash; an implicit definition of R(s, a).</li>
+</ul>
+
+
+<p>These three methods are used instead of <a href="../src/solver/abstract-problem/Model.hpp#L146">Model::generateStep</a> in order to avoid unnecessary recalculation, and to minize the extent to which new histories diverge from old ones due to re-randomization. To minimize such issues even further, you can use <a href="../src/solver/abstract-problem/TransitionParameters.hpp">TransitionParameters</a> and <a href="../src/solver/abstract-problem/Model.hpp#L155">Model::generateTransition</a>, which allows you to store extra information about a generated step. This can be used, for example, to store intermediate calculations, or generated random numbers. See the documentation of <a href="../src/solver/abstract-problem/Model.hpp">Model</a> for greater detail.</p>
+
+<hr />
+
+<h2>Generating Binaries For a New POMDP Model</h2>
+
+<p>For additional convenience, template methods to generate binaries for an
+individual problem are given in:</p>
+
+<ul>
+<li><a href="../src/problems/shared/solve.hpp">solve.hpp</a> &mdash;&ndash; initial offline policy generation; see
+  <a href="../src/problems/tag/solve.cpp">solve.cpp for Tag</a> for a usage example.</li>
+<li><a href="../src/problems/shared/simulate.hpp">simulate.hpp</a> &mdash;&ndash; simulation with online POMDP solution; see
+  <a href="../src/problems/tag/simulate.cpp">simulate.cpp for Tag</a> for a usage example.</li>
+</ul>
+
+
+<hr />
+
+<h2>Configuration and Building</h2>
+
+<p>This project uses a custom GNU Make build system, which is documented in further
+detail in <a href="../.make/README.md">this README</a>; the dependencies are cleanly managed
+and make can easily be run in parallel, i.e.</p>
+
+<pre><code>make -jN
+</code></pre>
+
+<p>where N is the number of threads you want to use; 8 is good for many CPUs.
+The code should build OK without any special configuration,
+but if need be the core build settings can be changed via the root Makefile.</p>
+
+<p>To build the core solver, simply use the command</p>
+
+<pre><code>make solver
+</code></pre>
+
+<p>This will build the solver as a static library in builds/release/libtapir.a.
+Alternatively, the solver can also be built as a shared library &ndash; use the
+command</p>
+
+<pre><code>make solver CFG=shared
+</code></pre>
+
+<p>and a shared library file will be output to builds/shared/libtapir.so</p>
+
+<p>The supplied code also comes with several example problems, as mentioned
+previously. To build the code with all of the example problems, simply use
+the command</p>
+
+<pre><code>make all
+</code></pre>
+
+<p>Alternatively, you can build only a specific problem by specifying that problem
+as a target. For example,</p>
+
+<pre><code>make tag -j4 CFG=shared
+</code></pre>
+
+<p>would use 4 threads to compile; that command would build the solver as a shared
+library, and also build the Tag problem to dynamically link against the shared
+library file.
+Alternatively, you can also compile a problem by running make from within that
+problem&rsquo;s source directory, e.g.</p>
+
+<pre><code>cd src/problems/tag
+make
+</code></pre>
+
+<p>Different build configurations are available via the &ldquo;CFG&rdquo; variable in the
+Makefile, which can be set from the command line; for example, debugging
+output can be generated by using</p>
+
+<pre><code>make CFG=debug
+</code></pre>
+
+<p>or by setting</p>
+
+<pre><code>DEFAULT_CFG:=debug
+</code></pre>
+
+<p>in the root Makefile. Each configuration sends intermediate
+compilation outputs into a different directory, which will be &ldquo;builds/$(CFG)&rdquo;.
+This makes it easy to switch between different builds, as the &ldquo;make&rdquo; command
+simply needs to copy the previously-made executables from the relevant build
+directory.</p>
+
+<p>For additional documentation on the build system, see the
+<a href="../.make/README.md">build system README</a>.</p>
+</body>
+</html>
