@@ -220,8 +220,13 @@ void Solver::resetTree(BeliefNode *newRoot) {
     nodesToBackup_.clear();
 
     std::vector<StateInfo *> allParticles;
+
+    // Filter out only the valid particles for the new belief.
     for (HistoryEntry *entry : newRoot->particles_) {
-        allParticles.push_back(entry->stateInfo_);
+        StateInfo *info = entry->stateInfo_;
+        if (model_->isValid(*info->getState())) {
+            allParticles.push_back(entry->stateInfo_);
+        }
     }
 
     HistoricalData *oldData = newRoot->getHistoricalData();
