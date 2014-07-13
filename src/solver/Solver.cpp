@@ -126,7 +126,7 @@ void Solver::improvePolicy(BeliefNode *startNode, long numberOfHistories, long m
     }
     if (maximumDepth < 0) {
         maximumDepth = options_->maximumDepth;
-        if (!options_->isAbsoluteHorizon) {
+        if (startNode != nullptr && !options_->isAbsoluteHorizon) {
             maximumDepth += startNode->getDepth();
         }
     }
