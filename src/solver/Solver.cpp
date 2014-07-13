@@ -224,9 +224,13 @@ void Solver::resetTree(BeliefNode *newRoot) {
         allParticles.push_back(entry->stateInfo_);
     }
 
-    std::unique_ptr<HistoricalData> data = newRoot->getHistoricalData()->copy();
+    HistoricalData *oldData = newRoot->getHistoricalData();
+    std::unique_ptr<HistoricalData> newData;
+    if (oldData != nullptr) {
+        newData = oldData->copy();
+    }
     newRoot = policy_->reset();
-    newRoot->data_ = std::move(data);
+    newRoot->data_ = std::move(newData);
     newRoot->setMapping(actionPool_->createActionMapping(newRoot));
     estimationStrategy_->setValueEstimator(this, newRoot);
     histories_->reset();
