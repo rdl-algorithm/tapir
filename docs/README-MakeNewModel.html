@@ -163,18 +163,15 @@ implementation of the <a href="../src/solver/abstract-problem/Model.hpp">Model</
 model of a POMDP. See <a href="../src/problems/tag/TagModel.cpp">TagModel</a> for an example implementation of this interface
 for the Tag POMDP.</p>
 
-<p>Formally, a POMDP can be specified as an 8-tuple, (S, A, O, T, Z, R, b0, γ),
-where
-&ndash; S is a set of states
-&ndash; A is a set of actions
-&ndash; O is a set of observations
-&ndash; T is the transition function, which is a conditional probability distribution</p>
-
-<pre><code>for the next state given the previous state and action,
-i.e. T(s, a, s') = p(s' | s, a)
-</code></pre>
+<p>Formally, a POMDP can be specified as an 8-tuple, (S, A, O, T, Z, R, b0, γ), where:</p>
 
 <ul>
+<li>S is a set of states</li>
+<li>A is a set of actions</li>
+<li>O is a set of observations</li>
+<li>T is the transition function, which is a conditional probability distribution
+  for the next state given the previous state and action,
+  i.e. T(s, a, s') = p(s' | s, a)</li>
 <li>Z is the observation function, which is a conditional probability distrubtion
   for the observation given the action and the resulting state,
   i.e. Z(a, o, s') = p(o | a, s')</li>
@@ -187,14 +184,11 @@ i.e. T(s, a, s') = p(s' | s, a)
 </ul>
 
 
-<p>Since this is a black box model, many of these elements are defined implicitly
-rather than explicitly. The key requirements to specify a POMDP model are:
-&ndash; <a href="../src/solver/abstract-problem/Model.hpp#L109">Model::sampleAnInitState</a> should sample an initial state from the</p>
-
-<pre><code>initial belief, and hence implicitly defines b0
-</code></pre>
+<p>Since this is a black box model, many of these elements are defined implicitly rather than explicitly. The key requirements to specify a POMDP model are:</p>
 
 <ul>
+<li><a href="../src/solver/abstract-problem/Model.hpp#L109">Model::sampleAnInitState</a> should sample an initial state from the
+  initial belief, and hence implicitly defines b0</li>
 <li><a href="../src/solver/abstract-problem/Model.hpp#L146">Model::generateStep</a> offers a simple generative model of the POMDP;
   it takes a single state and action, and returns an observation, next state,
   and a sampled reward value r, i.e. (s, a) => (o, r, s').
@@ -208,19 +202,9 @@ rather than explicitly. The key requirements to specify a POMDP model are:
 </ul>
 
 
-<p>As for S, A, and O, the states, actions, and observations should implement
-their respective abstract classes <a href="../src/solver/abstract-problem/State.hpp">State</a>, <a href="../src/solver/abstract-problem/Action.hpp">Action</a>, and <a href="../src/solver/abstract-problem/Observation.hpp">Observation</a>. That
-said, it is important to note that the sets of states and observations are
-actually implicitly defined via the black-box sampling methods &ndash;
-<a href="../src/solver/abstract-problem/Model.hpp#L109">Model::sampleAnInitState</a> should return a state within S, and
-<a href="../src/solver/abstract-problem/Model.hpp#L146">Model::generateStep</a> should return states and observations that are within
-S and O respectively. However, since the solver itself needs to select actions,
-actions require more explicit treatment by the ABT algorithm. This is
-done via the <a href="../src/solver/mappings/actions/ActionPool.hpp">ActionPool</a> interface and the method <a href="../src/solver/abstract-problem/Model.hpp#L309">Model::createActionPool</a>;
-see the <a href="#actionpool">section below</a> for some additional details.</p>
+<p>As for S, A, and O, the states, actions, and observations should implement their respective abstract classes <a href="../src/solver/abstract-problem/State.hpp">State</a>, <a href="../src/solver/abstract-problem/Action.hpp">Action</a>, and <a href="../src/solver/abstract-problem/Observation.hpp">Observation</a>. That said, it is important to note that the sets of states and observations are actually implicitly defined via the black-box sampling methods &ndash; <a href="../src/solver/abstract-problem/Model.hpp#L109">Model::sampleAnInitState</a> should return a state within S, and <a href="../src/solver/abstract-problem/Model.hpp#L146">Model::generateStep</a> should return states and observations that are within S and O respectively. However, since the solver itself needs to select actions, actions require more explicit treatment by the ABT algorithm. This is done via the <a href="../src/solver/mappings/actions/ActionPool.hpp">ActionPool</a> interface and the method <a href="../src/solver/abstract-problem/Model.hpp#L309">Model::createActionPool</a>; see the <a href="#actionpool">section below</a> for some additional details.</p>
 
-<p>See below for a more detailed description of the core functionality needed
-in order to make a new problem for TAPIR.</p>
+<p>See below for a more detailed description of the core functionality needed in order to make a new problem for TAPIR.</p>
 
 <h3>Model</h3>
 
@@ -234,59 +218,45 @@ possess an <a href="../src/solver/abstract-problem/Options.hpp">Options</a> inst
 
 <p>In addition to the these three core methods, and
 <a href="../src/solver/abstract-problem/Model.hpp#L309">Model::createActionPool</a> (see
-<a href="#actionpool">this section</a> for further details), a Model must also implement
-<a href="../src/solver/abstract-problem/Model.hpp#L113">Model::sampleStateUninformed</a>, which should generate states according to an
-uninformed prior (as opposed to from the initial belief);
+<a href="#actionpool">this section</a> for further details), a Model must also implement <a href="../src/solver/abstract-problem/Model.hpp#L113">Model::sampleStateUninformed</a>, which should generate states according to an uninformed prior (as opposed to from the initial belief);
 this is used by the default implementation for the
 <a href="../src/solver/abstract-problem/Model.hpp#L232">uninformed generateParticles</a> method.
 Custom implementations for the two particle filtering methods (
-<a href="../src/solver/abstract-problem/Model.hpp#L219">informed</a> and <a href="../src/solver/abstract-problem/Model.hpp#L232">uninformed</a>
-) can be written if better handling of particle depletion is needed. Also of
-key importance (although not mandatory) is a heuristic function, which is
-specified by <a href="../src/solver/abstract-problem/Model.hpp#L257">Model::getHeuristicFunction</a> &ndash; this uses a functional programming
-interface, and should return a <a href="../src/solver/abstract-problem/HeuristicFunction.hpp">HeuristicFunction</a>.
-By default, the heuristic function is simply one that always returns zero.</p>
+<a href="../src/solver/abstract-problem/Model.hpp#L219">informed</a> and <a href="../src/solver/abstract-problem/Model.hpp#L232">uninformed</a>) can be written if better handling of particle depletion is needed. Also of key importance (although not mandatory) is a heuristic function, which is specified by <a href="../src/solver/abstract-problem/Model.hpp#L257">Model::getHeuristicFunction</a> &ndash; this uses a functional programming interface, and should return a <a href="../src/solver/abstract-problem/HeuristicFunction.hpp">HeuristicFunction</a>. By default, the heuristic function is simply one that always returns zero.</p>
 
-<p>If you wish the model to handle changes, see
-<a href="#implementing-changes">the section on changes</a>
-below; in short, doing so requires implementations for several other methods,
-most notably <a href="../src/solver/abstract-problem/Model.hpp#L208">Model::applyChanges</a>.</p>
+<p>If you wish the model to handle changes, see <a href="#implementing-changes">the section on changes</a> below; in short, doing so requires implementations for several other methods, most notably <a href="../src/solver/abstract-problem/Model.hpp#L208">Model::applyChanges</a>.</p>
 
-<p>A convenient subclass of <a href="../src/solver/abstract-problem/Model.hpp">Model</a> is <a href="../src/problems/shared/ModelWithProgramOptions.hpp">ModelWithProgramOptions</a>, which uses
-additional options from <a href="../src/problems/shared/SharedOptions.hpp">SharedOptions</a> to provide some extra configuration
-settings, including text-based parsing in order to select different search
-strategies.</p>
+<p>A convenient subclass of <a href="../src/solver/abstract-problem/Model.hpp">Model</a> is <a href="../src/problems/shared/ModelWithProgramOptions.hpp">ModelWithProgramOptions</a>, which uses additional options from <a href="../src/problems/shared/SharedOptions.hpp">SharedOptions</a> to provide some extra configuration settings, including text-based parsing in order to select different search strategies.</p>
 
 <h3>Options</h3>
 
-<p>Each <a href="../src/solver/abstract-problem/Model.hpp">Model</a> instance should possess an <a href="../src/solver/abstract-problem/Options.hpp">Options</a> instance, which specifies
-the various configuration settings to use for that problem, and for TAPIR to
-use when solving that problem. The base <a href="../src/solver/abstract-problem/Options.hpp">Options</a> class has several parameters
-for ABT settings, but with respect to specifying a POMDP there are two crucial
-values that must be specified:
-&ndash; <a href="../src/solver/abstract-problem/Options.hpp#L37">Options::discountFactor</a> &ndash; the POMDP discount factor.
-&ndash; <a href="../src/solver/abstract-problem/Options.hpp#L29">Options::numberOfStateVariables</a> &ndash; the number of state variables used to</p>
+<p>Each <a href="../src/solver/abstract-problem/Model.hpp">Model</a> instance should possess an <a href="../src/solver/abstract-problem/Options.hpp">Options</a> instance, which specifies the various configuration settings to use for that problem, and for TAPIR to use when solving that problem. The base <a href="../src/solver/abstract-problem/Options.hpp">Options</a> class has several parameters for ABT settings, but with respect to specifying a POMDP there are two crucial values that must be specified:</p>
 
-<pre><code>define a state of the POMDP.
-</code></pre>
+<ul>
+<li><a href="../src/solver/abstract-problem/Options.hpp#L37">Options::discountFactor</a> &ndash; the POMDP discount factor.</li>
+<li><a href="../src/solver/abstract-problem/Options.hpp#L29">Options::numberOfStateVariables</a> &ndash; the number of state variables used to define a state of the POMDP.</li>
+</ul>
+
 
 <h3>State</h3>
 
 <p>Represents a state within the state space of the problem.
 See <a href="../src/problems/tag/TagState.cpp">TagState</a> for an example.</p>
 
-<p>The core implementation requires only the following methods:
-&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L40">copy()</a> &mdash;&ndash; duplicates the state
-&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a> &mdash;&ndash; hashes the state for storage in an std::unordered_map
-&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L43">equals()</a> &mdash;&ndash; identifies equivalent states; used in conjunction with <a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a></p>
-
-<p>Also useful (though not required) are:
-&ndash; <a href="../src/solver/abstract-problem/Point.hpp#L49">distanceTo()</a> &mdash;&ndash; defines a distance metric over the states;</p>
-
-<pre><code>the default is an infinite distance between any pair of states.
-</code></pre>
+<p>The core implementation requires only the following methods:</p>
 
 <ul>
+<li><a href="../src/solver/abstract-problem/Point.hpp#L40">copy()</a> &mdash;&ndash; duplicates the state</li>
+<li><a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a> &mdash;&ndash; hashes the state for storage in an std::unordered_map</li>
+<li><a href="../src/solver/abstract-problem/Point.hpp#L43">equals()</a> &mdash;&ndash; identifies equivalent states; used in conjunction with <a href="../src/solver/abstract-problem/Point.hpp#L46">hash()</a></li>
+</ul>
+
+
+<p>Also useful (though not required) are:</p>
+
+<ul>
+<li><a href="../src/solver/abstract-problem/Point.hpp#L49">distanceTo()</a> &mdash;&ndash; defines a distance metric over the states;
+  the default is an infinite distance between any pair of states.</li>
 <li><a href="../src/solver/abstract-problem/Point.hpp#L54">print()</a> &mdash;&ndash; generates a human-readable text representation
   of the state.</li>
 </ul>
@@ -342,15 +312,12 @@ once the actual UCB algorithm is being used.</p>
 <p>A standard implementation of <a href="../src/solver/mappings/actions/ActionPool.hpp">ActionPool</a> that should be sufficient for most
 purposes is provided as <a href="../src/solver/mappings/actions/enumerated_actions.hpp#L37">EnumeratedActionPool</a>. This implementation assumes
 that there is a finite, and relatively small, enumerated set of global actions
-that can be taken from any state in the problem. Use of this implementation
-has two prerequsites:
-&ndash; The <a href="../src/solver/abstract-problem/Action.hpp">Action</a> class used must implement the <a href="../src/solver/abstract-problem/DiscretizedPoint.hpp">DiscretizedPoint</a> interface,</p>
-
-<pre><code>which requires that every action be able to return its associated
-index in the enumeration via the method [DiscretizedPoint::getBinNumber]
-</code></pre>
+that can be taken from any state in the problem. Use of this implementation has two prerequsites:</p>
 
 <ul>
+<li>The <a href="../src/solver/abstract-problem/Action.hpp">Action</a> class used must implement the <a href="../src/solver/abstract-problem/DiscretizedPoint.hpp">DiscretizedPoint</a> interface,
+  which requires that every action be able to return its associated
+  index in the enumeration via the method <a href="../src/solver/abstract-problem/DiscretizedPoint.hpp#L38">DiscretizedPoint::getBinNumber</a></li>
 <li>The <a href="../src/solver/mappings/actions/enumerated_actions.hpp#L37">EnumeratedActionPool</a> constructor requires, as a constructor argument,
   a vector containing all of the actions, in the order of their enumeration.</li>
 </ul>
