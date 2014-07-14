@@ -201,7 +201,7 @@ simply build it as either a static or dynamic library (as per the
 and then link against it.
 
 If you want to run the example problems, you should first compile those
-problems, as per the [previous section](#configuration-and-building).
+problems, as per the previous section.
 Each problem should generate two core executables - "solve" for initial offline
 policy generation, and "simulate" for online simulation.
 After building, these executables are placed into the directory "problems", with

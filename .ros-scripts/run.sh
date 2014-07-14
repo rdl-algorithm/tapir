@@ -16,7 +16,7 @@ fi
 
 if [ -z "$VREP_DIR" ]
 then
-    echo "Set the environemnt variable TAPIR_WS_DIR, or run this script"
+    echo "Set the environemnt variable VREP_DIR, or run this script"
     echo "via ./simulate-ros in the problem directory."
     exit 3
 fi

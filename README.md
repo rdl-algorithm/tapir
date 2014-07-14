@@ -73,8 +73,8 @@ where N is the number of threads you want to use - 8 is a good choice on many
 CPUs.
 
 This will create the executables for a command-line interface for each of
-the example problems - these are created in problems/\[problem-name\],
-and also in src/problems/\[problem-name\] for convenience while editing the
+the example problems - these are created in `problems/[problem-name]`,
+and also in `src/problems/[problem-name]` for convenience while editing the
 source files.
 
 
@@ -87,7 +87,7 @@ RockSample, which is a well-known example POMDP:
     ./solve
     ./simulate
 
-You can also runRockSample\[11,11\], a version of RockSample with a larger
+You can also run `RockSample[11,11]`, a version of RockSample with a larger
 map and much larger state space, by using the command-line setting
 `--cfg default-11-11.cfg`, i.e.
 
@@ -158,7 +158,7 @@ TAPIR provides an interface with ROS and V-REP, tested on:
 
 ### Additional system requirements
 
-#### 1. ROS
+#### ROS
 Go [here](http://wiki.ros.org/hydro/Installation/Ubuntu) for instructions on
 how to install ROS. We have tested with ROS Hydro on Ubuntu 12.04 and with ROS
 Indigo on Ubuntu 14.04. Some possible issues and ways around them are:
@@ -194,7 +194,8 @@ On Ubuntu 14.04 you must instead use ROS Indigo,
 which is available via the package "ros-indigo-desktop-full"
 
 
-#### 2. V-REP
+#### V-REP
+
 Go [here](http://www.coppeliarobotics.com/downloads.html), download V-REP, and
 extract it to the directory of your choice. We have tested with
 V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:
@@ -202,15 +203,37 @@ V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:
 **Ubuntu 14.04:**
 
 On Ubuntu 14.04 the version of the ROS plugin that ships with V-REP will not
-work out of the box - it causes a segmentation fault in V-REP! You will need to
-recompile it yourself, by following the tutorial at
-http://www.coppeliarobotics.com/helpFiles/en/rosTutorialHydro.htm but with one
-major difference:   
-You will need to change line 14 of the CMakeLists.txt in
-\[V-REP root directory\]/programming/ros_packages/vrep_plugin/ to  
+work out of the box - it causes a segmentation fault in V-REP! You will
+need to recompile the plugin.
+
+
+#### V-REP ROS plugin
+
+V-REP comes with a plugin for ROS, but the default version of this plugin may
+not work properly for you - in particular, the current distribution of V-REP
+is not designed for ROS Indigo, and so if you're on Ubuntu 14.04 you will need
+to rebuild it.
+
+TAPIR comes with a script to automatically recompile the V-REP plugin for you,
+which can be run using the command 
+
+    make vrep_plugin
+    
+Note that this requires you to set the `VREP_DIR` and `ROS_SCRIPT` variables
+in the root Makefile before it will work properly.
+The script should automatically rebuild the plugin and copy it to `VREP_DIR`.
+
+If you instead wish to manually rebuild the plugin, follow the tutorial
+[here](http://www.coppeliarobotics.com/helpFiles/en/rosTutorialHydro.htm).
+To do this on Ubuntu 14.04, you will also need to change line 14 of  
+`VREP_DIR/programming/ros_packages/vrep_plugin/CMakeLists.txt`
+to  
 `link_directories("/opt/ros/indigo/lib")`  
 instead of  
-`link_directories("/opt/ros/hydro/lib")`
+`link_directories("/opt/ros/hydro/lib")`  
+Please note that the V-REP plugin also requires the ROS joystick packages
+in order to compile - for ROS Indigo those packages should be available
+via the Ubuntu/Debian package `ros-indigo-joy`.
 
 
 ### Setup and installation (for use with ROS and V-REP)
@@ -252,8 +275,8 @@ or the ROS plugin will fail to load; it is also important to read the console
 messages when V-REP is staring up in order to make sure that the ROS plugin
 loads correctly.
 If there is an issue with loading the ROS plugin, you may need to recompile
-the plugin - please read the V-REP ROS plugin tutorial
-[here](http://www.coppeliarobotics.com/helpFiles/en/rosTutorialHydro.htm).
+it - follow the instructions in the
+[previous section on the V-REP plugin](#v-rep-ros-plugin).
 
 If you run a roscore and launch V-REP manually, and have sourced the setup
 script for your Catkin workspace, i.e.
@@ -305,7 +328,7 @@ To create a new POMDP model and use it with the the command-line interface,
    [problems Makefile][src/problems/Makefile]
 6. Create a new subdirectory in [the config directory][problems] for your
    problem, and add any required configuration files there.
-7. Compile your code via "make \[problem-name\]", or simply by running
+7. Compile your code via `make [problem-name]`, or simply by running
    "make" from your new subdirectory of src/problems, e.g.
 ```
 cd src/problems/tag

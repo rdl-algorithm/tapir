@@ -245,9 +245,13 @@ ifeq ($(HAS_EIGEN),true)
 	CATKIN_MAKE_ENVS += HAS_EIGEN=1
 endif
 
+# Phony target to rebuild the V-REP plugin
+.PHONY: vrep_plugin
+vrep_plugin:
+	@env ROS_SCRIPT=$(ROS_SCRIPT) VREP_DIR=$(VREP_DIR) .ros-scripts/build_vrep_plugin.sh
+
 # Phony target for Boost, if a custom directory is used.
 .PHONY: boost
-
 ifeq ($(CUSTOM_BOOST_148_DIR),)
 # No custom Boost path => assume everything is OK
 else
