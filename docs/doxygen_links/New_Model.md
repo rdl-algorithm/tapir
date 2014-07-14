@@ -40,6 +40,7 @@
 [Options]: @ref solver::Options
 [Options::discountFactor]: @ref solver::Options::discountFactor
 [Options::numberOfStateVariables]: @ref solver::Options::numberOfStateVariables
+[README.md]: @ref index
 [RTree]: @ref solver::RTree
 [Serializer]: @ref solver::Serializer
 [SharedOptions]: @ref shared::SharedOptions

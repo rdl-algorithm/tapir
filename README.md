@@ -325,10 +325,10 @@ To create a new POMDP model and use it with the the command-line interface,
    problem, and add any required configuration files there.
 7. Compile your code via `make [problem-name]`, or simply by running
    "make" from your new subdirectory of src/problems, e.g.
-```
-cd src/problems/tag
-make
-```
+
+        cd src/problems/tag
+        make
+
 
 
 
