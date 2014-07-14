@@ -299,14 +299,12 @@ configuration file. For details, run</p>
 how to install ROS. We have tested with ROS Hydro on Ubuntu 12.04 and with ROS
 Indigo on Ubuntu 14.04. Some possible issues and ways around them are:</p>
 
-<p><strong>Ubuntu 12.04:</strong></p>
-
-<p>ROS Hydro defaults to using Boost 1.46 instead of Boost 1.48, and the Boost
+<ul>
+<li><p><strong>Ubuntu 12.04</strong>: ROS Hydro defaults to using Boost 1.46 instead of Boost 1.48, and the Boost
 1.48 headers are incompatible with C++11 (as used by TAPIR).
 To resolve this issue, you will need to install Boost 1.48 from source.
-The easiest way to set up Boost 1.48 for use with ROS and TAPIR is:</p>
-
-<p>At the top level directory of TAPIR (where this README file is located):</p>
+The easiest way to set up Boost 1.48 for use with ROS and TAPIR is,
+at the top level directory of TAPIR, to do the following:</p>
 
 <ol>
 <li>Set <code>CUSTOM_BOOST_148_DIR</code> in the root Makefile to the location
@@ -324,24 +322,24 @@ with GCC >= 4.7.0. These functions are performed by several scripts in the
 <code>.ros-scripts</code> directory.</p>
 
 <p>If you wish to compile Boost 1.48 manually with GCC >= 4.7.0, you should use
-the patch provided <a href="https://svn.boost.org/trac/boost/ticket/6165">here</a></p>
-
-<p><strong>Ubuntu 14.04:</strong></p>
-
-<p>On Ubuntu 14.04 you must instead use ROS Indigo,
-which is available via the package "ros-indigo-desktop-full"</p>
+the patch provided <a href="https://svn.boost.org/trac/boost/ticket/6165">here</a>.</p></li>
+<li><p><strong>Ubuntu 14.04</strong>:
+On Ubuntu 14.04 you must instead use ROS Indigo,
+which is available via the package "ros-indigo-desktop-full"</p></li>
+</ul>
 
 <h4>V-REP</h4>
 
 <p>Go <a href="http://www.coppeliarobotics.com/downloads.html">here</a>, download V-REP, and
-extract it to the directory of your choice. We have tested with
-V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:</p>
+extract it to the directory of your choice. TAPIR has been tested with
+V-REP PRO EDU V3.1.2.</p>
 
-<p><strong>Ubuntu 14.04:</strong></p>
-
-<p>On Ubuntu 14.04 the version of the ROS plugin that ships with V-REP will not
+<ul>
+<li><strong>Ubuntu 14.04</strong>:
+On Ubuntu 14.04 the version of the ROS plugin that ships with V-REP will not
 work out of the box - it causes a segmentation fault in V-REP! You will
-need to recompile the plugin.</p>
+need to recompile the plugin.</li>
+</ul>
 
 <h4>V-REP ROS plugin</h4>
 

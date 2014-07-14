@@ -163,48 +163,43 @@ Go [here](http://wiki.ros.org/hydro/Installation/Ubuntu) for instructions on
 how to install ROS. We have tested with ROS Hydro on Ubuntu 12.04 and with ROS
 Indigo on Ubuntu 14.04. Some possible issues and ways around them are:
 
-**Ubuntu 12.04:**
+- **Ubuntu 12.04**: ROS Hydro defaults to using Boost 1.46 instead of Boost 1.48, and the Boost
+    1.48 headers are incompatible with C++11 (as used by TAPIR).
+    To resolve this issue, you will need to install Boost 1.48 from source.
+    The easiest way to set up Boost 1.48 for use with ROS and TAPIR is,
+    at the top level directory of TAPIR, to do the following:
 
-ROS Hydro defaults to using Boost 1.46 instead of Boost 1.48, and the Boost
-1.48 headers are incompatible with C++11 (as used by TAPIR).
-To resolve this issue, you will need to install Boost 1.48 from source.
-The easiest way to set up Boost 1.48 for use with ROS and TAPIR is:
+    1. Set `CUSTOM_BOOST_148_DIR` in the root Makefile to the location
+        of your Boost 1.48 installation, or, if you haven't installed it yet,
+        the desired directory for it (e.g. `~/vrep`)
+    2. Run the command `make boost`
 
-At the top level directory of TAPIR (where this README file is located):
+    The command `make boost` will find if a Boost installation is in
+    `CUSTOM_BOOST_148_DIR`. If it doesn't find a Boost installation,
+    it will automatically download Boost and install it to the directory you've
+    specified at `CUSTOM_BOOST_148_DIR`.
+    It will also patch a bug in the Boost headers that causes problems
+    with GCC >= 4.7.0. These functions are performed by several scripts in the
+    `.ros-scripts` directory.
 
-1. Set `CUSTOM_BOOST_148_DIR` in the root Makefile to the location
-    of your Boost 1.48 installation, or, if you haven't installed it yet,
-    the desired directory for it (e.g. `~/vrep`)
-2. Run the command `make boost`
+    If you wish to compile Boost 1.48 manually with GCC >= 4.7.0, you should use
+    the patch provided [here](https://svn.boost.org/trac/boost/ticket/6165).
 
-The command `make boost` will find if a Boost installation is in
-`CUSTOM_BOOST_148_DIR`. If it doesn't find a Boost installation,
-it will automatically download Boost and install it to the directory you've
-specified at `CUSTOM_BOOST_148_DIR`.
-It will also patch a bug in the Boost headers that causes problems
-with GCC >= 4.7.0. These functions are performed by several scripts in the
-`.ros-scripts` directory.
-
-If you wish to compile Boost 1.48 manually with GCC >= 4.7.0, you should use
-the patch provided [here](https://svn.boost.org/trac/boost/ticket/6165)
-
-**Ubuntu 14.04:**
-
-On Ubuntu 14.04 you must instead use ROS Indigo,
-which is available via the package "ros-indigo-desktop-full"
+- **Ubuntu 14.04**:
+    On Ubuntu 14.04 you must instead use ROS Indigo,
+    which is available via the package "ros-indigo-desktop-full"
 
 
 #### V-REP
 
 Go [here](http://www.coppeliarobotics.com/downloads.html), download V-REP, and
-extract it to the directory of your choice. We have tested with
-V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:
+extract it to the directory of your choice. TAPIR has been tested with
+V-REP PRO EDU V3.1.2.
 
-**Ubuntu 14.04:**
-
-On Ubuntu 14.04 the version of the ROS plugin that ships with V-REP will not
-work out of the box - it causes a segmentation fault in V-REP! You will
-need to recompile the plugin.
+- **Ubuntu 14.04**:
+    On Ubuntu 14.04 the version of the ROS plugin that ships with V-REP will not
+    work out of the box - it causes a segmentation fault in V-REP! You will
+    need to recompile the plugin.
 
 
 #### V-REP ROS plugin
