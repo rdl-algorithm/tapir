@@ -356,7 +356,7 @@ For additional documentation on the build system, see the
 
 
 
-[../.make/README.md]: ../.make/README.md
+[../.make/README.md]: ../.make/README.html
 [../src/problems/shared/simulate.hpp]: ../src/problems/shared/simulate.hpp
 [../src/problems/shared/solve.hpp]: ../src/problems/shared/solve.hpp
 [../src/problems/tag/simulate.cpp]: ../src/problems/tag/simulate.cpp

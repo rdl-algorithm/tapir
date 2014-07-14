@@ -29,7 +29,9 @@ define DOXYGEN_MD_RECIPE
 	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#$(2)}\2/mg' $@
 	@perl -0pi -e 's/^(-+\n)(.*)(\n-+)$$/\1\2 {#\L\2}\3/mg' $@
 	@perl -0pi -e 's/^(#{2,}\s+)(.*)$$/\1\2 {#\L\2}/mg' $@
-	@perl -pi -e 's/({#.*})/($$res = $$1) =~ s\/ \/-\/g, $$res =~ s\/[()]\/\/g, $$res/eg' $@
+	@perl -pi -e 's/{#1\. ros.*}/{#ros}/g' $@
+	@perl -pi -e 's/{#2\. v-rep.*}/{#v-rep}/g' $@
+	@perl -pi -e 's/({#.*})/($$res = $$1) =~ s\/ \/-\/g, $$res =~ s\/[()\.]\/\/g, $$res/eg' $@
 endef
 
 # Create HTML versions of the Markdown-formatted READMEs

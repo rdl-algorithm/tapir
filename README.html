@@ -293,10 +293,11 @@ configuration file. For details, run</p>
 
 <h3>Additional system requirements</h3>
 
-<h4>1. <a href="http://wiki.ros.org/hydro/Installation/Ubuntu">ROS</a></h4>
+<h4>1. ROS</h4>
 
-<p>We have tested with ROS Hydro on Ubuntu 12.04 and with ROS Indigo on Ubuntu 14.04.
-Some possible issues and ways around them are:</p>
+<p>Go <a href="http://wiki.ros.org/hydro/Installation/Ubuntu">here</a> for instructions on
+how to install ROS. We have tested with ROS Hydro on Ubuntu 12.04 and with ROS
+Indigo on Ubuntu 14.04. Some possible issues and ways around them are:</p>
 
 <p><strong>Ubuntu 12.04:</strong></p>
 
@@ -330,10 +331,11 @@ the patch provided <a href="https://svn.boost.org/trac/boost/ticket/6165">here</
 <p>On Ubuntu 14.04 you must instead use ROS Indigo,
 which is available via the package "ros-indigo-desktop-full"</p>
 
-<h4>2. <a href="http://www.coppeliarobotics.com/downloads.html">V-REP</a></h4>
+<h4>2. V-REP</h4>
 
-<p>Download V-REP and extract it to the directory of your choice. We have tested
-with V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:</p>
+<p>Go <a href="http://www.coppeliarobotics.com/downloads.html">here</a>, download V-REP, and
+extract it to the directory of your choice. We have tested with
+V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:</p>
 
 <p><strong>Ubuntu 14.04:</strong></p>
 
@@ -348,7 +350,7 @@ You will need to change line 14 of the CMakeLists.txt in
 instead of <br />
 <code>link_directories("/opt/ros/hydro/lib")</code></p>
 
-<h3>Setup and installation</h3>
+<h3>Setup and installation (for use with ROS and V-REP)</h3>
 
 <p>This package is designed to be used with the ROS Catkin build system, and as
 such must be compiled within a Catkin workspace. To do this, start at the top
@@ -373,7 +375,7 @@ the default is <code>../vrep</code></li>
 <p>The command <code>make ros</code> can automatically set up a workspace for you and
 will add a symbolic link to the source directory into the workspace.</p>
 
-<h3>Running</h3>
+<h3>Running (with ROS and V-REP)</h3>
 
 <p>If you compiled with <code>make ros</code>, TAPIR will automatically create a script
 to run the Tag example problem together with the ROS and V-REP interface. To run
@@ -435,11 +437,11 @@ observations; this is done according to the
 <p>To create a new POMDP model and use it with the the command-line interface,</p>
 
 <ol>
-<li>Read the <a href="docs/README-MakeNewModel.md">README on implementing a new model</a></li>
+<li>Read the <a href="docs/README-MakeNewModel.html">README on implementing a new model</a></li>
 <li>Create a new subdirectory for your POMDP in
 <a href="src/problems">the problems directory</a></li>
 <li>Implement all the required classes, as per
-<a href="docs/README-MakeNewModel.md">the new model README</a></li>
+<a href="docs/README-MakeNewModel.html">the new model README</a></li>
 <li>Add a new Makefile to your problem directory - just copy
 <a href="src/problems/tag/Makefile">the Tag Makefile</a> and change MODULE_NAME to match
 your new problem.</li>

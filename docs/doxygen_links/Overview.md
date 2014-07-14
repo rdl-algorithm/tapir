@@ -7,7 +7,7 @@
 [../Makefile]: @ref LINK_DISABLED
 [../README.md]: @ref docs/generated/Quick_Start.md
 [../docs]: @ref docs
-[../docs/README-MakeNewModel.html]: @ref docs/generated/New_Model.md
+[../docs/README-MakeNewModel.md]: @ref docs/generated/New_Model.md
 [../docs/html]: @ref LINK_DISABLED
 [../docs/html/index.html]: @ref LINK_DISABLED
 [../launch]: @ref LINK_DISABLED

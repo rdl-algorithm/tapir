@@ -224,19 +224,19 @@ the options that can be configured for Tag.
 Implementing a new model
 --------------------------------------------------------------------------
 
-See [the guide on implementing a new model][../docs/README-MakeNewModel.html]
+See [the guide on implementing a new model][../docs/README-MakeNewModel.md]
 for details.
 
 
 
 [../.make]: ../.make
-[../.make/README.md]: ../.make/README.md
+[../.make/README.md]: ../.make/README.html
 [../.ros-scripts]: ../.ros-scripts
 [../CMakeLists.txt]: ../CMakeLists.txt
 [../Makefile]: ../Makefile
-[../README.md]: ../README.md
+[../README.md]: ../README.html
 [../docs]: ../docs
-[../docs/README-MakeNewModel.html]: ../docs/README-MakeNewModel.html
+[../docs/README-MakeNewModel.md]: ../docs/README-MakeNewModel.html
 [../docs/html]: ../docs/html
 [../docs/html/index.html]: ../docs/html/index.html
 [../launch]: ../launch

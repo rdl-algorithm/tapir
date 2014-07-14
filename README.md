@@ -158,10 +158,10 @@ TAPIR provides an interface with ROS and V-REP, tested on:
 
 ### Additional system requirements
 
-#### 1. [ROS](http://wiki.ros.org/hydro/Installation/Ubuntu)
-
-We have tested with ROS Hydro on Ubuntu 12.04 and with ROS Indigo on Ubuntu 14.04.
-Some possible issues and ways around them are:
+#### 1. ROS
+Go [here](http://wiki.ros.org/hydro/Installation/Ubuntu) for instructions on
+how to install ROS. We have tested with ROS Hydro on Ubuntu 12.04 and with ROS
+Indigo on Ubuntu 14.04. Some possible issues and ways around them are:
 
 **Ubuntu 12.04:**
 
@@ -194,10 +194,10 @@ On Ubuntu 14.04 you must instead use ROS Indigo,
 which is available via the package "ros-indigo-desktop-full"
 
 
-#### 2. [V-REP](http://www.coppeliarobotics.com/downloads.html)
-
-Download V-REP and extract it to the directory of your choice. We have tested
-with V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:
+#### 2. V-REP
+Go [here](http://www.coppeliarobotics.com/downloads.html), download V-REP, and
+extract it to the directory of your choice. We have tested with
+V-REP PRO EDU V3.1.2. Some possible issues and ways around them are:
 
 **Ubuntu 14.04:**
 
@@ -213,7 +213,7 @@ instead of
 `link_directories("/opt/ros/hydro/lib")`
 
 
-### Setup and installation
+### Setup and installation (for use with ROS and V-REP)
 
 This package is designed to be used with the ROS Catkin build system, and as
 such must be compiled within a Catkin workspace. To do this, start at the top
@@ -235,7 +235,7 @@ The command `make ros` can automatically set up a workspace for you and
 will add a symbolic link to the source directory into the workspace.
 
 
-### Running
+### Running (with ROS and V-REP)
 
 If you compiled with `make ros`, TAPIR will automatically create a script
 to run the Tag example problem together with the ROS and V-REP interface. To run
@@ -329,7 +329,7 @@ Release Notes
 
 
 
-[docs/README-MakeNewModel.md]: docs/README-MakeNewModel.md
+[docs/README-MakeNewModel.md]: docs/README-MakeNewModel.html
 [problems]: problems
 [problems/rocksample/default.cfg]: problems/rocksample/default.cfg
 [src/problems]: src/problems
