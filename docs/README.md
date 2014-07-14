@@ -230,13 +230,13 @@ for details.
 
 
 [../.make]: ../.make
-[../.make/README.md]: ../.make/README.html
+[../.make/README.md]: ../.make/README.md
 [../.ros-scripts]: ../.ros-scripts
 [../CMakeLists.txt]: ../CMakeLists.txt
 [../Makefile]: ../Makefile
-[../README.md]: ../README.html
+[../README.md]: ../README.md
 [../docs]: ../docs
-[../docs/README-MakeNewModel.md]: ../docs/README-MakeNewModel.html
+[../docs/README-MakeNewModel.md]: ../docs/README-MakeNewModel.md
 [../docs/html]: ../docs/html
 [../docs/html/index.html]: ../docs/html/index.html
 [../launch]: ../launch

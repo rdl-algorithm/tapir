@@ -329,7 +329,7 @@ Release Notes
 
 
 
-[docs/README-MakeNewModel.md]: docs/README-MakeNewModel.html
+[docs/README-MakeNewModel.md]: docs/README-MakeNewModel.md
 [problems]: problems
 [problems/rocksample/default.cfg]: problems/rocksample/default.cfg
 [src/problems]: src/problems

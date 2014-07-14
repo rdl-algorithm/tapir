@@ -1,180 +1,383 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC
-    "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-    "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">
-<html xml:lang='en' xmlns:svg='http://www.w3.org/2000/svg' xmlns='http://www.w3.org/1999/xhtml'>
-<head><meta content='application/xhtml+xml;charset=utf-8' http-equiv='Content-type' /><title>Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR)</title></head>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: #737373;
+    margin: 10px 10px 10px 20px;
+}
+a {
+    color: #0069d6;
+}
+a:hover {
+    color: #0050a3;
+    text-decoration: none;
+}
+a img {
+    border: none;
+}
+p {
+    margin-bottom: 9px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #404040;
+    line-height: 36px;
+}
+h1 {
+    margin-bottom: 18px;
+    font-size: 30px;
+}
+h2 {
+    font-size: 24px;
+}
+h3 {
+    font-size: 18px;
+}
+h4 {
+    font-size: 16px;
+}
+h5 {
+    font-size: 14px;
+}
+h6 {
+    font-size: 13px;
+}
+hr {
+    margin: 0 0 19px;
+    border: 0;
+    border-bottom: 1px solid #aaa;
+}
+blockquote {
+    padding: 13px 13px 21px 15px;
+    margin-bottom: 18px;
+    font-family:georgia,serif;
+    font-style: italic;
+}
+blockquote:before {
+    content:"\201C";
+    font-size:40px;
+    margin-left:-10px;
+    font-family:georgia,serif;
+    color:#eee;
+}
+blockquote p {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 18px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+code, pre {
+    padding: 0 3px 2px;
+    font-family: Monaco, Andale Mono, Courier New, monospace;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+code {
+    background-color: #fee9cc;
+    color: rgba(0, 0, 0, 0.75);
+    padding: 1px 3px;
+    font-size: 12px;
+}
+pre {
+    display: block;
+    padding: 14px;
+    margin: 0 0 18px;
+    line-height: 16px;
+    font-size: 11px;
+    border: 1px dashed #ccc;
+    border: 1px dashed rgba(0, 0, 0, 0.15);
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+pre code {
+    background-color: #fdfdfd;
+    color:#737373;
+    font-size: 11px;
+}
+@media screen and (min-width: 768px) {
+    body {
+        width: 748px;
+        margin:10px auto;
+    }
+}
+</style>
+<title>TAPIR Overview</title>
+</head>
 <body>
-<h1 id='toolkit_for_approximating_and_adapting_pomdp_solutions_in_realtime_tapir'>Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR)</h1>
+<h1>Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR)</h1>
 
-<p>TAPIR is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm [1]. ABT is an online POMDP solver capable of adapting to modifications to the POMDP model without the need to reconstruct the policy from scratch.</p>
+<p>TAPIR is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm [1].
+ABT is an online POMDP solver capable of adapting to modifications to the POMDP
+model without the need to reconstruct the policy from scratch.</p>
 
-<p>[1] H. Kurniawati and V. Yadav. An Online POMDP Solver for Uncertainty Planning in Dynamic Environment. Proc. Int. Symp. on Robotics Research. 2013. http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf</p>
+<p>[1] H. Kurniawati and V. Yadav. An Online POMDP Solver for Uncertainty Planning
+in Dynamic Environment. Proc. Int. Symp. on Robotics Research. 2013.
+http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf</p>
 
 <p>For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au</p>
 
-<p>For the latest news, please visit <a href='http://robotics.itee.uq.edu.au/~tapir'>the TAPIR website</a>.</p>
+<p>For the latest news, please visit
+<a href="http://robotics.itee.uq.edu.au/~tapir">the TAPIR website</a>.</p>
+
 <hr />
-<h2 id='tapir_development_team'>TAPIR Development Team</h2>
+
+<h2>TAPIR Development Team</h2>
 
 <ul>
 <li>Main developer: Dimitri Klimenko</li>
-
 <li>ROS + VREP interface: Joshua Song</li>
 </ul>
+
 <hr />
-<h2 id='system_requirements'>System Requirements</h2>
+
+<h2>System Requirements</h2>
 
 <p>Operating systems: Linux.</p>
 
 <p>Building and running the C++ source code requires:</p>
 
 <ul>
-<li><a href='https://gcc.gnu.org'>GNU C++ compiler</a> (&gt;= 4.8) or equivalent</li>
-
-<li><a href='http://libspatialindex.github.io'>libspatialindex</a> (&gt;= 1.7.0) Debian/Ubuntu package name: &#8220;libspatialindex-dev&#8221;</li>
+<li><a href="https://gcc.gnu.org">GNU C++ compiler</a> (>= 4.8) or equivalent</li>
+<li><a href="http://libspatialindex.github.io">libspatialindex</a> (>= 1.7.0)
+Debian/Ubuntu package name: "libspatialindex-dev"</li>
 </ul>
 
 <p><strong>Ubuntu 12.04 NOTE:</strong></p>
 
-<p>Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6 with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:</p>
+<p>Ubuntu 12.04 by default ships with g++ 4.6. One option is to replace g++ 4.6
+with g++ 4.8. Otherwise, to have both g++ 4.8 and g++ 4.6:</p>
 
 <pre><code>sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt-get update
 sudo apt-get install g++-4.8
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 60
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 40</code></pre>
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 40
+</code></pre>
 
 <p>Here, 4.8 priority is set to 60, higher than 4.6. To swap to 4.6 use:</p>
 
-<pre><code>sudo update-alternatives --config g++</code></pre>
-<hr />
-<h2 id='quick_start_guide'>Quick Start Guide</h2>
+<pre><code>sudo update-alternatives --config g++
+</code></pre>
 
-<p>Go to <a href='../README.md'>the Quick Start README</a> for a quick-start guide to setting up and running TAPIR.</p>
 <hr />
-<h2 id='package_structure'>Package Structure</h2>
 
-<p>The core solver code is located in <a href='../src/solver'>src/solver</a>, while several example problems are given in <a href='../src/problems'>src/problems</a>:</p>
+<h2>Quick Start Guide</h2>
+
+<p>Go to <a href="../README.html">the Quick Start README</a> for a quick-start guide to setting
+up and running TAPIR.</p>
+
+<hr />
+
+<h2>Package Structure</h2>
+
+<p>The core solver code is located in <a href="../src/solver">src/solver</a>,
+while several example problems are given in <a href="../src/problems">src/problems</a>:</p>
 
 <ul>
-<li><a href='../src/problems/tag'>Tag</a> - see <a href='http://www.cs.cmu.edu/~ggordon/jpineau-ggordon-thrun.ijcai03.pdf'>here</a> for a problem description.</li>
-
-<li><a href='../src/problems/rocksample'>RockSample</a> - see <a href='http://arxiv.org/ftp/arxiv/papers/1207/1207.4166.pdf'>here</a> for a problem description.</li>
+<li><a href="../src/problems/tag">Tag</a> - see
+<a href="http://www.cs.cmu.edu/~ggordon/jpineau-ggordon-thrun.ijcai03.pdf">here</a>
+for a problem description.</li>
+<li><a href="../src/problems/rocksample">RockSample</a> - see
+<a href="http://arxiv.org/ftp/arxiv/papers/1207/1207.4166.pdf">here</a>
+for a problem description.</li>
 </ul>
 
-<p>Here&#8217;s a quick overview of the contents of this package, by directory structure:</p>
+<p>Here's a quick overview of the contents of this package, by directory structure:</p>
 
 <ul>
 <li>README.md - this README!</li>
-
-<li><a href='../Makefile'>Makefile</a> - used to change most of the core settings used in building the code.</li>
-
-<li>.<a href='../.make'>make</a> - contains template Makefile code which is included by the Makefiles in many of the subdirectories. This is the core of the build system, which is described in the <a href='../.make/README.md'>Build System README</a>.</li>
-
-<li><a href='../problems'>problems</a> - contains problem-specific configuration settings, and is also the default output directory for all of the problem executables. * <a href='../problems/rocksample'>RockSample</a> - contains configuration settings for RockSample. This is also the default place for the generated executables for RockSample to go to. * <a href='../problems/tag'>Tag</a> - contains configuration settings for Tag; the generated executables for Tag will go here.</li>
-
-<li><a href='../docs'>docs</a> - contains <a href='../README.md'>a detailed overview</a>, as well as Doxygen settings in order to generate <a href='../docs/html/index.html'>HTML documentation</a>. * <a href='../docs/html'>html</a> - the output directory for HTML documentation</li>
-
-<li><a href='../src'>src</a> - the source directory * <a href='../src/solver'>solver</a> - the core ABT solver source code * <a href='../src/options'>options</a> - contains code for parsing configuration options. Most of the work is done by two libraries included in the code: - <a href='../src/options/tclap'>TCLAP</a> - see http://tclap.sourceforge.net/ for more details. - <a href='../src/options/inih'>inih</a> - see https://code.google.com/p/inih/ for more details. * <a href='../src/problems'>problems</a> - contains the code for all of the example problems. - <a href='../src/problems/shared'>shared</a> - contains shared code used by many problems - <a href='../src/problems/rocksample'>RockSample</a> - contains code for the RockSample POMDP. - <a href='../src/problems/tag'>Tag</a> - contains code for the Tag POMDP.</li>
+<li><a href="../Makefile">Makefile</a> - used to change most of the core settings used
+in building the code.</li>
+<li>.<a href="../.make">make</a> - contains template Makefile code which is included by
+the Makefiles in many of the subdirectories. This is the core of the build
+system, which is described in the <a href="../.make/README.html">Build System README</a>.</li>
+<li><a href="../problems">problems</a> - contains problem-specific configuration settings,
+and is also the default output directory for all of the problem executables.
+<ul>
+<li><a href="../problems/rocksample">RockSample</a> - contains configuration settings for
+RockSample. This is also the default place for the generated executables
+for RockSample to go to.</li>
+<li><a href="../problems/tag">Tag</a> - contains configuration settings for Tag; the
+generated executables for Tag will go here.</li>
+</ul></li>
+<li><a href="../docs">docs</a> - contains this overview README, as well as Doxygen settings
+in order to generate <a href="../docs/html/index.html">HTML documentation</a>.
+<ul>
+<li><a href="../docs/html">html</a> - the output directory for HTML documentation</li>
+</ul></li>
+<li><a href="../src">src</a> - the source directory
+<ul>
+<li><a href="../src/solver">solver</a> - the core ABT solver source code</li>
+<li><a href="../src/options">options</a> - contains code for parsing configuration options.
+Most of the work is done by two libraries included in the code:
+<ul>
+<li><a href="../src/options/tclap">TCLAP</a> - see http://tclap.sourceforge.net/ for
+more details.</li>
+<li><a href="../src/options/inih">inih</a> - see https://code.google.com/p/inih/ for
+more details.</li>
+</ul></li>
+<li><a href="../src/problems">problems</a> - contains the code for all of the example
+problems.
+<ul>
+<li><a href="../src/problems/shared">shared</a> - contains shared code used by many
+problems</li>
+<li><a href="../src/problems/rocksample">RockSample</a> - contains code for the
+RockSample POMDP.</li>
+<li><a href="../src/problems/tag">Tag</a> - contains code for the Tag POMDP.</li>
+</ul></li>
+</ul></li>
 </ul>
 
-<h3 id='rosrelated_directories'>ROS-related directories</h3>
+<h3>ROS-related directories</h3>
 
-<p>Some of the files and directories are specifically used for the ROS interface, and hence are not needed if you are not using TAPIR with ROS. These are:</p>
+<p>Some of the files and directories are specifically used for the ROS interface,
+and hence are not needed if you are not using TAPIR with ROS. These are:</p>
 
 <ul>
-<li><a href='../CMakeLists.txt'>CMakelists.txt</a> - This allows TAPIR to be used as a ROS package - it is not used by the standard build system for TAPIR.</li>
-
-<li><a href='../launch'>launch</a> - This contains launch files to be used by ROS, in order to conveniently launch specific scenarios.</li>
-
-<li><a href='../msg'>msg</a> - Describes ROS messages, which are published by ROS nodes; this allows a simple publish-subscribe model for one-way communication.</li>
-
-<li><a href='../srv'>srv</a> - Describes ROS services, which allow communication with a request-reply model.</li>
-
-<li><a href='../.ros-scripts'>.ros-scripts</a> - Some scripts for extra convenience in working with ROS.</li>
+<li><a href="../CMakeLists.txt">CMakelists.txt</a> - This allows TAPIR to be used as a ROS
+package - it is not used by the standard build system for TAPIR.</li>
+<li><a href="../launch">launch</a> - This contains launch files to be used by ROS, in order
+to conveniently launch specific scenarios.</li>
+<li><a href="../msg">msg</a> - Describes ROS messages, which are published by ROS nodes; this
+allows a simple publish-subscribe model for one-way communication.</li>
+<li><a href="../srv">srv</a> - Describes ROS services, which allow communication with a
+request-reply model.</li>
+<li><a href="../.ros-scripts">.ros-scripts</a> - Some scripts for extra convenience in working
+with ROS.</li>
 </ul>
+
 <hr />
-<h2 id='configuration_and_building'>Configuration and Building</h2>
 
-<p>This project uses a custom GNU Make build system, which is documented in further detail in <a href='../.make/README.md'>this README</a>; the dependencies are cleanly managed and make can easily be run in parallel, i.e.</p>
+<h2>Configuration and Building</h2>
 
-<pre><code>make -jN</code></pre>
+<p>This project uses a custom GNU Make build system, which is documented in further
+detail in <a href="../.make/README.html">this README</a>; the dependencies are cleanly managed
+and make can easily be run in parallel, i.e.</p>
 
-<p>where N is the number of threads you want to use; 8 is good for many CPUs. The code should build OK without any special configuration, but if need be the core build settings can be changed via the root Makefile.</p>
+<pre><code>make -jN
+</code></pre>
+
+<p>where N is the number of threads you want to use; 8 is good for many CPUs.
+The code should build OK without any special configuration,
+but if need be the core build settings can be changed via the root Makefile.</p>
 
 <p>To build the core solver, simply use the command</p>
 
-<pre><code>make solver</code></pre>
+<pre><code>make solver
+</code></pre>
 
-<p>This will build the solver as a static library in builds/release/libtapir.a. Alternatively, the solver can also be built as a shared library - use the command</p>
+<p>This will build the solver as a static library in builds/release/libtapir.a.
+Alternatively, the solver can also be built as a shared library - use the
+command</p>
 
-<pre><code>make solver CFG=shared</code></pre>
+<pre><code>make solver CFG=shared
+</code></pre>
 
 <p>and a shared library file will be output to builds/shared/libtapir.so</p>
 
-<p>The supplied code also comes with several example problems, as mentioned previously. To build the code with all of the example problems, simply use the command</p>
+<p>The supplied code also comes with several example problems, as mentioned
+previously. To build the code with all of the example problems, simply use
+the command</p>
 
-<pre><code>make all</code></pre>
+<pre><code>make all
+</code></pre>
 
-<p>Alternatively, you can build only a specific problem by specifying that problem as a target. For example,</p>
+<p>Alternatively, you can build only a specific problem by specifying that problem
+as a target. For example,</p>
 
-<pre><code>make tag -j4 CFG=shared</code></pre>
+<pre><code>make tag -j4 CFG=shared
+</code></pre>
 
-<p>would use 4 threads to compile; that command would build the solver as a shared library, and also build the Tag problem to dynamically link against the shared library file. Alternatively, you can also compile a problem by running make from within that problem&#8217;s source directory, e.g.</p>
+<p>would use 4 threads to compile; that command would build the solver as a shared
+library, and also build the Tag problem to dynamically link against the shared
+library file.
+Alternatively, you can also compile a problem by running make from within that
+problem's source directory, e.g.</p>
 
 <pre><code>cd src/problems/tag
-make</code></pre>
+make
+</code></pre>
 
-<p>Different build configurations are available via the &#8220;CFG&#8221; variable in the Makefile, which can be set from the command line; for example, debugging output can be generated by using</p>
+<p>Different build configurations are available via the "CFG" variable in the
+Makefile, which can be set from the command line; for example, debugging
+output can be generated by using</p>
 
-<pre><code>make CFG=debug</code></pre>
+<pre><code>make CFG=debug
+</code></pre>
 
 <p>or by setting</p>
 
-<pre><code>DEFAULT_CFG:=debug</code></pre>
+<pre><code>DEFAULT_CFG:=debug
+</code></pre>
 
-<p>in the root Makefile. Each configuration sends intermediate compilation outputs into a different directory, which will be &#8220;builds/$(CFG)&#8221;. This makes it easy to switch between different builds, as the &#8220;make&#8221; command simply needs to copy the previously-made executables from the relevant build directory.</p>
+<p>in the root Makefile. Each configuration sends intermediate
+compilation outputs into a different directory, which will be "builds/$(CFG)".
+This makes it easy to switch between different builds, as the "make" command
+simply needs to copy the previously-made executables from the relevant build
+directory.</p>
 
-<p>For additional documentation on the build system, see the <a href='../.make/README.md'>build system README</a>.</p>
+<p>For additional documentation on the build system, see the
+<a href="../.make/README.html">build system README</a>.</p>
+
 <hr />
-<h2 id='usage'>Usage</h2>
 
-<p>First of all, the solver can be used for your own purposes in library form; simply build it as either a static or dynamic library (as per the <a href='#configuration-and-building'>previous section</a>) and then link against it.</p>
+<h2>Usage</h2>
 
-<p>If you want to run the example problems, you should first compile those problems, as per the <a href='#configuration-and-building'>previous section</a>. Each problem should generate two core executables - &#8220;solve&#8221; for initial offline policy generation, and &#8220;simulate&#8221; for online simulation. After building, these executables are placed into the directory &#8220;problems&#8221;, with a subdirectory for each individual problem.</p>
+<p>First of all, the solver can be used for your own purposes in library form;
+simply build it as either a static or dynamic library (as per the
+<a href="#configuration-and-building">previous section</a>)
+and then link against it.</p>
 
-<p>Each problem will have its own setings, which can be configured in one of two ways - via command line parameters, or via configuration files. Any parameters passed via command line will override the settings in the file. For a quick summary of the command-line parameters available, run the executable with an argument of &#8221;&#8211;help&#8221; for the usage information. More advanced settings are available via config files; default versions of the configuration files are located in the directory &#8220;problems&#8221; - for example, see <a href='../problems/tag/default.cfg'>the default Tag configuration</a> The actual settings that are available in each config file are defined by subclasses of the base <span>Options</span> class, e.g. <span>TagOptions</span> specifies all of the options that can be configured for Tag.</p>
+<p>If you want to run the example problems, you should first compile those
+problems, as per the <a href="#configuration-and-building">previous section</a>.
+Each problem should generate two core executables - "solve" for initial offline
+policy generation, and "simulate" for online simulation.
+After building, these executables are placed into the directory "problems", with
+a subdirectory for each individual problem.</p>
+
+<p>Each problem will have its own setings, which can be configured in one of two
+ways - via command line parameters, or via configuration files. Any parameters
+passed via command line will override the settings in the file. For a quick
+summary of the command-line parameters available, run the executable with an
+argument of "--help" for the usage information. More advanced settings are
+available via config files; default versions of the configuration files are
+located in the directory "problems" - for example, see
+<a href="../problems/tag/default.cfg">the default Tag configuration</a>
+The actual settings that are available in each config file are defined by
+subclasses of the base [Options] class, e.g. [TagOptions] specifies all of
+the options that can be configured for Tag.</p>
+
 <hr />
-<h2 id='implementing_a_new_model'>Implementing a new model</h2>
 
-<p>See <a href='../docs/README-MakeNewModel.html'>the guide on implementing a new model</a> for details.</p>
-</body></html>
-[../.make]: ../.make
-[../.make/README.md]: ../.make/README.md
-[../.ros-scripts]: ../.ros-scripts
-[../CMakeLists.txt]: ../CMakeLists.txt
-[../Makefile]: ../Makefile
-[../README.md]: ../README.md
-[../docs]: ../docs
-[../docs/README-MakeNewModel.html]: ../docs/README-MakeNewModel.html
-[../docs/html]: ../docs/html
-[../docs/html/index.html]: ../docs/html/index.html
-[../launch]: ../launch
-[../msg]: ../msg
-[../problems]: ../problems
-[../problems/rocksample]: ../problems/rocksample
-[../problems/tag]: ../problems/tag
-[../problems/tag/default.cfg]: ../problems/tag/default.cfg
-[../src]: ../src
-[../src/options]: ../src/options
-[../src/options/inih]: ../src/options/inih
-[../src/options/tclap]: ../src/options/tclap
-[../src/problems]: ../src/problems
-[../src/problems/rocksample]: ../src/problems/rocksample
-[../src/problems/shared]: ../src/problems/shared
-[../src/problems/tag]: ../src/problems/tag
-[../src/solver]: ../src/solver
-[../srv]: ../srv
-[Options]: Options
-[TagOptions]: TagOptions
+<h2>Implementing a new model</h2>
+
+<p>See <a href="../docs/README-MakeNewModel.html">the guide on implementing a new model</a>
+for details.</p>
+</body>
+</html>

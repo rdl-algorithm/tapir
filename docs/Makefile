@@ -21,6 +21,7 @@ define HTML_RECIPE
 	@markdown $< >> $@
 	@echo '</body>' >> $@
 	@echo '</html>' >> $@
+	@perl -pi -e 's/\.md">/.html">/g' $@
 endef
 
 define DOXYGEN_MD_RECIPE
@@ -39,11 +40,11 @@ endef
 	$(call HTML_RECIPE,TAPIR Build System,docs/style.css)
 README.html: README.md docs/style.css docs/Makefile
 	$(call HTML_RECIPE,TAPIR Quick Start Guide,docs/style.css)
-docs/Overview.html: docs/README.md docs/style.css docs/Makefile
+docs/README.html: docs/README.md docs/style.css docs/Makefile
 	$(call HTML_RECIPE,TAPIR Overview,docs/style.css)
 docs/README-MakeNewModel.html: docs/README-MakeNewModel.md docs/style.css docs/Makefile
 	$(call HTML_RECIPE,Making a new model for TAPIR,docs/style.css)
-GENERATED_HTML := README.html .make/README.html docs/Overview.html docs/README-MakeNewModel.html
+GENERATED_HTML := README.html .make/README.html docs/README.html docs/README-MakeNewModel.html
 
 # Adapt the README.md files so that they will link nicely with Doxygen.
 docs/generated/Quick_Start.md: README.md docs/doxygen_links/Quick_Start.md docs/Makefile
