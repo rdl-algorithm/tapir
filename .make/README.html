@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: #737373;
+    margin: 10px 10px 10px 20px;
+}
+a {
+    color: #0069d6;
+}
+a:hover {
+    color: #0050a3;
+    text-decoration: none;
+}
+a img {
+    border: none;
+}
+p {
+    margin-bottom: 9px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #404040;
+    line-height: 36px;
+}
+h1 {
+    margin-bottom: 18px;
+    font-size: 30px;
+}
+h2 {
+    font-size: 24px;
+}
+h3 {
+    font-size: 18px;
+}
+h4 {
+    font-size: 16px;
+}
+h5 {
+    font-size: 14px;
+}
+h6 {
+    font-size: 13px;
+}
+hr {
+    margin: 0 0 19px;
+    border: 0;
+    border-bottom: 1px solid #aaa;
+}
+blockquote {
+    padding: 13px 13px 21px 15px;
+    margin-bottom: 18px;
+    font-family:georgia,serif;
+    font-style: italic;
+}
+blockquote:before {
+    content:"\201C";
+    font-size:40px;
+    margin-left:-10px;
+    font-family:georgia,serif;
+    color:#eee;
+}
+blockquote p {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 18px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+code, pre {
+    padding: 0 3px 2px;
+    font-family: Monaco, Andale Mono, Courier New, monospace;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+code {
+    background-color: #fee9cc;
+    color: rgba(0, 0, 0, 0.75);
+    padding: 1px 3px;
+    font-size: 12px;
+}
+pre {
+    display: block;
+    padding: 14px;
+    margin: 0 0 18px;
+    line-height: 16px;
+    font-size: 11px;
+    border: 1px dashed #ccc;
+    border: 1px dashed rgba(0, 0, 0, 0.15);
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+pre code {
+    background-color: #fdfdfd;
+    color:#737373;
+    font-size: 11px;
+}
+@media screen and (min-width: 768px) {
+    body {
+        width: 748px;
+        margin:10px auto;
+    }
+}
+</style>
+<title>TAPIR Build System</title>
+</head>
+<body>
+<h1>Custom non-recursive Make system</h1>
+
+<h2>Introduction</h2>
+
+<p>The build system uses a non-recursive approach with GNU make, similar to the
+one documented in the paper
+<a href="http://aegis.sourceforge.net/auug97.pdf">Recursive Make Considered Harmful</a>
+by Peter Miller, and adapting some Makefile code from
+<a href="http://evbergen.home.xs4all.nl/nonrecursive-make.html">here</a>.</p>
+
+<p>The paper describes many advantages to non-recursive Make; in short, it results
+in a cleaner and more robust dependency tree, and it means that the code can
+quite easily be compiled in parallel.</p>
+
+<p>The system used here adds two key conveniences to the aforementioned system:
+- Improved readability by moving standard code, especially the recursion,
+  into template files wihin the .make directory.
+  The recursion is located in <a href="stack.mk">stack.mk</a>.
+- The ability to call make from any child directory and have it behave the way
+   you would expect it to if that child directory were the root.</p>
+
+<h2>General usage</h2>
+
+<p>Global configuration settings are set in the root Makefile,
+and then individual modules can each be configured via the Makefile in their
+own subdirectory (e.g. src/Makefile).</p>
+
+<p>The subdirectory Makefiles should work more or less like normal Makefiles,
+although it is processed relative to the root directory, which means that any
+paths should be relative to the root - the variable $(d) is provided as
+shorthand for the relative path of the current module w.r.t. the root.</p>
+
+<p>Each module is also required to define two variables that are used for the
+recursive processing:
+- <code>MODULE_NAME</code>: The module name; should be a unique identifier. This is used
+    for generating intermediate targets for each specific module.
+- <code>CHILD_DIRS</code>: The subdirectories that are required to be processed.</p>
+
+<p>However, in order to mainain consistency with the rest of the build system,
+particularly with regards to build modes (release vs. debug) and with regards
+to the structure of the build output directories (e.g. builds/release
+and builds/debug), it is best to use the provided templates to automatically
+generate most of the rules. Refer to the Makefile in the src directory
+for a simple example, or read the next section for greater depth.</p>
+
+<h2>Makefile templates</h2>
+
+<p>The key rules that do most of the work are located in
+<a href="template.mk">template.mk</a>, which detects .cpp source files and includes
+a default .cpp -> .o recipe, as well as automatic dependency handling.</p>
+
+<p>To provide rules on how to build the module as a whole rather than implicitly
+via other modules that depend on it, you need to add the targets you want as
+prerequisites for the phony build targets. For example,
+build-solver
+is the target that builds the entire "solver" module.</p>
+
+<p>The simplest way to define the build pattern for a module is to simply build
+every individual object file - the rule for this is given in
+<a href="build.mk">build.mk</a>.</p>
+
+<p>The solver code is currently set to build into an archive called "libtapir.a";
+the rules to do this are defined in the src/solver Makefile.
+As you can see there, the rule defines all of the files that make up this
+library in terms of the automatic <code>OBJS_[module]</code> variables generated by
+the template code.</p>
+
+<p>Alternatively, if you set CFG=shared, the core solver code is instead built
+into a shared library "libtapir.so"</p>
+
+<h2>Problem templates</h2>
+
+<p>A more complex example is the build template used for each individual
+problem, which is located in <a href="problem-template.mk">problem-template.mk</a>.
+Its purpose is to defines recipes for the "solve" and "simulate" executables,
+which are the key executables for running TAPIR on a specific problem.</p>
+
+<p>The core of this template is defining all of the dependencies for each problem.
+The default dependencies are the other object files in the same directory as
+solve.cpp and simulate.cpp, the solver archive libtapir.a / libtapir.so,
+and the external library libspatialindex.</p>
+
+<p>If your problem needs to be linked to additional libraries, you can specify
+this by adding those dependencies to the variable
+<code>EXTRA_LINKER_ARGS_[module]</code>.</p>
+</body>
+</html>

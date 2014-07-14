@@ -144,7 +144,6 @@ else
 .PHONY: default
 default: $(DEFAULT_TARGET) ;
 
-
 # ----------------------------------------------------------------------
 # General-purpose recipes
 # ----------------------------------------------------------------------
@@ -157,41 +156,6 @@ LINK_RECIPE    = $(CXX) $(LDFLAGS) $(1) $(LDLIBS) -o $@
 
 # The recipe for directories; doesn't need to be $(call)-ed.
 MKDIR_RECIPE   = @mkdir -p $@
-
-# ----------------------------------------------------------------------
-# Documentation targets
-# ----------------------------------------------------------------------
-
-DOC_OUTPUT_DIRS := $(ROOT)/docs/html $(ROOT)/docs/generated
-
-
-# Directory dependency
-docs/generated/Overview.md docs/generated/Build_System.md: docs/generated
-docs/generated:
-	$(MKDIR_RECIPE)
-
-# Adapt docs/README.md so it works nicely with Doxygen.
-docs/generated/Overview.md: docs/README.md docs/doxygen_links.md Makefile
-	@echo "# Detailed TAPIR Documentation {#mainpage}\n" > $@
-	@cat docs/README.md docs/doxygen_links.md >> $@
-	@perl -0pi -e 's/^(.*)(\n=+)$$/\1 {#tapir}\2/mg' $@
-	@perl -0pi -e 's/^(.*)(\n-+)$$/\1 {#\L\1}\2/mg' $@
-	@perl -0pi -e 's/^([#]{2,}\s+)(.*)$$/\1\2 {#\L\2}/mg' $@
-	@perl -pi -e 's/({#.*})/($$res = $$1) =~ s\/ \/-\/g,$$res/eg' $@
-
-# Do the same thing for the build system README
-docs/generated/Build_System.md: .make/README.md docs/doxygen_links.md Makefile
-	@cat .make/README.md docs/doxygen_links.md > $@
-
-# Now a command to generate the documentation.
-.PHONY: doc
-doc: docs/Doxyfile docs/generated/Overview.md docs/generated/Build_System.md
-	doxygen docs/Doxyfile
-
-.PHONY: clean-doc
-clean-doc:
-	@echo Removing documentation directories!
-	@rm -rfv $(DOC_OUTPUT_DIRS) | grep "directory" ; true
 
 # ----------------------------------------------------------------------
 # Universal grouping targets
@@ -227,6 +191,9 @@ include .make/beautify-settings.mk
 
 # Start including other makefiles.
 dir := $(ROOT)/src
+include .make/stack.mk
+
+dir := $(ROOT)/docs
 include .make/stack.mk
 
 
@@ -283,7 +250,6 @@ endif
 
 ifeq ($(CUSTOM_BOOST_148_DIR),)
 # No custom Boost path => assume everything is OK
-boost: ;
 else
 
 # Custom boost path => inform catkin_make of the custom path.
@@ -293,7 +259,7 @@ BOOST_TEST = $(CUSTOM_BOOST_148_DIR)/include/boost/config.hpp
 
 # Recipe to automatically download and install boost:
 boost: | $(BOOST_TEST)
-$(BOOST_TEST) : ;
+$(BOOST_TEST) :
 	$(ABS_ROOT)/.ros-scripts/get_boost_148.sh
 	$(ABS_ROOT)/.ros-scripts/patch_boost_148.sh
 	env TAPIR_BOOST_148=$(CUSTOM_BOOST_148_DIR) $(ABS_ROOT)/.ros-scripts/build_boost_148.sh
@@ -304,7 +270,7 @@ CATKIN_MAKE := env $(CATKIN_MAKE_ENVS) catkin_make
 .PHONY: indigo-ws
 indigo-ws: $(CATKIN_SRC_DIR)
 	@cat $(ROOT)/.ros-scripts/.rosinstall > $(CATKIN_SRC_DIR)/.rosinstall
-	@cd $(CATKIN_SRC_DIR); wstool update
+	@cd $(CATKIN_SRC_DIR) && wstool update
 
 .PHONY: ros-scripts ros
 ros-scripts: $(TAG_SCRIPT)
