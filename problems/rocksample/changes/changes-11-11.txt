@@ -1,2 +1,15 @@
-t 10 : 1
-Add Obstacles: (4, 1) (4, 9)
+t 5 : 1
+Add Obstacles: (4, 2) (4, 6)
+t 8 : 2
+Add Obstacles: (2, 11) (5, 11)
+Add Obstacles: (5, 10) (5, 10)
+t 15 : 1
+Add Obstacles: (4, 1) (4, 3)
+t 18 : 1
+Remove Obstacles: (2, 11) (3, 11)
+t 23 : 2
+Add Obstacles: (8, 5) (8, 7)
+Add Obstacles: (9, 0) (9, 3)
+t 27 : 2
+Remove Obstacles: (5, 10) (5, 10)
+Remove Obstacles: (8, 5) (8, 7)
