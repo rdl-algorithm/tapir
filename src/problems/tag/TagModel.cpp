@@ -73,7 +73,7 @@ TagModel::TagModel(RandomGenerator *randGen, std::unique_ptr<TagOptions> options
             mdpSolver_(nullptr),
             pairwiseDistances_() {
     options_->numberOfStateVariables = 5;
-    options_->minVal = -failedTagPenalty_ / 1 - options_->discountFactor;
+    options_->minVal = -failedTagPenalty_ / (1 - options_->discountFactor);
     options_->maxVal = tagReward_;
 
     // Register the upper bound heuristic parser.
