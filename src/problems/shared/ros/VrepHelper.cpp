@@ -4,6 +4,7 @@
  */
 #include "VrepHelper.hpp"
 
+#include <ros/package.h>  // For finding package path
 #include <vector>
 #include <geometry_msgs/Point.h>
 
@@ -123,12 +124,26 @@ bool VrepHelper::isRunning() {
     return running_;
 }
 
-/** Loads a V-REP scene (.ttt file). Returns true if success */
-bool VrepHelper::loadScene(std::string fileName) {
+/** Loads a V-REP scene (.ttt file) from absolute file path.
+ *  Returns true if success
+ */
+bool VrepHelper::loadScene(std::string fullPath) {
     tapir::simRosLoadScene loadSrv;
-    loadSrv.request.fileName = fileName;
+    loadSrv.request.fileName = fullPath;
     loadClient_.call(loadSrv);
     return loadSrv.response.result == 1;
+}
+
+/** Loads a V-REP scene (.ttt file), starting from
+	 *  <package location>/problems/<problem name>/
+	 *  Returns true if success
+	 */
+bool VrepHelper::loadScene(std::string problemName, std::string relativePath,
+		std::string packageName) {
+	std::string problemPath = ros::package::getPath(packageName) +
+			"/problems/" + problemName;
+	std::string fullPath = problemPath + "/" + relativePath;
+	return loadScene(fullPath);
 }
 
 /** Callback for the /vrep/info topic */

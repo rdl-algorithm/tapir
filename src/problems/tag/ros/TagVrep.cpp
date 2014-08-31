@@ -18,7 +18,8 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Point.h>
 
-#include "VrepHelper.hpp"
+#include "problems/shared/ros/VrepHelper.hpp"
+#include "problems/shared/ros/RosInterface.hpp"
 #include "options/option_parser.hpp"
 #include "problems/shared/GridPosition.hpp"
 #include "problems/shared/simulate.hpp"
@@ -136,60 +137,19 @@ int main(int argc, char **argv)
     ros::Subscriber selectSub = node.subscribe("selected_cells", 1, selectCallback);
 
 	/**************** TAPIR init ***********************/
-    std::string tapirPath = ros::package::getPath("tapir");
-    std::string cfgPath = tapirPath + "/problems/tag/default.cfg";
-    std::unique_ptr<options::OptionParser> parser = TagOptions::makeParser(true);
-	TagOptions tagOptions;
-    parser->setOptions(&tagOptions);
-    parser->parseCfgFile(cfgPath);
-    parser->finalize();
-    tagOptions.mapPath = tapirPath + "/problems/tag/" + tagOptions.mapPath;
-    tagOptions.vrepScenePath = tapirPath + "/problems/tag/" + tagOptions.vrepScenePath;
-
-    if (tagOptions.seed == 0) {
-        tagOptions.seed = std::time(nullptr);
-    }
-    cout << "Seed: " << tagOptions.seed << endl;
-    RandomGenerator randGen;
-    randGen.seed(tagOptions.seed);
-    randGen.discard(10);
-
-    // Initialise TagModel
-    std::unique_ptr<TagModel> newModel = std::make_unique<TagModel>(
-        &randGen, std::make_unique<TagOptions>(tagOptions));
-    TagModel *model = newModel.get();
-
-    // Initialise Solver
-    solver::Solver solver(std::move(newModel));
-    solver.initializeEmpty();
-
-    // Generate policy
-    double totT;
-    double tStart;
-    tStart = tapir::clock_ms();
-    solver.improvePolicy();
-    totT = tapir::clock_ms() - tStart;
-    cout << "Total solving time: " << totT << "ms" << endl;
-
-    // Initialise TAPIR's Simulator (not VREP!!)
-    std::unique_ptr<TagModel> simulatorModel = std::make_unique<TagModel>(
-        &randGen, std::make_unique<TagOptions>(tagOptions));
-    solver::Simulator simulator(std::move(simulatorModel), &solver, true);
-    //if (hasChanges) {
-    //    simulator.loadChangeSequence(changesPath);
-    //}
-    long nSteps = 5000;
-    simulator.setMaxStepCount(nSteps);
+    RosInterface rosInterface;
+    TagOptions tagOptions = rosInterface.loadOptions<TagOptions>("tag", "default.cfg");
+    rosInterface.initialise<TagModel, TagOptions>(tagOptions, true);
+    TagModel* model = rosInterface.getSolverModel<TagModel>();
 
     /*************** VREP init *******************/
-
     vrepHelper.setRosNode(&node);
 
     // Attempt to load and start correct scene
     bool sceneLoaded = false;
     while (ros::ok()) {
         vrepHelper.stop();
-        sceneLoaded = vrepHelper.loadScene(tagOptions.vrepScenePath);
+        sceneLoaded = vrepHelper.loadScene("tag", tagOptions.vrepScenePath);
         if (sceneLoaded) {
             cout << "Successfully loaded V-REP scene tag.ttt" << endl;
             break;
@@ -205,10 +165,9 @@ int main(int argc, char **argv)
     }
 
     // Move robot and human to starting positions in VREP
-    solver::State const &startState =  *(simulator.getCurrentState());
-    TagState const &startTagState = static_cast<TagState const &>(startState);
-    Point startRobotPos = gridToPoint(startTagState.getRobotPosition());
-    Point startHumanPos = gridToPoint(startTagState.getOpponentPosition());
+    const TagState &startState = rosInterface.getCurrentState<TagState>();
+    Point startRobotPos = gridToPoint(startState.getRobotPosition());
+    Point startHumanPos = gridToPoint(startState.getOpponentPosition());
     vrepHelper.moveObject("Bill", startHumanPos.x, startHumanPos.y, 0);
     vrepHelper.moveObject("Bill_goalDummy", startHumanPos.x, startHumanPos.y, 0);
     vrepHelper.moveObject("Robot", startRobotPos.x, startRobotPos.y, 0.25);
@@ -233,17 +192,18 @@ int main(int argc, char **argv)
 
         // Process any changes (i.e. cell type changing between WALL and EMPTY)
         // based on user input
-        simulator.handleChanges(changes);
-        changes.clear();
+        if (changes.size() > 0) {
+        	rosInterface.handleChanges(changes);
+        	changes.clear();
+        }
 
 		// Step simulation
-        bool finished = !simulator.stepSimulation();
+        bool finished = !rosInterface.stepSimulation();
 
         // Publish new robot and human positions
-        solver::State const &state =  *(simulator.getCurrentState());
-      	TagState const &tagState = static_cast<TagState const &>(state);
-        Point robotPos = gridToPoint(tagState.getRobotPosition());
-        Point humanPos = gridToPoint(tagState.getOpponentPosition());
+      	const TagState &state = rosInterface.getCurrentState<TagState>();
+        Point robotPos = gridToPoint(state.getRobotPosition());
+        Point humanPos = gridToPoint(state.getOpponentPosition());
         publishHumanGoal(humanPos.x, humanPos.y);
         publishRobotGoal(robotPos.x, robotPos.y);
 
@@ -256,7 +216,7 @@ int main(int argc, char **argv)
         publishEnvMap(model->getEnvMap());
 
         // Publish belief about target position on VREP
-        solver::BeliefNode *currentBelief = simulator.getAgent()->getCurrentBelief();
+        solver::BeliefNode *currentBelief = rosInterface.getAgent()->getCurrentBelief();
         publishBelief(model->getBeliefProportions(currentBelief));
 
 		stepNumber++;
@@ -334,8 +294,6 @@ void selectCallback(const std_msgs::String::ConstPtr& msg) {
         std::getline(ss2, strType, ',');
         float x = std::stof(strX);
         float y = std::stof(strY);
-
-        std::cout << "STRYTPE" << strType << endl;
 
         // Define TagChange (see TagModel.hpp)
         GridPosition g = pointToGrid(Point(x, y));

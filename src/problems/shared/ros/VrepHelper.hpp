@@ -65,8 +65,17 @@ public:
 	/** Returns true iff VREP simulation is not stopped */
 	bool isRunning();
 
-	/** Loads a V-REP scene (.ttt file). Returns true if success */
-	bool loadScene(std::string fileName);
+	/** Loads a V-REP scene (.ttt file) from absolute file path.
+	 *  Returns true if success
+	 */
+	bool loadScene(std::string fullPath);
+
+	/** Loads a V-REP scene (.ttt file) from
+	 *  <package location>/problems/<problemName>/<relativePath>
+	 *  Returns true if success
+	 */
+	bool loadScene(std::string problemName, std::string relativePath,
+			std::string packageName = "tapir");
 
 private:
 	ros::NodeHandle *node_;

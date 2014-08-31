@@ -8,6 +8,7 @@
 #include "global.hpp"
 
 #include "solver/Agent.hpp"
+#include "solver/HistorySequence.hpp"
 
 #include "solver/abstract-problem/Action.hpp"
 #include "solver/abstract-problem/ModelChange.hpp"

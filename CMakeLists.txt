@@ -49,7 +49,7 @@ generate_messages(
 
 ## Declare a catkin package
 catkin_package(
-	INCLUDE_DIRS src src/options src/problems/shared/ros
+	INCLUDE_DIRS src src/options
 	LIBRARIES ${PROJECT_NAME}
 	CATKIN_DEPENDS roscpp roslib std_msgs geometry_msgs tf message_runtime laser_geometry)
 
@@ -102,6 +102,7 @@ add_library(TapirSolver
 
 add_library(TapirRos
 	src/problems/shared/ros/VrepHelper.cpp
+	src/problems/shared/ros/RosInterface.cpp
 )
 
 add_dependencies(TapirRos tapir_generate_messages_cpp)
@@ -120,6 +121,3 @@ target_link_libraries(TapirSolver spatialindex ${catkin_LIBRARIES})
 add_executable(tag_node src/problems/tag/ros/TagVrep.cpp)
 target_link_libraries(tag_node ${catkin_LIBRARIES} TapirTag TapirSolver TapirRos)
 add_dependencies(tag_node tapir_generate_messages_cpp)
-
-add_executable(scan_to_pcl_node src/problems/shared/ros/ScanToPcl.cpp)
-target_link_libraries(scan_to_pcl_node ${catkin_LIBRARIES})
