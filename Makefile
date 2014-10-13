@@ -85,7 +85,7 @@ ifeq ($(CXX),clang++)
   CXXWARN             := $(CWARN)
 else ifneq (,$(findstring g++,$(CXX)))
   CWARN               += -pedantic -Wall -Wextra -Wshadow
-  CWARN               += -Wswitch-default
+  CWARN               += -Wswitch-default -fmax-errors=5
   CXXWARN             := $(CWARN) -Weffc++
   override CXXFLAGS   += -frounding-math
 
