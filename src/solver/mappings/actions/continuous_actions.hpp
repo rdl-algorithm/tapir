@@ -189,7 +189,7 @@ class ContinuousActionPool: public solver::ActionPool {
      * ContinuousActionConstructionDataBase::data(). It enables the action chooser to
      * create new actions based on values it seems fit.
      *
-     * The default version uses createFullActionConstructionData first and then creates an action based
+     * The default version uses createActionConstructionData first and then creates an action based
      * on the full construction data. This might be inefficient and an implementation can override
      * this function for a more direct approach.
      *
@@ -205,6 +205,12 @@ class ContinuousActionPool: public solver::ActionPool {
      */
     virtual std::unique_ptr<Action> createAction(const ContinuousActionConstructionDataBase& constructionData) const = 0;
 
+
+    /** Returns the initial bounding box for the continuous search.
+     *
+     * For each dimension, the first entry of the pair is the lower bound, the second entry is the upper bound.
+     */
+	virtual std::vector<std::pair<double, double>> getInitialBoundingBox(BeliefNode* belief) const = 0;
 
     /** Returns a shared pointer to a container containing the construction data for the additional fixed actions in a hybrid action space.
      *
@@ -322,6 +328,10 @@ private:
     virtual std::vector<ActionMappingEntry const *> getVisitedEntries() const override;
     virtual ActionMappingEntry *getEntry(Action const &action) override;
     virtual ActionMappingEntry const *getEntry(Action const &action) const override;
+
+    ThisActionMapEntry* createOrGetActionMapEntry(const double* constructionDataVecto);
+
+    const std::vector<ThisActionMapEntry*>& getFixedEntries() const;
 
     /* ----------------- Methods for unvisited actions ------------------- */
     /** Returns the next action to be tried for this node, or nullptr if there are no more. */
