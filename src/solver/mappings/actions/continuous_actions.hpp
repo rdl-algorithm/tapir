@@ -56,12 +56,14 @@ class ContinuousActionMapEntry;
  *
  */
 class ContinuousActionConstructionDataBase {
+public:
 	virtual ~ContinuousActionConstructionDataBase() = default;
 
 	/** Returns a pointer to the data array of the underlying vector. If implemented using an std::array, just return std::array::data() */
 	virtual const double* data() const = 0;
-
 };
+
+
 
 /** An abstract class for continuous actions.
  *
@@ -89,11 +91,39 @@ public:
 	virtual ~ContinuousActionContainerBase() = default;
 	_NO_COPY_OR_MOVE(ContinuousActionContainerBase);
 
+	/** like std::unordered_map::size() */
+	virtual size_t size() const = 0;
+
+	/** like std::unordered_map::at() */
 	virtual std::unique_ptr<ContinuousActionMapEntry>& at(const ContinuousActionConstructionDataBase& key) = 0;
+
+	/** like std::unordered_map::at() */
 	virtual const std::unique_ptr<ContinuousActionMapEntry>& at(const ContinuousActionConstructionDataBase& key) const = 0;
+
+	/** like std::unordered_map::operator[] */
 	virtual std::unique_ptr<ContinuousActionMapEntry>& operator[](const ContinuousActionConstructionDataBase& key) = 0;
-	virtual std::vector<ActionMappingEntry const*> getEntriesWithChildren() const = 0;
-	virtual std::vector<ActionMappingEntry const*> getEntriesWithNonzeroVisitCount() const = 0;
+
+	/** like std::unordered_map::clear() */
+	virtual void clear() = 0;
+
+	/** get all entries of the container */
+	virtual std::vector<ActionMappingEntry const*> getEntries() const = 0;
+
+	/** get all entries of the container with children.
+	 *
+	 * The default implementation uses getEntries() and then selects those with children.
+	 * This works, but an implementation may choose to optimise the performance.
+	 */
+	virtual std::vector<ActionMappingEntry const*> getEntriesWithChildren() const;
+
+	/** get all entries of the container that are visited.
+	 *
+	 * The default implementation uses getEntries() and then selects those that are visited.
+	 * This works, but an implementation may choose to optimise the performance.
+	 */
+	virtual std::vector<ActionMappingEntry const*> getEntriesWithNonzeroVisitCount() const;
+
+
 };
 
 /** An implementation of ContinuousActionContainerBase as template.
@@ -111,9 +141,12 @@ class ContinuousActionContainer: public ContinuousActionContainerBase {
 	};
 
 public:
+	virtual size_t size() const override;
 	virtual std::unique_ptr<ContinuousActionMapEntry>& at(const ContinuousActionConstructionDataBase& key) override;
 	virtual const std::unique_ptr<ContinuousActionMapEntry>& at(const ContinuousActionConstructionDataBase& key) const override;
 	virtual std::unique_ptr<ContinuousActionMapEntry>& operator[](const ContinuousActionConstructionDataBase& key) override;
+	virtual void clear() override;
+	virtual std::vector<ActionMappingEntry const*> getEntries() const override;
 	virtual std::vector<ActionMappingEntry const*> getEntriesWithChildren() const override;
 	virtual std::vector<ActionMappingEntry const*> getEntriesWithNonzeroVisitCount() const override;
 private:
@@ -180,7 +213,7 @@ class ContinuousActionPool: public solver::ActionPool {
      *
      * The default version returns null to indicate there are no fixed actions.
      */
-	virtual std::shared_ptr<const std::vector<ContinuousActionConstructionDataBase>> createFixedActions(const BeliefNode* belief) const;
+	virtual std::vector<std::unique_ptr<ContinuousActionConstructionDataBase>> createFixedActions(const BeliefNode* belief) const;
 
 
 	/** This acts as a hint whether the chooser should try the fixed actions in the sequence they are given
@@ -192,14 +225,13 @@ class ContinuousActionPool: public solver::ActionPool {
 	 */
 	virtual bool randomiseFixedActions(const BeliefNode* belief) const;
 
-  private:
 };
 
-namespace ChooserDataBase_detail {
+
 
 /** The real base class for ChooserDataBase.
  *
- * Do not implement this, but ChooserDataBase so serialisation works.
+ * Do not implement this, but ChooserDataBase instead so serialisation works.
  */
 class ChooserDataBaseBase {
 	typedef ChooserDataBaseBase This;
@@ -220,7 +252,7 @@ private:
 	static std::unordered_map<std::string, LoadFromStreamFunction>& getDerivedLoadersSingleton();
 };
 
-} // namespace ChooserDataBase_detail
+
 
 /** A base class to hold data for the chooser.
  *
@@ -233,9 +265,9 @@ private:
  *
  */
 template<class Derived>
-class ChooserDataBase: public ChooserDataBase_detail::ChooserDataBaseBase {
+class ChooserDataBase: public ChooserDataBaseBase {
 	typedef ChooserDataBase This;
-	typedef ChooserDataBase_detail::ChooserDataBaseBase Base;
+	typedef ChooserDataBaseBase Base;
 public:
 	virtual ~ChooserDataBase() = default;
 	_NO_COPY_OR_MOVE(ChooserDataBase);
@@ -244,14 +276,6 @@ private:
 	static bool initialisationDummy;
 	static void registerType();
 };
-
-template<class Derived>
-bool ChooserDataBase<Derived>::initialisationDummy = (ChooserDataBase<Derived>::registerType(), true);
-
-template<class Derived>
-inline void ChooserDataBase<Derived>::registerType() {
-	registerDerivedType(typeid(Derived).name, [](std::istream& is) { std::make_unique<Derived>(is); });
-}
 
 
 
@@ -307,6 +331,15 @@ private:
     virtual long getTotalVisitCount() const override;
 
 
+    /* The chooserData
+     *
+     * This class does not do much with it. It is just there as a place for the chooser
+     * to store data. Thus it is simply a public member.
+     *
+     * This class only takes care of desctruction, serialisation and de-serialisation
+     * of the data stored here. Otherwise the chooserData is left alone.
+     */
+    std::unique_ptr<ChooserDataBaseBase> chooserData = nullptr;
 
   protected:
     /** The pool associated with this mapping. */
@@ -323,6 +356,10 @@ private:
 
     /** The total of the visit counts of all of the individual entries. */
     long totalVisitCount = 0;
+
+    /** Stores references to the entries that are considered fixed */
+    std::vector<ThisActionMapEntry*> fixedEntries;
+
 };
 
 
@@ -362,6 +399,8 @@ class ContinuousActionMapEntry : public solver::ActionMappingEntry {
     void setChild(std::unique_ptr<ActionNode>&& child);
     void deleteChild();
     const ActionNode* getChild() const;
+
+    const ThisActionConstructionData& getConstructionData() const;
 
   protected:
     /** The parent action mapping. */
@@ -403,7 +442,12 @@ class ContinuousActionTextSerializer: virtual public solver::Serializer {
     virtual void loadActionMapping(ThisActionMap &discMap, std::istream &is);
   protected:
     virtual void saveActionMapEntry(const ThisActionMapEntry& entry, std::ostream& os);
-    virtual std::unique_ptr<ThisActionMapEntry> loadActionMapEntry(const ThisActionMapEntry& entry, std::istream& is);
+    virtual std::unique_ptr<ThisActionMapEntry> loadActionMapEntry(ThisActionMap& map, std::istream& is);
+
+    /** Saves the construction data to the output stream */
+    virtual void saveConstructionData(const ContinuousActionConstructionDataBase&, std::ostream& os) = 0;
+    /** Loads the construction data from the input stream */
+    virtual std::unique_ptr<ContinuousActionConstructionDataBase> loadConstructionData(std::istream& is) = 0;
 };
 
 
@@ -412,6 +456,11 @@ class ContinuousActionTextSerializer: virtual public solver::Serializer {
 
 /* ------------------- Template Implementations ------------------- */
 
+/* ------------------- ContinuousActionContainer ------------------- */
+template<class CONSTRUCTION_DATA>
+inline size_t ContinuousActionContainer<CONSTRUCTION_DATA>::size() const {
+	return container.size();
+}
 
 template<class CONSTRUCTION_DATA>
 inline std::unique_ptr<ContinuousActionMapEntry>& ContinuousActionContainer<CONSTRUCTION_DATA>::at(const ContinuousActionConstructionDataBase& key) {
@@ -428,6 +477,21 @@ inline std::unique_ptr<ContinuousActionMapEntry>& ContinuousActionContainer<CONS
 	return container[static_cast<KeyType&>(key)];
 }
 
+template<class CONSTRUCTION_DATA>
+inline void ContinuousActionContainer<CONSTRUCTION_DATA>::clear() {
+	container.clear();
+}
+
+
+template<class CONSTRUCTION_DATA>
+inline std::vector<ActionMappingEntry const*> ContinuousActionContainer<CONSTRUCTION_DATA>::getEntries() const {
+	std::vector<ActionMappingEntry const *> result;
+	result.reserve(container.size());
+	for(auto& i : container) {
+		result.push_back(i.second);
+	}
+	return std::move(result);
+}
 
 template<class CONSTRUCTION_DATA>
 inline std::vector<ActionMappingEntry const*> ContinuousActionContainer<CONSTRUCTION_DATA>::getEntriesWithChildren() const {
@@ -461,6 +525,14 @@ inline std::vector<ActionMappingEntry const*> ContinuousActionContainer<CONSTRUC
 }
 
 
+/* ------------------- ChooserDataBase ------------------- */
+template<class Derived>
+bool ChooserDataBase<Derived>::initialisationDummy = (ChooserDataBase<Derived>::registerType(), true);
+
+template<class Derived>
+inline void ChooserDataBase<Derived>::registerType() {
+	registerDerivedType(typeid(Derived).name, [](std::istream& is) { std::make_unique<Derived>(is); });
+}
 
 
 

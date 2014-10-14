@@ -28,6 +28,43 @@ namespace solver {
 
 
 
+/* ---------------------- ContinuousActionContainerBase ---------------------- */
+
+std::vector<ActionMappingEntry const*> ContinuousActionContainerBase::getEntriesWithChildren() const {
+	std::vector<ActionMappingEntry const*> result = getEntries();
+	auto nextTarget = result.begin();
+	for(auto current = result.begin(); current !=  result.end(); ++current) {
+		ContinuousActionMapEntry const* entry = static_cast<ContinuousActionMapEntry const*>(*current);
+		if (entry->getChild() != nullptr) {
+			if (nextTarget != current) {
+				*nextTarget = *current;
+			}
+			++nextTarget;
+		}
+	}
+	result.erase(nextTarget, result.end());
+	return std::move(result);
+}
+
+std::vector<ActionMappingEntry const*> ContinuousActionContainerBase::getEntriesWithNonzeroVisitCount() const {
+	std::vector<ActionMappingEntry const*> result = getEntries();
+	auto nextTarget = result.begin();
+	for(auto current = result.begin(); current !=  result.end(); ++current) {
+		ContinuousActionMapEntry const* entry = static_cast<ContinuousActionMapEntry const*>(*current);
+		if (entry->getVisitCount() > 0) {
+			if (nextTarget != current) {
+				*nextTarget = *current;
+			}
+			++nextTarget;
+		}
+	}
+	result.erase(nextTarget, result.end());
+	return std::move(result);
+}
+
+
+
+
 /* ---------------------- ContinuousActionPool ---------------------- */
 std::unique_ptr<ActionMapping> ContinuousActionPool::createActionMapping(BeliefNode *node) {
     return std::make_unique<ContinuousActionMap>(node, this);
@@ -37,8 +74,8 @@ std::unique_ptr<Action> ContinuousActionPool::createAction(const double* constru
 	return createAction(*createActionConstructionData(constructionDataVector, belief));
 }
 
-std::shared_ptr<const std::vector<ContinuousActionConstructionDataBase>> ContinuousActionPool::createFixedActions(const BeliefNode* /*belief*/) const {
-	return nullptr;
+std::vector<std::unique_ptr<ContinuousActionConstructionDataBase>> ContinuousActionPool::createFixedActions(const BeliefNode* /*belief*/) const {
+	return {};
 }
 
 bool ContinuousActionPool::randomiseFixedActions(const BeliefNode* /*belief*/) const {
@@ -47,7 +84,6 @@ bool ContinuousActionPool::randomiseFixedActions(const BeliefNode* /*belief*/) c
 
 
 /* ---------------------- ChooserDataBase ---------------------- */
-namespace ChooserDataBase_detail {
 
 void ChooserDataBaseBase::registerDerivedType(const std::string& name, const LoadFromStreamFunction& loader) {
 	getDerivedLoadersSingleton()[name] = loader;
@@ -58,14 +94,23 @@ std::unordered_map<std::string, ChooserDataBaseBase::LoadFromStreamFunction>& Ch
 	return singleton;
 }
 
-} // namespace ChooserDataBase_detail
 
 
 /* ---------------------- ContinuousActionMap ---------------------- */
 ContinuousActionMap::ContinuousActionMap(BeliefNode *owner, ContinuousActionPool *thePool):
         ActionMapping(owner),
         pool(thePool),
-        entries(pool->createActionContainer(owner)) {
+        entries(pool->createActionContainer(owner)),
+        fixedEntries() {
+
+	auto fixed = pool->createFixedActions(owner);
+	for (std::unique_ptr<ContinuousActionConstructionDataBase>& constructionData : fixed) {
+		auto& storage = (*entries)[*constructionData];
+		if (storage == nullptr) {
+		  storage = std::make_unique<ThisActionMapEntry>(this, std::move(constructionData), true);
+		}
+		fixedEntries.push_back(storage.get());
+	}
 }
 
 
@@ -225,6 +270,11 @@ const ActionNode* ContinuousActionMapEntry::getChild() const {
 	return childNode.get();
 }
 
+
+const ContinuousActionMapEntry::ThisActionConstructionData& ContinuousActionMapEntry::getConstructionData() const {
+	return *constructionData;
+}
+
 /* ------------------- ContinuousActionTextSerializer ------------------- */
 void ContinuousActionTextSerializer::saveActionPool( ActionPool const &/*actionPool*/, std::ostream &/*os*/) {
     // Do nothing - the model can create a new one!
@@ -234,137 +284,94 @@ std::unique_ptr<ActionPool> ContinuousActionTextSerializer::loadActionPool(std::
     return getSolver()->getModel()->createActionPool(getSolver());
 }
 
-void ContinuousActionTextSerializer::saveActionMapping(ActionMapping const &map, std::ostream &os) {
-    DiscretizedActionMap const &discMap = static_cast<DiscretizedActionMap const &>(map);
-    os << discMap.getNumberOfVisitedEntries() << " visited actions with ";
-    os << discMap.getNChildren() << " children; ";
-    os << discMap.getTotalVisitCount() << " visits" << std::endl;
+void ContinuousActionTextSerializer::saveActionMapping(ActionMapping const &baseMap, std::ostream &os) {
+    ContinuousActionMap const &map = static_cast<ContinuousActionMap const &>(baseMap);
 
-    os << "Untried (";
-    for (auto it = discMap.binSequence_.begin(); it != discMap.binSequence_.end(); it++) {
-        os << *it;
-        if (std::next(it) != discMap.binSequence_.end()) {
-            os << ", ";
-        }
-    }
-    os << ")" << std::endl;
-    std::multimap<std::pair<double, double>, DiscretizedActionMapEntry const *> entriesByValue;
-    long visitedCount = 0;
-    for (int i = 0; i < discMap.numberOfBins_; i++) {
-        DiscretizedActionMapEntry const &entry = discMap.entries_[i];
-        if (entry.visitCount_ > 0) {
-            visitedCount++;
-        }
-        // An entry is saved if it has a node, or a nonzero visit count.
-        if (entry.visitCount_ > 0 || entry.childNode_ != nullptr) {
-            entriesByValue.emplace(
-                    std::make_pair(entry.meanQValue_, entry.binNumber_), &entry);
-        }
-    }
-    if (visitedCount != discMap.getNumberOfVisitedEntries()) {
-        debug::show_message("ERROR: incorrect number of visited entries!");
+
+    os << map.getNumberOfVisitedEntries() << " visited actions with ";
+    os << map.getNChildren() << " children; ";
+    os << map.getTotalVisitCount() << " visits" << std::endl;
+
+    auto entries = map.entries->getEntries();
+    os << entries.size() << " entries:" << std::endl;
+    for (ActionMappingEntry const* entry : entries) {
+    	saveActionMapEntry(static_cast<const ContinuousActionMapEntry&>(*entry), os);
     }
 
-    for (auto it = entriesByValue.rbegin(); it != entriesByValue.rend(); it++) {
-        DiscretizedActionMapEntry const &entry = *it->second;
-        os << "Action " << entry.getBinNumber() << " (";
-        saveAction(entry.getAction().get(), os);
-        os << "): " << entry.getMeanQValue() << " from ";
-        os << entry.getVisitCount() << " visits; total: ";
-        os << entry.getTotalQValue();
-        if (!entry.isLegal()) {
-            os << " ILLEGAL";
-        }
-        ActionNode *node = entry.getActionNode();
-        if (node == nullptr) {
-            os << " NO CHILD" << std::endl;
-        } else {
-            os << std::endl;
-            save(*entry.getActionNode(), os);
-        }
+    os << map.fixedEntries.size() << " fixed entries:" << std::endl;
+    for (ActionMappingEntry const* baseEntry : map.fixedEntries) {
+    	ContinuousActionMapEntry const* entry =  static_cast<ContinuousActionMapEntry const*>(baseEntry);
+    	saveConstructionData(entry->getConstructionData(), os);
     }
+
+    if (map.chooserData == nullptr) {
+    	os << "chooserData=NULL" << std::endl;
+    } else {
+    	os << "chooserData:" << std::endl;
+    	map.chooserData->saveToStream(map, os);
+    }
+
 }
 
 std::unique_ptr<ActionMapping>
 ContinuousActionTextSerializer::loadActionMapping(BeliefNode *owner, std::istream &is) {
-    std::unique_ptr<DiscretizedActionMap> discMap = std::make_unique<DiscretizedActionMap>(
-            owner,
-            static_cast<DiscretizedActionPool *>(getSolver()->getActionPool()),
-            std::vector<long> { });
-    loadActionMapping(*discMap, is);
-    return std::move(discMap);
+    std::unique_ptr<ContinuousActionMap> map = std::make_unique<ContinuousActionMap>(owner, static_cast<ContinuousActionPool*>(getSolver()->getActionPool()));
+    loadActionMapping(*map, is);
+    return std::move(map);
 }
 
-void ContinuousActionTextSerializer::loadActionMapping(DiscretizedActionMap &discMap,
-        std::istream &is) {
+void ContinuousActionTextSerializer::loadActionMapping(ContinuousActionMap &map, std::istream &is) {
 
     std::string line;
-    std::getline(is, line);
-    std::string tmpStr;
-    std::istringstream sstr4(line);
 
-    sstr4 >> discMap.numberOfVisitedEntries_ >> tmpStr >> tmpStr >> tmpStr;
-    sstr4 >> discMap.nChildren_ >> tmpStr;
-    sstr4 >> discMap.totalVisitCount_;
+    {
+    	std::getline(is, line);
+    	std::istringstream ss(line);
+    	std::string tmpStr;
 
-    std::getline(is, line);
-    std::istringstream sstr(line);
-    std::getline(sstr, tmpStr, '(');
-    std::getline(sstr, tmpStr, ')');
-    if (tmpStr != "") {
-        std::istringstream sstr2(tmpStr);
-        std::string actionString;
-        while (!sstr2.eof()) {
-            std::getline(sstr2, actionString, ',');
-            long code;
-            std::istringstream(actionString) >> code;
-            discMap.binSequence_.add(code);
-        }
+    	ss >> map.numberOfVisitedEntries >> tmpStr >> tmpStr >> tmpStr;
+    	ss >> map.nChildren >> tmpStr;
+    	ss >> map.totalVisitCount;
     }
 
-    for (long i = 0; i < discMap.numberOfVisitedEntries_ ; i++) {
-        // The first line contains info from the mapping.
-        std::getline(is, line);
-        std::istringstream sstr2(line);
-        long binNumber;
-        sstr2 >> tmpStr >> binNumber;
-        std::getline(sstr2, tmpStr, '(');
-        std::getline(sstr2, tmpStr, ')');
-        std::getline(sstr2, tmpStr, ':');
-        double meanQValue, totalQValue;
-        long visitCount;
-        std::string legalString;
-        sstr2 >> meanQValue >> tmpStr;
-        sstr2 >> visitCount >> tmpStr >> tmpStr;
-        sstr2 >> totalQValue >> legalString;
+    {
+    	std::getline(is, line);
+    	std::istringstream ss(line);
 
-        bool hasChild = true;
-        std::string tmpStr1, tmpStr2;
-        sstr2 >> tmpStr1 >> tmpStr2;
-        if (tmpStr1 == "NO" && tmpStr2 == "CHILD") {
-            hasChild = false;
-        }
+    	size_t entrySize;
+    	ss >> entrySize;
 
-        // Create an entry to hold the action node.
-        DiscretizedActionMapEntry &entry = discMap.entries_[binNumber];
-        entry.binNumber_ = binNumber;
-        entry.map_ = &discMap;
-        entry.meanQValue_ = meanQValue;
-        entry.visitCount_ = visitCount;
-        entry.totalQValue_ = totalQValue;
-        entry.isLegal_ = (legalString != "ILLEGAL");
+    	map.entries->clear();
 
-        // Read in the action node itself.
-        if (hasChild) {
-            entry.childNode_ = std::make_unique<ActionNode>(&entry);
-            ActionNode *node = entry.childNode_.get();
-            load(*node, is);
-        }
+    	for (size_t i=0; i<entrySize; i++) {
+    		auto entry = loadActionMapEntry(map, is);
+    		std::unique_ptr<ContinuousActionMapEntry>& storage = map.entries->operator[](entry->getConstructionData());
+    		if (storage != nullptr) {
+    			debug::show_message("Warning: while loading an action map entry, the spot in the container wasn't empty. This is most likely a nasty bug.");
+    		}
+    		storage = std::move(entry);
+    	}
     }
 
-    // Any bins we are supposed to try must be considered legal.
-    for (long binNumber : discMap.binSequence_) {
-        discMap.entries_[binNumber].isLegal_ = true;
+    {
+    	std::getline(is, line);
+    	std::istringstream ss(line);
+
+    	map.fixedEntries.clear();
+
+    	size_t entrySize;
+    	ss >> entrySize;
+    	for (size_t i=0; i<entrySize; i++) {
+    		auto constructionData = loadConstructionData(is);
+    		map.fixedEntries.push_back(map.entries->at(*constructionData).get());
+    	}
+    }
+
+    {
+    	std::getline(is, line);
+    	if (line=="chooserData:") {
+    		map.chooserData = ChooserDataBaseBase::loadFromStream(map, is);
+    	}
     }
 }
 
