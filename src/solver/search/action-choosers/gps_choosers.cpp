@@ -46,6 +46,7 @@ protected:
 		actions.fill(nullptr);
 		//children.fill(nullptr); // this is a uniq_ptr, that gets initialised with null anyway.
 	};
+	virtual ~GpsHierarchyDataBase() = default;
 	_NO_COPY_OR_MOVE(GpsHierarchyDataBase);
 
 
@@ -644,7 +645,7 @@ public:
 
 	}
 
-	static GpsChooserResponse gpsMaxAction(BeliefNode const *node, const GpsChooserOptions& options) {
+	static GpsChooserResponse gpsMaxAction(BeliefNode const *node, const Model& /*model*/, const GpsChooserOptions& options) {
 
 
 		ThisActionMap& mapping = *(static_cast<ThisActionMap*>(node->getMapping()));
@@ -701,9 +702,9 @@ public:
 		}
 
 		if (bestEntry != nullptr) {
-			return bestEntry->getAction();
+			return GpsChooserResponse(bestEntry->getAction(), bestEntry->getVisitCount() > 0);
 		} else {
-			return choosers::max_action(node);
+			return GpsChooserResponse(choosers::max_action(node), true);
 		}
 
 	}
@@ -712,7 +713,7 @@ public:
 };
 
 
-
+/* A routing function to call the appropriate template implementation based on run-time configuration options. */
 template<size_t DIMENSIONS>
 void route_gpsUcbAction_compass(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options);
 
@@ -736,6 +737,7 @@ void route_gpsUcbAction_compass(GpsChooserResponse& result, BeliefNode const *no
 }
 
 
+/* A routing function to call the appropriate template implementation based on run-time configuration options. */
 void route_gpsUcbAction_golden(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
 	if (options.dimensions==1) {
 		debug::show_message("Warning: golden search hasn't been implemented. Using compass search instead.");
@@ -750,6 +752,7 @@ void route_gpsUcbAction_golden(GpsChooserResponse& result, BeliefNode const *nod
 	}
 }
 
+/* A routing function to call the appropriate template implementation based on run-time configuration options. */
 void route_gpsUcbAction(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
 	if (options.searchType == GpsChooserOptions::COMPASS) {
 		route_gpsUcbAction_compass<1>(result, node, model, options);
@@ -765,19 +768,80 @@ void route_gpsUcbAction(GpsChooserResponse& result, BeliefNode const *node, cons
 	}
 }
 
-} // namespace gps_detail
 
+/* A routing function to call the appropriate template implementation based on run-time configuration options. */
+template<size_t DIMENSIONS>
+void route_gpsMaxAction_compass(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options);
 
-GpsChooserResponse gps_max_action(BeliefNode const */*node*/, const Model& /*model*/, const GpsChooserOptions& /*options*/) {
-#warning not implemented yet.
+template<>
+void route_gpsMaxAction_compass<GpsChooserOptions::maxDimensions+1>(GpsChooserResponse& /*result*/, BeliefNode const* /*node*/, const Model& /*model*/, const GpsChooserOptions& /*options*/) {
+	class TooManyDimensions: public std::exception {
+		virtual const char* what() const noexcept {
+			return "route_gpsUcbAction_compass: the dimensionality you requested wasn't instanciated during compile time. Please adjust GpsChooserOptions::maxDimensions.";
+		}
+	} e;
+	throw e;
+}
+
+template<size_t DIMENSIONS>
+void route_gpsMaxAction_compass(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
+	if (DIMENSIONS==options.dimensions) {
+		result = GpsSearch<CompassHierarchyData<DIMENSIONS>>::gpsMaxAction(node, model, options);
+	} else {
+		route_gpsMaxAction_compass<DIMENSIONS+1>(result, node, model, options);
+	}
 }
 
 
-GpsChooserResponse gps_ucb_action(BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
+/* A routing function to call the appropriate template implementation based on run-time configuration options. */
+void route_gpsMaxAction_golden(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
+	if (options.dimensions==1) {
+		debug::show_message("Warning: golden search hasn't been implemented. Using compass search instead.");
+		result = GpsSearch<CompassHierarchyData<1>>::gpsMaxAction(node, model, options);
+	} else {
+		class TooManyDimensions: public std::exception {
+			virtual const char* what() const noexcept {
+				return "Golden section search only works in one dimension. Please change your options.";
+			}
+		} e;
+		throw e;
+	}
+}
+
+/* A routing function to call the appropriate template implementation based on run-time configuration options. */
+void route_gpsMaxAction(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
+	if (options.searchType == GpsChooserOptions::COMPASS) {
+		route_gpsMaxAction_compass<1>(result, node, model, options);
+	} else if (options.searchType == GpsChooserOptions::GOLDEN) {
+		route_gpsMaxAction_golden(result, node, model, options);
+	} else {
+		class UnknownSearchType: public std::exception {
+			virtual const char* what() const noexcept {
+				return "the GPS search type you requested is unknown. Please change your options.";
+			}
+		} e;
+		throw e;
+	}
+}
+
+
+
+} // namespace gps_detail
+
+
+
+GpsChooserResponse gps_ucb_action(BeliefNode const* node, const Model& model, const GpsChooserOptions& options) {
 	GpsChooserResponse result;
 	gps_detail::route_gpsUcbAction(result, node, model, options);
 	return std::move(result);
 }
+
+GpsChooserResponse gps_max_action(BeliefNode const* node, const Model& model, const GpsChooserOptions& options) {
+	GpsChooserResponse result;
+	gps_detail::route_gpsMaxAction(result, node, model, options);
+	return std::move(result);
+}
+
 
 } /* namespace choosers */
 } /* namespace solver */
