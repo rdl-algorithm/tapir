@@ -21,6 +21,8 @@
 
 #include "solver/search/SearchStatus.hpp"
 
+#include "solver/search/action-choosers/choosers.hpp"
+
 namespace solver {
 /* ----------------------- StepGenerator ------------------------- */
 StepGenerator::StepGenerator(SearchStatus &status) :
@@ -180,4 +182,10 @@ SearchStatus BasicSearchStrategy::extendAndBackup(HistorySequence *sequence, lon
     // Finally, we just return the status.
     return status;
 }
+
+std::unique_ptr<Action> MaxRecommendedActionStrategy::getAction(const BeliefNode* belief) {
+	return choosers::max_action(belief);
+}
+
+
 } /* namespace solver */

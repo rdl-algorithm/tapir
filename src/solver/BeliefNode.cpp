@@ -29,6 +29,7 @@
 #include "solver/belief-estimators/estimators.hpp"
 
 #include "solver/search/action-choosers/choosers.hpp"
+#include "solver/search/search_interface.hpp"
 
 #include "solver/mappings/actions/ActionMapping.hpp"
 #include "solver/mappings/actions/ActionPool.hpp"
@@ -166,7 +167,7 @@ void BeliefNode::setValueEstimator(CachedValue<double> *estimator) {
     valueEstimator_ = estimator;
 }
 std::unique_ptr<Action> BeliefNode::getRecommendedAction() const {
-    return choosers::max_action(this);
+	return solver_->getRecommendationStrategy()->getAction(this);
 }
 double BeliefNode::getCachedValue() const {
     return valueEstimator_->getCache();

@@ -200,4 +200,13 @@ std::unique_ptr<solver::EstimationStrategy> RobustEstimateParser::parse(solver::
         std::vector<std::string> /*args*/) {
     return std::make_unique<solver::EstimationFunction>(solver::estimators::robust);
 }
+
+
+std::unique_ptr<solver::SelectRecommendedActionStrategy> MaxRecommendedActionStrategyParser::parse(solver::Solver * /*solver*/,
+        std::vector<std::string> /*args*/) {
+    return std::make_unique<solver::MaxRecommendedActionStrategy>();
+}
+
+
+
 } /* namespace shared */

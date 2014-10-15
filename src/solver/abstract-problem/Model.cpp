@@ -194,6 +194,11 @@ std::unique_ptr<SearchStrategy> Model::createSearchStrategy(Solver *solver) {
             getHeuristicFunction());
 }
 
+std::unique_ptr<SelectRecommendedActionStrategy> Model::createRecommendationSelectionStrategy(Solver */*solver*/) {
+    // Create a basic search strategy using max the Q-value function
+    return std::make_unique<MaxRecommendedActionStrategy>();
+}
+
 std::unique_ptr<EstimationStrategy> Model::createEstimationStrategy(Solver */*solver*/) {
     // Returns an estimation strategy using a simple average.
     return std::make_unique<EstimationFunction>(estimators::average);

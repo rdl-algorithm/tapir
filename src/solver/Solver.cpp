@@ -68,6 +68,7 @@ Solver::Solver(std::unique_ptr<Model> model) :
             policy_(nullptr),
             historyCorrector_(nullptr),
             searchStrategy_(nullptr),
+            recommendationStrategy_(nullptr),
             estimationStrategy_(nullptr),
             nodesToBackup_(),
             changeRoot_(nullptr),
@@ -99,6 +100,9 @@ ObservationPool *Solver::getObservationPool() const {
 }
 EstimationStrategy *Solver::getEstimationStrategy() const {
     return estimationStrategy_.get();
+}
+SelectRecommendedActionStrategy* Solver::getRecommendationStrategy() const {
+	return recommendationStrategy_.get();
 }
 Serializer *Solver::getSerializer() const {
     return serializer_.get();
@@ -670,6 +674,7 @@ void Solver::initialize() {
     // Possible model-specific customizations
     historyCorrector_ = model_->createHistoryCorrector(this);
     searchStrategy_ = model_->createSearchStrategy(this);
+    recommendationStrategy_ = model_->createRecommendationSelectionStrategy(this);
     estimationStrategy_ = model_->createEstimationStrategy(this);
 }
 

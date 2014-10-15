@@ -43,6 +43,7 @@ public:
         generatorParsers_(),
         heuristicParsers_(),
         searchParsers_(),
+        selectRecommendedActionParsers_(),
         estimationParsers_() {
         registerGeneratorParser("ucb", std::make_unique<UcbParser>());
         registerGeneratorParser("rollout", std::make_unique<DefaultRolloutParser>());
@@ -59,6 +60,8 @@ public:
         registerEstimationParser("mean", std::make_unique<AverageEstimateParser>());
         registerEstimationParser("max", std::make_unique<MaxEstimateParser>());
         registerEstimationParser("robust", std::make_unique<RobustEstimateParser>());
+
+        registerSelectRecommendedActionParser("max", std::make_unique<MaxRecommendedActionStrategyParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
@@ -108,6 +111,14 @@ public:
         searchParsers_.addParser(name, std::move(parser));
     }
 
+    /** Associates the given parser for search SelectRecommendedActionStrategy with the given name string, allowing it
+     * to be parsed at runtime.
+     */
+    virtual void registerSelectRecommendedActionParser(std::string name,
+            std::unique_ptr<Parser<std::unique_ptr<solver::SelectRecommendedActionStrategy>> > parser) {
+        selectRecommendedActionParsers_.addParser(name, std::move(parser));
+    }
+
     /** Associates the given parser for estimation strategies with the given name string,
      * allowing it to be parsed at runtime.
      *
@@ -126,6 +137,12 @@ public:
             override {
         return searchParsers_.parse(solver, options_->searchStrategy);
     }
+
+    virtual std::unique_ptr<solver::SelectRecommendedActionStrategy> createRecommendationSelectionStrategy(solver::Solver */*solver*/) override {
+        return selectRecommendedActionParsers_.parse(nullptr, options_->recommendationStrategy);
+    }
+
+
     virtual std::unique_ptr<solver::EstimationStrategy> createEstimationStrategy(
             solver::Solver *solver) override {
         return estimationParsers_.parse(solver, options_->estimator);
@@ -163,6 +180,8 @@ private:
     ParserSet<solver::HeuristicFunction> heuristicParsers_;
     /** The parsers for SearchStrategy instances. */
     ParserSet<std::unique_ptr<solver::SearchStrategy>> searchParsers_;
+    /** The parsers for SelectRecommendedActionStrategy instances. */
+    ParserSet<std::unique_ptr<solver::SelectRecommendedActionStrategy>> selectRecommendedActionParsers_;
     /** The parsers for EstimationStrategy instances. */
     ParserSet<std::unique_ptr<solver::EstimationStrategy>> estimationParsers_;
 };

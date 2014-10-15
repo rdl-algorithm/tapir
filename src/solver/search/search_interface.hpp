@@ -25,6 +25,7 @@
 
 #include "solver/search/SearchStatus.hpp"
 
+
 namespace solver {
 class BeliefNode;
 class HistoricalData;
@@ -57,6 +58,24 @@ public:
      */
     virtual SearchStatus extendAndBackup(HistorySequence *sequence, long maximumDepth) = 0;
 };
+
+/** An interface for the action recommendation functionality.
+ *
+ * Implementing classes must define the getAction method, which should select an action to execute on a given belief,
+ */
+class SelectRecommendedActionStrategy {
+public:
+	SelectRecommendedActionStrategy() = default;
+    virtual ~SelectRecommendedActionStrategy() = default;
+    _NO_COPY_OR_MOVE(SelectRecommendedActionStrategy);
+
+    /** Selects an action to execute during the simulation phase.
+     */
+    virtual std::unique_ptr<Action> getAction(const BeliefNode* belief) = 0;
+};
+
+
+
 
 /** An abstract class for generating new steps in a  history sequence, one step at a time.
  *
@@ -198,6 +217,23 @@ private:
     /** The heuristic to use to evalulate non-terminal states at the end of a sequence. */
     HeuristicFunction heuristic_;
 };
+
+/** An implementation for the action recommendation strategy.
+ *
+ * This simply maximises the Q-value.
+ */
+class MaxRecommendedActionStrategy: public SelectRecommendedActionStrategy {
+public:
+	MaxRecommendedActionStrategy() = default;
+    virtual ~MaxRecommendedActionStrategy() = default;
+    _NO_COPY_OR_MOVE(MaxRecommendedActionStrategy);
+
+    /** Selects an action to execute during the simulation phase.
+     */
+    virtual std::unique_ptr<Action> getAction(const BeliefNode* belief);
+};
+
+
 
 } /* namespace solver */
 

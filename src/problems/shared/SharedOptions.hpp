@@ -56,6 +56,8 @@ struct SharedOptions: public solver::Options {
     std::string searchHeuristic = "";
     /** The search strategy to use. */
     std::string searchStrategy = "";
+    /** The recommendation strategy to use. */
+    std::string recommendationStrategy = "";
     /** The function to estimate the value of a belief. */
     std::string estimator = "";
     /** The maximum distance between observations to group together; only applicable if
@@ -198,6 +200,7 @@ struct SharedOptions: public solver::Options {
 
         parser->addOption<std::string>("ABT", "searchHeuristic", &SharedOptions::searchHeuristic);
         parser->addOption<std::string>("ABT", "searchStrategy", &SharedOptions::searchStrategy);
+        parser->addOptionWithDefault<std::string>("ABT", "recommendationStrategy", &SharedOptions::recommendationStrategy, "max");
         parser->addOption<std::string>("ABT", "estimator", &SharedOptions::estimator);
         parser->addOptionWithDefault<double>("ABT", "maxObservationDistance",
                 &SharedOptions::maxObservationDistance, 0.0);

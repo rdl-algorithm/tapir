@@ -89,6 +89,10 @@ public:
     /** Returns the estimation strategy. */
     EstimationStrategy *getEstimationStrategy() const;
 
+    /** Returns the recommendation strategy. */
+    SelectRecommendedActionStrategy* getRecommendationStrategy() const;
+
+
     /** Returns the serializer for this solver. */
     Serializer *getSerializer() const;
 
@@ -250,6 +254,8 @@ private:
     std::unique_ptr<HistoryCorrector> historyCorrector_;
     /** The strategy to use when searching the tree. */
     std::unique_ptr<SearchStrategy> searchStrategy_;
+    /** The strategy to use when searching the tree. */
+    std::unique_ptr<SelectRecommendedActionStrategy> recommendationStrategy_;
 
     /** The strategy for estimating the value of a belief node based on actions from it. */
     std::unique_ptr<EstimationStrategy> estimationStrategy_;

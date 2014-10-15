@@ -38,6 +38,7 @@ class HistoricalData;
 class HistoryCorrector;
 class ObservationPool;
 class SearchStrategy;
+class SelectRecommendedActionStrategy;
 class Serializer;
 class Solver;
 class StateIndex;
@@ -277,7 +278,6 @@ public:
     virtual std::unique_ptr<Action> getRolloutAction(HistoryEntry const *entry, State const *state,
             HistoricalData const *data);
 
-
     /* ------- Customization of more complex solver functionality  --------- */
     // These are factory methods to allow the data structures used by ABT to be chosen in a
     // customizable way.
@@ -329,6 +329,13 @@ public:
      * change this coefficient value, simply override this method.
      */
     virtual std::unique_ptr<SearchStrategy> createSearchStrategy(Solver *solver);
+
+    /** Creates an action recommendation strategy for use by the given solver.
+     *
+     * The default action returns simply the action with the maximal estimated Q-value.
+     *
+     */
+    virtual std::unique_ptr<SelectRecommendedActionStrategy> createRecommendationSelectionStrategy(Solver *solver);
 
     /** Creates a strategy for estimating the value of belief nodes, for backprop, for the given
      * solver.

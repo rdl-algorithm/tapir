@@ -261,6 +261,18 @@ public:
     virtual std::unique_ptr<solver::EstimationStrategy> parse(solver::Solver *solver,
             std::vector<std::string> args) override;
 };
+
+/** A parser for max Q-value recommendation instances. */
+class MaxRecommendedActionStrategyParser: public Parser<std::unique_ptr<solver::SelectRecommendedActionStrategy>> {
+public:
+	MaxRecommendedActionStrategyParser() = default;
+    virtual ~MaxRecommendedActionStrategyParser() = default;
+    virtual std::unique_ptr<solver::SelectRecommendedActionStrategy> parse(solver::Solver *solver,
+            std::vector<std::string> args) override;
+};
+
+
+
 } /* namespace shared */
 
 #endif /* SHARED_PARSERS_HPP_ */
