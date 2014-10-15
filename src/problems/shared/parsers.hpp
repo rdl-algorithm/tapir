@@ -109,6 +109,15 @@ public:
             std::vector<std::string> args) override;
 };
 
+/** A parser for UcbStepGeneratorFactory instances. */
+class GpsParser: public Parser<std::unique_ptr<solver::StepGeneratorFactory>> {
+public:
+	GpsParser() = default;
+    virtual ~GpsParser() = default;
+    virtual std::unique_ptr<solver::StepGeneratorFactory> parse(solver::Solver *solver,
+            std::vector<std::string> args) override;
+};
+
 /** A parser for NnRolloutFactory instances. */
 class NnRolloutParser: public Parser<std::unique_ptr<solver::StepGeneratorFactory>> {
 public:

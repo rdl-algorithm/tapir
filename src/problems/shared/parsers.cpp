@@ -19,6 +19,7 @@
 #include "solver/search/search_interface.hpp"
 #include "solver/search/MultipleStrategiesExp3.hpp"
 #include "solver/search/steppers/ucb_search.hpp"
+#include "solver/search/steppers/gps_search.hpp"
 #include "solver/search/steppers/default_rollout.hpp"
 #include "solver/search/steppers/nn_rollout.hpp"
 
@@ -73,6 +74,31 @@ std::unique_ptr<solver::StepGeneratorFactory> UcbParser::parse(solver::Solver *s
     std::istringstream(args[1]) >> explorationCoefficient;
     return std::make_unique<solver::UcbStepGeneratorFactory>(solver, explorationCoefficient);
 }
+
+std::unique_ptr<solver::StepGeneratorFactory> GpsParser::parse(solver::Solver *solver, std::vector<std::string> args) {
+
+	using solver::choosers::GpsChooserOptions;
+	GpsChooserOptions options;
+
+	if (args[1] == "golden") {
+		options.searchType = GpsChooserOptions::GOLDEN;
+	} else if (args[1] == "compass") {
+		options.searchType = GpsChooserOptions::COMPASS;
+	} else {
+		debug::show_message("Warning: unknown gps search type given.");
+	}
+
+    std::istringstream(args[2]) >> options.dimensions;
+    std::istringstream(args[3]) >> options.disableGpsSearch;
+    std::istringstream(args[4]) >> options.explorationCoefficient;
+    std::istringstream(args[5]) >> options.newSearchPointCoefficient;
+    std::istringstream(args[6]) >> options.minimumVisitsBeforeChildCreation;
+    std::istringstream(args[7]) >> options.minimumChildCreationDistance;
+
+    return std::make_unique<solver::GpsStepGeneratorFactory>(solver, options);
+}
+
+
 std::unique_ptr<solver::StepGeneratorFactory> NnRolloutParser::parse(solver::Solver *solver,
         std::vector<std::string> args) {
     long maxNnComparisons;
