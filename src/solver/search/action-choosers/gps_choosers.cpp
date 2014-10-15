@@ -342,10 +342,26 @@ public:
 	static const char serialisationTerminator = '|';
 
 	/** method to save the date to a stream */
-	std::string saveToString() const;
+	std::string saveToString() const {
+		std::stringstream ss;
+		ss << "point: ";
+		for (double val : point) {
+			ss << val << " ";
+		}
+		ss << "radius: " << radius << " ";
+		return ss.str();
+	}
 
 	/** method to save the date to a stream */
-	void loadFromString(const std::string& line);
+	void loadFromString(const std::string& line) {
+		std::istringstream ss(line);
+		std::string dummy;
+		ss >> dummy;
+		for (double& val : point) {
+			ss >> val;
+		}
+		ss >> dummy >> radius;
+	}
 };
 
 
@@ -704,6 +720,7 @@ public:
 		if (bestEntry != nullptr) {
 			return GpsChooserResponse(bestEntry->getAction(), bestEntry->getVisitCount() > 0);
 		} else {
+			debug::show_message("Warning: could not get a gps action. Falling back to considering all actions.");
 			return GpsChooserResponse(choosers::max_action(node), true);
 		}
 

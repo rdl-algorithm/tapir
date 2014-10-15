@@ -267,7 +267,7 @@ protected:
 	typedef std::function<std::unique_ptr<ChooserDataBaseBase>(std::istream&, ThisActionMap& map)> LoadFromStreamFunction;
 	static void registerDerivedType(const std::string& name, const LoadFromStreamFunction& loader);
 
-	virtual void saveToStream_real(std::ostream& os, const ThisActionMap& map) const;
+	virtual void saveToStream_real(std::ostream& os, const ThisActionMap& map) const = 0;
 
 private:
 	static std::unordered_map<std::string, LoadFromStreamFunction>& getDerivedLoadersSingleton();
@@ -402,7 +402,7 @@ class ContinuousActionMapEntry : public solver::ActionMappingEntry {
 	typedef ContinuousActionConstructionDataBase ThisActionConstructionData;
 
 
-    friend class ContinuousActionMapTextSerializer;
+    friend class ContinuousActionTextSerializer;
 
 
   public:
@@ -466,7 +466,7 @@ class ContinuousActionTextSerializer: virtual public solver::Serializer {
     virtual std::unique_ptr<ActionMapping> loadActionMapping(BeliefNode *node, std::istream &is) override;
 
     /** Loads the data from the input stream into the given ThisActionMap. */
-    virtual void loadActionMapping(ThisActionMap &discMap, std::istream &is);
+    virtual void loadActionMapping(ThisActionMap &map, std::istream &is);
   protected:
     virtual void saveActionMapEntry(const ThisActionMapEntry& entry, std::ostream& os);
     virtual std::unique_ptr<ThisActionMapEntry> loadActionMapEntry(ThisActionMap& map, std::istream& is);

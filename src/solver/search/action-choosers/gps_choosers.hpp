@@ -11,6 +11,8 @@
 
 #include "solver/abstract-problem/Action.hpp"
 
+#include "solver/abstract-problem/Model.hpp"
+
 namespace solver {
 class BeliefNode;
 class Solver;
@@ -20,7 +22,7 @@ namespace choosers {
 struct GpsChooserOptions {
 
 	/** This defines the type of gps search used. I.e. the stencil, etc. */
-	enum{GOLDEN=0, COMPASS=1} searchType;
+	enum{GOLDEN=0, COMPASS=1} searchType = GOLDEN;
 
 	/** Sets the number of dimensions the gps search ought to search over. */
 	size_t dimensions = 1;
@@ -62,7 +64,7 @@ struct GpsChooserResponse {
 };
 
 /** Returns the action with the maximum estimate Q-value. */
-GpsChooserResponse gps_max_action(BeliefNode const *node, const GpsChooserOptions& options);
+GpsChooserResponse gps_max_action(BeliefNode const *node, const Model& model, const GpsChooserOptions& options);
 
 /** Returns the action with the highest visit count (ties are broken by max. value)
  *
@@ -72,7 +74,7 @@ GpsChooserResponse gps_max_action(BeliefNode const *node, const GpsChooserOption
 //GpsChooserResponse gps_robust_action(BeliefNode const *node, const GpsChooserOptions& options);
 
 /** Returns the action with the highest UCB value and performs the GPS tree search. */
-GpsChooserResponse gps_ucb_action(BeliefNode const *node, const GpsChooserOptions& options);
+GpsChooserResponse gps_ucb_action(BeliefNode const *node, const Model& model, const GpsChooserOptions& options);
 
 } /* namespace choosers */
 } /* namespace solver */

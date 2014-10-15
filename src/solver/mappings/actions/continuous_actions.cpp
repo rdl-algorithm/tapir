@@ -194,6 +194,11 @@ ContinuousActionMap::ThisActionMapEntry* ContinuousActionMap::createOrGetActionM
 	return entry.get();
 }
 
+const std::vector<ContinuousActionMap::ThisActionMapEntry*>& ContinuousActionMap::getFixedEntries() const {
+	return fixedEntries;
+}
+
+
 
 
 long ContinuousActionMap::getTotalVisitCount() const {
@@ -400,6 +405,51 @@ void ContinuousActionTextSerializer::loadActionMapping(ContinuousActionMap &map,
     	}
     }
 }
+
+void ContinuousActionTextSerializer::saveActionMapEntry(const ThisActionMapEntry& entry, std::ostream& os) {
+	saveConstructionData(*entry.constructionData, os);
+	os << "isLegal: " << entry.isLegal_;
+	os << " visitcount: " << entry.visitCount_;
+	os << " totalQvalue: " << entry.totalQValue_;
+	os << " meanQValue: " << entry.meanQValue_;
+	os << " hasChild: " << (entry.childNode != nullptr) << std::endl;
+	if (entry.childNode != nullptr) {
+		save(*entry.childNode, os);
+	}
+}
+
+std::unique_ptr<ContinuousActionTextSerializer::ThisActionMapEntry> ContinuousActionTextSerializer::loadActionMapEntry(ThisActionMap& map, std::istream& is) {
+
+	auto constructionData = loadConstructionData(is);
+
+	std::string line;
+	std::getline(is, line);
+	std::istringstream ss(line);
+	std::string dummy;
+
+	bool isLegal;
+	ss >> dummy >> isLegal;
+
+	std::unique_ptr<ThisActionMapEntry> result = std::make_unique<ThisActionMapEntry>(&map, std::move(constructionData), isLegal);
+
+	ss >> dummy >> result->visitCount_;
+	ss >> dummy >> result->totalQValue_;
+	ss >> dummy >> result->meanQValue_;
+
+	bool hasChild;
+	ss >> dummy >> hasChild;
+
+	if (hasChild) {
+		result->childNode = std::make_unique<ActionNode>(result.get());
+	    load(*result->childNode, is);
+	} else {
+		result->childNode = nullptr;
+	}
+
+	return std::move(result);
+}
+
+
 
 } /* namespace solver */
 
