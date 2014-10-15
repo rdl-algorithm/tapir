@@ -100,7 +100,7 @@ endif
 
 # Configuration-specific flags
 ifeq ($(CFG),release)
-  override CXXFLAGS  += -O3
+  override CXXFLAGS  += -O3 -flto
 else ifeq ($(CFG),shared)
   override CXXFLAGS  += -O3 -fpic
 else ifeq ($(CFG),profile)
@@ -124,7 +124,7 @@ endif
 # Linker flags
 # ----------------------------------------------------------------------
 override LIBDIRS += -L/usr/lib/x86_64-linux-gnu/
-override LDFLAGS += $(LIBDIRS)
+override LDFLAGS += $(LIBDIRS) -flto -O3 -fuse-linker-plugin
 
 # ----------------------------------------------------------------------
 # Redirection handling.
