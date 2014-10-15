@@ -19,6 +19,29 @@ class Solver;
 
 namespace choosers {
 
+struct GpsMaxRecommendationOptions {
+
+	/** This defines the type of gps search used. I.e. the stencil, etc. */
+	enum{GOLDEN=0, COMPASS=1} searchType = GOLDEN;
+
+	/** Sets the number of dimensions the gps search ought to search over. */
+	size_t dimensions = 1;
+
+	/** This is the maximum number of dimensions gps search expects at compile time.
+	 *
+	 * Gps search uses template code which must be instanciated at compile time. This
+	 * value determines up to which dimensionality the code is generated.
+	 *
+	 * Setting this value high will slow down compilation and bloat the final executable.
+	 */
+	static const size_t maxDimensions = 5;
+
+	/** Allows to quickly disable GPS search in this case only the fixed actions are considered. */
+	bool disableGpsSearch = false;
+
+};
+
+
 struct GpsChooserOptions {
 
 	/** This defines the type of gps search used. I.e. the stencil, etc. */
@@ -64,7 +87,7 @@ struct GpsChooserResponse {
 };
 
 /** Returns the action with the maximum estimate Q-value. */
-GpsChooserResponse gps_max_action(BeliefNode const *node, const Model& model, const GpsChooserOptions& options);
+GpsChooserResponse gps_max_action(BeliefNode const *node, const GpsMaxRecommendationOptions& options);
 
 /** Returns the action with the highest visit count (ties are broken by max. value)
  *

@@ -187,5 +187,11 @@ std::unique_ptr<Action> MaxRecommendedActionStrategy::getAction(const BeliefNode
 	return choosers::max_action(belief);
 }
 
+GpsMaxRecommendedActionStrategy::GpsMaxRecommendedActionStrategy(const choosers::GpsMaxRecommendationOptions& theOptions): options(theOptions) {}
+
+std::unique_ptr<Action> GpsMaxRecommendedActionStrategy::getAction(const BeliefNode* belief) {
+	return choosers::gps_max_action(belief, options).action;
+}
+
 
 } /* namespace solver */

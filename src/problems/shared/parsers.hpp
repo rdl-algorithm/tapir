@@ -271,6 +271,15 @@ public:
             std::vector<std::string> args) override;
 };
 
+/** A parser for max Q-value recommendation instances for gps search. */
+class GpsMaxRecommendedActionStrategyParser: public Parser<std::unique_ptr<solver::SelectRecommendedActionStrategy>> {
+public:
+	GpsMaxRecommendedActionStrategyParser() = default;
+    virtual ~GpsMaxRecommendedActionStrategyParser() = default;
+    virtual std::unique_ptr<solver::SelectRecommendedActionStrategy> parse(solver::Solver *solver,
+            std::vector<std::string> args) override;
+};
+
 
 
 } /* namespace shared */

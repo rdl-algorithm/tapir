@@ -4,6 +4,8 @@
  */
 #include "solver/search/action-choosers/gps_choosers.hpp"
 
+#include <utility>
+
 #include "solver/search/action-choosers/choosers.hpp"
 
 #include "solver/BeliefNode.hpp"
@@ -661,7 +663,7 @@ public:
 
 	}
 
-	static GpsChooserResponse gpsMaxAction(BeliefNode const *node, const Model& /*model*/, const GpsChooserOptions& options) {
+	static GpsChooserResponse gpsMaxAction(BeliefNode const *node, const GpsMaxRecommendationOptions& options) {
 
 
 		ThisActionMap& mapping = *(static_cast<ThisActionMap*>(node->getMapping()));
@@ -788,33 +790,33 @@ void route_gpsUcbAction(GpsChooserResponse& result, BeliefNode const *node, cons
 
 /* A routing function to call the appropriate template implementation based on run-time configuration options. */
 template<size_t DIMENSIONS>
-void route_gpsMaxAction_compass(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options);
+void route_gpsMaxAction_compass(GpsChooserResponse& result, BeliefNode const *node, const GpsMaxRecommendationOptions& options);
 
 template<>
-void route_gpsMaxAction_compass<GpsChooserOptions::maxDimensions+1>(GpsChooserResponse& /*result*/, BeliefNode const* /*node*/, const Model& /*model*/, const GpsChooserOptions& /*options*/) {
+void route_gpsMaxAction_compass<GpsChooserOptions::maxDimensions+1>(GpsChooserResponse& /*result*/, BeliefNode const* /*node*/, const GpsMaxRecommendationOptions& /*options*/) {
 	class TooManyDimensions: public std::exception {
 		virtual const char* what() const noexcept {
-			return "route_gpsUcbAction_compass: the dimensionality you requested wasn't instanciated during compile time. Please adjust GpsChooserOptions::maxDimensions.";
+			return "route_gpsUcbAction_compass: the dimensionality you requested wasn't instantiated during compile time. Please adjust GpsChooserOptions::maxDimensions.";
 		}
 	} e;
 	throw e;
 }
 
 template<size_t DIMENSIONS>
-void route_gpsMaxAction_compass(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
+void route_gpsMaxAction_compass(GpsChooserResponse& result, BeliefNode const *node, const GpsMaxRecommendationOptions& options) {
 	if (DIMENSIONS==options.dimensions) {
-		result = GpsSearch<CompassHierarchyData<DIMENSIONS>>::gpsMaxAction(node, model, options);
+		result = GpsSearch<CompassHierarchyData<DIMENSIONS>>::gpsMaxAction(node, options);
 	} else {
-		route_gpsMaxAction_compass<DIMENSIONS+1>(result, node, model, options);
+		route_gpsMaxAction_compass<DIMENSIONS+1>(result, node, options);
 	}
 }
 
 
 /* A routing function to call the appropriate template implementation based on run-time configuration options. */
-void route_gpsMaxAction_golden(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
+void route_gpsMaxAction_golden(GpsChooserResponse& result, BeliefNode const *node, const GpsMaxRecommendationOptions& options) {
 	if (options.dimensions==1) {
 		debug::show_message("Warning: golden search hasn't been implemented. Using compass search instead.");
-		result = GpsSearch<CompassHierarchyData<1>>::gpsMaxAction(node, model, options);
+		result = GpsSearch<CompassHierarchyData<1>>::gpsMaxAction(node, options);
 	} else {
 		class TooManyDimensions: public std::exception {
 			virtual const char* what() const noexcept {
@@ -826,11 +828,11 @@ void route_gpsMaxAction_golden(GpsChooserResponse& result, BeliefNode const *nod
 }
 
 /* A routing function to call the appropriate template implementation based on run-time configuration options. */
-void route_gpsMaxAction(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
-	if (options.searchType == GpsChooserOptions::COMPASS) {
-		route_gpsMaxAction_compass<1>(result, node, model, options);
-	} else if (options.searchType == GpsChooserOptions::GOLDEN) {
-		route_gpsMaxAction_golden(result, node, model, options);
+void route_gpsMaxAction(GpsChooserResponse& result, BeliefNode const *node, const GpsMaxRecommendationOptions& options) {
+	if (options.searchType == GpsMaxRecommendationOptions::COMPASS) {
+		route_gpsMaxAction_compass<1>(result, node, options);
+	} else if (options.searchType == GpsMaxRecommendationOptions::GOLDEN) {
+		route_gpsMaxAction_golden(result, node, options);
 	} else {
 		class UnknownSearchType: public std::exception {
 			virtual const char* what() const noexcept {
@@ -853,9 +855,9 @@ GpsChooserResponse gps_ucb_action(BeliefNode const* node, const Model& model, co
 	return std::move(result);
 }
 
-GpsChooserResponse gps_max_action(BeliefNode const* node, const Model& model, const GpsChooserOptions& options) {
+GpsChooserResponse gps_max_action(BeliefNode const* node, const GpsMaxRecommendationOptions& options) {
 	GpsChooserResponse result;
-	gps_detail::route_gpsMaxAction(result, node, model, options);
+	gps_detail::route_gpsMaxAction(result, node, options);
 	return std::move(result);
 }
 

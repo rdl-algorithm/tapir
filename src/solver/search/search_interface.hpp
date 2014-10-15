@@ -25,6 +25,8 @@
 
 #include "solver/search/SearchStatus.hpp"
 
+#include "solver/search/action-choosers/gps_choosers.hpp"
+
 
 namespace solver {
 class BeliefNode;
@@ -231,6 +233,23 @@ public:
     /** Selects an action to execute during the simulation phase.
      */
     virtual std::unique_ptr<Action> getAction(const BeliefNode* belief);
+};
+
+/** An implementation for the action recommendation strategy with gps search.
+ *
+ * This simply maximises the Q-value of all active (within gps search) actions.
+ */
+class GpsMaxRecommendedActionStrategy: public SelectRecommendedActionStrategy {
+public:
+	GpsMaxRecommendedActionStrategy(const choosers::GpsMaxRecommendationOptions& options);
+    virtual ~GpsMaxRecommendedActionStrategy() = default;
+    _NO_COPY_OR_MOVE(GpsMaxRecommendedActionStrategy);
+
+    /** Selects an action to execute during the simulation phase.
+     */
+    virtual std::unique_ptr<Action> getAction(const BeliefNode* belief);
+private:
+    choosers::GpsMaxRecommendationOptions options;
 };
 
 

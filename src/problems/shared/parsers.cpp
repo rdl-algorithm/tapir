@@ -80,20 +80,37 @@ std::unique_ptr<solver::StepGeneratorFactory> GpsParser::parse(solver::Solver *s
 	using solver::choosers::GpsChooserOptions;
 	GpsChooserOptions options;
 
-	if (args[1] == "golden") {
-		options.searchType = GpsChooserOptions::GOLDEN;
-	} else if (args[1] == "compass") {
-		options.searchType = GpsChooserOptions::COMPASS;
-	} else {
-		debug::show_message("Warning: unknown gps search type given.");
-	}
+	size_t index = 1;
 
-    std::istringstream(args[2]) >> options.dimensions;
-    std::istringstream(args[3]) >> options.disableGpsSearch;
-    std::istringstream(args[4]) >> options.explorationCoefficient;
-    std::istringstream(args[5]) >> options.newSearchPointCoefficient;
-    std::istringstream(args[6]) >> options.minimumVisitsBeforeChildCreation;
-    std::istringstream(args[7]) >> options.minimumChildCreationDistance;
+	if (args.size() > index) {
+		if (args[index] == "golden") {
+			options.searchType = GpsChooserOptions::GOLDEN;
+		} else if (args[index] == "compass") {
+			options.searchType = GpsChooserOptions::COMPASS;
+		} else {
+			debug::show_message("Warning: unknown gps search type given.");
+		}
+	}
+	index++;
+
+    if (args.size() > index) std::istringstream(args[2]) >> options.dimensions;
+    index++;
+    if (args.size() > index) std::istringstream(args[2]) >> options.disableGpsSearch;
+    index++;
+    if (args.size() > index) std::istringstream(args[2]) >> options.explorationCoefficient;
+    index++;
+    if (args.size() > index) std::istringstream(args[2]) >> options.newSearchPointCoefficient;
+    index++;
+    if (args.size() > index) std::istringstream(args[2]) >> options.minimumVisitsBeforeChildCreation;
+    index++;
+    if (args.size() > index) std::istringstream(args[2]) >> options.minimumChildCreationDistance;
+    index++;
+
+    if (args.size() < index) {
+    	debug::show_message("Warning: not enough arguments given for gps search. Some default values are used.");
+    } else if (args.size() > index) {
+    	debug::show_message("Warning: too many arguments given for gps search. Extra arguments are ignored.");
+    }
 
     return std::make_unique<solver::GpsStepGeneratorFactory>(solver, options);
 }
@@ -205,6 +222,41 @@ std::unique_ptr<solver::EstimationStrategy> RobustEstimateParser::parse(solver::
 std::unique_ptr<solver::SelectRecommendedActionStrategy> MaxRecommendedActionStrategyParser::parse(solver::Solver * /*solver*/,
         std::vector<std::string> /*args*/) {
     return std::make_unique<solver::MaxRecommendedActionStrategy>();
+}
+
+std::unique_ptr<solver::SelectRecommendedActionStrategy> GpsMaxRecommendedActionStrategyParser::parse(solver::Solver * /*solver*/,
+        std::vector<std::string> args) {
+
+	using solver::choosers::GpsMaxRecommendationOptions;
+	GpsMaxRecommendationOptions options;
+
+	// We only need to parse the options that are actually relevant for the max chooser.
+
+	size_t index = 1;
+
+	if (args.size() > index) {
+		if (args[index] == "golden") {
+			options.searchType = GpsMaxRecommendationOptions::GOLDEN;
+		} else if (args[index] == "compass") {
+			options.searchType = GpsMaxRecommendationOptions::COMPASS;
+		} else {
+			debug::show_message("Warning: unknown gps search type given.");
+		}
+	}
+	index++;
+
+    if (args.size() > index) std::istringstream(args[2]) >> options.dimensions;
+    index++;
+    if (args.size() > index) std::istringstream(args[2]) >> options.disableGpsSearch;
+    index++;
+
+    if (args.size() < index) {
+    	debug::show_message("Warning: not enough arguments given for gps max recommendation. Some default values are used.");
+    } else if (args.size() > index) {
+    	debug::show_message("Warning: too many arguments given for gps max recommendation. Extra arguments are ignored.");
+    }
+
+    return std::make_unique<solver::GpsMaxRecommendedActionStrategy>(options);
 }
 
 
