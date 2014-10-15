@@ -83,7 +83,7 @@ bool ContinuousActionPool::randomiseFixedActions(const BeliefNode* /*belief*/) c
 }
 
 
-/* ---------------------- ChooserDataBase ---------------------- */
+/* ---------------------- ChooserDataBaseBase ---------------------- */
 
 void ChooserDataBaseBase::registerDerivedType(const std::string& name, const LoadFromStreamFunction& loader) {
 	getDerivedLoadersSingleton()[name] = loader;
@@ -94,6 +94,17 @@ std::unordered_map<std::string, ChooserDataBaseBase::LoadFromStreamFunction>& Ch
 	return singleton;
 }
 
+void ChooserDataBaseBase::saveToStream(std::ostream& os, const ThisActionMap& map) const {
+	std::string name = typeid(*this).name();
+	os << name << std::endl;
+	saveToStream_real(os, map);
+}
+
+std::unique_ptr<ChooserDataBaseBase::This> ChooserDataBaseBase::loadFromStream(std::istream& is, ThisActionMap& map) {
+	std::string line;
+	std::getline(is, line);
+	return getDerivedLoadersSingleton()[line](is, map);
+}
 
 
 /* ---------------------- ContinuousActionMap ---------------------- */
@@ -169,6 +180,21 @@ ActionMappingEntry const *ContinuousActionMap::getEntry(Action const &baseAction
 	const ThisAction& action = static_cast<const ThisAction&>(baseAction);
 	return entries->at(action.getConstructionData()).get();
 }
+
+ContinuousActionMap::ThisActionMapEntry* ContinuousActionMap::getActionMapEntry(const double* constructionDataVector) {
+	return entries->at(constructionDataVector).get();
+}
+
+
+ContinuousActionMap::ThisActionMapEntry* ContinuousActionMap::createOrGetActionMapEntry(const double* constructionDataVector) {
+	auto& entry = (*entries)[constructionDataVector];
+	if (entry == nullptr) {
+		entry = std::make_unique<ThisActionMapEntry>(this, pool->createActionConstructionData(constructionDataVector, getOwner()), true);
+	}
+	return entry.get();
+}
+
+
 
 long ContinuousActionMap::getTotalVisitCount() const {
 	return totalVisitCount;
@@ -308,7 +334,7 @@ void ContinuousActionTextSerializer::saveActionMapping(ActionMapping const &base
     	os << "chooserData=NULL" << std::endl;
     } else {
     	os << "chooserData:" << std::endl;
-    	map.chooserData->saveToStream(map, os);
+    	map.chooserData->saveToStream(os, map);
     }
 
 }
@@ -370,7 +396,7 @@ void ContinuousActionTextSerializer::loadActionMapping(ContinuousActionMap &map,
     {
     	std::getline(is, line);
     	if (line=="chooserData:") {
-    		map.chooserData = ChooserDataBaseBase::loadFromStream(map, is);
+    		map.chooserData = ChooserDataBaseBase::loadFromStream(is, map);
     	}
     }
 }

@@ -63,14 +63,152 @@ public:
 	/** our children (if any). */
 	std::array<std::unique_ptr<Parent>, childrenSize> children;
 
+
+
+	/** a method to load the hierarchy data from a stream
+	 *
+	 * An implementation of this class must provide "loadFromString(std::string)" in order to populate its fields.
+	 *
+	 */
+	static std::unique_ptr<Parent> loadFromStream(std::istream is, ContinuousActionMap& map) {
+		std::unique_ptr<Parent> result = std::make_unique<Parent>();
+		result->loadFromStream_impl(is, map);
+		return std::move(result);
+	}
+
 protected:
-	// infrastructure for serialisation.
+	/** method to save the data to a stream
+	 *
+	 * An implementation of this class must provide "std::string saveToString()" in order to save its fields.
+	 * The returned string may only be one line (no line breaks) and may not contain the character that is
+	 * found in Parent::serialisationTerminator;
+	 *
+	 */
+	virtual void saveToStream_real(std::ostream& os, const ContinuousActionMap& /*map*/) const override {
+		saveToStream_impl(os,"","");
+	}
 
-	/** a constructor to load the hierarchy data from a stream */
-	explicit GpsHierarchyDataBase(std::istream& is);
 
-	/** method to save the date to a stream */
-	void saveToStream(std::ostream& os) const;
+
+private:
+
+	/** a method that does the work for saveToStream and recurses through the tree. */
+	void saveToStream_impl(std::ostream& os, const std::string& ownPrefix, const std::string& prefix) const {
+
+		// draw some nice lines for humans. When parsing we delete everything up to the first "<".
+		os << ownPrefix << "+--";
+		for (int i=0; i< 40-int(ownPrefix.size()); i++) {
+			os << "-";
+		}
+		os << "<";
+
+		//save the parent data first
+		os << static_cast<const Parent*>(this)->saveToString() << Parent::serialisationTerminator << " ";
+
+		// save the lower bounds
+		os << "lower: ";
+		for (double value : lower) {
+			os << value << " ";
+		}
+
+		// save the upper bounds
+		os << "upper: ";
+		for (double value : upper) {
+			os << value << " ";
+		}
+
+		// mark which children exist
+		os << "children: ";
+		size_t lastExistingChild = 0;
+		for (size_t i=0; i< children.size(); i++) {
+			os << (children[i] != nullptr) << " ";
+			if (children[i] != nullptr) lastExistingChild = i;
+		}
+
+		// some informational things that are not used for loading but handy for debugging
+		os << " [( qMeans, visits ): ";
+		for (ActionEntry* action : actions) {
+			if (action != nullptr) {
+				os << "( "<< action->getMeanQValue() << ", " << action->getVisitCount() << " ) ";
+			} else {
+				os << "n/a ";
+			}
+		}
+		os << "]";
+
+		// finally end the line.
+		os << std::endl;
+
+		// the children. when loading we can use the values in the "children" field above to check for existence of children.
+		for (size_t i = 0; i < children.size(); i++) {
+			if (children[i] != nullptr) {
+				if (i+1 != children.size()) {
+					children[i]->saveToStream_impl(os, prefix + "|-", prefix + (i>=lastExistingChild ? "  " : "| ") );
+				} else {
+					children[i]->saveToStream_impl(os, prefix + "`-", prefix + "  ");
+
+				}
+			}
+		}
+
+
+	}
+
+	/** a method that does the work for loadFromStream and recurses through the tree. */
+	void loadFromStream_impl(std::istream is, ContinuousActionMap& map) {
+		std::string line;
+		std::getline(is, line);
+
+		// get our bearings in the string
+		size_t parentStart = line.find('<') + 1;
+		size_t parentEnd = line.find(Parent::serialisationTerminator, parentStart);
+		size_t start = parentEnd + 2;
+
+		std::string dummy;
+	    std::istringstream ss(line.substr(start));
+
+		// we load ourself first in case the parent expects the bounds to be set already, etc.
+
+		// load the lower bounds
+		ss >> dummy;
+		for (double& value : lower) {
+			ss >> value;
+		}
+
+		// load the upper bounds
+		ss >> dummy;
+		for (double& value : upper) {
+			ss >> value;
+		}
+
+		// load the child markers
+		std::array<bool, children.size()> childrenExist;
+		ss >> dummy;
+		for (bool& marker : childrenExist) {
+			ss >> marker;
+		}
+
+		// now load the parent
+		static_cast<Parent*>(this)->loadFromString(line.substr(parentStart, parentEnd-parentStart));
+
+		// now we have to find the actions
+		for (size_t i = 0; i < actions.size(); i++) {
+			actions[i] = map.getActionMapEntry( static_cast<Parent*>(this)->calculateActionCoordinates(i).data() );
+		}
+
+		// now we load the children
+		for (size_t i = 0; i < children.size(); i++) {
+			if (childrenExist[i]) {
+				children[i] = loadFromStream(is, map);
+			} else {
+				children[i] == nullptr;
+			}
+		}
+
+
+	}
+
+
 };
 
 
@@ -167,9 +305,7 @@ public:
 		}
 	}
 
-	/** This function attempts to create the child with the correct index.
-	 *
-	 */
+	/** This function attempts to create the child with the correct index. */
 	void createChild(const size_t index, ContinuousActionMap& map) {
 
 		std::unique_ptr<This>& child = children[index];
@@ -181,7 +317,7 @@ public:
 		child->lower = lower;
 		child->upper = upper;
 
-		child->point = actions[index];
+		child->point = calculateActionCoordinates(index);
 
 		if (index == 0) {
 			child->radius = radius / 2;
@@ -202,11 +338,13 @@ private:
 public:
 	// infrastructure for serialisation.
 
-	/** a constructor to load the hierarchy data from a stream */
-	explicit CompassHierarchyData(std::istream& is);
+	static const char serialisationTerminator = '|';
 
 	/** method to save the date to a stream */
-	void saveToStream(std::ostream& os) const;
+	std::string saveToString() const;
+
+	/** method to save the date to a stream */
+	void loadFromString(const std::string& line);
 };
 
 
@@ -237,7 +375,7 @@ class GpsSearch {
 		return entry.getMeanQValue() + sqrt(options.explorationCoefficient * std::log( map.getTotalVisitCount() ) / entry.getVisitCount()  );
 	}
 
-	static void gpsUcbAction_processFixed(BeliefNode const *node, const Model& model, const GpsChooserOptions& options, const ThisActionMap& mapping, double& bestPointScore, ThisActionMapEntry*& bestEntry ) {
+	static void gpsUcbAction_processFixed(BeliefNode const */*node*/, const Model& model, const GpsChooserOptions& options, const ThisActionMap& mapping, double& bestPointScore, ThisActionMapEntry*& bestEntry ) {
 
 		// Process the actions and calculate the ucb score.
 		size_t unvisitedEntryCount = 0;
@@ -292,7 +430,7 @@ class GpsSearch {
 
 	}
 
-	static void gpsUcbAction_processGps(BeliefNode const *node, const Model& model, const GpsChooserOptions& options, ThisActionMap& mapping, double& bestPointScore, ThisActionMapEntry*& bestEntry ) {
+	static void gpsUcbAction_processGps(BeliefNode const */*node*/, const Model& model, const GpsChooserOptions& options, ThisActionMap& mapping, double& bestPointScore, ThisActionMapEntry*& bestEntry ) {
 
 		// we traverse the tree. If we decide to descend into a child, currentNode will be set to the child in the next round of the loop.
 		GpsStencil* currentNode = static_cast<GpsStencil*>(mapping.chooserData.get());
@@ -465,7 +603,6 @@ public:
 		// we traverse the tree to find the best node.
 		double bestPointScore = -std::numeric_limits<double>::infinity();
 		ThisActionMapEntry* bestEntry = nullptr;
-		bool blockCreationOfNewchild = false;
 
 		gpsUcbAction_processFixed(node, model, options, mapping, bestPointScore, bestEntry);
 
@@ -631,7 +768,7 @@ void route_gpsUcbAction(GpsChooserResponse& result, BeliefNode const *node, cons
 } // namespace gps_detail
 
 
-GpsChooserResponse gps_max_action(BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
+GpsChooserResponse gps_max_action(BeliefNode const */*node*/, const Model& /*model*/, const GpsChooserOptions& /*options*/) {
 #warning not implemented yet.
 }
 

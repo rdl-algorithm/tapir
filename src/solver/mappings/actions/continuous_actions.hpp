@@ -103,6 +103,15 @@ public:
 	/** like std::unordered_map::operator[] */
 	virtual std::unique_ptr<ContinuousActionMapEntry>& operator[](const ContinuousActionConstructionDataBase& key) = 0;
 
+	/** like std::unordered_map::at() but only providing the data pointer for the construction data */
+	virtual std::unique_ptr<ContinuousActionMapEntry>& at(const double* constructionDataVector) = 0;
+
+	/** like std::unordered_map::at() but only providing the data pointer for the construction data  */
+	virtual const std::unique_ptr<ContinuousActionMapEntry>& at(const double* constructionDataVector) const = 0;
+
+	/** like std::unordered_map::operator[] but only providing the data pointer for the construction data  */
+	virtual std::unique_ptr<ContinuousActionMapEntry>& operator[](const double* constructionDataVector) = 0;
+
 	/** like std::unordered_map::clear() */
 	virtual void clear() = 0;
 
@@ -145,6 +154,9 @@ public:
 	virtual std::unique_ptr<ContinuousActionMapEntry>& at(const ContinuousActionConstructionDataBase& key) override;
 	virtual const std::unique_ptr<ContinuousActionMapEntry>& at(const ContinuousActionConstructionDataBase& key) const override;
 	virtual std::unique_ptr<ContinuousActionMapEntry>& operator[](const ContinuousActionConstructionDataBase& key) override;
+	virtual std::unique_ptr<ContinuousActionMapEntry>& at(const double* constructionDataVector) override;
+	virtual const std::unique_ptr<ContinuousActionMapEntry>& at(const double* constructionDataVector) const override;
+	virtual std::unique_ptr<ContinuousActionMapEntry>& operator[](const double* constructionDataVector) override;
 	virtual void clear() override;
 	virtual std::vector<ActionMappingEntry const*> getEntries() const override;
 	virtual std::vector<ActionMappingEntry const*> getEntriesWithChildren() const override;
@@ -243,17 +255,20 @@ class ChooserDataBaseBase {
 	typedef ChooserDataBaseBase This;
 	typedef ContinuousActionMap ThisActionMap;
 public:
+	ChooserDataBaseBase() = default;
 	virtual ~ChooserDataBaseBase() = default;
 	_NO_COPY_OR_MOVE(ChooserDataBaseBase);
 
 
-	virtual void saveToStream(const ThisActionMap& map, std::ostream& os) const = 0;
-	static std::unique_ptr<This> loadFromStream(const ThisActionMap& map, std::istream& is);
+	void saveToStream(std::ostream& os, const ThisActionMap& map) const;
+	static std::unique_ptr<This> loadFromStream(std::istream& is, ThisActionMap& map);
 protected:
-	virtual void saveToStream_impl(const ThisActionMap& map, std::ostream& os) const = 0;
 
-	typedef std::function<std::unique_ptr<ChooserDataBaseBase>(std::istream&)> LoadFromStreamFunction;
+	typedef std::function<std::unique_ptr<ChooserDataBaseBase>(std::istream&, ThisActionMap& map)> LoadFromStreamFunction;
 	static void registerDerivedType(const std::string& name, const LoadFromStreamFunction& loader);
+
+	virtual void saveToStream_real(std::ostream& os, const ThisActionMap& map) const;
+
 private:
 	static std::unordered_map<std::string, LoadFromStreamFunction>& getDerivedLoadersSingleton();
 };
@@ -275,6 +290,7 @@ class ChooserDataBase: public ChooserDataBaseBase {
 	typedef ChooserDataBase This;
 	typedef ChooserDataBaseBase Base;
 public:
+	ChooserDataBase() = default;
 	virtual ~ChooserDataBase() = default;
 	_NO_COPY_OR_MOVE(ChooserDataBase);
 
@@ -329,7 +345,8 @@ private:
     virtual ActionMappingEntry *getEntry(Action const &action) override;
     virtual ActionMappingEntry const *getEntry(Action const &action) const override;
 
-    ThisActionMapEntry* createOrGetActionMapEntry(const double* constructionDataVecto);
+    ThisActionMapEntry* getActionMapEntry(const double* constructionDataVector);
+    ThisActionMapEntry* createOrGetActionMapEntry(const double* constructionDataVector);
 
     const std::vector<ThisActionMapEntry*>& getFixedEntries() const;
 
@@ -488,6 +505,21 @@ inline std::unique_ptr<ContinuousActionMapEntry>& ContinuousActionContainer<CONS
 }
 
 template<class CONSTRUCTION_DATA>
+inline std::unique_ptr<ContinuousActionMapEntry>& ContinuousActionContainer<CONSTRUCTION_DATA>::at(const double* constructionDataVector) {
+	return container.at(static_cast<KeyType&>(KeyType(constructionDataVector)));
+}
+
+template<class CONSTRUCTION_DATA>
+inline const std::unique_ptr<ContinuousActionMapEntry>& ContinuousActionContainer<CONSTRUCTION_DATA>::at(const double* constructionDataVector) const {
+	return container.at(static_cast<KeyType&>(KeyType(constructionDataVector)));
+}
+
+template<class CONSTRUCTION_DATA>
+inline std::unique_ptr<ContinuousActionMapEntry>& ContinuousActionContainer<CONSTRUCTION_DATA>::operator[](const double* constructionDataVector) {
+	return container[static_cast<KeyType&>(KeyType(constructionDataVector))];
+}
+
+template<class CONSTRUCTION_DATA>
 inline void ContinuousActionContainer<CONSTRUCTION_DATA>::clear() {
 	container.clear();
 }
@@ -541,7 +573,7 @@ bool ChooserDataBase<Derived>::initialisationDummy = (ChooserDataBase<Derived>::
 
 template<class Derived>
 inline void ChooserDataBase<Derived>::registerType() {
-	registerDerivedType(typeid(Derived).name, [](std::istream& is) { std::make_unique<Derived>(is); });
+	registerDerivedType(typeid(Derived).name(), [](std::istream& is) { std::make_unique<Derived>(is); });
 }
 
 
