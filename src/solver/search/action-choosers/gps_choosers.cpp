@@ -73,7 +73,7 @@ public:
 	 * An implementation of this class must provide "loadFromString(std::string)" in order to populate its fields.
 	 *
 	 */
-	static std::unique_ptr<Parent> loadFromStream(std::istream is, ContinuousActionMap& map) {
+	static std::unique_ptr<Parent> loadFromStream(std::istream& is, ContinuousActionMap& map) {
 		std::unique_ptr<Parent> result = std::make_unique<Parent>();
 		result->loadFromStream_impl(is, map);
 		return std::move(result);
@@ -120,6 +120,12 @@ private:
 			os << value << " ";
 		}
 
+		// mark which actions exist
+		os << "actions: ";
+		for (auto action : actions) {
+			os << (action != nullptr) << " ";
+		}
+
 		// mark which children exist
 		os << "children: ";
 		size_t lastExistingChild = 0;
@@ -158,7 +164,7 @@ private:
 	}
 
 	/** a method that does the work for loadFromStream and recurses through the tree. */
-	void loadFromStream_impl(std::istream is, ContinuousActionMap& map) {
+	void loadFromStream_impl(std::istream& is, ContinuousActionMap& map) {
 		std::string line;
 		std::getline(is, line);
 
@@ -184,8 +190,16 @@ private:
 			ss >> value;
 		}
 
+		// load the action markers
+		std::array<bool, actionSize> actionsExist;
+		ss >> dummy;
+		for (bool& marker : actionsExist) {
+			ss >> marker;
+		}
+
+
 		// load the child markers
-		std::array<bool, children.size()> childrenExist;
+		std::array<bool, childrenSize> childrenExist;
 		ss >> dummy;
 		for (bool& marker : childrenExist) {
 			ss >> marker;
@@ -196,7 +210,11 @@ private:
 
 		// now we have to find the actions
 		for (size_t i = 0; i < actions.size(); i++) {
-			actions[i] = map.getActionMapEntry( static_cast<Parent*>(this)->calculateActionCoordinates(i).data() );
+			if (actionsExist[i]) {
+				actions[i] = map.getActionMapEntry( static_cast<Parent*>(this)->calculateActionCoordinates(i).data() );
+			} else {
+				actions[i] = nullptr;
+			}
 		}
 
 		// now we load the children
@@ -626,7 +644,7 @@ public:
 		gpsUcbAction_processFixed(node, model, options, mapping, bestPointScore, bestEntry);
 
 		// return if there is an unvisited fixed action.
-		if (bestEntry->getVisitCount() == 0) {
+		if ( (bestEntry!= nullptr) && (bestEntry->getVisitCount() == 0) ) {
 			return GpsChooserResponse(bestEntry->getAction(), false);
 		}
 

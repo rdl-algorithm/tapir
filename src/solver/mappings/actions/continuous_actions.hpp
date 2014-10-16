@@ -311,8 +311,21 @@ public:
 	_NO_COPY_OR_MOVE(ChooserDataBase);
 
 private:
-	static bool initialisationDummy;
+	/** This function registers "Derived" with the base class
+	 *
+	 * This is needed for de-serialisation. It is then possible to load chooser data from file
+	 * regardless of its type by having the type name written to the file.
+	 */
 	static void registerType();
+
+	/** Only a dummy variable. It is used to run registerType() at program start. */
+	static bool initialisationDummy;
+
+	/** A useless function that only accesses initialisationDummy.
+	 *
+	 * If initialisationDummy is used nowhere, it isn't instantiated and registerType() doesn't run.
+	 */
+	virtual void accessInitialisationDummy();
 };
 
 
@@ -591,11 +604,20 @@ bool ChooserDataBase<Derived>::initialisationDummy = (ChooserDataBase<Derived>::
 
 template<class Derived>
 inline void ChooserDataBase<Derived>::registerType() {
-	registerDerivedType(typeid(Derived).name(), [](std::istream& is) { std::make_unique<Derived>(is); });
+
+	LoadFromStreamFunction loaderFunction = [](std::istream& is, ContinuousActionMap& map) {
+		return Derived::loadFromStream(is, map);
+	};
+
+	registerDerivedType(typeid(Derived).name(), loaderFunction);
+
 }
 
-
-
+template<class Derived>
+void ChooserDataBase<Derived>::accessInitialisationDummy() {
+	// make sure initialisationDummy is accessed.
+	if (initialisationDummy) {}
+}
 
 } /* namespace solver */
 

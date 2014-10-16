@@ -103,7 +103,7 @@ void ChooserDataBaseBase::saveToStream(std::ostream& os, const ThisActionMap& ma
 std::unique_ptr<ChooserDataBaseBase::This> ChooserDataBaseBase::loadFromStream(std::istream& is, ThisActionMap& map) {
 	std::string line;
 	std::getline(is, line);
-	return getDerivedLoadersSingleton()[line](is, map);
+	return getDerivedLoadersSingleton().at(line)(is, map);
 }
 
 
@@ -408,7 +408,7 @@ void ContinuousActionTextSerializer::loadActionMapping(ContinuousActionMap &map,
 
 void ContinuousActionTextSerializer::saveActionMapEntry(const ThisActionMapEntry& entry, std::ostream& os) {
 	saveConstructionData(entry.constructionData.get(), os);
-	os << "isLegal: " << entry.isLegal_;
+	os << " isLegal: " << entry.isLegal_;
 	os << " visitcount: " << entry.visitCount_;
 	os << " totalQvalue: " << entry.totalQValue_;
 	os << " meanQValue: " << entry.meanQValue_;
