@@ -86,6 +86,7 @@ int solve(int argc, char const *argv[]) {
     cout << "Saving to file...";
     cout.flush();
     std::ofstream outFile(options.policyPath);
+    outFile << std::setprecision(std::numeric_limits<double>::max_digits10);
     solver.getSerializer()->save(outFile);
     outFile.close();
     cout << "    Done." << endl;
