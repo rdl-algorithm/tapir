@@ -33,7 +33,7 @@
 #include "Map2d.hpp"
 #include "TruncatedNormalDistribution.hpp"
 
-#include "ContNavOptions.hpp"
+#include "PushBoxOptions.hpp"
 
 
 namespace solver {
@@ -47,15 +47,74 @@ class StatePool;
 /** A namespace to hold the various classes used for the Pushbox POMDP model. */
 namespace pushbox {
 
-class ContNavModel;
+
+class PushBoxModel;
+
+
+class PushBoxActionPool final: public solver::ContinuousActionPool {
+public:
+	PushBoxActionPool(const PushBoxModel& theModel): model(theModel) {};
+	virtual ~PushBoxActionPool() = default;
+	_NO_COPY_OR_MOVE(PushBoxActionPool);
+
+
+	/** Returns a container to store actions within a ContinuousActionMap */
+	virtual std::unique_ptr<ContinuousActionContainerBase> createActionContainer(BeliefNode *node) const override;
+
+	/** Returns an action construction data object based on a vector of numbers that was provided.
+	 *
+	 * Here, constructionData is a pointer to a data array as it is returned by
+	 * ContinuousActionConstructionDataBase::data(). It enables the action chooser to
+	 * create new actions based on values it seems fit.
+	 */
+	virtual std::unique_ptr<ContinuousActionConstructionDataBase> createActionConstructionData(const double* constructionDataVector, const BeliefNode* belief) const override;
+
+	/** Returns an action based on the Construction Data that was provided.
+	 *
+	 * In this version, constructionData is a pointer to a data array as it is returned by
+	 * ContinuousActionConstructionDataBase::data(). It enables the action chooser to
+	 * create new actions based on values it seems fit.
+	 *
+	 * The default version uses createActionConstructionData first and then creates an action based
+	 * on the full construction data. This might be inefficient and an implementation can override
+	 * this function for a more direct approach.
+	 *
+	 * TODO: Check whether this function is actually used or can be removed.
+	 */
+	virtual std::unique_ptr<Action> createAction(const double* constructionDataVector, const BeliefNode* belief) const override;
+
+
+	/** Returns an action based on the Construction Data that was provided.
+	 *
+	 * The default version calls createAction(constructionData.data()) which is probably fine
+	 * in a purely continuous case, but probably not in a hybrid case.
+	 */
+	virtual std::unique_ptr<Action> createAction(const ContinuousActionConstructionDataBase& constructionData) const override;
+
+
+	/** Returns the initial bounding box for the continuous search.
+	 *
+	 * For each dimension, the first entry of the pair is the lower bound, the second entry is the upper bound.
+	 */
+	virtual std::vector<std::pair<double, double>> getInitialBoundingBox(BeliefNode* belief) const override;
+
+	/** Returns a shared pointer to a container containing the construction data for the additional fixed actions in a hybrid action space.
+	 *
+	 * The result is a shared pointer. Thus, the implementation can decide whether it wants to create the container and pass on ownership or it
+	 * can return a reference to an internal vector without having to re-create it every time.
+	 *
+	 * The default version returns null to indicate there are no fixed actions.
+	 */
+	virtual std::vector<std::unique_ptr<ContinuousActionConstructionDataBase>> createFixedActions(const BeliefNode* belief) const override;
+
+private:
+	const PushBoxModel& model;
+};
 
 
 
 
-/** The implementation of the Model interface for the Tag POMDP.
- *
- * See this paper http://www.cs.cmu.edu/~ggordon/jpineau-ggordon-thrun.ijcai03.pdf
- * for a description of the Tag problem.
+/** The implementation of the Model interface for the PushBox POMDP.
  *
  * This class inherits from shared::ModelWithProgramOptions in order to use custom text-parsing
  * functionality to select many of the core ABT parameters, allowing the configuration options
@@ -63,6 +122,8 @@ class ContNavModel;
  */
 class PushBoxModel final: public shared::ModelWithProgramOptions {
 	typedef PushBoxModel This;
+
+public:
 	typedef StateRobotWithOpponent2d State;
 	typedef Action2d Action;
 	typedef BearingObservationDiscrete Observation;
@@ -73,7 +134,7 @@ public:
 	/** Constructs a new TagModel instance with the given random number engine, and the given set
 	 * of configuration options.
 	 */
-	PushBoxModel(RandomGenerator *randGen, std::unique_ptr<ContNavOptions> options);
+	PushBoxModel(RandomGenerator *randGen, std::unique_ptr<PushBoxOptions> options);
 
 	~PushBoxModel() = default;
 	_NO_COPY_OR_MOVE(PushBoxModel);
@@ -85,7 +146,7 @@ public:
 
 	bool isValid(solver::State const &baseState) override;
 
-	virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver* /*solver*/) override;
+	virtual std::unique_ptr<solver::ActionPool> createActionPool(solver::Solver* solver) override;
 
 	virtual std::unique_ptr<solver::Serializer> createSerializer(solver::Solver *solver) override;
 
@@ -107,6 +168,9 @@ public:
 
 	virtual Model::StepResult generateStep(solver::State const &baseState, solver::Action const &baseAction) override;
 
+
+	/* -------------------- simple getters ---------------------- */
+	size_t getFixedActionResolution() const { return options->fixedActionResolution; }
 
 
 private:
@@ -156,7 +220,7 @@ private:
 private:
 
 	/** The TagOptions instance associated with this model. */
-	ContNavOptions* options;
+	PushBoxOptions* options;
 
 	/** The penalty for each movement action. */
 	double moveCost;
@@ -182,7 +246,7 @@ private:
 	TruncatedNormalDistribution observationDistribution;
 	TruncatedNormalDistribution initialBoxPositionDistribution;
 
-	double observationBucketFactor;
+	size_t numberOfObservationBuckets;
 
 };
 } /* namespace pushbox */

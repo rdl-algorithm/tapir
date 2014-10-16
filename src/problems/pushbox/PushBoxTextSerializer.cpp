@@ -1,5 +1,5 @@
 
-#include "ContNavTextSerializer.hpp"
+#include "PushBoxTextSerializer.hpp"
 
 #include <iostream>                     // for operator<<, basic_ostream, basic_ostream<>::__ostream_type, basic_istream<>::__istream_type
 
@@ -11,6 +11,127 @@
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
 #include "PushBoxModel.hpp"
+
+namespace pushbox {
+
+PushBoxTextSerializer::PushBoxTextSerializer(solver::Solver *solver):
+		solver::Serializer(solver),
+		solver::TextSerializer(),
+		solver::ContinuousActionTextSerializer(),
+		solver::DiscreteObservationTextSerializer() {}
+
+
+
+
+void PushBoxTextSerializer::saveState(solver::State const *baseState, std::ostream &os) {
+	os << (baseState != nullptr) << " ";
+	if (baseState != nullptr) {
+		const State& state = static_cast<const State&>(*baseState);
+		os << state.getRobotPosition() << " ";
+		os << state.getOpponentPosition();
+	}
+}
+
+std::unique_ptr<solver::State> PushBoxTextSerializer::loadState(std::istream &is) {
+	bool notNull;
+	is >> notNull;
+	if (notNull) {
+		Position2d robot;
+		Position2d opponent;
+		is >> robot >> opponent;
+		return std::make_unique<State>(robot, opponent);
+	} else {
+		return nullptr;
+	}
+}
+
+void PushBoxTextSerializer::saveObservation(solver::Observation const *baseObservation, std::ostream &os) {
+	os << (baseObservation != nullptr) << " ";
+	if (baseObservation != nullptr) {
+		const Observation& observation = static_cast<const Observation&>(*baseObservation);
+		os << observation.getBearing() << " ";
+		os << observation.getBuckets();
+	}
+}
+
+
+std::unique_ptr<solver::Observation> PushBoxTextSerializer::loadObservation(std::istream &is) {
+	bool notNull;
+	is >> notNull;
+	if (notNull) {
+		int bearing;
+		int buckets;
+		is >> bearing >> buckets;
+		return std::make_unique<Observation>(bearing, buckets);
+	} else {
+		return nullptr;
+	}
+}
+
+void PushBoxTextSerializer::saveAction(solver::Action const* baseAction, std::ostream &os) {
+	os << (baseAction != nullptr) << " ";
+	if (baseAction != nullptr) {
+		const Action& action = static_cast<const Action&>(*baseAction);
+		os << action.getX() << " ";
+		os << action.getY();
+	}
+}
+
+
+std::unique_ptr<solver::Action> PushBoxTextSerializer::loadAction(std::istream &is) {
+	bool notNull;
+	is >> notNull;
+	if (notNull) {
+		int x;
+		int y;
+		is >> x >> y;
+		return std::make_unique<Action>(x, y);
+	} else {
+		return nullptr;
+	}
+}
+
+
+int PushBoxTextSerializer::getActionColumnWidth() {
+	return 10;
+}
+
+int PushBoxTextSerializer::getTPColumnWidth() {
+	return 0;
+}
+
+int PushBoxTextSerializer::getObservationColumnWidth() {
+	return 5;
+}
+
+
+void PushBoxTextSerializer::saveConstructionData(const ThisActionConstructionDataBase* baseData, std::ostream& os) {
+	os << (baseData != nullptr) << " ";
+	if (baseData != nullptr) {
+		const ConstructionData& data = static_cast<const ConstructionData&>(*baseData);
+		os << data[0] << " ";
+		os << data[1];
+	}
+}
+
+std::unique_ptr<PushBoxTextSerializer::ThisActionConstructionDataBase> PushBoxTextSerializer::loadConstructionData(std::istream& is) {
+	bool notNull;
+	is >> notNull;
+	if (notNull) {
+		int x;
+		int y;
+		is >> x >> y;
+		return std::make_unique<ConstructionData>(x, y);
+	} else {
+		return nullptr;
+	}
+}
+
+
+
+
+} // namespace pushbox
+
 
 //namespace solver {
 //class Solver;

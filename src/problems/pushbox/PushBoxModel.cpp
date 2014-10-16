@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "ContNavTextSerializer.hpp"
+#include "PushBoxTextSerializer.hpp"
 
 
 using std::cout;
@@ -11,9 +11,204 @@ using std::endl;
 
 namespace pushbox {
 
+
+/*----------------------------------- Helpers --------------------------------*/
+
+
 /** a little helper to get the square of an expression */
 template<typename T>
 inline T square(const T x) { return x*x; }
+
+/** constants to convert between degrees and radians. */
+static const double radians = 180 / M_PI;
+static const double degrees = M_PI / 180;
+
+/** A little helper to throw an exception with a message */
+inline void throwException(const std::string& message) {
+	class PushBoxException: public std::exception {
+		const std::string message;
+	public:
+		PushBoxException(const std::string theMessage): message(theMessage) {}
+
+		virtual const char* what() const noexcept {
+			return message.c_str();
+		}
+	};
+
+	throw PushBoxException(message);
+}
+
+
+
+/*----------------------------------- PushBoxActionPool --------------------------------*/
+
+std::unique_ptr<PushBoxActionPool::ContinuousActionContainerBase> PushBoxActionPool::createActionContainer(BeliefNode* /*node*/) const {
+	return std::make_unique<solver::ContinuousActionContainer<Action2dConstructionData>>(Action2dConstructionData::HashEqualOptions(0.03333333333333));
+}
+
+std::unique_ptr<PushBoxActionPool::ContinuousActionConstructionDataBase> PushBoxActionPool::createActionConstructionData(const double* constructionDataVector, const BeliefNode* /*belief*/) const {
+	return std::make_unique<Action2dConstructionData>(constructionDataVector);
+}
+
+std::unique_ptr<solver::Action> PushBoxActionPool::createAction(const double* constructionDataVector, const BeliefNode* /*belief*/) const {
+	return std::make_unique<Action2d>(constructionDataVector);
+}
+
+std::unique_ptr<solver::Action> PushBoxActionPool::createAction(const ContinuousActionConstructionDataBase& constructionData) const {
+	return std::make_unique<Action2d>(static_cast<const Action2dConstructionData&>(constructionData));
+}
+
+std::vector<std::pair<double, double>> PushBoxActionPool::getInitialBoundingBox(BeliefNode* /*belief*/) const {
+	return {{-1,1},{-1,1}};
+}
+
+std::vector<std::unique_ptr<PushBoxActionPool::ContinuousActionConstructionDataBase>> PushBoxActionPool::createFixedActions(const BeliefNode* /*belief*/) const {
+
+	size_t fixedActionResolution = model.getFixedActionResolution();
+
+	std::vector<std::unique_ptr<PushBoxActionPool::ContinuousActionConstructionDataBase>> result;
+
+	if (fixedActionResolution > 0) {
+		const double low = -1;
+		const double high = 1;
+		const double delta = (high-low) / fixedActionResolution;
+
+		result.reserve(square(fixedActionResolution));
+
+		for (size_t ix = 0; ix < fixedActionResolution; ix++) {
+			for (size_t iy = 0; iy < fixedActionResolution; iy++) {
+				result.push_back(std::make_unique<Action2dConstructionData>(low + delta * ( ix + 0.5), low + delta * ( iy + 0.5)));
+			}
+		}
+	}
+
+	return result;
+
+}
+
+
+/*----------------------------------- PushBoxModel --------------------------------*/
+
+PushBoxModel::PushBoxModel(RandomGenerator *randGen, std::unique_ptr<PushBoxOptions> theOptions):
+							ModelWithProgramOptions("ContNav", randGen, std::move(theOptions)),
+							options(const_cast<PushBoxOptions *>(static_cast<PushBoxOptions const *>(getOptions()))),
+							moveCost(options->moveCost),
+							goalReward(options->goalReward),
+							collisionPenalty(options->collisionPenalty),
+							startPosition(options->startPositionX,options->startPositionY),
+							startBoxPosition(options->boxPositionX,options->boxPositionY),
+							goalPosition(),
+							map(),
+							moveDistribution(0, options->moveUncertainty),
+							actionDistribution(0, options->actionUncertainty),
+							boxSpeedFactorDistribution(1, options->boxSpeedUncertainty),
+							boxAbsoluteDistribution(0, options->boxPositionMoveUncertainty),
+							observationDistribution(0, options->observationUncertainty),
+							initialBoxPositionDistribution(0, options->initialBoxPositionUncertainty),
+							numberOfObservationBuckets(options->observationBuckets)
+{
+	options->numberOfStateVariables = 2;
+	options->minVal = -(collisionPenalty + moveCost) / (1 - options->discountFactor);
+	options->maxVal = goalReward;
+
+	// Register the upper bound heuristic parser.
+	//registerHeuristicParser("upper", std::make_unique<ContNavUBParser>(this));
+	// Register the exact MDP heuristic parser.
+	//registerHeuristicParser("exactMdp", std::make_unique<TagMdpParser>(this));
+
+	if ( (options->sizeX > 0) && (options->sizeY > 0) ) {
+		map = Map(options->sizeX, options->sizeY, ' ');
+	}
+
+	if (!options->mapPath.empty()) {
+		map.loadFromFile(options->mapPath);
+	}
+
+	if ( (options->startPositionX >=0) && (options->startPositionY >=0) ) {
+		startPosition.x = options->startPositionX;
+		startPosition.y = options->startPositionY;
+	} else {
+		double sumX = 0;
+		double sumY = 0;
+		size_t count = 0;
+		for (size_t y = 0; y < map.sizeY(); y++ ) {
+			for (size_t x = 0; x < map.sizeX(); x++ ) {
+				if (map(x,y) == 's') {
+					sumX += x+0.5;
+					sumY += y+0.5;
+					count++;
+				}
+			}
+		}
+
+		if (count > 0) {
+			startPosition.x = sumX / count;
+			startPosition.y = sumY / count;
+		} else {
+			throwException("No start coordinates found.");
+		}
+	}
+
+	if ( (options->boxPositionX >=0) && (options->boxPositionY >=0) ) {
+		startBoxPosition.x = options->boxPositionX;
+		startBoxPosition.y = options->boxPositionY;
+	} else {
+		double sumX = 0;
+		double sumY = 0;
+		size_t count = 0;
+		for (size_t y = 0; y < map.sizeY(); y++ ) {
+			for (size_t x = 0; x < map.sizeX(); x++ ) {
+				if (map(x,y) == 'b') {
+					sumX += x+0.5;
+					sumY += y+0.5;
+					count++;
+				}
+			}
+		}
+
+		if (count > 0) {
+			startBoxPosition.x = sumX / count;
+			startBoxPosition.y = sumY / count;
+		} else {
+			throwException("No box coordinates found.");
+		}
+	}
+
+	if ( (options->goalPositionX >=0) && (options->goalPositionY >=0) ) {
+		goalPosition.x = options->goalPositionX;
+		goalPosition.y = options->goalPositionY;
+	} else {
+		double sumX = 0;
+		double sumY = 0;
+		size_t count = 0;
+		for (size_t y = 0; y < map.sizeY(); y++ ) {
+			for (size_t x = 0; x < map.sizeX(); x++ ) {
+				if (map(x,y) == 'g') {
+					sumX += x+0.5;
+					sumY += y+0.5;
+					count++;
+				}
+			}
+		}
+
+		if (count > 0) {
+			goalPosition.x = sumX / count;
+			goalPosition.y = sumY / count;
+		} else {
+			throwException("No goal coordinates found.");
+		}
+	}
+
+
+
+}
+
+
+
+std::unique_ptr<solver::ActionPool> PushBoxModel::createActionPool(solver::Solver* /*solver*/) {
+	return std::make_unique<PushBoxActionPool>(*this);
+}
+
 
 
 std::unique_ptr<solver::State> PushBoxModel::sampleAnInitState() {
@@ -206,20 +401,21 @@ std::unique_ptr<solver::Observation> PushBoxModel::makeObservation(const State& 
 	double deltaX = nextState.getOpponentPosition().x - nextState.getRobotPosition().x;
 	double deltaY = nextState.getOpponentPosition().y - nextState.getRobotPosition().y;
 
-	double angle = std::atan2(deltaY, deltaX) * tapir::constants::radian<double>();
+	double angle = std::atan2(deltaY, deltaX) * radians;
 
 	angle += observationDistribution(*getRandomGenerator());
 	if (angle < 0) angle += 360;
 	if (angle > 360) angle -= 360;
 	if (angle < 0) angle = 0;
 
+	double observationBucketFactor = 360/numberOfObservationBuckets;
 	double bearing = std::floor(angle / observationBucketFactor) * observationBucketFactor;
 
-	if (oldState.getBoxPosition() != nextState.getBoxPosition()) {
+	if (oldState.getOpponentPosition() != nextState.getOpponentPosition()) {
 		bearing += 1000;
 	}
 
-	return std::make_unique<Observation>(bearing);
+	return std::make_unique<Observation>(bearing, numberOfObservationBuckets);
 
 }
 
@@ -263,7 +459,7 @@ double PushBoxModel::getDefaultHeuristicValue(solver::HistoryEntry const * entry
 			return -collisionPenalty;
 		}
 
-		COMMA_THROW(comma::exception, "We should never reach this point. There seems to be an unknown terminal state.");
+		debug::show_message("Error: We should never reach this point. There seems to be an unknown terminal state.");
 	}
 
 	//return getNeighbourHeuristicValue(entry, baseState, data);
@@ -276,12 +472,12 @@ double PushBoxModel::getUpperBoundHeuristicValue(solver::HistoryEntry const * /*
 
 	double result=0;
 
-	double distanceToGoal = state.getBoxPosition().euclideanDistanceTo(goalPosition);
+	double distanceToGoal = state.getOpponentPosition().euclideanDistanceTo(goalPosition);
 
-	double goalToBoxX = state.getBoxPosition().x - goalPosition.x;
-	double goalToBoxY = state.getBoxPosition().y - goalPosition.y;
+	double goalToBoxX = state.getOpponentPosition().x - goalPosition.x;
+	double goalToBoxY = state.getOpponentPosition().y - goalPosition.y;
 
-	Position attractionPoint(state.getBoxPosition().x + goalToBoxX/distanceToGoal, state.getBoxPosition().y + goalToBoxY/distanceToGoal);
+	Position2d attractionPoint(state.getOpponentPosition().x + goalToBoxX/distanceToGoal, state.getOpponentPosition().y + goalToBoxY/distanceToGoal);
 
 	distanceToGoal += state.getRobotPosition().euclideanDistanceTo(attractionPoint);
 
@@ -294,6 +490,7 @@ double PushBoxModel::getUpperBoundHeuristicValue(solver::HistoryEntry const * /*
 	return result;
 }
 
+/*
 double PushBoxModel::getNeighbourHeuristicValue(solver::HistoryEntry const * entry, solver::State const *baseState, solver::HistoricalData const * data) {
 
 	const State* state = static_cast<const State*>(baseState);
@@ -382,62 +579,10 @@ double PushBoxModel::getNeighbourHeuristicValue(solver::HistoryEntry const * ent
 		return rewardSum / rewardCount;
 	}
 
-}
+} //*/
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void ContNavActionCreator::populateFixedActions() {
-
-	if (fixedActionResolution > 0) {
-		const double low = -1;
-		const double high = 1;
-		const double delta = (high-low) / fixedActionResolution;
-
-		fixedActions = std::make_shared<decltype(fixedActions)::element_type>();
-		fixedActions->reserve(fixedActionResolution*fixedActionResolution);
-
-		for (size_t ix = 0; ix < fixedActionResolution; ix++) {
-			for (size_t iy = 0; iy < fixedActionResolution; iy++) {
-				fixedActions->emplace_back();
-				fixedActions->back().data[0] = low + delta * ( ix + 0.5);
-				fixedActions->back().data[1] = low + delta * ( iy + 0.5);
-			}
-		}
-	}
-
-}
-
-
-std::shared_ptr<const std::vector<ContNavActionCreator::ActionConstructionData>> ContNavActionCreator::createFixedActions(const solver::BeliefNode* /*belief*/) const {
-	return fixedActions;
-}
 
 
 //ContNavUBParser::ContNavUBParser(ContNavModel *model) :
@@ -451,123 +596,10 @@ std::shared_ptr<const std::vector<ContNavActionCreator::ActionConstructionData>>
 //	};
 //}
 
-ContNavModel::ContNavModel(RandomGenerator *randGen, std::unique_ptr<ContNavOptions> theOptions):
-							ModelWithProgramOptions("ContNav", randGen, std::move(theOptions)),
-							options(const_cast<ContNavOptions *>(static_cast<ContNavOptions const *>(getOptions()))),
-							moveCost(options->moveCost),
-							goalReward(options->goalReward),
-							collisionPenalty(options->collisionPenalty),
-							startPosition(options->startPositionX,options->startPositionY),
-							startBoxPosition(options->boxPositionX,options->boxPositionY),
-							goalPosition(),
-							map(),
-							moveDistribution(0, options->moveUncertainty),
-							actionDistribution(0, options->actionUncertainty),
-							boxSpeedFactorDistribution(1, options->boxSpeedUncertainty),
-							boxAbsoluteDistribution(0, options->boxPositionMoveUncertainty),
-							observationDistribution(0, options->observationUncertainty),
-							initialBoxPositionDistribution(0, options->initialBoxPositionUncertainty),
-							observationBucketFactor(360 / options->observationBuckets)
-{
-	options->numberOfStateVariables = 2;
-	options->minVal = -(collisionPenalty + moveCost) / (1 - options->discountFactor);
-	options->maxVal = goalReward;
-
-	// Register the upper bound heuristic parser.
-	//registerHeuristicParser("upper", std::make_unique<ContNavUBParser>(this));
-	// Register the exact MDP heuristic parser.
-	//registerHeuristicParser("exactMdp", std::make_unique<TagMdpParser>(this));
-
-	if ( (options->sizeX > 0) && (options->sizeY > 0) ) {
-		map = Map(options->sizeX, options->sizeY, ' ');
-	}
-
-	if (!options->mapPath.empty()) {
-		map.loadFromFile(options->mapPath);
-	}
-
-	if ( (options->startPositionX >=0) && (options->startPositionY >=0) ) {
-		startPosition.x = options->startPositionX;
-		startPosition.y = options->startPositionY;
-	} else {
-		double sumX = 0;
-		double sumY = 0;
-		size_t count = 0;
-		for (size_t y = 0; y < map.sizeY(); y++ ) {
-			for (size_t x = 0; x < map.sizeX(); x++ ) {
-				if (map(x,y) == 's') {
-					sumX += x+0.5;
-					sumY += y+0.5;
-					count++;
-				}
-			}
-		}
-
-		if (count > 0) {
-			startPosition.x = sumX / count;
-			startPosition.y = sumY / count;
-		} else {
-			COMMA_THROW(comma::exception, "No start coordinates found.");
-		}
-	}
-
-	if ( (options->boxPositionX >=0) && (options->boxPositionY >=0) ) {
-		startBoxPosition.x = options->boxPositionX;
-		startBoxPosition.y = options->boxPositionY;
-	} else {
-		double sumX = 0;
-		double sumY = 0;
-		size_t count = 0;
-		for (size_t y = 0; y < map.sizeY(); y++ ) {
-			for (size_t x = 0; x < map.sizeX(); x++ ) {
-				if (map(x,y) == 'b') {
-					sumX += x+0.5;
-					sumY += y+0.5;
-					count++;
-				}
-			}
-		}
-
-		if (count > 0) {
-			startBoxPosition.x = sumX / count;
-			startBoxPosition.y = sumY / count;
-		} else {
-			COMMA_THROW(comma::exception, "No box coordinates found.");
-		}
-	}
-
-	if ( (options->goalPositionX >=0) && (options->goalPositionY >=0) ) {
-		goalPosition.x = options->goalPositionX;
-		goalPosition.y = options->goalPositionY;
-	} else {
-		double sumX = 0;
-		double sumY = 0;
-		size_t count = 0;
-		for (size_t y = 0; y < map.sizeY(); y++ ) {
-			for (size_t x = 0; x < map.sizeX(); x++ ) {
-				if (map(x,y) == 'g') {
-					sumX += x+0.5;
-					sumY += y+0.5;
-					count++;
-				}
-			}
-		}
-
-		if (count > 0) {
-			goalPosition.x = sumX / count;
-			goalPosition.y = sumY / count;
-		} else {
-			COMMA_THROW(comma::exception, "No goal coordinates found.");
-		}
-	}
 
 
-
-}
-
-
-std::unique_ptr<solver::Serializer> ContNavModel::createSerializer(solver::Solver *solver) {
-	return std::make_unique<ContNavTextSerializer>(solver);
+std::unique_ptr<solver::Serializer> PushBoxModel::createSerializer(solver::Solver *solver) {
+	return std::make_unique<PushBoxTextSerializer>(solver);
 }
 
 

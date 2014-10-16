@@ -12,7 +12,7 @@
 
 
 namespace pushbox {
-class ContNavModel;
+
 
 /** A class representing an observation of a bearing sensor
  *
@@ -25,6 +25,9 @@ class BearingObservationDiscrete: public solver::Point {
 
     _NO_COPY_OR_MOVE(BearingObservationDiscrete);
 
+    virtual std::unique_ptr<Point> copy() const {
+    	return std::make_unique<This>(bearing, buckets);
+    }
 
     double distanceTo(solver::Observation const &otherObs) const override {
     	This const &other =  static_cast<This const &>(otherObs);
@@ -46,6 +49,9 @@ class BearingObservationDiscrete: public solver::Point {
 
     /** Returns the bearing. */
     const int& getBearing() const { return bearing; }
+
+    /** Returns the number of buckets. */
+    const int& getBuckets() const { return buckets; }
 
 
   private:

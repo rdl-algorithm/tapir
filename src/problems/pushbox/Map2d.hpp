@@ -100,18 +100,20 @@ void Map2D<ValueType>::loadFromStream(std::istream& is) {
 			auto oldXSize = xSize;
 			clear();
 
-			std::stringstream ss;
 
 			class MapDataInvalid: public std::exception {
+				const std::string message;
+			public:
+				MapDataInvalid(const std::string theMessage): message(theMessage) {}
+
 				virtual const char* what() const noexcept {
 					return message.c_str();
 				}
-			public:
-				std::string message;
-			} e;
+			};
+
+			std::stringstream ss;
 			ss << "Map data is invalid. Line " << i << " has length " << lines[i].size() << ". Expected length " << oldXSize << ".";
-			e.message = ss.str();
-			throw e;
+			throw MapDataInvalid(ss.str());
 
 			return;
 		}

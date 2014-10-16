@@ -12,8 +12,9 @@ namespace pushbox {
  * This is pure continuous, so there are no extra fields necessary apart from what is in the data vector.
  */
 class Action2dConstructionData final: public solver::ContinuousActionConstructionDataBase {
-
+	typedef Action2dConstructionData This;
 public:
+
 	Action2dConstructionData() = default;
 
 	Action2dConstructionData(const double* constructionDataVector) {
@@ -22,10 +23,44 @@ public:
 		}
 	}
 
+	Action2dConstructionData(const double x, const double y): storage({x,y}) {};
+
+
 	virtual const double* data() const override { return storage.data(); }
 
+	size_t size() const { return storage.size(); }
 	double& operator[](size_t index) { return storage[index]; }
 	const double& operator[](size_t index) const { return storage[index]; }
+
+public:
+	/* Infrastructure for use in a ContinuousActionContainer */
+	struct HashEqualOptions{
+		HashEqualOptions(const double theTolerance): tolerance(theTolerance) {}
+
+		/* Defines the tolerance used when hashing and comparing elements. */
+		const double tolerance;
+	};
+
+	size_t hash(const HashEqualOptions& options) const {
+		size_t result = 0;
+		for (auto i : storage) {
+			tapir::hash_combine(result, snapToTolerance(i, options.tolerance));
+		}
+		return result;
+	}
+
+	bool equal(const This& other, const HashEqualOptions& options) const {
+		for (size_t i = 0; i<storage.size(); i++) {
+			if ( snapToTolerance(storage[i], options.tolerance) != snapToTolerance(other.storage[i], options.tolerance) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+private:
+	static double snapToTolerance(const double value, const double tolerance) { return std::round(value/tolerance)*tolerance; }
+
 
 private:
 	std::array<double, 2> storage = {{0,0}};
@@ -40,13 +75,18 @@ private:
 class Action2d final: public solver::ContinuousAction {
 	typedef Action2d This;
   public:
+	typedef Action2dConstructionData ConstructionData;
+
+
     /** Constructs a new action from the given ActionType. */
 	Action2d(const double x, const double y): storage() {
 		storage[0] = x;
 		storage[1] = y;
 	};
 
-	Action2d(const Action2dConstructionData& data):storage(data) {};
+	Action2d(const ConstructionData& data):storage(data) {};
+
+	Action2d(const double* constructionDataVector):storage(constructionDataVector) {};
 
     virtual ~Action2d() = default;
     _NO_COPY_OR_MOVE(Action2d);

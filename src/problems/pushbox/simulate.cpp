@@ -6,9 +6,8 @@
 #include "problems/shared/simulate.hpp"
 
 #include "PushBoxModel.hpp"
-#include "ContNavOptions.hpp"
 
 /** The main method for the "simulate" executable for Tag. */
 int main(int argc, char const *argv[]) {
-    return simulate<pushbox::PushBoxModel, pushbox::ContNavOptions>(argc, argv);
+    return simulate<pushbox::PushBoxModel, pushbox::PushBoxOptions>(argc, argv);
 }

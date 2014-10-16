@@ -16,6 +16,7 @@
 
 #include "solver/serialization/TextSerializer.hpp"    // for TextSerializer
 
+#include "PushBoxModel.hpp"
 
 namespace solver {
 class Solver;
@@ -35,30 +36,40 @@ std::vector<long> loadVector(std::istream &is);
  * the action mappings, and from solver::DiscreteObservationTextSerializer in order to serialize
  * the observation mappings.
  */
-class ContNavTextSerializer: virtual public solver::TextSerializer, virtual solver::ContinuousActionTextSerializer, virtual solver::DiscreteObservationTextSerializer {
+class PushBoxTextSerializer: virtual public solver::Serializer, virtual public solver::TextSerializer, virtual solver::ContinuousActionTextSerializer, virtual solver::DiscreteObservationTextSerializer {
+	typedef PushBoxModel Model;
+	typedef Model::State State;
+	typedef Model::Observation Observation;
+	typedef Model::Action Action;
+	typedef Action::ConstructionData ConstructionData;
   public:
     /** Creates a new TagTextSerializer instance, associated with the given solver. */
-	ContNavTextSerializer(solver::Solver *solver);
+	PushBoxTextSerializer(solver::Solver *solver);
 
-    virtual ~ContNavTextSerializer() = default;
-    _NO_COPY_OR_MOVE(ContNavTextSerializer);
+    virtual ~PushBoxTextSerializer() = default;
+    _NO_COPY_OR_MOVE(PushBoxTextSerializer);
 
 
-    void saveState(solver::State const *state, std::ostream &os) override;
-    std::unique_ptr<solver::State> loadState(std::istream &is) override;
+    virtual void saveState(solver::State const *state, std::ostream &os) override;
+    virtual std::unique_ptr<solver::State> loadState(std::istream &is) override;
 
-    void saveObservation(solver::Observation const *obs,
+    virtual void saveObservation(solver::Observation const *obs,
             std::ostream &os) override;
-    std::unique_ptr<solver::Observation> loadObservation(
+    virtual std::unique_ptr<solver::Observation> loadObservation(
             std::istream &is) override;
 
-    void saveAction(solver::Action const *action, std::ostream &os) override;
-    std::unique_ptr<solver::Action> loadAction(std::istream &is) override;
+    virtual void saveAction(solver::Action const *action, std::ostream &os) override;
+    virtual std::unique_ptr<solver::Action> loadAction(std::istream &is) override;
 
 
     virtual int getActionColumnWidth() override;
     virtual int getTPColumnWidth() override;
     virtual int getObservationColumnWidth() override;
+  protected:
+    /** Saves the construction data to the output stream */
+    virtual void saveConstructionData(const ThisActionConstructionDataBase*, std::ostream& os) override;
+    /** Loads the construction data from the input stream */
+    virtual std::unique_ptr<ThisActionConstructionDataBase> loadConstructionData(std::istream& is) override;
 };
 } /* namespace contnav */
 

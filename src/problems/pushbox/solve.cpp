@@ -6,9 +6,8 @@
 #include "problems/shared/solve.hpp"
 
 #include "PushBoxModel.hpp"
-#include "ContNavOptions.hpp"
 
 /** The main method for the "solve" executable for Tag. */
 int main(int argc, char const *argv[]) {
-    return solve<pushbox::ContNavModel, pushbox::ContNavOptions>(argc, argv);
+    return solve<pushbox::PushBoxModel, pushbox::PushBoxOptions>(argc, argv);
 }
