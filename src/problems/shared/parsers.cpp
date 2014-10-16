@@ -93,23 +93,27 @@ std::unique_ptr<solver::StepGeneratorFactory> GpsParser::parse(solver::Solver *s
 	}
 	index++;
 
-    if (args.size() > index) std::istringstream(args[2]) >> options.dimensions;
+    if (args.size() > index) std::istringstream(args[index]) >> options.dimensions;
     index++;
-    if (args.size() > index) std::istringstream(args[2]) >> options.disableGpsSearch;
+    if (args.size() > index) std::istringstream(args[index]) >> options.explorationCoefficient;
     index++;
-    if (args.size() > index) std::istringstream(args[2]) >> options.explorationCoefficient;
+    if (args.size() > index) std::istringstream(args[index]) >> options.newSearchPointCoefficient;
     index++;
-    if (args.size() > index) std::istringstream(args[2]) >> options.newSearchPointCoefficient;
+    if (args.size() > index) std::istringstream(args[index]) >> options.minimumVisitsBeforeChildCreation;
     index++;
-    if (args.size() > index) std::istringstream(args[2]) >> options.minimumVisitsBeforeChildCreation;
-    index++;
-    if (args.size() > index) std::istringstream(args[2]) >> options.minimumChildCreationDistance;
+    if (args.size() > index) std::istringstream(args[index]) >> options.minimumChildCreationDistance;
     index++;
 
     if (args.size() < index) {
     	debug::show_message("Warning: not enough arguments given for gps search. Some default values are used.");
     } else if (args.size() > index) {
     	debug::show_message("Warning: too many arguments given for gps search. Extra arguments are ignored.");
+    }
+
+    if (options.newSearchPointCoefficient <= 0) {
+    	options.disableGpsSearch = true;
+    } else {
+    	options.disableGpsSearch = false;
     }
 
     return std::make_unique<solver::GpsStepGeneratorFactory>(solver, options);
@@ -245,9 +249,12 @@ std::unique_ptr<solver::SelectRecommendedActionStrategy> GpsMaxRecommendedAction
 	}
 	index++;
 
-    if (args.size() > index) std::istringstream(args[2]) >> options.dimensions;
+    if (args.size() > index) std::istringstream(args[index]) >> options.dimensions;
     index++;
-    if (args.size() > index) std::istringstream(args[2]) >> options.disableGpsSearch;
+
+    bool enableGpsSearch = true;
+    if (args.size() > index) std::istringstream(args[index]) >> enableGpsSearch;
+    options.disableGpsSearch = !enableGpsSearch;
     index++;
 
     if (args.size() < index) {

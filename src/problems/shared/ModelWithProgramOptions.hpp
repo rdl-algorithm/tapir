@@ -46,6 +46,7 @@ public:
         selectRecommendedActionParsers_(),
         estimationParsers_() {
         registerGeneratorParser("ucb", std::make_unique<UcbParser>());
+        registerGeneratorParser("gps", std::make_unique<GpsParser>());
         registerGeneratorParser("rollout", std::make_unique<DefaultRolloutParser>());
         registerGeneratorParser("nn", std::make_unique<NnRolloutParser>());
         registerGeneratorParser("staged", std::make_unique<StagedParser>(&generatorParsers_));
@@ -62,6 +63,7 @@ public:
         registerEstimationParser("robust", std::make_unique<RobustEstimateParser>());
 
         registerSelectRecommendedActionParser("max", std::make_unique<MaxRecommendedActionStrategyParser>());
+        registerSelectRecommendedActionParser("gpsmax", std::make_unique<GpsMaxRecommendedActionStrategyParser>());
     }
 
     virtual ~ModelWithProgramOptions() = default;
