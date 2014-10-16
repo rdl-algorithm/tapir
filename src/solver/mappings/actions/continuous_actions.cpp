@@ -85,6 +85,10 @@ bool ContinuousActionPool::randomiseFixedActions(const BeliefNode* /*belief*/) c
 
 /* ---------------------- ChooserDataBaseBase ---------------------- */
 
+std::string ChooserDataBaseBase::getActionMarker(const ThisActionMapEntry* /*entry*/) const {
+	return "";
+}
+
 void ChooserDataBaseBase::registerDerivedType(const std::string& name, const LoadFromStreamFunction& loader) {
 	getDerivedLoadersSingleton()[name] = loader;
 }
@@ -304,6 +308,14 @@ const ActionNode* ContinuousActionMapEntry::getChild() const {
 
 const ContinuousActionMapEntry::ThisActionConstructionData& ContinuousActionMapEntry::getConstructionData() const {
 	return *constructionData;
+}
+
+std::string ContinuousActionMapEntry::getMarker() const {
+	if (map->chooserData != nullptr) {
+		return map->chooserData->getActionMarker(this);
+	} else {
+		return "";
+	}
 }
 
 /* ------------------- ContinuousActionTextSerializer ------------------- */

@@ -270,11 +270,18 @@ public:
 class ChooserDataBaseBase {
 	typedef ChooserDataBaseBase This;
 	typedef ContinuousActionMap ThisActionMap;
+	typedef ContinuousActionMapEntry ThisActionMapEntry;
 public:
 	ChooserDataBaseBase() = default;
 	virtual ~ChooserDataBaseBase() = default;
 	_NO_COPY_OR_MOVE(ChooserDataBaseBase);
 
+	/** This function can return a marker attached with an action.
+	 *
+	 * Implementing something useful is optional (the default returns an empty string.
+	 * This can be used for debugging and/or profiling.
+	 */
+	virtual std::string getActionMarker(const ThisActionMapEntry* entry) const;
 
 	void saveToStream(std::ostream& os, const ThisActionMap& map) const;
 	static std::unique_ptr<This> loadFromStream(std::istream& is, ThisActionMap& map);
@@ -457,6 +464,8 @@ public:
 	const ActionNode* getChild() const;
 
 	const ThisActionConstructionData& getConstructionData() const;
+
+	virtual std::string getMarker() const override;
 
 protected:
 	/** The parent action mapping. */

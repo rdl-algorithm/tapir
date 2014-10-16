@@ -66,7 +66,53 @@ public:
 	/** our children (if any). */
 	std::array<std::unique_ptr<Parent>, childrenSize> children;
 
+	/** Return a marker if the entry is on the active path (highest Q-value).
+	 *
+	 * This implementation assumes that actions and children of the same index belong together.
+	 * If another pattern is used, this must be overridden in the Parent.
+	 */
+	virtual std::string getActionMarker(const ActionEntry* entry) const override {
 
+		if (actionSize!=childrenSize) {
+			debug::show_message("Warning: this version of getActionMarker only works if actions and children of the same index belong together. This is not the case.");
+			return "";
+		}
+
+		std::string result;
+
+		size_t level=0;
+		This const* current = this;
+		while(current != nullptr) {
+
+			size_t bestIndex = 0;
+			double bestQValue = -std::numeric_limits<double>::infinity();
+
+			for (size_t i=0; i<current->actions.size(); i++){
+				if ( (current->actions[i]!=nullptr) && (current->actions[i]->getMeanQValue() > bestQValue) ){
+					bestQValue = current->actions[i]->getMeanQValue();
+					bestIndex = i;
+				}
+			}
+
+			if (current->actions[bestIndex] == nullptr) break;
+
+			for (size_t i=0; i<current->actions.size(); i++){
+				if ( current->actions[i]== entry){
+					if (i==bestIndex) {
+						result += 'A' + char(level);
+					} else {
+						result += 'a' + char(level);
+					}
+				}
+			}
+
+			current = current->children[bestIndex].get();
+			level++;
+		}
+
+		return result;
+
+	}
 
 	/** a method to load the hierarchy data from a stream
 	 *
