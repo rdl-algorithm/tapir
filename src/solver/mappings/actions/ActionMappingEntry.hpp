@@ -57,6 +57,14 @@ public:
      * need to be marked for updating via the model-changing interface.
      */
     virtual void setLegal(bool legal) = 0;
+
+    /** Returns a to give extended information about the entry.
+     *
+     * This can be used for debugging or performance analysis.
+     *
+     * The default implementation returns an empty string.
+     */
+    virtual std::string getMarker() const { return ""; }
 };
 } /* namespace solver */
 

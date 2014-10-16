@@ -515,17 +515,22 @@ void Solver::printBelief(BeliefNode *belief, std::ostream &os) {
     os << " with " << belief->getNumberOfStartingSequences() << " starts.";
     os << endl;
     os << "Action children: " << endl;
-    std::multimap<double, solver::ActionMappingEntry const *> actionValues;
+    typedef std::pair<solver::ActionMappingEntry const *, std::string> EntryWithMarker;
+    std::multimap<double, EntryWithMarker> actionValues;
+    size_t longestMarker = 0;
     for (solver::ActionMappingEntry const *entry : belief->getMapping()->getVisitedEntries()) {
-        actionValues.emplace(entry->getMeanQValue(), entry);
+    	EntryWithMarker entryWithMarker(entry, entry->getMarker() );
+    	longestMarker = std::max(longestMarker, entryWithMarker.second.length());
+        actionValues.insert(std::make_pair(entry->getMeanQValue(), std::move(entryWithMarker)));
     }
     for (auto it = actionValues.rbegin(); it != actionValues.rend(); it++) {
         tapir::print_double(it->first, os, 8, 2, std::ios_base::fixed | std::ios_base::showpos);
         os << ": ";
+        tapir::print_with_width(it->second.second, os, longestMarker);
         std::ostringstream sstr;
-        sstr << *it->second->getAction();
+        sstr << *it->second.first->getAction();
         tapir::print_with_width(sstr.str(), os, 17);
-        tapir::print_with_width(it->second->getVisitCount(), os, 8);
+        tapir::print_with_width(it->second.first->getVisitCount(), os, 8);
         os << endl;
     }
 }
