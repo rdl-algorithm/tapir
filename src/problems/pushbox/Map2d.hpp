@@ -62,7 +62,12 @@ template<class ValueType>
 void Map2D<ValueType>::loadFromFile(const std::string& filename) {
 	std::ifstream is;
 	is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	try {
 	is.open(filename);
+	} catch (std::exception&) {
+		debug::show_message("Could not open file " + filename);
+		throw;
+	}
 	is.exceptions(std::ifstream::goodbit);
 	loadFromStream(is);
 }

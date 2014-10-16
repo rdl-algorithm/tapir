@@ -84,8 +84,8 @@ std::unique_ptr<solver::Action> PushBoxTextSerializer::loadAction(std::istream &
 	bool notNull;
 	is >> notNull;
 	if (notNull) {
-		int x;
-		int y;
+		double x;
+		double y;
 		is >> x >> y;
 		return std::make_unique<Action>(x, y);
 	} else {
@@ -120,8 +120,8 @@ std::unique_ptr<PushBoxTextSerializer::ThisActionConstructionDataBase> PushBoxTe
 	bool notNull;
 	is >> notNull;
 	if (notNull) {
-		int x;
-		int y;
+		double x;
+		double y;
 		is >> x >> y;
 		return std::make_unique<ConstructionData>(x, y);
 	} else {
