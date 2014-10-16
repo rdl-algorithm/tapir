@@ -411,11 +411,9 @@ std::unique_ptr<solver::Observation> PushBoxModel::makeObservation(const State& 
 	double observationBucketFactor = 360/numberOfObservationBuckets;
 	double bearing = std::floor(angle / observationBucketFactor) * observationBucketFactor;
 
-	if (oldState.getOpponentPosition() != nextState.getOpponentPosition()) {
-		bearing += 1000;
-	}
+	bool pushed = (oldState.getOpponentPosition() != nextState.getOpponentPosition());
 
-	return std::make_unique<Observation>(bearing, numberOfObservationBuckets);
+	return std::make_unique<Observation>(bearing, numberOfObservationBuckets, pushed);
 
 }
 

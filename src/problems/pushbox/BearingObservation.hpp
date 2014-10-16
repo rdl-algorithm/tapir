@@ -21,22 +21,22 @@ class BearingObservationDiscrete: public solver::Point {
 	typedef BearingObservationDiscrete This;
   public:
 
-	BearingObservationDiscrete(int theBearing, int numberOfBuckets): bearing(theBearing), buckets(numberOfBuckets) {};
+	BearingObservationDiscrete(int theBearing, int numberOfBuckets, const bool wasPushed): bearing(theBearing), buckets(numberOfBuckets), pushed(wasPushed) {};
 
     _NO_COPY_OR_MOVE(BearingObservationDiscrete);
 
     virtual std::unique_ptr<Point> copy() const {
-    	return std::make_unique<This>(bearing, buckets);
+    	return std::make_unique<This>(bearing, buckets, pushed);
     }
 
     double distanceTo(solver::Observation const &otherObs) const override {
     	This const &other =  static_cast<This const &>(otherObs);
-    	return (bearing-other.bearing) % buckets;
+    	return ((bearing-other.bearing) % buckets) + ( pushed == other.pushed ? 0 : buckets);
     }
 
     bool equals(solver::Observation const &otherObs) const override {
     	This const &other =  static_cast<This const &>(otherObs);
-    	return bearing == other.bearing;
+    	return (bearing == other.bearing) && (pushed == other.pushed);
     }
 
     std::size_t hash() const override {
@@ -44,20 +44,23 @@ class BearingObservationDiscrete: public solver::Point {
     }
 
     void print(std::ostream &os) const override {
-        os << bearing;
+        os << bearing << (pushed ? " pushed" : " normal");
     }
 
     /** Returns the bearing. */
-    const int& getBearing() const { return bearing; }
+    int getBearing() const { return bearing; }
 
     /** Returns the number of buckets. */
-    const int& getBuckets() const { return buckets; }
+    int getBuckets() const { return buckets; }
 
+    /** returns the pushed status */
+    bool getPushed() const { return pushed; }
 
   private:
     /** The position the robot sees itself in. */
     int bearing;
     int buckets;
+    bool pushed;
 };
 
 

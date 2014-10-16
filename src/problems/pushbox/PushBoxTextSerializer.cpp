@@ -50,7 +50,8 @@ void PushBoxTextSerializer::saveObservation(solver::Observation const *baseObser
 	if (baseObservation != nullptr) {
 		const Observation& observation = static_cast<const Observation&>(*baseObservation);
 		os << observation.getBearing() << " ";
-		os << observation.getBuckets();
+		os << observation.getBuckets() << " ";
+		os << observation.getPushed();
 	}
 }
 
@@ -61,8 +62,9 @@ std::unique_ptr<solver::Observation> PushBoxTextSerializer::loadObservation(std:
 	if (notNull) {
 		int bearing;
 		int buckets;
-		is >> bearing >> buckets;
-		return std::make_unique<Observation>(bearing, buckets);
+		bool pushed;
+		is >> bearing >> buckets >> pushed;
+		return std::make_unique<Observation>(bearing, buckets, pushed);
 	} else {
 		return nullptr;
 	}
