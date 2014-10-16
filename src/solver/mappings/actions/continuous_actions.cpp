@@ -332,7 +332,7 @@ void ContinuousActionTextSerializer::saveActionMapping(ActionMapping const &base
     os << map.fixedEntries.size() << " fixed entries:" << std::endl;
     for (ActionMappingEntry const* baseEntry : map.fixedEntries) {
     	ContinuousActionMapEntry const* entry =  static_cast<ContinuousActionMapEntry const*>(baseEntry);
-    	saveConstructionData(entry->getConstructionData(), os);
+    	saveConstructionData(&entry->getConstructionData(), os);
     }
 
     if (map.chooserData == nullptr) {
@@ -407,7 +407,7 @@ void ContinuousActionTextSerializer::loadActionMapping(ContinuousActionMap &map,
 }
 
 void ContinuousActionTextSerializer::saveActionMapEntry(const ThisActionMapEntry& entry, std::ostream& os) {
-	saveConstructionData(*entry.constructionData, os);
+	saveConstructionData(entry.constructionData.get(), os);
 	os << "isLegal: " << entry.isLegal_;
 	os << " visitcount: " << entry.visitCount_;
 	os << " totalQvalue: " << entry.totalQValue_;
