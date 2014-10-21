@@ -430,6 +430,109 @@ public:
 	}
 };
 
+/** The hierarchy tree used for golden section search */
+class GoldenHierarchyData final: public GpsHierarchyDataBase<GoldenHierarchyData, 1, 2, 2> {
+	typedef GoldenHierarchyData This;
+	typedef GpsHierarchyDataBase<GoldenHierarchyData, 1, 2, 2> Base;
+
+private:
+	static constexpr const double goldenRatio = 0.6180339887498948482045868343656381177203091798057628621354; // (sqrt(5)-1)/2;
+	static constexpr const double oneMinusGoldenRatio = 1 - goldenRatio;
+
+public:
+	using Base::dimensions;
+	using Base::actionSize;
+	using Base::lower;
+	using Base::upper;
+	using Base::actions;
+	using Base::children;
+
+	/** create the hierarchy data. */
+	GoldenHierarchyData() = default;
+
+	/** This method initialises the fields to those suitable for the root of the search tree. */
+	void initialiseRoot(ContinuousActionMap& map) {
+		auto boundingBox = map.getActionPool()->getInitialBoundingBox(map.getOwner());
+
+		if (boundingBox.size() != dimensions) {
+			class InitialBoundingBoxHasWrongDimensions: public std::exception {
+				virtual const char* what() const noexcept {
+					return "The bounding box returned by the action pool has wrong dimensions. There is either a bug or a configuration error.";
+				}
+			} e;
+			throw e;
+		}
+
+		linkActions(map);
+
+	}
+
+	/** This function calculates the coordinates associated with the stencil.
+	 *
+	 * The values are used to initialise the actions field.
+	 */
+	std::array<double,dimensions> calculateActionCoordinates(const size_t index) const {
+		// we use the convention that index 0 is the lower point.
+		if (index==0) {
+			return { lower[0] * goldenRatio + upper[0] * oneMinusGoldenRatio };
+		} else {
+			return { lower[0] * oneMinusGoldenRatio + upper[0] * goldenRatio };
+		}
+	}
+
+	void linkActions(ContinuousActionMap& map) {
+		for (size_t i=0; i<actionSize; i++) {
+			auto coordinates = calculateActionCoordinates(i);
+			actions[i] = map.createOrGetActionMapEntry(coordinates.data());
+		}
+	}
+
+	/** this function determines, whether another child is allowed to be created.
+	 *
+	 * The purpose is to evaluate the minimumChildCreationDistance option.
+	 */
+	bool mayCreateChild(const size_t /*index*/, const GpsChooserOptions& options) const {
+		return (upper[0] - lower[0] > options.minimumChildCreationDistance);
+	}
+
+	/** This function attempts to create the child with the correct index. */
+	void createChild(const size_t index, ContinuousActionMap& map) {
+
+		std::unique_ptr<This>& child = children[index];
+
+		if (child != nullptr) return;
+
+		child = std::make_unique<This>();
+
+		if (index==0) {
+			child->lower = lower;
+			child->upper = calculateActionCoordinates(1);
+		} else {
+			child->lower = calculateActionCoordinates(0);
+			child->upper = upper;
+		}
+
+		child->linkActions(map);
+	}
+
+public:
+	// infrastructure for serialisation.
+
+	static const char serialisationTerminator = '|';
+
+	/** method to save the data to a stream */
+	std::string saveToString() const {
+		// we don't have any extra data members.
+		return "";
+	}
+
+	/** method to save the date to a stream */
+	void loadFromString(const std::string& /*line*/) {
+		// we don't have any extra data members.
+		return;
+	}
+};
+
 
 /** This class is a collection of static functions to perform the Gps search
  *
@@ -823,8 +926,7 @@ void route_gpsUcbAction_compass(GpsChooserResponse& result, BeliefNode const *no
 /* A routing function to call the appropriate template implementation based on run-time configuration options. */
 void route_gpsUcbAction_golden(GpsChooserResponse& result, BeliefNode const *node, const Model& model, const GpsChooserOptions& options) {
 	if (options.dimensions==1) {
-		debug::show_message("Warning: golden search hasn't been implemented. Using compass search instead.");
-		result = GpsSearch<CompassHierarchyData<1>>::gpsUcbAction(node, model, options);
+		result = GpsSearch<GoldenHierarchyData>::gpsUcbAction(node, model, options);
 	} else {
 		class TooManyDimensions: public std::exception {
 			virtual const char* what() const noexcept {
@@ -879,8 +981,7 @@ void route_gpsMaxAction_compass(GpsChooserResponse& result, BeliefNode const *no
 /* A routing function to call the appropriate template implementation based on run-time configuration options. */
 void route_gpsMaxAction_golden(GpsChooserResponse& result, BeliefNode const *node, const GpsMaxRecommendationOptions& options) {
 	if (options.dimensions==1) {
-		debug::show_message("Warning: golden search hasn't been implemented. Using compass search instead.");
-		result = GpsSearch<CompassHierarchyData<1>>::gpsMaxAction(node, options);
+		result = GpsSearch<GoldenHierarchyData>::gpsMaxAction(node, options);
 	} else {
 		class TooManyDimensions: public std::exception {
 			virtual const char* what() const noexcept {
