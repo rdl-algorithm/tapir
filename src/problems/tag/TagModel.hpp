@@ -120,6 +120,24 @@ class TagModel: public shared::ModelWithProgramOptions {
 
     /************************************************************/
 
+    /** Returns the resulting coordinates of an agent after it takes the given action type from the
+     * given position.
+     *
+     * The boolean flag will be false if the agent's move represents an attempt to move into an
+     * obstacle or off the edge of the map, which in the Tag POMDP simply causes them to stay
+     * in the same position.
+     *
+     * This flag is mostly not used as there is no penalty for this in Tag, and the returned
+     * position already reflects them staying still.
+     */
+    std::pair<GridPosition, bool> getMovedPos(GridPosition const &position, ActionType action);
+
+    /** Generates a new opponent position based on the current positions of the robot and the
+     * opponent.
+     */
+    GridPosition sampleNextOpponentPosition(GridPosition const &robotPos,
+            GridPosition const &opponentPos);
+
     /* ---------- Custom getters for extra functionality  ---------- */
     /** Returns the number of rows in the map for this TagModel instance. */
     long getNRows() const {
@@ -275,24 +293,6 @@ class TagModel: public shared::ModelWithProgramOptions {
      */
     std::unordered_map<GridPosition, double> getNextOpponentPositionDistribution(
             GridPosition const &robotPos, GridPosition const &opponentPos);
-
-    /** Generates a new opponent position based on the current positions of the robot and the
-     * opponent.
-     */
-    GridPosition sampleNextOpponentPosition(GridPosition const &robotPos,
-            GridPosition const &opponentPos);
-
-    /** Returns the resulting coordinates of an agent after it takes the given action type from the
-     * given position.
-     *
-     * The boolean flag will be false if the agent's move represents an attempt to move into an
-     * obstacle or off the edge of the map, which in the Tag POMDP simply causes them to stay
-     * in the same position.
-     *
-     * This flag is mostly not used as there is no penalty for this in Tag, and the returned
-     * position already reflects them staying still.
-     */
-    std::pair<GridPosition, bool> getMovedPos(GridPosition const &position, ActionType action);
 
     /** Returns true iff the given GridPosition represents a valid square that an agent could be
      * in - that is, the square must be empty, and within the bounds of the map.

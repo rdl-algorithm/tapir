@@ -102,9 +102,8 @@ add_library(TapirSolver
 
 add_library(TapirRos
 	src/problems/shared/ros/VrepHelper.cpp
-	src/problems/shared/ros/RosInterface.cpp
 )
-
+target_link_libraries(TapirRos ${catkin_LIBRARIES} TapirSolver)
 add_dependencies(TapirRos tapir_generate_messages_cpp)
 
 add_library(TapirTag
@@ -118,6 +117,6 @@ add_library(TapirTag
 
 target_link_libraries(TapirSolver spatialindex ${catkin_LIBRARIES})
 
-add_executable(tag_node src/problems/tag/ros/TagVrep.cpp)
+add_executable(tag_node src/problems/tag/ros/TagNode.cpp)
 target_link_libraries(tag_node ${catkin_LIBRARIES} TapirTag TapirSolver TapirRos)
 add_dependencies(tag_node tapir_generate_messages_cpp)
