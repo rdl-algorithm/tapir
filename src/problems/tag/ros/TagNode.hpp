@@ -1,3 +1,7 @@
+/** @file TagNode.hpp
+ *
+ * Contains TagNode, which implements the TapirNode interface and acts as a ROS node.
+ */
 #ifndef TAG_ROS_HPP_
 #define TAG_ROS_HPP_
 

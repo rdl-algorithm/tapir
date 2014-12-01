@@ -1,3 +1,7 @@
+/** @file TagNode.cpp
+ *
+ * Contains TagNode, which implements the TapirNode interface and acts as a ROS node.
+ */
 #include "TagNode.hpp"
 
 #include <iostream>

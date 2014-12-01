@@ -1,3 +1,9 @@
+/** @file TapirNode.hpp
+ *
+ * Defines TapirNode, an abstract class that can be used to implement the
+ * TAPIR solver as a ROS node.
+ */
+
 #ifndef TAPIR_NODE_HPP_
 #define TAPIR_NODE_HPP_
 
