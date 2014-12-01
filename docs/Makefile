@@ -56,7 +56,7 @@ docs/generated/New_Model.md: docs/README-MakeNewModel.md docs/doxygen_links/New_
 docs/generated/Build_System.md: .make/README.md docs/doxygen_links/Build_System.md docs/Makefile
 	$(call DOXYGEN_MD_RECIPE,Build System,build-system,docs/doxygen_links/Build_System.md)
 docs/generated/Ros_Tag.md: docs/README-RosTag.md docs/doxygen_links/Ros_Tag.md docs/Makefile
-	$(call DOXYGEN_MD_RECIPE,TAPIR ROS Tag,ros-tag,docs/doxygen_links/Ros_Tag.md)
+	$(call DOXYGEN_MD_RECIPE,Using TAPIR with ROS and V-REP,ros-tag,docs/doxygen_links/Ros_Tag.md)
 
 DOXYGEN_MD_FILES := docs/generated/Quick_Start.md docs/generated/Overview.md
 DOXYGEN_MD_FILES += docs/generated/New_Model.md docs/generated/Build_System.md docs/generated/Ros_Tag.md
