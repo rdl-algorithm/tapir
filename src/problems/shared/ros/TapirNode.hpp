@@ -74,8 +74,11 @@ protected:
 	/** Initialise models, solver, and simulator (if required). The Simulator
 	 *  class is only used if internalSimulation == true, in this case
 	 *  resulting observations and states are generated.
+	 *  If generatePolicy is set to false, a starting policy is not
+	 *  automatically generated. solver_->improvePolicy must then be manually
+	 *  called before starting.
 	 */
-	virtual void initTapir() {
+	virtual void initTapir(bool generatePolicy = true) {
 
 		// If seed is not specified in options, seed using current time
 		if (options_.seed == 0) {
@@ -93,12 +96,14 @@ protected:
 		solverModel_ = static_cast<Model *>(solver_->getModel());
 
 		// Generate policy
-		double totT;
-		double tStart;
-		tStart = tapir::clock_ms();
-		solver_->improvePolicy();
-		totT = tapir::clock_ms() - tStart;
-		std::cout << "Total solving time: " << totT << "ms" << std::endl;
+		if (generatePolicy) {
+			double totT;
+			double tStart;
+			tStart = tapir::clock_ms();
+			solver_->improvePolicy();
+			totT = tapir::clock_ms() - tStart;
+			std::cout << "Total solving time: " << totT << "ms" << std::endl;
+		}
 
 		// Init simulator
 		if (internalSimulation_) {
