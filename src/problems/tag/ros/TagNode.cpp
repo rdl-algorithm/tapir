@@ -71,7 +71,6 @@ void TagNode::initialise() {
 }
 
 void TagNode::timerCallback(const ros::TimerEvent& e) {
-	std::cout << "Step " << stepNumber_ << std::endl;
 
 	// Don't do anything if VREP is paused
 	if (!vrepHelper_.isRunning()) {
@@ -123,12 +122,10 @@ std::unique_ptr<TagObservation> TagNode::getObservation() {
 	GridPosition g = pointToGrid(p);
 	std::unique_ptr<TagObservation> observation =
 			std::make_unique<TagObservation>(g, visible_);
-	std::cout << "Observation: " << *observation << std::endl;
 	return observation;
 }
 
 void TagNode::applyAction(const TagAction& action) {
-	std::cout << "Action: " << action << std::endl;
 	const GridPosition& oldPos = lastObservation_->getPosition();
 	std::pair<GridPosition, bool> temp = solverModel_->getMovedPos(
 			oldPos, action.getActionType());

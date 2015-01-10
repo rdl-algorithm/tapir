@@ -18,6 +18,7 @@
 #include "solver/Solver.hpp"
 #include "solver/Simulator.hpp"
 #include "solver/BeliefTree.hpp"
+#include "solver/BeliefNode.hpp"
 
 template <class Options, class Model, class Observation, class Action>
 class TapirNode {
@@ -129,12 +130,36 @@ protected:
 			finished_ = !simulator_->stepSimulation();
 			return;
 		}
+
+		std::stringstream prevStream;
+		solver::BeliefNode *currentBelief = agent_->getCurrentBelief();
+
+		if (options_.hasVerboseOutput) {
+			std::cout << std::endl << std::endl << "t-" << stepNumber_ << std::endl;
+			std::cout << "Belief #" << currentBelief->getId() << std::endl;
+
+			solver::HistoricalData *data = currentBelief->getHistoricalData();
+			if (data != nullptr) {
+				std::cout << std::endl;
+				std::cout << *data;
+				std::cout << std::endl;
+			}
+			prevStream << "Before:" << std::endl;
+			solver_->printBelief(currentBelief, prevStream);
+		}
+
+
 		if (stepNumber_ != 0) {
+
+			// Get observation
 			lastObservation_ = getObservation();
-			solver::BeliefNode *currentBelief = agent_->getCurrentBelief();
+			if (options_.hasVerboseOutput) {
+				std::cout << "Observation: "  << *lastObservation_ << std::endl;
+			}
+
+			// Update belief
 			solver_->replenishChild(currentBelief, *lastAction_, *lastObservation_);
 			agent_->updateBelief(*lastAction_, *lastObservation_);
-			currentBelief = agent_->getCurrentBelief();
 
 			// If we're pruning on every step, we do it now.
 			if (options_.pruneEveryStep) {
@@ -146,6 +171,28 @@ protected:
 					std::cout << pruningTime << "ms." << std::endl;
 				}
 			}
+
+			if (currentBelief->getNumberOfParticles() == 0) {
+				debug::show_message("ERROR: Resulting belief has zero particles!!");
+			}
+
+			// Improve policy
+			currentBelief = agent_->getCurrentBelief();
+			solver_->improvePolicy(currentBelief);
+
+			if (options_.hasVerboseOutput) {
+				std::stringstream newStream;
+				newStream << "After:" << std::endl;
+				solver_->printBelief(currentBelief, newStream);
+				while (prevStream.good() || newStream.good()) {
+					std::string s1, s2;
+					std::getline(prevStream, s1);
+					std::getline(newStream, s2);
+					std::cout << s1 << std::setw(40 - s1.size()) << "";
+					std::cout << s2 << std::setw(40 - s2.size()) << "";
+					std::cout << std::endl;
+				}
+			}
 		}
 		stepNumber_++;
 
@@ -154,11 +201,12 @@ protected:
 		if (sa == nullptr) {
 			std::cout << "ERROR: Could not choose an action." << std::endl;
 		} else {
+			if (options_.hasVerboseOutput) {
+				std::cout << "Action: "  << *sa << std::endl;
+			}
 			lastAction_.reset(static_cast<Action *>(sa.release()));
 			applyAction(*lastAction_);
 		}
-		solver::BeliefNode *currentBelief = agent_->getCurrentBelief();
-		solver_->improvePolicy(currentBelief);
 	}
 
 	/** Handle model changes */
