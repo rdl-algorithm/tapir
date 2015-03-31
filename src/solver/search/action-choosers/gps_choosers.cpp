@@ -463,6 +463,11 @@ public:
 			throw e;
 		}
 
+		for(size_t i=0; i< dimensions; i++) {
+			lower[i] = boundingBox[i].first;
+			upper[i] = boundingBox[i].second;
+		}
+
 		linkActions(map);
 
 	}
