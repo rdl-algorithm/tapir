@@ -19,7 +19,9 @@ For the latest news, please visit
 TAPIR Development Team
 --------------------------------------------------------------------------
 
-- Main developer: Dimitri Klimenko
+- Main developers:
+    * Dimitri Klimenko (core toolkit)
+    * Konstantin Seiler (continuous action spaces)
 - ROS + VREP interface: Joshua Song
 
 
