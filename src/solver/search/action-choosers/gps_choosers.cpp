@@ -1,6 +1,6 @@
-/** @file choosers.cpp
+/** @file gps_choosers.cpp
  *
- * Contains implementations of basic action selection functions.
+ * Contains implementations of action selection functions for GPS search.
  */
 #include "solver/search/action-choosers/gps_choosers.hpp"
 

@@ -1,6 +1,7 @@
-/** @file choosers.hpp
+/** @file gps_choosers.hpp
  *
- * Defines some useful basic functions for selecting an action from a belief node.
+ * Defines some useful basic functions for selecting an action from a belief node
+ * for the GPS search functionality.
  */
 #ifndef SOLVER_GPS_CHOOSERS_HPP_
 #define SOLVER_GPS_CHOOSERS_HPP_

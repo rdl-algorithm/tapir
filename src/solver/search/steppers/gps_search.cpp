@@ -1,6 +1,7 @@
-/** @file ucb_search.cpp
+/** @file gps_search.cpp
  *
- * Contains the basic implementation code for a UCB-based search strategy.
+ * Contains the basic implementation code for a SearchStrategy using GPS
+ * search.
  */
 #include "solver/search/steppers/gps_search.hpp"
 
@@ -25,7 +26,7 @@ GpsStepGenerator::GpsStepGenerator(SearchStatus &status, Solver *solver, chooser
 
 Model::StepResult GpsStepGenerator::getStep(HistoryEntry const *entry, State const *state, HistoricalData const */*data*/) {
 
-    // If we previously chose a new action that hadn't been tried before, UCB is over.
+    // If we previously chose a new action that hadn't been tried before, the search is over.
     if (choseUnvisitedAction) {
         // We've reached the new leaf node - this search is over.
         status_ = SearchStatus::OUT_OF_STEPS;
