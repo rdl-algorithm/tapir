@@ -207,6 +207,32 @@ has two prerequsites:
 - The [EnumeratedActionPool] constructor requires, as a constructor argument,
     a vector containing all of the actions, in the order of their enumeration.
 
+### Working with continuous actions
+For continuous action spaces, the solver needs to be able to create new actions 
+based on numerical vector data. Thus, a few extra concepts need to be 
+implemented. The vector data is represented by a construction data class derived 
+from [ContinuousActionConstructionDataBase]. The construction data also contains 
+facilities to influence hashing (for insertion into hash tables) and equality 
+comparisons.
+
+The action itself must be derived from [ContinuousAction] and override the 
+abstract functions to create an action from given construction data and vice 
+versa. It has proven convenient (but it is not required) to use the construction 
+data class as storage within the action class. That is, the only data member of 
+the action class is the construction data.
+
+The action pool has to be derived from [ContinuousActionPool]. The action pool 
+is the means of accessing problem specific features needed for GPS-ABT. It 
+returns the bounding box used for the general pattern search and also returns 
+information about fixed actions that should be considered in case the action 
+space is a hybrid space (i.e. it has both, continuous and discrete actions). 
+The continuous action pool also contains a couple of technical methods to create 
+actions from construction data and to create an action container. The most 
+convenient way to create an action container is to return an instantiation of 
+the [ContinuousActionContainer] template. 
+For an example about implementing continuous actions, it is recommended to look 
+at the implementation of the [PushBoxActionPool].
+
 
 ### Serializer
 
@@ -225,6 +251,8 @@ for most purposes; in order to serialize this mapping class, the serializer
 implementation should also inherit from [DiscreteObservationTextSerializer].
 Similarly, if you use [EnumeratedActionPool] for mapping actions, your
 serializer should inherit from [EnumeratedActionTextSerializer].
+If continuous actions are used the serializer must inherit from 
+[ContinuousActionTextSerializer].
 
 To see a good example of the above, have a look at [TagTextSerializer].
 
