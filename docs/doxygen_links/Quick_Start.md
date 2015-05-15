@@ -1,6 +1,7 @@
 [TOC]
 
-[docs/README-MakeNewModel.md]: @ref docs/generated/New_Model.md
+[docs/ROS_VREP_Guide.md]: docs/generated/Ros_Tag.md
+[docs/Making_A_New_Model.md]: @ref docs/generated/New_Model.md
 [problems]: @ref problems
 [problems/rocksample/default.cfg]: @ref problems/rocksample/default.cfg
 [src/problems]: @ref src/problems

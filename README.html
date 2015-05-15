@@ -441,14 +441,11 @@ squares in the Tag grid:</p>
 the CTRL key while clicking on those cells.</li>
 </ul>
 
-<h3>Source code notes</h3>
+<h3>Interface details</h3>
 
-<p>The ROS/V-REP interface for Tag can be found in
-<a href="src/problems/tag/ros/TagVrep.cpp">TagVrep.cpp</a>.
-This interface uses the TAPIR <a href="src/solver/Simulator.hpp">Simulator</a> class
-in order to run thecore simulation and generate the POMDP transitions and
-observations; this is done according to the
-<a href="src/problems/tag/TagModel.hpp">Tag problem model</a>.</p>
+<p>Additional detail on how to interface with ROS and V-REP when implementing
+your own POMDP problems is provided in in the
+<a href="docs/ROS_VREP_Guide.html">ROS/V-REP Guide</a>.</p>
 
 <hr />
 
@@ -457,11 +454,11 @@ observations; this is done according to the
 <p>To create a new POMDP model and use it with the the command-line interface,</p>
 
 <ol>
-<li>Read the <a href="docs/README-MakeNewModel.html">README on implementing a new model</a></li>
+<li>Read the <a href="docs/Making_A_New_Model.html">README on implementing a new model</a></li>
 <li>Create a new subdirectory for your POMDP in
 <a href="src/problems">the problems directory</a></li>
 <li>Implement all the required classes, as per
-<a href="docs/README-MakeNewModel.html">the new model README</a></li>
+<a href="docs/Making_A_New_Model.html">the new model README</a></li>
 <li>Add a new Makefile to your problem directory - just copy
 <a href="src/problems/tag/Makefile">the Tag Makefile</a> and change MODULE_NAME to match
 your new problem.</li>

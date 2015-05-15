@@ -1,4 +1,4 @@
-/** @file tag/simulate.cpp
+/** @file conttag/simulate.cpp
  *
  * Defines the main method for the "simulate" executable for the Tag POMDP, which runs online
  * simulations to test the performance of the solver.

@@ -38,24 +38,25 @@ endef
 	$(call HTML_RECIPE,TAPIR Build System,docs/style.css)
 README.html: README.md docs/style.css docs/Makefile
 	$(call HTML_RECIPE,TAPIR Quick Start Guide,docs/style.css)
-docs/README.html: docs/README.md docs/style.css docs/Makefile
+docs/Overview.html: docs/Overview.md docs/style.css docs/Makefile
 	$(call HTML_RECIPE,TAPIR Overview,docs/style.css)
-docs/README-MakeNewModel.html: docs/README-MakeNewModel.md docs/style.css docs/Makefile
+docs/Making_A_New_Model.html: docs/Making_A_New_Model.md docs/style.css docs/Makefile
 	$(call HTML_RECIPE,Making a new model for TAPIR,docs/style.css)
-docs/README-RosTag.html: docs/README-RosTag.md docs/style.css docs/Makefile
-	$(call HTML_RECIPE,TAPIR ROS Tag for TAPIR,docs/style.css)
-GENERATED_HTML := README.html .make/README.html docs/README.html docs/README-RosTag.html docs/README-RosTag.html
+docs/ROS_VREP_Guide.html: docs/ROS_VREP_Guide.md docs/style.css docs/Makefile
+	$(call HTML_RECIPE,Using TAPIR with ROS and V-REP,docs/style.css)
+GENERATED_HTML := README.html .make/README.html
+GENERATED_HTML += docs/Overview.html docs/Making_A_New_Model.html docs/ROS_VREP_Guide.html
 
 # Adapt the README.md files so that they will link nicely with Doxygen.
 docs/generated/Quick_Start.md: README.md docs/doxygen_links/Quick_Start.md docs/Makefile
 	$(call DOXYGEN_MD_RECIPE,Quick Start Guide,quick-start,docs/doxygen_links/Quick_Start.md)
-docs/generated/Overview.md: docs/README.md docs/doxygen_links/Overview.md docs/Makefile
+docs/generated/Overview.md: docs/Overview.md docs/doxygen_links/Overview.md docs/Makefile
 	$(call DOXYGEN_MD_RECIPE,Overview,overview,docs/doxygen_links/Overview.md)
-docs/generated/New_Model.md: docs/README-MakeNewModel.md docs/doxygen_links/New_Model.md docs/Makefile
+docs/generated/New_Model.md: docs/Making_A_New_Model.md docs/doxygen_links/New_Model.md docs/Makefile
 	$(call DOXYGEN_MD_RECIPE,Making a new model,new-model,docs/doxygen_links/New_Model.md)
 docs/generated/Build_System.md: .make/README.md docs/doxygen_links/Build_System.md docs/Makefile
 	$(call DOXYGEN_MD_RECIPE,Build System,build-system,docs/doxygen_links/Build_System.md)
-docs/generated/Ros_Tag.md: docs/README-RosTag.md docs/doxygen_links/Ros_Tag.md docs/Makefile
+docs/generated/Ros_Tag.md: docs/ROS_VREP_Guide.md docs/doxygen_links/Ros_Tag.md docs/Makefile
 	$(call DOXYGEN_MD_RECIPE,Using TAPIR with ROS and V-REP,ros-tag,docs/doxygen_links/Ros_Tag.md)
 
 DOXYGEN_MD_FILES := docs/generated/Quick_Start.md docs/generated/Overview.md

@@ -76,7 +76,7 @@ for a problem description.
 
 Here's a quick overview of the contents of this package, by directory structure:
 
-- README.md - this README!
+- [README.md][../README.md] - the Quick Start Guide
 - [Makefile][../Makefile] - used to change most of the core settings used
   in building the code.
 - .[make][../.make] - contains template Makefile code which is included by
@@ -224,7 +224,7 @@ the options that can be configured for Tag.
 Implementing a new model
 --------------------------------------------------------------------------
 
-See [the guide on implementing a new model][../docs/README-MakeNewModel.md]
+See [the guide on implementing a new model][../docs/Making_A_New_Model.md]
 for details.
 
 
@@ -236,7 +236,7 @@ for details.
 [../Makefile]: ../Makefile
 [../README.md]: ../README.md
 [../docs]: ../docs
-[../docs/README-MakeNewModel.md]: ../docs/README-MakeNewModel.md
+[../docs/Making_A_New_Model.md]: ../docs/Making_A_New_Model.md
 [../docs/html]: ../docs/html
 [../docs/html/index.html]: ../docs/html/index.html
 [../launch]: ../launch

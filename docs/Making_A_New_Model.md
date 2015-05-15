@@ -312,7 +312,7 @@ individual problem are given in:
 - [simulate.hpp][../src/problems/shared/simulate.hpp] --- simulation with online POMDP solution; see
   [simulate.cpp for Tag][../src/problems/tag/simulate.cpp] for a usage example.
 
-Check the [overview][README.md] and the
+Check the [overview][Overview.md] and the
 [build system README][../.make/README.md] for further details for configuring
 your new POMDP for use with TAPIR.
 
@@ -362,7 +362,7 @@ your new POMDP for use with TAPIR.
 [Options]: ../src/solver/abstract-problem/Options.hpp
 [Options::discountFactor]: ../src/solver/abstract-problem/Options.hpp#L37
 [Options::numberOfStateVariables]: ../src/solver/abstract-problem/Options.hpp#L29
-[README.md]: README.md
+[Overview.md]: Overview.md
 [RTree]: ../src/solver/indexing/RTree.hpp
 [Serializer]: ../src/solver/serialization/Serializer.hpp
 [SharedOptions]: ../src/problems/shared/SharedOptions.hpp

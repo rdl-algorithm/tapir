@@ -295,15 +295,11 @@ squares in the Tag grid:
 the CTRL key while clicking on those cells.
 
 
-### Source code notes
+### Interface details
 
-The ROS/V-REP interface for Tag can be found in
-[TagVrep.cpp][src/problems/tag/ros/TagVrep.cpp].
-This interface uses the TAPIR [Simulator][src/solver/Simulator.hpp] class
-in order to run thecore simulation and generate the POMDP transitions and
-observations; this is done according to the
-[Tag problem model][src/problems/tag/TagModel.hpp].
-
+Additional detail on how to interface with ROS and V-REP when implementing
+your own POMDP problems is provided in in the
+[ROS/V-REP Guide][docs/ROS_VREP_Guide.md].
 
 --------------------------------------------------------------------------
 Implementing a new POMDP model
@@ -311,11 +307,11 @@ Implementing a new POMDP model
 
 To create a new POMDP model and use it with the the command-line interface,
 
-1. Read the [README on implementing a new model][docs/README-MakeNewModel.md]
+1. Read the [README on implementing a new model][docs/Making_A_New_Model.md]
 2. Create a new subdirectory for your POMDP in
    [the problems directory][src/problems]
 3. Implement all the required classes, as per
-   [the new model README][docs/README-MakeNewModel.md]
+   [the new model README][docs/Making_A_New_Model.md]
 4. Add a new Makefile to your problem directory - just copy
    [the Tag Makefile][src/problems/tag/Makefile] and change MODULE_NAME to match
   your new problem.
@@ -347,7 +343,8 @@ Release Notes
 
 
 
-[docs/README-MakeNewModel.md]: docs/README-MakeNewModel.md
+[docs/ROS_VREP_Guide.md]: docs/ROS_VREP_Guide.md
+[docs/Making_A_New_Model.md]: docs/Making_A_New_Model.md
 [problems]: problems
 [problems/rocksample/default.cfg]: problems/rocksample/default.cfg
 [src/problems]: src/problems

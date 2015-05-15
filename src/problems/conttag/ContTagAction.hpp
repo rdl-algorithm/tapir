@@ -8,7 +8,6 @@
 #include "solver/abstract-problem/Action.hpp"
 #include "solver/abstract-problem/DiscretizedPoint.hpp"             // for DiscretizedPoint
 #include "solver/mappings/actions/continuous_actions.hpp"
-#include <boost/math/constants/constants.hpp>
 
 namespace conttag {
 

@@ -127,7 +127,7 @@ pre code {
     }
 }
 </style>
-<title>TAPIR ROS Tag for TAPIR</title>
+<title>Using TAPIR with ROS and V-REP</title>
 </head>
 <body>
 <h1>Using TAPIR with ROS and V-REP</h1>
@@ -165,7 +165,7 @@ Improving the policy generally takes more time than the other steps, therefore i
 
 <h3>Initialise</h3>
 
-<p>The Tag ROS node is defined in [TagNode]. Before implementation in ROS, the problem model, observations, actions, etc. must be defined as described in <a href="../docs/README-MakeNewModel.html">the guide on implementing a new model</a>. [TagNode] inherits from [TapirNode], which is a templated class, so the TagNode class declaration appears as </p>
+<p>The Tag ROS node is defined in [TagNode]. Before implementation in ROS, the problem model, observations, actions, etc. must be defined as described in <a href="../docs/Making_A_New_Model.html">the guide on implementing a new model</a>. [TagNode] inherits from [TapirNode], which is a templated class, so the TagNode class declaration appears as </p>
 
 <pre><code>class TagNode : public TapirNode&lt;TagOptions, TagModel, TagObservation, TagAction&gt; {
 </code></pre>
@@ -204,7 +204,7 @@ Improving the policy generally takes more time than the other steps, therefore i
 
 <h3>Compiling</h3>
 
-<p>ROS uses a build system called catkin, which extends CMake. Source files and package dependencies are listed in [CMakeLists.txt]. The necessary source files (solver, Tag model, etc) are listed as libraries. The TagNode.cpp is listed as an executable in the line</p>
+<p>ROS uses a build system called catkin, which extends CMake. Source files and package dependencies are listed in CMakeLists.txt. The necessary source files (solver, Tag model, etc) are listed as libraries. The TagNode.cpp is listed as an executable in the line</p>
 
 <pre><code>add_executable(tag_node src/problems/tag/ros/TagNode.cpp)
 </code></pre>

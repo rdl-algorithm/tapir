@@ -699,7 +699,7 @@ WARNINGS               = YES
 # will automatically be disabled.
 # The default value is: YES.
 
-WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_UNDOCUMENTED   = NO
 
 # If the WARN_IF_DOC_ERROR tag is set to YES, doxygen will generate warnings for
 # potential errors in the documentation, such as not documenting some parameters
@@ -763,7 +763,7 @@ INPUT_ENCODING         = UTF-8
 # *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf,
 # *.qsf, *.as and *.js.
 
-FILE_PATTERNS          = *.md *.mk *.hpp *.cpp *.c *.h *.cfg Makefile
+FILE_PATTERNS          = *.md *.mk *.hpp *.cpp *.c *.h *.cfg Makefile CMakeLists.txt
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -780,7 +780,7 @@ RECURSIVE              = YES
 
 
 # Exclude the README.md files
-EXCLUDE                =  README.md .make/README.md docs/README.md docs/README-MakeNewModel.md docs/README-RosTag.md
+EXCLUDE                =  README.md .make/README.md docs/Making_A_New_Model.md docs/Overview.md docs/ROS_VREP_Guide.md
 EXCLUDE                += docs/html docs/doxygen_links
 EXCLUDE                += src/options/inih src/options/tclap
 

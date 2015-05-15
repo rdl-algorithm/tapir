@@ -1,4 +1,4 @@
-/** @file tag/solve.cpp
+/** @file pushbox/solve.cpp
  *
  * Defines the main method for the "solve" executable for the Tag POMDP, which generates an
  * initial policy.
