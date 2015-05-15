@@ -1,11 +1,9 @@
-MODULE_NAME = problems
-CHILD_DIRS := shared rocksample tag homecare pushbox conttag
+MODULE_NAME = conttag
+TARGET_NAMES := solve simulate
 
 ifdef HAS_ROOT_MAKEFILE
 
-problems: $(CHILD_DIRS)
-
-include .make/template.mk
+include .make/problem-template.mk
 
 else
 REDIRECT=$(MODULE_NAME)
