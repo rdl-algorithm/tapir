@@ -17,11 +17,11 @@ HAS_EIGEN            := false
 # If you have Boost installed normally, just leave this blank.
 CUSTOM_BOOST_148_DIR :=
 # Main ROS setup script
-ROS_SCRIPT           := /opt/ros/indigo/setup.sh
+ROS_SCRIPT           := /opt/ros/hydro/setup.sh
 # Directory for the Catkin workspace
-CATKIN_WS_DIR        := /home/kaymes/catkin_ws
+CATKIN_WS_DIR        := $(ABS_ROOT)/../catkin_ws
 # Directory in which to find V-REP
-VREP_DIR             := /home/kaymes/myprogs/vrep
+VREP_DIR             := $(ABS_ROOT)/../vrep
 
 # ----------------------------------------------------------------------
 # Basic build settings
