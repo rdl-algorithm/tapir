@@ -95,12 +95,7 @@ void Map2D<ValueType>::loadFromStream(std::istream& is) {
 	storage.resize(xSize*ySize);
 
 	for (size_t i=0; i<lines.size(); i++) {
-		if (lines[i].size() != xSize) {
-			auto oldXSize = xSize;
-			clear();
-			TAPIR_THROW("Line " << i << " has length " << lines[i].size() << ". Expected length " << oldXSize << ".");
-			return;
-		}
+		assert(lines[i].size() == xSize);
 	}
 
 	for (size_t y=0; y<ySize; y++) {

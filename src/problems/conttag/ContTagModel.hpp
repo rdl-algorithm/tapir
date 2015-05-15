@@ -61,7 +61,7 @@ public:
 	 * ContinuousActionConstructionDataBase::data(). It enables the action chooser to
 	 * create new actions based on values it seems fit.
 	 */
-	virtual std::unique_ptr<ContinuousActionConstructionDataBase> createActionConstructionData(const double* constructionDataVector) const override;
+	virtual std::unique_ptr<ContinuousActionConstructionDataBase> createActionConstructionData(const double* constructionDataVector, const BeliefNode* belief) const override;
 
 	/** Returns an action based on the Construction Data that was provided.
 	 *
@@ -75,7 +75,7 @@ public:
 	 *
 	 * TODO: Check whether this function is actually used or can be removed.
 	 */
-	virtual std::unique_ptr<Action> createAction(const double* constructionDataVector) const override;
+	virtual std::unique_ptr<Action> createAction(const double* constructionDataVector, const BeliefNode* belief) const override;
 
 
 	/** Returns an action based on the Construction Data that was provided.
@@ -221,8 +221,6 @@ public:
 	~ContTagModel() = default;
 	_NO_COPY_OR_MOVE(ContTagModel);
 
-	void drawSimulationState(solver::BeliefNode const *belief, solver::State const &state, std::ostream &os);
-	virtual void drawSimulationState(solver::MetaBelief const &belief, solver::State const &state, std::ostream &os) override;
 
 
 	/* --------------- The model interface proper ----------------- */
@@ -285,13 +283,9 @@ public:
 				solver::TransitionParameters const */*tp*/,
 				solver::State const *baseNextState,
 				const bool movedIntoWall = false)  {
-		if (baseNextState == nullptr) {
-			TAPIR_THROW("The state for the reward is null. We didn't expect this to happen.");
-		}
+		assert(baseNextState != nullptr);
 
-		if (&baseAction == nullptr) {
-			TAPIR_THROW( "The action for the reward is null. We didn't expect this to happen.");
-		}
+		assert(&baseAction != nullptr);
 
 		const State& nextState = static_cast<const State&>(*baseNextState);
 		const Action& action = static_cast<const Action&>(baseAction);
@@ -383,7 +377,7 @@ public:
 				return -tagFailPenalty;
 			}
 
-			TAPIR_THROW("We should never reach this point. There seems to be an unknown terminal state.");
+			assert(false); //we should never reach this point.
 		}
 
 		// return getNeighbourHeuristicValue(entry, baseState, data);

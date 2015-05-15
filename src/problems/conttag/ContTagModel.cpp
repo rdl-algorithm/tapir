@@ -18,11 +18,11 @@ std::unique_ptr<ContTagActionPool::ContinuousActionContainerBase> ContTagActionP
 	return std::make_unique<solver::ContinuousActionContainer<ContTagActionConstructionData>>(ContTagActionConstructionData::HashEqualOptions(0.03333333333333));
 }
 
-std::unique_ptr<ContTagActionPool::ContinuousActionConstructionDataBase> ContTagActionPool::createActionConstructionData(const double* constructionDataVector) const {
+std::unique_ptr<ContTagActionPool::ContinuousActionConstructionDataBase> ContTagActionPool::createActionConstructionData(const double* constructionDataVector, const BeliefNode* /*belief*/) const {
 	return std::make_unique<ContTagActionConstructionData>(constructionDataVector);
 }
 
-std::unique_ptr<solver::Action> ContTagActionPool::createAction(const double* constructionDataVector) const {
+std::unique_ptr<solver::Action> ContTagActionPool::createAction(const double* constructionDataVector, const BeliefNode* /*belief*/) const {
 	return std::make_unique<ContTagAction>(constructionDataVector);
 }
 
@@ -61,7 +61,7 @@ ContTagUBParser::ContTagUBParser(ContTagModel *model) :
 }
 
 solver::HeuristicFunction ContTagUBParser::parse(solver::Solver */*solver*/, std::vector<std::string> /*args*/) {
-	return [this] (solver::HistoryEntry const *, solver::State const *state, solver::HistoricalData const *, solver::MetaBelief const *) {
+	return [this] (solver::HistoryEntry const *, solver::State const *state, solver::HistoricalData const *) {
 		return model_->getUpperBoundHeuristicValue(*state);
 	};
 }
@@ -139,7 +139,8 @@ ContTagModel::ContTagModel(RandomGenerator *randGen, std::unique_ptr<ContTagOpti
 				}
 
 				if (possibleStartPositions.size()==0) {
-					TAPIR_THROW("No start coordinates found.");
+					std::cout << "No start coordinates found." << std::endl;
+					assert(false);
 				}
 
 				startPosition = possibleStartPositions[getRandomGenerator()->operator()() % possibleStartPositions.size()];
@@ -164,7 +165,8 @@ ContTagModel::ContTagModel(RandomGenerator *randGen, std::unique_ptr<ContTagOpti
 		}
 
 		if (possibleHumanStartFields.empty() ) {
-			TAPIR_THROW("No possible human start field coordinates found.");
+			std::cout << "No possible human start field coordinates found." << std::endl;
+			assert(false);
 		}
 	}
 
@@ -173,19 +175,6 @@ ContTagModel::ContTagModel(RandomGenerator *randGen, std::unique_ptr<ContTagOpti
 }
 
 
-void ContTagModel::drawSimulationState(solver::BeliefNode const *belief, solver::State const &/*state*/, std::ostream &os) {
-	os << "current_particles=[ ";
-	for (const solver::HistoryEntry* entry : belief->getParticles()) {
-		const State& state = static_cast<const State&>(*entry->getState());
-		os << state.getHumanPosition().x << ", " << state.getHumanPosition().y << "; ";
-	}
-	os << " ];" << std::endl;
-    // Default = do nothing.
-}
-
-void ContTagModel::drawSimulationState(solver::MetaBelief const &belief, solver::State const &state, std::ostream &os) {
-	drawSimulationState(belief.mapToSingleBelief(), state, os);
-}
 
 
 /** Generates a next state for the given state and action, as well as a boolean flag that will

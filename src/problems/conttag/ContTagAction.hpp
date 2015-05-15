@@ -67,10 +67,6 @@ public:
 		return true;
 	}
 
-	virtual bool equal(const Base& /*other*/) const override {
-		TAPIR_THROW("This has not been implemented yet.");
-		return false;
-	}
 
 private:
 	static double snapToTolerance(const double value, const double tolerance) { return std::round(value/tolerance)*tolerance; }
@@ -108,7 +104,6 @@ class ContTagAction final: public solver::ContinuousAction {
 
     std::unique_ptr<solver::Action> copy() const override {
     	auto result = std::make_unique<This>(storage);
-    	result->binNumber = binNumber;
     	return std::move(result);
     }
 
@@ -149,10 +144,6 @@ class ContTagAction final: public solver::ContinuousAction {
     	}
     }
 
-    virtual std::vector<double> getVectorForm() const override {
-        	return {getAngle()};
-    };
-
     /** Returns the content of this action. */
     double getAngle() const { return storage[0]; }
     bool isTag() const { return getAngle() == tagAction; }
@@ -162,15 +153,6 @@ class ContTagAction final: public solver::ContinuousAction {
     }
 
 
-    virtual long getBinNumber() const override {
-    	if (binNumber < 0) {
-    		TAPIR_THROW("The bin number has not been assigned.");
-    	}
-    	return binNumber;
-    }
-
-    void setBinNumber(const long theBinNumber) { binNumber = theBinNumber; }
-
   private:
     /** The actual data contained in this action.
      *
@@ -178,7 +160,6 @@ class ContTagAction final: public solver::ContinuousAction {
      */
     ConstructionData storage;
 
-    long binNumber = -1;
 };
 
 
