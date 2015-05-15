@@ -80,35 +80,22 @@ std::unique_ptr<solver::StepGeneratorFactory> GpsParser::parse(solver::Solver *s
 	using solver::choosers::GpsChooserOptions;
 	GpsChooserOptions options;
 
-	size_t index = 1;
-
-	if (args.size() > index) {
-		if (args[index] == "golden") {
-			options.searchType = GpsChooserOptions::GOLDEN;
-		} else if (args[index] == "compass") {
-			options.searchType = GpsChooserOptions::COMPASS;
-		} else {
-			debug::show_message("Warning: unknown gps search type given.");
-		}
+	std::string searchType = "";
+	fillOption(args, "searchType", searchType);
+	if (searchType == "golden") {
+		options.searchType = decltype(options)::GOLDEN;
+	} else if (searchType == "compass") {
+		options.searchType = decltype(options)::COMPASS;
+	} else {
+		std::cout << "Warning: unknown gps search type given: " << searchType << std::endl;
 	}
-	index++;
 
-    if (args.size() > index) std::istringstream(args[index]) >> options.dimensions;
-    index++;
-    if (args.size() > index) std::istringstream(args[index]) >> options.explorationCoefficient;
-    index++;
-    if (args.size() > index) std::istringstream(args[index]) >> options.newSearchPointCoefficient;
-    index++;
-    if (args.size() > index) std::istringstream(args[index]) >> options.minimumVisitsBeforeChildCreation;
-    index++;
-    if (args.size() > index) std::istringstream(args[index]) >> options.minimumChildCreationDistance;
-    index++;
-
-    if (args.size() < index) {
-    	debug::show_message("Warning: not enough arguments given for gps search. Some default values are used.");
-    } else if (args.size() > index) {
-    	debug::show_message("Warning: too many arguments given for gps search. Extra arguments are ignored.");
-    }
+	fillOption(args, "dimensions", options.dimensions);
+	fillOption(args, "explorationCoefficient", options.explorationCoefficient);
+	fillOption(args, "newSearchPointCoefficient", options.newSearchPointCoefficient);
+	fillOption(args, "minimumVisitsBeforeChildCreation", options.minimumVisitsBeforeChildCreation);
+	fillOption(args, "minimumChildCreationDistance", options.minimumChildCreationDistance);
+	fillOption(args, "initialCompassRadiusRatio", options.initialCompassRadiusRatio);
 
     if (options.newSearchPointCoefficient <= 0) {
     	options.disableGpsSearch = true;
@@ -234,38 +221,31 @@ std::unique_ptr<solver::SelectRecommendedActionStrategy> GpsMaxRecommendedAction
 	using solver::choosers::GpsMaxRecommendationOptions;
 	GpsMaxRecommendationOptions options;
 
-	// We only need to parse the options that are actually relevant for the max chooser.
-
-	size_t index = 1;
-
-	if (args.size() > index) {
-		if (args[index] == "golden") {
-			options.searchType = GpsMaxRecommendationOptions::GOLDEN;
-		} else if (args[index] == "compass") {
-			options.searchType = GpsMaxRecommendationOptions::COMPASS;
-		} else {
-			debug::show_message("Warning: unknown gps search type given.");
-		}
+	std::string searchType = "";
+	fillOption(args, "searchType", searchType);
+	if (searchType == "golden") {
+		options.searchType = decltype(options)::GOLDEN;
+	} else if (searchType == "compass") {
+		options.searchType = decltype(options)::COMPASS;
+	} else {
+		std::cout << "Warning: unknown gps search type given: " << searchType << std::endl;
 	}
-	index++;
 
-    if (args.size() > index) std::istringstream(args[index]) >> options.dimensions;
-    index++;
 
-    bool enableGpsSearch = true;
-    if (args.size() > index) std::istringstream(args[index]) >> enableGpsSearch;
-    options.disableGpsSearch = !enableGpsSearch;
-    index++;
+	fillOption(args, "dimensions", options.dimensions);
 
-    if (args.size() < index) {
-    	debug::show_message("Warning: not enough arguments given for gps max recommendation. Some default values are used.");
-    } else if (args.size() > index) {
-    	debug::show_message("Warning: too many arguments given for gps max recommendation. Extra arguments are ignored.");
-    }
+	std::string recommendationMode = "";
+	fillOption(args, "recommendationMode", recommendationMode);
+	if (recommendationMode == "mean") {
+		options.recommendationMode = decltype(options)::MEAN;
+	} else if (recommendationMode == "robust") {
+		options.recommendationMode = decltype(options)::ROBUST;
+	} else {
+		std::cout << "Warning: unknown recommendation mode given: " << recommendationMode << std::endl;
+	}
 
     return std::make_unique<solver::GpsMaxRecommendedActionStrategy>(options);
 }
-
 
 
 } /* namespace shared */

@@ -39,6 +39,7 @@ struct GpsMaxRecommendationOptions {
 	/** Allows to quickly disable GPS search in this case only the fixed actions are considered. */
 	bool disableGpsSearch = false;
 
+	enum{MEAN=0, ROBUST=1} recommendationMode = MEAN;
 };
 
 
@@ -61,6 +62,9 @@ struct GpsChooserOptions {
 
 	/** Allows to quickly disable GPS search in this case only the fixed actions are considered. */
 	bool disableGpsSearch = false;
+
+	/** The initial radius of the compass rose. A value of 1 means to max out the limits. It must be larger than zero. */
+	double initialCompassRadiusRatio = 1;
 
 	/** The UCB exploration coefficient. */
 	double explorationCoefficient = 2;

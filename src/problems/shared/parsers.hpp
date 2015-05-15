@@ -24,6 +24,54 @@ class ModelWithProgramOptions;
  */
 std::vector<std::string> split_function(std::string text);
 
+
+template<typename T>
+inline bool fillOption(const std::vector<std::string>& args, const std::string name, T& value) {
+	using std::string;
+
+	struct Local {
+		static string trim(const string& s) {
+			string result = "";
+			size_t firstNonSpace = s.find_first_not_of(' ');
+			if (firstNonSpace != string::npos) {
+				result = s.substr(firstNonSpace);
+				size_t lastNonSpace = s.find_last_not_of(' ');
+				result = result.substr(0,lastNonSpace+1);
+			}
+			return result;
+		}
+	};
+
+	for (size_t i=1; i<args.size(); i++) {
+		const string& arg = args[i];
+		size_t equalPos = arg.find('=');
+		if (equalPos == string::npos) {
+			std::cout << "The option '" << arg << "' does not contain an equal sign." << std::endl;
+			return false;
+		}
+		string parameter = Local::trim(arg.substr(0, equalPos));
+		if (parameter.empty()) {
+			std::cout <<  "The option '" << arg << "' has an empty parameter name." << std::endl;
+			return false;
+		}
+		if (parameter == name) {
+			string valueString = Local::trim(arg.substr(equalPos+1));
+			if (valueString.empty()) {
+				std::cout <<  "The option '" << arg << "' has an empty value." << std::endl;
+				return false;
+			}
+
+			std::istringstream(valueString) >> value;
+			return true;
+		}
+	}
+	std::stringstream ss;
+	ss << "Warning: the parameter \"" << name << "\" for option \"" << args[0] << "\" could not be found. Using \"" << value << "\" as default.";
+	debug::show_message(ss.str());
+	return false;
+}
+
+
 /** A class to parse strings into arbitrary constructs for the Solver to use. */
 template<typename TargetType>
 class Parser {

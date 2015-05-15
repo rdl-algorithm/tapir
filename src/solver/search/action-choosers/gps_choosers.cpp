@@ -299,7 +299,7 @@ public:
 	};
 
 	/** This method initialises the fields to those suitable for the root of the search tree. */
-	void initialiseRoot(ContinuousActionMap& map) {
+	void initialiseRoot(ContinuousActionMap& map, const GpsChooserOptions& options) {
 		auto boundingBox = map.getActionPool()->getInitialBoundingBox(map.getOwner());
 
 		if (boundingBox.size() != dimensions) {
@@ -323,6 +323,8 @@ public:
 				radius = maxRadius;
 			}
 		}
+
+		radius *= options.initialCompassRadiusRatio;
 
 		linkActions(map);
 
@@ -451,7 +453,7 @@ public:
 	GoldenHierarchyData() = default;
 
 	/** This method initialises the fields to those suitable for the root of the search tree. */
-	void initialiseRoot(ContinuousActionMap& map) {
+	void initialiseRoot(ContinuousActionMap& map, const GpsChooserOptions& /*options*/) {
 		auto boundingBox = map.getActionPool()->getInitialBoundingBox(map.getOwner());
 
 		if (boundingBox.size() != dimensions) {
@@ -555,10 +557,10 @@ class GpsSearch {
 	typedef ContinuousActionConstructionDataBase ActionConstructionData;
 
 
-	static void ensureChooserDataIsInitialised(ThisActionMap& map) {
+	static void ensureChooserDataIsInitialised(ThisActionMap& map, const GpsChooserOptions& options) {
 		if (map.chooserData == nullptr) {
 			map.chooserData = std::make_unique<GpsStencil>();
-			static_cast<GpsStencil&>(*map.chooserData).initialiseRoot(map);
+			static_cast<GpsStencil&>(*map.chooserData).initialiseRoot(map, options);
 		}
 	}
 
@@ -817,7 +819,7 @@ public:
 		}
 
 
-		ensureChooserDataIsInitialised(mapping);
+		ensureChooserDataIsInitialised(mapping, options);
 
 		gpsUcbAction_processGps(node, model, options, mapping, bestPointScore, bestEntry);
 
@@ -849,8 +851,18 @@ public:
 		for (ThisActionMapEntry* entry : mapping.getFixedEntries()) {
 			if (entry->getVisitCount() == 0) continue;
 
-			if (entry->getMeanQValue() >= bestPointScore) {
-				bestPointScore = entry->getMeanQValue();
+			double pointScore;
+			if (options.recommendationMode == GpsMaxRecommendationOptions::MEAN) {
+				pointScore = entry->getMeanQValue();
+			} else if (options.recommendationMode == GpsMaxRecommendationOptions::ROBUST){
+				pointScore = entry->getVisitCount();
+			} else {
+				std::cout << "Unknown recommendation mode." << std::endl;
+				return GpsChooserResponse(nullptr, false);
+			}
+
+			if (pointScore >= bestPointScore) {
+				bestPointScore = pointScore;
 				bestEntry = entry;
 			}
 		}
@@ -875,8 +887,18 @@ public:
 
 						double meanQValue = entry->getMeanQValue();
 
-						if (meanQValue >= bestPointScore) {
-							bestPointScore = meanQValue;
+						double pointScore;
+						if (options.recommendationMode == GpsMaxRecommendationOptions::MEAN) {
+							pointScore = meanQValue;
+						} else if (options.recommendationMode == GpsMaxRecommendationOptions::ROBUST){
+							pointScore = entry->getVisitCount();
+						} else {
+							std::cout << "Unknown recommendation mode." <<std::endl;
+							return GpsChooserResponse(nullptr, false);
+						}
+
+						if (pointScore >= bestPointScore) {
+							bestPointScore = pointScore;
 							bestEntry = entry;
 						}
 						if (meanQValue >= bestCurrentEntryScore) {
