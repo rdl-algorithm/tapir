@@ -308,9 +308,9 @@ your new POMDP for use with TAPIR.
 [ActionPool]: ../src/solver/mappings/actions/ActionPool.hpp
 [ContinuousActionConstructionDataBase]: ../src/solver/mappings/actions/continuous_actions.hpp#L58
 [ContinuousAction]: ../src/solver/mappings/actions/continuous_actions.hpp#L73
-[ContinuousActionPool]: ../src/solver/mappings/actions/continuous_actions.hpp#187
-[ContinuousActionContainer]: ../src/solver/mappings/actions/continuous_actions.hpp#145
-[ContinuousActionTextSerializer]: ../src/solver/mappings/actions/continuous_actions.hpp#492
+[ContinuousActionPool]: ../src/solver/mappings/actions/continuous_actions.hpp#L187
+[ContinuousActionContainer]: ../src/solver/mappings/actions/continuous_actions.hpp#L145
+[ContinuousActionTextSerializer]: ../src/solver/mappings/actions/continuous_actions.hpp#L492
 [DefaultHistoryCorrector]: ../src/solver/changes/DefaultHistoryCorrector.hpp
 [DiscreteObservationPool]: ../src/solver/mappings/observations/discrete_observations.hpp#L36
 [DiscreteObservationTextSerializer]: ../src/solver/mappings/observations/discrete_observations.hpp#L147

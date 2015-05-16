@@ -1,13 +1,29 @@
 Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR)
 ==========================================================================
 
-TAPIR is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm \[1\].
+TAPIR \[1\] is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm \[2\].
 ABT is an online POMDP solver capable of adapting to modifications to the POMDP
 model without the need to reconstruct the policy from scratch.
+For continuous action spaces, TAPIR also includes an implementation of General
+Pattern Search in Adaptive Belief Trees (GPS-ABT) \[3\].
 
-\[1\] H. Kurniawati and V. Yadav. An Online POMDP Solver for Uncertainty Planning
-in Dynamic Environment. Proc. Int. Symp. on Robotics Research. 2013.
+\[1\] D. Klimenko and J. Song and. H. Kurniawati.
+TAPIR: A Software Toolkit for Approximating and Adapting POMDP Solutions Online.
+_Proc. Australasian Conference on Robotics and Automation._
+2014.
+http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/acra14_tapir.pdf
+
+\[2\] H. Kurniawati and V. Yadav.
+An Online POMDP Solver for Uncertainty Planning in Dynamic Environment.
+_Proc. Int. Symp. on Robotics Research._
+2013.
 http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf
+
+\[3\] K. Seiler and H. Kurniawati and S.P.N. Singh.
+An Online and Approximate Solver for POMDPs with Continuous Action Space.
+_Proc. IEEE Int. Conference on Robotics and Automation (ICRA)._
+2015.
+http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/icra15_ctsActPomdp.pdf
 
 For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au
 
