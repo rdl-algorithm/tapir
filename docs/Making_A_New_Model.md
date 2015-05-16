@@ -1,31 +1,5 @@
-Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR)
-==========================================================================
-
-TAPIR is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm \[1\].
-ABT is an online POMDP solver capable of adapting to modifications to the POMDP
-model without the need to reconstruct the policy from scratch.
-
-\[1\] H. Kurniawati and V. Yadav. An Online POMDP Solver for Uncertainty Planning
-in Dynamic Environment. Proc. Int. Symp. on Robotics Research. 2013.
-http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf
-
-For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au
-
-For the latest news, please visit
-[the TAPIR website](http://robotics.itee.uq.edu.au/~tapir).
-
-
---------------------------------------------------------------------------
-TAPIR Development Team
---------------------------------------------------------------------------
-
-- Main developer: Dimitri Klimenko
-- ROS + VREP interface: Joshua Song
-
-
---------------------------------------------------------------------------
 Implementing a New POMDP Model
---------------------------------------------------------------------------
+==========================================================================
 
 At its core, implementation of a specific POMDP problem is done via an
 implementation of the [Model] interface, which represents a black-box generative
@@ -82,7 +56,7 @@ See below for a more detailed description of the core functionality needed
 in order to make a new problem for TAPIR.
 
 
-### Model
+## Model
 
 As previously mentioned, the [Model] class is the core interface for the
 specification of a POMDP model; see [TagModel] for a concrete example.
@@ -118,7 +92,7 @@ settings, including text-based parsing in order to select different search
 strategies.
 
 
-### Options
+## Options
 
 Each [Model] instance should possess an [Options] instance, which specifies
 the various configuration settings to use for that problem, and for TAPIR to
@@ -130,7 +104,7 @@ values that must be specified:
     define a state of the POMDP.
 
 
-### State
+## State
 
 Represents a state within the state space of the problem.
 See [TagState] for an example.
@@ -164,7 +138,7 @@ implementing [StateIndex] and having [Model::createStateIndex] return an
 instance of that custom implementation.
 
 
-### Observation
+## Observation
 
 Represents an observation within the action space of the problem.
 See [TagObservation] for an example.
@@ -173,7 +147,7 @@ Like [State], the [Observation] interface requires implementations for
 and custom implementations can be given for [distanceTo()] and [print()]
 
 
-### Action
+## Action
 
 Represents an action within the action space of the problem.
 See [TagAction] for an example.
@@ -182,7 +156,7 @@ Like [State], the [Action] interface requires implementations for
 and custom implementations can be given for [distanceTo()] and [print()]
 
 
-### ActionPool
+## ActionPool
 
 In order for the ABT solver to be able to search the space of possible actions,
 it needs a way to know which actions it will need to try, and at which belief
@@ -207,7 +181,7 @@ has two prerequsites:
 - The [EnumeratedActionPool] constructor requires, as a constructor argument,
     a vector containing all of the actions, in the order of their enumeration.
 
-### Working with continuous actions
+## Working with continuous actions
 For continuous action spaces, the solver needs to be able to create new actions 
 based on numerical vector data. Thus, a few extra concepts need to be 
 implemented. The vector data is represented by a construction data class derived 
@@ -234,7 +208,7 @@ For an example about implementing continuous actions, it is recommended to look
 at the implementation of the [PushBoxActionPool].
 
 
-### Serializer
+## Serializer
 
 If you require the ability to serialize a solver policy (e.g. to save it to
 a file), you must provide an implementation of the abstract [Serializer]
@@ -250,8 +224,8 @@ default observation mapping is [DiscreteObservationPool], which should suffice
 for most purposes; in order to serialize this mapping class, the serializer
 implementation should also inherit from [DiscreteObservationTextSerializer].
 Similarly, if you use [EnumeratedActionPool] for mapping actions, your
-serializer should inherit from [EnumeratedActionTextSerializer].
-If continuous actions are used the serializer must inherit from 
+serializer should inherit from [EnumeratedActionTextSerializer],
+and if continuous actions are used the serializer should inherit from 
 [ContinuousActionTextSerializer].
 
 To see a good example of the above, have a look at [TagTextSerializer].
@@ -332,6 +306,11 @@ your new POMDP for use with TAPIR.
 [ActionMapping]: ../src/solver/mappings/actions/ActionMapping.hpp
 [ActionMapping::getNextActionToTry]: ../src/solver/mappings/actions/ActionMapping.hpp#L92
 [ActionPool]: ../src/solver/mappings/actions/ActionPool.hpp
+[ContinuousActionConstructionDataBase]: ../src/solver/mappings/actions/continuous_actions.hpp#L58
+[ContinuousAction]: ../src/solver/mappings/actions/continuous_actions.hpp#L73
+[ContinuousActionPool]: ../src/solver/mappings/actions/continuous_actions.hpp#187
+[ContinuousActionContainer]: ../src/solver/mappings/actions/continuous_actions.hpp#145
+[ContinuousActionTextSerializer]: ../src/solver/mappings/actions/continuous_actions.hpp#492
 [DefaultHistoryCorrector]: ../src/solver/changes/DefaultHistoryCorrector.hpp
 [DiscreteObservationPool]: ../src/solver/mappings/observations/discrete_observations.hpp#L36
 [DiscreteObservationTextSerializer]: ../src/solver/mappings/observations/discrete_observations.hpp#L147
@@ -363,6 +342,7 @@ your new POMDP for use with TAPIR.
 [Options::discountFactor]: ../src/solver/abstract-problem/Options.hpp#L37
 [Options::numberOfStateVariables]: ../src/solver/abstract-problem/Options.hpp#L29
 [Overview.md]: Overview.md
+[PushBoxActionPool]: ../src/problems/pushbox/PushBoxModel.hpp#L54
 [RTree]: ../src/solver/indexing/RTree.hpp
 [Serializer]: ../src/solver/serialization/Serializer.hpp
 [SharedOptions]: ../src/problems/shared/SharedOptions.hpp

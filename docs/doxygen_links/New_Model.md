@@ -10,6 +10,11 @@
 [ActionMapping]: @ref solver::ActionMapping
 [ActionMapping::getNextActionToTry]: @ref solver::ActionMapping::getNextActionToTry
 [ActionPool]: @ref solver::ActionPool
+[ContinuousActionConstructionDataBase]: @ref solver::ContinuousActionConstructionDataBase
+[ContinuousAction]: @ref solver::ContinuousAction
+[ContinuousActionPool]: @ref solver::ContinuousActionPool
+[ContinuousActionContainer]: @ref solver::ContinuousActionContainer
+[ContinuousActionTextSerializer]: @ref solver::ContinuousActionTextSerializer
 [DefaultHistoryCorrector]: @ref solver::DefaultHistoryCorrector
 [DiscreteObservationPool]: @ref solver::DiscreteObservationPool
 [DiscreteObservationTextSerializer]: @ref solver::DiscreteObservationTextSerializer
@@ -41,6 +46,7 @@
 [Options::discountFactor]: @ref solver::Options::discountFactor
 [Options::numberOfStateVariables]: @ref solver::Options::numberOfStateVariables
 [Overview.md]: @ref index
+[PushBoxActionPool]: @ref pushbox::PushBoxActionPool
 [RTree]: @ref solver::RTree
 [Serializer]: @ref solver::Serializer
 [SharedOptions]: @ref shared::SharedOptions

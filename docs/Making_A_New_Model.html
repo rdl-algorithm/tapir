@@ -130,33 +130,7 @@ pre code {
 <title>Making a new model for TAPIR</title>
 </head>
 <body>
-<h1>Toolkit for approximating and Adapting POMDP solutions In Realtime (TAPIR)</h1>
-
-<p>TAPIR is a C++ implementation of the Adaptive Belief Tree (ABT) algorithm [1].
-ABT is an online POMDP solver capable of adapting to modifications to the POMDP
-model without the need to reconstruct the policy from scratch.</p>
-
-<p>[1] H. Kurniawati and V. Yadav. An Online POMDP Solver for Uncertainty Planning
-in Dynamic Environment. Proc. Int. Symp. on Robotics Research. 2013.
-http://robotics.itee.uq.edu.au/~hannakur/dokuwiki/papers/isrr13_abt.pdf</p>
-
-<p>For bug reports and suggestions, please email rdl.algorithm@itee.uq.edu.au</p>
-
-<p>For the latest news, please visit
-<a href="http://robotics.itee.uq.edu.au/~tapir">the TAPIR website</a>.</p>
-
-<hr />
-
-<h2>TAPIR Development Team</h2>
-
-<ul>
-<li>Main developer: Dimitri Klimenko</li>
-<li>ROS + VREP interface: Joshua Song</li>
-</ul>
-
-<hr />
-
-<h2>Implementing a New POMDP Model</h2>
+<h1>Implementing a New POMDP Model</h1>
 
 <p>At its core, implementation of a specific POMDP problem is done via an
 implementation of the [Model] interface, which represents a black-box generative
@@ -216,7 +190,7 @@ see the <a href="#actionpool">section below</a> for some additional details.</p>
 <p>See below for a more detailed description of the core functionality needed
 in order to make a new problem for TAPIR.</p>
 
-<h3>Model</h3>
+<h2>Model</h2>
 
 <p>As previously mentioned, the [Model] class is the core interface for the
 specification of a POMDP model; see [TagModel] for a concrete example.
@@ -251,7 +225,7 @@ additional options from [SharedOptions] to provide some extra configuration
 settings, including text-based parsing in order to select different search
 strategies.</p>
 
-<h3>Options</h3>
+<h2>Options</h2>
 
 <p>Each [Model] instance should possess an [Options] instance, which specifies
 the various configuration settings to use for that problem, and for TAPIR to
@@ -262,7 +236,7 @@ values that must be specified:
 - [Options::numberOfStateVariables] - the number of state variables used to
     define a state of the POMDP.</p>
 
-<h3>State</h3>
+<h2>State</h2>
 
 <p>Represents a state within the state space of the problem.
 See [TagState] for an example.</p>
@@ -295,7 +269,7 @@ inside the <a href="../src/solver/indexing/RTree.hpp">R*-tree</a>.</p>
 implementing [StateIndex] and having [Model::createStateIndex] return an
 instance of that custom implementation.</p>
 
-<h3>Observation</h3>
+<h2>Observation</h2>
 
 <p>Represents an observation within the action space of the problem.
 See [TagObservation] for an example.
@@ -303,7 +277,7 @@ Like [State], the [Observation] interface requires implementations for
 [copy()], [equals()], and [hash()],
 and custom implementations can be given for [distanceTo()] and [print()]</p>
 
-<h3>Action</h3>
+<h2>Action</h2>
 
 <p>Represents an action within the action space of the problem.
 See [TagAction] for an example.
@@ -311,7 +285,7 @@ Like [State], the [Action] interface requires implementations for
 [copy()], [equals()], and [hash()],
 and custom implementations can be given for [distanceTo()] and [print()]</p>
 
-<h3>ActionPool</h3>
+<h2>ActionPool</h2>
 
 <p>In order for the ABT solver to be able to search the space of possible actions,
 it needs a way to know which actions it will need to try, and at which belief
@@ -336,7 +310,34 @@ has two prerequsites:
 - The [EnumeratedActionPool] constructor requires, as a constructor argument,
     a vector containing all of the actions, in the order of their enumeration.</p>
 
-<h3>Serializer</h3>
+<h2>Working with continuous actions</h2>
+
+<p>For continuous action spaces, the solver needs to be able to create new actions 
+based on numerical vector data. Thus, a few extra concepts need to be 
+implemented. The vector data is represented by a construction data class derived 
+from [ContinuousActionConstructionDataBase]. The construction data also contains 
+facilities to influence hashing (for insertion into hash tables) and equality 
+comparisons.</p>
+
+<p>The action itself must be derived from [ContinuousAction] and override the 
+abstract functions to create an action from given construction data and vice 
+versa. It has proven convenient (but it is not required) to use the construction 
+data class as storage within the action class. That is, the only data member of 
+the action class is the construction data.</p>
+
+<p>The action pool has to be derived from [ContinuousActionPool]. The action pool 
+is the means of accessing problem specific features needed for GPS-ABT. It 
+returns the bounding box used for the general pattern search and also returns 
+information about fixed actions that should be considered in case the action 
+space is a hybrid space (i.e. it has both, continuous and discrete actions). 
+The continuous action pool also contains a couple of technical methods to create 
+actions from construction data and to create an action container. The most 
+convenient way to create an action container is to return an instantiation of 
+the [ContinuousActionContainer] template. 
+For an example about implementing continuous actions, it is recommended to look 
+at the implementation of the [PushBoxActionPool].</p>
+
+<h2>Serializer</h2>
 
 <p>If you require the ability to serialize a solver policy (e.g. to save it to
 a file), you must provide an implementation of the abstract [Serializer]
@@ -352,7 +353,9 @@ default observation mapping is [DiscreteObservationPool], which should suffice
 for most purposes; in order to serialize this mapping class, the serializer
 implementation should also inherit from [DiscreteObservationTextSerializer].
 Similarly, if you use [EnumeratedActionPool] for mapping actions, your
-serializer should inherit from [EnumeratedActionTextSerializer].</p>
+serializer should inherit from [EnumeratedActionTextSerializer],
+and if continuous actions are used the serializer should inherit from 
+[ContinuousActionTextSerializer].</p>
 
 <p>To see a good example of the above, have a look at [TagTextSerializer].</p>
 
