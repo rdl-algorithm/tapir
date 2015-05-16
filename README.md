@@ -37,8 +37,8 @@ TAPIR Development Team
 
 - Main developers:
     * Dimitri Klimenko (core toolkit)
-    * Konstantin Seiler (continuous action spaces)
-- ROS + VREP interface: Joshua Song
+    * Konstantin Seiler (continuous action spaces) 
+    * Joshua Song (ROS + VREP interface)
 
 
 --------------------------------------------------------------------------
@@ -351,7 +351,8 @@ Acknowledgements
 --------------------------------------------------------------------------
 
 The development of this package is partially funded by the
-University of Queensland BEE Division Grant 2013.
+University of Queensland BEE Division Grant 2013 and the
+BME Early Career Researcher 2014 to Hanna Kurniawati.
 
 
 --------------------------------------------------------------------------
