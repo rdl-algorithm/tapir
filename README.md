@@ -102,6 +102,14 @@ After compiling, you can try the following commands to try using TAPIR on
 RockSample, which is a well-known example POMDP:
 
     cd problems/rocksample
+    ./simulate --no-load
+
+This runs the simulator starting with an empty policy, with all of the
+calculations being done online during the simulation.
+To pre-generate an initial policy and use it as the starting point for
+a simulation, you can use the "solve" executable, i.e.
+
+    cd problems/rocksample
     ./solve
     ./simulate
 
@@ -110,8 +118,7 @@ map and much larger state space, by using the command-line setting
 `--cfg default-11-11.cfg`, i.e.
 
     cd problems/rocksample
-    ./solve --cfg default-11-11.cfg
-    ./simulate --cfg default-11-11.cfg
+    ./simulate --no-load -cfg default-11-11.cfg
 
 The command "solve" uses the parameters set in a problem-specific
 configuration file, which for RockSample is, by default,
@@ -121,10 +128,13 @@ written to the file "pol.pol" in the current working directory.
 
 The command "simulate" uses the same default configuration file, but its
 function is to run online simulations to evaluate the performance of
-the TAPIR solver. It starts by loading an initial policy from the policy
-file (default "pol.pol", as output by "solve"), and runs a step-by step
-simulation of the POMDP. The online solver is run on every step so that
-the policy can be dynamically generated on every step.
+the TAPIR solver.
+By default it starts by loading an initial policy from the policy file
+(default "pol.pol"), but with the argument "--no-load" it begins with an empty
+policy instead.
+Following this, "simulate" runs a step-by step simulation of the POMDP.
+The online solver is run on every step so that the policy can be dynamically
+generated on every step.
 
 
 ### Changing Configuration Files

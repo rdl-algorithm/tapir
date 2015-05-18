@@ -88,16 +88,6 @@ int simulate(int argc, char const *argv[]) {
     for (long runNumber = 0; runNumber < options.nRuns; runNumber++) {
         cout << "Run #" << runNumber+1 << endl;
         cout << "PRNG engine state: " << randGen << endl;
-        cout << "Loading policy... " << endl;
-
-        std::ifstream inFile;
-        inFile.open(options.policyPath);
-        if (!inFile.is_open()) {
-            std::ostringstream message;
-            message << "Failed to open " << options.policyPath;
-            debug::show_message(message.str());
-            return 1;
-        }
 
         // We want the simulated history to be independent of the solver's searching,
         // so we create a different random generator here.
@@ -111,8 +101,23 @@ int simulate(int argc, char const *argv[]) {
         std::unique_ptr<ModelType> solverModel = std::make_unique<ModelType>(&solverGen,
                 std::make_unique<OptionsType>(options));;
         solver::Solver solver(std::move(solverModel));
-        solver.getSerializer()->load(inFile);
-        inFile.close();
+
+        if (options.loadInitialPolicy) {
+            cout << "Loading policy... " << endl;
+            std::ifstream inFile;
+            inFile.open(options.policyPath);
+            if (!inFile.is_open()) {
+                std::ostringstream message;
+                message << "Failed to open " << options.policyPath;
+                debug::show_message(message.str());
+                return 1;
+            }
+            solver.getSerializer()->load(inFile);
+            inFile.close();
+        } else {
+        	cout << "Starting from empty policy. " << endl;
+        	solver.initializeEmpty();
+        }
 
         std::unique_ptr<ModelType> simulatorModel = std::make_unique<ModelType>(&randGen,
                 std::make_unique<OptionsType>(options));

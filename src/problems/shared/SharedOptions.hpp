@@ -40,6 +40,8 @@ struct SharedOptions: public solver::Options {
     long nSimulationSteps = 0;
     /** The number of simulations to run. */
     long nRuns = 0;
+    /** True iff we should load an initial policy before running the simulation. */
+    bool loadInitialPolicy = false;
     /** True iff we should save the resulting policy at the end of each simulation. */
     bool savePolicy = false;
 
@@ -141,6 +143,7 @@ struct SharedOptions: public solver::Options {
         }
 
         parser->addOptionWithDefault<long>("simulation", "nRuns", &SharedOptions::nRuns, 1);
+        parser->addOptionWithDefault<bool>("simulation", "loadInitialPolicy", &SharedOptions::loadInitialPolicy, false);
         parser->addOptionWithDefault<bool>("simulation", "savePolicy", &SharedOptions::savePolicy, false);
 
         if (simulating) {
@@ -181,6 +184,10 @@ struct SharedOptions: public solver::Options {
             parser->addSwitchArg("simulation", "savePolicy", &SharedOptions::savePolicy, "",
                     "save", "save policies to a file after simulation (these files can be very"
                             " large).", true);
+
+            parser->addSwitchArg("simulation", "loadInitialPolicy", &SharedOptions::loadInitialPolicy, "",
+                    "no-load", "don't load initial policy---start with empty policy and solve 100% online",
+					false);
         }
     }
 

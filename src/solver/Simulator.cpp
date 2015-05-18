@@ -159,7 +159,11 @@ bool Simulator::stepSimulation() {
     }
 
     double impSolTimeStart = tapir::clock_ms();
-    solver_->improvePolicy(currentBelief);
+    if (currentBelief == solver_->getPolicy()->getRoot()) {
+    	solver_->improvePolicy();
+    } else {
+    	solver_->improvePolicy(currentBelief);
+    }
     totalImprovementTime_ += (tapir::clock_ms() - impSolTimeStart);
 
     if (options_->hasVerboseOutput) {
