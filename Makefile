@@ -91,7 +91,7 @@ else ifneq (,$(findstring g++,$(CXX)))
 
 # For GCC >= 4.9 we can use C++1y and color diagnostics
   GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
-  ifeq ($(GCC_VERSION), 4.9)
+  ifneq (,$(findstring 4.9,$(GCC_VERSION)))
     CXXFLAGS_BASE     := -std=c++1y
     override LDFLAGS  += -fdiagnostics-color=auto
     override CXXFLAGS += -fdiagnostics-color=auto
