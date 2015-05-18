@@ -52,7 +52,7 @@ VREP_DIR := $(shell echo $(VREP_DIR))
 # ----------------------------------------------------------------------
 # Compiler & linker
 # ----------------------------------------------------------------------
-AR   := gcc-ar
+AR   := ar
 CC   := gcc
 CXX  := g++
 
@@ -92,9 +92,10 @@ else ifneq (,$(findstring g++,$(CXX)))
 # For GCC >= 4.9 we can use C++1y and color diagnostics
   GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
   ifeq ($(GCC_VERSION), 4.9)
-	CXXFLAGS_BASE     := -std=c++1y
-	override LDFLAGS  += -fdiagnostics-color=auto
-	override CXXFLAGS += -fdiagnostics-color=auto
+    CXXFLAGS_BASE     := -std=c++1y
+    override LDFLAGS  += -fdiagnostics-color=auto
+    override CXXFLAGS += -fdiagnostics-color=auto
+    AR                := gcc-ar
   endif
 endif
 
