@@ -77,6 +77,7 @@ add_library(TapirSolver
 	src/solver/indexing/FlaggingVisitor.cpp
 	src/solver/indexing/RTree.cpp
 	src/solver/indexing/SpatialIndexVisitor.cpp
+	src/solver/mappings/actions/continuous_actions.cpp
 	src/solver/mappings/actions/discretized_actions.cpp
 	src/solver/mappings/actions/enumerated_actions.cpp
 	src/solver/mappings/observations/approximate_observations.cpp
@@ -85,18 +86,20 @@ add_library(TapirSolver
 	src/solver/search/MultipleStrategiesExp3.cpp
 	src/solver/search/search_interface.cpp
 	src/solver/search/action-choosers/choosers.cpp
+	src/solver/search/action-choosers/gps_choosers.cpp
 	src/solver/search/steppers/default_rollout.cpp
+	src/solver/search/steppers/gps_search.cpp
 	src/solver/search/steppers/nn_rollout.cpp
 	src/solver/search/steppers/ucb_search.cpp
 	src/solver/serialization/TextSerializer.cpp
 	src/options/inih/ini.c
 	src/options/option_parser.cpp
-	src/problems/shared/parsers.cpp
 	src/problems/shared/geometry/Point2D.cpp
 	src/problems/shared/geometry/Rectangle2D.cpp
 	src/problems/shared/geometry/RTree.cpp
 	src/problems/shared/geometry/utilities.cpp
 	src/problems/shared/geometry/Vector2D.cpp
+	src/problems/shared/parsers.cpp
 	src/problems/shared/policy_iteration.cpp
 )
 
