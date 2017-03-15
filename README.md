@@ -182,14 +182,14 @@ TAPIR provides an interface with ROS and V-REP, tested on:
 
 - Ubuntu 12.04 with ROS Hydro + V-REP PRO EDU V3.1.2.
 - Ubuntu 14.04 with ROS Indigo + V-REP PRO EDU V3.1.2.
+- Ubuntu 16.04 with ROS Kinetic + V-REP PRO EDU V3.3.2.
 
 
 ### Additional system requirements
 
 #### ROS
 Go [here](http://wiki.ros.org/hydro/Installation/Ubuntu) for instructions on
-how to install ROS. We have tested with ROS Hydro on Ubuntu 12.04 and with ROS
-Indigo on Ubuntu 14.04. Some possible issues and ways around them are:
+how to install ROS. Some possible issues and ways around them are:
 
 - **Ubuntu 12.04**: ROS Hydro defaults to using Boost 1.46 instead of Boost 1.48, and the Boost
     1.48 headers are incompatible with C++11 (as used by TAPIR).
