@@ -90,8 +90,8 @@ else ifneq (,$(findstring g++,$(CXX)))
   override CXXFLAGS   += -frounding-math
 
 # For GCC >= 4.9 we can use C++1y and color diagnostics
-  GCC_VERSION := $(shell expr `$(CXX) -dumpversion`)
-  ifneq (,$(findstring 4.9,$(GCC_VERSION)))
+  GCC_VER_GTE49 := $(shell echo `gcc -dumpversion | cut -f1-2 -d.` \>= 4.9 | bc )
+  ifeq ($(GCC_VER_GTE49),1)
     CXXFLAGS_BASE     := -std=c++1y
     override LDFLAGS  += -fdiagnostics-color=auto
     override CXXFLAGS += -fdiagnostics-color=auto
