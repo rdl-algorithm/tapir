@@ -27,7 +27,13 @@ fi
 
 ROS_VERSION=$(rosversion -d)
 PATCH_PLUGIN=false
-if [ "$ROS_VERSION" = "hydro" ]
+DISABLE_OTHER_INTERFACE=false
+if [ -z "$ROS_VERSION" ]
+then
+    echo "ROS not found. Perhaps you have set the ROS_SCRIPT variable in"
+    echo "the root Makefile incorrectly?"
+    exit 4
+elif [ "$ROS_VERSION" = "hydro" ]
 then
     echo "ROS Hydro detected."
 elif [ "$ROS_VERSION" = "indigo" ]
@@ -35,9 +41,10 @@ then
     echo "ROS Indigo detected."
     PATCH_PLUGIN=true
 else
-    echo "ROS not found. Perhaps you have set the ROS_SCRIPT variable in"
-    echo "the root Makefile incorrectly?"
-    exit 4
+    echo "ROS $ROS_VERSION detected."
+    sudo apt-get install libopencv-dev
+    # New V-REP interface doesn't seem to compile, use old plugin
+    DISABLE_OTHER_INTERFACE=true
 fi
 
 JOY=$(env ROS_CACHE_TIMEOUT=0 rospack list-names | grep joy)
@@ -59,6 +66,11 @@ echo "Copying V-REP code"
 mkdir -p vrep_plugin_build/src
 cd vrep_plugin_build
 cp -r $VREP_DIR/programming/ros_packages/* src
+
+if $DISABLE_OTHER_INTERFACE
+then
+    rm -rf src/v_repExtRosInterface
+fi
 
 if $PATCH_PLUGIN
 then
