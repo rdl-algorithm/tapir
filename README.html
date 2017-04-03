@@ -315,11 +315,11 @@ configuration file. For details, run</p>
 
 <h4>ROS</h4>
 
-<p>Go <a href="http://wiki.ros.org/hydro/Installation/Ubuntu">here</a> for instructions on
-how to install ROS. Some possible issues and ways around them are:</p>
+<p>Go <a href="http://wiki.ros.org/kinetic/Installation/Ubuntu">here</a> for instructions on
+how to install ROS Kinetic.</p>
 
 <ul>
-<li><p><strong>Ubuntu 12.04</strong>: ROS Hydro defaults to using Boost 1.46 instead of Boost 1.48, and the Boost
+<p><strong>Ubuntu 12.04 boost issue</strong>: ROS Hydro defaults to using Boost 1.46 instead of Boost 1.48, and the Boost
 1.48 headers are incompatible with C++11 (as used by TAPIR).
 To resolve this issue, you will need to install Boost 1.48 from source.
 The easiest way to set up Boost 1.48 for use with ROS and TAPIR is,
@@ -341,17 +341,13 @@ with GCC >= 4.7.0. These functions are performed by several scripts in the
 <code>.ros-scripts</code> directory.</p>
 
 <p>If you wish to compile Boost 1.48 manually with GCC >= 4.7.0, you should use
-the patch provided <a href="https://svn.boost.org/trac/boost/ticket/6165">here</a>.</p></li>
-<li><p><strong>Ubuntu 14.04</strong>:
-On Ubuntu 14.04 you must instead use ROS Indigo,
-which is available via the package "ros-indigo-desktop-full"</p></li>
+the patch provided <a href="https://svn.boost.org/trac/boost/ticket/6165">here</a>.</p>
 </ul>
 
 <h4>V-REP</h4>
 
 <p>Go <a href="http://www.coppeliarobotics.com/downloads.html">here</a>, download V-REP, and
-extract it to the directory of your choice. TAPIR has been tested with
-V-REP PRO EDU V3.1.2.</p>
+extract it to the directory of your choice.</p>
 
 <ul>
 <li><strong>Ubuntu 14.04</strong>:
