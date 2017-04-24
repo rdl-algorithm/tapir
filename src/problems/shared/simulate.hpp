@@ -102,6 +102,9 @@ int simulate(int argc, char const *argv[]) {
                 std::make_unique<OptionsType>(options));;
         solver::Solver solver(std::move(solverModel));
 
+        if (!options.baseConfigPath.empty()) {
+            tapir::change_directory(workingDir);
+        }
         if (options.loadInitialPolicy) {
             cout << "Loading policy... " << endl;
             std::ifstream inFile;
@@ -115,8 +118,11 @@ int simulate(int argc, char const *argv[]) {
             solver.getSerializer()->load(inFile);
             inFile.close();
         } else {
-        	cout << "Starting from empty policy. " << endl;
-        	solver.initializeEmpty();
+            cout << "Starting from empty policy. " << endl;
+            solver.initializeEmpty();
+        }
+        if (!options.baseConfigPath.empty()) {
+            tapir::change_directory(options.baseConfigPath);
         }
 
         std::unique_ptr<ModelType> simulatorModel = std::make_unique<ModelType>(&randGen,
