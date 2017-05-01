@@ -667,7 +667,11 @@ void Solver::updateImmediate(BeliefNode *node, Action const &action, Observation
 /* ------------------ Initialization methods ------------------- */
 void Solver::initialize() {
     // Core data structures
-    statePool_ = std::make_unique<StatePool>(model_->createStateIndex());
+    if (options_->useStateIndex) {
+        statePool_ = std::make_unique<StatePool>(model_->createStateIndex());
+    } else {
+        statePool_ = std::make_unique<StatePool>(nullptr);
+    }
     histories_ = std::make_unique<Histories>();
     policy_ = std::make_unique<BeliefTree>(this);
     policy_->reset();

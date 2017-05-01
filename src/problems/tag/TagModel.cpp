@@ -440,6 +440,10 @@ void TagModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange>> co
         }
 
         solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+        if (tree == nullptr) {
+            debug::show_message("ERROR: state index must be enabled to handle changes in Tag!");
+            std::exit(4);
+        }
 
         double iLo = tagChange.i0;
         double iHi = tagChange.i1;

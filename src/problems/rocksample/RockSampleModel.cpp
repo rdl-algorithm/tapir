@@ -497,6 +497,10 @@ void RockSampleModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChan
 
         // If we're adding obstacles, we need to mark the invalid states as deleted.
         solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+        if (tree == nullptr) {
+            debug::show_message("ERROR: state index must be enabled to handle changes in RockSample!");
+            std::exit(4);
+        }
 
         std::vector<double> lowCorner;
         std::vector<double> highCorner;

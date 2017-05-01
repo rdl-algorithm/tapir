@@ -39,6 +39,9 @@ struct Options : options::BaseOptions {
     /* ------------------------- ABT settings --------------------- */
     /** Whether to prune the tree on every simulation step. */
     bool pruneEveryStep = false;
+    /** Whether to store encountered states in an indexing data structure for lookups.
+     * NOTE: this is usually mandatory for handling model changes. */
+    bool useStateIndex = true;
     /** Whether to completely re-build the tree from scratch if changes occur. */
     bool resetOnChanges = false;
     /** The minimum number of particles to maintain in the active belief node. */

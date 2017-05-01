@@ -193,6 +193,13 @@ struct SharedOptions: public solver::Options {
 
     /** Adds core ABT options for this SharedOptions instance to the given parser. */
     static void addABTOptions(options::OptionParser *parser) {
+        parser->addOptionWithDefault<bool>("ABT", "useStateIndex", &Options::useStateIndex, true);
+        parser->addSwitchArg("ABT", "useStateIndex", &Options::useStateIndex, "", "index",
+                "keep track of states in an index data structure (usually a spatial index)", true);
+        parser->addSwitchArg("ABT", "useStateIndex", &Options::useStateIndex, "", "no-index",
+                        "don't keep track of states in an index data structure", false);
+
+
         parser->addOption<unsigned long>("ABT", "historiesPerStep", &Options::historiesPerStep);
         parser->addValueArg<unsigned long>("ABT", "historiesPerStep", &Options::historiesPerStep,
                 "i", "histories-per-step",

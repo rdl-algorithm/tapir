@@ -97,7 +97,9 @@ StateInfo *StatePool::add(std::unique_ptr<StateInfo> newInfo) {
         }
         stateInfo->id_ = newId;
         statesByIndex_.push_back(std::move(newInfo));
-        stateIndex_->addStateInfo(stateInfo);
+        if (stateIndex_ != nullptr) {
+            stateIndex_->addStateInfo(stateInfo);
+        }
     } else {
         debug::show_message("ERROR: StateInfo already added!!");
     }

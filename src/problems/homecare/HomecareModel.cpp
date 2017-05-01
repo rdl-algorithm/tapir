@@ -640,6 +640,10 @@ void HomecareModel::applyChanges(std::vector<std::unique_ptr<solver::ModelChange
         }
 
         solver::RTree *tree = static_cast<solver::RTree *>(pool->getStateIndex());
+        if (tree == nullptr) {
+            debug::show_message("ERROR: state index must be enabled to handle changes in Homecare!");
+            std::exit(4);
+        }
 
         double iLo = homecareChange.i0;
         double iHi = homecareChange.i1;
